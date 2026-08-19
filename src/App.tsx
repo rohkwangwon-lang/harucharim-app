@@ -2,27 +2,46 @@ import { useState } from 'react'
 import { REVIEW_MODE } from './config'
 import { useAppState } from './lib/store'
 import { CANCER_BY_ID } from './data/cancers'
+import type { MealSlot } from './data/types'
+import { Onboarding } from './components/Onboarding'
 import { PatientPanel } from './components/PatientPanel'
 import { FoodSearch } from './components/FoodSearch'
 import { Supplements } from './components/Supplements'
 import { Analysis } from './components/Analysis'
 import { MenuPlanner } from './components/MenuPlanner'
 import { CancerGuide } from './components/CancerGuide'
+import { Exercise } from './components/Exercise'
 
-type Tab = 'search' | 'analysis' | 'menu' | 'supplement' | 'guide' | 'me'
+/**
+ * 탭은 5개로 고정한다.
+ * 모바일 하단 탭이 6개를 넘으면 글자가 잘리고 무엇이 어디 있는지 기억하기 어려워진다.
+ * 그래서 성격이 비슷한 영양제·운동·가이드는 '관리' 안에서 나눈다.
+ */
+type Tab = 'search' | 'today' | 'menu' | 'care' | 'me'
+type CareView = 'supplement' | 'exercise' | 'guide'
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'search', label: '음식 찾기', icon: '🔍' },
-  { id: 'analysis', label: '분석', icon: '📊' },
+  { id: 'today', label: '오늘', icon: '📊' },
   { id: 'menu', label: '식단', icon: '🍱' },
-  { id: 'supplement', label: '영양제', icon: '💊' },
-  { id: 'guide', label: '가이드', icon: '📖' },
+  { id: 'care', label: '관리', icon: '💊' },
   { id: 'me', label: '내 정보', icon: '👤' }
 ]
 
+const CARE_VIEWS: { id: CareView; label: string }[] = [
+  { id: 'supplement', label: '영양제' },
+  { id: 'exercise', label: '운동' },
+  { id: 'guide', label: '암종 가이드' }
+]
+
 export default function App() {
-  const { state, setPatient, addFood, setServings, removeFood, clearFoods, toggleSupplement } = useAppState()
+  const {
+    state, setPatient, addFood, setServings, removeFood, clearFoods,
+    toggleSupplement, completeOnboarding, resetOnboarding
+  } = useAppState()
+
   const [tab, setTabState] = useState<Tab>('search')
+  const [care, setCare] = useState<CareView>('supplement')
   const [toast, setToast] = useState<string | null>(null)
 
   // 탭을 바꿨는데 이전 화면의 스크롤 위치가 남아 있으면 빈 화면처럼 보인다
@@ -34,15 +53,25 @@ export default function App() {
   const profile = CANCER_BY_ID[state.patient.cancer]
   const selectedIds = new Set(state.selected.map((s) => s.foodId))
 
-  const handleAdd = (foodId: string, servings: number) => {
-    addFood(foodId, servings)
-    setToast('담았습니다')
+  const handleAdd = (foodId: string, servings: number, meal: MealSlot) => {
+    addFood(foodId, servings, meal)
+    setToast(`${meal}에 담았습니다`)
     setTimeout(() => setToast(null), 1400)
+  }
+
+  // 첫 실행이면 다른 화면을 보여주기 전에 기본 정보부터 받는다
+  if (!state.patient.onboarded) {
+    return (
+      <Onboarding
+        patient={state.patient}
+        onChange={setPatient}
+        onDone={completeOnboarding}
+      />
+    )
   }
 
   return (
     <div className="mx-auto flex min-h-full max-w-2xl flex-col">
-      {/* 헤더 */}
       <header className="safe-top sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
         <div className="flex items-center justify-between px-4 py-3">
           <div>
@@ -63,12 +92,12 @@ export default function App() {
 
       {REVIEW_MODE && <ReviewBanner />}
 
-      {/* 본문 */}
       <main className="flex-1 px-4 py-4 pb-24">
         {tab === 'search' && (
           <FoodSearch patient={state.patient} onAdd={handleAdd} selectedIds={selectedIds} />
         )}
-        {tab === 'analysis' && (
+
+        {tab === 'today' && (
           <Analysis
             patient={state.patient}
             selected={state.selected}
@@ -78,33 +107,66 @@ export default function App() {
             onClear={clearFoods}
           />
         )}
-        {tab === 'menu' && (
-          <MenuPlanner patient={state.patient} selected={state.selected} onAdd={handleAdd} />
-        )}
-        {tab === 'supplement' && (
-          <Supplements patient={state.patient} taking={state.supplements} onToggle={toggleSupplement} />
-        )}
-        {tab === 'guide' && <CancerGuide patient={state.patient} />}
-        {tab === 'me' && <PatientPanel patient={state.patient} onChange={setPatient} />}
 
-        {tab === 'me' && <Disclaimer />}
+        {tab === 'menu' && (
+          <MenuPlanner
+            patient={state.patient}
+            selected={state.selected}
+            onAdd={(id, s) => handleAdd(id, s, '점심')}
+          />
+        )}
+
+        {tab === 'care' && (
+          <>
+            <div className="mb-4 flex gap-1 rounded-xl bg-slate-100 p-1">
+              {CARE_VIEWS.map((v) => (
+                <button
+                  key={v.id}
+                  onClick={() => { setCare(v.id); window.scrollTo({ top: 0 }) }}
+                  className={`flex-1 rounded-lg px-2 py-2 text-xs font-semibold transition-colors ${
+                    care === v.id ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500'
+                  }`}
+                >
+                  {v.label}
+                </button>
+              ))}
+            </div>
+            {care === 'supplement' && (
+              <Supplements
+                patient={state.patient}
+                taking={state.supplements}
+                onToggle={toggleSupplement}
+              />
+            )}
+            {care === 'exercise' && <Exercise patient={state.patient} />}
+            {care === 'guide' && <CancerGuide patient={state.patient} />}
+          </>
+        )}
+
+        {tab === 'me' && (
+          <>
+            <PatientPanel patient={state.patient} onChange={setPatient} />
+            <button className="btn-outline mb-4 w-full" onClick={resetOnboarding}>
+              처음부터 다시 설정하기
+            </button>
+            <Disclaimer />
+          </>
+        )}
       </main>
 
-      {/* 토스트 */}
       {toast && (
         <div className="pointer-events-none fixed bottom-24 left-1/2 z-40 -translate-x-1/2 rounded-full bg-slate-900/90 px-4 py-2 text-xs font-medium text-white shadow-lg">
           {toast}
         </div>
       )}
 
-      {/* 하단 탭 */}
       <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-2xl">
           {TABS.map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium transition-colors ${
+              className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium transition-colors ${
                 tab === t.id ? 'text-brand-700' : 'text-slate-400'
               }`}
             >
@@ -135,19 +197,10 @@ function Disclaimer() {
     <div className="card mt-2 border-slate-200 bg-slate-50 p-4">
       <h3 className="text-sm font-bold text-slate-800">이 앱을 쓰실 때 알아 두실 것</h3>
       <ul className="mt-2 space-y-1.5 text-xs leading-relaxed text-slate-600">
-        <li>
-          · 이 앱은 진료·처방·영양 상담을 대체하지 않습니다. 실제 치료 결정은 반드시 담당 의료진과 상의하셔야 합니다.
-        </li>
-        <li>
-          · 모든 권고에는 근거 수준(A/B/C/G)과 출처를 함께 표시했습니다. 근거가 엇갈리는 주제는 그 사실 자체를 적었습니다.
-        </li>
-        <li>
-          · 영양성분 값은 국가표준식품성분표와 제품 표시값을 기준으로 정리한 대표값입니다.
-          조리법과 제품에 따라 실제 값은 달라집니다.
-        </li>
-        <li>
-          · 입력하신 정보는 이 기기 안에만 저장되며 어디로도 전송되지 않습니다.
-        </li>
+        <li>· 이 앱은 진료·처방·영양 상담을 대체하지 않습니다. 실제 치료 결정은 반드시 담당 의료진과 상의하셔야 합니다.</li>
+        <li>· 모든 권고에는 근거 수준(A/B/C/G)과 출처를 함께 표시했습니다. 근거가 엇갈리는 주제는 그 사실 자체를 적었습니다.</li>
+        <li>· 영양성분 값은 국가표준식품성분표와 제품 표시값을 기준으로 정리한 대표값입니다. 조리법과 제품에 따라 실제 값은 달라집니다.</li>
+        <li>· 입력하신 정보는 이 기기 안에만 저장되며 어디로도 전송되지 않습니다.</li>
       </ul>
     </div>
   )

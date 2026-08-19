@@ -5,6 +5,8 @@ import { activeInteractions, activeRules, evaluateSupplement } from '../engine/r
 import { NUTRIENT_META_BY_KEY, fmt } from '../engine/nutrition'
 import { REF_BY_ID } from '../data/references'
 import { EvidenceBadge, LevelBadge, LevelDot, Section } from './ui'
+import { adviseSupplements, type AdviceLevel } from '../engine/supplementAdvice'
+import { nutritionRisk } from '../engine/nutrition'
 
 const CATEGORIES: (SupplementCategory | '전체')[] = [
   '전체', '종합비타민', '비타민B군', '비타민C', '비타민D', '오메가3',
@@ -38,10 +40,37 @@ export function Supplements({
     [cat, patient, cached]
   )
 
+  const advice = useMemo(() => adviseSupplements(patient), [patient])
+  const risk = nutritionRisk(patient)
+  const rec = advice.filter((a) => a.level === 'recommend')
+  const con = advice.filter((a) => a.level === 'consider')
+  const avo = advice.filter((a) => a.level === 'avoid')
+
   return (
     <div>
       <Section
-        title="영양제"
+        title="선생님께 맞춘 추천"
+        desc={`${CANCER_LABEL[patient.cancer] ?? ''} · BMI ${risk.bmi} · 치료 이력과 증상을 함께 반영한 결과입니다.`}
+      >
+        {advice.length === 0 ? (
+          <div className="card px-4 py-6 text-center text-sm text-slate-400">
+            현재 입력하신 정보로는 특별히 권하거나 피할 영양제가 없습니다.
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {rec.length > 0 && <AdviceGroup title="챙기시면 좋습니다" level="recommend" items={rec} />}
+            {avo.length > 0 && <AdviceGroup title="피하시는 편이 좋습니다" level="avoid" items={avo} />}
+            {con.length > 0 && <AdviceGroup title="상황에 따라 고려" level="consider" items={con} />}
+          </div>
+        )}
+        <p className="mt-3 px-1 text-[11px] leading-relaxed text-slate-400">
+          제품이 아니라 <strong>분류</strong> 단위로 권합니다. 어떤 브랜드를 사야 한다는 뜻이 아니며,
+          이미 식사로 충분한 성분이라면 보충제를 더할 이유가 없습니다.
+        </p>
+      </Section>
+
+      <Section
+        title="전체 영양제 목록"
         desc="복용 중인 것을 선택하면 영양소 합계에 더해지고, 이 암종·약제와의 문제도 함께 검사합니다."
       >
         <div className="mb-3 flex gap-1.5 overflow-x-auto pb-1">
@@ -177,5 +206,55 @@ function Cites({ ids }: { ids: string[] }) {
         ))}
       </ul>
     </details>
+  )
+}
+
+const CANCER_LABEL: Record<string, string> = {
+  breast: '유방암', prostate: '전립선암', lung: '폐암', stomach: '위암', colorectal: '대장암',
+  liver: '간암', pancreas: '췌장암', esophagus: '식도암', headneck: '두경부암', gyn: '부인암'
+}
+
+const ADVICE_STYLE: Record<AdviceLevel, { cls: string; chip: string; label: string }> = {
+  recommend: { cls: 'border-brand-200 bg-brand-50/40', chip: 'bg-brand-600 text-white', label: '권장' },
+  consider: { cls: 'border-slate-200', chip: 'bg-slate-500 text-white', label: '고려' },
+  avoid: { cls: 'border-danger-200 bg-danger-50/40', chip: 'bg-danger-600 text-white', label: '피하세요' }
+}
+
+function AdviceGroup({
+  title, level, items
+}: {
+  title: string
+  level: AdviceLevel
+  items: ReturnType<typeof adviseSupplements>
+}) {
+  const st = ADVICE_STYLE[level]
+  return (
+    <div>
+      <h3 className="mb-2 px-1 text-xs font-bold uppercase tracking-wide text-slate-400">{title}</h3>
+      <div className="space-y-2">
+        {items.map((a, i) => (
+          <div key={a.category + i} className={`card p-3.5 ${st.cls}`}>
+            <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+              <span className={`chip ${st.chip}`}>{st.label}</span>
+              <span className="chip bg-white text-slate-600 ring-1 ring-slate-200">{a.category}</span>
+              <EvidenceBadge level={a.evidence} />
+            </div>
+            <p className="text-sm font-semibold text-slate-900">{a.title}</p>
+            <p className="mt-1 text-xs leading-relaxed text-slate-600">{a.reason}</p>
+            <p className="mt-2 text-[11px] text-slate-500">
+              이 추천이 나온 이유: <span className="font-medium text-slate-700">{a.trigger}</span>
+            </p>
+            {a.products.length > 0 && level !== 'avoid' && (
+              <div className="mt-2 flex flex-wrap gap-1">
+                {a.products.slice(0, 4).map((p) => (
+                  <span key={p.id} className="chip bg-white text-slate-500 ring-1 ring-slate-200">{p.name}</span>
+                ))}
+              </div>
+            )}
+            <Cites ids={a.refIds} />
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }

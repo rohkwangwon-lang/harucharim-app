@@ -1,0 +1,295 @@
+import { useState } from 'react'
+import type { CancerId, Cuisine, PatientCondition, PatientContext, Phase, TreatmentHistory } from '../data/types'
+import { CANCERS, CANCER_BY_ID } from '../data/cancers'
+import { nutritionRisk, personalTarget } from '../engine/nutrition'
+
+/**
+ * 첫 실행 안내.
+ *
+ * 암종과 치료 시기를 모르면 이 앱은 아무 말도 정확하게 할 수 없다.
+ * 그래서 설정 화면에 숨겨 두지 않고, 처음 열었을 때 네 단계로 나눠 받는다.
+ * 한 화면에 하나씩만 물어 부담을 줄이고, 마지막에 무엇이 달라지는지 보여 준다.
+ */
+
+const PHASES: { id: Phase; label: string; desc: string }[] = [
+  { id: 'during_rt', label: '방사선치료 중', desc: '점막염·설사 같은 급성 부작용 시기' },
+  { id: 'during_chemo', label: '항암치료 중', desc: '오심·미각변화·골수억제 시기' },
+  { id: 'neutropenia', label: '호중구감소증', desc: '식품 안전 규칙이 강화됩니다' },
+  { id: 'post_op', label: '수술 후 회복기', desc: '식이 단계를 올려가는 시기' },
+  { id: 'survivorship', label: '치료를 마쳤습니다', desc: '재발 예방과 체중 관리 중심' }
+]
+
+const HISTORIES: TreatmentHistory[] = [
+  '수술', '방사선치료', '항암화학요법', '항호르몬치료', '표적치료', '면역항암제', '조혈모세포이식'
+]
+
+const COMMON_CONDITIONS: PatientCondition[] = [
+  '식욕부진', '체중감소', '오심·구토', '구강점막염', '설사', '변비',
+  '연하곤란', '위절제후', '당뇨', '고혈압'
+]
+
+const CUISINES: Cuisine[] = ['한식', '양식', '중식', '일식', '동남아']
+
+export function Onboarding({
+  patient,
+  onChange,
+  onDone
+}: {
+  patient: PatientContext
+  onChange: (patch: Partial<PatientContext>) => void
+  onDone: (patch: Partial<PatientContext>) => void
+}) {
+  const [step, setStep] = useState(0)
+  const steps = ['암종', '치료 시기', '몸 상태', '식성']
+  const canNext = step === 0 ? !!patient.cancer : true
+
+  const toggle = <T,>(list: T[], v: T): T[] =>
+    list.includes(v) ? list.filter((x) => x !== v) : [...list, v]
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col bg-slate-50">
+      {/* 진행 표시 */}
+      <div className="safe-top shrink-0 border-b border-slate-200 bg-white px-5 pb-3 pt-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-base font-bold text-slate-900">온코푸드 시작하기</h1>
+          <span className="text-xs tabular-nums text-slate-400">{step + 1} / {steps.length}</span>
+        </div>
+        <div className="mt-3 flex gap-1.5">
+          {steps.map((s, i) => (
+            <div key={s} className="flex-1">
+              <div className={`h-1 rounded-full ${i <= step ? 'bg-brand-500' : 'bg-slate-200'}`} />
+              <div className={`mt-1 text-[10px] ${i === step ? 'font-semibold text-brand-700' : 'text-slate-400'}`}>{s}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-5 py-5">
+        {step === 0 && (
+          <Step
+            title="어떤 암으로 치료받고 계신가요?"
+            desc="선택하신 암종에 따라 권고 내용이 완전히 달라집니다. 같은 음식이 어떤 암에서는 권장이고 다른 암에서는 주의 대상입니다."
+          >
+            <div className="grid grid-cols-2 gap-2">
+              {CANCERS.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => onChange({ cancer: c.id as CancerId })}
+                  className={`rounded-xl border px-3 py-3 text-left text-sm font-medium transition-colors ${
+                    patient.cancer === c.id
+                      ? 'border-brand-500 bg-brand-50 text-brand-800'
+                      : 'border-slate-200 bg-white text-slate-700'
+                  }`}
+                >
+                  {c.name}
+                </button>
+              ))}
+            </div>
+          </Step>
+        )}
+
+        {step === 1 && (
+          <Step
+            title="지금 어느 단계에 계신가요?"
+            desc="시기에 따라 권고가 뒤집히기도 합니다. 예를 들어 대장암에서 식이섬유는 회복 후에는 권장이지만 수술 직후에는 제한해야 합니다."
+          >
+            <div className="space-y-2">
+              {PHASES.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => onChange({ phase: p.id })}
+                  className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-left transition-colors ${
+                    patient.phase === p.id ? 'border-brand-500 bg-brand-50' : 'border-slate-200 bg-white'
+                  }`}
+                >
+                  <span className={`mt-1 h-3.5 w-3.5 shrink-0 rounded-full border-2 ${
+                    patient.phase === p.id ? 'border-brand-600 bg-brand-600' : 'border-slate-300'
+                  }`} />
+                  <span>
+                    <span className="block text-sm font-semibold text-slate-900">{p.label}</span>
+                    <span className="block text-xs text-slate-500">{p.desc}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-5">
+              <p className="mb-2 text-sm font-semibold text-slate-800">지금까지 받으신 치료</p>
+              <p className="mb-2.5 text-xs text-slate-500">복수 선택할 수 있습니다. 영양제와 운동 추천에 반영됩니다.</p>
+              <div className="flex flex-wrap gap-1.5">
+                {HISTORIES.map((h) => (
+                  <button
+                    key={h}
+                    onClick={() => onChange({ history: toggle(patient.history ?? [], h) })}
+                    className={`chip border ${
+                      (patient.history ?? []).includes(h)
+                        ? 'border-brand-500 bg-brand-500 text-white'
+                        : 'border-slate-300 bg-white text-slate-600'
+                    }`}
+                  >
+                    {h}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </Step>
+        )}
+
+        {step === 2 && (
+          <Step
+            title="몸 상태를 알려주세요"
+            desc="열량과 단백질 목표는 체중을 기준으로 계산합니다. 정확하지 않아도 대략 넣으시면 됩니다."
+          >
+            <div className="card grid grid-cols-2 gap-3 p-4">
+              <Field label="체중 (kg)" value={patient.weightKg} onChange={(v) => onChange({ weightKg: v })} />
+              <Field label="신장 (cm)" value={patient.heightCm} onChange={(v) => onChange({ heightCm: v })} />
+              <Field label="나이" value={patient.age} onChange={(v) => onChange({ age: v })} />
+              <div>
+                <label className="label">성별</label>
+                <div className="flex gap-1.5">
+                  {(['M', 'F'] as const).map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => onChange({ sex: s })}
+                      className={`flex-1 rounded-xl border px-2 py-2 text-sm font-medium ${
+                        patient.sex === s ? 'border-brand-500 bg-brand-50 text-brand-800' : 'border-slate-300 bg-white text-slate-600'
+                      }`}
+                    >
+                      {s === 'M' ? '남' : '여'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="col-span-2">
+                <Field
+                  label="최근 6개월 체중 감소율 (%)"
+                  value={patient.weightLossPct ?? 0}
+                  onChange={(v) => onChange({ weightLossPct: v })}
+                />
+                <p className="mt-1 text-[11px] text-slate-400">
+                  없으면 0. 예: 60 kg 에서 57 kg 이 되었다면 5 %
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5">
+              <p className="mb-2 text-sm font-semibold text-slate-800">지금 겪고 계신 증상</p>
+              <p className="mb-2.5 text-xs text-slate-500">해당하는 것만 고르세요. 나중에 언제든 바꿀 수 있습니다.</p>
+              <div className="flex flex-wrap gap-1.5">
+                {COMMON_CONDITIONS.map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => onChange({ conditions: toggle(patient.conditions, c) })}
+                    className={`chip border ${
+                      patient.conditions.includes(c)
+                        ? 'border-brand-500 bg-brand-500 text-white'
+                        : 'border-slate-300 bg-white text-slate-600'
+                    }`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </Step>
+        )}
+
+        {step === 3 && (
+          <Step
+            title="어떤 음식으로 식단을 짤까요?"
+            desc="기본은 제철 한식입니다. 드시고 싶은 계통을 추가하면 식단에 함께 섞습니다."
+          >
+            <div className="flex flex-wrap gap-1.5">
+              {CUISINES.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => {
+                    const next = toggle<Cuisine>(patient.cuisines ?? ['한식'], c)
+                    onChange({ cuisines: next.length ? next : (['한식'] as Cuisine[]) })
+                  }}
+                  className={`chip border ${
+                    (patient.cuisines ?? ['한식']).includes(c)
+                      ? 'border-brand-500 bg-brand-500 text-white'
+                      : 'border-slate-300 bg-white text-slate-600'
+                  }`}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+
+            <Preview patient={patient} />
+          </Step>
+        )}
+      </div>
+
+      {/* 하단 버튼 */}
+      <div className="safe-bottom shrink-0 border-t border-slate-200 bg-white px-5 py-3">
+        <div className="flex gap-2">
+          {step > 0 && (
+            <button className="btn-ghost flex-1" onClick={() => setStep(step - 1)}>이전</button>
+          )}
+          {step < steps.length - 1 ? (
+            <button className="btn-primary flex-[2]" disabled={!canNext} onClick={() => setStep(step + 1)}>
+              다음
+            </button>
+          ) : (
+            <button className="btn-primary flex-[2]" onClick={() => onDone({})}>시작하기</button>
+          )}
+        </div>
+        {step === 0 && (
+          <button
+            className="mt-2 w-full text-center text-xs text-slate-400 hover:text-slate-600"
+            onClick={() => onDone({})}
+          >
+            나중에 설정하기
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function Step({ title, desc, children }: { title: string; desc: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <h2 className="text-xl font-bold leading-snug text-slate-900">{title}</h2>
+      <p className="mb-5 mt-1.5 text-sm leading-relaxed text-slate-500">{desc}</p>
+      {children}
+    </div>
+  )
+}
+
+function Field({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
+  return (
+    <div>
+      <label className="label">{label}</label>
+      <input
+        type="number" inputMode="decimal" className="input"
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value) || 0)}
+      />
+    </div>
+  )
+}
+
+/** 마지막 단계에서 "그래서 뭐가 달라지는데?"에 답한다 */
+function Preview({ patient }: { patient: PatientContext }) {
+  const profile = CANCER_BY_ID[patient.cancer]
+  const target = personalTarget(patient, profile.target.kcalPerKg, profile.target.proteinPerKg)
+  const risk = nutritionRisk(patient)
+
+  return (
+    <div className="mt-6 rounded-2xl border border-brand-200 bg-brand-50/60 p-4">
+      <p className="text-xs font-bold uppercase tracking-wide text-brand-700">설정 결과</p>
+      <p className="mt-1.5 text-sm font-semibold text-slate-900">{profile.name} · {patient.weightKg} kg 기준</p>
+      <ul className="mt-3 space-y-1.5 text-sm text-slate-700">
+        <li>· 하루 열량 목표 <strong>{target.kcal[0]}~{target.kcal[1]} kcal</strong></li>
+        <li>· 하루 단백질 목표 <strong>{target.protein[0]}~{target.protein[1]} g</strong></li>
+        {profile.target.naLimit && <li>· 나트륨 상한 <strong>{profile.target.naLimit.toLocaleString()} mg</strong></li>}
+        <li>· 적용되는 {profile.name} 권고 <strong>{profile.rules.length}개</strong></li>
+      </ul>
+      <p className="mt-3 border-t border-brand-200 pt-3 text-xs leading-relaxed text-slate-600">{risk.message}</p>
+    </div>
+  )
+}

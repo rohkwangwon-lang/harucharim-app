@@ -124,6 +124,12 @@ export type FoodTag =
   | '수분보충'
   | '고열량밀도'      // 악액질·체중감소 시 유리
 
+/** 제철 — 식단 추천에서 그 계절 재료를 우선 배치하는 데 쓴다 */
+export type Season = '봄' | '여름' | '가을' | '겨울' | '연중'
+
+/** 요리 계통 — 기본은 한식이고, 사용자가 원할 때만 다른 계통을 섞는다 */
+export type Cuisine = '한식' | '양식' | '중식' | '일식' | '동남아' | '무관'
+
 export type FoodForm =
   | 'ingredient'  // 식재료 (생 또는 기본 조리)
   | 'dish'        // 조리된 한 그릇 음식
@@ -154,6 +160,12 @@ export interface Food {
   note?: string
   /** 성분값 출처 — 'kfda' = 식품의약품안전처 식품영양성분DB, 'rda' = 농촌진흥청 표준성분표 */
   src?: 'kfda' | 'rda' | 'usda' | 'label' | 'calc'
+  /** 제철. 생략하면 연중으로 본다 */
+  season?: Season[]
+  /** 요리 계통. 생략하면 한식으로 본다 */
+  cuisine?: Cuisine
+  /** 유통 바코드(GTIN-13). 포장 제품에만 있다 */
+  barcode?: string
 }
 
 /* ────────────────────────────── 영양제 ────────────────────────────── */
@@ -335,7 +347,23 @@ export interface PatientContext {
   conditions: PatientCondition[]
   /** 복용 중인 약제 — 상호작용 검사 */
   medications: string[]
+  /** 받은 치료 이력 — 영양제·운동 추천에 반영 */
+  history?: TreatmentHistory[]
+  /** 식단에 섞어도 되는 요리 계통. 비우면 한식만 */
+  cuisines?: Cuisine[]
+  /** 온보딩을 마쳤는지 */
+  onboarded?: boolean
 }
+
+/** 치료 이력 — 영양 결핍과 운동 제약이 여기서 갈린다 */
+export type TreatmentHistory =
+  | '수술'
+  | '방사선치료'
+  | '항암화학요법'
+  | '항호르몬치료'
+  | '표적치료'
+  | '면역항암제'
+  | '조혈모세포이식'
 
 export type PatientCondition =
   | '연하곤란'
@@ -355,9 +383,16 @@ export type PatientCondition =
   | '고혈압'
   | '와파린복용'
 
-/** 사용자가 고른 식품 1건 (수량 중복 가능) */
+/** 끼니 구분 */
+export type MealSlot = '아침' | '점심' | '저녁' | '간식'
+
+export const MEAL_SLOTS: MealSlot[] = ['아침', '점심', '저녁', '간식']
+
+/** 사용자가 고른 식품 1건 (같은 음식을 여러 끼니에 담을 수 있다) */
 export interface SelectedItem {
   foodId: string
   /** 1회 제공량 기준 배수 (0.5, 1, 2 …) */
   servings: number
+  /** 어느 끼니에 먹(었)는지. 지정하지 않으면 앱이 배치한다 */
+  meal?: MealSlot
 }

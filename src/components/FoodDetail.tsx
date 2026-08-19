@@ -1,4 +1,6 @@
-import type { Food, PatientContext } from '../data/types'
+import { useState } from 'react'
+import type { Food, MealSlot, PatientContext } from '../data/types'
+import { MEAL_SLOTS } from '../data/types'
 import { evaluateFood } from '../engine/rules'
 import { foodContribution, NUTRIENT_META, fmt } from '../engine/nutrition'
 import { REF_BY_ID } from '../data/references'
@@ -9,13 +11,17 @@ export function FoodDetail({
   food,
   patient,
   onClose,
-  onAdd
+  onAdd,
+  defaultMeal
 }: {
   food: Food
   patient: PatientContext
   onClose: () => void
-  onAdd: (servings: number) => void
+  onAdd: (servings: number, meal: MealSlot) => void
+  /** 검색 화면에서 미리 정해 둔 끼니가 있으면 그것을 기본값으로 */
+  defaultMeal?: MealSlot
 }) {
+  const [meal, setMeal] = useState<MealSlot>(defaultMeal ?? '점심')
   const verdict = evaluateFood(food, patient, 1)
   const per = foodContribution(food, 1)
 
@@ -34,6 +40,17 @@ export function FoodDetail({
               <p className="mt-0.5 text-xs text-slate-500">
                 {food.group} · 1회 제공량 {food.serving.label} ({food.serving.g} g)
               </p>
+              <div className="mt-1.5 flex flex-wrap gap-1">
+                {food.cuisine && food.cuisine !== '무관' && (
+                  <span className="chip bg-slate-100 text-slate-500">{food.cuisine}</span>
+                )}
+                {food.season && food.season.length > 0 && (
+                  <span className="chip bg-emerald-100 text-emerald-700">제철 {food.season.join('·')}</span>
+                )}
+                {food.form === 'ingredient' && (
+                  <span className="chip bg-amber-100 text-amber-700">식재료</span>
+                )}
+              </div>
             </div>
             {verdict.level && <LevelBadge level={verdict.level} />}
           </div>
@@ -121,10 +138,28 @@ export function FoodDetail({
 
         {/* 하단 액션 */}
         <div className="safe-bottom shrink-0 border-t border-slate-100 bg-white px-5 py-3">
+          <div className="mb-2.5">
+            <p className="mb-1.5 text-[11px] font-medium text-slate-500">어느 끼니로 담을까요?</p>
+            <div className="flex gap-1.5">
+              {MEAL_SLOTS.map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setMeal(m)}
+                  className={`flex-1 rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors ${
+                    meal === m
+                      ? 'border-brand-500 bg-brand-500 text-white'
+                      : 'border-slate-300 bg-white text-slate-600'
+                  }`}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="flex gap-2">
             <button className="btn-ghost flex-1" onClick={onClose}>닫기</button>
-            <button className="btn-outline" onClick={() => onAdd(0.5)}>0.5인분</button>
-            <button className="btn-primary flex-1" onClick={() => onAdd(1)}>1인분 담기</button>
+            <button className="btn-outline" onClick={() => onAdd(0.5, meal)}>0.5인분</button>
+            <button className="btn-primary flex-1" onClick={() => onAdd(1, meal)}>{meal}에 담기</button>
           </div>
         </div>
       </div>

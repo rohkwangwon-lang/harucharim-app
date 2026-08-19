@@ -1,4 +1,5 @@
 import type { Reference } from './types'
+import { EXERCISE_REFERENCES } from './references-exercise'
 
 /**
  * 이 앱의 모든 임상 권고는 아래 문헌 중 하나 이상에 연결되어 있다.
@@ -117,6 +118,9 @@ export const REFERENCES: Reference[] = [
     citation: 'Arends J, et al. ESPEN guidelines on nutrition in cancer patients. Clin Nutr. 2017;36(1):11-48. — 악액질에서 단백질 1.0~1.5 g/kg, 오메가-3 고려.' }
 ]
 
+/** 식이 문헌과 운동 문헌을 함께 조회할 수 있게 합친다 */
+export const ALL_REFERENCES: Reference[] = [...REFERENCES, ...EXERCISE_REFERENCES]
+
 export const REF_BY_ID: Record<string, Reference> = Object.fromEntries(
-  REFERENCES.map((r) => [r.id, r])
+  ALL_REFERENCES.map((r) => [r.id, r])
 )

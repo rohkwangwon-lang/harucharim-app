@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { PatientContext, SelectedItem } from '../data/types'
+import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
 
 const STORAGE_KEY = 'oncofood.state.v1'
 
@@ -20,7 +20,10 @@ export const DEFAULT_PATIENT: PatientContext = {
   sex: 'F',
   weightLossPct: 0,
   conditions: [],
-  medications: []
+  medications: [],
+  history: [],
+  cuisines: ['한식'],
+  onboarded: false
 }
 
 const DEFAULT_STATE: AppState = {
@@ -59,29 +62,45 @@ export function useAppState() {
     setState((s) => ({ ...s, patient: { ...s.patient, ...patch } }))
   }, [])
 
-  /** 같은 식품을 또 고르면 인분을 더한다 (요구사항: 개수 중복 가능) */
-  const addFood = useCallback((foodId: string, servings = 1) => {
+  /**
+   * 같은 식품을 또 고르면 인분을 더한다.
+   * 단, 끼니가 다르면 별개 항목으로 둔다 — 아침에 먹은 밥과 저녁에 먹은 밥은 따로 세야 한다.
+   */
+  const addFood = useCallback((foodId: string, servings = 1, meal?: MealSlot) => {
     setState((s) => {
-      const idx = s.selected.findIndex((i) => i.foodId === foodId)
-      if (idx === -1) return { ...s, selected: [...s.selected, { foodId, servings }] }
+      const idx = s.selected.findIndex((i) => i.foodId === foodId && i.meal === meal)
+      if (idx === -1) return { ...s, selected: [...s.selected, { foodId, servings, meal }] }
       const next = [...s.selected]
       next[idx] = { ...next[idx], servings: Math.round((next[idx].servings + servings) * 10) / 10 }
       return { ...s, selected: next }
     })
   }, [])
 
-  const setServings = useCallback((foodId: string, servings: number) => {
+  const setServings = useCallback((foodId: string, servings: number, meal?: MealSlot) => {
     setState((s) => ({
       ...s,
       selected:
         servings <= 0
-          ? s.selected.filter((i) => i.foodId !== foodId)
-          : s.selected.map((i) => (i.foodId === foodId ? { ...i, servings } : i))
+          ? s.selected.filter((i) => !(i.foodId === foodId && i.meal === meal))
+          : s.selected.map((i) =>
+              i.foodId === foodId && i.meal === meal ? { ...i, servings } : i
+            )
     }))
   }, [])
 
-  const removeFood = useCallback((foodId: string) => {
-    setState((s) => ({ ...s, selected: s.selected.filter((i) => i.foodId !== foodId) }))
+  /** 담은 항목의 끼니를 바꾼다 */
+  const setMeal = useCallback((foodId: string, from: MealSlot | undefined, to: MealSlot | undefined) => {
+    setState((s) => ({
+      ...s,
+      selected: s.selected.map((i) => (i.foodId === foodId && i.meal === from ? { ...i, meal: to } : i))
+    }))
+  }, [])
+
+  const removeFood = useCallback((foodId: string, meal?: MealSlot) => {
+    setState((s) => ({
+      ...s,
+      selected: s.selected.filter((i) => !(i.foodId === foodId && i.meal === meal))
+    }))
   }, [])
 
   const clearFoods = useCallback(() => {
@@ -97,13 +116,26 @@ export function useAppState() {
     }))
   }, [])
 
+  /** 온보딩 완료 처리 — 첫 실행 화면을 다시 띄우지 않는다 */
+  const completeOnboarding = useCallback((patch: Partial<PatientContext>) => {
+    setState((s) => ({ ...s, patient: { ...s.patient, ...patch, onboarded: true } }))
+  }, [])
+
+  /** 설정을 처음부터 다시 — 온보딩을 다시 띄운다 */
+  const resetOnboarding = useCallback(() => {
+    setState((s) => ({ ...s, patient: { ...s.patient, onboarded: false } }))
+  }, [])
+
   return {
     state,
     setPatient,
     addFood,
     setServings,
+    setMeal,
     removeFood,
     clearFoods,
-    toggleSupplement
+    toggleSupplement,
+    completeOnboarding,
+    resetOnboarding
   }
 }

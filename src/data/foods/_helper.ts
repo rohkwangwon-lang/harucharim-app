@@ -1,10 +1,16 @@
-import type { Food, FoodGroup, FoodForm, FoodTag, Nutrients } from '../types'
+import type { Cuisine, Food, FoodForm, FoodGroup, FoodTag, Nutrients, Season } from '../types'
 
 interface Extra {
   aliases?: string[]
   gi?: number
   note?: string
   src?: Food['src']
+  /** 제철. 대부분은 seasonCuisine.ts 에서 붙이고, 여기서는 예외만 지정한다 */
+  season?: Season[]
+  /** 요리 계통. 생략하면 index.ts 에서 한식으로 채운다 */
+  cuisine?: Cuisine
+  /** 유통 바코드(GTIN-13) */
+  barcode?: string
 }
 
 /**

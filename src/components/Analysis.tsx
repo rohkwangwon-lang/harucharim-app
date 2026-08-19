@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import type { PatientContext, SelectedItem } from '../data/types'
+import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
+import { MEAL_SLOTS } from '../data/types'
 import { FOOD_BY_ID } from '../data/foods'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
 import { CANCER_BY_ID } from '../data/cancers'
@@ -21,8 +22,8 @@ export function Analysis({
   patient: PatientContext
   selected: SelectedItem[]
   supplements: string[]
-  onSetServings: (foodId: string, servings: number) => void
-  onRemove: (foodId: string) => void
+  onSetServings: (foodId: string, servings: number, meal?: MealSlot) => void
+  onRemove: (foodId: string, meal?: MealSlot) => void
   onClear: () => void
 }) {
   const supps = supplements.map((id) => SUPPLEMENT_BY_ID[id]).filter(Boolean)
@@ -58,13 +59,27 @@ export function Analysis({
           ) : undefined
         }
       >
-        <ul className="card divide-y divide-slate-100 overflow-hidden">
-          {selected.map((item) => {
+        <div className="space-y-2">
+        {([...MEAL_SLOTS, undefined] as (MealSlot | undefined)[]).map((slot) => {
+          const items = selected.filter((i) => i.meal === slot)
+          if (items.length === 0) return null
+          const slotKcal = items.reduce((sum, i) => {
+            const f = FOOD_BY_ID[i.foodId]
+            return sum + (f ? ((f.per100.kcal * f.serving.g) / 100) * i.servings : 0)
+          }, 0)
+          return (
+        <div key={slot ?? 'none'} className="card overflow-hidden">
+          <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/60 px-3.5 py-2">
+            <span className="text-sm font-bold text-slate-800">{slot ?? '끼니 미지정'}</span>
+            <span className="text-xs tabular-nums text-slate-400">{Math.round(slotKcal)} kcal</span>
+          </div>
+        <ul className="divide-y divide-slate-100">
+          {items.map((item) => {
             const food = FOOD_BY_ID[item.foodId]
             if (!food) return null
             const v = evalResult.verdicts.find((x) => x.food.id === food.id)
             return (
-              <li key={item.foodId} className="flex items-center gap-2 px-3.5 py-2.5">
+              <li key={item.foodId + '|' + (item.meal ?? '')} className="flex items-center gap-2 px-3.5 py-2.5">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
                     <span className="truncate text-sm font-medium text-slate-900">{food.name}</span>
@@ -80,25 +95,32 @@ export function Analysis({
                 <div className="flex shrink-0 items-center gap-1">
                   <button
                     className="h-7 w-7 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    onClick={() => onSetServings(item.foodId, Math.round((item.servings - 0.5) * 10) / 10)}
+                    onClick={() => onSetServings(item.foodId, Math.round((item.servings - 0.5) * 10) / 10, item.meal)}
                   >−</button>
                   <span className="w-8 text-center text-sm font-medium tabular-nums">{item.servings}</span>
                   <button
                     className="h-7 w-7 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    onClick={() => onSetServings(item.foodId, Math.round((item.servings + 0.5) * 10) / 10)}
+                    onClick={() => onSetServings(item.foodId, Math.round((item.servings + 0.5) * 10) / 10, item.meal)}
                   >＋</button>
                   <button
                     className="ml-1 h-7 w-7 rounded-lg text-slate-300 hover:bg-danger-50 hover:text-danger-600"
-                    onClick={() => onRemove(item.foodId)}
+                    onClick={() => onRemove(item.foodId, item.meal)}
                   >✕</button>
                 </div>
               </li>
             )
           })}
         </ul>
+        </div>
+          )
+        })}
+        </div>
       </Section>
 
-      <Section title="영양 요약" desc="선택한 음식과 영양제를 모두 합산한 값입니다.">
+      <Section
+        title="하루 영양 요약"
+        desc="아래 값은 담으신 모든 끼니와 영양제를 합한 하루치입니다. 한 끼 기준이 아닙니다."
+      >
         <div className="grid grid-cols-3 gap-2">
           <Stat
             label="에너지" value={String(Math.round(kcal))} unit="kcal"

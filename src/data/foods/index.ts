@@ -22,14 +22,21 @@ import { vegetables2 } from './vegetables2'
 import { fruits2 } from './fruits2'
 import { dishes2 } from './dishes2'
 import { misc2 } from './misc2'
+import { western } from './western'
+import { CUISINE_MAP, SEASON_MAP } from './seasonCuisine'
 
 export const FOODS: Food[] = [
   ...grains, ...legumes, ...nuts, ...vegetables, ...seaweedMushroom, ...fruits,
   ...meat, ...poultryEgg, ...seafood, ...dairy, ...fatsSugar,
   ...soups, ...sidedish, ...riceNoodle, ...eatout,
   ...beverages, ...snacks, ...processed, ...clinical,
-  ...vegetables2, ...fruits2, ...dishes2, ...misc2
-]
+  ...vegetables2, ...fruits2, ...dishes2, ...misc2, ...western
+].map((f) => ({
+  // 제철·요리 계통은 seasonCuisine.ts 한 곳에서 관리하고 여기서 붙인다
+  ...f,
+  season: f.season ?? SEASON_MAP[f.id],
+  cuisine: f.cuisine ?? CUISINE_MAP[f.id] ?? '한식'
+}))
 
 /** id → Food 조회용 인덱스 */
 export const FOOD_BY_ID: Record<string, Food> = Object.fromEntries(

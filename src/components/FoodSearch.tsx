@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import type { Food, FoodGroup, PatientContext } from '../data/types'
+import type { Cuisine, Food, FoodGroup, MealSlot, PatientContext } from '../data/types'
+import { MEAL_SLOTS } from '../data/types'
 import { FOODS } from '../data/foods'
 import { activeInteractions, activeRules, evaluateFood } from '../engine/rules'
 import { foodContribution } from '../engine/nutrition'
@@ -29,12 +30,17 @@ export function FoodSearch({
   selectedIds
 }: {
   patient: PatientContext
-  onAdd: (foodId: string, servings: number) => void
+  onAdd: (foodId: string, servings: number, meal: MealSlot) => void
   selectedIds: Set<string>
 }) {
   const [q, setQ] = useState('')
   const [group, setGroup] = useState<FoodGroup | '전체'>('전체')
   const [detail, setDetail] = useState<Food | null>(null)
+  /** 담을 끼니 — 여기서 미리 정해 두면 매번 고르지 않아도 된다 */
+  const [meal, setMeal] = useState<MealSlot>('점심')
+  /** 식재료만 보기 — 조리된 메뉴가 아니라 재료 단위로 짜고 싶을 때 */
+  const [onlyIngredient, setOnlyIngredient] = useState(false)
+  const [cuisine, setCuisine] = useState<Cuisine | '전체'>('전체')
 
   const cached = useMemo(
     () => ({ rules: activeRules(patient), interactions: activeInteractions(patient) }),
@@ -42,7 +48,13 @@ export function FoodSearch({
   )
 
   const results = useMemo(() => {
-    const list = FOODS.filter((f) => (group === '전체' || f.group === group) && matches(f, q.trim()))
+    const list = FOODS.filter(
+      (f) =>
+        (group === '전체' || f.group === group) &&
+        (!onlyIngredient || f.form === 'ingredient') &&
+        (cuisine === '전체' || (f.cuisine ?? '한식') === cuisine || f.cuisine === '무관') &&
+        matches(f, q.trim())
+    )
     // 검색어가 없으면 이 암종에서 권장되는 것을 먼저 보여준다
     return list
       .map((f) => ({ food: f, verdict: evaluateFood(f, patient, 1, cached) }))
@@ -52,7 +64,7 @@ export function FoodSearch({
         return rank(a.verdict.level) - rank(b.verdict.level)
       })
       .slice(0, 200)
-  }, [q, group, patient, cached])
+  }, [q, group, onlyIngredient, cuisine, patient, cached])
 
   return (
     <div>
@@ -63,7 +75,53 @@ export function FoodSearch({
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
+        {/* 담을 끼니를 먼저 정해 두면 음식을 고를 때마다 다시 묻지 않는다 */}
+        <div className="mt-2 flex items-center gap-2">
+          <span className="shrink-0 text-[11px] font-medium text-slate-500">담을 끼니</span>
+          <div className="flex flex-1 gap-1">
+            {MEAL_SLOTS.map((m) => (
+              <button
+                key={m}
+                onClick={() => setMeal(m)}
+                className={`flex-1 rounded-lg border px-2 py-1 text-xs font-medium transition-colors ${
+                  meal === m
+                    ? 'border-brand-500 bg-brand-500 text-white'
+                    : 'border-slate-300 bg-white text-slate-600'
+                }`}
+              >
+                {m}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="mt-2 flex gap-1.5 overflow-x-auto pb-1">
+          <button
+            onClick={() => setOnlyIngredient((v) => !v)}
+            className={`chip shrink-0 border ${
+              onlyIngredient
+                ? 'border-amber-500 bg-amber-500 text-white'
+                : 'border-slate-200 bg-white text-slate-600'
+            }`}
+          >
+            식재료만
+          </button>
+          {(['전체', '한식', '양식', '중식', '일식', '동남아'] as const).map((c) => (
+            <button
+              key={c}
+              onClick={() => setCuisine(c)}
+              className={`chip shrink-0 border ${
+                cuisine === c
+                  ? 'border-sky-500 bg-sky-500 text-white'
+                  : 'border-slate-200 bg-white text-slate-600'
+              }`}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-1.5 flex gap-1.5 overflow-x-auto pb-1">
           {GROUPS.map((g) => (
             <button
               key={g}
@@ -118,8 +176,9 @@ export function FoodSearch({
           food={detail}
           patient={patient}
           onClose={() => setDetail(null)}
-          onAdd={(s) => {
-            onAdd(detail.id, s)
+          defaultMeal={meal}
+          onAdd={(s, m) => {
+            onAdd(detail.id, s, m)
             setDetail(null)
           }}
         />
