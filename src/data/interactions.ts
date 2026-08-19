@@ -151,7 +151,8 @@ export const INTERACTIONS: Interaction[] = [
   {
     id: 'int-oxaliplatin-cold',
     agent: 'oxaliplatin',
-    match: { tags: ['수분보충'] },
+    // 차갑게 마시는 것이 문제이므로 음료로 한정한다
+    match: { restrictGroups: ['음료'], tags: ['수분보충'] },
     level: 'caution',
     title: '옥살리플라틴 투여 후 며칠간은 찬 음식·찬 음료를 피하세요',
     reason:

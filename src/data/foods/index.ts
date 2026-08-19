@@ -37,7 +37,7 @@ export const FOOD_BY_ID: Record<string, Food> = Object.fromEntries(
 )
 
 /** 중복 id 는 데이터 오류이므로 개발 중 즉시 드러나게 한다 */
-if (import.meta.env.DEV) {
+if (import.meta.env?.DEV) {
   const seen = new Set<string>()
   for (const f of FOODS) {
     if (seen.has(f.id)) console.error(`[foods] 중복 id: ${f.id}`)

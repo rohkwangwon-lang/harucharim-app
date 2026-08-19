@@ -113,7 +113,8 @@ export const headneck: CancerProfile = {
     {
       id: 'hn-aspiration',
       level: 'caution',
-      match: { tags: ['수분보충'] },
+      // 국·죽까지 잡지 않도록 음료로 한정한다. 문제가 되는 것은 물처럼 묽은 액체다.
+      match: { restrictGroups: ['음료'], tags: ['수분보충'] },
       title: '물처럼 묽은 액체가 오히려 사레의 원인이 됩니다',
       reason:
         '연하곤란에서는 묽은 액체가 가장 빠르게 흘러 기도로 넘어갑니다. 점도증진제로 걸쭉하게 만들면 흡인이 줄어듭니다. ' +

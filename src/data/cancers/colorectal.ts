@@ -76,10 +76,12 @@ export const colorectal: CancerProfile = {
     },
     {
       id: 'crc-highfiber-stricture',
-      level: 'avoid',
+      // 수술을 받았다고 모두 협착이나 장루가 있는 것은 아니다.
+      // 장루보유를 동반 상태로 고르면 cond-stoma-fiber 가 함께 걸린다.
+      level: 'caution',
       match: { tags: ['고식이섬유', '거친질감'] },
       phases: ['post_op'],
-      title: '장 협착이 있거나 장루를 만든 직후에는 질긴 섬유를 피하세요',
+      title: '수술 직후 질긴 섬유는 조심하세요 — 협착·장루가 있다면 특히',
       reason:
         '버섯 밑동, 팽이버섯, 나물 줄기, 견과류처럼 질긴 섬유는 좁아진 부위나 장루 입구를 막을 수 있습니다. ' +
         '충분히 잘게 썰고 오래 씹는 것이 기본이며, 증상이 있으면 해당 식품을 잠시 제외합니다.',
