@@ -26,8 +26,10 @@ import { western } from './western'
 import { ramyeon } from './ramyeon'
 import { gimbap } from './gimbap'
 import { CUISINE_MAP, SEASON_MAP } from './seasonCuisine'
+import { GENERATED_CORE } from './generated'
 
-export const FOODS: Food[] = [
+/** 손으로 검토해 태그를 붙인 식품. 검색에서 먼저 보여 준다. */
+export const CURATED_FOODS: Food[] = [
   ...grains, ...legumes, ...nuts, ...vegetables, ...seaweedMushroom, ...fruits,
   ...meat, ...poultryEgg, ...seafood, ...dairy, ...fatsSugar,
   ...soups, ...sidedish, ...riceNoodle, ...eatout,
@@ -40,6 +42,12 @@ export const FOODS: Food[] = [
   season: f.season ?? SEASON_MAP[f.id],
   cuisine: f.cuisine ?? CUISINE_MAP[f.id] ?? '한식'
 }))
+
+/**
+ * 전체 식품 = 수작업 검토분 + 공공데이터 자동 수집분.
+ * 수작업 검토분을 앞에 두어 검색 결과에서 먼저 걸리게 한다.
+ */
+export const FOODS: Food[] = [...CURATED_FOODS, ...GENERATED_CORE]
 
 /** id → Food 조회용 인덱스 */
 export const FOOD_BY_ID: Record<string, Food> = Object.fromEntries(

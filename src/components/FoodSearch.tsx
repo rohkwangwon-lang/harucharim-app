@@ -55,15 +55,45 @@ export function FoodSearch({
         (cuisine === '전체' || (f.cuisine ?? '한식') === cuisine || f.cuisine === '무관') &&
         matches(f, q.trim())
     )
-    // 검색어가 없으면 이 암종에서 권장되는 것을 먼저 보여준다
-    return list
-      .map((f) => ({ food: f, verdict: evaluateFood(f, patient, 1, cached) }))
-      .sort((a, b) => {
-        if (q.trim()) return 0
-        const rank = (l: string | null) => (l === 'prefer' ? 0 : l === null ? 1 : l === 'info' ? 2 : l === 'caution' ? 3 : 4)
-        return rank(a.verdict.level) - rank(b.verdict.level)
-      })
-      .slice(0, 200)
+    // 임상 규칙 평가는 한 건당 비용이 있다. 1만 8천 건 전부에 돌리면 입력이 버벅이므로
+    // 먼저 잘라 낸 다음 평가한다. 자를 때는 손으로 검토한 항목을 앞세운다.
+    const needle = q.trim().toLowerCase()
+
+    /**
+     * 검색 순위.
+     * 식품군 이름도 검색 대상이라 "우유"로 찾으면 유제품이 통째로 걸린다.
+     * 그래서 이름이 맞은 것을 먼저, 그중에서도 앞쪽에서 맞은 것을 먼저 보여 준다.
+     */
+    const score = (f: Food): number => {
+      if (!needle) return f.auto ? 1 : 0
+      const name = f.name.toLowerCase()
+      const alias = f.aliases?.some((a) => a.toLowerCase().includes(needle)) ?? false
+      let s: number
+      if (name === needle) s = 0
+      else if (name.startsWith(needle)) s = 1
+      else if (name.includes(needle)) s = 2
+      else if (alias) s = 3
+      else s = 6                       // 식품군·태그만 맞은 경우
+      if (f.auto) s += 0.5             // 같은 조건이면 손으로 검토한 항목을 앞에
+      return s
+    }
+
+    const ordered = list.sort((a, b) => {
+      const d = score(a) - score(b)
+      if (d !== 0) return d
+      return a.name.length - b.name.length
+    })
+
+    const page = ordered.slice(0, 120)
+    const scored = page.map((f) => ({ food: f, verdict: evaluateFood(f, patient, 1, cached) }))
+
+    // 검색어가 없을 때만 권장 우선으로 다시 세운다
+    if (!q.trim()) {
+      const rank = (l: string | null) =>
+        l === 'prefer' ? 0 : l === null ? 1 : l === 'info' ? 2 : l === 'caution' ? 3 : 4
+      scored.sort((a, b) => rank(a.verdict.level) - rank(b.verdict.level))
+    }
+    return scored
   }, [q, group, onlyIngredient, cuisine, patient, cached])
 
   return (
@@ -157,8 +187,17 @@ export function FoodSearch({
                       {selectedIds.has(food.id) && (
                         <span className="chip shrink-0 bg-brand-100 text-brand-700">담김</span>
                       )}
+                      {food.auto && (
+                        <span
+                          className="chip shrink-0 bg-slate-100 text-slate-500"
+                          title="식약처 공공데이터에서 자동으로 들여온 항목입니다. 성분값은 정확하지만 임상 태그는 성분으로 판정 가능한 것만 붙어 있습니다."
+                        >
+                          식약처
+                        </span>
+                      )}
                     </div>
                     <div className="mt-0.5 truncate text-[11px] text-slate-400">
+                      {food.maker ? `${food.maker} · ` : ''}
                       {food.serving.label} · {Math.round(per.kcal ?? 0)} kcal · 단백질{' '}
                       {(per.protein ?? 0).toFixed(1)} g · 나트륨 {Math.round(per.na ?? 0)} mg
                     </div>

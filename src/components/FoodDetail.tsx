@@ -50,10 +50,19 @@ export function FoodDetail({
                 {food.form === 'ingredient' && (
                   <span className="chip bg-amber-100 text-amber-700">식재료</span>
                 )}
+                {food.maker && <span className="chip bg-slate-100 text-slate-500">{food.maker}</span>}
               </div>
             </div>
             {verdict.level && <LevelBadge level={verdict.level} />}
           </div>
+          {food.auto && (
+            <p className="mt-2.5 rounded-lg bg-slate-50 px-3 py-2 text-[11px] leading-relaxed text-slate-500">
+              식품의약품안전처 공공데이터에서 자동으로 들여온 항목입니다.
+              <strong className="text-slate-700"> 영양성분 값은 식약처 자료</strong>라 신뢰할 수 있지만,
+              임상 판정은 성분으로 확인할 수 있는 것(나트륨·당·지방 등)만 붙어 있습니다.
+              조리법이나 가공 방식에 따른 판단은 빠져 있을 수 있습니다.
+            </p>
+          )}
           {food.note && (
             <p className="mt-2.5 rounded-lg bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-600">
               {food.note}
