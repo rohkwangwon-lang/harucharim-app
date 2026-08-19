@@ -4,3 +4,7 @@ dist-ssr
 *.local
 .DS_Store
 .vite
+
+# API 인증키 — 절대 커밋하지 않는다
+.env
+.env.local

@@ -23,6 +23,8 @@ import { fruits2 } from './fruits2'
 import { dishes2 } from './dishes2'
 import { misc2 } from './misc2'
 import { western } from './western'
+import { ramyeon } from './ramyeon'
+import { gimbap } from './gimbap'
 import { CUISINE_MAP, SEASON_MAP } from './seasonCuisine'
 
 export const FOODS: Food[] = [
@@ -30,7 +32,8 @@ export const FOODS: Food[] = [
   ...meat, ...poultryEgg, ...seafood, ...dairy, ...fatsSugar,
   ...soups, ...sidedish, ...riceNoodle, ...eatout,
   ...beverages, ...snacks, ...processed, ...clinical,
-  ...vegetables2, ...fruits2, ...dishes2, ...misc2, ...western
+  ...vegetables2, ...fruits2, ...dishes2, ...misc2, ...western,
+  ...ramyeon, ...gimbap
 ].map((f) => ({
   // 제철·요리 계통은 seasonCuisine.ts 한 곳에서 관리하고 여기서 붙인다
   ...f,
