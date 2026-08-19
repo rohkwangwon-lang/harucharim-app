@@ -1,0 +1,38 @@
+import { F } from './_helper'
+
+/** 유지·당류·조미료 */
+export const fatsSugar = [
+  F('oil-perilla', '들기름', '유지·당류', 'ingredient', 5, '1작은술',
+    { kcal: 900, carb: 0, protein: 0, fat: 100, satFat: 8.0, omega3: 60.0, vitE: 5.0, na: 0 },
+    ['오메가3풍부', '고지방', '고열량밀도'], { note: '산패가 빨라 냉장 보관' }),
+  F('oil-sesame', '참기름', '유지·당류', 'ingredient', 5, '1작은술',
+    { kcal: 900, carb: 0, protein: 0, fat: 100, satFat: 14.2, vitE: 1.4, vitK: 14, na: 0 },
+    ['고지방', '고열량밀도'], {}),
+  F('oil-olive', '올리브유', '유지·당류', 'ingredient', 5, '1작은술',
+    { kcal: 884, carb: 0, protein: 0, fat: 100, satFat: 13.8, vitE: 14.4, vitK: 60, na: 2 },
+    ['폴리페놀', '고지방', '고열량밀도'], { note: '지중해식 식단의 핵심 지방 급원' }),
+  F('oil-soybean', '콩기름', '유지·당류', 'ingredient', 5, '1작은술',
+    { kcal: 884, carb: 0, protein: 0, fat: 100, satFat: 15.6, omega3: 6.8, vitE: 8.2, vitK: 184, na: 0 },
+    ['고지방', '고열량밀도', '고비타민K'], {}),
+  F('mayonnaise', '마요네즈', '유지·당류', 'ingredient', 15, '1큰술',
+    { kcal: 680, carb: 2.0, protein: 1.0, fat: 75.0, satFat: 8.0, chol: 60, na: 640, k: 20 },
+    ['고지방', '고나트륨', '고열량밀도', '초가공식품'], {}),
+  F('ketchup', '케첩', '유지·당류', 'ingredient', 15, '1큰술',
+    { kcal: 100, carb: 25.0, protein: 1.0, fat: 0.2, sugar: 21.0, na: 900, k: 280, ca: 15, vitA: 30, vitC: 4 },
+    ['고나트륨', '고당', '리코펜', '초가공식품'], {}),
+  F('sugar-white', '설탕', '유지·당류', 'ingredient', 5, '1작은술',
+    { kcal: 387, carb: 100, protein: 0, fat: 0, sugar: 100, na: 1 },
+    ['고당'], { gi: 65 }),
+  F('honey', '꿀', '유지·당류', 'ingredient', 20, '1큰술',
+    { kcal: 304, carb: 82.4, protein: 0.3, fat: 0, sugar: 82.1, na: 4, k: 52, ca: 6, fe: 0.4, vitC: 0.5 },
+    ['고당', '부드러움'], { gi: 58, note: '호중구감소증에서는 멸균되지 않은 생꿀을 피한다' }),
+  F('salt', '소금', '유지·당류', 'ingredient', 2, '1/2작은술',
+    { kcal: 0, carb: 0, protein: 0, fat: 0, na: 38700, k: 8, ca: 24, mg: 1 },
+    ['고나트륨', '염장'], { note: '1 g 당 나트륨 약 390 mg' }),
+  F('vinegar', '식초', '유지·당류', 'ingredient', 5, '1작은술',
+    { kcal: 21, carb: 0.9, protein: 0, fat: 0, na: 5, k: 73 },
+    ['산성강함'], {}),
+  F('fish-sauce', '멸치액젓', '유지·당류', 'ingredient', 10, '1작은술',
+    { kcal: 40, carb: 2.0, protein: 8.0, fat: 0.1, na: 8500, k: 250, ca: 40, p: 100 },
+    ['고나트륨', '발효', '염장'], {})
+]

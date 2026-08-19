@@ -1,0 +1,363 @@
+/**
+ * 온코푸드 — 암 환자 식이·영양 의사결정 보조
+ * 데이터 스키마 정의
+ *
+ * 설계 원칙
+ *  1) 영양성분은 항상 "가식부 100 g 당" 값으로 저장하고, 1회 제공량은 별도 필드로 둔다.
+ *     → 사용자가 몇 인분을 선택하든 계산식이 하나로 유지된다.
+ *  2) 암종별 권고는 개별 식품 id 를 직접 나열하지 않고 가급적 tag 로 매칭한다.
+ *     → 식품이 1,000종으로 늘어나도 규칙은 늘어나지 않는다.
+ *  3) 모든 임상 권고에는 근거 수준(evidence)과 출처(refIds)를 반드시 붙인다.
+ *     근거 없는 값은 만들어 넣지 않는다.
+ */
+
+/* ────────────────────────────── 영양소 ────────────────────────────── */
+
+/** 가식부 100 g 당 영양성분. 값이 확인되지 않은 항목은 undefined 로 두고 0 으로 채우지 않는다. */
+export interface Nutrients {
+  /** 에너지 (kcal) */ kcal: number
+  /** 탄수화물 (g) */ carb: number
+  /** 당류 (g) */ sugar?: number
+  /** 식이섬유 (g) */ fiber?: number
+  /** 단백질 (g) */ protein: number
+  /** 지방 (g) */ fat: number
+  /** 포화지방 (g) */ satFat?: number
+  /** 트랜스지방 (g) */ transFat?: number
+  /** 오메가-3 지방산 (g, ALA+EPA+DHA) */ omega3?: number
+  /** 콜레스테롤 (mg) */ chol?: number
+
+  /** 나트륨 (mg) */ na: number
+  /** 칼륨 (mg) */ k?: number
+  /** 칼슘 (mg) */ ca?: number
+  /** 인 (mg) */ p?: number
+  /** 마그네슘 (mg) */ mg?: number
+  /** 철 (mg) */ fe?: number
+  /** 아연 (mg) */ zn?: number
+  /** 셀레늄 (µg) */ se?: number
+
+  /** 비타민 A (µg RAE) */ vitA?: number
+  /** 비타민 D (µg) */ vitD?: number
+  /** 비타민 E (mg α-TE) */ vitE?: number
+  /** 비타민 K (µg) */ vitK?: number
+  /** 비타민 C (mg) */ vitC?: number
+  /** 티아민 B1 (mg) */ b1?: number
+  /** 리보플라빈 B2 (mg) */ b2?: number
+  /** 나이아신 B3 (mg NE) */ b3?: number
+  /** 비타민 B6 (mg) */ b6?: number
+  /** 엽산 (µg DFE) */ folate?: number
+  /** 비타민 B12 (µg) */ b12?: number
+
+  /** 퓨린 (mg) — 신기능 저하·고요산혈증 참고용 */ purine?: number
+  /** 알코올 (g) */ alcohol?: number
+}
+
+export type NutrientKey = keyof Nutrients
+
+/* ────────────────────────────── 식품 ────────────────────────────── */
+
+export type FoodGroup =
+  | '곡류·전분'
+  | '두류·대두가공'
+  | '견과·종실'
+  | '채소'
+  | '해조·버섯'
+  | '과일'
+  | '육류'
+  | '가금류·난류'
+  | '어패류'
+  | '우유·유제품'
+  | '유지·당류'
+  | '국·탕·찌개'
+  | '밥·면·죽 요리'
+  | '반찬·조림·볶음'
+  | '가공식품'
+  | '음료'
+  | '간식·디저트'
+  | '외식·프랜차이즈'
+  | '경장영양·환자식'
+
+/** 규칙 엔진이 매칭하는 식품 속성 태그. 임상 권고는 대부분 이 태그를 통해 연결된다. */
+export type FoodTag =
+  // 조리·가공 방식
+  | '생식'            // 익히지 않음 — 호중구감소증 시 주의
+  | '발효'
+  | '훈제'
+  | '염장'            // 소금 절임 (젓갈·장아찌)
+  | '직화구이'        // 고온 직화 — HCA/PAH
+  | '튀김'
+  | '가공육'          // 햄·소시지·베이컨 — IARC Group 1
+  | '초가공식품'
+  // 성분 특성
+  | '고나트륨'
+  | '고당'
+  | '고지방'
+  | '포화지방높음'
+  | '고식이섬유'
+  | '저잔사'          // low-residue, 장 협착·급성 장염 시
+  | '고단백'
+  | '고칼륨'
+  | '고인'
+  | '고퓨린'
+  | '고비타민K'       // 와파린 상호작용
+  | '고칼슘'
+  | '철분풍부'
+  | '적색육'
+  | '오메가3풍부'
+  | '프로바이오틱스'
+  | '식물성에스트로겐' // 대두 이소플라본
+  | '십자화과'
+  | '알리움'          // 마늘·양파·부추
+  | '카로티노이드'
+  | '리코펜'
+  | '폴리페놀'
+  | '자몽계'          // CYP3A4 억제
+  | '카페인'
+  | '알코올'
+  | '유당함유'
+  | '글루텐함유'
+  | '매운맛'
+  | '산성강함'        // 감귤·토마토·식초 — 구강점막염 시 통증
+  | '거친질감'        // 견과·바삭한 튀김 — 점막염·연하곤란 시 손상
+  | '가스유발'        // FODMAP
+  | '저FODMAP'
+  | '부드러움'        // 연하곤란·점막염 시 적합
+  | '수분보충'
+  | '고열량밀도'      // 악액질·체중감소 시 유리
+
+export type FoodForm =
+  | 'ingredient'  // 식재료 (생 또는 기본 조리)
+  | 'dish'        // 조리된 한 그릇 음식
+  | 'processed'   // 포장 가공식품
+  | 'beverage'
+  | 'snack'
+  | 'eatout'      // 외식 메뉴
+
+export interface Food {
+  id: string
+  /** 대표 표기명 */
+  name: string
+  /** 검색용 동의어·이명 (예: '고구마' ← '군고구마', 'sweet potato') */
+  aliases?: string[]
+  group: FoodGroup
+  form: FoodForm
+  /** 1회 제공량 — 실제 한국인이 한 번에 먹는 현실적인 양 */
+  serving: {
+    /** 가식부 그램 */ g: number
+    /** 사용자에게 보여줄 표기 (예: '공기 1그릇') */ label: string
+  }
+  /** 가식부 100 g 당 영양성분 */
+  per100: Nutrients
+  tags: FoodTag[]
+  /** 혈당지수 (포도당 기준, 확인된 값만) */
+  gi?: number
+  /** 표시용 보충 설명 */
+  note?: string
+  /** 성분값 출처 — 'kfda' = 식품의약품안전처 식품영양성분DB, 'rda' = 농촌진흥청 표준성분표 */
+  src?: 'kfda' | 'rda' | 'usda' | 'label' | 'calc'
+}
+
+/* ────────────────────────────── 영양제 ────────────────────────────── */
+
+export type SupplementCategory =
+  | '종합비타민'
+  | '비타민B군'
+  | '비타민C'
+  | '비타민D'
+  | '오메가3'
+  | '칼슘·마그네슘'
+  | '철분'
+  | '아연·미네랄'
+  | '유산균'
+  | '단백질보충'
+  | '경장영양(균형영양식)'
+  | '간건강'
+  | '홍삼·인삼'
+  | '항산화·기타'
+  | '식이섬유'
+
+/** 영양소로 환산되지 않는 기능성 원료 (한국 건강기능식품 기능성 원료 등) */
+export interface ActiveIngredient {
+  name: string
+  /** 1일 섭취량 기준 함량 표기 (예: '1,000 mg') */
+  amount: string
+}
+
+export interface Supplement {
+  id: string
+  /** 제품명 또는 대표 품목명 */
+  name: string
+  brand: string
+  category: SupplementCategory
+  /** 1일 섭취 방법 표기 (예: '1일 1회 1정') */
+  dosageLabel: string
+  /** 1일 섭취량 기준 영양성분 (Nutrients 키를 그대로 사용) */
+  perDay: Partial<Nutrients>
+  actives?: ActiveIngredient[]
+  /** 약국 일반 유통 여부 */
+  otc: boolean
+  /** 건강기능식품 인정 여부 */
+  hf?: boolean
+  note?: string
+}
+
+/* ────────────────────────────── 임상 권고 ────────────────────────────── */
+
+export type CancerId =
+  | 'breast' | 'prostate' | 'lung' | 'stomach' | 'colorectal'
+  | 'liver' | 'pancreas' | 'esophagus' | 'headneck' | 'gyn'
+
+/** 치료 시기 — 같은 식품도 시기에 따라 권고가 달라진다. */
+export type Phase =
+  | 'all'
+  | 'during_rt'        // 방사선치료 중
+  | 'during_chemo'     // 항암화학요법 중
+  | 'neutropenia'      // 호중구감소증
+  | 'post_op'          // 수술 후 회복기
+  | 'survivorship'     // 치료 종료 후 관리기
+
+/**
+ * 근거 수준
+ *  A — 무작위배정 임상시험 또는 그 메타분석
+ *  B — 대규모 전향적 코호트·환자대조군 연구
+ *  C — 소규모·후향적 연구, 기전 연구, 일관되지 않은 결과
+ *  G — 주요 학회 가이드라인의 합의 권고 (WCRF/AICR, ASCO, ESPEN, NCCN 등)
+ */
+export type EvidenceLevel = 'A' | 'B' | 'C' | 'G'
+
+export type RuleLevel =
+  | 'avoid'      // 금기 — 하지 않도록 권고
+  | 'caution'    // 주의 — 제한하거나 조건부
+  | 'prefer'     // 권장 — 이득 근거 있음
+  | 'info'       // 정보 — 흔한 오해 교정 등
+
+/**
+ * 식품·영양제를 규칙에 연결하는 매칭 조건.
+ * tags / foodIds / groups / nutrient 등 조건들은 서로 OR 로 평가한다.
+ * restrictGroups 만 예외로, 지정하면 그 식품군에 속한 것만 최종적으로 통과시킨다(AND).
+ */
+export interface RuleMatch {
+  /** OR 매칭 결과를 이 식품군으로 한정한다 (예: 고당 규칙을 음료·간식에만 적용) */
+  restrictGroups?: FoodGroup[]
+  tags?: FoodTag[]
+  foodIds?: string[]
+  groups?: FoodGroup[]
+  supplementCategories?: SupplementCategory[]
+  supplementIds?: string[]
+  /** 성분 임계값 매칭 (예: 1회 제공량 나트륨 > 800 mg) */
+  nutrient?: {
+    key: NutrientKey
+    op: '>' | '<'
+    value: number
+    /** serving = 1회 제공량, per100 = 100 g 당, day = 하루 총섭취 */
+    basis: 'serving' | 'per100' | 'day'
+  }
+}
+
+export interface NutritionRule {
+  id: string
+  level: RuleLevel
+  match: RuleMatch
+  /** 사용자에게 보이는 한 줄 요약 */
+  title: string
+  /** 왜 그런지 — 기전과 임상 근거를 사용자 언어로 */
+  reason: string
+  evidence: EvidenceLevel
+  refIds: string[]
+  /** 해당 시기에만 적용. 생략 시 'all' */
+  phases?: Phase[]
+}
+
+/** 항암제·표적치료제·방사선과 식품/영양제 사이의 상호작용 */
+export interface Interaction {
+  id: string
+  /** 상호작용 상대 (약제명 또는 치료 modality) */
+  agent: string
+  match: RuleMatch
+  level: RuleLevel
+  title: string
+  reason: string
+  evidence: EvidenceLevel
+  refIds: string[]
+}
+
+export interface Reference {
+  id: string
+  /** 인용 표기 */
+  citation: string
+  year: number
+  url?: string
+  /** 근거 유형 */
+  kind: 'guideline' | 'rct' | 'meta' | 'cohort' | 'review' | 'db'
+}
+
+/** 암종별 영양 목표 — ESPEN/ASPEN 종양환자 권고 기반 */
+export interface NutritionTarget {
+  /** 체중 kg 당 열량 (kcal/kg/day) [최소, 최대] */
+  kcalPerKg: [number, number]
+  /** 체중 kg 당 단백질 (g/kg/day) [최소, 최대] */
+  proteinPerKg: [number, number]
+  /** 하루 나트륨 상한 (mg) */
+  naLimit?: number
+  /** 하루 식이섬유 목표 (g) */
+  fiberTarget?: [number, number]
+  /** 하루 수분 목표 (mL/kg) */
+  fluidPerKg?: number
+  notes: string[]
+}
+
+export interface CancerProfile {
+  id: CancerId
+  name: string
+  /** 이 암종 식이 관리의 한 문단 요약 */
+  summary: string
+  /** 이 암종에서 특히 문제가 되는 증상·합병증 */
+  keyIssues: string[]
+  target: NutritionTarget
+  rules: NutritionRule[]
+  /** 시기별 실무 지침 */
+  phaseNotes: Partial<Record<Exclude<Phase, 'all'>, string>>
+  refIds: string[]
+}
+
+/* ────────────────────────────── 사용자 입력 ────────────────────────────── */
+
+export interface PatientContext {
+  cancer: CancerId
+  phase: Phase
+  /** 현재 체중 (kg) */
+  weightKg: number
+  heightCm: number
+  age: number
+  sex: 'M' | 'F'
+  /** 최근 6개월 체중 감소율 (%) — 악액질 판정 */
+  weightLossPct?: number
+  /** 동반 상태 — 추가 규칙 트리거 */
+  conditions: PatientCondition[]
+  /** 복용 중인 약제 — 상호작용 검사 */
+  medications: string[]
+}
+
+export type PatientCondition =
+  | '연하곤란'
+  | '구강점막염'
+  | '설사'
+  | '변비'
+  | '오심·구토'
+  | '식욕부진'
+  | '체중감소'
+  | '호중구감소증'
+  | '위절제후'
+  | '장루보유'
+  | '복수'
+  | '간성뇌증위험'
+  | '신기능저하'
+  | '당뇨'
+  | '고혈압'
+  | '와파린복용'
+
+/** 사용자가 고른 식품 1건 (수량 중복 가능) */
+export interface SelectedItem {
+  foodId: string
+  /** 1회 제공량 기준 배수 (0.5, 1, 2 …) */
+  servings: number
+}

@@ -1,0 +1,37 @@
+import { F } from './_helper'
+
+/** 가공식품 — 편의점·마트에서 흔히 집는 품목 */
+export const processed = [
+  F('tofu-processed-nugget', '두부과자', '가공식품', 'snack', 30, '1봉',
+    { kcal: 450, carb: 55.0, protein: 12.0, fat: 20.0, satFat: 6.0, na: 500, k: 200, ca: 150, p: 180, fe: 2.0 },
+    ['초가공식품', '고나트륨', '식물성에스트로겐'], {}),
+  F('canned-corn', '옥수수통조림', '가공식품', 'processed', 80, '1/2캔',
+    { kcal: 81, carb: 18.0, protein: 2.6, fat: 0.8, sugar: 5.0, fiber: 2.0, na: 250, k: 170, ca: 4, p: 60, fe: 0.4 },
+    ['초가공식품', '고나트륨', '가스유발'], {}),
+  F('canned-tuna-oil', '참치통조림(기름 포함)', '가공식품', 'processed', 100, '1캔',
+    { kcal: 198, carb: 0, protein: 22.0, fat: 12.0, satFat: 2.2, omega3: 0.3, chol: 45, na: 400, k: 220, ca: 12, p: 200, se: 60, vitD: 1.8, b12: 2.4 },
+    ['고단백', '초가공식품', '고지방'], {}),
+  F('instant-porridge', '즉석죽(레토르트)', '가공식품', 'processed', 285, '1개',
+    { kcal: 60, carb: 12.0, protein: 1.8, fat: 0.6, fiber: 0.4, na: 180, k: 50, ca: 10, p: 30, fe: 0.4 },
+    ['초가공식품', '부드러움', '저잔사'],
+    { note: '치료 중 조리가 어려울 때 실용적. 다만 열량이 낮아 이것만으로는 부족하다' }),
+  F('instant-rice', '즉석밥', '가공식품', 'processed', 210, '1개',
+    { kcal: 148, carb: 33.0, protein: 2.6, fat: 0.3, na: 5, k: 30, ca: 3, p: 45, fe: 0.2 },
+    ['초가공식품', '부드러움'], {}),
+  F('soup-instant', '컵스프(분말)', '가공식품', 'processed', 200, '1컵',
+    { kcal: 45, carb: 6.5, protein: 1.0, fat: 1.6, na: 350, k: 40, ca: 20, p: 30 },
+    ['초가공식품', '고나트륨', '부드러움'], {}),
+  F('bread-cream', '크림빵', '가공식품', 'processed', 90, '1개',
+    { kcal: 320, carb: 48.0, protein: 6.0, fat: 11.0, satFat: 5.5, sugar: 20.0, na: 280, k: 100, ca: 60, p: 90, fe: 1.0 },
+    ['초가공식품', '고당', '부드러움', '포화지방높음'], {}),
+  F('sausage-fish', '분홍소시지', '가공식품', 'processed', 50, '3쪽',
+    { kcal: 220, carb: 12.0, protein: 9.0, fat: 15.0, satFat: 5.5, na: 850, k: 130, ca: 40, p: 150, fe: 0.8 },
+    ['가공육', '초가공식품', '고나트륨', '고지방'], {}),
+  F('cereal-corn', '콘프레이크', '가공식품', 'processed', 40, '1공기',
+    { kcal: 370, carb: 84.0, protein: 7.0, fat: 0.9, sugar: 20.0, fiber: 3.0, na: 600, k: 130, ca: 15, p: 90, fe: 8.0, zn: 2.0, b1: 1.0, folate: 200 },
+    ['초가공식품', '고당', '고나트륨'], { note: '철·엽산이 강화된 제품이 많다' }),
+  F('jelly-nutrition', '영양젤리(파우치)', '가공식품', 'processed', 130, '1개',
+    { kcal: 130, carb: 30.0, protein: 0.5, fat: 0, sugar: 22.0, na: 40, k: 30, ca: 50, vitC: 30 },
+    ['부드러움', '고당', '수분보충'],
+    { note: '삼키기 쉬워 구강점막염·연하곤란 시 열량 보충용으로 쓸 수 있다' })
+]

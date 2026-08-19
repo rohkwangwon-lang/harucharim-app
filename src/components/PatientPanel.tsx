@@ -1,0 +1,208 @@
+import type { PatientContext, PatientCondition, Phase } from '../data/types'
+import { CANCERS } from '../data/cancers'
+import { MEDICATIONS } from '../data/interactions'
+import { nutritionRisk, personalTarget } from '../engine/nutrition'
+import { CANCER_BY_ID } from '../data/cancers'
+import { Section, Stat } from './ui'
+
+const PHASES: { id: Phase; label: string; desc: string }[] = [
+  { id: 'during_rt', label: '방사선치료 중', desc: '점막염·설사 등 급성 부작용 시기' },
+  { id: 'during_chemo', label: '항암치료 중', desc: '오심·미각변화·골수억제 시기' },
+  { id: 'neutropenia', label: '호중구감소증', desc: '식품 안전 규칙이 강화됩니다' },
+  { id: 'post_op', label: '수술 후 회복기', desc: '식이 단계 상향, 소량 분할식' },
+  { id: 'survivorship', label: '치료 종료 후', desc: '재발 예방과 체중 관리 중심' }
+]
+
+const CONDITIONS: PatientCondition[] = [
+  '연하곤란', '구강점막염', '설사', '변비', '오심·구토', '식욕부진', '체중감소',
+  '호중구감소증', '위절제후', '장루보유', '복수', '간성뇌증위험', '신기능저하',
+  '당뇨', '고혈압', '와파린복용'
+]
+
+export function PatientPanel({
+  patient,
+  onChange
+}: {
+  patient: PatientContext
+  onChange: (patch: Partial<PatientContext>) => void
+}) {
+  const profile = CANCER_BY_ID[patient.cancer]
+  const target = personalTarget(patient, profile.target.kcalPerKg, profile.target.proteinPerKg)
+  const risk = nutritionRisk(patient)
+
+  const toggleCondition = (c: PatientCondition) =>
+    onChange({
+      conditions: patient.conditions.includes(c)
+        ? patient.conditions.filter((x) => x !== c)
+        : [...patient.conditions, c]
+    })
+
+  const toggleMed = (id: string) =>
+    onChange({
+      medications: patient.medications.includes(id)
+        ? patient.medications.filter((x) => x !== id)
+        : [...patient.medications, id]
+    })
+
+  return (
+    <div>
+      <Section title="암종" desc="선택한 암종에 따라 권고와 경고가 완전히 달라집니다.">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {CANCERS.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => onChange({ cancer: c.id })}
+              className={`rounded-xl border px-3 py-2.5 text-left text-sm font-medium transition-colors ${
+                patient.cancer === c.id
+                  ? 'border-brand-500 bg-brand-50 text-brand-800'
+                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+              }`}
+            >
+              {c.name}
+            </button>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="치료 시기" desc="같은 음식도 시기에 따라 권고가 반대로 바뀝니다.">
+        <div className="space-y-2">
+          {PHASES.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => onChange({ phase: p.id })}
+              className={`flex w-full items-start gap-3 rounded-xl border px-3.5 py-2.5 text-left transition-colors ${
+                patient.phase === p.id
+                  ? 'border-brand-500 bg-brand-50'
+                  : 'border-slate-200 bg-white hover:bg-slate-50'
+              }`}
+            >
+              <span
+                className={`mt-1 h-3 w-3 shrink-0 rounded-full border-2 ${
+                  patient.phase === p.id ? 'border-brand-600 bg-brand-600' : 'border-slate-300'
+                }`}
+              />
+              <span>
+                <span className="block text-sm font-medium text-slate-900">{p.label}</span>
+                <span className="block text-xs text-slate-500">{p.desc}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="신체 정보" desc="열량·단백질 목표는 체중을 기준으로 계산됩니다.">
+        <div className="card grid grid-cols-2 gap-3 p-3.5 sm:grid-cols-4">
+          <div>
+            <label className="label">체중 (kg)</label>
+            <input
+              type="number" inputMode="decimal" className="input"
+              value={patient.weightKg}
+              onChange={(e) => onChange({ weightKg: Number(e.target.value) || 0 })}
+            />
+          </div>
+          <div>
+            <label className="label">신장 (cm)</label>
+            <input
+              type="number" inputMode="decimal" className="input"
+              value={patient.heightCm}
+              onChange={(e) => onChange({ heightCm: Number(e.target.value) || 0 })}
+            />
+          </div>
+          <div>
+            <label className="label">나이</label>
+            <input
+              type="number" inputMode="numeric" className="input"
+              value={patient.age}
+              onChange={(e) => onChange({ age: Number(e.target.value) || 0 })}
+            />
+          </div>
+          <div>
+            <label className="label">성별</label>
+            <div className="flex gap-1.5">
+              {(['M', 'F'] as const).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => onChange({ sex: s })}
+                  className={`flex-1 rounded-xl border px-2 py-2 text-sm font-medium ${
+                    patient.sex === s
+                      ? 'border-brand-500 bg-brand-50 text-brand-800'
+                      : 'border-slate-300 bg-white text-slate-600'
+                  }`}
+                >
+                  {s === 'M' ? '남' : '여'}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="col-span-2 sm:col-span-4">
+            <label className="label">최근 6개월 체중 감소율 (%)</label>
+            <input
+              type="number" inputMode="decimal" className="input"
+              value={patient.weightLossPct ?? 0}
+              onChange={(e) => onChange({ weightLossPct: Number(e.target.value) || 0 })}
+            />
+            <p className="mt-1 text-[11px] text-slate-400">
+              5 % 이상이면 영양 개입 기준에 해당합니다. 예: 60 kg → 57 kg 이면 5 %
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          <Stat label="BMI" value={String(risk.bmi)} hint={risk.bmiLabel}
+            tone={risk.risk === 'high' ? 'bad' : risk.risk === 'moderate' ? 'warn' : 'good'} />
+          <Stat label="하루 열량 목표" value={`${target.kcal[0]}~${target.kcal[1]}`} unit="kcal" />
+          <Stat label="하루 단백질 목표" value={`${target.protein[0]}~${target.protein[1]}`} unit="g" />
+        </div>
+
+        <div
+          className={`mt-3 rounded-xl px-3.5 py-3 text-xs leading-relaxed ${
+            risk.risk === 'high'
+              ? 'bg-danger-50 text-danger-700'
+              : risk.risk === 'moderate'
+                ? 'bg-warn-50 text-warn-700'
+                : 'bg-brand-50 text-brand-800'
+          }`}
+        >
+          {risk.message}
+        </div>
+      </Section>
+
+      <Section title="지금 겪고 있는 증상" desc="증상 규칙이 암종 규칙보다 실제 식단을 더 크게 좌우하는 경우가 많습니다.">
+        <div className="flex flex-wrap gap-1.5">
+          {CONDITIONS.map((c) => (
+            <button
+              key={c}
+              onClick={() => toggleCondition(c)}
+              className={`chip border transition-colors ${
+                patient.conditions.includes(c)
+                  ? 'border-brand-500 bg-brand-500 text-white'
+                  : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="복용 중인 약" desc="선택한 약제와 관련된 식품·영양제 상호작용만 표시됩니다.">
+        <div className="flex flex-wrap gap-1.5">
+          {MEDICATIONS.map((m) => (
+            <button
+              key={m.id}
+              onClick={() => toggleMed(m.id)}
+              title={m.aliases.join(', ')}
+              className={`chip border transition-colors ${
+                patient.medications.includes(m.id)
+                  ? 'border-sky-500 bg-sky-500 text-white'
+                  : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              {m.name}
+            </button>
+          ))}
+        </div>
+      </Section>
+    </div>
+  )
+}

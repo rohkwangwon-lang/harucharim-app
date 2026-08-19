@@ -1,0 +1,36 @@
+import { F } from './_helper'
+
+/** 간식·디저트 */
+export const snacks = [
+  F('yakgwa', '약과', '간식·디저트', 'snack', 30, '1개',
+    { kcal: 420, carb: 60.0, protein: 3.5, fat: 18.0, satFat: 6.0, sugar: 35.0, na: 130, k: 60, ca: 15, p: 50, fe: 0.8 },
+    ['고당', '튀김', '고열량밀도'], {}),
+  F('biscuit-plain', '크래커', '간식·디저트', 'snack', 30, '5조각',
+    { kcal: 450, carb: 68.0, protein: 8.0, fat: 16.0, satFat: 7.0, sugar: 10.0, fiber: 2.5, na: 700, k: 110, ca: 40, p: 90, fe: 1.5 },
+    ['초가공식품', '고나트륨', '거친질감'], { note: '아침 오심 시 소량의 마른 크래커가 도움이 된다' }),
+  F('potato-chip', '감자칩', '간식·디저트', 'snack', 60, '1봉',
+    { kcal: 536, carb: 53.0, protein: 6.0, fat: 34.0, satFat: 10.0, fiber: 4.0, na: 550, k: 1200, ca: 25, p: 160, fe: 1.5, vitC: 15 },
+    ['튀김', '초가공식품', '고나트륨', '고지방', '고칼륨', '거친질감'], {}),
+  F('chocolate-dark', '다크초콜릿(70%)', '간식·디저트', 'snack', 25, '3조각',
+    { kcal: 598, carb: 46.0, protein: 7.8, fat: 43.0, satFat: 24.5, sugar: 24.0, fiber: 11.0, na: 20, k: 715, ca: 73, p: 308, mg: 228, fe: 11.9, zn: 3.3 },
+    ['폴리페놀', '고당', '고열량밀도', '포화지방높음', '카페인'], {}),
+  F('cookie-butter', '버터쿠키', '간식·디저트', 'snack', 30, '2개',
+    { kcal: 480, carb: 65.0, protein: 5.5, fat: 22.0, satFat: 13.0, sugar: 28.0, na: 350, k: 90, ca: 30, p: 80, fe: 1.5 },
+    ['고당', '포화지방높음', '초가공식품', '고열량밀도'], {}),
+  F('cake-shortcake', '생크림케이크', '간식·디저트', 'snack', 100, '1조각',
+    { kcal: 320, carb: 40.0, protein: 4.5, fat: 16.0, satFat: 10.0, sugar: 28.0, na: 200, k: 100, ca: 60, p: 90, fe: 0.8 },
+    ['고당', '포화지방높음', '부드러움', '고열량밀도'], {}),
+  F('pudding', '푸딩', '간식·디저트', 'snack', 100, '1개',
+    { kcal: 130, carb: 20.0, protein: 3.5, fat: 4.0, satFat: 2.2, sugar: 18.0, na: 90, k: 130, ca: 100, p: 90, vitD: 0.5 },
+    ['부드러움', '고당', '유당함유'], { note: '연하곤란·구강점막염 시 삼키기 쉬운 열량원' }),
+  F('sikhye', '식혜', '간식·디저트', 'beverage', 250, '1컵',
+    { kcal: 55, carb: 13.5, protein: 0.4, fat: 0.1, sugar: 12.0, na: 10, k: 20, ca: 3, p: 10 },
+    ['고당', '수분보충', '부드러움'], {}),
+  F('misugaru', '미숫가루(탄 것)', '간식·디저트', 'beverage', 250, '1컵',
+    { kcal: 85, carb: 14.0, protein: 3.5, fat: 1.8, sugar: 6.0, fiber: 1.5, na: 25, k: 130, ca: 60, p: 90, mg: 30, fe: 1.0 },
+    ['부드러움', '고열량밀도', '고단백'],
+    { note: '우유에 타면 부피 대비 열량·단백질이 높아 식욕부진 시 유용하다' }),
+  F('nut-bar', '견과바', '간식·디저트', 'snack', 30, '1개',
+    { kcal: 470, carb: 45.0, protein: 9.0, fat: 27.0, satFat: 4.5, sugar: 25.0, fiber: 5.0, na: 90, k: 320, ca: 70, p: 200, mg: 90, fe: 2.0 },
+    ['고열량밀도', '고당', '거친질감'], {})
+]
