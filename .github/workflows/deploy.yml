@@ -28,6 +28,13 @@ jobs:
         # GitHub Pages 는 https://<user>.github.io/<repo>/ 하위 경로로 서빙되므로
         # base 를 저장소 이름으로 맞춰 준다
         run: ONCOFOOD_BASE=/${{ github.event.repository.name }}/ npm run build
+        env:
+          # 문의·로그인용 Supabase 연결값.
+          # 저장소 Settings → Secrets and variables → Actions 에 등록하면 주입된다.
+          # 비어 있으면 문의·로그인만 꺼진 채로 빌드된다(나머지 기능은 정상).
+          # 이 두 값은 브라우저에 노출되는 공개 키다. service_role 키는 절대 넣지 말 것.
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

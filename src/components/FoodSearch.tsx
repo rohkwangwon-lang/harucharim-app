@@ -5,9 +5,10 @@ import { FOODS } from '../data/foods'
 import { activeInteractions, activeRules, evaluateFood } from '../engine/rules'
 import { foodContribution } from '../engine/nutrition'
 import { FoodDetail } from './FoodDetail'
-import { LevelDot, Empty } from './ui'
+import { LevelDot } from './ui'
 import { BarcodeScanner } from './BarcodeScanner'
 import { getStatus, lookupBarcode, searchExtended } from '../lib/foodStore'
+import { InquiryDialog } from './InquiryDialog'
 
 const GROUPS: (FoodGroup | '전체')[] = [
   '전체', '밥·면·죽 요리', '국·탕·찌개', '반찬·조림·볶음', '육류', '어패류',
@@ -45,20 +46,25 @@ export function FoodSearch({
   /** 식재료만 보기 — 조리된 메뉴가 아니라 재료 단위로 짜고 싶을 때 */
   const [onlyIngredient, setOnlyIngredient] = useState(false)
   const [cuisine, setCuisine] = useState<Cuisine | '전체'>('전체')
-  /** 기기에 받아 둔 확장 데이터에서 찾은 결과 */
-  const [extra, setExtra] = useState<Food[]>([])
+  /**
+   * 기기에 받아 둔 확장 데이터에서 찾은 결과.
+   * 저장소 조회는 비동기라 늦게 도착한다. 어떤 검색어의 결과인지 함께 담아 두지 않으면
+   * 검색어를 바꾼 뒤에도 이전 결과가 남아 엉뚱한 항목이 섞인다.
+   */
+  const [extra, setExtra] = useState<{ q: string; items: Food[] }>({ q: '', items: [] })
   const [hasExt, setHasExt] = useState(false)
   const [scanning, setScanning] = useState(false)
   const [scanMsg, setScanMsg] = useState<string | null>(null)
+  const [asking, setAsking] = useState(false)
 
   useEffect(() => { getStatus().then((st) => setHasExt(st.installed)) }, [])
 
   // 앱에 든 것에서 충분히 찾았으면 굳이 저장소까지 뒤지지 않는다
   useEffect(() => {
-    const q = qDeferred.trim()
-    if (!hasExt || q.length < 2) { setExtra([]); return }
+    const dq = qDeferred.trim()
+    if (!hasExt || dq.length < 2) { setExtra({ q: dq, items: [] }); return }
     let alive = true
-    searchExtended(q, 40).then((r) => { if (alive) setExtra(r) })
+    searchExtended(dq, 40).then((r) => { if (alive) setExtra({ q: dq, items: r }) })
     return () => { alive = false }
   }, [qDeferred, hasExt])
 
@@ -118,10 +124,11 @@ export function FoodSearch({
         l === 'prefer' ? 0 : l === null ? 1 : l === 'info' ? 2 : l === 'caution' ? 3 : 4
       scored.sort((a, b) => rank(a.verdict.level) - rank(b.verdict.level))
     }
-    // 앱에 든 결과가 적으면 기기에 받아 둔 확장 데이터에서 더 채운다
-    if (q.trim() && extra.length > 0) {
+    // 앱에 든 결과가 적으면 기기에 받아 둔 확장 데이터에서 더 채운다.
+    // 지금 검색어의 결과일 때만 쓴다.
+    if (needle && extra.q === needle && extra.items.length > 0) {
       const have = new Set(scored.map((x) => x.food.name))
-      for (const f of extra) {
+      for (const f of extra.items) {
         if (scored.length >= 120) break
         if (have.has(f.name)) continue
         if (onlyIngredient) continue
@@ -220,7 +227,20 @@ export function FoodSearch({
       </div>
 
       {results.length === 0 ? (
-        <Empty>검색 결과가 없습니다. 다른 이름으로 찾아보세요.</Empty>
+        <div className="card px-4 py-8 text-center">
+          <p className="text-sm text-slate-500">‘{q}’ 을(를) 찾지 못했습니다.</p>
+          <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
+            다른 이름으로 찾아보시거나, 저희에게 알려 주시면 자료를 추가하겠습니다.
+          </p>
+          <button className="btn-primary mx-auto mt-4 text-xs" onClick={() => setAsking(true)}>
+            이 음식 추가 요청하기
+          </button>
+          {!hasExt && (
+            <p className="mt-3 text-[11px] leading-relaxed text-slate-400">
+              ‘내 정보 → 편의점·마트 상품 데이터’ 를 받으시면 시중 가공식품 27만 종에서도 찾습니다.
+            </p>
+          )}
+        </div>
       ) : (
         <ul className="card divide-y divide-slate-100 overflow-hidden">
           {results.map(({ food, verdict }) => {
@@ -259,6 +279,14 @@ export function FoodSearch({
             )
           })}
         </ul>
+      )}
+
+      {asking && (
+        <InquiryDialog
+          onClose={() => setAsking(false)}
+          presetSubject={q.trim()}
+          presetKind="food"
+        />
       )}
 
       {scanning && (

@@ -12,6 +12,8 @@ import { MenuPlanner } from './components/MenuPlanner'
 import { CancerGuide } from './components/CancerGuide'
 import { Exercise } from './components/Exercise'
 import { DataManager } from './components/DataManager'
+import { InquiryDialog } from './components/InquiryDialog'
+import { displayName, useSession } from './lib/auth'
 
 /**
  * 탭은 5개로 고정한다.
@@ -44,6 +46,8 @@ export default function App() {
   const [tab, setTabState] = useState<Tab>('search')
   const [care, setCare] = useState<CareView>('supplement')
   const [toast, setToast] = useState<string | null>(null)
+  const [asking, setAsking] = useState(false)
+  const { user } = useSession()
 
   // 탭을 바꿨는데 이전 화면의 스크롤 위치가 남아 있으면 빈 화면처럼 보인다
   const setTab = (next: Tab) => {
@@ -148,6 +152,22 @@ export default function App() {
           <>
             <PatientPanel patient={state.patient} onChange={setPatient} />
             <DataManager />
+
+            <div className="card mb-5 p-4">
+              <h3 className="text-sm font-bold text-slate-800">문의하기</h3>
+              <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                찾으시는 음식·영양제가 없거나 내용이 이상하면 알려 주세요. 확인 후 답변드립니다.
+              </p>
+              {user && (
+                <p className="mt-2 text-xs text-slate-600">
+                  <span className="chip bg-brand-100 text-brand-700">로그인됨</span>{' '}
+                  {displayName(user)}
+                </p>
+              )}
+              <button className="btn-outline mt-3 w-full text-xs" onClick={() => setAsking(true)}>
+                문의 남기기 · 내 문의 보기
+              </button>
+            </div>
             <button className="btn-outline mb-4 w-full" onClick={resetOnboarding}>
               처음부터 다시 설정하기
             </button>
@@ -155,6 +175,8 @@ export default function App() {
           </>
         )}
       </main>
+
+      {asking && <InquiryDialog onClose={() => setAsking(false)} />}
 
       {toast && (
         <div className="pointer-events-none fixed bottom-24 left-1/2 z-40 -translate-x-1/2 rounded-full bg-slate-900/90 px-4 py-2 text-xs font-medium text-white shadow-lg">
@@ -202,7 +224,13 @@ function Disclaimer() {
         <li>· 이 앱은 진료·처방·영양 상담을 대체하지 않습니다. 실제 치료 결정은 반드시 담당 의료진과 상의하셔야 합니다.</li>
         <li>· 모든 권고에는 근거 수준(A/B/C/G)과 출처를 함께 표시했습니다. 근거가 엇갈리는 주제는 그 사실 자체를 적었습니다.</li>
         <li>· 영양성분 값은 국가표준식품성분표와 제품 표시값을 기준으로 정리한 대표값입니다. 조리법과 제품에 따라 실제 값은 달라집니다.</li>
-        <li>· 입력하신 정보는 이 기기 안에만 저장되며 어디로도 전송되지 않습니다.</li>
+        <li>
+          · 암종·체중·식단 같은 <strong>건강 정보는 이 기기 안에만</strong> 저장되며 어디로도 전송되지 않습니다.
+        </li>
+        <li>
+          · 다만 <strong>문의를 보내실 때만</strong> 적어 주신 내용과 연락처가 서버로 전송됩니다.
+          답변 외의 목적으로 쓰지 않으며, 문의하지 않으시면 아무것도 전송되지 않습니다.
+        </li>
       </ul>
     </div>
   )

@@ -24,13 +24,21 @@ const num = (v) => {
   return Number.isFinite(n) ? n : undefined
 }
 
-/** "900.000g" → 900 */
+/**
+ * "900.000g" → 900
+ *
+ * 원본에 1 g 짜리 밀키트처럼 명백히 잘못된 값이 섞여 있다.
+ * 그대로 두면 "1회 제공량 1 g · 1 kcal" 같은 무의미한 표시가 나오므로,
+ * 사람이 한 번에 먹는 양으로 보기 어려운 값은 버리고 100 g 기준으로 되돌린다.
+ */
 function parseServing(z) {
   if (!z || z === 'null') return undefined
   const m = String(z).match(/([\d.]+)\s*(g|ml|mL|㎖|㎎)?/)
   if (!m) return undefined
   const n = Number(m[1])
-  return Number.isFinite(n) && n > 0 && n <= 3000 ? Math.round(n) : undefined
+  if (!Number.isFinite(n)) return undefined
+  if (n < 5 || n > 3000) return undefined
+  return Math.round(n)
 }
 
 /** 성분값으로만 판정하는 태그 — 이름 추측이 없어 안전하다 */
@@ -101,8 +109,12 @@ for (const f of files) {
       if (v !== undefined) extra[key] = v
     }
 
-    // 에너지도 없는 자료는 계산에 쓸 수 없다
+    // 에너지가 없거나 사실상 0 인 자료는 계산에 쓸 수 없다.
+    // (물·차처럼 진짜 0 인 것은 음료 분류라 따로 살린다.)
     if (n.kcal === undefined) { skippedNoKcal++; continue }
+    if (n.kcal <= 1 && (it.FOOD_CAT1_NM || '') !== '음료류' && (it.FOOD_CAT1_NM || '') !== '음료 및 차류' && (it.FOOD_CAT1_NM || '') !== '다류') {
+      skippedNoKcal++; continue
+    }
     if (n.carb === undefined) n.carb = 0
     if (n.protein === undefined) n.protein = 0
     if (n.fat === undefined) n.fat = 0

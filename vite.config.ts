@@ -8,7 +8,12 @@ import { VitePWA } from 'vite-plugin-pwa'
  */
 const base = process.env.ONCOFOOD_BASE ?? '/'
 
+
 export default defineConfig({
+  define: {
+    // 문의에 함께 담아 어떤 판에서 생긴 일인지 알 수 있게 한다
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? '0.0.0')
+  },
   base,
   plugins: [
     react(),
