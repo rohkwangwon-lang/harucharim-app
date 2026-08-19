@@ -73,12 +73,19 @@ export function DataManager() {
           <>
             <p className="text-sm leading-relaxed text-slate-700">
               지금은 자주 먹는 식품 <strong>1만 8천 종</strong>이 앱에 들어 있습니다.
-              여기에 시중 가공식품 <strong>27만 종</strong>을 더하면 편의점·마트 상품을 바코드로 찾을 수 있습니다.
+              여기에 시중 가공식품 <strong>27만 종</strong>과 바코드 <strong>23만 건</strong>을 더하면
+              편의점·마트 상품을 바코드로 찾을 수 있습니다.
+            </p>
+            <p className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-[11px] leading-relaxed text-slate-500">
+              바코드를 찍으면 제품은 대부분 확인되지만, <strong>영양성분까지 나오는 것은 약 30 %</strong> 입니다.
+              성분 분석이 된 제품이 그만큼이기 때문입니다. 나머지는 제품명만 알려 드리니
+              이름으로 다시 찾아 주세요.
             </p>
             <ul className="mt-3 space-y-1 text-xs text-slate-500">
-              <li>· 내려받는 용량 약 9 MB — Wi-Fi 를 권합니다</li>
-              <li>· 저장 후에는 인터넷 없이 동작합니다</li>
-              <li>· 저장 공간 약 60 MB 를 씁니다</li>
+              <li>· 내려받는 용량 약 <strong>14 MB</strong> — Wi-Fi 를 권합니다</li>
+              <li>· 저장하는 데 1~2분 걸립니다. 화면을 켜 둔 채로 기다려 주세요</li>
+              <li>· 저장 후에는 인터넷 없이 검색과 바코드 조회가 됩니다</li>
+              <li>· 기기 저장 공간을 약 150 MB 씁니다</li>
             </ul>
             <button className="btn-primary mt-3 w-full" onClick={run}>
               상품 데이터 받기
