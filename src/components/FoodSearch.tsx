@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Cuisine, Food, FoodGroup, MealSlot, PatientContext } from '../data/types'
 import { MEAL_SLOTS } from '../data/types'
 import { FOODS } from '../data/foods'
@@ -6,6 +6,8 @@ import { activeInteractions, activeRules, evaluateFood } from '../engine/rules'
 import { foodContribution } from '../engine/nutrition'
 import { FoodDetail } from './FoodDetail'
 import { LevelDot, Empty } from './ui'
+import { BarcodeScanner } from './BarcodeScanner'
+import { getStatus, lookupBarcode, searchExtended } from '../lib/foodStore'
 
 const GROUPS: (FoodGroup | '전체')[] = [
   '전체', '밥·면·죽 요리', '국·탕·찌개', '반찬·조림·볶음', '육류', '어패류',
@@ -34,6 +36,8 @@ export function FoodSearch({
   selectedIds: Set<string>
 }) {
   const [q, setQ] = useState('')
+  /** 저장소 조회는 입력이 잠깐 멈춘 뒤에 한다 */
+  const [qDeferred, setQDeferred] = useState('')
   const [group, setGroup] = useState<FoodGroup | '전체'>('전체')
   const [detail, setDetail] = useState<Food | null>(null)
   /** 담을 끼니 — 여기서 미리 정해 두면 매번 고르지 않아도 된다 */
@@ -41,6 +45,27 @@ export function FoodSearch({
   /** 식재료만 보기 — 조리된 메뉴가 아니라 재료 단위로 짜고 싶을 때 */
   const [onlyIngredient, setOnlyIngredient] = useState(false)
   const [cuisine, setCuisine] = useState<Cuisine | '전체'>('전체')
+  /** 기기에 받아 둔 확장 데이터에서 찾은 결과 */
+  const [extra, setExtra] = useState<Food[]>([])
+  const [hasExt, setHasExt] = useState(false)
+  const [scanning, setScanning] = useState(false)
+  const [scanMsg, setScanMsg] = useState<string | null>(null)
+
+  useEffect(() => { getStatus().then((st) => setHasExt(st.installed)) }, [])
+
+  // 앱에 든 것에서 충분히 찾았으면 굳이 저장소까지 뒤지지 않는다
+  useEffect(() => {
+    const q = qDeferred.trim()
+    if (!hasExt || q.length < 2) { setExtra([]); return }
+    let alive = true
+    searchExtended(q, 40).then((r) => { if (alive) setExtra(r) })
+    return () => { alive = false }
+  }, [qDeferred, hasExt])
+
+  useEffect(() => {
+    const t = setTimeout(() => setQDeferred(q), 250)
+    return () => clearTimeout(t)
+  }, [q])
 
   const cached = useMemo(
     () => ({ rules: activeRules(patient), interactions: activeInteractions(patient) }),
@@ -93,18 +118,44 @@ export function FoodSearch({
         l === 'prefer' ? 0 : l === null ? 1 : l === 'info' ? 2 : l === 'caution' ? 3 : 4
       scored.sort((a, b) => rank(a.verdict.level) - rank(b.verdict.level))
     }
+    // 앱에 든 결과가 적으면 기기에 받아 둔 확장 데이터에서 더 채운다
+    if (q.trim() && extra.length > 0) {
+      const have = new Set(scored.map((x) => x.food.name))
+      for (const f of extra) {
+        if (scored.length >= 120) break
+        if (have.has(f.name)) continue
+        if (onlyIngredient) continue
+        if (group !== '전체' && f.group !== group) continue
+        have.add(f.name)
+        scored.push({ food: f, verdict: evaluateFood(f, patient, 1, cached) })
+      }
+    }
     return scored
-  }, [q, group, onlyIngredient, cuisine, patient, cached])
+  }, [q, group, onlyIngredient, cuisine, patient, cached, extra])
 
   return (
     <div>
       <div className="sticky top-0 z-10 -mx-4 mb-3 bg-slate-50/95 px-4 pb-2 pt-1 backdrop-blur">
-        <input
-          className="input"
-          placeholder="음식 이름으로 검색 — 예: 된장찌개, 두부, 삼겹살"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-        />
+        <div className="flex gap-1.5">
+          <input
+            className="input flex-1"
+            placeholder="음식 이름으로 검색 — 예: 된장찌개, 두부, 삼겹살"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+          />
+          <button
+            className="btn-outline shrink-0 px-3"
+            onClick={() => { setScanMsg(null); setScanning(true) }}
+            title="제품 바코드를 카메라로 찍어 찾습니다"
+          >
+            바코드
+          </button>
+        </div>
+        {scanMsg && (
+          <p className="mt-1.5 rounded-lg bg-warn-50 px-3 py-2 text-[11px] leading-relaxed text-warn-700">
+            {scanMsg}
+          </p>
+        )}
         {/* 담을 끼니를 먼저 정해 두면 음식을 고를 때마다 다시 묻지 않는다 */}
         <div className="mt-2 flex items-center gap-2">
           <span className="shrink-0 text-[11px] font-medium text-slate-500">담을 끼니</span>
@@ -208,6 +259,31 @@ export function FoodSearch({
             )
           })}
         </ul>
+      )}
+
+      {scanning && (
+        <BarcodeScanner
+          onClose={() => setScanning(false)}
+          onDetect={async (code) => {
+            setScanning(false)
+            if (!hasExt) {
+              setScanMsg(
+                `바코드 ${code} 를 읽었습니다. 상품을 찾으려면 ‘내 정보 → 편의점·마트 상품 데이터’ 에서 먼저 데이터를 받아 주세요.`
+              )
+              return
+            }
+            const hit = await lookupBarcode(code)
+            if (!hit) {
+              setScanMsg(`바코드 ${code} 에 해당하는 제품을 찾지 못했습니다. 이름으로 검색해 보세요.`)
+              return
+            }
+            if (hit.food) {
+              setDetail(hit.food)
+            } else {
+              setScanMsg(`${hit.productName} — 제품은 찾았지만 영양성분 자료가 없습니다.`)
+            }
+          }}
+        />
       )}
 
       {detail && (

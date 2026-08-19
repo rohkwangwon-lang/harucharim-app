@@ -11,6 +11,7 @@ import { Analysis } from './components/Analysis'
 import { MenuPlanner } from './components/MenuPlanner'
 import { CancerGuide } from './components/CancerGuide'
 import { Exercise } from './components/Exercise'
+import { DataManager } from './components/DataManager'
 
 /**
  * 탭은 5개로 고정한다.
@@ -146,6 +147,7 @@ export default function App() {
         {tab === 'me' && (
           <>
             <PatientPanel patient={state.patient} onChange={setPatient} />
+            <DataManager />
             <button className="btn-outline mb-4 w-full" onClick={resetOnboarding}>
               처음부터 다시 설정하기
             </button>
