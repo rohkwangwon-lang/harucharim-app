@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { REVIEW_MODE } from './config'
 import { useAppState } from './lib/store'
 import { CANCER_BY_ID } from './data/cancers'
 import { PatientPanel } from './components/PatientPanel'
@@ -60,6 +61,8 @@ export default function App() {
         </div>
       </header>
 
+      {REVIEW_MODE && <ReviewBanner />}
+
       {/* 본문 */}
       <main className="flex-1 px-4 py-4 pb-24">
         {tab === 'search' && (
@@ -111,6 +114,18 @@ export default function App() {
           ))}
         </div>
       </nav>
+    </div>
+  )
+}
+
+/** 검수 단계임을 방문자에게 알린다. 정식 공개 시 config 의 REVIEW_MODE 를 끄면 사라진다. */
+function ReviewBanner() {
+  return (
+    <div className="border-b border-amber-200 bg-amber-50 px-4 py-2">
+      <p className="text-[11px] leading-relaxed text-amber-800">
+        <strong className="font-bold">검수용 시험 버전입니다.</strong> 아직 공개 배포 전이며 내용을 검토하는 중입니다.
+        치료 관련 결정은 반드시 담당 의료진과 상의하세요.
+      </p>
     </div>
   )
 }

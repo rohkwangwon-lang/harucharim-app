@@ -1,0 +1,4 @@
+# 검수 기간 동안 모든 크롤러를 차단한다.
+# 정식 공개 시 이 파일을 삭제하고 index.html 의 robots meta 도 함께 지운다.
+User-agent: *
+Disallow: /
