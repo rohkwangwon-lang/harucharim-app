@@ -24,7 +24,7 @@ const STORE_MYCODE = 'myBarcodes'
 const STORE_SUPP = 'extSupps'
 
 /** 데이터 판을 올릴 때 이 값을 바꾸면 사용자 기기에서 다시 받는다 */
-export const DATA_VERSION = '2026-08-21f'
+export const DATA_VERSION = '2026-08-21g'
 
 export interface InstallProgress {
   phase: '식품 데이터' | '바코드 데이터' | '영양제 데이터' | '마무리'
@@ -317,16 +317,25 @@ export interface ExtSupplement {
 }
 
 /** 시판 건강기능식품을 이름으로 찾는다 */
+/**
+ * 시판 건강기능식품을 찾는다.
+ *
+ * 검색어가 없으면 앞에서부터 보여 준다.
+ * 예전에는 두 글자 이상 입력해야만 결과가 나왔다. 그래서 45,618 종을 받아 두고도
+ * 화면에는 손으로 검토한 35 종만 보였고, 받은 것이 어디 갔는지 알 수 없었다.
+ * 찾을 이름을 이미 아는 사람만 쓸 수 있는 검색은 목록이 아니다.
+ */
 export async function searchSupplements(query: string, limit = 40): Promise<ExtSupplement[]> {
   const q = query.trim().toLowerCase()
-  if (q.length < 2) return []
+  if (q.length === 1) return []
   const db = await openDB()
   return new Promise((resolve, reject) => {
     const out: ExtSupplement[] = []
     const seen = new Set<number>()
     const t = db.transaction(STORE_SUPP, 'readonly')
-    const idx = t.objectStore(STORE_SUPP).index('nm')
-    const cur = idx.openCursor(IDBKeyRange.bound(q, q + '￿'))
+    const store = t.objectStore(STORE_SUPP)
+    const idx = store.index('nm')
+    const cur = q ? idx.openCursor(IDBKeyRange.bound(q, q + '￿')) : store.openCursor()
     cur.onsuccess = () => {
       const c = cur.result
       if (!c || out.length >= limit) return resolve(out)
@@ -369,6 +378,12 @@ export interface BarcodeHit {
   food?: Food
   /** 사용자가 직접 이어 둔 것인지 */
   linkedByUser?: boolean
+  /**
+   * 등록이 이미 끝난 제품인지.
+   * 바코드는 제품이 단종되면 몇 해 뒤 다른 제품에 다시 쓰인다.
+   * 그래서 끝난 등록이 걸렸다면 지금 손에 든 물건과 다를 수 있다.
+   */
+  stale?: boolean
 }
 
 /** 바코드로 제품을 찾는다. 영양성분은 품목보고번호로 이어붙인다. */
@@ -410,9 +425,9 @@ export async function lookupBarcode(code: string): Promise<BarcodeHit | null> {
     return { barcode: code, productName: mine.name, reportNo: '', food, linkedByUser: true }
   }
 
-  let rec: { b: string; n: string; p: string } | undefined
+  let rec: { b: string; n: string; p: string; old?: number } | undefined
   for (const v of barcodeVariants(code)) {
-    rec = await tx<{ b: string; n: string; p: string } | undefined>(STORE_BARCODE, 'readonly', (s) => s.get(v))
+    rec = await tx<typeof rec>(STORE_BARCODE, 'readonly', (s) => s.get(v))
     if (rec) break
   }
   if (!rec) return null
@@ -425,5 +440,5 @@ export async function lookupBarcode(code: string): Promise<BarcodeHit | null> {
     )
     if (hit) food = toFood(hit.i, hit.r, sc)
   }
-  return { barcode: code, productName: rec.p, reportNo: rec.n, food }
+  return { barcode: code, productName: rec.p, reportNo: rec.n, food, stale: rec.old === 1 }
 }

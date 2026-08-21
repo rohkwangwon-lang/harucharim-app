@@ -38,9 +38,14 @@ export function Supplements({
   const [scanMsg, setScanMsg] = useState<string | null>(null)
 
   useEffect(() => { getStatus().then((st) => setHasExt(st.installed && st.suppCount > 0)) }, [])
+  /*
+   * 검색어가 없어도 목록을 보여 준다.
+   * 예전에는 두 글자 이상 쳐야만 결과가 나와서, 45,618 종을 받아 두고도
+   * 화면에는 검토한 35 종만 보였다. 받은 것이 어디 갔는지 알 수 없다는 말이 나온 이유다.
+   */
   useEffect(() => {
     const t = setTimeout(() => {
-      if (!hasExt || q.trim().length < 2) { setMarket([]); return }
+      if (!hasExt || q.trim().length === 1) { setMarket([]); return }
       searchSupplements(q.trim(), 30).then(setMarket)
     }, 250)
     return () => clearTimeout(t)
@@ -116,6 +121,22 @@ export function Supplements({
           </button>
         </div>
 
+        {hasExt && (
+          <div className="mb-3 flex gap-1.5 overflow-x-auto pb-1">
+            {['유산균', '오메가3', '비타민D', '종합비타민', '홍삼', '루테인', '칼슘', '단백질', '밀크씨슬', '마그네슘'].map((k) => (
+              <button
+                key={k}
+                onClick={() => setQ(q === k ? '' : k)}
+                className={`chip shrink-0 border ${
+                  q === k ? 'border-brand-500 bg-brand-500 text-white' : 'border-stone-200 bg-white text-stone-600'
+                }`}
+              >
+                {k}
+              </button>
+            ))}
+          </div>
+        )}
+
         {scanMsg && (
           <p className="mb-3 rounded-lg bg-warn-50 px-3 py-2 text-[11px] leading-relaxed text-warn-700">
             {scanMsg}
@@ -143,11 +164,18 @@ export function Supplements({
         )}
 
         {market.length > 0 && (
-          <div className="space-y-2">
-            {market.map((m) => (
-              <MarketProduct key={m.id} product={m} patient={patient} />
-            ))}
-          </div>
+          <>
+            <p className="mb-2 text-[11px] text-stone-400">
+              {q.trim()
+                ? <>&lsquo;{q.trim()}&rsquo; 검색 결과 {market.length}건{market.length >= 30 && ' 이상'}</>
+                : <>45,618종 가운데 처음 {market.length}건입니다. 위 단추나 검색으로 좁혀 보세요.</>}
+            </p>
+            <div className="space-y-2">
+              {market.map((m) => (
+                <MarketProduct key={m.id} product={m} patient={patient} />
+              ))}
+            </div>
+          </>
         )}
         {hasExt && q.trim().length >= 2 && market.length === 0 && (
           <p className="card px-4 py-6 text-center text-sm text-stone-400">
@@ -157,8 +185,8 @@ export function Supplements({
       </Section>
 
       <Section
-        title="전체 영양제 목록"
-        desc="복용 중인 것을 선택하면 영양소 합계에 더해지고, 이 암종·약제와의 문제도 함께 검사합니다."
+        title={`손으로 검토한 영양제 ${SUPPLEMENTS.length}종`}
+        desc="성분과 근거를 하나하나 확인한 것들입니다. 복용 중인 것을 선택하면 영양소 합계에 더해지고, 이 암종·약제와의 문제도 함께 검사합니다. 시판 제품 전체는 위에서 찾으실 수 있습니다."
       >
         <div className="mb-3 flex gap-1.5 overflow-x-auto pb-1">
           {CATEGORIES.map((c) => (

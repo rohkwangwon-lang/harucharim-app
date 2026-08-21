@@ -55,12 +55,23 @@ for (let p = 1; p <= lastPage; p++) {
 
   const start = (p - 1) * PAGE + 1
   const body = await fetchRange(start, start + PAGE - 1)
-  // 필요한 열만 남긴다. 원본 전체를 두면 용량만 커진다.
+  /*
+   * 필요한 열만 남긴다. 원본 전체를 두면 용량만 커진다.
+   *
+   * 유효종료일(END_DT)과 폐업일자(CLSBIZ_DT)를 반드시 함께 받는다.
+   * 이 표에는 이미 끝난 등록이 그대로 남아 있어서, 예전에 이 두 열을 버렸더니
+   * 1993 년에 등록되고 지금은 팔지 않는 제품이 최신 제품인 양 나왔다.
+   * (펩시 제로를 찍었는데 헤이루사과사이다가 나온 것이 그 경우다 —
+   *  바코드는 제품이 단종되면 다른 제품에 다시 쓰인다.)
+   */
   const rows = (body.row || []).map((r) => ({
     b: r.BAR_CD,
     n: r.PRDLST_REPORT_NO,
     p: r.PRDLST_NM,
-    c: r.BSSH_NM
+    c: r.BSSH_NM,
+    d: r.PRMS_DT,      // 허가일자
+    e: r.END_DT,       // 유효종료일 — 지났으면 끝난 등록이다
+    x: r.CLSBIZ_DT     // 폐업일자 — 있으면 그 업체는 문을 닫았다
   })).filter((r) => r.b && r.n)
   fs.writeFileSync(file, JSON.stringify(rows))
   done++

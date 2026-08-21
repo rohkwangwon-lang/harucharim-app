@@ -68,9 +68,11 @@ export function FoodSearch({
   /** 스캔했지만 못 찾아서, 사용자가 직접 이어 주기를 기다리는 바코드 */
   const [linking, setLinking] = useState<string | null>(null)
   const [scanResult, setScanResult] = useState<{
-    kind: 'no-data' | 'not-found' | 'no-nutrition'
+    kind: 'no-data' | 'not-found' | 'no-nutrition' | 'stale'
     code: string
     productName?: string
+    /** 끝난 등록이라도 성분을 찾았으면 확인 후 담을 수 있게 들고 있는다 */
+    food?: Food
     message: string
   } | null>(null)
   const [asking, setAsking] = useState(false)
@@ -282,6 +284,24 @@ export function FoodSearch({
                   </button>
                 </>
               )}
+              {scanResult.kind === 'stale' && (
+                <>
+                  {scanResult.food && (
+                    <button
+                      className="btn-outline py-1.5 text-xs"
+                      onClick={() => { const f = scanResult.food!; setScanResult(null); setDetail(f) }}
+                    >
+                      맞습니다 — {scanResult.productName} 담기
+                    </button>
+                  )}
+                  <button
+                    className="btn-primary py-1.5 text-xs"
+                    onClick={() => { setLinking(scanResult.code); setScanResult(null) }}
+                  >
+                    아닙니다 — 직접 찾아 연결하기
+                  </button>
+                </>
+              )}
               {scanResult.kind === 'not-found' && (
                 <button
                   className="btn-primary py-1.5 text-xs"
@@ -476,6 +496,28 @@ export function FoodSearch({
                 code,
                 message: '등록되지 않은 바코드입니다.'
               })
+              return
+            }
+
+            /*
+             * 끝난 등록이 걸린 경우.
+             *
+             * 바코드는 제품이 단종되면 몇 해 뒤 다른 제품에 다시 쓰인다.
+             * 그래서 이 경우에는 찾은 것을 바로 담게 하지 않고 먼저 확인을 받는다.
+             * 확인 없이 담게 두면, 펩시 제로를 찍었는데 헤이루사과사이다가
+             * 조용히 식단에 들어간다.
+             */
+            if (hit.stale) {
+              setScanResult({
+                kind: 'stale',
+                code,
+                productName: hit.productName,
+                food: hit.food,
+                message:
+                  '이 바코드로 등록된 제품은 판매가 끝난 것으로 나옵니다. ' +
+                  '바코드는 단종되면 다른 제품에 다시 쓰이기 때문에, 지금 손에 드신 것과 다를 수 있습니다.'
+              })
+              setQ(hit.productName)
               return
             }
 

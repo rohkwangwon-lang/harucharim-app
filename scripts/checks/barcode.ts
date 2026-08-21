@@ -8,7 +8,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const ROOT = path.resolve(process.cwd())
-const bar: { b: string; n: string; p: string }[] =
+const bar: { b: string; n: string; p: string; old?: number }[] =
   JSON.parse(fs.readFileSync(path.join(ROOT, 'public/data/barcodes.json'), 'utf8'))
 const core = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/data/foods/generated-core.json'), 'utf8'))
 const ext = JSON.parse(fs.readFileSync(path.join(ROOT, 'public/data/foods-extended.json'), 'utf8'))
@@ -86,7 +86,20 @@ for (const r of bar) {
 }
 console.log(`  연결 표본 ${checked}건 중 이름이 전혀 안 겹치는 것 ${odd}건 (${checked ? (odd / checked * 100).toFixed(0) : 0}%)`)
 
-/* ── 4. 없는 바코드는 조용히 없다고 해야 한다 ───────── */
+/* ── 4. 끝난 등록은 반드시 표시되어야 한다 ─────────── */
+{
+  const stale = bar.filter((r) => r.old === 1)
+  const live = bar.filter((r) => r.old !== 1)
+  console.log(`  끝난 등록 ${stale.length.toLocaleString()}건 · 살아 있는 등록 ${live.length.toLocaleString()}건`)
+  if (stale.length === 0) bad('끝난 등록이 하나도 표시되지 않음', '유효기간 정보를 못 받아 온 것일 수 있다')
+  // 절반을 넘으면 표시가 잘못 붙은 것이다
+  if (stale.length > bar.length * 0.6) bad('끝난 등록 비율이 지나치게 높음', `${(stale.length / bar.length * 100).toFixed(0)}%`)
+  // 같은 바코드에 살아 있는 등록이 있는데도 끝난 쪽이 뽑혔는지
+  const liveCodes = new Set(live.map((r) => r.b))
+  for (const r of stale) if (liveCodes.has(r.b)) bad('살아 있는 등록을 두고 끝난 쪽을 골랐다', r.b)
+}
+
+/* ── 5. 없는 바코드는 조용히 없다고 해야 한다 ───────── */
 for (let i = 0; i < 500; i++) {
   const fake = String(Math.floor(rnd() * 9e12) + 1e12)
   if (index.has(fake)) continue
