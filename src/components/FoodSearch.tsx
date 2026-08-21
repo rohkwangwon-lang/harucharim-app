@@ -176,14 +176,20 @@ export function FoodSearch({
     <div>
       {onDone && (
         <button
-          className="mb-2 flex items-center gap-1 text-xs font-medium text-brand-700"
+          className="sticky top-0 z-20 -mx-4 mb-2 flex w-[calc(100%+2rem)] items-center justify-between gap-2 bg-brand-600 px-4 py-3 text-left text-white shadow-md transition-colors hover:bg-brand-700"
           onClick={onDone}
         >
-          ← 오늘 식단으로 돌아가기
+          <span className="flex items-center gap-1.5">
+            <span aria-hidden className="text-base leading-none">←</span>
+            <span className="text-sm font-bold">내 식단으로 돌아가기</span>
+          </span>
+          <span className="rounded-full bg-white/20 px-2.5 py-1 text-xs font-semibold tabular-nums">
+            {selectedIds.size}가지 담김
+          </span>
         </button>
       )}
 
-      <div className="sticky top-0 z-10 -mx-4 mb-3 bg-slate-50/95 px-4 pb-2 pt-1 backdrop-blur">
+      <div className={`sticky ${onDone ? 'top-[52px]' : 'top-0'} z-10 -mx-4 mb-3 bg-slate-50/95 px-4 pb-2 pt-1 backdrop-blur`}>
         <div className="flex gap-1.5">
           <input
             className="input flex-1"

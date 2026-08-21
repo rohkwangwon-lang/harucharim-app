@@ -172,8 +172,11 @@ export function RecommendedMenu({
         </div>
       </Section>
 
-      <button className="btn-outline mb-4 w-full text-xs" onClick={onGoCompose}>
-        ← 나만의 식단 구성으로 돌아가기
+      <button
+        className="mb-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-800 px-4 py-3.5 text-sm font-bold text-white transition-colors hover:bg-slate-900"
+        onClick={onGoCompose}
+      >
+        <span aria-hidden>←</span> 내 식단으로 돌아가기
       </button>
 
       <p className="px-1 pb-2 text-[11px] leading-relaxed text-slate-400">
