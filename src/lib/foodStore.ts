@@ -14,18 +14,20 @@ import type { PackedFoods } from '../data/foods/generated'
  */
 
 const DB_NAME = 'oncofood'
-const DB_VERSION = 2
+const DB_VERSION = 3
 const STORE_FOOD = 'extFoods'
 const STORE_BARCODE = 'barcodes'
 const STORE_META = 'meta'
 /** 사용자가 직접 이어 붙인 바코드 — 공공데이터에 없는 제품을 메운다 */
 const STORE_MYCODE = 'myBarcodes'
+/** 건강기능식품 — 시판 제품 전체 */
+const STORE_SUPP = 'extSupps'
 
 /** 데이터 판을 올릴 때 이 값을 바꾸면 사용자 기기에서 다시 받는다 */
-export const DATA_VERSION = '2026-08-21'
+export const DATA_VERSION = '2026-08-21b'
 
 export interface InstallProgress {
-  phase: '식품 데이터' | '바코드 데이터' | '마무리'
+  phase: '식품 데이터' | '바코드 데이터' | '영양제 데이터' | '마무리'
   loaded: number
   total: number
 }
@@ -35,6 +37,7 @@ export interface StoreStatus {
   version?: string
   foodCount: number
   barcodeCount: number
+  suppCount: number
 }
 
 let dbPromise: Promise<IDBDatabase> | null = null
@@ -60,6 +63,10 @@ function openDB(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains(STORE_MYCODE)) {
         db.createObjectStore(STORE_MYCODE, { keyPath: 'b' })
       }
+      if (!db.objectStoreNames.contains(STORE_SUPP)) {
+        const s = db.createObjectStore(STORE_SUPP, { keyPath: 'i' })
+        s.createIndex('nm', 'nm', { multiEntry: true })
+      }
     }
     req.onsuccess = () => resolve(req.result)
     req.onerror = () => reject(req.error)
@@ -84,14 +91,16 @@ export async function getStatus(): Promise<StoreStatus> {
     const meta = await tx<{ k: string; v: string } | undefined>(STORE_META, 'readonly', (s) => s.get('version'))
     const foodCount = await tx<number>(STORE_FOOD, 'readonly', (s) => s.count())
     const barcodeCount = await tx<number>(STORE_BARCODE, 'readonly', (s) => s.count())
+    const suppCount = await tx<number>(STORE_SUPP, 'readonly', (s) => s.count())
     return {
       installed: !!meta && meta.v === DATA_VERSION && foodCount > 0,
       version: meta?.v,
       foodCount,
-      barcodeCount
+      barcodeCount,
+      suppCount
     }
   } catch {
-    return { installed: false, foodCount: 0, barcodeCount: 0 }
+    return { installed: false, foodCount: 0, barcodeCount: 0, suppCount: 0 }
   }
 }
 
@@ -152,6 +161,30 @@ export async function install(onProgress?: (p: InstallProgress) => void): Promis
     // 바코드 파일이 아직 없어도 식품 검색은 쓸 수 있어야 한다
   }
 
+  // ── 건강기능식품 ──────────────────────────────────────────
+  onProgress?.({ phase: '영양제 데이터', loaded: 0, total: 1 })
+  try {
+    const sp = (await (await fetch(`${base}data/supplements-extended.json`)).json()) as {
+      cols: string[]; items: [string, string, string, string, string][]
+    }
+    for (let start = 0; start < sp.items.length; start += CHUNK) {
+      const slice = sp.items.slice(start, start + CHUNK)
+      await new Promise<void>((resolve, reject) => {
+        const t = db.transaction(STORE_SUPP, 'readwrite')
+        const store = t.objectStore(STORE_SUPP)
+        slice.forEach((row, k) => {
+          const i = start + k
+          store.put({ i, nm: tokens(row[0]), r: row })
+        })
+        t.oncomplete = () => resolve()
+        t.onerror = () => reject(t.error)
+      })
+      onProgress?.({ phase: '영양제 데이터', loaded: Math.min(start + CHUNK, sp.items.length), total: sp.items.length })
+    }
+  } catch {
+    // 영양제 파일이 없어도 나머지는 쓸 수 있어야 한다
+  }
+
   onProgress?.({ phase: '마무리', loaded: 1, total: 1 })
   await tx(STORE_META, 'readwrite', (s) => s.put({ k: 'version', v: DATA_VERSION }))
   return getStatus()
@@ -161,7 +194,7 @@ export async function install(onProgress?: (p: InstallProgress) => void): Promis
 export async function clearStore(): Promise<void> {
   const db = await openDB()
   await Promise.all(
-    [STORE_FOOD, STORE_BARCODE, STORE_META].map(
+    [STORE_FOOD, STORE_BARCODE, STORE_SUPP, STORE_META].map(
       (name) =>
         new Promise<void>((resolve, reject) => {
           const t = db.transaction(name, 'readwrite')
@@ -265,6 +298,43 @@ export async function searchExtended(query: string, limit = 40): Promise<Food[]>
       if (!seen.has(rec.i)) {
         seen.add(rec.i)
         out.push(toFood(rec.i, rec.r, sc))
+      }
+      c.continue()
+    }
+    cur.onerror = () => reject(cur.error)
+  })
+}
+
+/** 공공데이터에서 들여온 건강기능식품 한 건 */
+export interface ExtSupplement {
+  id: string
+  name: string
+  maker: string
+  /** 표시된 주된 기능성 */
+  fn: string
+  reportNo: string
+  use: string
+}
+
+/** 시판 건강기능식품을 이름으로 찾는다 */
+export async function searchSupplements(query: string, limit = 40): Promise<ExtSupplement[]> {
+  const q = query.trim().toLowerCase()
+  if (q.length < 2) return []
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const out: ExtSupplement[] = []
+    const seen = new Set<number>()
+    const t = db.transaction(STORE_SUPP, 'readonly')
+    const idx = t.objectStore(STORE_SUPP).index('nm')
+    const cur = idx.openCursor(IDBKeyRange.bound(q, q + '￿'))
+    cur.onsuccess = () => {
+      const c = cur.result
+      if (!c || out.length >= limit) return resolve(out)
+      const rec = c.value as { i: number; r: [string, string, string, string, string] }
+      if (!seen.has(rec.i)) {
+        seen.add(rec.i)
+        const [name, maker, fn, no, use] = rec.r
+        out.push({ id: `sx-${rec.i}`, name, maker, fn, reportNo: no, use })
       }
       c.continue()
     }

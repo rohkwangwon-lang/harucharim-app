@@ -46,7 +46,8 @@ export function DataManager() {
             <div className="flex items-center gap-2">
               <span className="chip bg-brand-100 text-brand-700">받아 둠</span>
               <span className="text-sm text-slate-600">
-                식품 {status.foodCount.toLocaleString()}종 · 바코드 {status.barcodeCount.toLocaleString()}건
+                식품 {status.foodCount.toLocaleString()}종 · 영양제 {status.suppCount.toLocaleString()}종 ·
+                바코드 {status.barcodeCount.toLocaleString()}건
               </span>
             </div>
             <p className="mt-2 text-xs leading-relaxed text-slate-500">
@@ -79,8 +80,8 @@ export function DataManager() {
             )}
             <p className="text-sm leading-relaxed text-slate-700">
               지금은 자주 먹는 식품 <strong>1만 8천 종</strong>이 앱에 들어 있습니다.
-              여기에 시중 가공식품 <strong>27만 종</strong>과 바코드 <strong>23만 건</strong>을 더하면
-              편의점·마트 상품을 바코드로 찾을 수 있습니다.
+              여기에 시중 가공식품 <strong>27만 종</strong>, 식약처 신고 영양제 <strong>4만 5천 종</strong>,
+              바코드 <strong>23만 건</strong>을 더하면 편의점·마트 상품과 시판 영양제를 모두 찾을 수 있습니다.
             </p>
             <p className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-[11px] leading-relaxed text-slate-500">
               바코드를 찍으면 제품은 대부분 확인되지만, <strong>영양성분까지 나오는 것은 약 30 %</strong> 입니다.
@@ -88,7 +89,7 @@ export function DataManager() {
               이름으로 다시 찾아 주세요.
             </p>
             <ul className="mt-3 space-y-1 text-xs text-slate-500">
-              <li>· 내려받는 용량 약 <strong>14 MB</strong> — Wi-Fi 를 권합니다</li>
+              <li>· 내려받는 용량 약 <strong>16 MB</strong> — Wi-Fi 를 권합니다</li>
               <li>· 저장하는 데 1~2분 걸립니다. 화면을 켜 둔 채로 기다려 주세요</li>
               <li>· 저장 후에는 인터넷 없이 검색과 바코드 조회가 됩니다</li>
               <li>· 기기 저장 공간을 약 150 MB 씁니다</li>

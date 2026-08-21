@@ -12,3 +12,4 @@ dist-ssr
 # 공공데이터 원본 — 용량이 커서 커밋하지 않는다 (스크립트로 다시 받을 수 있음)
 data/raw/
 data/raw-barcode/
+data/raw-supplement/
