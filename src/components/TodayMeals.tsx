@@ -1,0 +1,383 @@
+import { useMemo } from 'react'
+import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
+import { MEAL_SLOTS } from '../data/types'
+import { FOOD_BY_ID } from '../data/foods'
+import { SUPPLEMENT_BY_ID } from '../data/supplements'
+import { CANCER_BY_ID } from '../data/cancers'
+import { buildDayMenu, currentSeason } from '../engine/menu'
+import { evaluateSelection } from '../engine/rules'
+import { foodContribution, personalTarget, sumIntake } from '../engine/nutrition'
+import { BASE_EXERCISE, CONDITION_EXERCISE_NOTES, EXERCISE_BY_CANCER } from '../data/exercise'
+import { REF_BY_ID } from '../data/references'
+import { EvidenceBadge, LevelBadge, Meter, Section, Stat } from './ui'
+
+const SLOT_ICON: Record<MealSlot, string> = { 아침: '🌅', 점심: '🍚', 저녁: '🌙', 간식: '🍎' }
+
+/**
+ * 오늘 식단.
+ *
+ * 이 앱을 여는 가장 흔한 이유는 "오늘 뭘 먹을까" 또는 "지금 먹은 게 괜찮을까" 이다.
+ * 그래서 첫 화면을 끼니 단위로 두고, 담고·평가받고·운동까지 한 자리에서 끝낸다.
+ */
+export function TodayMeals({
+  patient,
+  selected,
+  supplements,
+  onAddTo,
+  onSetServings,
+  onRemove,
+  onClear,
+  onApplySuggestion
+}: {
+  patient: PatientContext
+  selected: SelectedItem[]
+  supplements: string[]
+  /** 해당 끼니로 음식을 담으러 간다 */
+  onAddTo: (meal: MealSlot) => void
+  onSetServings: (foodId: string, servings: number, meal?: MealSlot) => void
+  onRemove: (foodId: string, meal?: MealSlot) => void
+  onClear: () => void
+  /** 추천 항목을 실제로 담는다 */
+  onApplySuggestion: (foodId: string, meal: MealSlot) => void
+}) {
+  const profile = CANCER_BY_ID[patient.cancer]
+  const target = personalTarget(patient, profile.target.kcalPerKg, profile.target.proteinPerKg)
+  const supps = supplements.map((id) => SUPPLEMENT_BY_ID[id]).filter(Boolean)
+
+  const totals = useMemo(() => sumIntake(selected, supps), [selected, supplements])
+  const evalResult = useMemo(() => evaluateSelection(selected, patient), [selected, patient])
+  const menu = useMemo(() => buildDayMenu(selected, patient), [selected, patient])
+
+  const kcal = Math.round(totals.kcal ?? 0)
+  const protein = Math.round(totals.protein ?? 0)
+  const na = Math.round(totals.na ?? 0)
+  const naLimit = profile.target.naLimit ?? 2000
+
+  const filledSlots = MEAL_SLOTS.filter((m) => selected.some((i) => i.meal === m))
+  const emptySlots = MEAL_SLOTS.filter((m) => !selected.some((i) => i.meal === m))
+
+  const warnings = evalResult.grouped.filter(
+    (g) => g.hit.rule.level === 'avoid' || g.hit.rule.level === 'caution'
+  )
+
+  return (
+    <div>
+      {/* ── 오늘 요약 ─────────────────────────────────── */}
+      <div className="mb-4 rounded-2xl border border-brand-200 bg-brand-50/60 px-4 py-3.5">
+        <p className="text-xs font-bold uppercase tracking-wide text-brand-700">오늘 하루</p>
+        <p className="mt-1 text-sm font-semibold text-slate-900">
+          {profile.name} · {currentSeason()}철 · {patient.weightKg} kg 기준
+        </p>
+        <p className="mt-1 text-xs leading-relaxed text-slate-600">
+          아침·점심·저녁·간식을 <strong>모두 합한 것이 하루치</strong>입니다. 한 끼 분량이 아닙니다.
+        </p>
+      </div>
+
+      <div className="mb-3 grid grid-cols-3 gap-2">
+        <Stat
+          label="에너지" value={String(kcal)} unit="kcal" hint={`목표 ${target.kcal[0]}~${target.kcal[1]}`}
+          tone={kcal === 0 ? 'neutral' : kcal < target.kcal[0] ? 'warn' : kcal > target.kcal[1] * 1.15 ? 'bad' : 'good'}
+        />
+        <Stat
+          label="단백질" value={String(protein)} unit="g" hint={`목표 ${target.protein[0]} g 이상`}
+          tone={protein === 0 ? 'neutral' : protein < target.protein[0] ? 'warn' : 'good'}
+        />
+        <Stat
+          label="나트륨" value={String(na)} unit="mg" hint={`상한 ${naLimit}`}
+          tone={na > naLimit ? 'bad' : 'good'}
+        />
+      </div>
+
+      <div className="card mb-5 space-y-3 p-3.5">
+        <MeterRow label="에너지" value={kcal} min={target.kcal[0]} max={target.kcal[1]} unit="kcal" />
+        <MeterRow label="단백질" value={protein} min={target.protein[0]} max={target.protein[1]} unit="g" />
+        <MeterRow label="나트륨" value={na} min={0} max={naLimit} unit="mg" overLimit={na > naLimit} />
+      </div>
+
+      {/* ── 일부만 넣어도 된다는 안내 ─────────────────── */}
+      {emptySlots.length > 0 && (
+        <div className="mb-4 rounded-xl border border-slate-200 bg-white px-3.5 py-3">
+          <p className="text-xs leading-relaxed text-slate-600">
+            {filledSlots.length === 0 ? (
+              <>
+                <strong className="text-slate-800">한 끼만 넣으셔도 됩니다.</strong> 드신 것이나 드실 것을 하나만
+                담아 주시면, 나머지 끼니는 {profile.name}에 맞춰 <strong>저희가 채워 추천</strong>해 드립니다.
+              </>
+            ) : (
+              <>
+                <strong className="text-slate-800">{emptySlots.join('·')}이 비어 있습니다.</strong> 채우지 않으셔도
+                괜찮습니다. 아래 <strong>추천 채우기</strong>를 누르시면 {profile.name}에 맞는 음식으로 채워 드립니다.
+              </>
+            )}
+          </p>
+        </div>
+      )}
+
+      {/* ── 끼니별 구성 ───────────────────────────────── */}
+      <Section
+        title="끼니별 구성"
+        right={
+          selected.length > 0 ? (
+            <button className="text-xs font-medium text-slate-400 hover:text-danger-600" onClick={onClear}>
+              전체 비우기
+            </button>
+          ) : undefined
+        }
+      >
+        <div className="space-y-2.5">
+          {MEAL_SLOTS.map((slot) => {
+            const items = selected.filter((i) => i.meal === slot)
+            const slotKcal = items.reduce((sum, i) => {
+              const f = FOOD_BY_ID[i.foodId]
+              return sum + (f ? ((f.per100.kcal * f.serving.g) / 100) * i.servings : 0)
+            }, 0)
+            // 이 끼니에 앱이 채워 넣은 추천
+            const suggested = menu.meals[slot].filter((e) => e.origin === 'added')
+
+            return (
+              <div key={slot} className="card overflow-hidden">
+                <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/60 px-3.5 py-2">
+                  <span className="text-sm font-bold text-slate-800">
+                    <span className="mr-1.5">{SLOT_ICON[slot]}</span>{slot}
+                  </span>
+                  <span className="text-xs tabular-nums text-slate-400">
+                    {items.length > 0 ? `${Math.round(slotKcal)} kcal` : '비어 있음'}
+                  </span>
+                </div>
+
+                {items.length > 0 && (
+                  <ul className="divide-y divide-slate-100">
+                    {items.map((item) => {
+                      const food = FOOD_BY_ID[item.foodId]
+                      if (!food) return null
+                      const v = evalResult.verdicts.find((x) => x.food.id === food.id)
+                      const per = foodContribution(food, item.servings)
+                      return (
+                        <li key={item.foodId + slot} className="flex items-center gap-2 px-3.5 py-2.5">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5">
+                              <span className="truncate text-sm font-medium text-slate-900">{food.name}</span>
+                              {v?.level === 'avoid' && <LevelBadge level="avoid" />}
+                              {v?.level === 'caution' && <LevelBadge level="caution" />}
+                            </div>
+                            <div className="mt-0.5 text-[11px] text-slate-400">
+                              {food.serving.label} × {item.servings} · {Math.round(per.kcal ?? 0)} kcal ·
+                              나트륨 {Math.round(per.na ?? 0)} mg
+                            </div>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-1">
+                            <button
+                              className="h-7 w-7 rounded-lg bg-slate-100 text-slate-600"
+                              onClick={() => onSetServings(item.foodId, Math.round((item.servings - 0.5) * 10) / 10, slot)}
+                            >−</button>
+                            <span className="w-7 text-center text-sm font-medium tabular-nums">{item.servings}</span>
+                            <button
+                              className="h-7 w-7 rounded-lg bg-slate-100 text-slate-600"
+                              onClick={() => onSetServings(item.foodId, Math.round((item.servings + 0.5) * 10) / 10, slot)}
+                            >＋</button>
+                            <button
+                              className="ml-0.5 h-7 w-7 rounded-lg text-slate-300 hover:bg-danger-50 hover:text-danger-600"
+                              onClick={() => onRemove(item.foodId, slot)}
+                            >✕</button>
+                          </div>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )}
+
+                {/* 추천 채우기 */}
+                {suggested.length > 0 && (
+                  <div className="border-t border-slate-100 bg-brand-50/40 px-3.5 py-2.5">
+                    <p className="mb-1.5 text-[11px] font-bold text-brand-700">이렇게 채워 보세요</p>
+                    <div className="space-y-1.5">
+                      {suggested.map((e) => (
+                        <div key={e.food.id} className="flex items-center gap-2">
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-xs font-medium text-slate-800">
+                              {e.food.name}
+                              {e.seasonal && <span className="ml-1 text-[10px] text-emerald-600">제철</span>}
+                            </p>
+                            <p className="truncate text-[11px] text-slate-500">{e.contribution}</p>
+                          </div>
+                          <button
+                            className="shrink-0 rounded-lg bg-brand-600 px-2.5 py-1 text-[11px] font-medium text-white"
+                            onClick={() => onApplySuggestion(e.food.id, slot)}
+                          >
+                            담기
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  className="w-full border-t border-slate-100 px-3.5 py-2.5 text-xs font-medium text-brand-700 hover:bg-slate-50"
+                  onClick={() => onAddTo(slot)}
+                >
+                  ＋ {slot}에 음식 추가
+                </button>
+              </div>
+            )
+          })}
+        </div>
+      </Section>
+
+      {/* ── 평가 ──────────────────────────────────────── */}
+      {selected.length > 0 && (
+        <Section title="오늘 식단 평가" desc="담으신 것을 기준으로 계산한 결과입니다.">
+          <div className="card divide-y divide-slate-100">
+            {menu.notes.map((n, i) => (
+              <p key={i} className="px-3.5 py-2.5 text-xs leading-relaxed text-slate-700">{n}</p>
+            ))}
+          </div>
+
+          {warnings.length > 0 && (
+            <div className="mt-2 space-y-2">
+              {warnings.slice(0, 4).map((g) => (
+                <div
+                  key={g.hit.rule.id}
+                  className={`card p-3.5 ${
+                    g.hit.rule.level === 'avoid' ? 'border-danger-200 bg-danger-50/40' : 'border-warn-200 bg-warn-50/40'
+                  }`}
+                >
+                  <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+                    <LevelBadge level={g.hit.rule.level} />
+                    <EvidenceBadge level={g.hit.rule.evidence} />
+                  </div>
+                  <p className="text-sm font-semibold text-slate-900">{g.hit.rule.title}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-600">{g.hit.rule.reason}</p>
+                  <p className="mt-2 text-[11px] text-slate-500">
+                    해당 음식: {g.foods.map((f) => f.name).join(', ')}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </Section>
+      )}
+
+      {/* ── 운동 조언 ─────────────────────────────────── */}
+      {selected.length > 0 && <ExerciseAdvice patient={patient} kcal={kcal} target={target.kcal} />}
+
+      <p className="px-1 pb-2 text-[11px] leading-relaxed text-slate-400">
+        이 화면은 <strong>하루(24시간)</strong> 기준입니다. 담으신 음식과 입력하신 정보만으로 계산한 참고값이며,
+        실제 처방·영양 상담을 대체하지 않습니다.
+      </p>
+    </div>
+  )
+}
+
+function MeterRow({
+  label, value, min, max, unit, overLimit
+}: { label: string; value: number; min: number; max: number; unit: string; overLimit?: boolean }) {
+  return (
+    <div>
+      <div className="mb-1 flex items-baseline justify-between text-xs">
+        <span className="font-medium text-slate-600">{label}</span>
+        <span className="tabular-nums text-slate-400">{Math.round(value)} / {max} {unit}</span>
+      </div>
+      <Meter value={value} min={min} max={max} overLimit={overLimit} />
+    </div>
+  )
+}
+
+/**
+ * 오늘 먹은 양에 맞춘 운동 조언.
+ *
+ * "몇 kcal 먹었으니 몇 분 뛰세요" 식의 계산은 하지 않는다.
+ * 그런 식의 상쇄는 치료 중 환자에게 맞지 않고, 근거도 없다.
+ * 대신 이 암종에서 근거가 있는 운동을 그날 상황에 맞춰 안내한다.
+ */
+function ExerciseAdvice({
+  patient, kcal, target
+}: { patient: PatientContext; kcal: number; target: [number, number] }) {
+  const plan = EXERCISE_BY_CANCER[patient.cancer]
+  const main = plan.items[0] ?? BASE_EXERCISE[0]
+  const walk = BASE_EXERCISE[0]
+  const strength = BASE_EXERCISE[1]
+
+  const under = kcal < target[0]
+  const over = kcal > target[1] * 1.15
+
+  const conditionNote = patient.conditions
+    .map((c) => CONDITION_EXERCISE_NOTES[c])
+    .find(Boolean)
+
+  return (
+    <Section title="오늘 운동" desc="식단과 함께 봐야 의미가 있는 부분입니다.">
+      <div className="card p-4">
+        <p className="text-sm leading-relaxed text-slate-700">
+          {under ? (
+            <>
+              오늘 열량이 목표보다 적습니다. <strong>운동량을 늘리기보다 먼저 채우시는 편</strong>이 좋습니다.
+              부족한 상태에서 운동을 늘리면 근육부터 빠집니다. 가벼운 걷기 정도로 유지하세요.
+            </>
+          ) : over ? (
+            <>
+              오늘 열량이 목표를 넘었습니다. 다만 <strong>한 끼로 만회하려 굶지 마세요.</strong>{' '}
+              내일 채소와 단백질 비중을 올리고, 오늘은 식후 걷기를 더하는 편이 낫습니다.
+            </>
+          ) : (
+            <>
+              오늘 열량은 목표 범위 안에 있습니다. 이 상태를 유지하면서{' '}
+              <strong>근육을 지키는 운동</strong>을 더하시면 됩니다.
+            </>
+          )}
+        </p>
+
+        <div className="mt-3 space-y-2">
+          <ExerciseLine label="유산소" name={walk.name} dose={walk.dose} />
+          <ExerciseLine label="근력" name={strength.name} dose={strength.dose} />
+          {main !== walk && <ExerciseLine label={`${CANCER_BY_ID[patient.cancer].name} 특이`} name={main.name} dose={main.dose} highlight />}
+        </div>
+
+        {conditionNote && (
+          <p className="mt-3 rounded-lg bg-warn-50 px-3 py-2 text-[11px] leading-relaxed text-warn-700">
+            {conditionNote}
+          </p>
+        )}
+
+        {main.refIds.length > 0 && (
+          <details className="mt-3">
+            <summary className="cursor-pointer text-[11px] font-medium text-slate-400">
+              근거 {main.refIds.length}건
+            </summary>
+            <ul className="mt-1.5 space-y-1">
+              {main.refIds.map((id) => {
+                const r = REF_BY_ID[id]
+                if (!r) return null
+                return (
+                  <li key={id} className="text-[11px] leading-relaxed text-slate-500">
+                    {r.url ? (
+                      <a href={r.url} target="_blank" rel="noreferrer" className="underline decoration-slate-300">
+                        {r.citation}
+                      </a>
+                    ) : r.citation}
+                  </li>
+                )
+              })}
+            </ul>
+          </details>
+        )}
+      </div>
+    </Section>
+  )
+}
+
+function ExerciseLine({
+  label, name, dose, highlight
+}: { label: string; name: string; dose: string; highlight?: boolean }) {
+  return (
+    <div className={`rounded-lg px-3 py-2 ${highlight ? 'bg-brand-50' : 'bg-slate-50'}`}>
+      <div className="flex items-center gap-1.5">
+        <span className={`chip ${highlight ? 'bg-brand-600 text-white' : 'bg-white text-slate-600 ring-1 ring-slate-200'}`}>
+          {label}
+        </span>
+        <span className="text-xs font-semibold text-slate-800">{name}</span>
+      </div>
+      <p className="mt-1 text-[11px] leading-relaxed tabular-nums text-slate-600">{dose}</p>
+    </div>
+  )
+}

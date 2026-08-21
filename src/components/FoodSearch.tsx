@@ -30,11 +30,17 @@ function matches(food: Food, q: string): boolean {
 export function FoodSearch({
   patient,
   onAdd,
-  selectedIds
+  selectedIds,
+  initialMeal,
+  onDone
 }: {
   patient: PatientContext
   onAdd: (foodId: string, servings: number, meal: MealSlot) => void
   selectedIds: Set<string>
+  /** 오늘 식단에서 넘어온 경우 어느 끼니에 담을지 */
+  initialMeal?: MealSlot
+  /** 담기를 마치고 오늘 식단으로 돌아간다 */
+  onDone?: () => void
 }) {
   const [q, setQ] = useState('')
   /** 저장소 조회는 입력이 잠깐 멈춘 뒤에 한다 */
@@ -42,7 +48,7 @@ export function FoodSearch({
   const [group, setGroup] = useState<FoodGroup | '전체'>('전체')
   const [detail, setDetail] = useState<Food | null>(null)
   /** 담을 끼니 — 여기서 미리 정해 두면 매번 고르지 않아도 된다 */
-  const [meal, setMeal] = useState<MealSlot>('점심')
+  const [meal, setMeal] = useState<MealSlot>(initialMeal ?? '점심')
   /** 식재료만 보기 — 조리된 메뉴가 아니라 재료 단위로 짜고 싶을 때 */
   const [onlyIngredient, setOnlyIngredient] = useState(false)
   const [cuisine, setCuisine] = useState<Cuisine | '전체'>('전체')
@@ -56,6 +62,8 @@ export function FoodSearch({
   const [scanning, setScanning] = useState(false)
   const [scanMsg, setScanMsg] = useState<string | null>(null)
   const [asking, setAsking] = useState(false)
+  /** 한 번에 그리는 개수. 1만 8천 건을 통째로 그리면 화면이 멈춘다. */
+  const [limit, setLimit] = useState(60)
 
   useEffect(() => { getStatus().then((st) => setHasExt(st.installed)) }, [])
 
@@ -73,10 +81,23 @@ export function FoodSearch({
     return () => clearTimeout(t)
   }, [q])
 
+  useEffect(() => { setLimit(60) }, [q, group, onlyIngredient, cuisine])
+
   const cached = useMemo(
     () => ({ rules: activeRules(patient), interactions: activeInteractions(patient) }),
     [patient]
   )
+
+  /** 조건에 맞는 전체 건수 — 화면에 그리는 수와 별개로 알려 준다 */
+  const totalMatched = useMemo(() => {
+    return FOODS.filter(
+      (f) =>
+        (group === '전체' || f.group === group) &&
+        (!onlyIngredient || f.form === 'ingredient') &&
+        (cuisine === '전체' || (f.cuisine ?? '한식') === cuisine || f.cuisine === '무관') &&
+        matches(f, q.trim())
+    ).length
+  }, [q, group, onlyIngredient, cuisine])
 
   const results = useMemo(() => {
     const list = FOODS.filter(
@@ -115,7 +136,7 @@ export function FoodSearch({
       return a.name.length - b.name.length
     })
 
-    const page = ordered.slice(0, 120)
+    const page = ordered.slice(0, limit)
     const scored = page.map((f) => ({ food: f, verdict: evaluateFood(f, patient, 1, cached) }))
 
     // 검색어가 없을 때만 권장 우선으로 다시 세운다
@@ -129,7 +150,7 @@ export function FoodSearch({
     if (needle && extra.q === needle && extra.items.length > 0) {
       const have = new Set(scored.map((x) => x.food.name))
       for (const f of extra.items) {
-        if (scored.length >= 120) break
+        if (scored.length >= limit) break
         if (have.has(f.name)) continue
         if (onlyIngredient) continue
         if (group !== '전체' && f.group !== group) continue
@@ -138,10 +159,19 @@ export function FoodSearch({
       }
     }
     return scored
-  }, [q, group, onlyIngredient, cuisine, patient, cached, extra])
+  }, [q, group, onlyIngredient, cuisine, patient, cached, extra, limit])
 
   return (
     <div>
+      {onDone && (
+        <button
+          className="mb-2 flex items-center gap-1 text-xs font-medium text-brand-700"
+          onClick={onDone}
+        >
+          ← 오늘 식단으로 돌아가기
+        </button>
+      )}
+
       <div className="sticky top-0 z-10 -mx-4 mb-3 bg-slate-50/95 px-4 pb-2 pt-1 backdrop-blur">
         <div className="flex gap-1.5">
           <input
@@ -242,6 +272,13 @@ export function FoodSearch({
           )}
         </div>
       ) : (
+        <>
+        <div className="mb-2 flex items-baseline justify-between px-1">
+          <span className="text-xs text-slate-500">
+            {totalMatched.toLocaleString()}가지 중 {Math.min(results.length, totalMatched).toLocaleString()}가지 표시
+          </span>
+          {hasExt && <span className="text-[11px] text-slate-400">기기 저장 데이터 포함</span>}
+        </div>
         <ul className="card divide-y divide-slate-100 overflow-hidden">
           {results.map(({ food, verdict }) => {
             const per = foodContribution(food, 1)
@@ -279,6 +316,16 @@ export function FoodSearch({
             )
           })}
         </ul>
+
+        {results.length < totalMatched && (
+          <button
+            className="btn-outline mt-3 w-full text-xs"
+            onClick={() => setLimit((n) => n + 120)}
+          >
+            더 보기 · 남은 {(totalMatched - results.length).toLocaleString()}가지
+          </button>
+        )}
+        </>
       )}
 
       {asking && (

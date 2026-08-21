@@ -91,6 +91,7 @@ const catCount = {}
 const seen = new Set()
 let skippedNoKcal = 0
 let skippedDup = 0
+let skippedBadValue = 0
 
 for (const f of files) {
   const items = JSON.parse(fs.readFileSync(path.join(RAW, f), 'utf8'))
@@ -108,6 +109,17 @@ for (const f of files) {
       const v = num(it[src])
       if (v !== undefined) extra[key] = v
     }
+
+    /*
+     * 물리적으로 불가능한 값은 원본 오류다. 100 g 안에 100 g 넘는 성분이 있을 수 없고,
+     * 가장 열량이 높은 순수 지방도 900 kcal 을 넘지 못한다.
+     * 이런 자료가 섞이면 "단백질 374 g 보충" 같은 엉뚱한 계산이 나온다.
+     */
+    const impossible =
+      (n.protein ?? 0) > 100 || (n.fat ?? 0) > 100 || (n.carb ?? 0) > 100 ||
+      (n.kcal ?? 0) > 900 || (n.na ?? 0) > 40000 ||
+      (n.protein ?? 0) < 0 || (n.fat ?? 0) < 0 || (n.carb ?? 0) < 0
+    if (impossible) { skippedBadValue++; continue }
 
     // 에너지가 없거나 사실상 0 인 자료는 계산에 쓸 수 없다.
     // (물·차처럼 진짜 0 인 것은 음료 분류라 따로 살린다.)
@@ -161,7 +173,7 @@ for (const f of files) {
 console.log('')
 console.log(`핵심(음식·품목대표) : ${core.length.toLocaleString()}건`)
 console.log(`확장(상용 가공식품) : ${extended.length.toLocaleString()}건`)
-console.log(`제외 — 에너지 없음 ${skippedNoKcal.toLocaleString()} · 중복 ${skippedDup.toLocaleString()}`)
+console.log(`제외 — 에너지 없음 ${skippedNoKcal.toLocaleString()} · 중복 ${skippedDup.toLocaleString()} · 불가능한 값 ${skippedBadValue.toLocaleString()}`)
 console.log('')
 console.log('식품 대분류 상위 25 (매핑 확인용):')
 for (const [k, v] of Object.entries(catCount).sort((a, b) => b[1] - a[1]).slice(0, 25)) {

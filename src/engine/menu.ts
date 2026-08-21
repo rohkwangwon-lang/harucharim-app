@@ -1,6 +1,6 @@
 import type { Cuisine, EvidenceLevel, Food, FoodGroup, MealSlot, PatientContext, Season, SelectedItem } from '../data/types'
 import { MEAL_SLOTS } from '../data/types'
-import { FOODS, FOOD_BY_ID } from '../data/foods'
+import { CURATED_FOODS, FOOD_BY_ID } from '../data/foods'
 import { CANCER_BY_ID } from '../data/cancers'
 import { activeInteractions, activeRules, evaluateFood, type RuleHit, type InteractionHit } from './rules'
 import { addTotals, foodContribution, personalTarget, type NutrientTotals } from './nutrition'
@@ -106,7 +106,7 @@ export function suggestAlternative(
   )
   const ownTags = food.tags.filter((t) => !offending.has(t))
 
-  const scored = FOODS.filter((f) => f.id !== food.id && f.group === food.group)
+  const scored = CURATED_FOODS.filter((f) => f.id !== food.id && f.group === food.group)
     .map((f) => {
       const v = evaluateFood(f, patient, 1, cached)
       if (v.level === 'avoid' || v.level === 'caution') return null
@@ -302,12 +302,21 @@ function pickFillers(
   }
 
   const candidates: Cand[] = []
-  for (const f of FOODS) {
+  /**
+   * 후보는 손으로 검토한 식품에서만 고른다.
+   *
+   * 공공데이터에서 들여온 것은 성분값은 믿을 만하지만 1회 제공량이 부정확하고
+   * ("삶아서 말린 나물" 100 g 처럼 실제로 먹지 않는 양), 이상치도 섞여 있다.
+   * 검색해서 찾아보는 데는 쓸모가 있어도, 앱이 먼저 권하는 자리에는 맞지 않는다.
+   */
+  for (const f of CURATED_FOODS) {
     if (exclude.has(f.id)) continue
     // 조미료·기름처럼 그 자체로 한 끼를 이루지 않는 것은 제안하지 않는다
     if (f.group === '유지·당류') continue
     if (f.tags.some((t) => NEVER_SUGGEST.has(t))) continue
     if (!allowedCuisine(f, cuisines)) continue
+    // 사람이 한 번에 먹는 양으로 보기 어려운 것은 제외한다
+    if (f.serving.g < 10) continue
 
     const v = evaluateFood(f, patient, 1, cached)
     if (v.level === 'avoid' || v.level === 'caution') continue
@@ -324,9 +333,14 @@ function pickFillers(
     if (seasonal) score += 10
 
     const c = foodContribution(f, 1)
+    const kcal = c.kcal ?? 0
+    const protein = c.protein ?? 0
+    // 1회 제공량 기준으로 말이 되지 않는 값은 데이터 오류로 보고 거른다
+    if (kcal > 900 || protein > 80) continue
+
     candidates.push({
       food: f, score, prefers, seasonal,
-      kcal: c.kcal ?? 0, protein: c.protein ?? 0, fiber: c.fiber ?? 0, na: c.na ?? 0
+      kcal, protein, fiber: c.fiber ?? 0, na: c.na ?? 0
     })
   }
 

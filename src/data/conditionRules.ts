@@ -147,6 +147,36 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
     }
   ],
 
+  체중증가: [
+    {
+      id: 'cond-gain-dense', level: 'caution', match: { tags: ['고열량밀도', '고당', '튀김'] },
+      title: '치료 중 늘어난 체중은 치료 후에도 잘 빠지지 않습니다',
+      reason:
+        '항암 치료 중 체중이 오히려 느는 일은 흔합니다. 오심을 달래려 탄수화물 위주로 먹게 되고, ' +
+        '스테로이드가 식욕을 올리며, 활동량은 줄기 때문입니다. ' +
+        '문제는 이때 늘어난 것이 근육이 아니라 지방이고, 치료가 끝난 뒤에도 잘 빠지지 않는다는 점입니다. ' +
+        '열량을 줄이기보다 같은 열량에서 단백질과 채소의 비중을 올리는 편이 실천하기 쉽습니다.',
+      evidence: 'B', refIds: ['asco2022', 'acs2022']
+    },
+    {
+      id: 'cond-gain-veg', level: 'prefer', match: { tags: ['고식이섬유'], groups: ['채소', '해조·버섯'] },
+      title: '먼저 채소로 배를 채우면 총량이 자연스럽게 줄어듭니다',
+      reason:
+        '식사 순서를 채소 → 단백질 → 밥으로 바꾸는 것만으로 총섭취량이 줄어듭니다. ' +
+        '먹는 양을 참는 방식은 치료 중에 오래 가지 못합니다.',
+      evidence: 'G', refIds: ['acs2022', 'kdri2020']
+    },
+    {
+      id: 'cond-gain-move', level: 'info', match: { tags: ['고단백'] },
+      title: '체중보다 근육량이 중요합니다',
+      reason:
+        '치료 중에는 체중계 숫자가 그대로여도 근육이 줄고 지방이 느는 경우가 많습니다. ' +
+        '단백질을 유지하면서 저항운동을 더해야 몸의 구성이 나빠지지 않습니다. ' +
+        '이 시기에 무리한 감량을 하면 근육부터 빠집니다.',
+      evidence: 'G', refIds: ['acsm2019', 'asco2022']
+    }
+  ],
+
   호중구감소증: [
     {
       id: 'cond-neut-raw', level: 'avoid', match: { tags: ['생식'] },

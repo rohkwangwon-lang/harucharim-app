@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { isSupabaseConfigured } from '../lib/supabase'
+import { displayName, PROVIDER_LABEL, signIn, useSession, type Provider } from '../lib/auth'
 import type { CancerId, Cuisine, PatientCondition, PatientContext, Phase, TreatmentHistory } from '../data/types'
 import { CANCERS, CANCER_BY_ID } from '../data/cancers'
 import { nutritionRisk, personalTarget } from '../engine/nutrition'
@@ -24,7 +26,7 @@ const HISTORIES: TreatmentHistory[] = [
 ]
 
 const COMMON_CONDITIONS: PatientCondition[] = [
-  '식욕부진', '체중감소', '오심·구토', '구강점막염', '설사', '변비',
+  '식욕부진', '체중감소', '체중증가', '오심·구토', '구강점막염', '설사', '변비',
   '연하곤란', '위절제후', '당뇨', '고혈압'
 ]
 
@@ -40,8 +42,9 @@ export function Onboarding({
   onDone: (patch: Partial<PatientContext>) => void
 }) {
   const [step, setStep] = useState(0)
-  const steps = ['암종', '치료 시기', '몸 상태', '식성']
-  const canNext = step === 0 ? !!patient.cancer : true
+  const { user } = useSession()
+  const steps = ['시작', '암종', '치료 시기', '몸 상태', '식성']
+  const canNext = step === 1 ? !!patient.cancer : true
 
   const toggle = <T,>(list: T[], v: T): T[] =>
     list.includes(v) ? list.filter((x) => x !== v) : [...list, v]
@@ -67,6 +70,64 @@ export function Onboarding({
       <div className="flex-1 overflow-y-auto px-5 py-5">
         {step === 0 && (
           <Step
+            title="온코푸드를 시작합니다"
+            desc="로그인하시면 기기를 바꿔도 설정이 유지되고, 문의하신 내용의 답변을 앱에서 바로 확인하실 수 있습니다. 로그인 없이 쓰셔도 모든 기능은 그대로입니다."
+          >
+            {user ? (
+              <div className="rounded-2xl border border-brand-200 bg-brand-50/60 p-4">
+                <p className="text-sm font-semibold text-brand-800">
+                  {displayName(user)} 님, 반갑습니다
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-slate-600">
+                  로그인되었습니다. 다음 단계에서 몇 가지만 알려주시면 준비가 끝납니다.
+                </p>
+              </div>
+            ) : isSupabaseConfigured ? (
+              <>
+                <div className="flex flex-col gap-2">
+                  {(['kakao', 'google'] as Provider[]).map((p) => (
+                    <button
+                      key={p}
+                      className={`btn py-3 text-sm ${
+                        p === 'kakao'
+                          ? 'bg-[#FEE500] text-[#191600] hover:bg-[#f5dc00]'
+                          : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                      }`}
+                      onClick={() => signIn(p).catch(() => undefined)}
+                    >
+                      {PROVIDER_LABEL[p]}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-4 text-center text-xs text-slate-400">
+                  처음이시면 위 버튼으로 바로 가입됩니다. 따로 아이디를 만들지 않으셔도 됩니다.
+                </p>
+              </>
+            ) : (
+              <div className="rounded-xl bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+                로그인 기능을 준비하고 있습니다. 지금은 그대로 진행하셔도 됩니다.
+              </div>
+            )}
+
+            <div className="mt-6 rounded-xl bg-slate-50 px-4 py-3">
+              <p className="text-[11px] leading-relaxed text-slate-500">
+                암종·체중·식단 같은 <strong className="text-slate-700">건강 정보는 이 기기 안에만</strong> 저장되며
+                서버로 전송되지 않습니다. 로그인은 문의 답변을 확인하기 위한 것입니다.{' '}
+                <a
+                  href={`${import.meta.env.BASE_URL}privacy.html`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline decoration-slate-300"
+                >
+                  개인정보처리방침
+                </a>
+              </p>
+            </div>
+          </Step>
+        )}
+
+        {step === 1 && (
+          <Step
             title="어떤 암으로 치료받고 계신가요?"
             desc="선택하신 암종에 따라 권고 내용이 완전히 달라집니다. 같은 음식이 어떤 암에서는 권장이고 다른 암에서는 주의 대상입니다."
           >
@@ -88,7 +149,7 @@ export function Onboarding({
           </Step>
         )}
 
-        {step === 1 && (
+        {step === 2 && (
           <Step
             title="지금 어느 단계에 계신가요?"
             desc="시기에 따라 권고가 뒤집히기도 합니다. 예를 들어 대장암에서 식이섬유는 회복 후에는 권장이지만 수술 직후에는 제한해야 합니다."
@@ -135,7 +196,7 @@ export function Onboarding({
           </Step>
         )}
 
-        {step === 2 && (
+        {step === 3 && (
           <Step
             title="몸 상태를 알려주세요"
             desc="열량과 단백질 목표는 체중을 기준으로 계산합니다. 정확하지 않아도 대략 넣으시면 됩니다."
@@ -194,7 +255,7 @@ export function Onboarding({
           </Step>
         )}
 
-        {step === 3 && (
+        {step === 4 && (
           <Step
             title="어떤 음식으로 식단을 짤까요?"
             desc="기본은 제철 한식입니다. 드시고 싶은 계통을 추가하면 식단에 함께 섞습니다."
@@ -231,13 +292,13 @@ export function Onboarding({
           )}
           {step < steps.length - 1 ? (
             <button className="btn-primary flex-[2]" disabled={!canNext} onClick={() => setStep(step + 1)}>
-              다음
+              {step === 0 && !user ? '로그인 없이 시작하기' : '다음'}
             </button>
           ) : (
             <button className="btn-primary flex-[2]" onClick={() => onDone({})}>시작하기</button>
           )}
         </div>
-        {step === 0 && (
+        {step === 1 && (
           <button
             className="mt-2 w-full text-center text-xs text-slate-400 hover:text-slate-600"
             onClick={() => onDone({})}

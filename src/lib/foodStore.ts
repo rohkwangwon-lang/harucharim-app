@@ -20,7 +20,7 @@ const STORE_BARCODE = 'barcodes'
 const STORE_META = 'meta'
 
 /** 데이터 판을 올릴 때 이 값을 바꾸면 사용자 기기에서 다시 받는다 */
-export const DATA_VERSION = '2026-08-20'
+export const DATA_VERSION = '2026-08-21'
 
 export interface InstallProgress {
   phase: '식품 데이터' | '바코드 데이터' | '마무리'
