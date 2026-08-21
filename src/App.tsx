@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { REVIEW_MODE } from './config'
 import { useAppState } from './lib/store'
 import { CANCER_BY_ID } from './data/cancers'
@@ -13,6 +13,8 @@ import { CancerGuide } from './components/CancerGuide'
 import { Exercise } from './components/Exercise'
 import { DataManager } from './components/DataManager'
 import { InquiryDialog } from './components/InquiryDialog'
+import { AdminInquiries } from './components/AdminInquiries'
+import { checkAdmin } from './lib/inquiry'
 import { displayName, useSession } from './lib/auth'
 
 /**
@@ -48,6 +50,12 @@ export default function App() {
   const [toast, setToast] = useState<string | null>(null)
   const [asking, setAsking] = useState(false)
   const { user } = useSession()
+  // 관리자로 등록된 계정으로 로그인하면 문의 관리 화면이 나타난다
+  const [isAdmin, setIsAdmin] = useState(false)
+  useEffect(() => {
+    if (!user) { setIsAdmin(false); return }
+    checkAdmin().then(setIsAdmin)
+  }, [user])
 
   // 탭을 바꿨는데 이전 화면의 스크롤 위치가 남아 있으면 빈 화면처럼 보인다
   const setTab = (next: Tab) => {
@@ -151,6 +159,8 @@ export default function App() {
         {tab === 'me' && (
           <>
             <PatientPanel patient={state.patient} onChange={setPatient} />
+            {isAdmin && <AdminInquiries />}
+
             <DataManager />
 
             <div className="card mb-5 p-4">

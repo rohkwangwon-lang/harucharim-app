@@ -79,3 +79,47 @@ function friendly(msg: string): string {
   if (/network|fetch/i.test(msg)) return '인터넷 연결을 확인해 주세요.'
   return msg
 }
+
+/* ────────────────────────── 관리자 ────────────────────────── */
+
+export interface AdminInquiry extends Inquiry {
+  contact_email: string | null
+  user_id: string | null
+  app_version: string | null
+}
+
+/** 지금 로그인한 사람이 관리자인지 */
+export async function checkAdmin(): Promise<boolean> {
+  if (!supabase) return false
+  const { data, error } = await supabase.rpc('of_is_admin')
+  if (error) return false
+  return data === true
+}
+
+/** 들어온 문의 전체 (관리자만 보인다) */
+export async function listAllInquiries(): Promise<AdminInquiry[]> {
+  if (!supabase) return []
+  const { data, error } = await supabase
+    .from('of_admin_inquiries')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(200)
+  if (error) return []
+  return (data ?? []) as AdminInquiry[]
+}
+
+/** 답변 저장 */
+export async function answerInquiry(id: string, answer: string) {
+  if (!supabase) throw new Error('서버에 연결되어 있지 않습니다.')
+  const { error } = await supabase
+    .from('of_inquiries')
+    .update({ answer: answer.trim(), answered_at: new Date().toISOString(), status: 'answered' })
+    .eq('id', id)
+  if (error) throw new Error(friendly(error.message))
+}
+
+/** 처리 완료로 닫기 */
+export async function closeInquiry(id: string) {
+  if (!supabase) return
+  await supabase.from('of_inquiries').update({ status: 'closed' }).eq('id', id)
+}
