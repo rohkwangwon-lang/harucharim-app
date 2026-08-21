@@ -29,6 +29,7 @@ export function TodayMeals({
   supplements,
   onAddTo,
   onSetServings,
+  onSetMeal,
   onRemove,
   onClear,
   onApplySuggestion,
@@ -44,6 +45,8 @@ export function TodayMeals({
   /** 해당 끼니로 음식을 담으러 간다 */
   onAddTo: (meal: MealSlot) => void
   onSetServings: (foodId: string, servings: number, meal?: MealSlot) => void
+  /** 담은 항목의 끼니를 옮긴다 */
+  onSetMeal: (foodId: string, from: MealSlot | undefined, to: MealSlot) => void
   onRemove: (foodId: string, meal?: MealSlot) => void
   onClear: () => void
   /** 추천 항목을 실제로 담는다 */
@@ -82,6 +85,14 @@ export function TodayMeals({
   const protein = Math.round(totals.protein ?? 0)
   const na = Math.round(totals.na ?? 0)
   const naLimit = profile.target.naLimit ?? 2000
+
+  /*
+   * 어느 끼니에도 걸리지 않는 항목.
+   * 불러올 때 끼니를 채워 넣으므로 보통은 없지만, 없다고 단정하지 않는다.
+   * 예전에 이런 항목이 화면에서만 사라진 채 합계와 추천에는 남아,
+   * 담지도 않은 음식이 아침에 들어가 있는 것처럼 보였다.
+   */
+  const unassigned = selected.filter((i) => !i.meal || !MEAL_SLOTS.includes(i.meal))
 
   const filledSlots = MEAL_SLOTS.filter((m) => selected.some((i) => i.meal === m))
   const emptySlots = MEAL_SLOTS.filter((m) => !selected.some((i) => i.meal === m))
@@ -348,6 +359,45 @@ export function TodayMeals({
               </div>
             )
           })}
+
+          {unassigned.length > 0 && (
+            <div className="card overflow-hidden border-warn-200">
+              <div className="border-b border-warn-200 bg-warn-50/70 px-3.5 py-2">
+                <p className="text-sm font-bold text-stone-800">끼니를 정하지 않은 것</p>
+                <p className="mt-0.5 text-[11px] leading-relaxed text-stone-600">
+                  예전 판에서 담으신 기록입니다. 합계에는 들어가 있으니 끼니를 정해 주세요.
+                </p>
+              </div>
+              <ul className="divide-y divide-stone-100">
+                {unassigned.map((item) => {
+                  const food = FOOD_BY_ID[item.foodId]
+                  if (!food) return null
+                  return (
+                    <li key={item.foodId} className="px-3.5 py-2.5">
+                      <p className="text-sm font-medium text-stone-900">{food.name}</p>
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {MEAL_SLOTS.map((m) => (
+                          <button
+                            key={m}
+                            className="chip border border-stone-200 bg-white text-stone-600 hover:border-brand-500 hover:text-brand-700"
+                            onClick={() => onSetMeal(item.foodId, item.meal, m)}
+                          >
+                            {m}으로
+                          </button>
+                        ))}
+                        <button
+                          className="chip border border-stone-200 bg-white text-stone-400 hover:border-danger-300 hover:text-danger-600"
+                          onClick={() => onRemove(item.foodId, item.meal)}
+                        >
+                          빼기
+                        </button>
+                      </div>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          )}
         </div>
       </Section>
 

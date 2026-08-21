@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
+import { FOOD_BY_ID } from '../data/foods'
+import { defaultSlotFor } from '../engine/menu'
 import { today as todayKey, type DayKey } from './day'
 
 const STORAGE_KEY = 'oncofood.state.v1'
@@ -39,6 +41,31 @@ const DEFAULT_STATE: AppState = {
   supplements: []
 }
 
+/**
+ * 기록을 불러올 때 한 번 정리한다.
+ *
+ * 초기 판에는 끼니 개념이 없었다(끼니 지정은 나중에 들어왔다).
+ * 그때 담은 항목에는 meal 이 비어 있는데, '내 식단'은 끼니별로 걸러 보여 주므로
+ * 그런 항목은 어느 끼니에도 뜨지 않고 사라졌다. 그런데 합계에는 계속 들어가고,
+ * 추천 화면은 식품군을 보고 아침에 배치해 "담지도 않은 삼계탕이 아침에 있다"가 됐다.
+ *
+ * 그래서 끼니를 채워 넣고, 같은 끼니에 같은 음식이 겹치면 인분을 합친다.
+ * 화면에 안 보이는 기록은 없어야 한다.
+ */
+function normalizeDay(list: SelectedItem[]): SelectedItem[] {
+  const out: SelectedItem[] = []
+  for (const item of list) {
+    const meal: MealSlot = item.meal ?? defaultSlotFor(FOOD_BY_ID[item.foodId])
+    const same = out.find((x) => x.foodId === item.foodId && x.meal === meal)
+    if (same) {
+      same.servings = Math.round((same.servings + item.servings) * 10) / 10
+    } else {
+      out.push({ ...item, meal })
+    }
+  }
+  return out
+}
+
 function load(): AppState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -49,6 +76,9 @@ function load(): AppState {
     const diary = parsed.diary ?? {}
     if (parsed.selected?.length && !diary[todayKey()]) {
       diary[todayKey()] = parsed.selected
+    }
+    for (const key of Object.keys(diary)) {
+      diary[key as DayKey] = normalizeDay(diary[key as DayKey] ?? [])
     }
 
     return {

@@ -45,7 +45,7 @@ const CARE_VIEWS: { id: CareView; label: string }[] = [
 export default function App() {
   const {
     state, day, setDay, selected, setWeight,
-    setPatient, adoptName, addFood, setServings, removeFood, clearFoods,
+    setPatient, adoptName, addFood, setServings, setMeal, removeFood, clearFoods,
     toggleSupplement, completeOnboarding, resetOnboarding
   } = useAppState()
 
@@ -121,6 +121,7 @@ export default function App() {
             supplements={state.supplements}
             onAddTo={(meal) => { setPendingMeal(meal); setTab('search') }}
             onSetServings={setServings}
+            onSetMeal={setMeal}
             onRemove={removeFood}
             onClear={clearFoods}
             onApplySuggestion={(id, meal) => handleAdd(id, 1, meal)}
