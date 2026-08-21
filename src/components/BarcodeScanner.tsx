@@ -22,6 +22,8 @@ export function BarcodeScanner({
   const videoRef = useRef<HTMLVideoElement>(null)
   const [status, setStatus] = useState<Status>('준비 중')
   const [error, setError] = useState<string | null>(null)
+  /** 카메라가 못 읽을 때 손으로 넣는 번호 */
+  const [manual, setManual] = useState('')
   const stopRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
@@ -127,14 +129,47 @@ export function BarcodeScanner({
         )}
       </div>
 
-      <div className="safe-bottom px-5 py-4 text-center">
-        <p className="text-xs text-white/70">
+      {/*
+        * 손으로 번호를 넣는 길.
+        *
+        * 카메라가 못 읽는 경우가 꽤 있다 — 포장이 구겨졌거나, 냉동실에서 꺼내 김이 서렸거나,
+        * 조명이 어둡거나, 애초에 카메라를 못 쓰는 기기이거나.
+        * 그때 아무 길도 없으면 여기서 끝난다. 바코드 아래 숫자는 눈으로 읽을 수 있으니
+        * 그대로 넣으실 수 있게 둔다.
+        */}
+      <div className="safe-bottom px-5 pb-4 pt-3">
+        <p className="mb-2.5 text-center text-xs text-white/70">
           {status === '스캔 중'
             ? '제품 뒷면의 바코드를 틀 안에 맞춰 주세요'
             : status === '오류'
-              ? '카메라를 사용할 수 없습니다'
+              ? '카메라를 사용할 수 없습니다. 아래에 번호를 넣어 주세요'
               : '카메라를 준비하고 있습니다…'}
         </p>
+
+        <form
+          className="flex gap-1.5"
+          onSubmit={(e) => {
+            e.preventDefault()
+            const code = manual.replace(/\D/g, '')
+            if (code.length >= 8) onDetect(code)
+          }}
+        >
+          <input
+            className="min-w-0 flex-1 rounded-xl border border-white/25 bg-white/10 px-3 py-2.5 text-sm text-white placeholder:text-white/45 focus:border-brand-400 focus:outline-none"
+            inputMode="numeric"
+            autoComplete="off"
+            placeholder="바코드 아래 숫자를 직접 넣으셔도 됩니다"
+            value={manual}
+            onChange={(e) => setManual(e.target.value)}
+          />
+          <button
+            type="submit"
+            disabled={manual.replace(/\D/g, '').length < 8}
+            className="shrink-0 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white disabled:bg-white/15 disabled:text-white/40"
+          >
+            찾기
+          </button>
+        </form>
       </div>
     </div>
   )

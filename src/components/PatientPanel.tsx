@@ -213,6 +213,39 @@ export function PatientPanel({
           ))}
         </div>
       </Section>
+
+      <Section
+        title="바코드 스캔"
+        desc="공공 바코드 자료는 국내 제품을 다 담지 못합니다. 자주 빗나가 성가시면 꺼 두셔도 됩니다."
+      >
+        <button
+          onClick={() => onChange({ useBarcode: patient.useBarcode === false })}
+          className="flex w-full items-center justify-between rounded-xl border border-stone-200 bg-white px-3.5 py-3 text-left"
+        >
+          <span className="min-w-0 pr-3">
+            <span className="block text-sm font-medium text-stone-900">
+              바코드로 찾기 {patient.useBarcode === false ? '꺼짐' : '켜짐'}
+            </span>
+            <span className="mt-0.5 block text-[11px] leading-relaxed text-stone-500">
+              {patient.useBarcode === false
+                ? '찾기·영양제 화면에서 바코드 단추가 보이지 않습니다. 이름으로 찾으시면 됩니다.'
+                : '살아 있는 등록 148,155건에서 찾습니다. 못 찾으면 번호를 직접 넣거나 이름으로 찾아 이어 두실 수 있습니다.'}
+            </span>
+          </span>
+          <span
+            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+              patient.useBarcode === false ? 'bg-stone-300' : 'bg-brand-600'
+            }`}
+            aria-hidden
+          >
+            <span
+              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${
+                patient.useBarcode === false ? 'left-0.5' : 'left-[22px]'
+              }`}
+            />
+          </span>
+        </button>
+      </Section>
     </div>
   )
 }

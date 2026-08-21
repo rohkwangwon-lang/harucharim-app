@@ -203,6 +203,7 @@ export function FoodSearch({
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
+          {patient.useBarcode !== false && (
           <button
             className="btn-outline shrink-0 px-3"
             onClick={() => { setScanMsg(null); setScanning(true) }}
@@ -211,6 +212,7 @@ export function FoodSearch({
             <IconBarcode className="h-4 w-4" />
             <span className="ml-1">바코드</span>
           </button>
+          )}
         </div>
         {scanMsg && (
           <p className="mt-1.5 rounded-lg bg-warn-50 px-3 py-2 text-[11px] leading-relaxed text-warn-700">

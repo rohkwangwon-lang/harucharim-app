@@ -110,6 +110,7 @@ export function Supplements({
             onChange={(e) => setQ(e.target.value)}
             disabled={!hasExt}
           />
+          {patient.useBarcode !== false && (
           <button
             className="btn-outline shrink-0 px-3"
             disabled={!hasExt}
@@ -119,6 +120,7 @@ export function Supplements({
             <IconBarcode className="h-4 w-4" />
             <span className="ml-1">바코드</span>
           </button>
+          )}
         </div>
 
         {hasExt && (

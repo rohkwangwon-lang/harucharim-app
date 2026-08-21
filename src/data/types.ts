@@ -373,6 +373,13 @@ export interface PatientContext {
   cuisines?: Cuisine[]
   /** 온보딩을 마쳤는지 */
   onboarded?: boolean
+  /**
+   * 바코드 스캔을 쓸지.
+   *
+   * 공공 바코드 자료는 국내 제품을 다 담지 못한다. 스캔이 자주 빗나가면
+   * 오히려 성가시므로 꺼 둘 수 있게 한다. 기본은 켬이다.
+   */
+  useBarcode?: boolean
 }
 
 /** 치료 이력 — 영양 결핍과 운동 제약이 여기서 갈린다 */
