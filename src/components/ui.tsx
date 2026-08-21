@@ -7,7 +7,7 @@ const LEVEL_STYLE: Record<RuleLevel, { cls: string; label: string; icon: string 
   avoid: { cls: 'bg-danger-100 text-danger-700', label: '피하세요', icon: '✕' },
   caution: { cls: 'bg-warn-100 text-warn-700', label: '주의', icon: '!' },
   prefer: { cls: 'bg-brand-100 text-brand-700', label: '권장', icon: '✓' },
-  info: { cls: 'bg-slate-100 text-slate-600', label: '참고', icon: 'i' }
+  info: { cls: 'bg-stone-100 text-stone-600', label: '참고', icon: 'i' }
 }
 
 export function LevelBadge({ level, className = '' }: { level: RuleLevel; className?: string }) {
@@ -22,12 +22,12 @@ export function LevelBadge({ level, className = '' }: { level: RuleLevel; classN
 
 /** 목록에서 쓰는 작은 점 표시 */
 export function LevelDot({ level }: { level: RuleLevel | null }) {
-  if (!level) return <span className="h-2 w-2 rounded-full bg-slate-200" />
+  if (!level) return <span className="h-2 w-2 rounded-full bg-stone-200" />
   const color =
     level === 'avoid' ? 'bg-danger-500'
     : level === 'caution' ? 'bg-warn-500'
     : level === 'prefer' ? 'bg-brand-500'
-    : 'bg-slate-300'
+    : 'bg-stone-300'
   return <span className={`h-2 w-2 rounded-full ${color}`} />
 }
 
@@ -70,8 +70,8 @@ export function Section({
     <section className="mb-5">
       <div className="mb-2.5 flex items-end justify-between gap-3 px-1">
         <div>
-          <h2 className="text-base font-bold text-slate-900">{title}</h2>
-          {desc && <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{desc}</p>}
+          <h2 className="text-base font-bold text-stone-900">{title}</h2>
+          {desc && <p className="mt-0.5 text-xs leading-relaxed text-stone-500">{desc}</p>}
         </div>
         {right}
       </div>
@@ -82,7 +82,7 @@ export function Section({
 
 export function Empty({ children }: { children: ReactNode }) {
   return (
-    <div className="card px-4 py-10 text-center text-sm text-slate-400">{children}</div>
+    <div className="card px-4 py-10 text-center text-sm text-stone-400">{children}</div>
   )
 }
 
@@ -104,15 +104,15 @@ export function Stat({
     tone === 'good' ? 'text-brand-700'
     : tone === 'warn' ? 'text-warn-700'
     : tone === 'bad' ? 'text-danger-700'
-    : 'text-slate-900'
+    : 'text-stone-900'
   return (
     <div className="card px-3.5 py-3">
-      <div className="text-[11px] font-medium text-slate-500">{label}</div>
+      <div className="text-[11px] font-medium text-stone-500">{label}</div>
       <div className={`mt-1 text-xl font-bold tabular-nums ${toneCls}`}>
         {value}
-        {unit && <span className="ml-0.5 text-xs font-medium text-slate-400">{unit}</span>}
+        {unit && <span className="ml-0.5 text-xs font-medium text-stone-400">{unit}</span>}
       </div>
-      {hint && <div className="mt-0.5 text-[11px] leading-tight text-slate-400">{hint}</div>}
+      {hint && <div className="mt-0.5 text-[11px] leading-tight text-stone-400">{hint}</div>}
     </div>
   )
 }
@@ -133,10 +133,10 @@ export function Meter({
   const minPct = Math.min(100, (min / max) * 100)
   const color = overLimit ? 'bg-danger-500' : value < min ? 'bg-warn-500' : 'bg-brand-500'
   return (
-    <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
+    <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-stone-200">
       <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${pct}%` }} />
       <div
-        className="absolute top-0 h-full w-px bg-slate-400/70"
+        className="absolute top-0 h-full w-px bg-stone-400/70"
         style={{ left: `${minPct}%` }}
         aria-hidden
       />

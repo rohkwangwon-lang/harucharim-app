@@ -10,6 +10,7 @@ import { Supplements } from './components/Supplements'
 import { TodayMeals } from './components/TodayMeals'
 import { RecommendedMenu } from './components/RecommendedMenu'
 import { Diary } from './components/Diary'
+import { IconDiary, IconMe, IconMeal, IconPill, IconSearch, IconSuggest } from './components/icons'
 import { label as dayLabel, today } from './lib/day'
 import { CancerGuide } from './components/CancerGuide'
 import { Exercise } from './components/Exercise'
@@ -27,13 +28,13 @@ import { displayName, useSession } from './lib/auth'
 type Tab = 'compose' | 'diary' | 'suggest' | 'search' | 'supp' | 'me'
 type CareView = 'exercise' | 'guide'
 
-const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: 'compose', label: '내 식단', icon: '🍱' },
-  { id: 'diary', label: '기록', icon: '📅' },
-  { id: 'suggest', label: '추천', icon: '✨' },
-  { id: 'search', label: '찾기', icon: '🔍' },
-  { id: 'supp', label: '영양제', icon: '💊' },
-  { id: 'me', label: '내 정보', icon: '👤' }
+const TABS: { id: Tab; label: string; Icon: typeof IconMeal }[] = [
+  { id: 'compose', label: '내 식단', Icon: IconMeal },
+  { id: 'diary', label: '기록', Icon: IconDiary },
+  { id: 'suggest', label: '추천', Icon: IconSuggest },
+  { id: 'search', label: '찾기', Icon: IconSearch },
+  { id: 'supp', label: '영양제', Icon: IconPill },
+  { id: 'me', label: '내 정보', Icon: IconMe }
 ]
 
 const CARE_VIEWS: { id: CareView; label: string }[] = [
@@ -44,7 +45,7 @@ const CARE_VIEWS: { id: CareView; label: string }[] = [
 export default function App() {
   const {
     state, day, setDay, selected, setWeight,
-    setPatient, addFood, setServings, removeFood, clearFoods,
+    setPatient, adoptName, addFood, setServings, removeFood, clearFoods,
     toggleSupplement, completeOnboarding, resetOnboarding
   } = useAppState()
 
@@ -60,7 +61,9 @@ export default function App() {
   useEffect(() => {
     if (!user) { setIsAdmin(false); return }
     checkAdmin().then(setIsAdmin)
-  }, [user])
+    const n = displayName(user)
+    if (n && n !== '사용자') adoptName(n)
+  }, [user, adoptName])
 
   // 탭을 바꿨는데 이전 화면의 스크롤 위치가 남아 있으면 빈 화면처럼 보인다
   const setTab = (next: Tab) => {
@@ -90,11 +93,11 @@ export default function App() {
 
   return (
     <div className="mx-auto flex min-h-full max-w-2xl flex-col">
-      <header className="safe-top sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
+      <header className="safe-top sticky top-0 z-20 border-b border-stone-200 bg-white/90 backdrop-blur">
         <div className="flex items-center justify-between px-4 py-3">
           <div>
-            <h1 className="text-base font-bold tracking-tight text-slate-900">온코푸드</h1>
-            <p className="text-[11px] text-slate-500">암 환자를 위한 식이·영양 도우미</p>
+            <h1 className="text-base font-bold tracking-tight text-stone-900">온코푸드</h1>
+            <p className="text-[11px] text-stone-500">암 환자를 위한 식이·영양 도우미</p>
           </div>
           <button
             onClick={() => setTab('me')}
@@ -177,14 +180,14 @@ export default function App() {
 
         {tab === 'me' && (
           <>
-            <div className="mb-4 flex gap-1 rounded-xl bg-slate-100 p-1">
+            <div className="mb-4 flex gap-1 rounded-xl bg-stone-100 p-1">
               {([['설정', 'setting'], ...CARE_VIEWS.map((v) => [v.label, v.id] as const)] as const).map(
                 ([lab, id]) => (
                   <button
                     key={id}
                     onClick={() => { setCare(id as CareView | 'setting'); window.scrollTo({ top: 0 }) }}
                     className={`flex-1 rounded-lg px-2 py-2 text-xs font-semibold transition-colors ${
-                      care === id ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500'
+                      care === id ? 'bg-white text-brand-700 shadow-sm' : 'text-stone-500'
                     }`}
                   >
                     {lab}
@@ -203,29 +206,29 @@ export default function App() {
             <DataManager />
 
             <div className="card mb-5 p-4">
-              <h3 className="text-sm font-bold text-slate-800">문의하기</h3>
-              <p className="mt-1 text-xs leading-relaxed text-slate-500">
+              <h3 className="text-sm font-bold text-stone-800">문의하기</h3>
+              <p className="mt-1 text-xs leading-relaxed text-stone-500">
                 찾으시는 음식·영양제가 없거나 내용이 이상하면 알려 주세요. 확인 후 답변드립니다.
               </p>
               {user && (
                 <>
-                  <p className="mt-2 text-xs text-slate-600">
+                  <p className="mt-2 text-xs text-stone-600">
                     <span className="chip bg-brand-100 text-brand-700">로그인됨</span>{' '}
                     {displayName(user)}
                     {user.email ? ` · ${user.email}` : ''}
                   </p>
                   {!isAdmin && (
                     <details className="mt-2">
-                      <summary className="cursor-pointer text-[11px] text-slate-400">
+                      <summary className="cursor-pointer text-[11px] text-stone-400">
                         관리자로 등록하려면
                       </summary>
-                      <p className="mt-1.5 text-[11px] leading-relaxed text-slate-500">
-                        아래 계정 식별자를 <code className="rounded bg-slate-100 px-1">of_admins</code> 표에
+                      <p className="mt-1.5 text-[11px] leading-relaxed text-stone-500">
+                        아래 계정 식별자를 <code className="rounded bg-stone-100 px-1">of_admins</code> 표에
                         넣으면 이 계정이 관리자가 됩니다. 카카오 로그인은 이메일을 주지 않아
                         식별자로 등록해야 합니다.
                       </p>
                       <p
-                        className="mt-1.5 cursor-pointer select-all break-all rounded-lg bg-slate-100 px-2.5 py-2 font-mono text-[11px] text-slate-700"
+                        className="mt-1.5 cursor-pointer select-all break-all rounded-lg bg-stone-100 px-2.5 py-2 font-mono text-[11px] text-stone-700"
                         onClick={() => navigator.clipboard?.writeText(user.id)}
                         title="눌러서 복사"
                       >
@@ -252,25 +255,29 @@ export default function App() {
       {asking && <InquiryDialog onClose={() => setAsking(false)} />}
 
       {toast && (
-        <div className="pointer-events-none fixed bottom-24 left-1/2 z-40 -translate-x-1/2 rounded-full bg-slate-900/90 px-4 py-2 text-xs font-medium text-white shadow-lg">
+        <div className="pointer-events-none fixed bottom-24 left-1/2 z-40 -translate-x-1/2 rounded-full bg-stone-900/90 px-4 py-2 text-xs font-medium text-white shadow-lg">
           {toast}
         </div>
       )}
 
-      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 backdrop-blur">
+      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-stone-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-2xl">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium transition-colors ${
-                tab === t.id ? 'text-brand-700' : 'text-slate-400'
-              }`}
-            >
-              <span className="text-lg leading-none">{t.icon}</span>
-              {t.label}
-            </button>
-          ))}
+          {TABS.map((t) => {
+            const on = tab === t.id
+            return (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                aria-current={on ? 'page' : undefined}
+                className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] transition-colors ${
+                  on ? 'font-semibold text-brand-700' : 'font-medium text-stone-400'
+                }`}
+              >
+                <t.Icon className="h-[22px] w-[22px]" strokeWidth={on ? 1.9 : 1.6} />
+                {t.label}
+              </button>
+            )
+          })}
         </div>
       </nav>
     </div>
@@ -291,9 +298,9 @@ function ReviewBanner() {
 
 function Disclaimer() {
   return (
-    <div className="card mt-2 border-slate-200 bg-slate-50 p-4">
-      <h3 className="text-sm font-bold text-slate-800">이 앱을 쓰실 때 알아 두실 것</h3>
-      <ul className="mt-2 space-y-1.5 text-xs leading-relaxed text-slate-600">
+    <div className="card mt-2 border-stone-200 bg-stone-50 p-4">
+      <h3 className="text-sm font-bold text-stone-800">이 앱을 쓰실 때 알아 두실 것</h3>
+      <ul className="mt-2 space-y-1.5 text-xs leading-relaxed text-stone-600">
         <li>· 이 앱은 진료·처방·영양 상담을 대체하지 않습니다. 실제 치료 결정은 반드시 담당 의료진과 상의하셔야 합니다.</li>
         <li>· 모든 권고에는 근거 수준(A/B/C/G)과 출처를 함께 표시했습니다. 근거가 엇갈리는 주제는 그 사실 자체를 적었습니다.</li>
         <li>· 영양성분 값은 국가표준식품성분표와 제품 표시값을 기준으로 정리한 대표값입니다. 조리법과 제품에 따라 실제 값은 달라집니다.</li>

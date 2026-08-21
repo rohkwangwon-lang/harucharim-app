@@ -165,6 +165,11 @@ export function useAppState() {
   }, [])
 
   /** 온보딩 완료 처리 — 첫 실행 화면을 다시 띄우지 않는다 */
+  /** 로그인 계정 이름을 아직 이름이 없을 때만 채운다 (사용자가 고친 이름을 덮어쓰지 않는다) */
+  const adoptName = useCallback((n: string) => {
+    setState((s) => (s.patient.name ? s : { ...s, patient: { ...s.patient, name: n } }))
+  }, [])
+
   const completeOnboarding = useCallback((patch: Partial<PatientContext>) => {
     setState((s) => ({ ...s, patient: { ...s.patient, ...patch, onboarded: true } }))
   }, [])
@@ -183,6 +188,7 @@ export function useAppState() {
     selected,
     setWeight,
     setPatient,
+    adoptName,
     addFood,
     setServings,
     setMeal,

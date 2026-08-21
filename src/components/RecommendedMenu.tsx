@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { IconEvening, IconMorning, IconNoon, IconSnack } from './icons'
 import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
 import { MEAL_SLOTS } from '../data/types'
 import { buildDayMenu } from '../engine/menu'
@@ -7,7 +8,9 @@ import { CANCER_BY_ID } from '../data/cancers'
 import { REF_BY_ID } from '../data/references'
 import { EvidenceBadge, Section, Stat } from './ui'
 
-const SLOT_ICON: Record<MealSlot, string> = { 아침: '🌅', 점심: '🍚', 저녁: '🌙', 간식: '🍎' }
+const SLOT_ICON: Record<MealSlot, typeof IconMorning> = {
+  아침: IconMorning, 점심: IconNoon, 저녁: IconEvening, 간식: IconSnack
+}
 
 /**
  * 추천 식단.
@@ -48,10 +51,10 @@ export function RecommendedMenu({
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-xs font-bold uppercase tracking-wide text-brand-700">하루(24시간) 전체</p>
-            <p className="mt-1 text-sm font-semibold text-slate-900">
+            <p className="mt-1 text-sm font-semibold text-stone-900">
               {profile.name} · {menu.season}철 추천 식단
             </p>
-            <p className="mt-1 text-xs leading-relaxed text-slate-600">
+            <p className="mt-1 text-xs leading-relaxed text-stone-600">
               {selected.length > 0 ? (
                 <>담으신 <strong>{selected.length}가지</strong>에 부족한 부분을 채웠습니다.</>
               ) : (
@@ -83,12 +86,12 @@ export function RecommendedMenu({
           <div className="space-y-2">
             {menu.removed.map((r) => (
               <div key={r.food.id} className="card border-danger-200 bg-danger-50/40 p-3.5">
-                <p className="text-sm font-semibold text-slate-900">{r.food.name}</p>
-                <p className="mt-1 text-xs leading-relaxed text-slate-600">{r.reason}</p>
+                <p className="text-sm font-semibold text-stone-900">{r.food.name}</p>
+                <p className="mt-1 text-xs leading-relaxed text-stone-600">{r.reason}</p>
                 {r.alternative && (
                   <div className="mt-2.5 flex items-center justify-between gap-2 rounded-lg bg-white px-3 py-2">
                     <div className="min-w-0">
-                      <span className="text-[11px] text-slate-400">이렇게 바꿔 보세요</span>
+                      <span className="text-[11px] text-stone-400">이렇게 바꿔 보세요</span>
                       <p className="truncate text-sm font-medium text-brand-700">{r.alternative.name}</p>
                     </div>
                     <button
@@ -113,24 +116,25 @@ export function RecommendedMenu({
             const slotKcal = entries.reduce((s, e) => s + (foodContribution(e.food, e.servings).kcal ?? 0), 0)
             return (
               <div key={slot} className="card overflow-hidden">
-                <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/60 px-3.5 py-2">
-                  <span className="text-sm font-bold text-slate-800">
-                    <span className="mr-1.5">{SLOT_ICON[slot]}</span>{slot}
+                <div className="flex items-center justify-between border-b border-stone-100 bg-stone-50/60 px-3.5 py-2">
+                  <span className="flex items-center gap-1.5 text-sm font-bold text-stone-800">
+                    {(() => { const I = SLOT_ICON[slot]; return <I className="h-4 w-4 text-stone-500" /> })()}
+                    {slot}
                   </span>
-                  <span className="text-xs tabular-nums text-slate-400">{Math.round(slotKcal)} kcal</span>
+                  <span className="text-xs tabular-nums text-stone-400">{Math.round(slotKcal)} kcal</span>
                 </div>
-                <ul className="divide-y divide-slate-100">
+                <ul className="divide-y divide-stone-100">
                   {entries.map((e) => {
                     const per = foodContribution(e.food, e.servings)
                     return (
                       <li key={e.food.id + slot} className="px-3.5 py-2.5">
                         <div className="flex items-center gap-2">
-                          <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-900">
+                          <span className="min-w-0 flex-1 truncate text-sm font-medium text-stone-900">
                             {e.food.name}
                           </span>
                           {e.seasonal && <span className="chip shrink-0 bg-emerald-100 text-emerald-700">제철</span>}
                           {e.origin === 'chosen' ? (
-                            <span className="chip shrink-0 bg-slate-100 text-slate-500">내가 담음</span>
+                            <span className="chip shrink-0 bg-stone-100 text-stone-500">내가 담음</span>
                           ) : (
                             <button
                               className="shrink-0 rounded-lg bg-brand-600 px-2.5 py-1 text-[11px] font-medium text-white"
@@ -140,7 +144,7 @@ export function RecommendedMenu({
                             </button>
                           )}
                         </div>
-                        <div className="mt-0.5 text-[11px] text-slate-400">
+                        <div className="mt-0.5 text-[11px] text-stone-400">
                           {e.food.serving.label} × {e.servings} · {Math.round(per.kcal ?? 0)} kcal ·
                           단백질 {(per.protein ?? 0).toFixed(1)} g · 나트륨 {Math.round(per.na ?? 0)} mg
                         </div>
@@ -165,21 +169,21 @@ export function RecommendedMenu({
       </Section>
 
       <Section title="점검">
-        <div className="card divide-y divide-slate-100">
+        <div className="card divide-y divide-stone-100">
           {menu.notes.map((n, i) => (
-            <p key={i} className="px-3.5 py-2.5 text-xs leading-relaxed text-slate-600">{n}</p>
+            <p key={i} className="px-3.5 py-2.5 text-xs leading-relaxed text-stone-600">{n}</p>
           ))}
         </div>
       </Section>
 
       <button
-        className="mb-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-800 px-4 py-3.5 text-sm font-bold text-white transition-colors hover:bg-slate-900"
+        className="mb-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-stone-800 px-4 py-3.5 text-sm font-bold text-white transition-colors hover:bg-stone-900"
         onClick={onGoCompose}
       >
         <span aria-hidden>←</span> 내 식단으로 돌아가기
       </button>
 
-      <p className="px-1 pb-2 text-[11px] leading-relaxed text-slate-400">
+      <p className="px-1 pb-2 text-[11px] leading-relaxed text-stone-400">
         추천 항목마다 어떤 권고에 따른 것인지와 근거를 함께 표시했습니다.
         실제 처방·영양 상담을 대체하지 않습니다.
       </p>
@@ -195,9 +199,9 @@ function Refs({ ids }: { ids: string[] }) {
       <summary className="cursor-pointer text-[10px] font-medium text-brand-700/70">근거 {refs.length}건</summary>
       <ul className="mt-1 space-y-0.5">
         {refs.map((r) => (
-          <li key={r.id} className="text-[10px] leading-relaxed text-slate-500">
+          <li key={r.id} className="text-[10px] leading-relaxed text-stone-500">
             {r.url ? (
-              <a href={r.url} target="_blank" rel="noreferrer" className="underline decoration-slate-300">{r.citation}</a>
+              <a href={r.url} target="_blank" rel="noreferrer" className="underline decoration-stone-300">{r.citation}</a>
             ) : r.citation}
           </li>
         ))}

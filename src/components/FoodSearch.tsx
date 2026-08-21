@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { IconBarcode } from './icons'
 import type { Cuisine, Food, FoodGroup, MealSlot, PatientContext } from '../data/types'
 import { MEAL_SLOTS } from '../data/types'
 import { FOODS } from '../data/foods'
@@ -189,7 +190,7 @@ export function FoodSearch({
         </button>
       )}
 
-      <div className={`sticky ${onDone ? 'top-[52px]' : 'top-0'} z-10 -mx-4 mb-3 bg-slate-50/95 px-4 pb-2 pt-1 backdrop-blur`}>
+      <div className={`sticky ${onDone ? 'top-[52px]' : 'top-0'} z-10 -mx-4 mb-3 bg-stone-50/95 px-4 pb-2 pt-1 backdrop-blur`}>
         <div className="flex gap-1.5">
           <input
             className="input flex-1"
@@ -202,7 +203,8 @@ export function FoodSearch({
             onClick={() => { setScanMsg(null); setScanning(true) }}
             title="제품 바코드를 카메라로 찍어 찾습니다"
           >
-            바코드
+            <IconBarcode className="h-4 w-4" />
+            <span className="ml-1">바코드</span>
           </button>
         </div>
         {scanMsg && (
@@ -216,10 +218,10 @@ export function FoodSearch({
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <p className="font-mono text-[11px] text-brand-700">바코드 {linking}</p>
-                <p className="mt-1 text-xs font-semibold text-slate-900">
+                <p className="mt-1 text-xs font-semibold text-stone-900">
                   이 바코드에 연결할 제품을 골라 주세요
                 </p>
-                <p className="mt-1 text-[11px] leading-relaxed text-slate-600">
+                <p className="mt-1 text-[11px] leading-relaxed text-stone-600">
                   아래에서 제품을 찾아 누르시면 이 바코드와 이어집니다.
                   다음부터는 스캔만으로 바로 찾을 수 있습니다.
                 </p>
@@ -239,7 +241,7 @@ export function FoodSearch({
               <div className="min-w-0">
                 <p className="font-mono text-[11px] text-warn-700">바코드 {scanResult.code}</p>
                 {scanResult.productName && (
-                  <p className="mt-0.5 truncate text-sm font-semibold text-slate-900">
+                  <p className="mt-0.5 truncate text-sm font-semibold text-stone-900">
                     {scanResult.productName}
                   </p>
                 )}
@@ -259,7 +261,7 @@ export function FoodSearch({
                 </button>
               )}
               {scanResult.kind === 'no-nutrition' && (
-                <span className="text-[11px] leading-relaxed text-slate-600">
+                <span className="text-[11px] leading-relaxed text-stone-600">
                   제품명으로 비슷한 것을 찾아 두었습니다. 아래 목록을 확인해 보세요.
                 </span>
               )}
@@ -282,7 +284,7 @@ export function FoodSearch({
         )}
         {/* 담을 끼니를 먼저 정해 두면 음식을 고를 때마다 다시 묻지 않는다 */}
         <div className="mt-2 flex items-center gap-2">
-          <span className="shrink-0 text-[11px] font-medium text-slate-500">담을 끼니</span>
+          <span className="shrink-0 text-[11px] font-medium text-stone-500">담을 끼니</span>
           <div className="flex flex-1 gap-1">
             {MEAL_SLOTS.map((m) => (
               <button
@@ -291,7 +293,7 @@ export function FoodSearch({
                 className={`flex-1 rounded-lg border px-2 py-1 text-xs font-medium transition-colors ${
                   meal === m
                     ? 'border-brand-500 bg-brand-500 text-white'
-                    : 'border-slate-300 bg-white text-slate-600'
+                    : 'border-stone-300 bg-white text-stone-600'
                 }`}
               >
                 {m}
@@ -306,7 +308,7 @@ export function FoodSearch({
             className={`chip shrink-0 border ${
               onlyIngredient
                 ? 'border-amber-500 bg-amber-500 text-white'
-                : 'border-slate-200 bg-white text-slate-600'
+                : 'border-stone-200 bg-white text-stone-600'
             }`}
           >
             식재료만
@@ -318,7 +320,7 @@ export function FoodSearch({
               className={`chip shrink-0 border ${
                 cuisine === c
                   ? 'border-sky-500 bg-sky-500 text-white'
-                  : 'border-slate-200 bg-white text-slate-600'
+                  : 'border-stone-200 bg-white text-stone-600'
               }`}
             >
               {c}
@@ -334,7 +336,7 @@ export function FoodSearch({
               className={`chip shrink-0 border ${
                 group === g
                   ? 'border-brand-500 bg-brand-500 text-white'
-                  : 'border-slate-200 bg-white text-slate-600'
+                  : 'border-stone-200 bg-white text-stone-600'
               }`}
             >
               {g}
@@ -345,15 +347,15 @@ export function FoodSearch({
 
       {results.length === 0 ? (
         <div className="card px-4 py-8 text-center">
-          <p className="text-sm text-slate-500">‘{q}’ 을(를) 찾지 못했습니다.</p>
-          <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
+          <p className="text-sm text-stone-500">‘{q}’ 을(를) 찾지 못했습니다.</p>
+          <p className="mt-1.5 text-xs leading-relaxed text-stone-400">
             다른 이름으로 찾아보시거나, 저희에게 알려 주시면 자료를 추가하겠습니다.
           </p>
           <button className="btn-primary mx-auto mt-4 text-xs" onClick={() => setAsking(true)}>
             이 음식 추가 요청하기
           </button>
           {!hasExt && (
-            <p className="mt-3 text-[11px] leading-relaxed text-slate-400">
+            <p className="mt-3 text-[11px] leading-relaxed text-stone-400">
               ‘내 정보 → 편의점·마트 상품 데이터’ 를 받으시면 시중 가공식품 27만 종에서도 찾습니다.
             </p>
           )}
@@ -361,12 +363,12 @@ export function FoodSearch({
       ) : (
         <>
         <div className="mb-2 flex items-baseline justify-between px-1">
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-stone-500">
             {totalMatched.toLocaleString()}가지 중 {Math.min(results.length, totalMatched).toLocaleString()}가지 표시
           </span>
-          {hasExt && <span className="text-[11px] text-slate-400">기기 저장 데이터 포함</span>}
+          {hasExt && <span className="text-[11px] text-stone-400">기기 저장 데이터 포함</span>}
         </div>
-        <ul className="card divide-y divide-slate-100 overflow-hidden">
+        <ul className="card divide-y divide-stone-100 overflow-hidden">
           {results.map(({ food, verdict }) => {
             const per = foodContribution(food, 1)
             return (
@@ -381,33 +383,33 @@ export function FoodSearch({
                     }
                     setDetail(food)
                   }}
-                  className={`flex w-full items-center gap-3 px-3.5 py-2.5 text-left hover:bg-slate-50 ${
+                  className={`flex w-full items-center gap-3 px-3.5 py-2.5 text-left hover:bg-stone-50 ${
                     linking ? 'hover:bg-brand-50' : ''
                   }`}
                 >
                   <LevelDot level={verdict.level} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
-                      <span className="truncate text-sm font-medium text-slate-900">{food.name}</span>
+                      <span className="truncate text-sm font-medium text-stone-900">{food.name}</span>
                       {selectedIds.has(food.id) && (
                         <span className="chip shrink-0 bg-brand-100 text-brand-700">담김</span>
                       )}
                       {food.auto && (
                         <span
-                          className="chip shrink-0 bg-slate-100 text-slate-500"
+                          className="chip shrink-0 bg-stone-100 text-stone-500"
                           title="식약처 공공데이터에서 자동으로 들여온 항목입니다. 성분값은 정확하지만 임상 태그는 성분으로 판정 가능한 것만 붙어 있습니다."
                         >
                           식약처
                         </span>
                       )}
                     </div>
-                    <div className="mt-0.5 truncate text-[11px] text-slate-400">
+                    <div className="mt-0.5 truncate text-[11px] text-stone-400">
                       {food.maker ? `${food.maker} · ` : ''}
                       {food.serving.label} · {Math.round(per.kcal ?? 0)} kcal · 단백질{' '}
                       {(per.protein ?? 0).toFixed(1)} g · 나트륨 {Math.round(per.na ?? 0)} mg
                     </div>
                   </div>
-                  <span className="shrink-0 text-slate-300">›</span>
+                  <span className="shrink-0 text-stone-300">›</span>
                 </button>
               </li>
             )

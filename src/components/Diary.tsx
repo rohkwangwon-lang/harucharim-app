@@ -43,13 +43,13 @@ export function Diary({
 
   return (
     <div>
-      <div className="mb-4 flex gap-1 rounded-xl bg-slate-100 p-1">
+      <div className="mb-4 flex gap-1 rounded-xl bg-stone-100 p-1">
         {([['day', '하루'], ['week', '한 주'], ['month', '한 달']] as const).map(([k, l]) => (
           <button
             key={k}
             onClick={() => setView(k)}
             className={`flex-1 rounded-lg py-2 text-xs font-semibold transition-colors ${
-              view === k ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500'
+              view === k ? 'bg-white text-brand-700 shadow-sm' : 'text-stone-500'
             }`}
           >
             {l}
@@ -119,7 +119,7 @@ function DayView({
           <span className={`h-2.5 w-2.5 rounded-full ${st.dot}`} />
           <span className={`text-sm font-bold ${st.text}`}>{st.label}</span>
         </div>
-        <p className="mt-1 text-xs leading-relaxed text-slate-700">{s.note}</p>
+        <p className="mt-1 text-xs leading-relaxed text-stone-700">{s.note}</p>
       </div>
 
       {!s.empty && (
@@ -138,7 +138,7 @@ function DayView({
             value={w}
             onChange={(e) => setW(e.target.value)}
           />
-          <span className="text-sm text-slate-500">kg</span>
+          <span className="text-sm text-stone-500">kg</span>
           <button className="btn-primary py-2 text-xs" onClick={() => onSetWeight(Number(w) || 0)}>
             기록
           </button>
@@ -151,24 +151,24 @@ function DayView({
         </button>
       }>
         {s.empty ? (
-          <div className="card px-4 py-8 text-center text-sm text-slate-400">
+          <div className="card px-4 py-8 text-center text-sm text-stone-400">
             기록이 없습니다. ‘이 날짜로 편집’ 을 눌러 채워 넣으실 수 있습니다.
           </div>
         ) : (
           <div className="space-y-2">
             {byMeal.filter((b) => b.list.length > 0).map((b) => (
               <div key={b.meal} className="card overflow-hidden">
-                <div className="border-b border-slate-100 bg-slate-50/60 px-3.5 py-2 text-sm font-bold text-slate-800">
+                <div className="border-b border-stone-100 bg-stone-50/60 px-3.5 py-2 text-sm font-bold text-stone-800">
                   {b.meal}
                 </div>
-                <ul className="divide-y divide-slate-100">
+                <ul className="divide-y divide-stone-100">
                   {b.list.map((i) => {
                     const f = FOOD_BY_ID[i.foodId]
                     if (!f) return null
                     return (
-                      <li key={i.foodId + b.meal} className="px-3.5 py-2 text-sm text-slate-700">
+                      <li key={i.foodId + b.meal} className="px-3.5 py-2 text-sm text-stone-700">
                         {f.name}
-                        <span className="ml-1.5 text-[11px] text-slate-400">
+                        <span className="ml-1.5 text-[11px] text-stone-400">
                           {f.serving.label} × {i.servings}
                         </span>
                       </li>
@@ -218,7 +218,7 @@ function WeekView({
         <Stat label="하루 평균 단백질" value={String(avgProtein)} unit="g" hint={`목표 ${t.protein[0]} 이상`} />
       </div>
 
-      <div className="card divide-y divide-slate-100 overflow-hidden">
+      <div className="card divide-y divide-stone-100 overflow-hidden">
         {days.map((d) => {
           const s = summarize(d)
           const st = GRADE_STYLE[s.grade]
@@ -228,15 +228,15 @@ function WeekView({
               key={d}
               disabled={future}
               onClick={() => onPick(d)}
-              className={`flex w-full items-center gap-3 px-3.5 py-3 text-left ${future ? 'opacity-30' : 'hover:bg-slate-50'}`}
+              className={`flex w-full items-center gap-3 px-3.5 py-3 text-left ${future ? 'opacity-30' : 'hover:bg-stone-50'}`}
             >
               <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${st.dot}`} />
-              <span className="w-20 shrink-0 text-sm font-medium text-slate-800">{label(d)}</span>
-              <span className="min-w-0 flex-1 truncate text-xs text-slate-500">
+              <span className="w-20 shrink-0 text-sm font-medium text-stone-800">{label(d)}</span>
+              <span className="min-w-0 flex-1 truncate text-xs text-stone-500">
                 {s.empty ? '기록 없음' : `${s.kcal} kcal · 단백질 ${s.protein} g`}
               </span>
               {weights[d] && (
-                <span className="shrink-0 text-[11px] tabular-nums text-slate-400">{weights[d]} kg</span>
+                <span className="shrink-0 text-[11px] tabular-nums text-stone-400">{weights[d]} kg</span>
               )}
               <span className={`chip shrink-0 ${st.bg} ${st.text}`}>{st.label}</span>
             </button>
@@ -280,7 +280,7 @@ function MonthView({
       <div className="card p-3">
         <div className="mb-1.5 grid grid-cols-7 gap-1 text-center">
           {['일', '월', '화', '수', '목', '금', '토'].map((w) => (
-            <span key={w} className="text-[10px] font-medium text-slate-400">{w}</span>
+            <span key={w} className="text-[10px] font-medium text-stone-400">{w}</span>
           ))}
         </div>
         <div className="grid grid-cols-7 gap-1">
@@ -295,7 +295,7 @@ function MonthView({
                 disabled={future}
                 onClick={() => onPick(c)}
                 className={`aspect-square rounded-lg text-[11px] font-medium tabular-nums transition-colors ${
-                  future ? 'text-slate-200' : `${st.bg} ${st.text} hover:ring-2 hover:ring-brand-300`
+                  future ? 'text-stone-200' : `${st.bg} ${st.text} hover:ring-2 hover:ring-brand-300`
                 } ${c === today() ? 'ring-2 ring-brand-500' : ''}`}
               >
                 {fromKey(c).getDate()}
@@ -307,7 +307,7 @@ function MonthView({
 
       <div className="mt-2 flex flex-wrap gap-3 px-1">
         {(['good', 'low', 'high', 'none'] as const).map((g) => (
-          <span key={g} className="flex items-center gap-1.5 text-[11px] text-slate-500">
+          <span key={g} className="flex items-center gap-1.5 text-[11px] text-stone-500">
             <span className={`h-2.5 w-2.5 rounded ${GRADE_STYLE[g].bg}`} />
             {GRADE_STYLE[g].label}
           </span>
@@ -326,7 +326,7 @@ function WeightTrend({
   if (entries.length < 2) {
     return (
       <Section title="체중 흐름" desc="이틀 이상 기록하시면 변화를 그려 드립니다.">
-        <div className="card px-4 py-6 text-center text-sm text-slate-400">
+        <div className="card px-4 py-6 text-center text-sm text-stone-400">
           {entries.length === 0 ? '아직 기록이 없습니다.' : '하루 더 기록해 주세요.'}
         </div>
       </Section>
@@ -347,10 +347,10 @@ function WeightTrend({
     <Section title="체중 흐름" desc={`최근 ${entries.length}회 기록`}>
       <div className="card p-4">
         <div className="mb-3 flex items-baseline gap-2">
-          <span className="text-2xl font-bold tabular-nums text-slate-900">{last}</span>
-          <span className="text-sm text-slate-500">kg</span>
+          <span className="text-2xl font-bold tabular-nums text-stone-900">{last}</span>
+          <span className="text-sm text-stone-500">kg</span>
           <span className={`ml-auto text-sm font-semibold tabular-nums ${
-            diff < 0 ? 'text-danger-600' : diff > 0 ? 'text-warn-600' : 'text-slate-400'
+            diff < 0 ? 'text-danger-600' : diff > 0 ? 'text-warn-600' : 'text-stone-400'
           }`}>
             {diff > 0 ? '+' : ''}{diff} kg ({pct > 0 ? '+' : ''}{pct} %)
           </span>
@@ -374,7 +374,7 @@ function WeightTrend({
           ))}
         </svg>
 
-        <div className="mt-1 flex justify-between text-[10px] text-slate-400">
+        <div className="mt-1 flex justify-between text-[10px] text-stone-400">
           <span>{label(entries[0][0], true)}</span>
           <span>{label(entries[entries.length - 1][0], true)}</span>
         </div>
@@ -386,7 +386,7 @@ function WeightTrend({
           </p>
         )}
         {patient.weightKg > 0 && Math.abs(last - patient.weightKg) > 2 && (
-          <p className="mt-2 text-[11px] text-slate-500">
+          <p className="mt-2 text-[11px] text-stone-500">
             설정에 적힌 체중({patient.weightKg} kg)과 차이가 있습니다. 오늘 체중을 기록하시면 목표 계산이 함께 갱신됩니다.
           </p>
         )}
@@ -402,10 +402,10 @@ function Nav({
 }: { title: string; onPrev: () => void; onNext: () => void; canNext: boolean }) {
   return (
     <div className="mb-3 flex items-center justify-between">
-      <button className="h-9 w-9 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200" onClick={onPrev}>‹</button>
-      <span className="text-sm font-bold text-slate-900">{title}</span>
+      <button className="h-9 w-9 rounded-lg bg-stone-100 text-stone-600 hover:bg-stone-200" onClick={onPrev}>‹</button>
+      <span className="text-sm font-bold text-stone-900">{title}</span>
       <button
-        className="h-9 w-9 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 disabled:opacity-30"
+        className="h-9 w-9 rounded-lg bg-stone-100 text-stone-600 hover:bg-stone-200 disabled:opacity-30"
         disabled={!canNext} onClick={onNext}
       >›</button>
     </div>

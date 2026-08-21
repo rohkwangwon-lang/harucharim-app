@@ -102,7 +102,7 @@ export function BarcodeScanner({
   }, [onDetect])
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-slate-900">
+    <div className="fixed inset-0 z-50 flex flex-col bg-stone-900">
       <div className="safe-top flex items-center justify-between px-4 py-3">
         <span className="text-sm font-semibold text-white">바코드 스캔</span>
         <button className="rounded-lg px-3 py-1.5 text-sm text-white/80 hover:bg-white/10" onClick={onClose}>

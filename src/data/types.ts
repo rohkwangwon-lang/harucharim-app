@@ -344,6 +344,8 @@ export interface CancerProfile {
 /* ────────────────────────────── 사용자 입력 ────────────────────────────── */
 
 export interface PatientContext {
+  /** 부르는 이름. 로그인하면 자동으로 채워지고, 직접 고칠 수도 있다. */
+  name?: string
   cancer: CancerId
   phase: Phase
   /** 현재 체중 (kg) */

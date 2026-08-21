@@ -26,7 +26,7 @@ export function Exercise({ patient }: { patient: PatientContext }) {
     <div>
       <Section title="운동이 이 암종에서 갖는 의미">
         <div className="card p-4">
-          <p className="text-sm leading-relaxed text-slate-700">{plan.summary}</p>
+          <p className="text-sm leading-relaxed text-stone-700">{plan.summary}</p>
         </div>
       </Section>
 
@@ -54,13 +54,13 @@ export function Exercise({ patient }: { patient: PatientContext }) {
             {conditionNotes.map(({ c, note }) => (
               <div key={c} className="card border-brand-200 bg-brand-50/40 p-3.5">
                 <span className="chip bg-brand-500 text-white">{c}</span>
-                <p className="mt-2 text-xs leading-relaxed text-slate-700">{note}</p>
+                <p className="mt-2 text-xs leading-relaxed text-stone-700">{note}</p>
               </div>
             ))}
             {historyNotes.map(({ h, note }) => (
               <div key={h} className="card border-sky-200 bg-sky-50/40 p-3.5">
                 <span className="chip bg-sky-500 text-white">{h}</span>
-                <p className="mt-2 text-xs leading-relaxed text-slate-700">{note}</p>
+                <p className="mt-2 text-xs leading-relaxed text-stone-700">{note}</p>
               </div>
             ))}
           </div>
@@ -68,9 +68,9 @@ export function Exercise({ patient }: { patient: PatientContext }) {
       )}
 
       <Section title={`${plan.cautions.length}가지 주의사항`} desc="이 암종에서 특히 조심할 것들입니다.">
-        <ul className="card divide-y divide-slate-100">
+        <ul className="card divide-y divide-stone-100">
           {plan.cautions.map((c, i) => (
-            <li key={i} className="flex gap-2.5 px-3.5 py-2.5 text-sm text-slate-700">
+            <li key={i} className="flex gap-2.5 px-3.5 py-2.5 text-sm text-stone-700">
               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-warn-500" />
               {c}
             </li>
@@ -79,9 +79,9 @@ export function Exercise({ patient }: { patient: PatientContext }) {
       </Section>
 
       <Section title="이럴 때는 멈추세요" desc="안전이 먼저입니다. 아래 상황에서는 운동을 미루고 확인부터 받으세요.">
-        <ul className="card divide-y divide-slate-100 border-danger-200">
+        <ul className="card divide-y divide-stone-100 border-danger-200">
           {STOP_SIGNS.map((s, i) => (
-            <li key={i} className="flex gap-2.5 px-3.5 py-2.5 text-sm text-slate-700">
+            <li key={i} className="flex gap-2.5 px-3.5 py-2.5 text-sm text-stone-700">
               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-danger-500" />
               {s}
             </li>
@@ -89,7 +89,7 @@ export function Exercise({ patient }: { patient: PatientContext }) {
         </ul>
       </Section>
 
-      <p className="px-1 pb-2 text-[11px] leading-relaxed text-slate-400">
+      <p className="px-1 pb-2 text-[11px] leading-relaxed text-stone-400">
         여기 적힌 운동량은 일반적인 권고입니다. 심장·폐 질환이 있거나 골전이가 있는 경우에는
         시작 전에 담당 의료진과 상의하세요.
       </p>
@@ -105,21 +105,21 @@ function ExerciseCard({ item, highlight }: { item: ExerciseItem; highlight?: boo
         <span className={`chip ${KIND_STYLE[item.kind]}`}>{item.kind}</span>
         <EvidenceBadge level={item.evidence} />
       </div>
-      <p className="text-sm font-semibold text-slate-900">{item.name}</p>
-      <p className="mt-1.5 rounded-lg bg-slate-50 px-3 py-2 text-xs font-medium tabular-nums text-slate-700">
+      <p className="text-sm font-semibold text-stone-900">{item.name}</p>
+      <p className="mt-1.5 rounded-lg bg-stone-50 px-3 py-2 text-xs font-medium tabular-nums text-stone-700">
         {item.dose}
       </p>
-      <p className="mt-2 text-xs leading-relaxed text-slate-600">{item.why}</p>
+      <p className="mt-2 text-xs leading-relaxed text-stone-600">{item.why}</p>
       {refs.length > 0 && (
         <details className="mt-2">
-          <summary className="cursor-pointer text-[11px] font-medium text-slate-400 hover:text-slate-600">
+          <summary className="cursor-pointer text-[11px] font-medium text-stone-400 hover:text-stone-600">
             근거 {refs.length}건
           </summary>
           <ul className="mt-1.5 space-y-1">
             {refs.map((r) => (
-              <li key={r.id} className="text-[11px] leading-relaxed text-slate-500">
+              <li key={r.id} className="text-[11px] leading-relaxed text-stone-500">
                 {r.url ? (
-                  <a href={r.url} target="_blank" rel="noreferrer" className="underline decoration-slate-300">{r.citation}</a>
+                  <a href={r.url} target="_blank" rel="noreferrer" className="underline decoration-stone-300">{r.citation}</a>
                 ) : r.citation}
               </li>
             ))}

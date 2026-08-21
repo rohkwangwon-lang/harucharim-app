@@ -49,18 +49,18 @@ export function AdminInquiries() {
       title="문의 관리"
       desc={`들어온 문의 ${items.length}건 · 답변 대기 ${openCount}건`}
       right={
-        <button className="text-xs font-medium text-slate-400 hover:text-slate-600" onClick={load}>
+        <button className="text-xs font-medium text-stone-400 hover:text-stone-600" onClick={load}>
           새로고침
         </button>
       }
     >
-      <div className="mb-3 flex gap-1 rounded-xl bg-slate-100 p-1">
+      <div className="mb-3 flex gap-1 rounded-xl bg-stone-100 p-1">
         {([['open', `답변 대기 ${openCount}`], ['all', `전체 ${items.length}`]] as const).map(([k, label]) => (
           <button
             key={k}
             onClick={() => setFilter(k)}
             className={`flex-1 rounded-lg py-1.5 text-xs font-semibold ${
-              filter === k ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500'
+              filter === k ? 'bg-white text-brand-700 shadow-sm' : 'text-stone-500'
             }`}
           >
             {label}
@@ -73,9 +73,9 @@ export function AdminInquiries() {
       )}
 
       {loading ? (
-        <div className="card px-4 py-8 text-center text-sm text-slate-400">불러오는 중…</div>
+        <div className="card px-4 py-8 text-center text-sm text-stone-400">불러오는 중…</div>
       ) : shown.length === 0 ? (
-        <div className="card px-4 py-8 text-center text-sm text-slate-400">
+        <div className="card px-4 py-8 text-center text-sm text-stone-400">
           {filter === 'open' ? '답변을 기다리는 문의가 없습니다.' : '들어온 문의가 없습니다.'}
         </div>
       ) : (
@@ -83,33 +83,33 @@ export function AdminInquiries() {
           {shown.map((q) => (
             <div key={q.id} className="card p-3.5">
               <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
-                <span className="chip bg-slate-100 text-slate-600">{KIND_LABEL[q.kind]}</span>
+                <span className="chip bg-stone-100 text-stone-600">{KIND_LABEL[q.kind]}</span>
                 <span className={`chip ${
                   q.status === 'answered' ? 'bg-brand-100 text-brand-700'
-                  : q.status === 'closed' ? 'bg-slate-200 text-slate-500'
+                  : q.status === 'closed' ? 'bg-stone-200 text-stone-500'
                   : 'bg-warn-100 text-warn-700'
                 }`}>
                   {q.status === 'answered' ? '답변함' : q.status === 'closed' ? '종료' : '대기'}
                 </span>
-                <span className="text-[11px] text-slate-400">
+                <span className="text-[11px] text-stone-400">
                   {new Date(q.created_at).toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })}
                 </span>
               </div>
 
-              <p className="text-sm font-semibold text-slate-900">{q.subject}</p>
-              <p className="mt-1 whitespace-pre-wrap text-xs leading-relaxed text-slate-600">{q.body}</p>
+              <p className="text-sm font-semibold text-stone-900">{q.subject}</p>
+              <p className="mt-1 whitespace-pre-wrap text-xs leading-relaxed text-stone-600">{q.body}</p>
 
-              <p className="mt-2 text-[11px] text-slate-400">
+              <p className="mt-2 text-[11px] text-stone-400">
                 연락처: {q.contact_email ?? (q.user_id ? '로그인 사용자 (앱에서 답변 확인)' : '없음')}
               </p>
 
               {q.answer ? (
                 <div className="mt-2.5 rounded-lg bg-brand-50 px-3 py-2.5">
                   <p className="mb-1 text-[11px] font-bold text-brand-700">보낸 답변</p>
-                  <p className="whitespace-pre-wrap text-xs leading-relaxed text-slate-700">{q.answer}</p>
+                  <p className="whitespace-pre-wrap text-xs leading-relaxed text-stone-700">{q.answer}</p>
                   {q.status !== 'closed' && (
                     <button
-                      className="mt-2 text-[11px] text-slate-400 hover:text-slate-600"
+                      className="mt-2 text-[11px] text-stone-400 hover:text-stone-600"
                       onClick={async () => { await closeInquiry(q.id); load() }}
                     >
                       종료 처리
@@ -132,7 +132,7 @@ export function AdminInquiries() {
                     {busy === q.id ? '저장 중…' : '답변 저장'}
                   </button>
                   {q.contact_email && (
-                    <p className="mt-1.5 text-[11px] leading-relaxed text-slate-400">
+                    <p className="mt-1.5 text-[11px] leading-relaxed text-stone-400">
                       이 분은 로그인하지 않으셨습니다. 답변을 저장한 뒤 {q.contact_email} 로 직접 메일을 보내 주세요.
                     </p>
                   )}

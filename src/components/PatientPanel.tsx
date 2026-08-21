@@ -55,7 +55,7 @@ export function PatientPanel({
               className={`rounded-xl border px-3 py-2.5 text-left text-sm font-medium transition-colors ${
                 patient.cancer === c.id
                   ? 'border-brand-500 bg-brand-50 text-brand-800'
-                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                  : 'border-stone-200 bg-white text-stone-700 hover:bg-stone-50'
               }`}
             >
               {c.name}
@@ -73,17 +73,17 @@ export function PatientPanel({
               className={`flex w-full items-start gap-3 rounded-xl border px-3.5 py-2.5 text-left transition-colors ${
                 patient.phase === p.id
                   ? 'border-brand-500 bg-brand-50'
-                  : 'border-slate-200 bg-white hover:bg-slate-50'
+                  : 'border-stone-200 bg-white hover:bg-stone-50'
               }`}
             >
               <span
                 className={`mt-1 h-3 w-3 shrink-0 rounded-full border-2 ${
-                  patient.phase === p.id ? 'border-brand-600 bg-brand-600' : 'border-slate-300'
+                  patient.phase === p.id ? 'border-brand-600 bg-brand-600' : 'border-stone-300'
                 }`}
               />
               <span>
-                <span className="block text-sm font-medium text-slate-900">{p.label}</span>
-                <span className="block text-xs text-slate-500">{p.desc}</span>
+                <span className="block text-sm font-medium text-stone-900">{p.label}</span>
+                <span className="block text-xs text-stone-500">{p.desc}</span>
               </span>
             </button>
           ))}
@@ -92,6 +92,16 @@ export function PatientPanel({
 
       <Section title="신체 정보" desc="열량·단백질 목표는 체중을 기준으로 계산됩니다.">
         <div className="card grid grid-cols-2 gap-3 p-3.5 sm:grid-cols-4">
+          <div className="col-span-2 sm:col-span-4">
+            <label className="label">어떻게 불러 드릴까요</label>
+            <input
+              className="input"
+              placeholder="이름 또는 별칭"
+              value={patient.name ?? ''}
+              onChange={(e) => onChange({ name: e.target.value.trim() || undefined })}
+              maxLength={20}
+            />
+          </div>
           <div>
             <label className="label">체중 (kg)</label>
             <input
@@ -126,7 +136,7 @@ export function PatientPanel({
                   className={`flex-1 rounded-xl border px-2 py-2 text-sm font-medium ${
                     patient.sex === s
                       ? 'border-brand-500 bg-brand-50 text-brand-800'
-                      : 'border-slate-300 bg-white text-slate-600'
+                      : 'border-stone-300 bg-white text-stone-600'
                   }`}
                 >
                   {s === 'M' ? '남' : '여'}
@@ -141,7 +151,7 @@ export function PatientPanel({
               value={patient.weightLossPct ?? 0}
               onChange={(e) => onChange({ weightLossPct: Number(e.target.value) || 0 })}
             />
-            <p className="mt-1 text-[11px] text-slate-400">
+            <p className="mt-1 text-[11px] text-stone-400">
               5 % 이상이면 영양 개입 기준에 해당합니다. 예: 60 kg → 57 kg 이면 5 %
             </p>
           </div>
@@ -176,7 +186,7 @@ export function PatientPanel({
               className={`chip border transition-colors ${
                 patient.conditions.includes(c)
                   ? 'border-brand-500 bg-brand-500 text-white'
-                  : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50'
+                  : 'border-stone-300 bg-white text-stone-600 hover:bg-stone-50'
               }`}
             >
               {c}
@@ -195,7 +205,7 @@ export function PatientPanel({
               className={`chip border transition-colors ${
                 patient.medications.includes(m.id)
                   ? 'border-sky-500 bg-sky-500 text-white'
-                  : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50'
+                  : 'border-stone-300 bg-white text-stone-600 hover:bg-stone-50'
               }`}
             >
               {m.name}

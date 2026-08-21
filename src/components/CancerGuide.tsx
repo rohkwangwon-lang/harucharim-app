@@ -18,14 +18,14 @@ export function CancerGuide({ patient }: { patient: PatientContext }) {
     <div>
       <Section title={p.name}>
         <div className="card p-4">
-          <p className="text-sm leading-relaxed text-slate-700">{p.summary}</p>
+          <p className="text-sm leading-relaxed text-stone-700">{p.summary}</p>
         </div>
       </Section>
 
       <Section title="이 암종에서 특히 문제가 되는 것">
-        <ul className="card divide-y divide-slate-100">
+        <ul className="card divide-y divide-stone-100">
           {p.keyIssues.map((k, i) => (
-            <li key={i} className="flex gap-2.5 px-3.5 py-2.5 text-sm text-slate-700">
+            <li key={i} className="flex gap-2.5 px-3.5 py-2.5 text-sm text-stone-700">
               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-500" />
               {k}
             </li>
@@ -34,7 +34,7 @@ export function CancerGuide({ patient }: { patient: PatientContext }) {
       </Section>
 
       <Section title="영양 목표" desc="ESPEN 종양환자 권고를 기준으로 한 값입니다.">
-        <div className="card divide-y divide-slate-100 text-sm">
+        <div className="card divide-y divide-stone-100 text-sm">
           <Row label="에너지" value={`체중 1 kg 당 ${p.target.kcalPerKg[0]}~${p.target.kcalPerKg[1]} kcal`} />
           <Row label="단백질" value={`체중 1 kg 당 ${p.target.proteinPerKg[0]}~${p.target.proteinPerKg[1]} g`} />
           {p.target.naLimit && <Row label="나트륨" value={`하루 ${p.target.naLimit.toLocaleString()} mg 이하`} />}
@@ -46,7 +46,7 @@ export function CancerGuide({ patient }: { patient: PatientContext }) {
         {p.target.notes.length > 0 && (
           <ul className="mt-2 space-y-1 px-1">
             {p.target.notes.map((n, i) => (
-              <li key={i} className="text-[11px] leading-relaxed text-slate-500">· {n}</li>
+              <li key={i} className="text-[11px] leading-relaxed text-stone-500">· {n}</li>
             ))}
           </ul>
         )}
@@ -65,15 +65,15 @@ export function CancerGuide({ patient }: { patient: PatientContext }) {
                   <LevelBadge level={r.level} />
                   <EvidenceBadge level={r.evidence} />
                   {r.phases && !r.phases.includes('all') && (
-                    <span className="chip bg-slate-100 text-slate-500">
+                    <span className="chip bg-stone-100 text-stone-500">
                       {r.phases.map((ph) => (ph === 'all' ? '' : PHASE_LABEL[ph])).filter(Boolean).join(' · ')}
                     </span>
                   )}
                 </div>
-                <p className="text-sm font-semibold text-slate-900">{r.title}</p>
-                <p className="mt-1 text-xs leading-relaxed text-slate-600">{r.reason}</p>
+                <p className="text-sm font-semibold text-stone-900">{r.title}</p>
+                <p className="mt-1 text-xs leading-relaxed text-stone-600">{r.reason}</p>
                 <details className="mt-2">
-                  <summary className="cursor-pointer text-[11px] font-medium text-slate-400">
+                  <summary className="cursor-pointer text-[11px] font-medium text-stone-400">
                     근거 {r.refIds.length}건
                   </summary>
                   <ul className="mt-1.5 space-y-1">
@@ -81,9 +81,9 @@ export function CancerGuide({ patient }: { patient: PatientContext }) {
                       const ref = REF_BY_ID[id]
                       if (!ref) return null
                       return (
-                        <li key={id} className="text-[11px] leading-relaxed text-slate-500">
+                        <li key={id} className="text-[11px] leading-relaxed text-stone-500">
                           {ref.url ? (
-                            <a href={ref.url} target="_blank" rel="noreferrer" className="underline decoration-slate-300">
+                            <a href={ref.url} target="_blank" rel="noreferrer" className="underline decoration-stone-300">
                               {ref.citation}
                             </a>
                           ) : ref.citation}
@@ -102,10 +102,10 @@ export function CancerGuide({ patient }: { patient: PatientContext }) {
           {(Object.entries(p.phaseNotes) as [Exclude<Phase, 'all'>, string][]).map(([ph, note]) => (
             <div key={ph} className={`card p-3.5 ${patient.phase === ph ? 'border-brand-300 bg-brand-50/40' : ''}`}>
               <div className="mb-1 flex items-center gap-1.5">
-                <span className="text-sm font-bold text-slate-800">{PHASE_LABEL[ph]}</span>
+                <span className="text-sm font-bold text-stone-800">{PHASE_LABEL[ph]}</span>
                 {patient.phase === ph && <span className="chip bg-brand-500 text-white">현재</span>}
               </div>
-              <p className="text-xs leading-relaxed text-slate-600">{note}</p>
+              <p className="text-xs leading-relaxed text-stone-600">{note}</p>
             </div>
           ))}
         </div>
@@ -117,8 +117,8 @@ export function CancerGuide({ patient }: { patient: PatientContext }) {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between px-3.5 py-2.5">
-      <span className="text-slate-500">{label}</span>
-      <span className="font-medium text-slate-900">{value}</span>
+      <span className="text-stone-500">{label}</span>
+      <span className="font-medium text-stone-900">{value}</span>
     </div>
   )
 }

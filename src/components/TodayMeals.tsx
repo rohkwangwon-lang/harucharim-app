@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { IconEvening, IconMorning, IconNoon, IconSnack, IconSuggest } from './icons'
 import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
 import { MEAL_SLOTS } from '../data/types'
 import { FOOD_BY_ID } from '../data/foods'
@@ -12,7 +13,9 @@ import { REF_BY_ID } from '../data/references'
 import { EvidenceBadge, LevelBadge, Meter, Section, Stat } from './ui'
 import { label as dayLabel, today as todayKey } from '../lib/day'
 
-const SLOT_ICON: Record<MealSlot, string> = { 아침: '🌅', 점심: '🍚', 저녁: '🌙', 간식: '🍎' }
+const SLOT_ICON: Record<MealSlot, typeof IconMorning> = {
+  아침: IconMorning, 점심: IconNoon, 저녁: IconEvening, 간식: IconSnack
+}
 
 /**
  * 오늘 식단.
@@ -94,10 +97,10 @@ export function TodayMeals({
       {/* ── 오늘 요약 ─────────────────────────────────── */}
       <div className="mb-4 rounded-2xl border border-brand-200 bg-brand-50/60 px-4 py-3.5">
         <p className="text-xs font-bold uppercase tracking-wide text-brand-700">나만의 식단 구성</p>
-        <p className="mt-1 text-sm font-semibold text-slate-900">
+        <p className="mt-1 text-sm font-semibold text-stone-900">
           {profile.name} · {currentSeason()}철 · {patient.weightKg} kg 기준
         </p>
-        <p className="mt-1 text-xs leading-relaxed text-slate-600">
+        <p className="mt-1 text-xs leading-relaxed text-stone-600">
           아침·점심·저녁·간식을 <strong>모두 합한 것이 하루치</strong>입니다. 한 끼 분량이 아닙니다.
         </p>
       </div>
@@ -125,7 +128,7 @@ export function TodayMeals({
 
       {/* 체중 기록 — 매일 같은 조건에서 재는 것이 중요하다 */}
       <div className="card mb-4 flex items-center gap-2 p-3.5">
-        <span className="shrink-0 text-xs font-medium text-slate-600">
+        <span className="shrink-0 text-xs font-medium text-stone-600">
           {day === todayKey() ? '오늘' : dayLabel(day)} 체중
         </span>
         <input
@@ -138,16 +141,16 @@ export function TodayMeals({
             if (v !== (weight ?? 0)) onSetWeight(v || 0)
           }}
         />
-        <span className="shrink-0 text-sm text-slate-500">kg</span>
+        <span className="shrink-0 text-sm text-stone-500">kg</span>
       </div>
 
       {/* ── 일부만 넣어도 된다는 안내 ─────────────────── */}
       {emptySlots.length > 0 && (
-        <div className="mb-4 rounded-xl border border-slate-200 bg-white px-3.5 py-3">
-          <p className="text-xs leading-relaxed text-slate-600">
+        <div className="mb-4 rounded-xl border border-stone-200 bg-white px-3.5 py-3">
+          <p className="text-xs leading-relaxed text-stone-600">
             {filledSlots.length === 0 ? (
               <>
-                <strong className="text-slate-800">나만의 식단을 구성해 보세요.</strong> 아침·점심·저녁·간식 중
+                <strong className="text-stone-800">나만의 식단을 구성해 보세요.</strong> 아침·점심·저녁·간식 중
                 드시고 싶은 메뉴를 찾아 채우시면 <strong>검증하고 평가해 드립니다.</strong>
                 <br />
                 전부 채우지 않으셔도 됩니다. 필요한 끼니만 채우시면 나머지는{' '}
@@ -155,7 +158,7 @@ export function TodayMeals({
               </>
             ) : (
               <>
-                <strong className="text-slate-800">{emptySlots.join('·')}이 비어 있습니다.</strong> 채우지 않으셔도
+                <strong className="text-stone-800">{emptySlots.join('·')}이 비어 있습니다.</strong> 채우지 않으셔도
                 괜찮습니다. 아래 각 끼니의 <strong>이렇게 채워 보세요</strong>에서 하나씩 담으시거나,
                 <strong> 추천 식단</strong> 탭에서 하루치를 한 번에 받아보실 수 있습니다.
               </>
@@ -173,18 +176,18 @@ export function TodayMeals({
           <div className="space-y-2.5">
             {ideas.map((idea) => (
               <div key={idea.source.id} className="card overflow-hidden">
-                <div className="border-b border-slate-100 bg-slate-50/60 px-3.5 py-2">
-                  <span className="text-sm font-bold text-slate-800">{idea.source.name}</span>
-                  <span className="ml-1.5 text-[11px] text-slate-400">으로 만들 수 있는 요리</span>
+                <div className="border-b border-stone-100 bg-stone-50/60 px-3.5 py-2">
+                  <span className="text-sm font-bold text-stone-800">{idea.source.name}</span>
+                  <span className="ml-1.5 text-[11px] text-stone-400">으로 만들 수 있는 요리</span>
                 </div>
-                <ul className="divide-y divide-slate-100">
+                <ul className="divide-y divide-stone-100">
                   {idea.dishes.map((d) => {
                     const per = foodContribution(d, 1)
                     return (
                       <li key={d.id} className="flex items-center gap-2 px-3.5 py-2.5">
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-slate-900">{d.name}</p>
-                          <p className="truncate text-[11px] text-slate-400">
+                          <p className="truncate text-sm font-medium text-stone-900">{d.name}</p>
+                          <p className="truncate text-[11px] text-stone-400">
                             {d.serving.label} · {Math.round(per.kcal ?? 0)} kcal · 나트륨 {Math.round(per.na ?? 0)} mg
                           </p>
                         </div>
@@ -192,7 +195,7 @@ export function TodayMeals({
                           {MEAL_SLOTS.slice(0, 3).map((m) => (
                             <button
                               key={m}
-                              className="rounded-lg bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-600 hover:bg-brand-100 hover:text-brand-700"
+                              className="rounded-lg bg-stone-100 px-2 py-1 text-[11px] font-medium text-stone-600 hover:bg-brand-100 hover:text-brand-700"
                               onClick={() => onApplySuggestion(d.id, m)}
                             >
                               {m}
@@ -214,7 +217,7 @@ export function TodayMeals({
         className="mb-4 flex w-full items-center gap-3 rounded-2xl bg-brand-600 px-4 py-4 text-left text-white shadow-md transition-colors hover:bg-brand-700 active:bg-brand-800"
         onClick={onSeeSuggestions}
       >
-        <span aria-hidden className="text-2xl leading-none">✨</span>
+        <IconSuggest className="h-6 w-6 shrink-0 text-white/90" strokeWidth={1.8} />
         <span className="min-w-0 flex-1">
           <span className="block text-base font-bold">하루치를 한 번에 추천받기</span>
           <span className="mt-0.5 block text-xs leading-relaxed text-white/85">
@@ -231,7 +234,7 @@ export function TodayMeals({
         title="끼니별 구성"
         right={
           selected.length > 0 ? (
-            <button className="text-xs font-medium text-slate-400 hover:text-danger-600" onClick={onClear}>
+            <button className="text-xs font-medium text-stone-400 hover:text-danger-600" onClick={onClear}>
               전체 비우기
             </button>
           ) : undefined
@@ -249,17 +252,18 @@ export function TodayMeals({
 
             return (
               <div key={slot} className="card overflow-hidden">
-                <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/60 px-3.5 py-2">
-                  <span className="text-sm font-bold text-slate-800">
-                    <span className="mr-1.5">{SLOT_ICON[slot]}</span>{slot}
+                <div className="flex items-center justify-between border-b border-stone-100 bg-stone-50/60 px-3.5 py-2">
+                  <span className="flex items-center gap-1.5 text-sm font-bold text-stone-800">
+                    {(() => { const I = SLOT_ICON[slot]; return <I className="h-4 w-4 text-stone-500" /> })()}
+                    {slot}
                   </span>
-                  <span className="text-xs tabular-nums text-slate-400">
+                  <span className="text-xs tabular-nums text-stone-400">
                     {items.length > 0 ? `${Math.round(slotKcal)} kcal` : '비어 있음'}
                   </span>
                 </div>
 
                 {items.length > 0 && (
-                  <ul className="divide-y divide-slate-100">
+                  <ul className="divide-y divide-stone-100">
                     {items.map((item) => {
                       const food = FOOD_BY_ID[item.foodId]
                       if (!food) return null
@@ -269,27 +273,27 @@ export function TodayMeals({
                         <li key={item.foodId + slot} className="flex items-center gap-2 px-3.5 py-2.5">
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1.5">
-                              <span className="truncate text-sm font-medium text-slate-900">{food.name}</span>
+                              <span className="truncate text-sm font-medium text-stone-900">{food.name}</span>
                               {v?.level === 'avoid' && <LevelBadge level="avoid" />}
                               {v?.level === 'caution' && <LevelBadge level="caution" />}
                             </div>
-                            <div className="mt-0.5 text-[11px] text-slate-400">
+                            <div className="mt-0.5 text-[11px] text-stone-400">
                               {food.serving.label} × {item.servings} · {Math.round(per.kcal ?? 0)} kcal ·
                               나트륨 {Math.round(per.na ?? 0)} mg
                             </div>
                           </div>
                           <div className="flex shrink-0 items-center gap-1">
                             <button
-                              className="h-7 w-7 rounded-lg bg-slate-100 text-slate-600"
+                              className="h-7 w-7 rounded-lg bg-stone-100 text-stone-600"
                               onClick={() => onSetServings(item.foodId, Math.round((item.servings - 0.5) * 10) / 10, slot)}
                             >−</button>
                             <span className="w-7 text-center text-sm font-medium tabular-nums">{item.servings}</span>
                             <button
-                              className="h-7 w-7 rounded-lg bg-slate-100 text-slate-600"
+                              className="h-7 w-7 rounded-lg bg-stone-100 text-stone-600"
                               onClick={() => onSetServings(item.foodId, Math.round((item.servings + 0.5) * 10) / 10, slot)}
                             >＋</button>
                             <button
-                              className="ml-0.5 h-7 w-7 rounded-lg text-slate-300 hover:bg-danger-50 hover:text-danger-600"
+                              className="ml-0.5 h-7 w-7 rounded-lg text-stone-300 hover:bg-danger-50 hover:text-danger-600"
                               onClick={() => onRemove(item.foodId, slot)}
                             >✕</button>
                           </div>
@@ -301,17 +305,17 @@ export function TodayMeals({
 
                 {/* 추천 채우기 */}
                 {suggested.length > 0 && (
-                  <div className="border-t border-slate-100 bg-brand-50/40 px-3.5 py-2.5">
+                  <div className="border-t border-stone-100 bg-brand-50/40 px-3.5 py-2.5">
                     <p className="mb-1.5 text-[11px] font-bold text-brand-700">이렇게 채워 보세요</p>
                     <div className="space-y-1.5">
                       {suggested.map((e) => (
                         <div key={e.food.id} className="flex items-center gap-2">
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-xs font-medium text-slate-800">
+                            <p className="truncate text-xs font-medium text-stone-800">
                               {e.food.name}
                               {e.seasonal && <span className="ml-1 text-[10px] text-emerald-600">제철</span>}
                             </p>
-                            <p className="truncate text-[11px] text-slate-500">{e.contribution}</p>
+                            <p className="truncate text-[11px] text-stone-500">{e.contribution}</p>
                           </div>
                           <button
                             className="shrink-0 rounded-lg bg-brand-600 px-2.5 py-1 text-[11px] font-medium text-white"
@@ -326,7 +330,7 @@ export function TodayMeals({
                 )}
 
                 <button
-                  className="w-full border-t border-slate-100 px-3.5 py-2.5 text-xs font-medium text-brand-700 hover:bg-slate-50"
+                  className="w-full border-t border-stone-100 px-3.5 py-2.5 text-xs font-medium text-brand-700 hover:bg-stone-50"
                   onClick={() => onAddTo(slot)}
                 >
                   ＋ {slot}에 음식 추가
@@ -340,9 +344,9 @@ export function TodayMeals({
       {/* ── 평가 ──────────────────────────────────────── */}
       {selected.length > 0 && (
         <Section title="오늘 식단 평가" desc="담으신 것을 기준으로 계산한 결과입니다.">
-          <div className="card divide-y divide-slate-100">
+          <div className="card divide-y divide-stone-100">
             {menu.notes.map((n, i) => (
-              <p key={i} className="px-3.5 py-2.5 text-xs leading-relaxed text-slate-700">{n}</p>
+              <p key={i} className="px-3.5 py-2.5 text-xs leading-relaxed text-stone-700">{n}</p>
             ))}
           </div>
 
@@ -359,9 +363,9 @@ export function TodayMeals({
                     <LevelBadge level={g.hit.rule.level} />
                     <EvidenceBadge level={g.hit.rule.evidence} />
                   </div>
-                  <p className="text-sm font-semibold text-slate-900">{g.hit.rule.title}</p>
-                  <p className="mt-1 text-xs leading-relaxed text-slate-600">{g.hit.rule.reason}</p>
-                  <p className="mt-2 text-[11px] text-slate-500">
+                  <p className="text-sm font-semibold text-stone-900">{g.hit.rule.title}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-stone-600">{g.hit.rule.reason}</p>
+                  <p className="mt-2 text-[11px] text-stone-500">
                     해당 음식: {g.foods.map((f) => f.name).join(', ')}
                   </p>
                 </div>
@@ -374,7 +378,7 @@ export function TodayMeals({
       {/* ── 운동 조언 ─────────────────────────────────── */}
       {selected.length > 0 && <ExerciseAdvice patient={patient} kcal={kcal} target={target.kcal} />}
 
-      <p className="px-1 pb-2 text-[11px] leading-relaxed text-slate-400">
+      <p className="px-1 pb-2 text-[11px] leading-relaxed text-stone-400">
         이 화면은 <strong>하루(24시간)</strong> 기준입니다. 담으신 음식과 입력하신 정보만으로 계산한 참고값이며,
         실제 처방·영양 상담을 대체하지 않습니다.
       </p>
@@ -388,8 +392,8 @@ function MeterRow({
   return (
     <div>
       <div className="mb-1 flex items-baseline justify-between text-xs">
-        <span className="font-medium text-slate-600">{label}</span>
-        <span className="tabular-nums text-slate-400">{Math.round(value)} / {max} {unit}</span>
+        <span className="font-medium text-stone-600">{label}</span>
+        <span className="tabular-nums text-stone-400">{Math.round(value)} / {max} {unit}</span>
       </div>
       <Meter value={value} min={min} max={max} overLimit={overLimit} />
     </div>
@@ -421,7 +425,7 @@ function ExerciseAdvice({
   return (
     <Section title="오늘 운동" desc="식단과 함께 봐야 의미가 있는 부분입니다.">
       <div className="card p-4">
-        <p className="text-sm leading-relaxed text-slate-700">
+        <p className="text-sm leading-relaxed text-stone-700">
           {under ? (
             <>
               오늘 열량이 목표보다 적습니다. <strong>운동량을 늘리기보다 먼저 채우시는 편</strong>이 좋습니다.
@@ -454,7 +458,7 @@ function ExerciseAdvice({
 
         {main.refIds.length > 0 && (
           <details className="mt-3">
-            <summary className="cursor-pointer text-[11px] font-medium text-slate-400">
+            <summary className="cursor-pointer text-[11px] font-medium text-stone-400">
               근거 {main.refIds.length}건
             </summary>
             <ul className="mt-1.5 space-y-1">
@@ -462,9 +466,9 @@ function ExerciseAdvice({
                 const r = REF_BY_ID[id]
                 if (!r) return null
                 return (
-                  <li key={id} className="text-[11px] leading-relaxed text-slate-500">
+                  <li key={id} className="text-[11px] leading-relaxed text-stone-500">
                     {r.url ? (
-                      <a href={r.url} target="_blank" rel="noreferrer" className="underline decoration-slate-300">
+                      <a href={r.url} target="_blank" rel="noreferrer" className="underline decoration-stone-300">
                         {r.citation}
                       </a>
                     ) : r.citation}
@@ -483,14 +487,14 @@ function ExerciseLine({
   label, name, dose, highlight
 }: { label: string; name: string; dose: string; highlight?: boolean }) {
   return (
-    <div className={`rounded-lg px-3 py-2 ${highlight ? 'bg-brand-50' : 'bg-slate-50'}`}>
+    <div className={`rounded-lg px-3 py-2 ${highlight ? 'bg-brand-50' : 'bg-stone-50'}`}>
       <div className="flex items-center gap-1.5">
-        <span className={`chip ${highlight ? 'bg-brand-600 text-white' : 'bg-white text-slate-600 ring-1 ring-slate-200'}`}>
+        <span className={`chip ${highlight ? 'bg-brand-600 text-white' : 'bg-white text-stone-600 ring-1 ring-stone-200'}`}>
           {label}
         </span>
-        <span className="text-xs font-semibold text-slate-800">{name}</span>
+        <span className="text-xs font-semibold text-stone-800">{name}</span>
       </div>
-      <p className="mt-1 text-[11px] leading-relaxed tabular-nums text-slate-600">{dose}</p>
+      <p className="mt-1 text-[11px] leading-relaxed tabular-nums text-stone-600">{dose}</p>
     </div>
   )
 }
