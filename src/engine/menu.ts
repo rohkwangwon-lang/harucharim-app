@@ -40,7 +40,7 @@ export interface DayMenu {
   /** 사용자가 골랐지만 이 암종에서 피해야 해 제외한 항목 */
   removed: { food: Food; reason: string; alternative?: Food }[]
   /** 목표 대비 부족·초과 요약 */
-  notes: string[]
+  notes: DayNote[]
   /**
    * 끼니별 설명. 비어 있는 끼니의 사유이거나,
    * 예산이 빠듯해 가볍게 채운 끼니의 사정이다.
@@ -86,10 +86,17 @@ function isSeasonal(food: Food, season: Season): boolean {
   return food.season.includes(season)
 }
 
-/** 사용자가 허용한 요리 계통인지. 비어 있으면 한식만 쓴다. */
+/**
+ * 사용자가 허용한 요리 계통인지.
+ *
+ * 한식은 언제나 포함한다. 이 앱의 바탕은 제철 한식이고, 양식·중식·일식은
+ * 거기에 더하는 것이지 대신하는 것이 아니다.
+ * 검토분에 중식은 8가지, 동남아는 1가지뿐이라 그것만으로는 하루가 만들어지지 않는다.
+ * 실제로 "동남아만" 고르면 열량이 목표의 절반에도 못 미치는 하루가 나왔다.
+ */
 function allowedCuisine(food: Food, allowed: Cuisine[]): boolean {
   var c = food.cuisine ?? '한식'
-  if (c === '무관') return true
+  if (c === '무관' || c === '한식') return true
   return allowed.includes(c)
 }
 
@@ -286,9 +293,15 @@ export function buildDayMenu(
 
   const used = new Set(keep.map((k) => k.food.id))
   const candidates = collectCandidates(patient, cached, cuisines, season)
+  /*
+   * 보충 단계에서 쓸 후보. 여기서는 영양보충 음료도 넣는다 —
+   * 하루를 다 짜고도 열량이 모자란다면 그것이 곧 경구영양보충의 적응증이다.
+   */
+  const topUpPool = collectCandidates(patient, cached, cuisines, season, true)
+    .filter((c) => c.na <= 120 && (c.kcal >= 60 || c.protein >= 5))
 
   // 3) 부족분 채우기
-  const notes: string[] = []
+  const notes: DayNote[] = []
   const fiber = fiberGoal(patient, profile)
   const fiberTarget = fiber.range[0]
 
@@ -356,6 +369,78 @@ export function buildDayMenu(
       seasonal: isSeasonal(best.food, season)
     })
     foodTotals = addTotals(foodTotals, foodContribution(best.food, best.servings))
+    used.add(best.food.id)
+    groupCount.set(best.food.group, (groupCount.get(best.food.group) ?? 0) + 1)
+  }
+
+  /*
+   * 3-2) 그래도 열량·단백질이 모자라면 간식으로 보충한다.
+   *
+   * 위암은 나트륨 상한이 1,500 mg 이라, 비빔밥 한 그릇(1,750 mg)만 담아도
+   * 그 자리에서 상한의 1.7 배가 된다. 그러면 위 단계는 거의 무염인 것만 받게 되고,
+   * 열량이 400 kcal 넘게 모자란 채로 끝났다.
+   *
+   * 하지만 견과·두유·미숫가루·영양음료는 나트륨이 거의 없으면서 열량과 단백질이 높다.
+   * 짜게 드셨다고 해서 굶어야 할 이유는 없다. 이 단계에서는
+   *  - 나트륨이 아주 낮은 것만 (120 mg 이하)
+   *  - 간식 자리와 식품군 상한을 조금 더 열고
+   *  - 영양보충 음료도 후보에 넣어
+   * 열량·단백질만 겨냥해 채운다. 식이섬유는 여기서 따지지 않는다.
+   */
+  const topUpCap = cap + 2
+  for (let guard = 0; guard < 12; guard++) {
+    const cur = running()
+    const need = {
+      kcal: target.kcal[0] - (cur.kcal ?? 0),
+      protein: target.protein[0] - (cur.protein ?? 0),
+      fiber: 0
+    }
+    if (need.kcal <= 25 && need.protein <= 2) break
+
+    const room = { kcal: target.kcal[1] - (cur.kcal ?? 0), na: naLimit - (cur.na ?? 0) }
+    if (room.kcal <= 40) break
+
+    const best = bestFiller(
+      topUpPool, need, room, used, meals, groupCount,
+      // 나트륨은 거의 없는 것만. 예산이 남아 있으면 평소대로 절반까지.
+      Math.max(120, room.na * 0.5),
+      topUpCap,
+      GROUP_CAP + 1
+    )
+    if (!best) break
+
+    const slot = placeIn(slotsFor(best.food), meals, topUpCap)
+    if (!slot) { used.add(best.food.id); continue }
+
+    /*
+     * 가짓수 대신 양을 늘린다.
+     *
+     * 큰 체격이거나 암종·증상 규칙이 겹쳐 쓸 수 있는 음식이 몇 가지 안 남는 경우가 있다
+     * (간암에 당뇨가 겹치면 검토분 483 종 가운데 33 종만 남는다).
+     * 그럴 때 서로 다른 음식을 스무 가지 늘어놓는 것보다, 먹던 것을 두 배로 드시는 편이
+     * 실제에 가깝다 — 영양음료 두 캔, 견과 두 줌처럼.
+     */
+    const one = foodContribution(best.food, 1)
+    const roomLeft = { kcal: room.kcal - (one.kcal ?? 0), na: room.na - (one.na ?? 0) }
+    const doubleUp =
+      need.kcal > (one.kcal ?? 0) * 1.6 &&
+      (one.kcal ?? 0) <= roomLeft.kcal &&
+      (one.na ?? 0) <= Math.max(120, roomLeft.na) &&
+      /*
+       * 양이 늘면 판정이 달라지는 음식이 있다.
+       * 두유라떼는 한 잔이면 괜찮지만 두 잔이면 당류 기준에 걸려 '주의'가 된다.
+       * 늘린 양 그대로 다시 판정해 보고, 여전히 괜찮을 때만 늘린다.
+       */
+      !['avoid', 'caution'].includes(evaluateFood(best.food, patient, 2, cached).level ?? '')
+    const servings = doubleUp ? 2 : best.servings
+
+    meals[slot].push({
+      food: best.food, servings, origin: 'added',
+      contribution: `${best.contribution} · 보충`,
+      ruleTitle: best.ruleTitle, evidence: best.evidence, refIds: best.refIds,
+      seasonal: isSeasonal(best.food, season)
+    })
+    foodTotals = addTotals(foodTotals, foodContribution(best.food, servings))
     used.add(best.food.id)
     groupCount.set(best.food.group, (groupCount.get(best.food.group) ?? 0) + 1)
   }
@@ -463,7 +548,19 @@ function placeIn(
   if (empty.length > 0) return empty[0]
   const pool = slots.filter((s) => s !== '간식' || meals['간식'].length < cap)
   if (pool.length === 0) return undefined
-  return pool.reduce((a, b) => (meals[a].length <= meals[b].length ? a : b))
+
+  /*
+   * 가짓수가 아니라 열량으로 견준다.
+   * 가짓수로 보면 나물 두 접시가 올라간 저녁이 '이미 찬 끼니'가 되어,
+   * 87 kcal 짜리 저녁과 네 가지가 올라간 아침이 나란히 놓였다.
+   * 사람이 한 끼로 느끼는 것은 접시 수가 아니라 양이다.
+   */
+  const load = (s: MealSlot) =>
+    meals[s].reduce((n, e) => n + (foodContribution(e.food, e.servings).kcal ?? 0), 0)
+  // 간식은 끼니가 아니므로, 갈 곳이 있으면 끼니를 먼저 채운다
+  const mains = pool.filter((s) => s !== '간식')
+  const target = mains.length > 0 ? mains : pool
+  return target.reduce((a, b) => (load(a) <= load(b) ? a : b))
 }
 
 /** 후보 한 건 — 영양 기여분을 미리 계산해 둔다 */
@@ -496,7 +593,9 @@ function collectCandidates(
   patient: PatientContext,
   cached: { rules: RuleHit[]; interactions: InteractionHit[] },
   cuisines: Cuisine[],
-  season: Season
+  season: Season,
+  /** 경구영양보충을 후보에 넣을지 — 보충 단계에서는 열량 미달 자체가 적응증이다 */
+  forceONS = false
 ): Cand[] {
   const PENALTY: Partial<Record<string, number>> = {
     적색육: 12, 직화구이: 8, 초가공식품: 12, 튀김: 10, 가공육: 30,
@@ -523,7 +622,7 @@ function collectCandidates(
 
   const out: Cand[] = []
   for (const f of CURATED_FOODS) {
-    if (f.group === '경장영양·환자식' && !needsONS) continue
+    if (f.group === '경장영양·환자식' && !needsONS && !forceONS) continue
     // 조미료·기름처럼 그 자체로 한 끼를 이루지 않는 것은 제안하지 않는다
     if (f.group === '유지·당류') continue
     if (f.tags.some((t) => NEVER_SUGGEST.has(t))) continue
@@ -630,13 +729,15 @@ function bestFiller(
   /** 한 가지가 가져가도 되는 나트륨의 최대치 */
   naCap: number,
   /** 간식 가짓수 상한 */
-  cap: number
+  cap: number,
+  /** 한 식품군에서 낼 수 있는 최대 가짓수 */
+  groupCap = GROUP_CAP
 ): Filler | undefined {
 
   let best: { c: Cand; score: number } | undefined
   for (const c of all) {
     if (exclude.has(c.food.id)) continue
-    if ((groupCount.get(c.food.group) ?? 0) >= GROUP_CAP) continue
+    if ((groupCount.get(c.food.group) ?? 0) >= groupCap) continue
     if (c.kcal > room.kcal) continue
     if (c.na > naCap) continue
     // 넣을 끼니가 없으면 (간식이 다 찼는데 간식밖에 못 가는 것) 의미가 없다
@@ -663,6 +764,13 @@ function bestFiller(
      * 열량이 모자란 동안에는 위의 fill 항이 이 값보다 크므로 방해가 되지 않는다.
      */
     const kcalCost = c.kcal / Math.max(200, room.kcal)
+    /*
+     * 남은 예산을 넘겨 버리는 선택에는 따로 벌점을 준다.
+     * 모자란 동안에는 상한을 넘겨서라도 먹이는 것이 맞지만, 같은 값을 하는
+     * 더 싱거운 것이 있다면 그쪽을 골라야 한다. 이 벌점이 없어서
+     * 마지막 한 가지(단백질음료 150 mg)가 하루를 1,546 / 1,500 으로 만들었다.
+     */
+    const crossPenalty = c.na > room.na ? 22 : 0
 
     /*
      * 부족분을 메우는 정도가 가장 중요하다.
@@ -672,7 +780,7 @@ function bestFiller(
      * 정작 값싸고 섬유가 많은 나물 반찬이 들어갈 자리가 없어졌다.
      * 근거는 같은 값이면 앞세우는 기준이지, 무엇을 채울지 정하는 기준이 아니다.
      */
-    const score = fill * 80 + c.bonus * 0.5 - c.penalty * 2.5 - naCost * 25 - kcalCost * 14
+    const score = fill * 80 + c.bonus * 0.5 - c.penalty * 2.5 - naCost * 25 - kcalCost * 14 - crossPenalty
     if (!best || score > best.score) best = { c, score }
   }
   if (!best) return undefined
@@ -760,7 +868,14 @@ function pickForSlot(
   // 1) 열량에 여유가 있으면 보통 한 끼를 낸다
   if (room.kcal >= 250) {
     const pool = fits.filter((c) => c.kcal <= room.kcal)
-    const src = pool.length > 0 ? pool : fits
+    /*
+     * 나트륨 예산 안에 드는 것을 먼저 본다.
+     * 이 단계에는 나트륨 조건이 아예 없어서, 앱이 처음부터 구성한 하루가
+     * 스스로 정한 상한을 넘기는 일이 있었다(위암 1,546 / 1,500 mg).
+     * 예산 안에 드는 것이 하나도 없을 때만 넘겨서 고른다 — 끼니를 비우는 것보다는 낫다.
+     */
+    const within = pool.filter((c) => c.na <= room.na)
+    const src = within.length > 0 ? within : pool.length > 0 ? pool : fits
     const rank = (c: Cand) => c.bonus - c.penalty + anchor(c) + c.kcal / kcalWeight - naPenalty(c)
     const c = [...src].sort((a, b) => rank(b) - rank(a))[0]
     const hit = explain(c, ['고단백', '고열량밀도'])
@@ -820,73 +935,92 @@ function pickForSlot(
  * 아직 담지도 않은 저녁이 계산에 들어가 있었기 때문이다.
  * 무엇을 계산했는지 부르는 쪽이 정하도록 합계를 인자로 받는다.
  */
+/**
+ * 평가 한 줄.
+ *
+ * 예전에는 문장만 돌려주어 화면에서 모두 같은 회색 문단으로 늘어섰다.
+ * 그래서 "충족합니다" 와 "상한을 넘습니다" 가 나란히 같은 무게로 보였다.
+ * 무엇이 문제인지 눈으로 먼저 골라낼 수 있도록 성격을 함께 돌려준다.
+ */
+export interface DayNote {
+  tone: 'good' | 'low' | 'over' | 'info'
+  /** 무엇에 대한 말인지 — 화면에서 제목으로 쓴다 */
+  topic: string
+  text: string
+}
+
 export function dayNotes(
   totals: NutrientTotals,
   suppTotals: NutrientTotals,
   patient: PatientContext,
   /** 나트륨 값이 없는 식품의 이름들 — 합계가 실제보다 적게 나온다 */
   naUnknown: string[] = []
-): string[] {
+): DayNote[] {
   const profile = CANCER_BY_ID[patient.cancer]
   const target = personalTarget(patient, profile.target.kcalPerKg, profile.target.proteinPerKg)
   const naLimit = profile.target.naLimit ?? 2000
-  const notes: string[] = []
+  const notes: DayNote[] = []
 
   const kcal = totals.kcal ?? 0
   const protein = totals.protein ?? 0
   const na = totals.na ?? 0
 
   if (kcal < target.kcal[0]) {
-    notes.push(
-      `열량이 목표(${target.kcal[0]}~${target.kcal[1]} kcal)보다 ${Math.round(target.kcal[0] - kcal)} kcal 부족합니다. ` +
-      '견과·유제품·경구영양보충 음료처럼 부피 대비 열량이 높은 것을 간식으로 더해 보세요.'
-    )
+    notes.push({ tone: 'low', topic: '에너지',
+      text: `목표(${target.kcal[0]}~${target.kcal[1]} kcal)보다 ${Math.round(target.kcal[0] - kcal)} kcal 부족합니다. ` +
+        '견과·유제품·경구영양보충 음료처럼 부피 대비 열량이 높은 것을 간식으로 더해 보세요.' })
   } else if (kcal > target.kcal[1] * 1.15) {
-    notes.push(`열량이 목표 상단(${target.kcal[1]} kcal)을 넘습니다. 치료 중이라면 문제가 아닐 수 있으나, 체중 관리기라면 조정이 필요합니다.`)
+    notes.push({ tone: 'over', topic: '에너지',
+      text: `목표 상단(${target.kcal[1]} kcal)을 넘습니다. 치료 중이라면 문제가 아닐 수 있으나, 체중 관리기라면 조정이 필요합니다.` })
   } else {
-    notes.push(`열량 ${Math.round(kcal)} kcal — 목표 범위(${target.kcal[0]}~${target.kcal[1]} kcal)에 들어옵니다.`)
+    notes.push({ tone: 'good', topic: '에너지',
+      text: `${Math.round(kcal)} kcal — 목표 범위(${target.kcal[0]}~${target.kcal[1]} kcal)에 들어옵니다.` })
   }
 
   if (protein < target.protein[0]) {
-    notes.push(
-      `단백질이 목표(${target.protein[0]}~${target.protein[1]} g)보다 ${Math.round(target.protein[0] - protein)} g 부족합니다. ` +
-      '계란·두부·생선·닭가슴살 중 하나를 한 끼에 더하면 대개 채워집니다.'
-    )
+    notes.push({ tone: 'low', topic: '단백질',
+      text: `목표(${target.protein[0]}~${target.protein[1]} g)보다 ${Math.round(target.protein[0] - protein)} g 부족합니다. ` +
+        '계란·두부·생선·닭가슴살 중 하나를 한 끼에 더하면 대개 채워집니다.' })
   } else {
-    notes.push(`단백질 ${Math.round(protein)} g — 목표(${target.protein[0]} g 이상)를 충족합니다.`)
+    notes.push({ tone: 'good', topic: '단백질',
+      text: `${Math.round(protein)} g — 목표(${target.protein[0]} g 이상)를 충족합니다.` })
   }
 
   if (na > naLimit) {
-    notes.push(
-      `나트륨이 ${Math.round(na)} mg 으로 이 암종의 권고 상한(${naLimit} mg)을 넘습니다. ` +
-      '국물을 남기는 것만으로 상당 부분이 줄어듭니다.'
-    )
+    notes.push({ tone: 'over', topic: '나트륨',
+      text: `${Math.round(na)} mg 으로 이 암종의 권고 상한(${naLimit} mg)을 넘습니다. ` +
+        '국물을 남기는 것만으로 상당 부분이 줄어듭니다.' })
+  } else if (na > naLimit * 0.85) {
+    notes.push({ tone: 'info', topic: '나트륨',
+      text: `${Math.round(na)} mg — 상한(${naLimit} mg)에 가깝습니다. 오늘은 국물을 남기시는 편이 좋겠습니다.` })
+  } else {
+    notes.push({ tone: 'good', topic: '나트륨', text: `${Math.round(na)} mg — 상한(${naLimit} mg) 안에 있습니다.` })
   }
 
   const suppNa = suppTotals.na ?? 0
   if (suppNa > 0) {
-    notes.push(
-      `나트륨 ${Math.round(na)} mg 중 ${Math.round(suppNa)} mg 은 드시는 영양제에서 나옵니다. ` +
-      '끼니별 소계를 모두 더한 값과 합계가 그만큼 차이 납니다.'
-    )
+    notes.push({ tone: 'info', topic: '영양제 몫',
+      text: `나트륨 ${Math.round(na)} mg 중 ${Math.round(suppNa)} mg 은 드시는 영양제에서 나옵니다. ` +
+        '끼니별 소계를 모두 더한 값과 합계가 그만큼 차이 납니다.' })
   }
 
   const fiber = totals.fiber ?? 0
   const goal = fiberGoal(patient, profile)
   if (goal.lowResidue) {
     if (fiber > goal.range[1]) {
-      notes.push(
-        `식이섬유가 ${Math.round(fiber)} g 입니다. 지금은 잔사를 줄여야 하는 시기라 ` +
-        `${goal.range[0]}~${goal.range[1]} g 정도가 적당합니다. 거친 나물·통곡·생채소를 줄여 보세요.`
-      )
+      notes.push({ tone: 'over', topic: '식이섬유',
+        text: `${Math.round(fiber)} g 입니다. 지금은 잔사를 줄여야 하는 시기라 ` +
+          `${goal.range[0]}~${goal.range[1]} g 정도가 적당합니다. 거친 나물·통곡·생채소를 줄여 보세요.` })
     } else {
-      notes.push(
-        `식이섬유 ${Math.round(fiber)} g — 설사·장루가 있는 동안의 목표(${goal.range[0]}~${goal.range[1]} g) 안에 있습니다. ` +
-        '이 시기에는 섬유를 늘리는 것이 목표가 아닙니다.'
-      )
+      notes.push({ tone: 'good', topic: '식이섬유',
+        text: `${Math.round(fiber)} g — 설사·장루가 있는 동안의 목표(${goal.range[0]}~${goal.range[1]} g) 안에 있습니다. ` +
+          '이 시기에는 섬유를 늘리는 것이 목표가 아닙니다.' })
     }
   } else if (fiber < goal.range[0]) {
-    notes.push(`식이섬유가 ${Math.round(fiber)} g 으로 목표(${goal.range[0]}~${goal.range[1]} g)에 못 미칩니다.`)
+    notes.push({ tone: 'low', topic: '식이섬유',
+      text: `${Math.round(fiber)} g 으로 목표(${goal.range[0]}~${goal.range[1]} g)에 못 미칩니다.` })
+  } else {
+    notes.push({ tone: 'good', topic: '식이섬유', text: `${Math.round(fiber)} g — 목표(${goal.range[0]}~${goal.range[1]} g) 안에 있습니다.` })
   }
 
   /*
@@ -896,10 +1030,9 @@ export function dayNotes(
   if (naUnknown.length > 0) {
     const head = naUnknown.slice(0, 3).join('·')
     const subject = naUnknown.length > 3 ? `${head} 외 ${naUnknown.length - 3}가지` : head
-    notes.push(
-      `${subject}${topicParticle(subject)} 원본 자료에 나트륨 값이 없어 위 합계에 잡히지 않았습니다. ` +
-      '실제 섭취량은 이보다 많습니다.'
-    )
+    notes.push({ tone: 'info', topic: '빠진 값',
+      text: `${subject}${topicParticle(subject)} 원본 자료에 나트륨 값이 없어 위 합계에 잡히지 않았습니다. ` +
+        '실제 섭취량은 이보다 많습니다.' })
   }
 
   return notes

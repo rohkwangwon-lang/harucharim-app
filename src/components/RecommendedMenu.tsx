@@ -7,7 +7,7 @@ import { foodContribution, personalTarget } from '../engine/nutrition'
 import { CANCER_BY_ID } from '../data/cancers'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
 import { REF_BY_ID } from '../data/references'
-import { EvidenceBadge, NutrientPanel, NutrientRow, nutrientState, Section } from './ui'
+import { DayNoteList, EvidenceBadge, NutrientPanel, NutrientRow, nutrientState, Section } from './ui'
 
 const SLOT_ICON: Record<MealSlot, typeof IconMorning> = {
   아침: IconMorning, 점심: IconNoon, 저녁: IconEvening, 간식: IconSnack
@@ -242,11 +242,7 @@ export function RecommendedMenu({
       </Section>
 
       <Section title="점검">
-        <div className="card divide-y divide-stone-100">
-          {menu.notes.map((n, i) => (
-            <p key={i} className="px-3.5 py-2.5 text-xs leading-relaxed text-stone-600">{n}</p>
-          ))}
-        </div>
+<DayNoteList notes={menu.notes} />
       </Section>
 
       <button

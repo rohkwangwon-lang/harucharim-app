@@ -141,7 +141,26 @@ for (let iter = 0; iter < N; iter++) {
   try { summarizeDay(diary, patient, supps) } catch (e: any) { report('summarizeDay 예외', `${ctx} :: ${e?.message}`) }
   try { sumIntake(diary, supps) } catch (e: any) { report('sumIntake 예외', `${ctx} :: ${e?.message}`) }
   try { cov.ideas += ideasFromIngredients(diary, patient).length } catch (e: any) { report('ideasFromIngredients 예외', `${ctx} :: ${e?.message}`) }
-  try { dayNotes(m.totals, m.suppTotals, patient) } catch (e: any) { report('dayNotes 예외', `${ctx} :: ${e?.message}`) }
+  try {
+    for (const n of dayNotes(m.totals, m.suppTotals, patient)) {
+      if (!n.text?.trim()) report('평가 문장 비었음', `${ctx} ${n.topic}`)
+      if (!n.topic?.trim()) report('평가 제목 비었음', `${ctx} ${n.text}`)
+      if (!['good','low','over','info'].includes(n.tone)) report('평가 성격 이상', `${ctx} ${n.tone}`)
+    }
+  } catch (e: any) { report('dayNotes 예외', `${ctx} :: ${e?.message}`) }
+
+  /*
+   * 사용자가 아무것도 담지 않았다면 앱이 처음부터 구성한 하루다.
+   * 그 하루가 열량·단백질 목표에 못 미치면 추천으로서 의미가 없다.
+   */
+  if (diary.length === 0) {
+    if ((m.totals.kcal ?? 0) < m.target.kcal[0] * 0.95)
+      report('처음부터 구성한 하루가 열량 미달', `${ctx} ${Math.round(m.totals.kcal ?? 0)}/${m.target.kcal[0]}`)
+    if ((m.totals.protein ?? 0) < m.target.protein[0])
+      report('처음부터 구성한 하루가 단백질 미달', `${ctx} ${Math.round(m.totals.protein ?? 0)}/${m.target.protein[0]}`)
+    if (m.meals['간식'].length === 0)
+      report('처음부터 구성했는데 간식이 없음', ctx)
+  }
   try { nutritionRisk(patient) } catch (e: any) { report('nutritionRisk 예외', `${ctx} :: ${e?.message}`) }
   try { getDailyReference(patient.sex, patient.age) } catch (e: any) { report('getDailyReference 예외', `${ctx} :: ${e?.message}`) }
 

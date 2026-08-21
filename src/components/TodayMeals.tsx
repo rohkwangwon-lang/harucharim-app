@@ -10,7 +10,7 @@ import { evaluateSelection } from '../engine/rules'
 import { foodContribution, personalTarget, sumIntake } from '../engine/nutrition'
 import { BASE_EXERCISE, CONDITION_EXERCISE_NOTES, EXERCISE_BY_CANCER } from '../data/exercise'
 import { REF_BY_ID } from '../data/references'
-import { EvidenceBadge, LevelBadge, NutrientPanel, NutrientRow, nutrientState, Section } from './ui'
+import { DayNoteList, EvidenceBadge, LevelBadge, NutrientPanel, NutrientRow, nutrientState, Section } from './ui'
 import { label as dayLabel, today as todayKey } from '../lib/day'
 
 const SLOT_ICON: Record<MealSlot, typeof IconMorning> = {
@@ -417,11 +417,7 @@ export function TodayMeals({
       {/* ── 평가 ──────────────────────────────────────── */}
       {selected.length > 0 && (
         <Section title="오늘 식단 평가" desc="담으신 것을 기준으로 계산한 결과입니다.">
-          <div className="card divide-y divide-stone-100">
-            {notes.map((n, i) => (
-              <p key={i} className="px-3.5 py-2.5 text-xs leading-relaxed text-stone-700">{n}</p>
-            ))}
-          </div>
+<DayNoteList notes={notes} />
 
           {warnings.length > 0 && (
             <div className="mt-2 space-y-2">

@@ -279,3 +279,46 @@ export function NutrientPanel({
     </div>
   )
 }
+
+/**
+ * 평가 한 줄을 성격에 맞게 보여 준다.
+ *
+ * 예전에는 모두 같은 회색 문단이라, "충족합니다" 와 "상한을 넘습니다" 가
+ * 나란히 같은 무게로 보였다. 여러 줄이 늘어서면 무엇이 문제인지 다 읽어야 알 수 있었다.
+ * 왼쪽 색띠와 제목으로 성격을 먼저 드러내고, 문제부터 위로 올린다.
+ */
+export function DayNoteList({
+  notes
+}: {
+  notes: { tone: 'good' | 'low' | 'over' | 'info'; topic: string; text: string }[]
+}) {
+  const STYLE = {
+    over: { bar: 'bg-danger-500', chip: 'bg-danger-100 text-danger-800', label: '넘음' },
+    low:  { bar: 'bg-warn-500',   chip: 'bg-warn-100 text-warn-800',     label: '부족' },
+    info: { bar: 'bg-stone-300',  chip: 'bg-stone-100 text-stone-600',   label: '참고' },
+    good: { bar: 'bg-brand-400',  chip: 'bg-brand-100 text-brand-800',   label: '좋음' }
+  } as const
+  // 문제부터 위로. 잘된 것은 아래에 모아 둔다.
+  const order = { over: 0, low: 1, info: 2, good: 3 }
+  const sorted = [...notes].sort((a, b) => order[a.tone] - order[b.tone])
+
+  return (
+    <div className="card divide-y divide-stone-100">
+      {sorted.map((n, i) => {
+        const st = STYLE[n.tone]
+        return (
+          <div key={i} className="flex gap-2.5 px-3 py-2.5">
+            <div className={`mt-0.5 w-1 shrink-0 rounded-full ${st.bar}`} aria-hidden />
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-bold text-stone-800">{n.topic}</span>
+                <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${st.chip}`}>{st.label}</span>
+              </div>
+              <p className="mt-1 text-xs leading-relaxed text-stone-600">{n.text}</p>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}

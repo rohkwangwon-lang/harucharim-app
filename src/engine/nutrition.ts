@@ -143,13 +143,33 @@ export function getDailyReference(sex: 'M' | 'F', age: number): DailyReference {
   return { recommended, upper, goal }
 }
 
+/**
+ * 계산에 쓸 체중.
+ *
+ * kcal/kg 를 실제 체중에 그대로 곱하면 비만인 분에게 터무니없는 목표가 나온다.
+ * 172 cm 130 kg 이면 하루 3,900 kcal 이 되는데, 지방 조직은 그만큼의 에너지를
+ * 쓰지 않으므로 과대평가다. 그렇게 잡아 두면 앱은 매일 "열량이 모자랍니다" 라고 말하고,
+ * 채우려다 과식을 권하게 된다.
+ *
+ * BMI 30 이상에서는 보정체중을 쓴다 — 표준체중에 초과분의 4분의 1만 더한다(ESPEN/ASPEN).
+ * 저체중인 분은 실제 체중을 그대로 쓴다. 늘려 잡을 이유가 없다.
+ */
+export function dosingWeight(patient: PatientContext): number {
+  const h = patient.heightCm / 100
+  if (!(h > 0)) return patient.weightKg
+  const bmi = patient.weightKg / (h * h)
+  if (bmi < 30) return patient.weightKg
+  const ideal = 22 * h * h          // 한국인 표준체중 기준
+  return Math.round(ideal + (patient.weightKg - ideal) * 0.25)
+}
+
 /** 환자 상태에 따른 개인별 열량·단백질 목표 (ESPEN 기반, 암종 프로필의 target 을 받아 계산) */
 export function personalTarget(
   patient: PatientContext,
   kcalPerKg: [number, number],
   proteinPerKg: [number, number]
 ): { kcal: [number, number]; protein: [number, number]; fluid: number } {
-  const w = patient.weightKg
+  const w = dosingWeight(patient)
   return {
     kcal: [Math.round(w * kcalPerKg[0]), Math.round(w * kcalPerKg[1])],
     protein: [Math.round(w * proteinPerKg[0]), Math.round(w * proteinPerKg[1])],
