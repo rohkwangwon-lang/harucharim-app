@@ -24,7 +24,7 @@ const STORE_MYCODE = 'myBarcodes'
 const STORE_SUPP = 'extSupps'
 
 /** 데이터 판을 올릴 때 이 값을 바꾸면 사용자 기기에서 다시 받는다 */
-export const DATA_VERSION = '2026-08-21c'
+export const DATA_VERSION = '2026-08-21d'
 
 export interface InstallProgress {
   phase: '식품 데이터' | '바코드 데이터' | '영양제 데이터' | '마무리'
@@ -256,11 +256,8 @@ function toFood(i: number, row: Row, sc: { cols: string[]; groups: string[]; tag
     const v = vals[c]
     if (v !== null && v !== undefined) per100[sc.cols[c] as NutrientKey] = v
   }
+  // 에너지만은 있어야 계산이 성립한다. 나머지는 없으면 없는 대로 둔다.
   if (per100.kcal === undefined) per100.kcal = 0
-  if (per100.carb === undefined) per100.carb = 0
-  if (per100.protein === undefined) per100.protein = 0
-  if (per100.fat === undefined) per100.fat = 0
-  if (per100.na === undefined) per100.na = 0
   const food: Food = {
     id: `kx-${i}`,
     name,

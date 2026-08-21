@@ -115,11 +115,33 @@ for (const f of files) {
      * 가장 열량이 높은 순수 지방도 900 kcal 을 넘지 못한다.
      * 이런 자료가 섞이면 "단백질 374 g 보충" 같은 엉뚱한 계산이 나온다.
      */
+    const has = (v) => typeof v === 'number'
     const impossible =
       (n.protein ?? 0) > 100 || (n.fat ?? 0) > 100 || (n.carb ?? 0) > 100 ||
       (n.kcal ?? 0) > 900 || (n.na ?? 0) > 40000 ||
-      (n.protein ?? 0) < 0 || (n.fat ?? 0) < 0 || (n.carb ?? 0) < 0
+      (n.protein ?? 0) < 0 || (n.fat ?? 0) < 0 || (n.carb ?? 0) < 0 ||
+      /*
+       * 성분끼리 앞뒤가 안 맞는 자료도 버린다.
+       * 100 g 안에 107 g 이 들어 있다거나(휘낭시에), 탄수화물 7 g 인데
+       * 당류가 104 g 이라거나(말차 라떼), 지방 0 g 인데 포화지방이 0.6 g 인 것들이다.
+       * 어느 쪽이 맞는지 알 수 없으니 고쳐 쓸 수 없다.
+       * 이런 자료로 계산하면 "당류 104 g" 같은 숫자를 환자에게 보여 주게 된다.
+       */
+      (has(n.carb) && has(n.protein) && has(n.fat) && n.carb + n.protein + n.fat > 101) ||
+      (has(n.sugar) && has(n.carb) && n.sugar > n.carb + 0.5) ||
+      (has(n.satFat) && has(n.fat) && n.satFat > n.fat + 0.5)
     if (impossible) { skippedBadValue++; continue }
+
+    /*
+     * 표기 열량과 다량영양소가 서로 두 배 넘게 어긋나는 자료도 버린다.
+     * "대구, 삶은것"의 단백질이 75.9 g/100 g 으로 적혀 있는 식이다 — 실제로는 20 g 대다.
+     * 술은 알코올이 g 당 7 kcal 을 내므로 다량영양소만으로 설명되지 않는다. 여기서 뺀다.
+     */
+    const isAlcohol = (it.FOOD_CAT1_NM || '') === '주류'
+    if (!isAlcohol && has(n.carb) && has(n.protein) && has(n.fat) && n.kcal > 40) {
+      const calc = n.carb * 4 + n.protein * 4 + n.fat * 9
+      if (calc > 0 && (n.kcal > calc * 2.2 || n.kcal < calc * 0.45)) { skippedBadValue++; continue }
+    }
 
     // 에너지가 없거나 사실상 0 인 자료는 계산에 쓸 수 없다.
     // (물·차처럼 진짜 0 인 것은 음료 분류라 따로 살린다.)
@@ -127,10 +149,17 @@ for (const f of files) {
     if (n.kcal <= 1 && (it.FOOD_CAT1_NM || '') !== '음료류' && (it.FOOD_CAT1_NM || '') !== '음료 및 차류' && (it.FOOD_CAT1_NM || '') !== '다류') {
       skippedNoKcal++; continue
     }
-    if (n.carb === undefined) n.carb = 0
-    if (n.protein === undefined) n.protein = 0
-    if (n.fat === undefined) n.fat = 0
-    if (n.na === undefined) n.na = 0
+    /*
+     * 값이 없는 성분을 0 으로 채우지 않는다.
+     *
+     * 예전에는 빠진 값을 0 으로 메웠다. 그 결과 148 kcal 짜리 리조또가
+     * "탄수화물 0 g · 지방 0 g" 으로 표시됐다. 자동 수집분 17,899 종 가운데
+     * 9,733 종이 그런 상태였다 — 절반이 넘는다.
+     *
+     * 원본이 그 성분을 아예 신고하지 않은 것이지, 들어 있지 않다는 뜻이 아니다.
+     * 특히 나트륨을 0 으로 채우면 하루 합계에서 통째로 빠져 상한 판정이 어긋난다.
+     * 모르는 값은 모른다고 두고, 화면에서 '정보 없음'으로 밝힌다.
+     */
 
     const cat1 = it.FOOD_CAT1_NM || ''
     catCount[cat1] = (catCount[cat1] || 0) + 1

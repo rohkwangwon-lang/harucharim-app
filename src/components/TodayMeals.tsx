@@ -5,7 +5,7 @@ import { MEAL_SLOTS } from '../data/types'
 import { FOOD_BY_ID } from '../data/foods'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
 import { CANCER_BY_ID } from '../data/cancers'
-import { buildDayMenu, currentSeason, dayNotes, ideasFromIngredients } from '../engine/menu'
+import { buildDayMenu, currentSeason, dayNotes, ideasFromIngredients, naUnknownNames } from '../engine/menu'
 import { evaluateSelection } from '../engine/rules'
 import { foodContribution, personalTarget, sumIntake } from '../engine/nutrition'
 import { BASE_EXERCISE, CONDITION_EXERCISE_NOTES, EXERCISE_BY_CANCER } from '../data/exercise'
@@ -77,7 +77,7 @@ export function TodayMeals({
     () => supps.reduce((t, x) => ({ ...t, na: (t.na ?? 0) + ((x.perDay as { na?: number }).na ?? 0) }), {} as { na?: number }),
     [supplements]
   )
-  const notes = useMemo(() => dayNotes(totals, suppTotals, patient), [totals, suppTotals, patient])
+  const notes = useMemo(() => dayNotes(totals, suppTotals, patient, naUnknownNames(selected)), [totals, suppTotals, patient, selected])
   /** 담아 두신 식재료로 만들 수 있는 요리 */
   const ideas = useMemo(() => ideasFromIngredients(selected, patient), [selected, patient])
 
@@ -209,7 +209,7 @@ export function TodayMeals({
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-medium text-stone-900">{d.name}</p>
                           <p className="truncate text-[11px] text-stone-400">
-                            {d.serving.label} · {Math.round(per.kcal ?? 0)} kcal · 나트륨 {Math.round(per.na ?? 0)} mg
+                            {d.serving.label} · {Math.round(per.kcal ?? 0)} kcal · 나트륨 {per.na === undefined ? '정보 없음' : `${Math.round(per.na)} mg`}
                           </p>
                         </div>
                         <div className="flex shrink-0 gap-1">
@@ -300,7 +300,7 @@ export function TodayMeals({
                             </div>
                             <div className="mt-0.5 text-[11px] text-stone-400">
                               {food.serving.label} × {item.servings} · {Math.round(per.kcal ?? 0)} kcal ·
-                              나트륨 {Math.round(per.na ?? 0)} mg
+                              나트륨 {per.na === undefined ? '정보 없음' : `${Math.round(per.na)} mg`}
                             </div>
                           </div>
                           <div className="flex shrink-0 items-center gap-1">

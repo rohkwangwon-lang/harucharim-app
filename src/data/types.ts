@@ -14,19 +14,27 @@
 /* ────────────────────────────── 영양소 ────────────────────────────── */
 
 /** 가식부 100 g 당 영양성분. 값이 확인되지 않은 항목은 undefined 로 두고 0 으로 채우지 않는다. */
+/**
+ * 100 g(가식부) 당 성분값.
+ *
+ * 에너지를 뺀 나머지는 모두 선택이다. 공공데이터의 가공식품은 신고된 항목만
+ * 값이 있고, 없는 항목은 비어 있다. 그것을 0 으로 채우면
+ * "148 kcal 인데 탄수화물 0 g·지방 0 g" 같은 거짓말이 된다.
+ * 모르는 값은 undefined 로 두고 화면에서 '정보 없음'이라고 밝힌다.
+ */
 export interface Nutrients {
   /** 에너지 (kcal) */ kcal: number
-  /** 탄수화물 (g) */ carb: number
+  /** 탄수화물 (g) */ carb?: number
   /** 당류 (g) */ sugar?: number
   /** 식이섬유 (g) */ fiber?: number
-  /** 단백질 (g) */ protein: number
-  /** 지방 (g) */ fat: number
+  /** 단백질 (g) */ protein?: number
+  /** 지방 (g) */ fat?: number
   /** 포화지방 (g) */ satFat?: number
   /** 트랜스지방 (g) */ transFat?: number
   /** 오메가-3 지방산 (g, ALA+EPA+DHA) */ omega3?: number
   /** 콜레스테롤 (mg) */ chol?: number
 
-  /** 나트륨 (mg) */ na: number
+  /** 나트륨 (mg) */ na?: number
   /** 칼륨 (mg) */ k?: number
   /** 칼슘 (mg) */ ca?: number
   /** 인 (mg) */ p?: number

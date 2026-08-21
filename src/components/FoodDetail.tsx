@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { Food, MealSlot, PatientContext } from '../data/types'
 import { MEAL_SLOTS } from '../data/types'
 import { evaluateFood } from '../engine/rules'
-import { foodContribution, NUTRIENT_META, fmt } from '../engine/nutrition'
+import { foodContribution, missingMacros, NUTRIENT_META, fmt } from '../engine/nutrition'
 import { REF_BY_ID } from '../data/references'
 import { EvidenceBadge, LevelBadge } from './ui'
 
@@ -170,6 +170,13 @@ export function FoodDetail({
               </tbody>
             </table>
           </div>
+
+          {missingMacros(food).length > 0 && (
+            <p className="mt-2 rounded-lg bg-warn-50 px-3 py-2 text-[11px] leading-relaxed text-warn-700">
+              이 제품은 원본 자료에 <strong>{missingMacros(food).join('·')}</strong> 값이 없어 표시하지 않았습니다.
+              들어 있지 않다는 뜻이 아니라 신고되지 않은 것이므로, 하루 합계에도 잡히지 않습니다.
+            </p>
+          )}
 
           {food.gi && (
             <p className="mt-2 text-xs text-stone-500">혈당지수(GI) {food.gi} — 포도당 100 기준</p>

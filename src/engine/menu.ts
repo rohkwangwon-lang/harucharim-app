@@ -364,7 +364,7 @@ export function buildDayMenu(
   const totals = running()
 
   // 6) 요약
-  notes.push(...dayNotes(totals, suppTotals, patient))
+  notes.push(...dayNotes(totals, suppTotals, patient, naUnknownNames(chosen)))
 
   return { scope: '하루(24시간) 전체', season, meals, totals, suppTotals, slotTotals, target, removed, notes, slotNotes }
 }
@@ -712,7 +712,9 @@ function pickForSlot(
 export function dayNotes(
   totals: NutrientTotals,
   suppTotals: NutrientTotals,
-  patient: PatientContext
+  patient: PatientContext,
+  /** 나트륨 값이 없는 식품의 이름들 — 합계가 실제보다 적게 나온다 */
+  naUnknown: string[] = []
 ): string[] {
   const profile = CANCER_BY_ID[patient.cancer]
   const target = personalTarget(patient, profile.target.kcalPerKg, profile.target.proteinPerKg)
@@ -764,5 +766,40 @@ export function dayNotes(
     notes.push(`식이섬유가 ${Math.round(fiber)} g 으로 목표(${fiberTarget[0]}~${fiberTarget[1]} g)에 못 미칩니다.`)
   }
 
+  /*
+   * 나트륨을 신고하지 않은 가공식품이 섞여 있으면 합계가 실제보다 적게 나온다.
+   * "상한 안에 들어옵니다" 라고 안심시켜 놓고 실제로는 넘겼을 수 있으므로 밝힌다.
+   */
+  if (naUnknown.length > 0) {
+    const head = naUnknown.slice(0, 3).join('·')
+    const subject = naUnknown.length > 3 ? `${head} 외 ${naUnknown.length - 3}가지` : head
+    notes.push(
+      `${subject}${topicParticle(subject)} 원본 자료에 나트륨 값이 없어 위 합계에 잡히지 않았습니다. ` +
+      '실제 섭취량은 이보다 많습니다.'
+    )
+  }
+
   return notes
+}
+
+/**
+ * 은/는 을 앞말에 맞춰 고른다.
+ * "도넛는" 처럼 나오면 앱이 만든 문장이라는 티가 그대로 난다.
+ */
+function topicParticle(word: string): string {
+  const last = word.trim().slice(-1)
+  const code = last.charCodeAt(0)
+  // 한글 음절이 아니면(숫자·영문·괄호 등) 안전하게 '은'
+  if (code < 0xac00 || code > 0xd7a3) return '은'
+  return (code - 0xac00) % 28 === 0 ? '는' : '은'
+}
+
+/** 담은 것 중 나트륨 값이 없는 식품의 이름 */
+export function naUnknownNames(items: SelectedItem[]): string[] {
+  const out: string[] = []
+  for (const it of items) {
+    const f = FOOD_BY_ID[it.foodId]
+    if (f && f.per100.na === undefined && !out.includes(f.name)) out.push(f.name)
+  }
+  return out
 }

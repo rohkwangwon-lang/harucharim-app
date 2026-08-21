@@ -24,12 +24,9 @@ export function unpack(p: PackedFoods, idPrefix: string): Food[] {
       const v = vals[c]
       if (v !== null && v !== undefined) per100[p.cols[c] as NutrientKey] = v
     }
-    // 계산에 반드시 필요한 값은 비어 있으면 0 으로 채운다
+    // 에너지만은 있어야 계산이 성립한다. 나머지는 없으면 없는 대로 둔다 —
+    // 0 으로 채우면 신고하지 않은 성분이 '들어 있지 않다'로 바뀐다.
     if (per100.kcal === undefined) per100.kcal = 0
-    if (per100.carb === undefined) per100.carb = 0
-    if (per100.protein === undefined) per100.protein = 0
-    if (per100.fat === undefined) per100.fat = 0
-    if (per100.na === undefined) per100.na = 0
 
     const food: Food = {
       id: `${idPrefix}${i}`,

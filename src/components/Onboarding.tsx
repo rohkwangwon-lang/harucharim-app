@@ -43,8 +43,14 @@ export function Onboarding({
 }) {
   const [step, setStep] = useState(0)
   const { user } = useSession()
-  const steps = ['시작', '암종', '치료 시기', '몸 상태', '식성']
-  const canNext = step === 1 ? !!patient.cancer : true
+  const steps = ['로그인', '암종', '치료 시기', '몸 상태', '식성']
+  /*
+   * 첫 화면은 로그인을 거쳐야 넘어간다.
+   * 다만 로그인 서버가 설정되지 않은 환경(로컬 개발·미리보기)에서까지 막으면
+   * 앱을 아예 쓸 수 없게 되므로, 그때는 그대로 통과시킨다.
+   */
+  const needsLogin = isSupabaseConfigured && !user
+  const canNext = step === 0 ? !needsLogin : step === 1 ? !!patient.cancer : true
 
   const toggle = <T,>(list: T[], v: T): T[] =>
     list.includes(v) ? list.filter((x) => x !== v) : [...list, v]
@@ -71,7 +77,7 @@ export function Onboarding({
         {step === 0 && (
           <Step
             title="온코푸드를 시작합니다"
-            desc="로그인하시면 기기를 바꿔도 설정이 유지되고, 문의하신 내용의 답변을 앱에서 바로 확인하실 수 있습니다. 로그인 없이 쓰셔도 모든 기능은 그대로입니다."
+            desc="먼저 로그인해 주세요. 기기를 바꾸셔도 설정이 유지되고, 문의하신 내용의 답변을 앱에서 바로 확인하실 수 있습니다."
           >
             {user ? (
               <div className="rounded-2xl border border-brand-200 bg-brand-50/60 p-4">
@@ -101,6 +107,9 @@ export function Onboarding({
                 </div>
                 <p className="mt-4 text-center text-xs text-stone-400">
                   처음이시면 위 버튼으로 바로 가입됩니다. 따로 아이디를 만들지 않으셔도 됩니다.
+                </p>
+                <p className="mt-2 text-center text-[11px] text-stone-400">
+                  로그인하시면 다음 단계로 넘어갑니다.
                 </p>
               </>
             ) : (
@@ -292,7 +301,7 @@ export function Onboarding({
           )}
           {step < steps.length - 1 ? (
             <button className="btn-primary flex-[2]" disabled={!canNext} onClick={() => setStep(step + 1)}>
-              {step === 0 && !user ? '로그인 없이 시작하기' : '다음'}
+              {step === 0 && needsLogin ? '로그인이 필요합니다' : '다음'}
             </button>
           ) : (
             <button className="btn-primary flex-[2]" onClick={() => onDone({})}>시작하기</button>

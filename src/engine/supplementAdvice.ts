@@ -32,8 +32,19 @@ export interface SupplementAdvice {
   products: Supplement[]
 }
 
-function productsIn(category: SupplementCategory): Supplement[] {
-  return SUPPLEMENTS.filter((s) => s.category === category)
+/**
+ * 이 분류에서 이 환자에게 내놓아도 되는 제품만 고른다.
+ *
+ * 분류 단위로 권하는 이유는 특정 브랜드를 밀지 않기 위해서인데,
+ * 분류만 보고 제품을 통째로 나열하면 그 안에 금기 제품이 섞여 나온다.
+ * 실제로 "아연·미네랄"을 권하면서 셀레늄 200 µg 을 함께 보여 주고 있었다.
+ * 치료 중 고용량 항산화제는 이 앱이 스스로 '피하세요'로 판정하는 것이다(근거 A).
+ * 같은 화면에서 권하면서 동시에 피하라고 하는 셈이었다.
+ */
+function productsIn(category: SupplementCategory, patient: PatientContext): Supplement[] {
+  return SUPPLEMENTS.filter(
+    (s) => s.category === category && evaluateSupplement(s, patient).level !== 'avoid'
+  )
 }
 
 const ORDER: Record<AdviceLevel, number> = { avoid: 0, recommend: 1, consider: 2 }
@@ -46,7 +57,7 @@ export function adviseSupplements(patient: PatientContext): SupplementAdvice[] {
   const cond = (c: string) => patient.conditions.includes(c as never)
 
   const push = (a: Omit<SupplementAdvice, 'products'>) =>
-    out.push({ ...a, products: productsIn(a.category) })
+    out.push({ ...a, products: productsIn(a.category, patient) })
 
   /* ── 치료 이력에서 오는 결핍 ─────────────────────────── */
 

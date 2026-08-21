@@ -166,6 +166,9 @@ export function FoodSearch({
         if (have.has(f.name)) continue
         if (onlyIngredient) continue
         if (group !== '전체' && f.group !== group) continue
+        // 앱에 든 결과와 같은 조건을 적용한다.
+        // 요리 계통만 빠져 있어서, 중식으로 걸러 놓아도 확장분은 그대로 나왔다.
+        if (cuisine !== '전체' && (f.cuisine ?? '한식') !== cuisine && f.cuisine !== '무관') continue
         have.add(f.name)
         scored.push({ food: f, verdict: evaluateFood(f, patient, 1, cached) })
       }
@@ -406,7 +409,7 @@ export function FoodSearch({
                     <div className="mt-0.5 truncate text-[11px] text-stone-400">
                       {food.maker ? `${food.maker} · ` : ''}
                       {food.serving.label} · {Math.round(per.kcal ?? 0)} kcal · 단백질{' '}
-                      {(per.protein ?? 0).toFixed(1)} g · 나트륨 {Math.round(per.na ?? 0)} mg
+                      {(per.protein ?? 0).toFixed(1)} g · 나트륨 {per.na === undefined ? '정보 없음' : `${Math.round(per.na)} mg`}
                     </div>
                   </div>
                   <span className="shrink-0 text-stone-300">›</span>

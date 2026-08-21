@@ -179,7 +179,7 @@ export function RecommendedMenu({
                         </div>
                         <div className="mt-0.5 text-[11px] text-stone-400">
                           {e.food.serving.label} × {e.servings} · {Math.round(per.kcal ?? 0)} kcal ·
-                          단백질 {(per.protein ?? 0).toFixed(1)} g · 나트륨 {Math.round(per.na ?? 0)} mg
+                          단백질 {(per.protein ?? 0).toFixed(1)} g · 나트륨 {per.na === undefined ? '정보 없음' : `${Math.round(per.na)} mg`}
                         </div>
                         {e.origin === 'added' && e.ruleTitle && (
                           <div className="mt-1.5 rounded-lg bg-brand-50 px-2.5 py-2">
