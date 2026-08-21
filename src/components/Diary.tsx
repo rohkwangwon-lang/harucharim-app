@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import type { PatientContext, SelectedItem } from '../data/types'
+import type { PatientContext, SelectedItem, Supplement } from '../data/types'
+import { SUPPLEMENT_BY_ID } from '../data/supplements'
 import type { DayKey } from '../lib/day'
 import {
   addDays, addMonths, calendarGrid, fromKey, label, monthLabel, today, weekOf
@@ -21,6 +22,7 @@ export function Diary({
   diary,
   weights,
   day,
+  supplements,
   onPickDay,
   onSetWeight,
   onGoCompose
@@ -29,16 +31,22 @@ export function Diary({
   diary: Record<DayKey, SelectedItem[]>
   weights: Record<DayKey, number>
   day: DayKey
+  /** 복용 중인 영양제 id — 나트륨·열량 합계에 함께 넣는다 */
+  supplements: string[]
   onPickDay: (d: DayKey) => void
   onSetWeight: (kg: number, forDay: DayKey) => void
   onGoCompose: () => void
 }) {
   const [view, setView] = useState<View>('week')
   const [cursor, setCursor] = useState<DayKey>(day)
+  const supps = useMemo(
+    () => supplements.map((id) => SUPPLEMENT_BY_ID[id]).filter(Boolean),
+    [supplements]
+  )
 
   const summarize = useMemo(
-    () => (d: DayKey) => summarizeDay(diary[d] ?? [], patient),
-    [diary, patient]
+    () => (d: DayKey) => summarizeDay(diary[d] ?? [], patient, supps),
+    [diary, patient, supps]
   )
 
   return (
@@ -60,7 +68,7 @@ export function Diary({
       {view === 'day' && (
         <DayView
           d={cursor} patient={patient} items={diary[cursor] ?? []}
-          weight={weights[cursor]}
+          weight={weights[cursor]} supps={supps}
           onMove={(n) => setCursor(addDays(cursor, n))}
           onSetWeight={(kg) => onSetWeight(kg, cursor)}
           onEdit={() => { onPickDay(cursor); onGoCompose() }}
@@ -91,17 +99,18 @@ export function Diary({
 /* ────────────────────────── 하루 ────────────────────────── */
 
 function DayView({
-  d, patient, items, weight, onMove, onSetWeight, onEdit
+  d, patient, items, weight, supps, onMove, onSetWeight, onEdit
 }: {
   d: DayKey
   patient: PatientContext
   items: SelectedItem[]
   weight?: number
+  supps: Supplement[]
   onMove: (n: number) => void
   onSetWeight: (kg: number) => void
   onEdit: () => void
 }) {
-  const s = summarizeDay(items, patient)
+  const s = summarizeDay(items, patient, supps)
   const st = GRADE_STYLE[s.grade]
   const [w, setW] = useState(weight ? String(weight) : '')
 

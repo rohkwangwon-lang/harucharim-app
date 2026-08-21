@@ -5,7 +5,7 @@ import { MEAL_SLOTS } from '../data/types'
 import { FOOD_BY_ID } from '../data/foods'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
 import { CANCER_BY_ID } from '../data/cancers'
-import { buildDayMenu, currentSeason, ideasFromIngredients } from '../engine/menu'
+import { buildDayMenu, currentSeason, dayNotes, ideasFromIngredients } from '../engine/menu'
 import { evaluateSelection } from '../engine/rules'
 import { foodContribution, personalTarget, sumIntake } from '../engine/nutrition'
 import { BASE_EXERCISE, CONDITION_EXERCISE_NOTES, EXERCISE_BY_CANCER } from '../data/exercise'
@@ -64,7 +64,17 @@ export function TodayMeals({
 
   const totals = useMemo(() => sumIntake(selected, supps), [selected, supplements])
   const evalResult = useMemo(() => evaluateSelection(selected, patient), [selected, patient])
-  const menu = useMemo(() => buildDayMenu(selected, patient), [selected, patient])
+  const menu = useMemo(() => buildDayMenu(selected, patient, supps), [selected, patient, supplements])
+  /*
+   * 평가는 '추천으로 채워진 하루'가 아니라 '실제로 담으신 것'을 대상으로 한다.
+   * 위쪽 숫자는 담은 것을 세고 아래쪽 평가는 추천까지 센다면, 같은 화면에서
+   * 나트륨이 두 개 나온다. 실제로 그렇게 나와 있었다.
+   */
+  const suppTotals = useMemo(
+    () => supps.reduce((t, x) => ({ ...t, na: (t.na ?? 0) + ((x.perDay as { na?: number }).na ?? 0) }), {} as { na?: number }),
+    [supplements]
+  )
+  const notes = useMemo(() => dayNotes(totals, suppTotals, patient), [totals, suppTotals, patient])
   /** 담아 두신 식재료로 만들 수 있는 요리 */
   const ideas = useMemo(() => ideasFromIngredients(selected, patient), [selected, patient])
 
@@ -345,7 +355,7 @@ export function TodayMeals({
       {selected.length > 0 && (
         <Section title="오늘 식단 평가" desc="담으신 것을 기준으로 계산한 결과입니다.">
           <div className="card divide-y divide-stone-100">
-            {menu.notes.map((n, i) => (
+            {notes.map((n, i) => (
               <p key={i} className="px-3.5 py-2.5 text-xs leading-relaxed text-stone-700">{n}</p>
             ))}
           </div>

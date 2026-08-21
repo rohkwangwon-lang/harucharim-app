@@ -1,4 +1,4 @@
-import type { PatientContext, SelectedItem } from '../data/types'
+import type { PatientContext, SelectedItem, Supplement } from '../data/types'
 import { CANCER_BY_ID } from '../data/cancers'
 import { personalTarget, sumIntake } from './nutrition'
 
@@ -23,10 +23,24 @@ export interface DaySummary {
   note: string
 }
 
-export function summarizeDay(items: SelectedItem[], patient: PatientContext): DaySummary {
+/**
+ * 영양제도 함께 받는다.
+ * 경장영양 한 캔에 나트륨이 200 mg 가까이 들어 있어, 화면마다 넣고 빼면
+ * 같은 날의 나트륨이 화면마다 다르게 나온다.
+ */
+export function summarizeDay(
+  items: SelectedItem[],
+  patient: PatientContext,
+  supplements: Supplement[] = []
+): DaySummary {
   const profile = CANCER_BY_ID[patient.cancer]
   const target = personalTarget(patient, profile.target.kcalPerKg, profile.target.proteinPerKg)
 
+  /*
+   * 음식 기록이 없는 날은 '기록 없음'이다.
+   * 영양제 목록은 "지금 드시는 것"이라 날짜가 없어서, 이걸 과거의 빈 날에까지
+   * 얹으면 아무것도 안 적은 날이 "200 kcal 부족"으로 보인다.
+   */
   if (items.length === 0) {
     return {
       grade: 'none', kcal: 0, protein: 0, na: 0, target, empty: true,
@@ -34,7 +48,7 @@ export function summarizeDay(items: SelectedItem[], patient: PatientContext): Da
     }
   }
 
-  const t = sumIntake(items, [])
+  const t = sumIntake(items, supplements)
   const kcal = Math.round(t.kcal ?? 0)
   const protein = Math.round(t.protein ?? 0)
   const na = Math.round(t.na ?? 0)

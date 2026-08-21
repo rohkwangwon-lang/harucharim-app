@@ -5,6 +5,7 @@ import { MEAL_SLOTS } from '../data/types'
 import { buildDayMenu } from '../engine/menu'
 import { foodContribution, personalTarget } from '../engine/nutrition'
 import { CANCER_BY_ID } from '../data/cancers'
+import { SUPPLEMENT_BY_ID } from '../data/supplements'
 import { REF_BY_ID } from '../data/references'
 import { EvidenceBadge, Section, Stat } from './ui'
 
@@ -22,28 +23,52 @@ const SLOT_ICON: Record<MealSlot, typeof IconMorning> = {
 export function RecommendedMenu({
   patient,
   selected,
+  supplements,
   onApply,
   onApplyAll,
   onGoCompose
 }: {
   patient: PatientContext
   selected: SelectedItem[]
+  /** 복용 중인 영양제 id — 하루 합계에 함께 넣는다 */
+  supplements: string[]
   onApply: (foodId: string, meal: MealSlot) => void
   onApplyAll: (items: { foodId: string; meal: MealSlot }[]) => void
   onGoCompose: () => void
 }) {
   const [seed, setSeed] = useState(0)
   const profile = CANCER_BY_ID[patient.cancer]
+  const naLimit = profile.target.naLimit ?? 2000
   const target = personalTarget(patient, profile.target.kcalPerKg, profile.target.proteinPerKg)
-  const menu = useMemo(() => buildDayMenu(selected, patient), [selected, patient, seed])
+  const supps = useMemo(
+    () => supplements.map((id) => SUPPLEMENT_BY_ID[id]).filter(Boolean),
+    [supplements]
+  )
+  const menu = useMemo(() => buildDayMenu(selected, patient, supps), [selected, patient, supps, seed])
 
   const added = MEAL_SLOTS.flatMap((slot) =>
     menu.meals[slot].filter((e) => e.origin === 'added').map((e) => ({ foodId: e.food.id, meal: slot }))
   )
 
-  const kcal = Math.round(menu.totals.kcal ?? 0)
+  /*
+   * 화면에 보이는 숫자끼리 더해도 합계가 나오도록, 항목별로 반올림한 값을 그대로 쌓는다.
+   * 정확한 값을 마지막에 한 번 반올림하면 항목을 손으로 더해 본 사람과 숫자가 어긋난다.
+   * 영양제 몫은 끼니에 속하지 않으므로 따로 세어 마지막에 더한다.
+   */
+  const slotNa: Record<MealSlot, number> = { 아침: 0, 점심: 0, 저녁: 0, 간식: 0 }
+  const slotKcal: Record<MealSlot, number> = { 아침: 0, 점심: 0, 저녁: 0, 간식: 0 }
+  for (const slot of MEAL_SLOTS) {
+    for (const e of menu.meals[slot]) {
+      const per = foodContribution(e.food, e.servings)
+      slotNa[slot] += Math.round(per.na ?? 0)
+      slotKcal[slot] += Math.round(per.kcal ?? 0)
+    }
+  }
+  const suppNa = Math.round(menu.suppTotals.na ?? 0)
+  const suppKcal = Math.round(menu.suppTotals.kcal ?? 0)
+  const na = MEAL_SLOTS.reduce((n, s) => n + slotNa[s], 0) + suppNa
+  const kcal = MEAL_SLOTS.reduce((n, s) => n + slotKcal[s], 0) + suppKcal
   const protein = Math.round(menu.totals.protein ?? 0)
-  const na = Math.round(menu.totals.na ?? 0)
 
   return (
     <div>
@@ -71,8 +96,8 @@ export function RecommendedMenu({
       <div className="mb-4 grid grid-cols-3 gap-2">
         <Stat label="에너지" value={String(kcal)} unit="kcal" hint={`목표 ${target.kcal[0]}~${target.kcal[1]}`} />
         <Stat label="단백질" value={String(protein)} unit="g" hint={`목표 ${target.protein[0]} g 이상`} />
-        <Stat label="나트륨" value={String(na)} unit="mg" hint={`상한 ${profile.target.naLimit ?? 2000}`}
-          tone={na > (profile.target.naLimit ?? 2000) ? 'bad' : 'good'} />
+        <Stat label="나트륨" value={String(na)} unit="mg" hint={`상한 ${naLimit}`}
+          tone={na > naLimit ? 'bad' : 'good'} />
       </div>
 
       {added.length > 0 && (
@@ -112,8 +137,9 @@ export function RecommendedMenu({
         <div className="space-y-2.5">
           {MEAL_SLOTS.map((slot) => {
             const entries = menu.meals[slot]
-            if (entries.length === 0) return null
-            const slotKcal = entries.reduce((s, e) => s + (foodContribution(e.food, e.servings).kcal ?? 0), 0)
+            const why = menu.slotNotes[slot]
+            // 비어 있어도 칸을 없애지 않는다. 왜 비었는지가 답이기 때문이다.
+            if (entries.length === 0 && !why) return null
             return (
               <div key={slot} className="card overflow-hidden">
                 <div className="flex items-center justify-between border-b border-stone-100 bg-stone-50/60 px-3.5 py-2">
@@ -121,8 +147,15 @@ export function RecommendedMenu({
                     {(() => { const I = SLOT_ICON[slot]; return <I className="h-4 w-4 text-stone-500" /> })()}
                     {slot}
                   </span>
-                  <span className="text-xs tabular-nums text-stone-400">{Math.round(slotKcal)} kcal</span>
+                  <span className="text-xs tabular-nums text-stone-400">
+                    {slotKcal[slot]} kcal · 나트륨 {slotNa[slot]} mg
+                  </span>
                 </div>
+                {why && (
+                  <p className="border-b border-stone-100 bg-warn-50/60 px-3.5 py-2.5 text-[11px] leading-relaxed text-stone-600">
+                    {why}
+                  </p>
+                )}
                 <ul className="divide-y divide-stone-100">
                   {entries.map((e) => {
                     const per = foodContribution(e.food, e.servings)
@@ -165,6 +198,33 @@ export function RecommendedMenu({
               </div>
             )
           })}
+        </div>
+      </Section>
+
+      <Section title="나트륨 합계 내역" desc="위 끼니별 숫자를 그대로 더한 값입니다. 손으로 더해 보셔도 같습니다.">
+        <div className="card divide-y divide-stone-100">
+          {MEAL_SLOTS.filter((s) => menu.meals[s].length > 0).map((s) => (
+            <div key={s} className="flex items-center justify-between px-3.5 py-2 text-xs">
+              <span className="text-stone-500">{s}</span>
+              <span className="tabular-nums text-stone-700">{slotNa[s].toLocaleString('ko-KR')} mg</span>
+            </div>
+          ))}
+          {suppNa > 0 && (
+            <div className="flex items-center justify-between px-3.5 py-2 text-xs">
+              <span className="text-stone-500">
+                영양제 {supps.length}종
+                <span className="ml-1 text-[10px] text-stone-400">끼니에 들어가지 않는 몫</span>
+              </span>
+              <span className="tabular-nums text-stone-700">{suppNa.toLocaleString('ko-KR')} mg</span>
+            </div>
+          )}
+          <div className="flex items-center justify-between bg-stone-50/60 px-3.5 py-2.5 text-sm font-bold">
+            <span className="text-stone-800">합계</span>
+            <span className={`tabular-nums ${na > naLimit ? 'text-danger-700' : 'text-stone-900'}`}>
+              {na.toLocaleString('ko-KR')} mg
+              <span className="ml-1.5 text-[11px] font-medium text-stone-400">/ 상한 {naLimit.toLocaleString('ko-KR')}</span>
+            </span>
+          </div>
         </div>
       </Section>
 

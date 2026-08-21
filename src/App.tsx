@@ -138,6 +138,7 @@ export default function App() {
             diary={state.diary}
             weights={state.weights}
             day={day}
+            supplements={state.supplements}
             onPickDay={setDay}
             onSetWeight={setWeight}
             onGoCompose={() => setTab('compose')}
@@ -148,6 +149,7 @@ export default function App() {
           <RecommendedMenu
             patient={state.patient}
             selected={selected}
+            supplements={state.supplements}
             onApply={(id, meal) => handleAdd(id, 1, meal)}
             onApplyAll={(items) => {
               items.forEach((i) => addFood(i.foodId, 1, i.meal))
