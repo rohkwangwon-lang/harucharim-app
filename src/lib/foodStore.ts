@@ -24,7 +24,7 @@ const STORE_MYCODE = 'myBarcodes'
 const STORE_SUPP = 'extSupps'
 
 /** 데이터 판을 올릴 때 이 값을 바꾸면 사용자 기기에서 다시 받는다 */
-export const DATA_VERSION = '2026-08-21e'
+export const DATA_VERSION = '2026-08-21f'
 
 export interface InstallProgress {
   phase: '식품 데이터' | '바코드 데이터' | '영양제 데이터' | '마무리'
@@ -215,6 +215,8 @@ export async function clearStore(): Promise<void> {
  * 그런 경우 한 번 이어 두면 다음부터 스캔으로 바로 찾을 수 있게 한다.
  */
 export async function linkBarcode(code: string, foodId: string, foodName: string) {
+  // 저장할 때도 숫자만 남긴다. 조회 쪽과 표기가 어긋나면 이어 둔 것을 못 찾는다.
+  code = String(code).replace(/\D/g, '') || code
   await tx(STORE_MYCODE, 'readwrite', (s) =>
     s.put({ b: code.trim(), foodId, name: foodName, at: Date.now() })
   )
@@ -370,9 +372,33 @@ export interface BarcodeHit {
 }
 
 /** 바코드로 제품을 찾는다. 영양성분은 품목보고번호로 이어붙인다. */
+/**
+ * 스캐너가 돌려준 코드로 시도해 볼 표기들.
+ *
+ * 같은 상품인데 표기가 갈린다.
+ *  - UPC-A 12 자리를 스캐너가 EAN-13 으로 읽으면 앞에 0 이 하나 붙는다
+ *  - 반대로 표에는 0 으로 시작하는 13 자리인데 스캐너가 12 자리로 주기도 한다
+ *  - EAN-8 은 13 자리로 채워 오는 기기가 있다
+ * 표에 있는데도 못 찾는 일이 없도록 이 변형들을 함께 본다.
+ */
+function barcodeVariants(raw: string): string[] {
+  const code = String(raw).replace(/\D/g, '')
+  if (!code) return []
+  const out = [code]
+  if (code.length === 13 && code.startsWith('0')) out.push(code.slice(1))
+  if (code.length === 12) out.push('0' + code)
+  if (code.length === 13 && code.startsWith('00000')) out.push(code.slice(5))
+  if (code.length === 8) out.push(code.padStart(13, '0'))
+  return [...new Set(out)]
+}
+
 export async function lookupBarcode(code: string): Promise<BarcodeHit | null> {
   // 직접 이어 둔 것이 있으면 그것을 우선한다
-  const mine = await getLinkedBarcode(code)
+  let mine: Awaited<ReturnType<typeof getLinkedBarcode>>
+  for (const v of barcodeVariants(code)) {
+    mine = await getLinkedBarcode(v)
+    if (mine) break
+  }
   if (mine) {
     const sc = await schema()
     let food: Food | undefined
@@ -384,9 +410,11 @@ export async function lookupBarcode(code: string): Promise<BarcodeHit | null> {
     return { barcode: code, productName: mine.name, reportNo: '', food, linkedByUser: true }
   }
 
-  const rec = await tx<{ b: string; n: string; p: string } | undefined>(STORE_BARCODE, 'readonly', (s) =>
-    s.get(code)
-  )
+  let rec: { b: string; n: string; p: string } | undefined
+  for (const v of barcodeVariants(code)) {
+    rec = await tx<{ b: string; n: string; p: string } | undefined>(STORE_BARCODE, 'readonly', (s) => s.get(v))
+    if (rec) break
+  }
   if (!rec) return null
 
   const sc = await schema()

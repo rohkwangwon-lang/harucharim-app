@@ -57,10 +57,26 @@ const seen = new Set()
 let matched = 0
 let nameMatched = 0
 
+/**
+ * 원본 바코드 문자열을 정리한다.
+ *
+ * 손으로 입력된 자료라 이런 것들이 섞여 있다.
+ *   '8801047501459ㅐ'          — 한글 자모가 붙음
+ *   '8801094 842406'            — 가운데 공백
+ *   '8801094123208\n8801094122409' — 한 칸에 두 개
+ * 그대로 두면 스캔해도 영영 안 맞는다. 숫자만 남기고, 두 개면 둘로 나눈다.
+ */
+function cleanCodes(raw) {
+  return String(raw)
+    .split(/[\n\r,;]+/)
+    .map((x) => x.replace(/\D/g, ''))
+    .filter((x) => x.length >= 8 && x.length <= 14)
+}
+
 for (const f of sources) {
   for (const r of JSON.parse(fs.readFileSync(f, 'utf8'))) {
-    const code = String(r.b).trim()
-    if (!code || seen.has(code)) continue
+  for (const code of cleanCodes(r.b)) {
+    if (seen.has(code)) continue
     seen.add(code)
     let n = String(r.n)
     let linked = reportNos.has(n)
@@ -69,8 +85,12 @@ for (const f of sources) {
       const alt = byName.get(normName(r.p))
       if (alt) { n = alt; linked = true; nameMatched++ }
     }
+    // 제품명이 없으면 스캔해도 "이게 뭐다" 를 말해 줄 수 없다. 넣지 않는다.
+    const name = String(r.p || '').trim()
+    if (!name) continue
     if (linked) matched++
-    out.push({ b: code, n, p: r.p })
+    out.push({ b: code, n, p: name })
+  }
   }
 }
 

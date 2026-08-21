@@ -10,7 +10,7 @@ import { Supplements } from './components/Supplements'
 import { TodayMeals } from './components/TodayMeals'
 import { RecommendedMenu } from './components/RecommendedMenu'
 import { Diary } from './components/Diary'
-import { IconDiary, IconMe, IconMeal, IconPill, IconSearch, IconSuggest } from './components/icons'
+import { IconDiary, IconGuide, IconMe, IconMeal, IconPill, IconSearch, IconSuggest, Logo } from './components/icons'
 import { label as dayLabel, today } from './lib/day'
 import { CancerGuide } from './components/CancerGuide'
 import { Exercise } from './components/Exercise'
@@ -25,7 +25,7 @@ import { displayName, useSession } from './lib/auth'
  * 모바일 하단 탭이 6개를 넘으면 글자가 잘리고 무엇이 어디 있는지 기억하기 어려워진다.
  * 그래서 성격이 비슷한 영양제·운동·가이드는 '관리' 안에서 나눈다.
  */
-type Tab = 'compose' | 'diary' | 'suggest' | 'search' | 'supp' | 'me'
+type Tab = 'compose' | 'diary' | 'suggest' | 'search' | 'supp' | 'care' | 'me'
 type CareView = 'exercise' | 'guide'
 
 const TABS: { id: Tab; label: string; Icon: typeof IconMeal }[] = [
@@ -34,6 +34,13 @@ const TABS: { id: Tab; label: string; Icon: typeof IconMeal }[] = [
   { id: 'suggest', label: '추천', Icon: IconSuggest },
   { id: 'search', label: '찾기', Icon: IconSearch },
   { id: 'supp', label: '영양제', Icon: IconPill },
+  /*
+   * 운동과 암종 가이드는 '내 정보' 안에 있었다.
+   * 내 정보는 키·몸무게를 고치고 문의를 넣는 자리인데,
+   * 매일 볼 운동 처방과 암종별 식이 지침이 그 아래 숨어 있었다.
+   * 성격이 다르므로 따로 낸다.
+   */
+  { id: 'care', label: '가이드', Icon: IconGuide },
   { id: 'me', label: '내 정보', Icon: IconMe }
 ]
 
@@ -52,7 +59,7 @@ export default function App() {
   const [tab, setTabState] = useState<Tab>('compose')
   /** 음식 찾기로 넘어갈 때 어느 끼니에 담을지 미리 정해 둔다 */
   const [pendingMeal, setPendingMeal] = useState<MealSlot>('점심')
-  const [care, setCare] = useState<CareView | 'setting'>('setting')
+  const [care, setCare] = useState<CareView>('exercise')
   const [toast, setToast] = useState<string | null>(null)
   const [asking, setAsking] = useState(false)
   const { user } = useSession()
@@ -95,9 +102,12 @@ export default function App() {
     <div className="mx-auto flex min-h-full max-w-2xl flex-col">
       <header className="safe-top sticky top-0 z-20 border-b border-stone-200 bg-white/90 backdrop-blur">
         <div className="flex items-center justify-between px-4 py-3">
-          <div>
-            <h1 className="text-base font-bold tracking-tight text-stone-900">온코푸드</h1>
-            <p className="text-[11px] text-stone-500">암 환자를 위한 식이·영양 도우미</p>
+          <div className="flex items-center gap-2.5">
+            <Logo className="h-9 w-9 shrink-0 text-brand-600" />
+            <div>
+              <h1 className="text-base font-bold tracking-tight text-stone-900">온코푸드</h1>
+              <p className="text-[11px] text-stone-500">암 환자를 위한 식이·영양 도우미</p>
+            </div>
           </div>
           <button
             onClick={() => setTab('me')}
@@ -181,27 +191,28 @@ export default function App() {
           />
         )}
 
-        {tab === 'me' && (
+        {tab === 'care' && (
           <>
             <div className="mb-4 flex gap-1 rounded-xl bg-stone-100 p-1">
-              {([['설정', 'setting'], ...CARE_VIEWS.map((v) => [v.label, v.id] as const)] as const).map(
-                ([lab, id]) => (
-                  <button
-                    key={id}
-                    onClick={() => { setCare(id as CareView | 'setting'); window.scrollTo({ top: 0 }) }}
-                    className={`flex-1 rounded-lg px-2 py-2 text-xs font-semibold transition-colors ${
-                      care === id ? 'bg-white text-brand-700 shadow-sm' : 'text-stone-500'
-                    }`}
-                  >
-                    {lab}
-                  </button>
-                )
-              )}
+              {CARE_VIEWS.map((v) => (
+                <button
+                  key={v.id}
+                  onClick={() => { setCare(v.id); window.scrollTo({ top: 0 }) }}
+                  className={`flex-1 rounded-lg px-2 py-2 text-xs font-semibold transition-colors ${
+                    care === v.id ? 'bg-white text-brand-700 shadow-sm' : 'text-stone-500'
+                  }`}
+                >
+                  {v.label}
+                </button>
+              ))}
             </div>
-
             {care === 'exercise' && <Exercise patient={state.patient} />}
             {care === 'guide' && <CancerGuide patient={state.patient} />}
-            {care === 'setting' && (
+          </>
+        )}
+
+        {tab === 'me' && (
+          <>
               <>
             <PatientPanel patient={state.patient} onChange={setPatient} />
             {isAdmin && <AdminInquiries />}
@@ -250,7 +261,6 @@ export default function App() {
             </button>
             <Disclaimer />
               </>
-            )}
           </>
         )}
       </main>
