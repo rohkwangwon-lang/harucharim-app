@@ -169,10 +169,32 @@ export default function App() {
                 찾으시는 음식·영양제가 없거나 내용이 이상하면 알려 주세요. 확인 후 답변드립니다.
               </p>
               {user && (
-                <p className="mt-2 text-xs text-slate-600">
-                  <span className="chip bg-brand-100 text-brand-700">로그인됨</span>{' '}
-                  {displayName(user)}
-                </p>
+                <>
+                  <p className="mt-2 text-xs text-slate-600">
+                    <span className="chip bg-brand-100 text-brand-700">로그인됨</span>{' '}
+                    {displayName(user)}
+                    {user.email ? ` · ${user.email}` : ''}
+                  </p>
+                  {!isAdmin && (
+                    <details className="mt-2">
+                      <summary className="cursor-pointer text-[11px] text-slate-400">
+                        관리자로 등록하려면
+                      </summary>
+                      <p className="mt-1.5 text-[11px] leading-relaxed text-slate-500">
+                        아래 계정 식별자를 <code className="rounded bg-slate-100 px-1">of_admins</code> 표에
+                        넣으면 이 계정이 관리자가 됩니다. 카카오 로그인은 이메일을 주지 않아
+                        식별자로 등록해야 합니다.
+                      </p>
+                      <p
+                        className="mt-1.5 cursor-pointer select-all break-all rounded-lg bg-slate-100 px-2.5 py-2 font-mono text-[11px] text-slate-700"
+                        onClick={() => navigator.clipboard?.writeText(user.id)}
+                        title="눌러서 복사"
+                      >
+                        {user.id}
+                      </p>
+                    </details>
+                  )}
+                </>
               )}
               <button className="btn-outline mt-3 w-full text-xs" onClick={() => setAsking(true)}>
                 문의 남기기 · 내 문의 보기
@@ -240,6 +262,17 @@ function Disclaimer() {
         <li>
           · 다만 <strong>문의를 보내실 때만</strong> 적어 주신 내용과 연락처가 서버로 전송됩니다.
           답변 외의 목적으로 쓰지 않으며, 문의하지 않으시면 아무것도 전송되지 않습니다.
+        </li>
+        <li>
+          ·{' '}
+          <a
+            href={`${import.meta.env.BASE_URL}privacy.html`}
+            target="_blank"
+            rel="noreferrer"
+            className="font-medium text-brand-700 underline decoration-brand-300 underline-offset-2"
+          >
+            개인정보처리방침 보기
+          </a>
         </li>
       </ul>
     </div>
