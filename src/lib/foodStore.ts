@@ -14,10 +14,12 @@ import type { PackedFoods } from '../data/foods/generated'
  */
 
 const DB_NAME = 'oncofood'
-const DB_VERSION = 1
+const DB_VERSION = 2
 const STORE_FOOD = 'extFoods'
 const STORE_BARCODE = 'barcodes'
 const STORE_META = 'meta'
+/** 사용자가 직접 이어 붙인 바코드 — 공공데이터에 없는 제품을 메운다 */
+const STORE_MYCODE = 'myBarcodes'
 
 /** 데이터 판을 올릴 때 이 값을 바꾸면 사용자 기기에서 다시 받는다 */
 export const DATA_VERSION = '2026-08-21'
@@ -54,6 +56,9 @@ function openDB(): Promise<IDBDatabase> {
       }
       if (!db.objectStoreNames.contains(STORE_META)) {
         db.createObjectStore(STORE_META, { keyPath: 'k' })
+      }
+      if (!db.objectStoreNames.contains(STORE_MYCODE)) {
+        db.createObjectStore(STORE_MYCODE, { keyPath: 'b' })
       }
     }
     req.onsuccess = () => resolve(req.result)
@@ -168,6 +173,35 @@ export async function clearStore(): Promise<void> {
   )
 }
 
+/* ─────────────────── 직접 이어 붙인 바코드 ─────────────────── */
+
+/**
+ * 공공데이터 바코드는 23만 건이지만 시중 제품을 다 담지 못한다.
+ * 검색으로는 찾아지는데 바코드만 없는 제품이 많다.
+ * 그런 경우 한 번 이어 두면 다음부터 스캔으로 바로 찾을 수 있게 한다.
+ */
+export async function linkBarcode(code: string, foodId: string, foodName: string) {
+  await tx(STORE_MYCODE, 'readwrite', (s) =>
+    s.put({ b: code.trim(), foodId, name: foodName, at: Date.now() })
+  )
+}
+
+export async function unlinkBarcode(code: string) {
+  await tx(STORE_MYCODE, 'readwrite', (s) => s.delete(code.trim()))
+}
+
+export async function getLinkedBarcode(code: string) {
+  return tx<{ b: string; foodId: string; name: string } | undefined>(STORE_MYCODE, 'readonly', (s) =>
+    s.get(code.trim())
+  )
+}
+
+export async function listLinkedBarcodes() {
+  return tx<{ b: string; foodId: string; name: string; at: number }[]>(STORE_MYCODE, 'readonly', (s) =>
+    s.getAll()
+  )
+}
+
 /* ────────────────────────── 조회 ────────────────────────── */
 
 let schemaCache: { cols: string[]; groups: string[]; tags: string[] } | null = null
@@ -244,10 +278,25 @@ export interface BarcodeHit {
   reportNo: string
   /** 영양성분까지 찾았으면 채워진다 */
   food?: Food
+  /** 사용자가 직접 이어 둔 것인지 */
+  linkedByUser?: boolean
 }
 
 /** 바코드로 제품을 찾는다. 영양성분은 품목보고번호로 이어붙인다. */
 export async function lookupBarcode(code: string): Promise<BarcodeHit | null> {
+  // 직접 이어 둔 것이 있으면 그것을 우선한다
+  const mine = await getLinkedBarcode(code)
+  if (mine) {
+    const sc = await schema()
+    let food: Food | undefined
+    if (mine.foodId.startsWith('kx-') && sc) {
+      const i = Number(mine.foodId.slice(3))
+      const rec = await tx<{ i: number; r: Row } | undefined>(STORE_FOOD, 'readonly', (s) => s.get(i))
+      if (rec) food = toFood(rec.i, rec.r, sc)
+    }
+    return { barcode: code, productName: mine.name, reportNo: '', food, linkedByUser: true }
+  }
+
   const rec = await tx<{ b: string; n: string; p: string } | undefined>(STORE_BARCODE, 'readonly', (s) =>
     s.get(code)
   )

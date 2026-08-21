@@ -7,7 +7,7 @@ import { foodContribution } from '../engine/nutrition'
 import { FoodDetail } from './FoodDetail'
 import { LevelDot } from './ui'
 import { BarcodeScanner } from './BarcodeScanner'
-import { getStatus, lookupBarcode, searchExtended } from '../lib/foodStore'
+import { getStatus, linkBarcode, lookupBarcode, searchExtended } from '../lib/foodStore'
 import { InquiryDialog } from './InquiryDialog'
 
 const GROUPS: (FoodGroup | '전체')[] = [
@@ -64,6 +64,8 @@ export function FoodSearch({
   const [hasExt, setHasExt] = useState(false)
   const [scanning, setScanning] = useState(false)
   const [scanMsg, setScanMsg] = useState<string | null>(null)
+  /** 스캔했지만 못 찾아서, 사용자가 직접 이어 주기를 기다리는 바코드 */
+  const [linking, setLinking] = useState<string | null>(null)
   const [scanResult, setScanResult] = useState<{
     kind: 'no-data' | 'not-found' | 'no-nutrition'
     code: string
@@ -203,6 +205,28 @@ export function FoodSearch({
           </p>
         )}
 
+        {linking && (
+          <div className="mt-1.5 rounded-xl border border-brand-300 bg-brand-50 px-3.5 py-3">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="font-mono text-[11px] text-brand-700">바코드 {linking}</p>
+                <p className="mt-1 text-xs font-semibold text-slate-900">
+                  이 바코드에 연결할 제품을 골라 주세요
+                </p>
+                <p className="mt-1 text-[11px] leading-relaxed text-slate-600">
+                  아래에서 제품을 찾아 누르시면 이 바코드와 이어집니다.
+                  다음부터는 스캔만으로 바로 찾을 수 있습니다.
+                </p>
+              </div>
+              <button
+                className="shrink-0 text-brand-700/60 hover:text-brand-700"
+                onClick={() => setLinking(null)}
+                aria-label="취소"
+              >✕</button>
+            </div>
+          </div>
+        )}
+
         {scanResult && (
           <div className="mt-1.5 rounded-xl border border-warn-200 bg-warn-50 px-3.5 py-3">
             <div className="flex items-start justify-between gap-2">
@@ -232,6 +256,14 @@ export function FoodSearch({
                 <span className="text-[11px] leading-relaxed text-slate-600">
                   제품명으로 비슷한 것을 찾아 두었습니다. 아래 목록을 확인해 보세요.
                 </span>
+              )}
+              {scanResult.kind === 'not-found' && (
+                <button
+                  className="btn-primary py-1.5 text-xs"
+                  onClick={() => { setLinking(scanResult.code); setScanResult(null) }}
+                >
+                  이름으로 찾아 연결하기
+                </button>
               )}
               <button
                 className="btn-outline py-1.5 text-xs"
@@ -334,8 +366,18 @@ export function FoodSearch({
             return (
               <li key={food.id}>
                 <button
-                  onClick={() => setDetail(food)}
-                  className="flex w-full items-center gap-3 px-3.5 py-2.5 text-left hover:bg-slate-50"
+                  onClick={async () => {
+                    if (linking) {
+                      await linkBarcode(linking, food.id, food.name)
+                      setLinking(null)
+                      setScanMsg(`${food.name} 을(를) 바코드 ${linking} 에 연결했습니다. 다음부터 스캔으로 바로 찾습니다.`)
+                      return
+                    }
+                    setDetail(food)
+                  }}
+                  className={`flex w-full items-center gap-3 px-3.5 py-2.5 text-left hover:bg-slate-50 ${
+                    linking ? 'hover:bg-brand-50' : ''
+                  }`}
                 >
                   <LevelDot level={verdict.level} />
                   <div className="min-w-0 flex-1">
@@ -414,6 +456,9 @@ export function FoodSearch({
 
             if (hit.food) {
               setDetail(hit.food)
+              if (hit.linkedByUser) {
+                setScanMsg(`직접 연결해 두신 제품입니다 — ${hit.productName}`)
+              }
               return
             }
 
