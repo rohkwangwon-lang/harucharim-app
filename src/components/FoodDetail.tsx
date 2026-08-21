@@ -22,15 +22,16 @@ export function FoodDetail({
   defaultMeal?: MealSlot
 }) {
   const [meal, setMeal] = useState<MealSlot>(defaultMeal ?? '점심')
+  const [servings, setServings] = useState(1)
   const verdict = evaluateFood(food, patient, 1)
-  const per = foodContribution(food, 1)
+  const per = foodContribution(food, servings)
 
   const shown = NUTRIENT_META.filter((m) => typeof per[m.key] === 'number' && per[m.key]! > 0)
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
       <div className="absolute inset-0 bg-slate-900/40" onClick={onClose} />
-      <div className="relative flex max-h-[88vh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl bg-white sm:rounded-3xl">
+      <div className="relative flex max-h-[85vh] max-h-[85dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl bg-white sm:rounded-3xl">
         {/* 헤더 */}
         <div className="shrink-0 border-b border-slate-100 px-5 pb-3 pt-4">
           <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-slate-200 sm:hidden" />
@@ -68,6 +69,47 @@ export function FoodDetail({
               {food.note}
             </p>
           )}
+        </div>
+
+        {/* 담기 조작 — 스크롤과 상관없이 늘 보이도록 헤더 바로 아래 둔다 */}
+        <div className="shrink-0 border-b border-slate-100 bg-slate-50/60 px-5 py-3">
+          <div className="flex items-center gap-2">
+            <span className="shrink-0 text-[11px] font-medium text-slate-500">양</span>
+            <div className="flex items-center gap-1">
+              <button
+                className="h-8 w-8 rounded-lg bg-white text-slate-600 ring-1 ring-slate-200 disabled:opacity-30"
+                disabled={servings <= 0.5}
+                onClick={() => setServings((v) => Math.max(0.5, Math.round((v - 0.5) * 10) / 10))}
+              >−</button>
+              <span className="w-16 text-center text-sm font-semibold tabular-nums text-slate-900">
+                {servings}인분
+              </span>
+              <button
+                className="h-8 w-8 rounded-lg bg-white text-slate-600 ring-1 ring-slate-200"
+                onClick={() => setServings((v) => Math.round((v + 0.5) * 10) / 10)}
+              >＋</button>
+            </div>
+            <span className="ml-auto text-right text-[11px] leading-tight text-slate-500">
+              {Math.round(food.serving.g * servings)} g<br />
+              <span className="font-medium text-slate-700">{Math.round(per.kcal ?? 0)} kcal</span>
+            </span>
+          </div>
+
+          <div className="mt-2 flex gap-1.5">
+            {MEAL_SLOTS.map((m) => (
+              <button
+                key={m}
+                onClick={() => setMeal(m)}
+                className={`flex-1 rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors ${
+                  meal === m
+                    ? 'border-brand-500 bg-brand-500 text-white'
+                    : 'border-slate-300 bg-white text-slate-600'
+                }`}
+              >
+                {m}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* 본문 */}
@@ -111,7 +153,7 @@ export function FoodDetail({
 
           {/* 성분표 */}
           <h4 className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
-            1회 제공량 ({food.serving.g} g) 기준 영양성분
+{servings}인분 ({Math.round(food.serving.g * servings)} g) 기준 영양성분
           </h4>
           <div className="overflow-hidden rounded-xl border border-slate-200">
             <table className="w-full text-sm">
@@ -147,28 +189,11 @@ export function FoodDetail({
 
         {/* 하단 액션 */}
         <div className="safe-bottom shrink-0 border-t border-slate-100 bg-white px-5 py-3">
-          <div className="mb-2.5">
-            <p className="mb-1.5 text-[11px] font-medium text-slate-500">어느 끼니로 담을까요?</p>
-            <div className="flex gap-1.5">
-              {MEAL_SLOTS.map((m) => (
-                <button
-                  key={m}
-                  onClick={() => setMeal(m)}
-                  className={`flex-1 rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors ${
-                    meal === m
-                      ? 'border-brand-500 bg-brand-500 text-white'
-                      : 'border-slate-300 bg-white text-slate-600'
-                  }`}
-                >
-                  {m}
-                </button>
-              ))}
-            </div>
-          </div>
           <div className="flex gap-2">
             <button className="btn-ghost flex-1" onClick={onClose}>닫기</button>
-            <button className="btn-outline" onClick={() => onAdd(0.5, meal)}>0.5인분</button>
-            <button className="btn-primary flex-1" onClick={() => onAdd(1, meal)}>{meal}에 담기</button>
+            <button className="btn-primary flex-[2]" onClick={() => onAdd(servings, meal)}>
+              {meal}에 {servings}인분 담기
+            </button>
           </div>
         </div>
       </div>

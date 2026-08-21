@@ -14,7 +14,7 @@ import type { PackedFoods } from '../data/foods/generated'
  */
 
 const DB_NAME = 'oncofood'
-const DB_VERSION = 3
+const DB_VERSION = 4
 const STORE_FOOD = 'extFoods'
 const STORE_BARCODE = 'barcodes'
 const STORE_META = 'meta'
@@ -24,7 +24,7 @@ const STORE_MYCODE = 'myBarcodes'
 const STORE_SUPP = 'extSupps'
 
 /** 데이터 판을 올릴 때 이 값을 바꾸면 사용자 기기에서 다시 받는다 */
-export const DATA_VERSION = '2026-08-21b'
+export const DATA_VERSION = '2026-08-21c'
 
 export interface InstallProgress {
   phase: '식품 데이터' | '바코드 데이터' | '영양제 데이터' | '마무리'
@@ -66,6 +66,7 @@ function openDB(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains(STORE_SUPP)) {
         const s = db.createObjectStore(STORE_SUPP, { keyPath: 'i' })
         s.createIndex('nm', 'nm', { multiEntry: true })
+        s.createIndex('no', 'no', { unique: false })
       }
     }
     req.onsuccess = () => resolve(req.result)
@@ -174,7 +175,7 @@ export async function install(onProgress?: (p: InstallProgress) => void): Promis
         const store = t.objectStore(STORE_SUPP)
         slice.forEach((row, k) => {
           const i = start + k
-          store.put({ i, nm: tokens(row[0]), r: row })
+          store.put({ i, nm: tokens(row[0]), no: row[3] || '', r: row })
         })
         t.oncomplete = () => resolve()
         t.onerror = () => reject(t.error)
@@ -340,6 +341,25 @@ export async function searchSupplements(query: string, limit = 40): Promise<ExtS
     }
     cur.onerror = () => reject(cur.error)
   })
+}
+
+/**
+ * 바코드로 건강기능식품을 찾는다.
+ *
+ * 바코드 표에는 신고번호가 함께 들어 있다. 식품에서 못 찾으면
+ * 같은 번호로 영양제 쪽을 한 번 더 뒤진다.
+ */
+export async function lookupSupplementByBarcode(code: string): Promise<ExtSupplement | null> {
+  const rec = await tx<{ b: string; n: string; p: string } | undefined>(STORE_BARCODE, 'readonly', (s) =>
+    s.get(code.trim())
+  )
+  if (!rec?.n) return null
+  const hit = await tx<{ i: number; r: [string, string, string, string, string] } | undefined>(
+    STORE_SUPP, 'readonly', (s) => s.index('no').get(rec.n)
+  )
+  if (!hit) return null
+  const [name, maker, fn, no, use] = hit.r
+  return { id: `sx-${hit.i}`, name, maker, fn, reportNo: no, use }
 }
 
 export interface BarcodeHit {

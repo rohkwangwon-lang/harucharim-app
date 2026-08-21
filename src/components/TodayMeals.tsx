@@ -4,7 +4,7 @@ import { MEAL_SLOTS } from '../data/types'
 import { FOOD_BY_ID } from '../data/foods'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
 import { CANCER_BY_ID } from '../data/cancers'
-import { buildDayMenu, currentSeason } from '../engine/menu'
+import { buildDayMenu, currentSeason, ideasFromIngredients } from '../engine/menu'
 import { evaluateSelection } from '../engine/rules'
 import { foodContribution, personalTarget, sumIntake } from '../engine/nutrition'
 import { BASE_EXERCISE, CONDITION_EXERCISE_NOTES, EXERCISE_BY_CANCER } from '../data/exercise'
@@ -50,6 +50,8 @@ export function TodayMeals({
   const totals = useMemo(() => sumIntake(selected, supps), [selected, supplements])
   const evalResult = useMemo(() => evaluateSelection(selected, patient), [selected, patient])
   const menu = useMemo(() => buildDayMenu(selected, patient), [selected, patient])
+  /** 담아 두신 식재료로 만들 수 있는 요리 */
+  const ideas = useMemo(() => ideasFromIngredients(selected, patient), [selected, patient])
 
   const kcal = Math.round(totals.kcal ?? 0)
   const protein = Math.round(totals.protein ?? 0)
@@ -103,8 +105,11 @@ export function TodayMeals({
           <p className="text-xs leading-relaxed text-slate-600">
             {filledSlots.length === 0 ? (
               <>
-                <strong className="text-slate-800">한 끼만 넣으셔도 됩니다.</strong> 드신 것이나 드실 것을 하나만
-                담아 주시면, 나머지 끼니는 {profile.name}에 맞춰 <strong>저희가 채워 추천</strong>해 드립니다.
+                <strong className="text-slate-800">나만의 식단을 구성해 보세요.</strong> 아침·점심·저녁·간식 중
+                드시고 싶은 메뉴를 찾아 채우시면 <strong>검증하고 평가해 드립니다.</strong>
+                <br />
+                전부 채우지 않으셔도 됩니다. 필요한 끼니만 채우시면 나머지는{' '}
+                <strong>영양을 따져 {profile.name}에 맞는 식단으로 추천</strong>해 드립니다.
               </>
             ) : (
               <>
@@ -115,6 +120,51 @@ export function TodayMeals({
             )}
           </p>
         </div>
+      )}
+
+      {/* 담은 식재료로 만들 수 있는 요리 */}
+      {ideas.length > 0 && (
+        <Section
+          title="담으신 재료로 이런 메뉴는 어떠세요"
+          desc="고르신 식재료를 쓰는 요리입니다. 나트륨이 낮고 이 암종에 맞는 것부터 보여 드립니다."
+        >
+          <div className="space-y-2.5">
+            {ideas.map((idea) => (
+              <div key={idea.source.id} className="card overflow-hidden">
+                <div className="border-b border-slate-100 bg-slate-50/60 px-3.5 py-2">
+                  <span className="text-sm font-bold text-slate-800">{idea.source.name}</span>
+                  <span className="ml-1.5 text-[11px] text-slate-400">으로 만들 수 있는 요리</span>
+                </div>
+                <ul className="divide-y divide-slate-100">
+                  {idea.dishes.map((d) => {
+                    const per = foodContribution(d, 1)
+                    return (
+                      <li key={d.id} className="flex items-center gap-2 px-3.5 py-2.5">
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium text-slate-900">{d.name}</p>
+                          <p className="truncate text-[11px] text-slate-400">
+                            {d.serving.label} · {Math.round(per.kcal ?? 0)} kcal · 나트륨 {Math.round(per.na ?? 0)} mg
+                          </p>
+                        </div>
+                        <div className="flex shrink-0 gap-1">
+                          {MEAL_SLOTS.slice(0, 3).map((m) => (
+                            <button
+                              key={m}
+                              className="rounded-lg bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-600 hover:bg-brand-100 hover:text-brand-700"
+                              onClick={() => onApplySuggestion(d.id, m)}
+                            >
+                              {m}
+                            </button>
+                          ))}
+                        </div>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </Section>
       )}
 
       {/* 추천 식단으로 건너가는 길 */}

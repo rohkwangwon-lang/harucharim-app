@@ -7,7 +7,8 @@ import { REF_BY_ID } from '../data/references'
 import { EvidenceBadge, LevelBadge, LevelDot, Section } from './ui'
 import { adviseSupplements, type AdviceLevel } from '../engine/supplementAdvice'
 import { nutritionRisk } from '../engine/nutrition'
-import { getStatus, searchSupplements, type ExtSupplement } from '../lib/foodStore'
+import { getStatus, lookupSupplementByBarcode, searchSupplements, type ExtSupplement } from '../lib/foodStore'
+import { BarcodeScanner } from './BarcodeScanner'
 import { judgeProduct } from '../engine/ingredientVerdict'
 
 const CATEGORIES: (SupplementCategory | '전체')[] = [
@@ -31,6 +32,9 @@ export function Supplements({
   const [q, setQ] = useState('')
   const [market, setMarket] = useState<ExtSupplement[]>([])
   const [hasExt, setHasExt] = useState(false)
+
+  const [scanning, setScanning] = useState(false)
+  const [scanMsg, setScanMsg] = useState<string | null>(null)
 
   useEffect(() => { getStatus().then((st) => setHasExt(st.installed && st.suppCount > 0)) }, [])
   useEffect(() => {
@@ -92,13 +96,49 @@ export function Supplements({
             : '내 정보에서 상품 데이터를 받으시면 시판 제품 45,618종을 검색할 수 있습니다.'
         }
       >
-        <input
-          className="input mb-3"
-          placeholder={hasExt ? '제품명으로 검색 — 예: 락토핏, 오메가3, 홍삼' : '먼저 상품 데이터를 받아 주세요'}
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          disabled={!hasExt}
-        />
+        <div className="mb-3 flex gap-1.5">
+          <input
+            className="input flex-1"
+            placeholder={hasExt ? '제품명으로 검색 — 예: 락토핏, 오메가3, 홍삼' : '먼저 상품 데이터를 받아 주세요'}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            disabled={!hasExt}
+          />
+          <button
+            className="btn-outline shrink-0 px-3"
+            disabled={!hasExt}
+            onClick={() => { setScanMsg(null); setScanning(true) }}
+            title="영양제 통의 바코드를 찍어 찾습니다"
+          >
+            바코드
+          </button>
+        </div>
+
+        {scanMsg && (
+          <p className="mb-3 rounded-lg bg-warn-50 px-3 py-2 text-[11px] leading-relaxed text-warn-700">
+            {scanMsg}
+          </p>
+        )}
+
+        {scanning && (
+          <BarcodeScanner
+            onClose={() => setScanning(false)}
+            onDetect={async (code) => {
+              setScanning(false)
+              const hit = await lookupSupplementByBarcode(code)
+              if (hit) {
+                setMarket([hit])
+                setQ(hit.name)
+                setScanMsg(null)
+              } else {
+                setScanMsg(
+                  `바코드 ${code} 로 등록된 건강기능식품을 찾지 못했습니다. ` +
+                  '제품 통에 적힌 이름으로 검색해 보세요.'
+                )
+              }
+            }}
+          />
+        )}
 
         {market.length > 0 && (
           <div className="space-y-2">

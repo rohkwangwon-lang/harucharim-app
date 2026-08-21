@@ -12,6 +12,7 @@ import path from 'node:path'
 
 const ROOT = path.resolve(import.meta.dirname, '..')
 const RAW = path.join(ROOT, 'data/raw-barcode')
+const RAW2 = path.join(ROOT, 'data/raw-barcode-i2570')
 const EXT = path.join(ROOT, 'public/data/foods-extended.json')
 const CORE = path.join(ROOT, 'src/data/foods/generated-core.json')
 
@@ -41,14 +42,23 @@ for (const f of [EXT, CORE]) {
 }
 console.log(`영양 데이터: 품목보고번호 ${reportNos.size.toLocaleString()}개 · 제품명 ${byName.size.toLocaleString()}개`)
 
-const files = fs.readdirSync(RAW).filter((f) => f.endsWith('.json')).sort()
+/** C005 와 I2570 두 표를 함께 읽는다. 서로 겹치지 않는 제품이 있다. */
+const sources = []
+for (const dir of [RAW, RAW2]) {
+  if (!fs.existsSync(dir)) continue
+  for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.json')).sort()) {
+    sources.push(path.join(dir, f))
+  }
+}
+console.log(`원본 ${sources.length}개 파일`)
+
 const out = []
 const seen = new Set()
 let matched = 0
 let nameMatched = 0
 
-for (const f of files) {
-  for (const r of JSON.parse(fs.readFileSync(path.join(RAW, f), 'utf8'))) {
+for (const f of sources) {
+  for (const r of JSON.parse(fs.readFileSync(f, 'utf8'))) {
     const code = String(r.b).trim()
     if (!code || seen.has(code)) continue
     seen.add(code)

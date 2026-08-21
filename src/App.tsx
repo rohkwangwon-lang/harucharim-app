@@ -22,19 +22,19 @@ import { displayName, useSession } from './lib/auth'
  * 모바일 하단 탭이 6개를 넘으면 글자가 잘리고 무엇이 어디 있는지 기억하기 어려워진다.
  * 그래서 성격이 비슷한 영양제·운동·가이드는 '관리' 안에서 나눈다.
  */
-type Tab = 'compose' | 'suggest' | 'search' | 'care' | 'me'
-type CareView = 'supplement' | 'exercise' | 'guide'
+type Tab = 'compose' | 'suggest' | 'search' | 'supp' | 'care' | 'me'
+type CareView = 'exercise' | 'guide'
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'compose', label: '내 식단', icon: '🍱' },
   { id: 'suggest', label: '추천 식단', icon: '✨' },
   { id: 'search', label: '음식 찾기', icon: '🔍' },
-  { id: 'care', label: '관리', icon: '💊' },
+  { id: 'supp', label: '영양제', icon: '💊' },
+  { id: 'care', label: '가이드', icon: '🏃' },
   { id: 'me', label: '내 정보', icon: '👤' }
 ]
 
 const CARE_VIEWS: { id: CareView; label: string }[] = [
-  { id: 'supplement', label: '영양제' },
   { id: 'exercise', label: '운동' },
   { id: 'guide', label: '암종 가이드' }
 ]
@@ -48,7 +48,7 @@ export default function App() {
   const [tab, setTabState] = useState<Tab>('compose')
   /** 음식 찾기로 넘어갈 때 어느 끼니에 담을지 미리 정해 둔다 */
   const [pendingMeal, setPendingMeal] = useState<MealSlot>('점심')
-  const [care, setCare] = useState<CareView>('supplement')
+  const [care, setCare] = useState<CareView>('exercise')
   const [toast, setToast] = useState<string | null>(null)
   const [asking, setAsking] = useState(false)
   const { user } = useSession()
@@ -148,6 +148,14 @@ export default function App() {
           />
         )}
 
+        {tab === 'supp' && (
+          <Supplements
+            patient={state.patient}
+            taking={state.supplements}
+            onToggle={toggleSupplement}
+          />
+        )}
+
         {tab === 'care' && (
           <>
             <div className="mb-4 flex gap-1 rounded-xl bg-slate-100 p-1">
@@ -163,13 +171,6 @@ export default function App() {
                 </button>
               ))}
             </div>
-            {care === 'supplement' && (
-              <Supplements
-                patient={state.patient}
-                taking={state.supplements}
-                onToggle={toggleSupplement}
-              />
-            )}
             {care === 'exercise' && <Exercise patient={state.patient} />}
             {care === 'guide' && <CancerGuide patient={state.patient} />}
           </>

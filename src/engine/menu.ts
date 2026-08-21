@@ -122,6 +122,69 @@ export function suggestAlternative(
   return scored.sort((a, b) => b.score - a.score)[0].food
 }
 
+/**
+ * 식재료 이름에서 요리 이름과 맞춰 볼 핵심어를 뽑는다.
+ *   "두부(부침용)" → "두부",  "시금치(데친 것)" → "시금치"
+ */
+function coreWord(name: string): string {
+  return name
+    .replace(/\([^)]*\)/g, '')
+    .replace(/(생것|삶은 것|데친 것|찐 것|말린 것|가루|분말)/g, '')
+    .trim()
+}
+
+export interface IngredientIdea {
+  /** 사용자가 담은 식재료 */
+  source: Food
+  /** 그 식재료로 만들 수 있는 요리들 */
+  dishes: Food[]
+}
+
+/**
+ * 담은 식재료를 쓰는 요리를 찾아 준다.
+ *
+ * 두부를 담아 두면 "그래서 두부로 뭘 해 먹지" 가 다음 질문이다.
+ * 이름이 겹치는 요리를 찾아 그 답을 미리 내놓는다.
+ */
+export function ideasFromIngredients(
+  chosen: SelectedItem[],
+  patient: PatientContext,
+  limitPerItem = 4
+): IngredientIdea[] {
+  const cached = { rules: activeRules(patient), interactions: activeInteractions(patient) }
+  const cuisines: Cuisine[] = patient.cuisines && patient.cuisines.length ? patient.cuisines : ['한식']
+  const chosenIds = new Set(chosen.map((c) => c.foodId))
+  const out: IngredientIdea[] = []
+
+  for (const item of chosen) {
+    const src = FOOD_BY_ID[item.foodId]
+    if (!src || src.form !== 'ingredient') continue
+
+    const key = coreWord(src.name)
+    if (key.length < 2) continue
+
+    const dishes = CURATED_FOODS.filter((f) => {
+      if (f.id === src.id || chosenIds.has(f.id)) return false
+      if (f.form === 'ingredient') return false
+      if (!f.name.includes(key)) return false
+      if (!allowedCuisine(f, cuisines)) return false
+      const v = evaluateFood(f, patient, 1, cached)
+      return v.level !== 'avoid'
+    })
+      .sort((a, b) => {
+        // 이 암종에서 권장되는 것을 먼저
+        const av = evaluateFood(a, patient, 1, cached).hits.filter((h) => h.rule.level === 'prefer').length
+        const bv = evaluateFood(b, patient, 1, cached).hits.filter((h) => h.rule.level === 'prefer').length
+        if (av !== bv) return bv - av
+        return (a.per100.na ?? 0) - (b.per100.na ?? 0)
+      })
+      .slice(0, limitPerItem)
+
+    if (dishes.length > 0) out.push({ source: src, dishes })
+  }
+  return out
+}
+
 /** pickFillers 가 돌려주는 한 건 */
 interface Filler {
   food: Food
@@ -317,6 +380,16 @@ function pickFillers(
     if (!allowedCuisine(f, cuisines)) continue
     // 사람이 한 번에 먹는 양으로 보기 어려운 것은 제외한다
     if (f.serving.g < 10) continue
+    /*
+     * 끼니로 제안하는 자리이므로 '요리'만 고른다.
+     * "대두(삶은 것)", "냉이", "아마씨" 같은 식재료를 끼니로 내놓으면
+     * 그걸 어떻게 먹으라는 말인지 알 수 없다.
+     * 다만 영양보충 음료처럼 그대로 먹는 것은 예외로 둔다.
+     */
+    if (f.form === 'ingredient' && f.group !== '경장영양·환자식') continue
+    // "(삶은 것)", "(데친 것)" 처럼 조리 상태만 적힌 이름은 재료에 가깝다.
+    // 간식 자리에 "밤(삶은 것)" 이 올라오면 메뉴로 읽히지 않는다.
+    if (/\((생것|삶은 것|데친 것|찐 것|말린 것|불린 것|생)\)/.test(f.name)) continue
 
     const v = evaluateFood(f, patient, 1, cached)
     if (v.level === 'avoid' || v.level === 'caution') continue
