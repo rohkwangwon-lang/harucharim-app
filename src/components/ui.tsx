@@ -143,3 +143,139 @@ export function Meter({
     </div>
   )
 }
+
+/* ────────────────── 영양 상태 한눈에 보기 ────────────────── */
+
+/**
+ * 한 영양소가 지금 어느 상태인가.
+ *
+ * 숫자만 보여 주면 그것이 좋은 상태인지 아닌지 읽는 사람이 판단해야 한다.
+ * 1,723 kcal 이 충분한지 아닌지는 목표를 외우고 있어야 알 수 있다.
+ * 그래서 판정을 앱이 먼저 내고, 색과 글자로 함께 말한다.
+ */
+export type NutrientState = 'none' | 'low' | 'ok' | 'high' | 'over'
+
+export const NUTRIENT_STATE: Record<
+  NutrientState,
+  { label: string; chip: string; fill: string; text: string }
+> = {
+  none: { label: '기록 없음', chip: 'bg-stone-100 text-stone-500', fill: 'bg-stone-300', text: 'text-stone-400' },
+  low:  { label: '부족',     chip: 'bg-warn-100 text-warn-800',    fill: 'bg-warn-500',  text: 'text-warn-800' },
+  ok:   { label: '적정',     chip: 'bg-brand-100 text-brand-800',  fill: 'bg-brand-500', text: 'text-stone-900' },
+  high: { label: '주의',     chip: 'bg-warn-100 text-warn-800',    fill: 'bg-warn-500',  text: 'text-warn-800' },
+  over: { label: '넘음',     chip: 'bg-danger-100 text-danger-800', fill: 'bg-danger-500', text: 'text-danger-800' }
+}
+
+/** 값과 목표 범위로 상태를 정한다. limit 이 있으면 그 위는 '넘음'이다. */
+export function nutrientState(
+  value: number,
+  min: number,
+  max: number,
+  opts?: { limit?: number; empty?: boolean; overOk?: boolean }
+): NutrientState {
+  if (opts?.empty) return 'none'
+  if (opts?.limit !== undefined) {
+    if (value > opts.limit) return 'over'
+    // 상한의 85 % 를 넘었으면 '적정'이라고 말하면 안 된다.
+    // 1,750/2,000 을 초록으로 칠하면 안심하고 국물을 마시게 된다.
+    return value > opts.limit * 0.85 ? 'high' : 'ok'
+  }
+  if (value < min) return 'low'
+  /*
+   * 넘어도 괜찮은 것이 있다. 단백질이 그렇다 —
+   * 치료 중에는 더 드시는 편이 낫고, 목표 상단은 "이만큼은 드세요" 의 위쪽 눈금일 뿐이다.
+   * 88 g 을 '주의'로 칠하면 잘 드신 날에 경고를 보게 된다.
+   * 다만 신장 기능이 떨어진 분에게는 반대이므로, 그때는 이 예외를 끈다.
+   */
+  if (opts?.overOk) return 'ok'
+  if (value > max * 1.15) return 'over'
+  if (value > max) return 'high'
+  return 'ok'
+}
+
+/**
+ * 영양소 한 줄.
+ *
+ * 목표 구간을 띠로 깔고 그 위에 지금 값을 채운다.
+ * 목표에 못 미치면 띠가 비어 보이고, 넘으면 띠 밖으로 삐져나온다 — 눈으로 바로 읽힌다.
+ */
+export function NutrientRow({
+  label, value, unit, min, max, limit, state, hint
+}: {
+  label: string
+  value: number
+  unit: string
+  /** 목표 하단 */ min: number
+  /** 목표 상단 */ max: number
+  /** 상한 (나트륨처럼 넘으면 안 되는 것) */ limit?: number
+  state: NutrientState
+  hint?: string
+}) {
+  const st = NUTRIENT_STATE[state]
+  // 눈금의 끝. 목표보다 많이 먹은 날도 막대가 화면 안에 들어와야 한다.
+  const scale = Math.max((limit ?? max) * 1.3, value * 1.08, 1)
+  const pct = (n: number) => `${Math.min(100, Math.max(0, (n / scale) * 100))}%`
+
+  return (
+    <div className="px-3.5 py-2.5">
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="flex items-center gap-1.5 text-xs font-semibold text-stone-700">
+          {label}
+          <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${st.chip}`}>{st.label}</span>
+        </span>
+        <span className={`text-sm font-bold tabular-nums ${st.text}`}>
+          {Math.round(value).toLocaleString('ko-KR')}
+          <span className="ml-0.5 text-[10px] font-medium text-stone-400">{unit}</span>
+        </span>
+      </div>
+
+      <div className="relative mt-1.5 h-2.5 w-full overflow-hidden rounded-full bg-stone-100">
+        {/* 목표 구간 */}
+        <div
+          className="absolute top-0 h-full bg-brand-100"
+          style={{ left: pct(min), width: `calc(${pct(max)} - ${pct(min)})` }}
+          aria-hidden
+        />
+        {/* 지금 값 */}
+        <div className={`absolute top-0 h-full rounded-full ${st.fill}`} style={{ width: pct(value) }} />
+        {/* 상한선 */}
+        {limit !== undefined && (
+          <div className="absolute top-0 h-full w-0.5 bg-danger-500" style={{ left: pct(limit) }} aria-hidden />
+        )}
+      </div>
+
+      <div className="mt-1 text-[10px] text-stone-400">
+        {limit !== undefined ? `상한 ${limit.toLocaleString('ko-KR')} ${unit}` : `목표 ${min.toLocaleString('ko-KR')}~${max.toLocaleString('ko-KR')} ${unit}`}
+        {hint && ` · ${hint}`}
+      </div>
+    </div>
+  )
+}
+
+/**
+ * 여러 줄을 묶고, 맨 위에 한 문장으로 결론을 낸다.
+ * 화면을 열자마자 "오늘 뭐가 문제인지"가 먼저 보여야 한다.
+ */
+export function NutrientPanel({
+  states, children
+}: { states: NutrientState[]; children: React.ReactNode }) {
+  const bad = states.filter((s) => s === 'over').length
+  const low = states.filter((s) => s === 'low').length
+  const high = states.filter((s) => s === 'high').length
+  const none = states.every((s) => s === 'none')
+
+  const headline = none
+    ? { text: '아직 담으신 것이 없습니다', cls: 'bg-stone-100 text-stone-600' }
+    : bad > 0
+      ? { text: `${bad}가지가 기준을 넘었습니다`, cls: 'bg-danger-100 text-danger-800' }
+      : low + high > 0
+        ? { text: `${low > 0 ? `${low}가지 부족` : ''}${low > 0 && high > 0 ? ' · ' : ''}${high > 0 ? `${high}가지 주의` : ''}`, cls: 'bg-warn-100 text-warn-800' }
+        : { text: '모두 적정 범위입니다', cls: 'bg-brand-100 text-brand-800' }
+
+  return (
+    <div className="card mb-3 overflow-hidden">
+      <div className={`px-3.5 py-2 text-xs font-bold ${headline.cls}`}>{headline.text}</div>
+      <div className="divide-y divide-stone-100">{children}</div>
+    </div>
+  )
+}

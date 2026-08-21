@@ -55,7 +55,7 @@ const SLOT_BY_GROUP: Record<FoodGroup, MealSlot[]> = {
   '견과·종실': ['간식'],
   채소: ['점심', '저녁'],
   '해조·버섯': ['아침', '점심', '저녁'],
-  과일: ['간식'],
+  과일: ['아침', '간식'],
   육류: ['점심', '저녁'],
   '가금류·난류': ['아침', '점심', '저녁'],
   어패류: ['점심', '저녁'],
@@ -211,16 +211,6 @@ export function ideasFromIngredients(
   return out
 }
 
-/** pickFillers 가 돌려주는 한 건 */
-interface Filler {
-  food: Food
-  servings: number
-  contribution: string
-  ruleTitle: string
-  evidence: EvidenceLevel
-  refIds: string[]
-}
-
 /**
  * 하루 메뉴를 구성한다.
  *
@@ -299,30 +289,75 @@ export function buildDayMenu(
 
   // 3) 부족분 채우기
   const notes: string[] = []
-  const cur0 = running()
-  const kcalGap = target.kcal[0] - (cur0.kcal ?? 0)
-  const proteinGap = target.protein[0] - (cur0.protein ?? 0)
-  const fiberGap = (profile.target.fiberTarget?.[0] ?? 20) - (cur0.fiber ?? 0)
-  const naBudget = naLimit - (cur0.na ?? 0)
+  const fiber = fiberGoal(patient, profile)
+  const fiberTarget = fiber.range[0]
 
-  if (kcalGap > 100 || proteinGap > 10 || fiberGap > 5) {
-    const fillers = pickFillers(
-      candidates, kcalGap, proteinGap, fiberGap, naBudget, used,
-      // 목표 상단을 넘겨서까지 채우지는 않는다
-      target.kcal[1] - (cur0.kcal ?? 0)
-    )
-    for (const f of fillers) {
-      const slot = placeIn(slotsFor(f.food), meals)
-      if (!slot) continue
-      meals[slot].push({
-        food: f.food, servings: f.servings, origin: 'added',
-        contribution: f.contribution, ruleTitle: f.ruleTitle,
-        evidence: f.evidence, refIds: f.refIds,
-        seasonal: isSeasonal(f.food, season)
-      })
-      foodTotals = addTotals(foodTotals, foodContribution(f.food, f.servings))
-      used.add(f.food.id)
+  /*
+   * 목표에 닿을 때까지 한 가지씩 고른다.
+   *
+   * 예전에는 "단백질 3개 → 섬유 3개 → 열량 1개" 로 칸을 정해 두고 채웠다.
+   * 그래서 앞선 몇 가지가 나트륨 예산을 다 써 버리면 뒤가 통째로 막혔다.
+   * 실제로 처음부터 구성한 하루의 90 % 가 열량 미달, 98 % 가 식이섬유 미달이었고,
+   * 쓸 수 있는 후보 44 종이 남아 있는데도 멈춰 있었다.
+   *
+   * 이제는 매번 "지금 가장 모자란 것을 나트륨 대비 가장 잘 채우는 것"을 고른다.
+   * 한 가지가 남은 나트륨 예산의 절반 넘게 가져가지 못하게 막아, 뒤에 올 것의 자리를 남긴다.
+   */
+  const groupCount = new Map<string, number>()
+  for (const k of keep) groupCount.set(k.food.group, (groupCount.get(k.food.group) ?? 0) + 1)
+  const cap = snackCap(patient)
+
+  for (let guard = 0; guard < 40; guard++) {
+    const cur = running()
+    const need = {
+      kcal: target.kcal[0] - (cur.kcal ?? 0),
+      protein: target.protein[0] - (cur.protein ?? 0),
+      fiber: fiberTarget - (cur.fiber ?? 0)
     }
+    if (need.kcal <= 25 && need.protein <= 2 && need.fiber <= 0.5) break
+
+    /*
+     * 나트륨 상한을 절대선으로 쓰면, 담으신 국·찌개 한 그릇이 예산을 다 써 버렸을 때
+     * 앱이 남은 하루를 굶기게 된다. 비빔밥(나트륨 1,750 mg) 한 그릇을 담으면
+     * 그 뒤로 아무것도 못 넣어, 열량이 목표에 못 미치는 하루가 76 % 였다.
+     *
+     * 암환자에게는 저영양이 먼저다(ESPEN).
+     * 그렇다고 상한을 통째로 올리면 짠 음식이 먼저 뽑혀 오히려 나빠진다.
+     * 그래서 상한은 그대로 두고, 모자란 동안에만 '아주 싱거운 것'에 한해 길을 열어 둔다.
+     * 견과·과일·채소는 대개 100 mg 아래라 이 문으로 들어온다.
+     */
+    const na = cur.na ?? 0
+    const room = { kcal: target.kcal[1] - (cur.kcal ?? 0), na: naLimit - na }
+    /*
+     * 한 가지가 가져가도 되는 나트륨의 최대치.
+     *  - 예산이 남아 있으면 그 절반까지. 뒤에 올 것의 자리를 남겨야 한다.
+     *  - 예산이 없어도 열량·단백질이 모자라면 250 mg 이하는 받는다.
+     *    견과·과일·나물은 대개 여기 들어온다.
+     *  - 상한의 1.5 배를 넘어서면 거의 무염인 것만 받는다. 여기서도 멈추지 않으면
+     *    나트륨을 무한정 쌓게 된다.
+     */
+    const short = need.kcal > 0 || need.protein > 0
+    const naCap =
+      na >= naLimit * 1.5 ? Math.max(40, room.na * 0.5)
+        : short ? Math.max(250, room.na * 0.5)
+          // 식이섬유만 모자란 경우에도 길은 열어 둔다.
+          // 나물·채소는 대개 200 mg 아래라, 여기서 막으면 채소를 못 넣는다.
+          : need.fiber > 0 ? Math.max(120, room.na * 0.5)
+            : Math.max(0, room.na * 0.5)
+    const best = bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap)
+    if (!best) break
+
+    const slot = placeIn(slotsFor(best.food), meals, cap)
+    if (!slot) { used.add(best.food.id); continue }
+    meals[slot].push({
+      food: best.food, servings: best.servings, origin: 'added',
+      contribution: best.contribution, ruleTitle: best.ruleTitle,
+      evidence: best.evidence, refIds: best.refIds,
+      seasonal: isSeasonal(best.food, season)
+    })
+    foodTotals = addTotals(foodTotals, foodContribution(best.food, best.servings))
+    used.add(best.food.id)
+    groupCount.set(best.food.group, (groupCount.get(best.food.group) ?? 0) + 1)
   }
 
   /*
@@ -331,8 +366,12 @@ export function buildDayMenu(
    * 여기까지는 "영양소가 모자라면 채운다"는 규칙만 있었다.
    * 그래서 아침·점심만으로 목표가 채워지면 저녁이 통째로 비었다.
    * 하루 세 끼는 영양소 계산과 별개로 지켜야 할 틀이므로, 마지막에 따로 본다.
+   *
+   * 간식도 함께 본다. 치료 중에는 한 번에 많이 못 드시는 경우가 흔해서,
+   * 하루 목표를 세 끼로만 나누면 한 끼가 너무 커진다.
+   * 간식은 그 부담을 나누는 자리이므로 하루 식단에 들어가야 한다.
    */
-  for (const slot of MAIN_SLOTS) {
+  for (const slot of [...MAIN_SLOTS, '간식' as MealSlot]) {
     if (meals[slot].length > 0) continue
     const cur = running()
     const room = {
@@ -369,11 +408,42 @@ export function buildDayMenu(
   return { scope: '하루(24시간) 전체', season, meals, totals, suppTotals, slotTotals, target, removed, notes, slotNotes }
 }
 
+/**
+ * 이 환자에게 맞는 식이섬유 목표.
+ *
+ * 암종별 목표를 그대로 쓰면 설사 환자에게 "식이섬유가 부족합니다" 라고 말하게 된다.
+ * 같은 앱이 바로 위에서는 거친 섬유를 '피하세요' 로 판정하고 있는데도 그렇다.
+ * 설사·장루 보유처럼 잔사를 줄여야 하는 상태에서는 목표 자체가 달라야 한다.
+ */
+export function fiberGoal(
+  patient: PatientContext,
+  profile: { target: { fiberTarget?: [number, number] } }
+): { range: [number, number]; lowResidue: boolean } {
+  const lowResidue = patient.conditions.some((c) => c === '설사' || c === '장루보유')
+  // 저잔사식에서도 완전히 끊지는 않는다. 수용성 섬유는 오히려 도움이 된다.
+  if (lowResidue) return { range: [8, 15], lowResidue: true }
+  return { range: profile.target.fiberTarget ?? [20, 30], lowResidue: false }
+}
+
 /** 끼니로 세는 자리. 간식은 이 틀에 넣지 않는다 — 없어도 하루가 성립한다. */
 const MAIN_SLOTS: MealSlot[] = ['아침', '점심', '저녁']
 
-/** 간식으로 내놓을 수 있는 최대 가짓수 */
-const SNACK_CAP = 2
+/**
+ * 간식으로 내놓을 수 있는 최대 가짓수.
+ *
+ * 저나트륨·고열량 식품 — 견과·과일·영양음료 — 은 거의 다 간식 전용 식품군이다.
+ * 그래서 이 수를 2 로 묶어 두면, 짠 국 한 그릇을 담으신 날에는
+ * 남은 열량을 채울 길이 아예 막힌다. 실제로 그 때문에 열량 미달이 75 % 였다.
+ *
+ * 한편 치료 중에는 한 번에 많이 못 드시는 경우가 흔해, 소량씩 자주 나눠 드시는 것이
+ * 권장된다(ESPEN). 그래서 기본 3 가지, 식욕이 없거나 체중이 줄고 있으면 4 가지까지 둔다.
+ */
+function snackCap(patient: PatientContext): number {
+  const needsGrazing = patient.conditions.some(
+    (c) => c === '식욕부진' || c === '체중감소' || c === '위절제후' || c === '오심·구토'
+  )
+  return needsGrazing ? 4 : 3
+}
 
 /**
  * 어느 끼니에 넣을지 고른다. 넣을 자리가 없으면 undefined 를 돌려준다.
@@ -384,10 +454,14 @@ const SNACK_CAP = 2
  * 간식밖에 갈 곳이 없는데 간식이 찼다면 아예 넣지 않는다 — 하루에
  * 곶감·푸룬·미숫가루·영양음료가 나란히 놓이면 식단으로 읽히지 않는다.
  */
-function placeIn(slots: MealSlot[], meals: Record<MealSlot, MenuEntry[]>): MealSlot | undefined {
+function placeIn(
+  slots: MealSlot[],
+  meals: Record<MealSlot, MenuEntry[]>,
+  cap: number
+): MealSlot | undefined {
   const empty = slots.filter((s) => meals[s].length === 0 && s !== '간식')
   if (empty.length > 0) return empty[0]
-  const pool = slots.filter((s) => s !== '간식' || meals['간식'].length < SNACK_CAP)
+  const pool = slots.filter((s) => s !== '간식' || meals['간식'].length < cap)
   if (pool.length === 0) return undefined
   return pool.reduce((a, b) => (meals[a].length <= meals[b].length ? a : b))
 }
@@ -395,7 +469,10 @@ function placeIn(slots: MealSlot[], meals: Record<MealSlot, MenuEntry[]>): MealS
 /** 후보 한 건 — 영양 기여분을 미리 계산해 둔다 */
 interface Cand {
   food: Food
-  score: number
+  /** 권장 근거·제철에서 오는 가산점 */
+  bonus: number
+  /** 굳이 늘릴 이유가 없는 성질에서 오는 감점 (양수) */
+  penalty: number
   /** 이 식품에 걸린 권장 규칙들 — 어떤 이유로 넣었는지 설명할 때 고른다 */
   prefers: RuleHit[]
   seasonal: boolean
@@ -432,8 +509,21 @@ function collectCandidates(
    */
   const NEVER_SUGGEST = new Set(['생식', '알코올', '가공육', '염장', '훈제'])
 
+  /*
+   * 경구영양보충(ONS)은 영양 위험이 있는 분에게 쓰는 것이다.
+   * 잘 드시고 계신 분께 "균형영양식 2 캔"을 권하면 이상하기도 하거니와,
+   * 열량이 높아 하루 예산을 먼저 차지해 버려 채소·과일이 들어갈 자리를 없앤다.
+   */
+  const bmi = patient.weightKg / Math.pow(patient.heightCm / 100, 2)
+  const needsONS =
+    (patient.weightLossPct ?? 0) >= 5 || bmi < 18.5 ||
+    patient.conditions.some((c) =>
+      c === '식욕부진' || c === '체중감소' || c === '연하곤란' ||
+      c === '구강점막염' || c === '오심·구토' || c === '위절제후')
+
   const out: Cand[] = []
   for (const f of CURATED_FOODS) {
+    if (f.group === '경장영양·환자식' && !needsONS) continue
     // 조미료·기름처럼 그 자체로 한 끼를 이루지 않는 것은 제안하지 않는다
     if (f.group === '유지·당류') continue
     if (f.tags.some((t) => NEVER_SUGGEST.has(t))) continue
@@ -456,13 +546,20 @@ function collectCandidates(
 
     const prefers = v.hits.filter((h) => h.rule.level === 'prefer')
 
-    // 암종·증상 규칙에서 나온 권장을 공통 규칙보다 높게 친다
-    let score = 0
-    for (const h of prefers) score += h.source === '공통' ? 6 : 14
-    for (const t of f.tags) score -= PENALTY[t] ?? 0
+    /*
+     * 가산점과 감점을 따로 센다.
+     * 예전에는 하나로 합쳐 두고 점수 전체에 계수를 곱했는데,
+     * 그러면 계수를 낮출 때 적색육·직화구이 감점까지 함께 약해진다.
+     * 실제로 그 때문에 삼겹살 구이(662 kcal)가 추천에 올라왔다.
+     * 권장은 "같은 값이면 앞세우는" 기준이라 줄여도 되지만, 감점은 그대로 두어야 한다.
+     */
+    let bonus = 0
+    for (const h of prefers) bonus += h.source === '공통' ? 6 : 14
+    let penalty = 0
+    for (const t of f.tags) penalty += PENALTY[t] ?? 0
 
     const seasonal = isSeasonal(f, season)
-    if (seasonal) score += 10
+    if (seasonal) bonus += 10
 
     const c = foodContribution(f, 1)
     const kcal = c.kcal ?? 0
@@ -478,18 +575,19 @@ function collectCandidates(
      */
     const satiety = fiber * 4 + f.serving.g / 40 + protein * 0.3 - kcal / 25
 
-    out.push({ food: f, score, prefers, seasonal, kcal, protein, fiber, na: c.na ?? 0, satiety })
+    out.push({ food: f, bonus, penalty, prefers, seasonal, kcal, protein, fiber, na: c.na ?? 0, satiety })
   }
   return out
 }
 
-/** pickFillers 가 돌려주는 한 건 */
+/** 부족분을 채우려고 고른 한 건 */
 interface Filler {
   food: Food
   servings: number
   contribution: string
   ruleTitle: string
-  evidence: EvidenceLevel
+  /** 근거가 되는 규칙이 없으면 비어 있다 */
+  evidence?: EvidenceLevel
   refIds: string[]
 }
 
@@ -503,96 +601,109 @@ function explain(c: Cand, wantTags: string[]): RuleHit | undefined {
 }
 
 /**
- * 부족한 부분을 채울 식품을 고른다.
- *
- * 단순히 "단백질이 가장 많은 것"을 집으면 위 절제 환자에게 양고기를 권하는 식의 결과가 나온다.
- * 그래서 다음을 함께 본다.
- *  - 이 암종·증상에서 권장 근거가 있는가 (공통 규칙보다 암종·증상 규칙에 더 큰 가중치)
- *  - 지금 제철인가 (제철 재료를 우선 배치한다)
- *  - 사용자가 허용한 요리 계통인가 (기본은 한식)
- *  - 이 암종에서 굳이 늘릴 이유가 없는 성질인가 (적색육·직화구이·초가공·고지방에 감점)
- *  - 남은 나트륨·열량 예산 안에 들어오는가
- * 그리고 한 식품군에 몰리지 않도록 군당 최대 2개까지만 넣는다.
+ * 한 식품군에서 하루에 내놓을 수 있는 최대 가짓수.
+ * 2 로 묶으면 채소 두 접시를 넣은 뒤로 채소를 더 못 넣어, 섬유가 늘 모자랐다.
  */
-function pickFillers(
+const GROUP_CAP = 3
+
+/**
+ * 지금 가장 모자란 것을 가장 잘 채우는 한 가지를 고른다.
+ *
+ * 무엇을 볼 것인가.
+ *  - 남은 부족분을 얼마나 메우는가 (열량·단백질·식이섬유를 함께 본다)
+ *  - 그 대가로 나트륨을 얼마나 쓰는가. 나트륨은 이 앱에서 가장 빠듯한 예산이다.
+ *  - 이 암종·증상에서 권장 근거가 있는가 (공통 규칙보다 암종·증상 규칙을 높게 친다)
+ *  - 지금 제철인가
+ *  - 굳이 늘릴 이유가 없는 성질인가 (적색육·직화구이·초가공·고지방에 감점)
+ *
+ * 한 가지가 남은 나트륨 예산의 절반을 넘게 가져가지 못하게 막는다.
+ * 그렇게 하지 않으면 국·찌개 한 그릇이 예산을 다 써 버려 뒤에 올 채소·과일이 들어갈 자리가 없어진다.
+ * 실제로 그 때문에 하루가 1,374 kcal 에서 멈춰 있었다.
+ */
+function bestFiller(
   all: Cand[],
-  kcalGap: number,
-  proteinGap: number,
-  fiberGap: number,
-  naBudget: number,
+  need: { kcal: number; protein: number; fiber: number },
+  room: { kcal: number; na: number },
   exclude: Set<string>,
-  kcalHeadroom: number
-): Filler[] {
-  const candidates = all.filter((c) => !exclude.has(c.food.id) && c.prefers.length > 0)
+  meals: Record<MealSlot, MenuEntry[]>,
+  groupCount: Map<string, number>,
+  /** 한 가지가 가져가도 되는 나트륨의 최대치 */
+  naCap: number,
+  /** 간식 가짓수 상한 */
+  cap: number
+): Filler | undefined {
 
-  const out: Filler[] = []
-  const groupCount = new Map<string, number>()
-  let na = naBudget
-  let remainingProtein = proteinGap
-  let remainingKcal = kcalGap
-  let remainingFiber = fiberGap
-  let headroom = kcalHeadroom
+  let best: { c: Cand; score: number } | undefined
+  for (const c of all) {
+    if (exclude.has(c.food.id)) continue
+    if ((groupCount.get(c.food.group) ?? 0) >= GROUP_CAP) continue
+    if (c.kcal > room.kcal) continue
+    if (c.na > naCap) continue
+    // 넣을 끼니가 없으면 (간식이 다 찼는데 간식밖에 못 가는 것) 의미가 없다
+    if (!placeIn(slotsFor(c.food), meals, cap)) continue
 
-  const take = (c: Cand, contribution: string, wantTags: string[]) => {
-    const hit = explain(c, wantTags)
-    out.push({
-      food: c.food,
-      servings: 1,
-      contribution,
-      ruleTitle: hit?.rule.title ?? '',
-      evidence: hit?.rule.evidence ?? 'G',
-      refIds: hit?.rule.refIds ?? []
-    })
-    groupCount.set(c.food.group, (groupCount.get(c.food.group) ?? 0) + 1)
-    na -= c.na
-    remainingProtein -= c.protein
-    remainingKcal -= c.kcal
-    remainingFiber -= c.fiber
-    headroom -= c.kcal
+    /*
+     * 부족분을 얼마나 메우는지 — 필요한 만큼만 쳐 준다.
+     * 단백질이 5 g 모자란데 50 g 짜리를 넣어도 메운 것은 5 g 이다.
+     */
+    const fill =
+      (need.protein > 0 ? Math.min(c.protein, need.protein) / need.protein : 0) * 3.0 +
+      (need.fiber > 0 ? Math.min(c.fiber, need.fiber) / need.fiber : 0) * 2.0 +
+      // 열량을 가장 무겁게 본다. 치료 중 가장 먼저 무너지는 것이 에너지다(ESPEN).
+      (need.kcal > 0 ? Math.min(c.kcal, need.kcal) / need.kcal : 0) * 3.5
+
+    if (fill <= 0.01) continue
+
+    // 나트륨은 남은 예산에 견주어 값을 매긴다. 예산이 빠듯할수록 비싸진다.
+    const naCost = c.na / Math.max(150, room.na)
+    /*
+     * 열량 상한도 예산이다.
+     * 열량이 이미 찼는데 식이섬유가 남았다면, 남은 열량으로 섬유를 최대한 사야 한다.
+     * 이 항이 없으면 고열량 식품이 먼저 상한을 채워, 채소를 넣을 자리가 없어진다.
+     * 열량이 모자란 동안에는 위의 fill 항이 이 값보다 크므로 방해가 되지 않는다.
+     */
+    const kcalCost = c.kcal / Math.max(200, room.kcal)
+
+    /*
+     * 부족분을 메우는 정도가 가장 중요하다.
+     * 예전에는 이 항이 30 점이고 규칙 점수(c.score)가 그대로 더해졌는데,
+     * 제철 가산 10 점 + 암종 권장 14 점만으로도 24 점이라 부족분 점수를 눌러 버렸다.
+     * 그 결과 "권장 근거가 있는 고열량 식품"이 먼저 뽑혀 열량 상한을 채우고,
+     * 정작 값싸고 섬유가 많은 나물 반찬이 들어갈 자리가 없어졌다.
+     * 근거는 같은 값이면 앞세우는 기준이지, 무엇을 채울지 정하는 기준이 아니다.
+     */
+    const score = fill * 80 + c.bonus * 0.5 - c.penalty * 2.5 - naCost * 25 - kcalCost * 14
+    if (!best || score > best.score) best = { c, score }
   }
+  if (!best) return undefined
 
-  /*
-   * 예산을 넘기면서까지 채우지는 않는다.
-   * 예전에는 식이섬유가 모자라다는 이유만으로 계속 담아, 이미 3,000 kcal 를 넘긴
-   * 식단에 나트륨 8,000 mg 짜리 하루가 만들어졌다.
-   */
-  const usable = (c: Cand) =>
-    !out.some((o) => o.food.id === c.food.id) &&
-    (groupCount.get(c.food.group) ?? 0) < 2 &&
-    c.na <= na &&
-    c.kcal <= headroom
+  const c = best.c
+  // 무엇을 채우려고 넣었는지 — 가장 크게 메운 것을 말한다
+  const parts: { label: string; ratio: number }[] = [
+    { label: `단백질 ${Math.round(c.protein)} g 보충`, ratio: need.protein > 0 ? Math.min(c.protein, need.protein) / need.protein : 0 },
+    { label: `식이섬유 ${c.fiber.toFixed(1)} g 보충`, ratio: need.fiber > 0 ? Math.min(c.fiber, need.fiber) / need.fiber : 0 },
+    { label: `열량 ${Math.round(c.kcal)} kcal 보충`, ratio: need.kcal > 0 ? Math.min(c.kcal, need.kcal) / need.kcal : 0 }
+  ]
+  parts.sort((a, b) => b.ratio - a.ratio)
+  const wantTags =
+    parts[0].label.startsWith('단백질') ? ['고단백']
+      : parts[0].label.startsWith('식이섬유') ? ['고식이섬유', '십자화과', '저잔사']
+        : ['고열량밀도']
 
-  // 1) 단백질 — 치료 중 우선순위가 열량보다 높다
-  const byProtein = [...candidates]
-    .filter((c) => c.protein >= 7)
-    .sort((a, b) => b.score + b.protein - (a.score + a.protein))
-  for (const c of byProtein) {
-    if (remainingProtein <= 5 || out.length >= 3) break
-    if (!usable(c)) continue
-    take(c, `단백질 ${Math.round(c.protein)} g 보충`, ['고단백'])
+  const hit = explain(c, wantTags)
+  return {
+    food: c.food,
+    servings: 1,
+    contribution: parts[0].label,
+    /*
+     * 권장 근거가 붙은 식품이면 그 문장을 그대로 쓴다.
+     * 근거가 없는 식품은 없는 대로 말한다 — 있지도 않은 권고를 지어내지 않는다.
+     */
+    ruleTitle: hit?.rule.title ?? '이 암종에서 특별히 권하거나 피할 이유는 없는 음식입니다. 모자란 부분을 채우려고 넣었습니다.',
+    // 규칙이 없으면 근거 수준도 없다. 없는 근거에 'G' 배지를 붙이면 근거가 있는 것처럼 보인다.
+    evidence: hit?.rule.evidence,
+    refIds: hit?.rule.refIds ?? []
   }
-
-  // 2) 식이섬유 — 채소·과일·해조가 하나도 없는 식단을 막는다
-  const byFiber = [...candidates]
-    .filter((c) => c.fiber >= 1.5)
-    .sort((a, b) => b.score + b.fiber * 2 - (a.score + a.fiber * 2))
-  for (const c of byFiber) {
-    if (remainingFiber <= 3 || out.length >= 6) break
-    if (!usable(c)) continue
-    take(c, `식이섬유 ${c.fiber.toFixed(1)} g 보충`, ['고식이섬유', '십자화과', '저잔사'])
-  }
-
-  // 3) 남은 열량
-  const byKcal = [...candidates]
-    .filter((c) => c.kcal >= 80)
-    .sort((a, b) => b.score + b.kcal / 20 - (a.score + a.kcal / 20))
-  for (const c of byKcal) {
-    if (remainingKcal <= 150 || out.length >= 7) break
-    if (!usable(c)) continue
-    take(c, `열량 ${Math.round(c.kcal)} kcal 보충`, ['고열량밀도'])
-  }
-
-  return out
 }
 
 /**
@@ -650,7 +761,7 @@ function pickForSlot(
   if (room.kcal >= 250) {
     const pool = fits.filter((c) => c.kcal <= room.kcal)
     const src = pool.length > 0 ? pool : fits
-    const rank = (c: Cand) => c.score + anchor(c) + c.kcal / kcalWeight - naPenalty(c)
+    const rank = (c: Cand) => c.bonus - c.penalty + anchor(c) + c.kcal / kcalWeight - naPenalty(c)
     const c = [...src].sort((a, b) => rank(b) - rank(a))[0]
     const hit = explain(c, ['고단백', '고열량밀도'])
     return {
@@ -658,7 +769,7 @@ function pickForSlot(
         food: c.food, servings: 1,
         contribution: `${slot} 한 끼 구성`,
         ruleTitle: hit?.rule.title ?? '하루 세 끼의 틀을 지키기 위해 넣었습니다.',
-        evidence: hit?.rule.evidence ?? 'G',
+        evidence: hit?.rule.evidence,
         refIds: hit?.rule.refIds ?? []
       },
       note: naOver
@@ -675,7 +786,7 @@ function pickForSlot(
    */
   const light = fits.filter((c) => c.kcal <= 150)
   const src = light.length > 0 ? light : [...fits].sort((a, b) => a.kcal - b.kcal).slice(0, 5)
-  const c = [...src].sort((a, b) => b.satiety * 3 + b.score - naPenalty(b) - (a.satiety * 3 + a.score - naPenalty(a)))[0]
+  const c = [...src].sort((a, b) => b.satiety * 3 + b.bonus - b.penalty - naPenalty(b) - (a.satiety * 3 + a.bonus - a.penalty - naPenalty(a)))[0]
   const hit = explain(c, ['고식이섬유', '수분보충', '저잔사'])
 
   const over = Math.round(-room.kcal)
@@ -761,9 +872,21 @@ export function dayNotes(
   }
 
   const fiber = totals.fiber ?? 0
-  const fiberTarget = profile.target.fiberTarget
-  if (fiberTarget && fiber < fiberTarget[0]) {
-    notes.push(`식이섬유가 ${Math.round(fiber)} g 으로 목표(${fiberTarget[0]}~${fiberTarget[1]} g)에 못 미칩니다.`)
+  const goal = fiberGoal(patient, profile)
+  if (goal.lowResidue) {
+    if (fiber > goal.range[1]) {
+      notes.push(
+        `식이섬유가 ${Math.round(fiber)} g 입니다. 지금은 잔사를 줄여야 하는 시기라 ` +
+        `${goal.range[0]}~${goal.range[1]} g 정도가 적당합니다. 거친 나물·통곡·생채소를 줄여 보세요.`
+      )
+    } else {
+      notes.push(
+        `식이섬유 ${Math.round(fiber)} g — 설사·장루가 있는 동안의 목표(${goal.range[0]}~${goal.range[1]} g) 안에 있습니다. ` +
+        '이 시기에는 섬유를 늘리는 것이 목표가 아닙니다.'
+      )
+    }
+  } else if (fiber < goal.range[0]) {
+    notes.push(`식이섬유가 ${Math.round(fiber)} g 으로 목표(${goal.range[0]}~${goal.range[1]} g)에 못 미칩니다.`)
   }
 
   /*

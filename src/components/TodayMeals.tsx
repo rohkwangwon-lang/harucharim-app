@@ -5,12 +5,12 @@ import { MEAL_SLOTS } from '../data/types'
 import { FOOD_BY_ID } from '../data/foods'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
 import { CANCER_BY_ID } from '../data/cancers'
-import { buildDayMenu, currentSeason, dayNotes, ideasFromIngredients, naUnknownNames } from '../engine/menu'
+import { buildDayMenu, currentSeason, dayNotes, fiberGoal, ideasFromIngredients, naUnknownNames } from '../engine/menu'
 import { evaluateSelection } from '../engine/rules'
 import { foodContribution, personalTarget, sumIntake } from '../engine/nutrition'
 import { BASE_EXERCISE, CONDITION_EXERCISE_NOTES, EXERCISE_BY_CANCER } from '../data/exercise'
 import { REF_BY_ID } from '../data/references'
-import { EvidenceBadge, LevelBadge, Meter, Section, Stat } from './ui'
+import { EvidenceBadge, LevelBadge, NutrientPanel, NutrientRow, nutrientState, Section } from './ui'
 import { label as dayLabel, today as todayKey } from '../lib/day'
 
 const SLOT_ICON: Record<MealSlot, typeof IconMorning> = {
@@ -84,7 +84,16 @@ export function TodayMeals({
   const kcal = Math.round(totals.kcal ?? 0)
   const protein = Math.round(totals.protein ?? 0)
   const na = Math.round(totals.na ?? 0)
+  const fiber = Math.round((totals.fiber ?? 0) * 10) / 10
   const naLimit = profile.target.naLimit ?? 2000
+  // 신장 기능이 떨어진 분에게는 단백질 과다가 문제가 된다
+  const renalCare = patient.conditions.some((c) => c === '신기능저하' || c === '간성뇌증위험')
+  const fiber_ = fiberGoal(patient, profile)
+  const empty = selected.length === 0
+  const kcalState = nutrientState(kcal, target.kcal[0], target.kcal[1], { empty })
+  const proteinState = nutrientState(protein, target.protein[0], target.protein[1], { empty, overOk: !renalCare })
+  const fiberState = nutrientState(fiber, fiber_.range[0], fiber_.range[1], { empty })
+  const naState = nutrientState(na, 0, naLimit, { empty, limit: naLimit })
 
   /*
    * 어느 끼니에도 걸리지 않는 항목.
@@ -126,26 +135,30 @@ export function TodayMeals({
         </p>
       </div>
 
-      <div className="mb-3 grid grid-cols-3 gap-2">
-        <Stat
-          label="에너지" value={String(kcal)} unit="kcal" hint={`목표 ${target.kcal[0]}~${target.kcal[1]}`}
-          tone={kcal === 0 ? 'neutral' : kcal < target.kcal[0] ? 'warn' : kcal > target.kcal[1] * 1.15 ? 'bad' : 'good'}
+      {/*
+        * 숫자 카드와 막대가 같은 내용을 두 번 보여 주고 있었다.
+        * 그런데 정작 "이게 충분한 건가" 는 목표를 외우고 있어야 알 수 있었다.
+        * 판정을 앱이 먼저 내려 글자와 색으로 함께 말한다.
+        */}
+      <NutrientPanel states={[kcalState, proteinState, fiberState, naState]}>
+        <NutrientRow
+          label="에너지" value={kcal} unit="kcal"
+          min={target.kcal[0]} max={target.kcal[1]} state={kcalState}
         />
-        <Stat
-          label="단백질" value={String(protein)} unit="g" hint={`목표 ${target.protein[0]} g 이상`}
-          tone={protein === 0 ? 'neutral' : protein < target.protein[0] ? 'warn' : 'good'}
+        <NutrientRow
+          label="단백질" value={protein} unit="g"
+          min={target.protein[0]} max={target.protein[1]} state={proteinState}
         />
-        <Stat
-          label="나트륨" value={String(na)} unit="mg" hint={`상한 ${naLimit}`}
-          tone={na > naLimit ? 'bad' : 'good'}
+        <NutrientRow
+          label="식이섬유" value={fiber} unit="g"
+          min={fiber_.range[0]} max={fiber_.range[1]} state={fiberState}
+          hint={fiber_.lowResidue ? '지금은 잔사를 줄이는 시기입니다' : undefined}
         />
-      </div>
-
-      <div className="card mb-5 space-y-3 p-3.5">
-        <MeterRow label="에너지" value={kcal} min={target.kcal[0]} max={target.kcal[1]} unit="kcal" />
-        <MeterRow label="단백질" value={protein} min={target.protein[0]} max={target.protein[1]} unit="g" />
-        <MeterRow label="나트륨" value={na} min={0} max={naLimit} unit="mg" overLimit={na > naLimit} />
-      </div>
+        <NutrientRow
+          label="나트륨" value={na} unit="mg"
+          min={0} max={naLimit} limit={naLimit} state={naState}
+        />
+      </NutrientPanel>
 
       {/* 체중 기록 — 매일 같은 조건에서 재는 것이 중요하다 */}
       <div className="card mb-4 flex items-center gap-2 p-3.5">
@@ -446,19 +459,6 @@ export function TodayMeals({
   )
 }
 
-function MeterRow({
-  label, value, min, max, unit, overLimit
-}: { label: string; value: number; min: number; max: number; unit: string; overLimit?: boolean }) {
-  return (
-    <div>
-      <div className="mb-1 flex items-baseline justify-between text-xs">
-        <span className="font-medium text-stone-600">{label}</span>
-        <span className="tabular-nums text-stone-400">{Math.round(value)} / {max} {unit}</span>
-      </div>
-      <Meter value={value} min={min} max={max} overLimit={overLimit} />
-    </div>
-  )
-}
 
 /**
  * 오늘 먹은 양에 맞춘 운동 조언.

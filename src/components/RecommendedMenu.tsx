@@ -2,12 +2,12 @@ import { useMemo, useState } from 'react'
 import { IconEvening, IconMorning, IconNoon, IconSnack } from './icons'
 import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
 import { MEAL_SLOTS } from '../data/types'
-import { buildDayMenu } from '../engine/menu'
+import { buildDayMenu, fiberGoal } from '../engine/menu'
 import { foodContribution, personalTarget } from '../engine/nutrition'
 import { CANCER_BY_ID } from '../data/cancers'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
 import { REF_BY_ID } from '../data/references'
-import { EvidenceBadge, Section, Stat } from './ui'
+import { EvidenceBadge, NutrientPanel, NutrientRow, nutrientState, Section } from './ui'
 
 const SLOT_ICON: Record<MealSlot, typeof IconMorning> = {
   아침: IconMorning, 점심: IconNoon, 저녁: IconEvening, 간식: IconSnack
@@ -39,6 +39,8 @@ export function RecommendedMenu({
   const [seed, setSeed] = useState(0)
   const profile = CANCER_BY_ID[patient.cancer]
   const naLimit = profile.target.naLimit ?? 2000
+  // 신장 기능이 떨어진 분에게는 단백질 과다가 문제가 된다
+  const renalCare = patient.conditions.some((c) => c === '신기능저하' || c === '간성뇌증위험')
   const target = personalTarget(patient, profile.target.kcalPerKg, profile.target.proteinPerKg)
   const supps = useMemo(
     () => supplements.map((id) => SUPPLEMENT_BY_ID[id]).filter(Boolean),
@@ -69,6 +71,12 @@ export function RecommendedMenu({
   const na = MEAL_SLOTS.reduce((n, s) => n + slotNa[s], 0) + suppNa
   const kcal = MEAL_SLOTS.reduce((n, s) => n + slotKcal[s], 0) + suppKcal
   const protein = Math.round(menu.totals.protein ?? 0)
+  const fiber = Math.round((menu.totals.fiber ?? 0) * 10) / 10
+  const fg = fiberGoal(patient, profile)
+  const kcalState = nutrientState(kcal, target.kcal[0], target.kcal[1])
+  const proteinState = nutrientState(protein, target.protein[0], target.protein[1], { overOk: !renalCare })
+  const fiberState = nutrientState(fiber, fg.range[0], fg.range[1])
+  const naState = nutrientState(na, 0, naLimit, { limit: naLimit })
 
   return (
     <div>
@@ -93,12 +101,17 @@ export function RecommendedMenu({
         </div>
       </div>
 
-      <div className="mb-4 grid grid-cols-3 gap-2">
-        <Stat label="에너지" value={String(kcal)} unit="kcal" hint={`목표 ${target.kcal[0]}~${target.kcal[1]}`} />
-        <Stat label="단백질" value={String(protein)} unit="g" hint={`목표 ${target.protein[0]} g 이상`} />
-        <Stat label="나트륨" value={String(na)} unit="mg" hint={`상한 ${naLimit}`}
-          tone={na > naLimit ? 'bad' : 'good'} />
-      </div>
+      <NutrientPanel states={[kcalState, proteinState, fiberState, naState]}>
+        <NutrientRow label="에너지" value={kcal} unit="kcal"
+          min={target.kcal[0]} max={target.kcal[1]} state={kcalState} />
+        <NutrientRow label="단백질" value={protein} unit="g"
+          min={target.protein[0]} max={target.protein[1]} state={proteinState} />
+        <NutrientRow label="식이섬유" value={fiber} unit="g"
+          min={fg.range[0]} max={fg.range[1]} state={fiberState}
+          hint={fg.lowResidue ? '지금은 잔사를 줄이는 시기입니다' : undefined} />
+        <NutrientRow label="나트륨" value={na} unit="mg"
+          min={0} max={naLimit} limit={naLimit} state={naState} />
+      </NutrientPanel>
 
       {added.length > 0 && (
         <button className="btn-primary mb-4 w-full" onClick={() => onApplyAll(added)}>
