@@ -264,9 +264,23 @@ export function FoodSearch({
                 </button>
               )}
               {scanResult.kind === 'no-nutrition' && (
-                <span className="text-[11px] leading-relaxed text-stone-600">
-                  제품명으로 비슷한 것을 찾아 두었습니다. 아래 목록을 확인해 보세요.
-                </span>
+                <>
+                  <span className="w-full text-[11px] leading-relaxed text-stone-600">
+                    제품명으로 비슷한 것을 찾아 두었습니다. 아래에서 고르신 뒤 이 바코드에 연결해 두시면
+                    다음부터는 스캔만으로 바로 담기실 수 있습니다.
+                  </span>
+                  {/*
+                    * 공공 바코드 자료에는 제품명만 있고 성분이 없는 것이 70 % 다.
+                    * 예전에는 이 경우에 연결 버튼이 없어서, 매번 다시 검색해야 했다.
+                    * 성분을 지어낼 수는 없으니, 사용자가 직접 이어 두게 하는 것이 답이다.
+                    */}
+                  <button
+                    className="btn-primary py-1.5 text-xs"
+                    onClick={() => { setLinking(scanResult.code); setScanResult(null) }}
+                  >
+                    이 바코드에 연결하기
+                  </button>
+                </>
               )}
               {scanResult.kind === 'not-found' && (
                 <button
