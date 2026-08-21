@@ -310,6 +310,22 @@ export function FoodSearch({
                   이름으로 찾아 연결하기
                 </button>
               )}
+              {/*
+                * 코리안넷은 국내 바코드의 공식 등록처(GS1 Korea)라 식약처 자료보다 최신이다.
+                * 다만 그곳 자료는 대한상공회의소 귀속 자산이고 무단 수집이 금지되어 있어,
+                * 우리가 긁어와 담아 두지 않는다. 공개된 조회 페이지로 보내 드릴 뿐이다.
+                * 거기서 제품명을 확인하시고 돌아와 연결하시면 된다.
+                */}
+              {scanResult.kind !== 'no-data' && (
+                <a
+                  className="btn-outline py-1.5 text-xs"
+                  href={`https://gs1.koreannet.or.kr/pr/${scanResult.code.replace(/\D/g, '')}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  코리안넷에서 확인하기
+                </a>
+              )}
               <button
                 className="btn-outline py-1.5 text-xs"
                 onClick={() => { setAsking(true) }}
