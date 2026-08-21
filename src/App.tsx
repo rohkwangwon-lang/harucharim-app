@@ -8,6 +8,7 @@ import { PatientPanel } from './components/PatientPanel'
 import { FoodSearch } from './components/FoodSearch'
 import { Supplements } from './components/Supplements'
 import { TodayMeals } from './components/TodayMeals'
+import { RecommendedMenu } from './components/RecommendedMenu'
 import { CancerGuide } from './components/CancerGuide'
 import { Exercise } from './components/Exercise'
 import { DataManager } from './components/DataManager'
@@ -21,11 +22,12 @@ import { displayName, useSession } from './lib/auth'
  * 모바일 하단 탭이 6개를 넘으면 글자가 잘리고 무엇이 어디 있는지 기억하기 어려워진다.
  * 그래서 성격이 비슷한 영양제·운동·가이드는 '관리' 안에서 나눈다.
  */
-type Tab = 'today' | 'search' | 'care' | 'me'
+type Tab = 'compose' | 'suggest' | 'search' | 'care' | 'me'
 type CareView = 'supplement' | 'exercise' | 'guide'
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: 'today', label: '오늘 식단', icon: '🍱' },
+  { id: 'compose', label: '내 식단', icon: '🍱' },
+  { id: 'suggest', label: '추천 식단', icon: '✨' },
   { id: 'search', label: '음식 찾기', icon: '🔍' },
   { id: 'care', label: '관리', icon: '💊' },
   { id: 'me', label: '내 정보', icon: '👤' }
@@ -43,7 +45,7 @@ export default function App() {
     toggleSupplement, completeOnboarding, resetOnboarding
   } = useAppState()
 
-  const [tab, setTabState] = useState<Tab>('today')
+  const [tab, setTabState] = useState<Tab>('compose')
   /** 음식 찾기로 넘어갈 때 어느 끼니에 담을지 미리 정해 둔다 */
   const [pendingMeal, setPendingMeal] = useState<MealSlot>('점심')
   const [care, setCare] = useState<CareView>('supplement')
@@ -106,7 +108,7 @@ export default function App() {
       {REVIEW_MODE && <ReviewBanner />}
 
       <main className="flex-1 px-4 py-4 pb-24">
-        {tab === 'today' && (
+        {tab === 'compose' && (
           <TodayMeals
             patient={state.patient}
             selected={state.selected}
@@ -116,6 +118,22 @@ export default function App() {
             onRemove={removeFood}
             onClear={clearFoods}
             onApplySuggestion={(id, meal) => handleAdd(id, 1, meal)}
+            onSeeSuggestions={() => setTab('suggest')}
+          />
+        )}
+
+        {tab === 'suggest' && (
+          <RecommendedMenu
+            patient={state.patient}
+            selected={state.selected}
+            onApply={(id, meal) => handleAdd(id, 1, meal)}
+            onApplyAll={(items) => {
+              items.forEach((i) => addFood(i.foodId, 1, i.meal))
+              setToast(`${items.length}가지를 담았습니다`)
+              setTimeout(() => setToast(null), 1600)
+              setTab('compose')
+            }}
+            onGoCompose={() => setTab('compose')}
           />
         )}
 
@@ -125,7 +143,8 @@ export default function App() {
             onAdd={handleAdd}
             selectedIds={selectedIds}
             initialMeal={pendingMeal}
-            onDone={() => setTab('today')}
+            onDone={() => setTab('compose')}
+            onNeedData={() => setTab('me')}
           />
         )}
 

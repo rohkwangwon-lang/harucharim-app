@@ -32,15 +32,18 @@ export function FoodSearch({
   onAdd,
   selectedIds,
   initialMeal,
-  onDone
+  onDone,
+  onNeedData
 }: {
   patient: PatientContext
   onAdd: (foodId: string, servings: number, meal: MealSlot) => void
   selectedIds: Set<string>
   /** 오늘 식단에서 넘어온 경우 어느 끼니에 담을지 */
   initialMeal?: MealSlot
-  /** 담기를 마치고 오늘 식단으로 돌아간다 */
+  /** 담기를 마치고 내 식단으로 돌아간다 */
   onDone?: () => void
+  /** 상품 데이터를 받으러 내 정보로 보낸다 */
+  onNeedData?: () => void
 }) {
   const [q, setQ] = useState('')
   /** 저장소 조회는 입력이 잠깐 멈춘 뒤에 한다 */
@@ -61,6 +64,12 @@ export function FoodSearch({
   const [hasExt, setHasExt] = useState(false)
   const [scanning, setScanning] = useState(false)
   const [scanMsg, setScanMsg] = useState<string | null>(null)
+  const [scanResult, setScanResult] = useState<{
+    kind: 'no-data' | 'not-found' | 'no-nutrition'
+    code: string
+    productName?: string
+    message: string
+  } | null>(null)
   const [asking, setAsking] = useState(false)
   /** 한 번에 그리는 개수. 1만 8천 건을 통째로 그리면 화면이 멈춘다. */
   const [limit, setLimit] = useState(60)
@@ -192,6 +201,46 @@ export function FoodSearch({
           <p className="mt-1.5 rounded-lg bg-warn-50 px-3 py-2 text-[11px] leading-relaxed text-warn-700">
             {scanMsg}
           </p>
+        )}
+
+        {scanResult && (
+          <div className="mt-1.5 rounded-xl border border-warn-200 bg-warn-50 px-3.5 py-3">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="font-mono text-[11px] text-warn-700">바코드 {scanResult.code}</p>
+                {scanResult.productName && (
+                  <p className="mt-0.5 truncate text-sm font-semibold text-slate-900">
+                    {scanResult.productName}
+                  </p>
+                )}
+                <p className="mt-1 text-[11px] leading-relaxed text-warn-700">{scanResult.message}</p>
+              </div>
+              <button
+                className="shrink-0 text-warn-700/60 hover:text-warn-700"
+                onClick={() => setScanResult(null)}
+                aria-label="닫기"
+              >✕</button>
+            </div>
+
+            <div className="mt-2.5 flex flex-wrap gap-1.5">
+              {scanResult.kind === 'no-data' && (
+                <button className="btn-primary py-1.5 text-xs" onClick={onNeedData}>
+                  상품 데이터 받으러 가기
+                </button>
+              )}
+              {scanResult.kind === 'no-nutrition' && (
+                <span className="text-[11px] leading-relaxed text-slate-600">
+                  제품명으로 비슷한 것을 찾아 두었습니다. 아래 목록을 확인해 보세요.
+                </span>
+              )}
+              <button
+                className="btn-outline py-1.5 text-xs"
+                onClick={() => { setAsking(true) }}
+              >
+                이 제품 추가 요청하기
+              </button>
+            </div>
+          </div>
         )}
         {/* 담을 끼니를 먼저 정해 두면 음식을 고를 때마다 다시 묻지 않는다 */}
         <div className="mt-2 flex items-center gap-2">
@@ -331,7 +380,7 @@ export function FoodSearch({
       {asking && (
         <InquiryDialog
           onClose={() => setAsking(false)}
-          presetSubject={q.trim()}
+          presetSubject={scanResult?.productName || scanResult?.code || q.trim()}
           presetKind="food"
         />
       )}
@@ -341,22 +390,42 @@ export function FoodSearch({
           onClose={() => setScanning(false)}
           onDetect={async (code) => {
             setScanning(false)
+            setScanMsg(null)
+
             if (!hasExt) {
-              setScanMsg(
-                `바코드 ${code} 를 읽었습니다. 상품을 찾으려면 ‘내 정보 → 편의점·마트 상품 데이터’ 에서 먼저 데이터를 받아 주세요.`
-              )
+              setScanResult({
+                kind: 'no-data',
+                code,
+                message: '상품을 찾으려면 먼저 상품 데이터를 받아야 합니다.'
+              })
               return
             }
+
             const hit = await lookupBarcode(code)
+
             if (!hit) {
-              setScanMsg(`바코드 ${code} 에 해당하는 제품을 찾지 못했습니다. 이름으로 검색해 보세요.`)
+              setScanResult({
+                kind: 'not-found',
+                code,
+                message: '등록되지 않은 바코드입니다.'
+              })
               return
             }
+
             if (hit.food) {
               setDetail(hit.food)
-            } else {
-              setScanMsg(`${hit.productName} — 제품은 찾았지만 영양성분 자료가 없습니다.`)
+              return
             }
+
+            // 제품은 확인됐지만 성분 자료가 없다.
+            // 그냥 "없다"로 끝내지 않고 제품명으로 찾아 준다.
+            setScanResult({
+              kind: 'no-nutrition',
+              code,
+              productName: hit.productName,
+              message: '제품은 확인했지만 영양성분 자료가 등록되어 있지 않습니다.'
+            })
+            setQ(hit.productName)
           }}
         />
       )}

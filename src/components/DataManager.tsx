@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { clearStore, getStatus, install, type InstallProgress, type StoreStatus } from '../lib/foodStore'
+import { clearStore, DATA_VERSION, getStatus, install, type InstallProgress, type StoreStatus } from '../lib/foodStore'
 import { Section } from './ui'
 
 /**
@@ -71,6 +71,12 @@ export function DataManager() {
           </>
         ) : (
           <>
+            {status && status.foodCount > 0 && status.version !== DATA_VERSION && (
+              <p className="mb-3 rounded-lg bg-warn-50 px-3 py-2.5 text-xs leading-relaxed text-warn-700">
+                <strong>자료가 갱신되었습니다.</strong> 예전에 받아 두신 것({status.version ?? '이전 판'})은
+                더 쓰지 않습니다. 다시 받으셔야 검색과 바코드 조회가 됩니다.
+              </p>
+            )}
             <p className="text-sm leading-relaxed text-slate-700">
               지금은 자주 먹는 식품 <strong>1만 8천 종</strong>이 앱에 들어 있습니다.
               여기에 시중 가공식품 <strong>27만 종</strong>과 바코드 <strong>23만 건</strong>을 더하면

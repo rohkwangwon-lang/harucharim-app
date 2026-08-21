@@ -27,7 +27,8 @@ export function TodayMeals({
   onSetServings,
   onRemove,
   onClear,
-  onApplySuggestion
+  onApplySuggestion,
+  onSeeSuggestions
 }: {
   patient: PatientContext
   selected: SelectedItem[]
@@ -39,6 +40,8 @@ export function TodayMeals({
   onClear: () => void
   /** 추천 항목을 실제로 담는다 */
   onApplySuggestion: (foodId: string, meal: MealSlot) => void
+  /** 추천 식단 화면으로 넘어간다 */
+  onSeeSuggestions: () => void
 }) {
   const profile = CANCER_BY_ID[patient.cancer]
   const target = personalTarget(patient, profile.target.kcalPerKg, profile.target.proteinPerKg)
@@ -64,7 +67,7 @@ export function TodayMeals({
     <div>
       {/* ── 오늘 요약 ─────────────────────────────────── */}
       <div className="mb-4 rounded-2xl border border-brand-200 bg-brand-50/60 px-4 py-3.5">
-        <p className="text-xs font-bold uppercase tracking-wide text-brand-700">오늘 하루</p>
+        <p className="text-xs font-bold uppercase tracking-wide text-brand-700">나만의 식단 구성</p>
         <p className="mt-1 text-sm font-semibold text-slate-900">
           {profile.name} · {currentSeason()}철 · {patient.weightKg} kg 기준
         </p>
@@ -106,12 +109,31 @@ export function TodayMeals({
             ) : (
               <>
                 <strong className="text-slate-800">{emptySlots.join('·')}이 비어 있습니다.</strong> 채우지 않으셔도
-                괜찮습니다. 아래 <strong>추천 채우기</strong>를 누르시면 {profile.name}에 맞는 음식으로 채워 드립니다.
+                괜찮습니다. 아래 각 끼니의 <strong>이렇게 채워 보세요</strong>에서 하나씩 담으시거나,
+                <strong> 추천 식단</strong> 탭에서 하루치를 한 번에 받아보실 수 있습니다.
               </>
             )}
           </p>
         </div>
       )}
+
+      {/* 추천 식단으로 건너가는 길 */}
+      <button
+        className="mb-4 flex w-full items-center justify-between rounded-xl border border-brand-200 bg-white px-3.5 py-3 text-left transition-colors hover:bg-brand-50/50"
+        onClick={onSeeSuggestions}
+      >
+        <span>
+          <span className="block text-sm font-semibold text-slate-900">
+            ✨ 하루치를 한 번에 추천받기
+          </span>
+          <span className="block text-[11px] text-slate-500">
+            {filledSlots.length > 0
+              ? '담으신 것에 맞춰 나머지를 채운 하루 식단을 보여드립니다'
+              : '아직 담은 것이 없어도 됩니다. 처음부터 구성해 드립니다'}
+          </span>
+        </span>
+        <span className="shrink-0 text-slate-300">›</span>
+      </button>
 
       {/* ── 끼니별 구성 ───────────────────────────────── */}
       <Section
