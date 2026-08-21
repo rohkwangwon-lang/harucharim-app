@@ -1,12 +1,18 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
+import { today as todayKey, type DayKey } from './day'
 
 const STORAGE_KEY = 'oncofood.state.v1'
 
 export interface AppState {
   patient: PatientContext
-  /** 오늘 먹었거나 먹으려는 식품 */
-  selected: SelectedItem[]
+  /**
+   * 날짜별 식단 기록. 열쇠는 'YYYY-MM-DD'.
+   * 하루치만 두면 어제 무엇을 먹었는지 알 수 없어, 처음부터 날짜별로 쌓는다.
+   */
+  diary: Record<DayKey, SelectedItem[]>
+  /** 날짜별 체중 (kg) */
+  weights: Record<DayKey, number>
   /** 복용 중인 영양제 id */
   supplements: string[]
 }
@@ -28,7 +34,8 @@ export const DEFAULT_PATIENT: PatientContext = {
 
 const DEFAULT_STATE: AppState = {
   patient: DEFAULT_PATIENT,
-  selected: [],
+  diary: {},
+  weights: {},
   supplements: []
 }
 
@@ -36,10 +43,18 @@ function load(): AppState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return DEFAULT_STATE
-    const parsed = JSON.parse(raw) as Partial<AppState>
+    const parsed = JSON.parse(raw) as Partial<AppState> & { selected?: SelectedItem[] }
+
+    // 예전 판은 하루치만 담고 있었다. 그 내용을 오늘 기록으로 옮긴다.
+    const diary = parsed.diary ?? {}
+    if (parsed.selected?.length && !diary[todayKey()]) {
+      diary[todayKey()] = parsed.selected
+    }
+
     return {
       patient: { ...DEFAULT_PATIENT, ...parsed.patient },
-      selected: parsed.selected ?? [],
+      diary,
+      weights: parsed.weights ?? {},
       supplements: parsed.supplements ?? []
     }
   } catch {
@@ -49,6 +64,11 @@ function load(): AppState {
 
 export function useAppState() {
   const [state, setState] = useState<AppState>(load)
+  /** 지금 보고 있는 날짜. 기본은 오늘이고, 기록에서 다른 날로 옮겨 갈 수 있다. */
+  const [day, setDay] = useState<DayKey>(todayKey())
+
+  /** 그날의 식단 */
+  const selected = state.diary[day] ?? []
 
   useEffect(() => {
     try {
@@ -68,44 +88,72 @@ export function useAppState() {
    */
   const addFood = useCallback((foodId: string, servings = 1, meal?: MealSlot) => {
     setState((s) => {
-      const idx = s.selected.findIndex((i) => i.foodId === foodId && i.meal === meal)
-      if (idx === -1) return { ...s, selected: [...s.selected, { foodId, servings, meal }] }
-      const next = [...s.selected]
-      next[idx] = { ...next[idx], servings: Math.round((next[idx].servings + servings) * 10) / 10 }
-      return { ...s, selected: next }
+      const list = s.diary[day] ?? []
+      const idx = list.findIndex((i) => i.foodId === foodId && i.meal === meal)
+      const next =
+        idx === -1
+          ? [...list, { foodId, servings, meal }]
+          : list.map((x, k) =>
+              k === idx ? { ...x, servings: Math.round((x.servings + servings) * 10) / 10 } : x
+            )
+      return { ...s, diary: { ...s.diary, [day]: next } }
     })
-  }, [])
+  }, [day])
 
   const setServings = useCallback((foodId: string, servings: number, meal?: MealSlot) => {
-    setState((s) => ({
-      ...s,
-      selected:
+    setState((s) => {
+      const list = s.diary[day] ?? []
+      const next =
         servings <= 0
-          ? s.selected.filter((i) => !(i.foodId === foodId && i.meal === meal))
-          : s.selected.map((i) =>
-              i.foodId === foodId && i.meal === meal ? { ...i, servings } : i
-            )
-    }))
-  }, [])
+          ? list.filter((i) => !(i.foodId === foodId && i.meal === meal))
+          : list.map((i) => (i.foodId === foodId && i.meal === meal ? { ...i, servings } : i))
+      return { ...s, diary: { ...s.diary, [day]: next } }
+    })
+  }, [day])
 
   /** 담은 항목의 끼니를 바꾼다 */
   const setMeal = useCallback((foodId: string, from: MealSlot | undefined, to: MealSlot | undefined) => {
-    setState((s) => ({
-      ...s,
-      selected: s.selected.map((i) => (i.foodId === foodId && i.meal === from ? { ...i, meal: to } : i))
-    }))
-  }, [])
+    setState((s) => {
+      const list = s.diary[day] ?? []
+      return {
+        ...s,
+        diary: {
+          ...s.diary,
+          [day]: list.map((i) => (i.foodId === foodId && i.meal === from ? { ...i, meal: to } : i))
+        }
+      }
+    })
+  }, [day])
 
   const removeFood = useCallback((foodId: string, meal?: MealSlot) => {
     setState((s) => ({
       ...s,
-      selected: s.selected.filter((i) => !(i.foodId === foodId && i.meal === meal))
+      diary: {
+        ...s.diary,
+        [day]: (s.diary[day] ?? []).filter((i) => !(i.foodId === foodId && i.meal === meal))
+      }
     }))
-  }, [])
+  }, [day])
 
   const clearFoods = useCallback(() => {
-    setState((s) => ({ ...s, selected: [] }))
-  }, [])
+    setState((s) => {
+      const next = { ...s.diary }
+      delete next[day]
+      return { ...s, diary: next }
+    })
+  }, [day])
+
+  /** 그날 체중을 적는다. 0 이면 지운다. */
+  const setWeight = useCallback((kg: number, forDay: DayKey = day) => {
+    setState((s) => {
+      const next = { ...s.weights }
+      if (kg > 0) next[forDay] = kg
+      else delete next[forDay]
+      // 오늘 체중을 적으면 계산 기준도 함께 맞춘다
+      const patient = forDay === todayKey() && kg > 0 ? { ...s.patient, weightKg: kg } : s.patient
+      return { ...s, weights: next, patient }
+    })
+  }, [day])
 
   const toggleSupplement = useCallback((id: string) => {
     setState((s) => ({
@@ -128,6 +176,12 @@ export function useAppState() {
 
   return {
     state,
+    /** 지금 보고 있는 날짜 */
+    day,
+    setDay,
+    /** 그날의 식단 */
+    selected,
+    setWeight,
     setPatient,
     addFood,
     setServings,

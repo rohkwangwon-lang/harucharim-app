@@ -10,6 +10,7 @@ import { foodContribution, personalTarget, sumIntake } from '../engine/nutrition
 import { BASE_EXERCISE, CONDITION_EXERCISE_NOTES, EXERCISE_BY_CANCER } from '../data/exercise'
 import { REF_BY_ID } from '../data/references'
 import { EvidenceBadge, LevelBadge, Meter, Section, Stat } from './ui'
+import { label as dayLabel, today as todayKey } from '../lib/day'
 
 const SLOT_ICON: Record<MealSlot, string> = { 아침: '🌅', 점심: '🍚', 저녁: '🌙', 간식: '🍎' }
 
@@ -28,7 +29,11 @@ export function TodayMeals({
   onRemove,
   onClear,
   onApplySuggestion,
-  onSeeSuggestions
+  onSeeSuggestions,
+  day,
+  onBackToToday,
+  weight,
+  onSetWeight
 }: {
   patient: PatientContext
   selected: SelectedItem[]
@@ -42,6 +47,13 @@ export function TodayMeals({
   onApplySuggestion: (foodId: string, meal: MealSlot) => void
   /** 추천 식단 화면으로 넘어간다 */
   onSeeSuggestions: () => void
+  /** 지금 보고 있는 날짜 */
+  day: string
+  /** 오늘로 되돌아간다 */
+  onBackToToday: () => void
+  /** 그날 체중 */
+  weight?: number
+  onSetWeight: (kg: number) => void
 }) {
   const profile = CANCER_BY_ID[patient.cancer]
   const target = personalTarget(patient, profile.target.kcalPerKg, profile.target.proteinPerKg)
@@ -67,6 +79,18 @@ export function TodayMeals({
 
   return (
     <div>
+      {day !== todayKey() && (
+        <button
+          className="mb-3 flex w-full items-center justify-between rounded-xl border border-warn-300 bg-warn-50 px-3.5 py-2.5 text-left"
+          onClick={onBackToToday}
+        >
+          <span className="text-xs leading-relaxed text-warn-800">
+            <strong>{dayLabel(day)}</strong> 기록을 보고 계십니다. 여기서 담으면 그날 기록에 들어갑니다.
+          </span>
+          <span className="shrink-0 text-xs font-semibold text-warn-800">오늘로 →</span>
+        </button>
+      )}
+
       {/* ── 오늘 요약 ─────────────────────────────────── */}
       <div className="mb-4 rounded-2xl border border-brand-200 bg-brand-50/60 px-4 py-3.5">
         <p className="text-xs font-bold uppercase tracking-wide text-brand-700">나만의 식단 구성</p>
@@ -97,6 +121,24 @@ export function TodayMeals({
         <MeterRow label="에너지" value={kcal} min={target.kcal[0]} max={target.kcal[1]} unit="kcal" />
         <MeterRow label="단백질" value={protein} min={target.protein[0]} max={target.protein[1]} unit="g" />
         <MeterRow label="나트륨" value={na} min={0} max={naLimit} unit="mg" overLimit={na > naLimit} />
+      </div>
+
+      {/* 체중 기록 — 매일 같은 조건에서 재는 것이 중요하다 */}
+      <div className="card mb-4 flex items-center gap-2 p-3.5">
+        <span className="shrink-0 text-xs font-medium text-slate-600">
+          {day === todayKey() ? '오늘' : dayLabel(day)} 체중
+        </span>
+        <input
+          type="number" inputMode="decimal"
+          className="input flex-1 text-right"
+          placeholder="기록 안 함"
+          defaultValue={weight ?? ''}
+          onBlur={(e) => {
+            const v = Number(e.target.value)
+            if (v !== (weight ?? 0)) onSetWeight(v || 0)
+          }}
+        />
+        <span className="shrink-0 text-sm text-slate-500">kg</span>
       </div>
 
       {/* ── 일부만 넣어도 된다는 안내 ─────────────────── */}

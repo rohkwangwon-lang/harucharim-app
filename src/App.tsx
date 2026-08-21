@@ -9,6 +9,8 @@ import { FoodSearch } from './components/FoodSearch'
 import { Supplements } from './components/Supplements'
 import { TodayMeals } from './components/TodayMeals'
 import { RecommendedMenu } from './components/RecommendedMenu'
+import { Diary } from './components/Diary'
+import { label as dayLabel, today } from './lib/day'
 import { CancerGuide } from './components/CancerGuide'
 import { Exercise } from './components/Exercise'
 import { DataManager } from './components/DataManager'
@@ -22,15 +24,15 @@ import { displayName, useSession } from './lib/auth'
  * 모바일 하단 탭이 6개를 넘으면 글자가 잘리고 무엇이 어디 있는지 기억하기 어려워진다.
  * 그래서 성격이 비슷한 영양제·운동·가이드는 '관리' 안에서 나눈다.
  */
-type Tab = 'compose' | 'suggest' | 'search' | 'supp' | 'care' | 'me'
+type Tab = 'compose' | 'diary' | 'suggest' | 'search' | 'supp' | 'me'
 type CareView = 'exercise' | 'guide'
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'compose', label: '내 식단', icon: '🍱' },
-  { id: 'suggest', label: '추천 식단', icon: '✨' },
-  { id: 'search', label: '음식 찾기', icon: '🔍' },
+  { id: 'diary', label: '기록', icon: '📅' },
+  { id: 'suggest', label: '추천', icon: '✨' },
+  { id: 'search', label: '찾기', icon: '🔍' },
   { id: 'supp', label: '영양제', icon: '💊' },
-  { id: 'care', label: '가이드', icon: '🏃' },
   { id: 'me', label: '내 정보', icon: '👤' }
 ]
 
@@ -41,14 +43,15 @@ const CARE_VIEWS: { id: CareView; label: string }[] = [
 
 export default function App() {
   const {
-    state, setPatient, addFood, setServings, removeFood, clearFoods,
+    state, day, setDay, selected, setWeight,
+    setPatient, addFood, setServings, removeFood, clearFoods,
     toggleSupplement, completeOnboarding, resetOnboarding
   } = useAppState()
 
   const [tab, setTabState] = useState<Tab>('compose')
   /** 음식 찾기로 넘어갈 때 어느 끼니에 담을지 미리 정해 둔다 */
   const [pendingMeal, setPendingMeal] = useState<MealSlot>('점심')
-  const [care, setCare] = useState<CareView>('exercise')
+  const [care, setCare] = useState<CareView | 'setting'>('setting')
   const [toast, setToast] = useState<string | null>(null)
   const [asking, setAsking] = useState(false)
   const { user } = useSession()
@@ -66,7 +69,7 @@ export default function App() {
   }
 
   const profile = CANCER_BY_ID[state.patient.cancer]
-  const selectedIds = new Set(state.selected.map((s) => s.foodId))
+  const selectedIds = new Set<string>(selected.map((x) => x.foodId))
 
   const handleAdd = (foodId: string, servings: number, meal: MealSlot) => {
     addFood(foodId, servings, meal)
@@ -99,7 +102,7 @@ export default function App() {
           >
             <span className="block text-xs font-bold text-brand-800">{profile.name}</span>
             <span className="block text-[10px] text-brand-600">
-              {state.patient.weightKg} kg · {state.selected.length}가지 담김
+              {day === today() ? '오늘' : dayLabel(day)} · {selected.length}가지
             </span>
           </button>
         </div>
@@ -111,7 +114,7 @@ export default function App() {
         {tab === 'compose' && (
           <TodayMeals
             patient={state.patient}
-            selected={state.selected}
+            selected={selected}
             supplements={state.supplements}
             onAddTo={(meal) => { setPendingMeal(meal); setTab('search') }}
             onSetServings={setServings}
@@ -119,13 +122,29 @@ export default function App() {
             onClear={clearFoods}
             onApplySuggestion={(id, meal) => handleAdd(id, 1, meal)}
             onSeeSuggestions={() => setTab('suggest')}
+            day={day}
+            onBackToToday={() => setDay(today())}
+            weight={state.weights[day]}
+            onSetWeight={(kg) => setWeight(kg, day)}
+          />
+        )}
+
+        {tab === 'diary' && (
+          <Diary
+            patient={state.patient}
+            diary={state.diary}
+            weights={state.weights}
+            day={day}
+            onPickDay={setDay}
+            onSetWeight={setWeight}
+            onGoCompose={() => setTab('compose')}
           />
         )}
 
         {tab === 'suggest' && (
           <RecommendedMenu
             patient={state.patient}
-            selected={state.selected}
+            selected={selected}
             onApply={(id, meal) => handleAdd(id, 1, meal)}
             onApplyAll={(items) => {
               items.forEach((i) => addFood(i.foodId, 1, i.meal))
@@ -156,28 +175,28 @@ export default function App() {
           />
         )}
 
-        {tab === 'care' && (
-          <>
-            <div className="mb-4 flex gap-1 rounded-xl bg-slate-100 p-1">
-              {CARE_VIEWS.map((v) => (
-                <button
-                  key={v.id}
-                  onClick={() => { setCare(v.id); window.scrollTo({ top: 0 }) }}
-                  className={`flex-1 rounded-lg px-2 py-2 text-xs font-semibold transition-colors ${
-                    care === v.id ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500'
-                  }`}
-                >
-                  {v.label}
-                </button>
-              ))}
-            </div>
-            {care === 'exercise' && <Exercise patient={state.patient} />}
-            {care === 'guide' && <CancerGuide patient={state.patient} />}
-          </>
-        )}
-
         {tab === 'me' && (
           <>
+            <div className="mb-4 flex gap-1 rounded-xl bg-slate-100 p-1">
+              {([['설정', 'setting'], ...CARE_VIEWS.map((v) => [v.label, v.id] as const)] as const).map(
+                ([lab, id]) => (
+                  <button
+                    key={id}
+                    onClick={() => { setCare(id as CareView | 'setting'); window.scrollTo({ top: 0 }) }}
+                    className={`flex-1 rounded-lg px-2 py-2 text-xs font-semibold transition-colors ${
+                      care === id ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500'
+                    }`}
+                  >
+                    {lab}
+                  </button>
+                )
+              )}
+            </div>
+
+            {care === 'exercise' && <Exercise patient={state.patient} />}
+            {care === 'guide' && <CancerGuide patient={state.patient} />}
+            {care === 'setting' && (
+              <>
             <PatientPanel patient={state.patient} onChange={setPatient} />
             {isAdmin && <AdminInquiries />}
 
@@ -224,6 +243,8 @@ export default function App() {
               처음부터 다시 설정하기
             </button>
             <Disclaimer />
+              </>
+            )}
           </>
         )}
       </main>
