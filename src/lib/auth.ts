@@ -34,11 +34,25 @@ export function useSession() {
   return { session, user: session?.user ?? null, loading }
 }
 
+/**
+ * 로그인 제공자에게 요청할 정보.
+ *
+ * 카카오는 기본값으로 이메일까지 요구하는데, 그 동의항목은 비즈앱 심사를 통과해야
+ * 쓸 수 있다. 심사 전에 요청하면 카카오가 KOE205 로 거절한다.
+ * 우리는 이메일이 없어도 동작하도록 만들었으므로 닉네임만 요청한다.
+ */
+const SCOPES: Partial<Record<Provider, string>> = {
+  kakao: 'profile_nickname'
+}
+
 export async function signIn(provider: Provider) {
   if (!supabase) throw new Error('로그인이 아직 준비되지 않았습니다.')
   // 로그인 후 이 앱으로 정확히 돌아오게 한다 (GitHub Pages 하위 경로 대응)
   const redirectTo = new URL(import.meta.env.BASE_URL || '/', window.location.origin).toString()
-  const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo } })
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: { redirectTo, scopes: SCOPES[provider] }
+  })
   if (error) throw error
 }
 
@@ -50,5 +64,12 @@ export async function signOut() {
 export function displayName(user: User | null): string {
   if (!user) return ''
   const m = user.user_metadata ?? {}
-  return (m.name as string) || (m.full_name as string) || (m.preferred_username as string) || user.email || '사용자'
+  return (
+    (m.name as string) ||
+    (m.full_name as string) ||
+    (m.nickname as string) ||           // 카카오는 여기로 닉네임이 온다
+    (m.preferred_username as string) ||
+    user.email ||
+    '사용자'
+  )
 }
