@@ -36,7 +36,32 @@ export const SEASON_MAP: Record<string, Season[]> = {
   'pollock-fresh': ['겨울'], 'cod': ['겨울'], 'maesaengi': ['겨울'], 'tot': ['겨울'],
   'gim': ['겨울'], 'miyeok-soaked': ['봄', '겨울'], 'spinach-blanched': ['겨울'],
   'mustard-leaf': ['겨울'], 'gat-kimchi': ['겨울'], 'kimchi-baechu': ['겨울'],
-  'yam': ['겨울'], 'sea-cucumber': ['겨울'], 'hairtail': ['가을', '겨울']
+  'yam': ['겨울'], 'sea-cucumber': ['겨울'], 'hairtail': ['가을', '겨울'],
+
+  /*
+   * 제철 '요리'.
+   *
+   * 여기까지는 재료에만 제철을 붙여 두었다. 그런데 추천은 요리에서만 고르므로
+   * (재료를 끼니로 내놓을 수는 없다) 계절이 결과에 아무 영향을 주지 못했다.
+   * 실제로 네 계절 모두 같은 일곱 가지가 나왔다.
+   *
+   * 그래서 관습적으로 굳어진 제철 요리에 계절을 붙인다.
+   * 지어내지 않고, 한국에서 그 계절 음식으로 통하는 것만 적는다.
+   */
+  // 봄 — 봄나물
+  'gosari-namul': ['봄'], 'bean-sprout-mixed': ['봄'],
+
+  // 여름 — 찬 국수와 보양식
+  'naengmyeon': ['여름'], 'bibim-naengmyeon': ['여름'], 'kongguksu': ['여름'],
+  'makguksu': ['여름'], 'bibim-guksu': ['여름'],
+  'samgyetang-soup': ['여름'], 'samgyetang-half': ['여름'],
+
+  // 가을 — 추어탕과 추석
+  'chueotang': ['가을'], 'tteok-songpyeon': ['가을'], 'juk-pumpkin': ['가을', '겨울'],
+
+  // 겨울 — 설날과 뜨거운 국물
+  'tteokguk': ['겨울'], 'mandu-guk': ['겨울'], 'fishcake': ['겨울'],
+  'shabu-shabu': ['겨울'], 'sigeumchi-namul': ['겨울', '봄']
 }
 
 /** 한식이 아닌 항목 */

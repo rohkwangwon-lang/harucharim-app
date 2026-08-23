@@ -109,8 +109,15 @@ for (let iter = 0; iter < N; iter++) {
     const v = evaluateFood(e.food, patient, e.servings, cached)
     if (v.level === 'avoid') report('피해야 할 것을 추천함', `${ctx} ${e.food.name}`)
     if (v.level === 'caution') report('주의 항목을 추천함', `${ctx} ${e.food.name}`)
-    if (e.food.form === 'ingredient' && e.food.group !== '경장영양·환자식')
+    /*
+     * 식재료를 끼니로 내놓으면 안 된다 — "대두(삶은 것)" 을 저녁으로 낼 수는 없다.
+     * 다만 과일과 영양보충 음료는 재료로 분류돼 있어도 그대로 먹는 것이라 예외다.
+     */
+    const eatenAsIs = e.food.group === '과일' || e.food.group === '경장영양·환자식'
+    if (e.food.form === 'ingredient' && !eatenAsIs)
       report('식재료를 메뉴로 추천함', `${ctx} ${e.food.name}`)
+    if (/\((생것|삶은 것|데친 것|찐 것|말린 것|불린 것|생)\)/.test(e.food.name))
+      report('조리 상태 이름을 메뉴로 추천함', `${ctx} ${e.food.name}`)
     if (!FOOD_BY_ID[e.food.id]) report('번들에 없는 식품 추천', `${ctx} ${e.food.name}`)
   }
 

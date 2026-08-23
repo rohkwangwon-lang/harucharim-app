@@ -1,4 +1,4 @@
-import type { Cuisine, EvidenceLevel, Food, FoodGroup, MealSlot, PatientContext, Season, SelectedItem, Supplement } from '../data/types'
+import type { Cuisine, EvidenceLevel, Food, FoodGroup, MealSlot, NutrientKey, PatientContext, Season, SelectedItem, Supplement } from '../data/types'
 import { MEAL_SLOTS } from '../data/types'
 import { CURATED_FOODS, FOOD_BY_ID } from '../data/foods'
 import { CANCER_BY_ID } from '../data/cancers'
@@ -477,6 +477,80 @@ export function buildDayMenu(
     used.add(entry.food.id)
   }
 
+  /*
+   * 4-2) 제철로 바꿔 넣기.
+   *
+   * 화면에는 "여름철 추천 식단" 이라 적혀 있는데, 실제로는 네 계절이 모두 같았다.
+   * 제철 가산점을 점수에 섞어 두었지만 영양 점수에 묻혀 아무 일도 하지 못했다.
+   *
+   * 가중치를 키워 맞추는 대신, 다 짠 뒤에 한 번 바꿔 넣는다.
+   * 같은 식품군에서 열량이 비슷하고 나트륨이 더 늘지 않는 제철 음식이 있으면
+   * 그것으로 교체한다. 영양은 그대로 두고 계절만 바꾸는 것이라 안전하다.
+   *
+   * 국수·국물 같은 여름·겨울 대표 음식은 나트륨이 높아 '주의' 판정을 받는다.
+   * 그런 것은 여기서도 쓰지 않는다 — 제철이라고 해서 권할 이유가 되지는 않는다.
+   */
+  {
+    const seasonal = candidates.filter((c) => c.seasonal && !used.has(c.food.id))
+    for (const slot of MEAL_SLOTS) {
+      for (const entry of meals[slot]) {
+        if (entry.origin !== 'added' || entry.seasonal) continue
+        const cur = foodContribution(entry.food, entry.servings)
+        const curKcal = cur.kcal ?? 0
+        const curNa = cur.na ?? 0
+
+        /*
+         * 바꿔도 되는지는 하루 총량으로 본다.
+         * 항목 하나만 놓고 "나트륨이 늘면 안 된다" 고 하면 거의 아무것도 못 바꾼다.
+         * 한식 반찬은 대개 200 mg 안팎이고 데친 채소는 50 mg 이라, 늘 채소가 이긴다.
+         * 바꾼 뒤에도 하루가 상한 안에 있고 열량이 목표 범위에 남는다면 문제될 것이 없다.
+         */
+        const now = running()
+        const dayNa = now.na ?? 0
+        const dayKcal = now.kcal ?? 0
+        const dayProtein = now.protein ?? 0
+        const dayFiber = now.fiber ?? 0
+        const swap = seasonal.find(
+          (c) =>
+            /*
+             * 같은 식품군끼리 바꾸는 것이 원칙이다 — 국을 과일로 바꾸면 끼니가 무너진다.
+             * 다만 간식 자리는 다르다. 거기서는 무엇이 오든 간식이고,
+             * 제철 과일이 들어갈 자리가 바로 거기다.
+             * 이 완화가 없으면 죽 위주 식단(식도암·두경부암)에는 과일이 낄 틈이 없어
+             * 네 계절이 모두 같아진다.
+             */
+            (c.food.group === entry.food.group || slot === '간식') &&
+            slotsFor(c.food).includes(slot) &&
+            Math.abs(c.kcal - curKcal) <= Math.max(120, curKcal * 0.4) &&
+            // 상한에 딱 맞추지 않는다. 제철 때문에 안전 여유를 써 버리면 안 된다.
+            dayNa - curNa + c.na <= naLimit * 0.95 &&
+            dayKcal - curKcal + c.kcal >= target.kcal[0] &&
+            dayKcal - curKcal + c.kcal <= target.kcal[1] &&
+            // 단백질·식이섬유도 하루 총량으로 본다. 항목끼리 견주면
+            // 섬유가 많은 가을 과일이 자리를 잡은 뒤로는 아무것도 못 바꾸게 된다.
+            dayProtein - (cur.protein ?? 0) + c.protein >= target.protein[0] &&
+            dayFiber - (cur.fiber ?? 0) + c.fiber >= fiberTarget
+        )
+        if (!swap) continue
+
+        used.delete(entry.food.id)
+        used.add(swap.food.id)
+        seasonal.splice(seasonal.indexOf(swap), 1)
+        foodTotals = addTotals(foodTotals, foodContribution(swap.food, entry.servings))
+        for (const [k, v] of Object.entries(cur) as [NutrientKey, number][]) {
+          foodTotals[k] = (foodTotals[k] ?? 0) - v
+        }
+        const hit = explain(swap, [])
+        entry.food = swap.food
+        entry.seasonal = true
+        entry.contribution = `${entry.contribution ?? ''} · ${season} 제철`.replace(/^ · /, '')
+        entry.ruleTitle = hit?.rule.title ?? `${season}에 나는 것으로 바꿔 넣었습니다.`
+        entry.evidence = hit?.rule.evidence
+        entry.refIds = hit?.rule.refIds ?? []
+      }
+    }
+  }
+
   // 5) 끼니별 소계 — 화면에서 항목을 더한 값과 정확히 같아야 한다
   const slotTotals: Record<MealSlot, NutrientTotals> = { 아침: {}, 점심: {}, 저녁: {}, 간식: {} }
   for (const slot of MEAL_SLOTS) {
@@ -606,7 +680,19 @@ function collectCandidates(
    * 환자가 직접 고르는 것은 막지 않지만, 앱이 먼저 권하지는 않는 성질.
    * 규칙상 금기가 아닌 시기라도 치료 중인 환자에게 회나 술을 제안하는 것은 부적절하다.
    */
-  const NEVER_SUGGEST = new Set(['생식', '알코올', '가공육', '염장', '훈제'])
+  const NEVER_SUGGEST = new Set(['알코올', '가공육', '염장', '훈제'])
+
+  /*
+   * 날것은 동물성만 막는다.
+   *
+   * 예전에는 '생식' 태그가 붙은 것을 모두 막았다. 회·생굴·날달걀을 막으려던 것인데,
+   * 그 태그는 사과·딸기·상추·오이에도 붙어 있어서 신선 농산물 43 종이 함께 막혔다.
+   * 그래서 계절이 바뀌어도 추천에 나오는 과일은 곶감·건자두 같은 말린 것뿐이었다.
+   *
+   * 호중구감소증처럼 날것을 정말 피해야 하는 상태는 규칙 엔진이 따로 판정한다
+   * (그때는 사과·딸기도 '피하세요'가 된다). 여기서 이중으로 막을 이유가 없다.
+   */
+  const RAW_RISK_GROUPS = new Set<FoodGroup>(['어패류', '가금류·난류', '육류', '외식·프랜차이즈'])
 
   /*
    * 경구영양보충(ONS)은 영양 위험이 있는 분에게 쓰는 것이다.
@@ -626,6 +712,7 @@ function collectCandidates(
     // 조미료·기름처럼 그 자체로 한 끼를 이루지 않는 것은 제안하지 않는다
     if (f.group === '유지·당류') continue
     if (f.tags.some((t) => NEVER_SUGGEST.has(t))) continue
+    if (f.tags.includes('생식') && RAW_RISK_GROUPS.has(f.group)) continue
     if (!allowedCuisine(f, cuisines)) continue
     // 사람이 한 번에 먹는 양으로 보기 어려운 것은 제외한다
     if (f.serving.g < 10) continue
@@ -635,7 +722,15 @@ function collectCandidates(
      * 그걸 어떻게 먹으라는 말인지 알 수 없다.
      * 다만 영양보충 음료처럼 그대로 먹는 것은 예외로 둔다.
      */
-    if (f.form === 'ingredient' && f.group !== '경장영양·환자식') continue
+    /*
+     * 과일은 재료로 분류돼 있어도 그대로 먹는 것이다.
+     * 사과 한 개, 귤 두 개는 조리가 필요 없는 완결된 간식인데,
+     * '재료' 라는 이유로 32 종이 통째로 추천에서 빠져 있었다.
+     * 그래서 계절이 바뀌어도 늘 곶감만 나왔다 — 곶감만 form 이 snack 이었기 때문이다.
+     * 아래 이름 규칙이 "(생것)·(삶은 것)" 같은 조리 상태 이름은 따로 걸러 준다.
+     */
+    const eatenAsIs = f.group === '과일' || f.group === '경장영양·환자식'
+    if (f.form === 'ingredient' && !eatenAsIs) continue
     // "(삶은 것)", "(데친 것)" 처럼 조리 상태만 적힌 이름은 재료에 가깝다.
     // 간식 자리에 "밤(삶은 것)" 이 올라오면 메뉴로 읽히지 않는다.
     if (/\((생것|삶은 것|데친 것|찐 것|말린 것|불린 것|생)\)/.test(f.name)) continue
@@ -657,8 +752,8 @@ function collectCandidates(
     let penalty = 0
     for (const t of f.tags) penalty += PENALTY[t] ?? 0
 
+    // 제철 가산은 bestFiller 에서 따로 센다. 여기서 더하면 두 번 세는 셈이 된다.
     const seasonal = isSeasonal(f, season)
-    if (seasonal) bonus += 10
 
     const c = foodContribution(f, 1)
     const kcal = c.kcal ?? 0
@@ -780,7 +875,19 @@ function bestFiller(
      * 정작 값싸고 섬유가 많은 나물 반찬이 들어갈 자리가 없어졌다.
      * 근거는 같은 값이면 앞세우는 기준이지, 무엇을 채울지 정하는 기준이 아니다.
      */
-    const score = fill * 80 + c.bonus * 0.5 - c.penalty * 2.5 - naCost * 25 - kcalCost * 14 - crossPenalty
+    /*
+     * 제철은 따로 센다.
+     *
+     * 예전에는 제철 가산 10 점이 c.bonus 안에 섞여 있었고, 그 bonus 에 0.5 를 곱하니
+     * 실제로는 5 점이었다. fill * 80 앞에서 아무 일도 하지 못했다.
+     * 그래서 봄·여름·가을·겨울 어느 때에 물어도 똑같은 일곱 가지가 나왔다.
+     * 화면에는 "여름철 추천 식단" 이라 적어 놓고서 그랬다.
+     *
+     * 영양을 뒤집을 만큼은 아니고, 엇비슷한 후보끼리 갈릴 때 제철이 이기는 정도로 둔다.
+     */
+    const seasonBonus = c.seasonal ? 22 : 0
+
+    const score = fill * 80 + c.bonus * 0.5 + seasonBonus - c.penalty * 2.5 - naCost * 25 - kcalCost * 14 - crossPenalty
     if (!best || score > best.score) best = { c, score }
   }
   if (!best) return undefined
