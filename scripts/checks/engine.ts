@@ -167,6 +167,23 @@ for (let iter = 0; iter < N; iter++) {
       report('처음부터 구성한 하루가 단백질 미달', `${ctx} ${Math.round(m.totals.protein ?? 0)}/${m.target.protein[0]}`)
     if (m.meals['간식'].length === 0)
       report('처음부터 구성했는데 간식이 없음', ctx)
+
+    /*
+     * 아침이 가장 무거운 끼니가 되면 안 된다.
+     * 한국에서 하루 식사는 저녁이 가장 무겁고 아침이 가장 가볍다.
+     * 아침에 630 kcal 짜리 삼계탕을 놓아 봐야 실제로 드시지 않는다.
+     * 소량씩 자주 드셔야 하는 분은 넷을 고르게 하므로 이 검사에서 뺀다.
+     */
+    const grazing = patient.conditions.some(
+      (c) => c === '식욕부진' || c === '체중감소' || c === '위절제후' || c === '오심·구토'
+    )
+    if (!grazing) {
+      const kcalOf = (s: MealSlot) =>
+        m.meals[s].reduce((n, e) => n + (foodContribution(e.food, e.servings).kcal ?? 0), 0)
+      const b = kcalOf('아침'), l = kcalOf('점심'), d = kcalOf('저녁')
+      if (b > d * 1.1) report('아침이 저녁보다 무거움', `${ctx} 아침 ${Math.round(b)} > 저녁 ${Math.round(d)}`)
+      if (b > l * 1.25) report('아침이 점심보다 크게 무거움', `${ctx} 아침 ${Math.round(b)} > 점심 ${Math.round(l)}`)
+    }
   }
   try { nutritionRisk(patient) } catch (e: any) { report('nutritionRisk 예외', `${ctx} :: ${e?.message}`) }
   try { getDailyReference(patient.sex, patient.age) } catch (e: any) { report('getDailyReference 예외', `${ctx} :: ${e?.message}`) }

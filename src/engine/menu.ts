@@ -55,7 +55,9 @@ const SLOT_BY_GROUP: Record<FoodGroup, MealSlot[]> = {
   '견과·종실': ['간식'],
   채소: ['점심', '저녁'],
   '해조·버섯': ['아침', '점심', '저녁'],
-  과일: ['아침', '간식'],
+  // 과일은 식후 후식으로도 먹는다. 간식으로만 묶어 두면 간식이 차는 순간
+  // 아침으로 몰려, 가벼워야 할 아침이 가장 무거운 끼니가 된다.
+  과일: ['아침', '점심', '저녁', '간식'],
   육류: ['점심', '저녁'],
   '가금류·난류': ['아침', '점심', '저녁'],
   어패류: ['점심', '저녁'],
@@ -319,6 +321,17 @@ export function buildDayMenu(
   const groupCount = new Map<string, number>()
   for (const k of keep) groupCount.set(k.food.group, (groupCount.get(k.food.group) ?? 0) + 1)
   const cap = snackCap(patient)
+  /*
+   * 끼니별 목표 열량. 하루 목표 범위의 가운데를 비중대로 나눈다.
+   * 딱 맞출 수는 없고 맞출 필요도 없지만, 어느 끼니가 아직 제 몫에 모자란지
+   * 견줄 잣대는 있어야 한다.
+   */
+  const midKcal = (target.kcal[0] + target.kcal[1]) / 2
+  const shares = mealShares(patient)
+  const quota: Record<MealSlot, number> = {
+    아침: midKcal * shares['아침'], 점심: midKcal * shares['점심'],
+    저녁: midKcal * shares['저녁'], 간식: midKcal * shares['간식']
+  }
 
   for (let guard = 0; guard < 40; guard++) {
     const cur = running()
@@ -357,10 +370,10 @@ export function buildDayMenu(
           // 나물·채소는 대개 200 mg 아래라, 여기서 막으면 채소를 못 넣는다.
           : need.fiber > 0 ? Math.max(120, room.na * 0.5)
             : Math.max(0, room.na * 0.5)
-    const best = bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap)
+    const best = bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota)
     if (!best) break
 
-    const slot = placeIn(slotsFor(best.food), meals, cap)
+    const slot = placeIn(slotsFor(best.food), meals, cap, quota)
     if (!slot) { used.add(best.food.id); continue }
     meals[slot].push({
       food: best.food, servings: best.servings, origin: 'added',
@@ -405,11 +418,12 @@ export function buildDayMenu(
       // 나트륨은 거의 없는 것만. 예산이 남아 있으면 평소대로 절반까지.
       Math.max(120, room.na * 0.5),
       topUpCap,
+      quota,
       GROUP_CAP + 1
     )
     if (!best) break
 
-    const slot = placeIn(slotsFor(best.food), meals, topUpCap)
+    const slot = placeIn(slotsFor(best.food), meals, topUpCap, quota)
     if (!slot) { used.add(best.food.id); continue }
 
     /*
@@ -588,6 +602,29 @@ export function fiberGoal(
 const MAIN_SLOTS: MealSlot[] = ['아침', '점심', '저녁']
 
 /**
+ * 끼니별로 하루 열량을 어떻게 나눌 것인가.
+ *
+ * 예전에는 "지금 가장 가벼운 끼니" 에 넣었다. 그러면 넷이 고르게 되는데,
+ * 실제로는 아침 35 % · 점심 27 % · 저녁 23 % 로 아침이 가장 무거워졌다.
+ * 빈 끼니를 앞에서부터 채우다 보니 단백질이 많은 주요리가 늘 아침에 놓인 탓이다.
+ *
+ * 한국에서 하루 식사는 저녁이 가장 무겁고 아침이 가장 가볍다.
+ * 아침에 630 kcal 짜리 삼계탕을 놓아 봐야 실제로 드시지 않는다.
+ *
+ * 다만 소량씩 자주 드셔야 하는 분은 다르다. 식욕이 없거나 위를 절제하신 경우
+ * 한 끼를 크게 만들면 그 끼니를 통째로 남기신다. 그때는 넷을 고르게 하고
+ * 간식 몫을 키운다.
+ */
+function mealShares(patient: PatientContext): Record<MealSlot, number> {
+  const grazing = patient.conditions.some(
+    (c) => c === '식욕부진' || c === '체중감소' || c === '위절제후' || c === '오심·구토'
+  )
+  return grazing
+    ? { 아침: 0.25, 점심: 0.26, 저녁: 0.27, 간식: 0.22 }
+    : { 아침: 0.25, 점심: 0.30, 저녁: 0.35, 간식: 0.10 }
+}
+
+/**
  * 간식으로 내놓을 수 있는 최대 가짓수.
  *
  * 저나트륨·고열량 식품 — 견과·과일·영양음료 — 은 거의 다 간식 전용 식품군이다.
@@ -616,25 +653,30 @@ function snackCap(patient: PatientContext): number {
 function placeIn(
   slots: MealSlot[],
   meals: Record<MealSlot, MenuEntry[]>,
-  cap: number
+  cap: number,
+  /** 끼니별 목표 열량 — 여기에 견주어 가장 모자란 끼니에 넣는다 */
+  quota: Record<MealSlot, number>
 ): MealSlot | undefined {
-  const empty = slots.filter((s) => meals[s].length === 0 && s !== '간식')
-  if (empty.length > 0) return empty[0]
   const pool = slots.filter((s) => s !== '간식' || meals['간식'].length < cap)
   if (pool.length === 0) return undefined
 
   /*
-   * 가짓수가 아니라 열량으로 견준다.
-   * 가짓수로 보면 나물 두 접시가 올라간 저녁이 '이미 찬 끼니'가 되어,
+   * 가짓수가 아니라 '제 몫에 얼마나 모자란가' 로 견준다.
+   *
+   * 가짓수로 보면 나물 두 접시가 올라간 저녁이 '이미 찬 끼니' 가 되어,
    * 87 kcal 짜리 저녁과 네 가지가 올라간 아침이 나란히 놓였다.
-   * 사람이 한 끼로 느끼는 것은 접시 수가 아니라 양이다.
+   * 절대 열량으로 견주면 넷이 똑같이 나뉘어, 아침이 저녁만큼 무거워진다.
+   * 사람이 한 끼로 느끼는 것은 접시 수도, 균등한 몫도 아니다.
    */
   const load = (s: MealSlot) =>
     meals[s].reduce((n, e) => n + (foodContribution(e.food, e.servings).kcal ?? 0), 0)
-  // 간식은 끼니가 아니므로, 갈 곳이 있으면 끼니를 먼저 채운다
+  const shortfall = (s: MealSlot) => quota[s] - load(s)
+
+  // 간식은 끼니가 아니다. 끼니 쪽에 아직 여유가 있으면 그쪽을 먼저 채운다.
   const mains = pool.filter((s) => s !== '간식')
-  const target = mains.length > 0 ? mains : pool
-  return target.reduce((a, b) => (load(a) <= load(b) ? a : b))
+  const hungry = mains.filter((s) => shortfall(s) > 0)
+  const target = hungry.length > 0 ? hungry : mains.length > 0 ? mains : pool
+  return target.reduce((a, b) => (shortfall(a) >= shortfall(b) ? a : b))
 }
 
 /** 후보 한 건 — 영양 기여분을 미리 계산해 둔다 */
@@ -825,6 +867,8 @@ function bestFiller(
   naCap: number,
   /** 간식 가짓수 상한 */
   cap: number,
+  /** 끼니별 목표 열량 */
+  quota: Record<MealSlot, number>,
   /** 한 식품군에서 낼 수 있는 최대 가짓수 */
   groupCap = GROUP_CAP
 ): Filler | undefined {
@@ -836,7 +880,7 @@ function bestFiller(
     if (c.kcal > room.kcal) continue
     if (c.na > naCap) continue
     // 넣을 끼니가 없으면 (간식이 다 찼는데 간식밖에 못 가는 것) 의미가 없다
-    if (!placeIn(slotsFor(c.food), meals, cap)) continue
+    if (!placeIn(slotsFor(c.food), meals, cap, quota)) continue
 
     /*
      * 부족분을 얼마나 메우는지 — 필요한 만큼만 쳐 준다.
