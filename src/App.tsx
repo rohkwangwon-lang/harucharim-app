@@ -13,6 +13,7 @@ import { Diary } from './components/Diary'
 import { IconDiary, IconGuide, IconMe, IconMeal, IconPill, IconSearch, IconSuggest, Logo } from './components/icons'
 import { label as dayLabel, today } from './lib/day'
 import { CancerGuide } from './components/CancerGuide'
+import { EvidenceGuide } from './components/EvidenceGuide'
 import { Exercise } from './components/Exercise'
 import { DataManager } from './components/DataManager'
 import { InquiryDialog } from './components/InquiryDialog'
@@ -26,7 +27,7 @@ import { displayName, useSession } from './lib/auth'
  * 그래서 성격이 비슷한 영양제·운동·가이드는 '관리' 안에서 나눈다.
  */
 type Tab = 'compose' | 'diary' | 'suggest' | 'search' | 'supp' | 'care' | 'me'
-type CareView = 'exercise' | 'guide'
+type CareView = 'exercise' | 'guide' | 'evidence'
 
 const TABS: { id: Tab; label: string; Icon: typeof IconMeal }[] = [
   { id: 'compose', label: '내 식단', Icon: IconMeal },
@@ -46,7 +47,12 @@ const TABS: { id: Tab; label: string; Icon: typeof IconMeal }[] = [
 
 const CARE_VIEWS: { id: CareView; label: string }[] = [
   { id: 'exercise', label: '운동' },
-  { id: 'guide', label: '암종 가이드' }
+  { id: 'guide', label: '암종 가이드' },
+  /*
+   * 이 앱은 판정마다 '근거 A·B·C·G' 를 붙여 놓고 그 뜻을 어디에도 적지 않았다.
+   * 마우스를 올려야 보이는 풍선말뿐이라 휴대폰에서는 볼 방법이 없었다.
+   */
+  { id: 'evidence', label: '근거 등급' }
 ]
 
 export default function App() {
@@ -211,6 +217,7 @@ export default function App() {
             </div>
             {care === 'exercise' && <Exercise patient={state.patient} />}
             {care === 'guide' && <CancerGuide patient={state.patient} />}
+            {care === 'evidence' && <EvidenceGuide patient={state.patient} />}
           </>
         )}
 

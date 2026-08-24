@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 import type { EvidenceLevel, RuleLevel } from '../data/types'
 
@@ -33,23 +34,67 @@ export function LevelDot({ level }: { level: RuleLevel | null }) {
 
 /* ── 근거 수준 배지 ─────────────────────────────────────────── */
 
-const EVIDENCE_DESC: Record<EvidenceLevel, string> = {
-  A: '무작위배정 임상시험 또는 그 메타분석',
-  B: '대규모 전향적 코호트·환자대조군 연구',
-  C: '소규모·후향적 연구 또는 기전 연구 — 결과가 일관되지 않음',
-  G: '주요 학회 가이드라인의 합의 권고'
+/**
+ * 근거 등급 설명.
+ *
+ * 이 앱의 모든 판정에는 등급이 붙는다. 그런데 그 뜻을 알 수 있는 곳이
+ * 마우스를 올렸을 때 뜨는 풍선말뿐이었다 — 휴대폰에서는 볼 방법이 없다.
+ * 뜻과 '그래서 어떻게 받아들이면 되는지' 를 함께 둔다.
+ */
+export const EVIDENCE_INFO: Record<
+  EvidenceLevel,
+  { what: string; how: string; chip: string; dot: string }
+> = {
+  A: {
+    what: '무작위배정 임상시험, 또는 그런 시험들을 모은 메타분석',
+    how: '사람을 무작위로 나눠 직접 비교한 결과입니다. 이 앱에서 가장 단단한 근거이며, 웬만하면 따르시는 편이 좋습니다.',
+    chip: 'bg-emerald-100 text-emerald-800', dot: 'bg-emerald-500'
+  },
+  B: {
+    what: '많은 사람을 오래 따라간 관찰 연구 (코호트·환자대조군)',
+    how: '무작위로 나누지 않았기 때문에 "이것 때문"이라고 단정하기는 어렵지만, 규모가 크고 방향이 일관됩니다. 참고하실 만합니다.',
+    chip: 'bg-sky-100 text-sky-800', dot: 'bg-sky-500'
+  },
+  C: {
+    what: '규모가 작거나 되돌아본 연구, 또는 세포·동물 수준의 기전 연구',
+    how: '아직 사람에서 확인되지 않았거나 결과가 엇갈립니다. 참고만 하시고, 이것만 보고 식습관을 크게 바꾸지는 마세요.',
+    chip: 'bg-amber-100 text-amber-800', dot: 'bg-amber-500'
+  },
+  G: {
+    what: '주요 학회 가이드라인의 합의 권고 (WCRF/AICR · ASCO · ESPEN · NCCN 등)',
+    how: '연구 하나를 가리키는 것이 아니라, 전문가들이 근거를 모아 합의한 내용입니다. 실제 진료에서 쓰는 기준입니다.',
+    chip: 'bg-violet-100 text-violet-800', dot: 'bg-violet-500'
+  }
 }
 
+/**
+ * 근거 배지. 누르면 그 자리에서 뜻을 펼친다.
+ *
+ * 풍선말은 손가락으로 쓰는 기기에서 뜨지 않는다.
+ * 환자분이 "근거 C" 를 보고 그게 센 말인지 약한 말인지 알 수 있어야 한다.
+ */
 export function EvidenceBadge({ level }: { level: EvidenceLevel }) {
-  const cls =
-    level === 'A' ? 'bg-emerald-100 text-emerald-800'
-    : level === 'B' ? 'bg-sky-100 text-sky-800'
-    : level === 'C' ? 'bg-amber-100 text-amber-800'
-    : 'bg-violet-100 text-violet-800'
+  const [open, setOpen] = useState(false)
+  const info = EVIDENCE_INFO[level]
   return (
-    <span className={`chip ${cls}`} title={EVIDENCE_DESC[level]}>
-      근거 {level}
-    </span>
+    <>
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); setOpen((v) => !v) }}
+        className={`chip ${info.chip} ring-1 ring-inset ring-black/5`}
+        aria-expanded={open}
+      >
+        근거 {level}
+        <span aria-hidden className="ml-0.5 opacity-50">?</span>
+      </button>
+      {open && (
+        <span className="mt-1 block w-full rounded-lg bg-stone-50 px-2.5 py-2 text-[11px] leading-relaxed text-stone-600">
+          <strong className="text-stone-800">{info.what}</strong>
+          <br />
+          {info.how}
+        </span>
+      )}
+    </>
   )
 }
 
