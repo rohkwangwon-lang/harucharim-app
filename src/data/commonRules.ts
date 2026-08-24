@@ -125,7 +125,9 @@ export const COMMON_RULES: NutritionRule[] = [
   {
     id: 'common-vegetables',
     level: 'prefer',
-    match: { groups: ['채소', '해조·버섯'] },
+    // 절이거나 소금에 저장한 형태는 '채소를 챙기세요' 의 대상이 아니다.
+    // 갓김치·오이지가 '염장이라 피하세요' 와 '채소라 권장' 을 동시에 받고 있었다.
+    match: { groups: ['채소', '해조·버섯'], excludeTags: ['염장', '고나트륨'] },
     title: '채소는 하루 400 g 이상을 목표로 하세요',
     reason:
       'WCRF/AICR 와 미국암학회는 생존자에게 채소·과일이 풍부한 식사를 권고합니다. ' +
@@ -136,7 +138,8 @@ export const COMMON_RULES: NutritionRule[] = [
   {
     id: 'common-protein',
     level: 'prefer',
-    match: { tags: ['고단백'] },
+    // 젓갈·자반도 단백질이지만 그것 때문에 권할 것은 아니다
+    match: { tags: ['고단백'], excludeTags: ['염장', '가공육', '훈제'] },
     title: '치료 중에는 단백질을 평소보다 더 챙겨야 합니다',
     reason:
       'ESPEN 은 암 환자에게 체중 1 kg 당 1.0~1.5 g 의 단백질을 권고합니다. 60 kg 성인이라면 하루 60~90 g 으로, ' +

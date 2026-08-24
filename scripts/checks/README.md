@@ -10,6 +10,8 @@ node_modules/.bin/jiti scripts/checks/data.ts     # 식품/영양제 데이터·
 node_modules/.bin/jiti scripts/checks/diary.ts    # 기록 정규화·주월 집계·체중 추이
 node_modules/.bin/jiti scripts/checks/barcode.ts  # 바코드 표 무결성·스캐너 표기 흔들림
 node_modules/.bin/jiti scripts/checks/season.ts   # 계절이 실제로 추천을 바꾸는가
+node_modules/.bin/jiti scripts/checks/targets.ts  # 열량·단백질 목표와 조정 사유
+node_modules/.bin/jiti scripts/checks/rules.ts    # 임상 규칙·출처·상호작용 무결성
 ```
 
 검사가 헛돌지 않는지 보려면 engine.ts 가 찍는 커버리지 숫자를 본다.

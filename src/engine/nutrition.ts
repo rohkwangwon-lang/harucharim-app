@@ -260,3 +260,53 @@ export function fmt(value: number, digits: number): string {
     maximumFractionDigits: digits
   })
 }
+
+/* ────────── 목표를 왜 그렇게 잡았는지 ────────── */
+
+/** 하루 목표를 조정한 사유 한 건 */
+export interface TargetNote {
+  /** 무엇을 조정했는지 */ label: string
+  /** 왜 그랬는지 */ reason: string
+}
+
+/**
+ * 이 환자의 하루 목표가 기본값과 달라진 이유를 모은다.
+ *
+ * 앱이 조용히 목표를 낮추거나 올리면, 화면의 숫자가 왜 그 값인지 알 수 없다.
+ * "왜 나는 1,500 kcal 이고 저 사람은 1,800 kcal 인가" 에 답할 수 있어야 한다.
+ * 특히 낮춘 경우는 반드시 밝혀야 한다 — 모르고 보면 앱이 덜 먹으라고 하는 것처럼 보인다.
+ */
+export function targetNotes(patient: PatientContext): TargetNote[] {
+  const out: TargetNote[] = []
+  const h = patient.heightCm / 100
+  const bmi = h > 0 ? patient.weightKg / (h * h) : 22
+  const loss = patient.weightLossPct ?? 0
+
+  const dosing = dosingWeight(patient)
+  if (dosing !== patient.weightKg) {
+    out.push({
+      label: `보정체중 ${dosing} kg 기준`,
+      reason:
+        `BMI ${bmi.toFixed(1)} 로 계산에 실제 체중을 그대로 쓰면 필요량이 과대평가됩니다. ` +
+        '지방 조직은 근육만큼 에너지를 쓰지 않기 때문입니다. 표준체중에 초과분의 4분의 1을 더한 값으로 계산했습니다.'
+    })
+  }
+
+  if (patient.conditions.includes('체중증가') && bmi >= 23 && loss < 5) {
+    out.push({
+      label: '열량 목표를 한 단계 낮췄습니다',
+      reason:
+        '체중 증가를 걱정하고 계시고 과체중 범위입니다. 암종별 기준값은 체중을 지키거나 회복시키기 위한 것이라 ' +
+        '그대로 두면 매일 "열량이 모자랍니다" 라고 말하게 됩니다. 다만 치료 중 급격한 감량은 권하지 않아 13 %만 낮췄습니다.'
+    })
+  }
+
+  if (loss >= 5) {
+    out.push({
+      label: '체중이 줄고 있어 목표를 낮추지 않았습니다',
+      reason: `최근 ${loss} % 감소하셨습니다. 이 시점에는 열량과 단백질을 채우는 것이 먼저입니다.`
+    })
+  }
+
+  return out
+}

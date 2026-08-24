@@ -5,9 +5,9 @@ import { MEAL_SLOTS } from '../data/types'
 import { FOOD_BY_ID } from '../data/foods'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
 import { CANCER_BY_ID } from '../data/cancers'
-import { buildDayMenu, currentSeason, dayNotes, fiberGoal, ideasFromIngredients, naUnknownNames, recentFoods } from '../engine/menu'
+import { buildDayMenu, currentSeason, dayNotes, fiberGoal, ideasFromIngredients, naUnknownNames, planNotes, recentFoods } from '../engine/menu'
 import { evaluateSelection } from '../engine/rules'
-import { foodContribution, personalTarget, sumIntake } from '../engine/nutrition'
+import { foodContribution, personalTarget, sumIntake, targetNotes } from '../engine/nutrition'
 import { BASE_EXERCISE, CONDITION_EXERCISE_NOTES, EXERCISE_BY_CANCER } from '../data/exercise'
 import { REF_BY_ID } from '../data/references'
 import { DayNoteList, EvidenceBadge, LevelBadge, NutrientPanel, NutrientRow, nutrientState, Section } from './ui'
@@ -96,6 +96,11 @@ export function TodayMeals({
   // 신장 기능이 떨어진 분에게는 단백질 과다가 문제가 된다
   const renalCare = patient.conditions.some((c) => c === '신기능저하' || c === '간성뇌증위험')
   const fiber_ = fiberGoal(patient, profile)
+  /** 기본값과 다르게 잡은 것들 — 목표를 왜 그 값으로 두었는지 */
+  const adjustments = useMemo(
+    () => [...targetNotes(patient), ...planNotes(patient)],
+    [patient]
+  )
   const empty = selected.length === 0
   const kcalState = nutrientState(kcal, target.kcal[0], target.kcal[1], { empty })
   const proteinState = nutrientState(protein, target.protein[0], target.protein[1], { empty, overOk: !renalCare })
@@ -140,6 +145,27 @@ export function TodayMeals({
         <p className="mt-1 text-xs leading-relaxed text-stone-600">
           아침·점심·저녁·간식을 <strong>모두 합한 것이 하루치</strong>입니다. 한 끼 분량이 아닙니다.
         </p>
+
+        {/*
+          * 기본값과 다르게 잡은 것이 있으면 그 자리에서 밝힌다.
+          * 앱이 조용히 목표를 낮추면, 화면의 숫자가 왜 그 값인지 알 수 없다.
+          * 특히 낮춘 경우는 모르고 보면 앱이 덜 먹으라고 하는 것처럼 읽힌다.
+          */}
+        {adjustments.length > 0 && (
+          <ul className="mt-2.5 space-y-1.5 border-t border-brand-200/70 pt-2.5">
+            {adjustments.map((a) => (
+              <li key={a.label}>
+                <details>
+                  <summary className="cursor-pointer text-xs font-semibold text-brand-800">
+                    {a.label}
+                    <span className="ml-1 text-[10px] font-medium text-brand-600/70">이유 보기</span>
+                  </summary>
+                  <p className="mt-1 text-[11px] leading-relaxed text-stone-600">{a.reason}</p>
+                </details>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {/*

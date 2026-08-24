@@ -268,6 +268,15 @@ export type RuleLevel =
 export interface RuleMatch {
   /** OR 매칭 결과를 이 식품군으로 한정한다 (예: 고당 규칙을 음료·간식에만 적용) */
   restrictGroups?: FoodGroup[]
+  /**
+   * 이 태그가 붙었으면 걸리지 않는다.
+   *
+   * "채소를 충분히 드세요" 는 갓김치·오이지에까지 붙을 이유가 없다.
+   * 실제로 위암에서 갓김치가 '염장이라 피하세요' 와 '채소라 권장' 을 동시에 받아,
+   * 한 음식에 반대되는 두 문장이 나란히 붙었다.
+   * 권고의 대상이 아닌 형태를 여기서 덜어낸다.
+   */
+  excludeTags?: FoodTag[]
   tags?: FoodTag[]
   foodIds?: string[]
   groups?: FoodGroup[]

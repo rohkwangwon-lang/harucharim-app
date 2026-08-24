@@ -40,6 +40,8 @@ export interface FoodVerdict {
 function matchesFood(match: RuleMatch, food: Food, servings = 1): boolean {
   // restrictGroups 는 AND 조건 — 여기서 걸러지면 나머지는 볼 필요가 없다
   if (match.restrictGroups && !match.restrictGroups.includes(food.group)) return false
+  // excludeTags 도 AND 조건. 하나라도 걸리면 이 규칙은 이 음식에 해당하지 않는다.
+  if (match.excludeTags?.some((t) => food.tags.includes(t))) return false
 
   if (match.foodIds?.includes(food.id)) return true
   if (match.groups?.includes(food.group)) return true
@@ -121,13 +123,24 @@ export function evaluateFood(
   const rules = cached?.rules ?? activeRules(patient)
   const inter = cached?.interactions ?? activeInteractions(patient)
 
-  const hits = rules.filter((h) => matchesFood(h.rule.match, food, servings))
+  const all = rules.filter((h) => matchesFood(h.rule.match, food, servings))
   const interactions = inter.filter((h) => matchesFood(h.interaction.match, food, servings))
 
   const level = strongestLevel([
-    ...hits.map((h) => h.rule.level),
+    ...all.map((h) => h.rule.level),
     ...interactions.map((h) => h.interaction.level)
   ])
+
+  /*
+   * 피해야 할 음식이면 권장 사유는 보여 주지 않는다.
+   *
+   * 두 규칙이 동시에 맞는 일이 실제로 있다. 폐암 방사선치료 중 견과는
+   * 거친 질감이라 피해야 하지만, 악액질에는 열량이 높아 도움이 된다.
+   * 둘 다 맞는 말이라 규칙을 고칠 것은 아니다.
+   * 다만 화면에 "견과를 드세요" 와 "견과를 피하세요" 가 나란히 붙으면
+   * 무엇을 믿어야 할지 알 수 없다. 결론이 '피하세요' 라면 그 이유만 보여 준다.
+   */
+  const hits = level === 'avoid' ? all.filter((h) => h.rule.level !== 'prefer') : all
 
   return { food, level, hits, interactions }
 }

@@ -1,0 +1,136 @@
+/**
+ * 일곱 번째 검사 — 임상 규칙 데이터.
+ *
+ * 이 앱의 판단은 전부 규칙에서 나온다. 규칙에 근거가 없거나, 출처가 실재하지 않거나,
+ * 같은 음식을 두고 서로 반대로 말하면 화면의 모든 판정이 흔들린다.
+ * 규칙 자체를 검사한 적이 없어 새로 만든다.
+ */
+import { COMMON_RULES } from '../../src/data/commonRules'
+import { CONDITION_RULES } from '../../src/data/conditionRules'
+import { INTERACTIONS, MEDICATIONS } from '../../src/data/interactions'
+import { INGREDIENT_RULES } from '../../src/data/ingredientRules'
+import { CANCERS } from '../../src/data/cancers'
+import { REF_BY_ID } from '../../src/data/references'
+import { CURATED_FOODS, FOOD_BY_ID } from '../../src/data/foods'
+import { SUPPLEMENTS } from '../../src/data/supplements'
+import { evaluateFood, activeRules, activeInteractions } from '../../src/engine/rules'
+import { DEFAULT_PATIENT } from '../../src/lib/store'
+import type { NutritionRule } from '../../src/data/types'
+
+const bugs: string[] = []
+const seenB = new Set<string>()
+const bad = (k: string, d: string) => { const s = `${k} :: ${d}`; if (!seenB.has(s)) { seenB.add(s); bugs.push(s) } }
+
+/* ── 1. 규칙 한 건 한 건이 성한가 ────────────────── */
+const allTags = new Set(CURATED_FOODS.flatMap((f) => f.tags as string[]))
+const allGroups = new Set(CURATED_FOODS.map((f) => f.group as string))
+const suppCats = new Set(SUPPLEMENTS.map((s) => s.category as string))
+const ids = new Set<string>()
+let ruleCount = 0
+
+function checkRule(r: NutritionRule, where: string) {
+  ruleCount++
+  if (!r.id) { bad('규칙에 id 없음', `${where} ${r.title}`); return }
+  if (ids.has(r.id)) bad('규칙 id 중복', r.id)
+  ids.add(r.id)
+  if (!r.title?.trim()) bad('규칙에 제목 없음', r.id)
+  if (!r.reason?.trim()) bad('규칙에 설명 없음', `${r.id} ${r.title}`)
+  if (r.reason && r.reason.length < 30) bad('규칙 설명이 너무 짧음', `${r.id}`)
+  if (!['avoid', 'caution', 'prefer', 'info'].includes(r.level)) bad('규칙 등급 이상', `${r.id} ${r.level}`)
+  if (!['A', 'B', 'C', 'G'].includes(r.evidence)) bad('근거 수준 이상', `${r.id} ${r.evidence}`)
+  if (!r.refIds?.length) bad('규칙에 출처 없음', `${r.id} ${r.title}`)
+  for (const ref of r.refIds ?? []) if (!REF_BY_ID[ref]) bad('없는 출처를 가리킴', `${r.id} → ${ref}`)
+
+  const m = r.match ?? {}
+  if (!m.tags?.length && !m.foodIds?.length && !m.groups?.length &&
+      !m.supplementCategories?.length && !m.supplementIds?.length && !m.nutrient)
+    bad('무엇에 걸리는지 없는 규칙', `${r.id} ${r.title}`)
+  for (const t of m.tags ?? []) if (!allTags.has(t as string)) bad('쓰이지 않는 태그를 가리킴', `${r.id} → ${t}`)
+  for (const g of m.groups ?? []) if (!allGroups.has(g as string)) bad('없는 식품군을 가리킴', `${r.id} → ${g}`)
+  for (const g of m.restrictGroups ?? []) if (!allGroups.has(g as string)) bad('없는 식품군으로 한정', `${r.id} → ${g}`)
+  for (const fid of m.foodIds ?? []) if (!FOOD_BY_ID[fid]) bad('없는 식품을 가리킴', `${r.id} → ${fid}`)
+  for (const c of m.supplementCategories ?? []) if (!suppCats.has(c as string)) bad('없는 영양제 분류를 가리킴', `${r.id} → ${c}`)
+  for (const sid of m.supplementIds ?? []) if (!SUPPLEMENTS.some((s) => s.id === sid)) bad('없는 영양제를 가리킴', `${r.id} → ${sid}`)
+  if (m.nutrient) {
+    if (!['>', '<'].includes(m.nutrient.op)) bad('성분 조건 연산자 이상', r.id)
+    if (!Number.isFinite(m.nutrient.value)) bad('성분 조건 값 이상', r.id)
+    if (!['serving', 'per100', 'day'].includes(m.nutrient.basis)) bad('성분 조건 기준 이상', r.id)
+  }
+}
+
+for (const r of COMMON_RULES) checkRule(r, '공통')
+for (const [cond, rules] of Object.entries(CONDITION_RULES)) for (const r of rules) checkRule(r, cond)
+for (const c of CANCERS) for (const r of c.rules ?? []) checkRule(r, c.id)
+
+/* ── 2. 상호작용 ─────────────────────────────── */
+const medIds = new Set(MEDICATIONS.map((m) => m.id))
+for (const it of INTERACTIONS) {
+  if (!medIds.has(it.agent)) bad('없는 약제를 가리키는 상호작용', `${it.title} → ${it.agent}`)
+  if (!it.title?.trim()) bad('상호작용에 제목 없음', it.agent)
+  if (!it.reason?.trim()) bad('상호작용에 설명 없음', it.title)
+  if (!['avoid', 'caution', 'prefer', 'info'].includes(it.level)) bad('상호작용 등급 이상', it.title)
+  for (const ref of it.refIds ?? []) if (!REF_BY_ID[ref]) bad('상호작용이 없는 출처를 가리킴', `${it.title} → ${ref}`)
+}
+for (const m of MEDICATIONS) {
+  if (!m.name?.trim()) bad('약제 이름 없음', m.id)
+  if (!INTERACTIONS.some((i) => i.agent === m.id))
+    bad('상호작용이 하나도 없는 약제', `${m.id} ${m.name} — 골라도 아무 일이 없다`)
+}
+
+/* ── 3. 성분 규칙(영양제) ────────────────────── */
+for (const r of INGREDIENT_RULES) {
+  if (!r.name?.trim()) bad('성분 규칙 이름 없음', JSON.stringify(r).slice(0, 40))
+  if (!r.match?.length) bad('성분 규칙에 찾을 말이 없음', r.name)
+  if (!r.reason?.trim()) bad('성분 규칙에 사유 없음', r.name)
+  if (!r.refIds?.length) bad('성분 규칙에 출처 없음', r.name)
+  for (const ref of r.refIds ?? []) if (!REF_BY_ID[ref]) bad('성분 규칙이 없는 출처를 가리킴', `${r.name} → ${ref}`)
+  if (!['avoid', 'caution', 'prefer', 'info'].includes(r.base)) bad('성분 규칙 등급 이상', r.name)
+}
+
+/* ── 4. 같은 음식을 두고 반대로 말하지 않는가 ──── */
+let conflicts = 0
+for (const prof of CANCERS) {
+  for (const ph of ['during_rt', 'during_chemo', 'survivor'] as const) {
+    const patient = { ...DEFAULT_PATIENT, onboarded: true, cancer: prof.id, phase: ph }
+    const cached = { rules: activeRules(patient), interactions: activeInteractions(patient) }
+    for (const f of CURATED_FOODS) {
+      const v = evaluateFood(f, patient, 1, cached)
+      const levels = new Set(v.hits.map((h) => h.rule.level))
+      // 같은 음식에 '피하세요'와 '권장'이 함께 걸리면 화면에서 무엇을 믿어야 할지 알 수 없다
+      if (levels.has('avoid') && levels.has('prefer')) {
+        conflicts++
+        if (conflicts <= 5) {
+          const a = v.hits.filter((h) => h.rule.level === 'avoid').map((h) => h.rule.id)
+          const p = v.hits.filter((h) => h.rule.level === 'prefer').map((h) => h.rule.id)
+          bad('한 음식에 피하세요와 권장이 함께 걸림', `${prof.id}/${ph} ${f.name} — ${a} vs ${p}`)
+        }
+      }
+      // 판정이 있으면 근거도 있어야 한다
+      if (v.level && v.hits.length === 0 && v.interactions.length === 0)
+        bad('판정은 있는데 근거 규칙이 없음', `${prof.id} ${f.name} ${v.level}`)
+    }
+  }
+}
+
+/* ── 5. 출처 ─────────────────────────────────── */
+const used = new Set<string>()
+for (const r of [...COMMON_RULES, ...Object.values(CONDITION_RULES).flat(), ...CANCERS.flatMap((c) => c.rules ?? [])])
+  for (const ref of r.refIds ?? []) used.add(ref)
+for (const it of INTERACTIONS) for (const ref of it.refIds ?? []) used.add(ref)
+for (const r of INGREDIENT_RULES) for (const ref of r.refIds ?? []) used.add(ref)
+for (const [id, ref] of Object.entries(REF_BY_ID)) {
+  if (!ref.citation?.trim()) bad('출처에 인용 문구 없음', id)
+  if (ref.url && !/^https?:\/\//.test(ref.url)) bad('출처 주소 형식 이상', `${id} ${ref.url}`)
+}
+const orphan = Object.keys(REF_BY_ID).filter((id) => !used.has(id))
+
+console.log(`  규칙 ${ruleCount}건 · 상호작용 ${INTERACTIONS.length}건 · 성분규칙 ${INGREDIENT_RULES.length}건 · 출처 ${Object.keys(REF_BY_ID).length}건`)
+console.log(`  쓰이지 않는 출처 ${orphan.length}건${orphan.length ? ` (${orphan.slice(0, 4).join(', ')}…)` : ''}`)
+
+console.log(`\n규칙 검사 완료 — 문제 ${bugs.length}종`)
+const g = new Map<string, string[]>()
+for (const b of bugs) { const k = b.split(' :: ')[0]; if (!g.has(k)) g.set(k, []); g.get(k)!.push(b.split(' :: ')[1]) }
+for (const [k, l] of [...g].sort((a, b) => b[1].length - a[1].length)) {
+  console.log(`■ ${k} (${l.length}종)`); l.slice(0, 5).forEach((d) => console.log('   -', d))
+}
+if (!bugs.length) console.log('문제 없음')

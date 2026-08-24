@@ -711,6 +711,50 @@ export function fiberGoal(
   return { range: profile.target.fiberTarget ?? [20, 30], lowResidue: false }
 }
 
+/**
+ * 식단을 짤 때 이 환자에게만 달리 적용한 것들.
+ *
+ * 열량·단백질 목표가 왜 그 값인지는 targetNotes 가 답하고,
+ * 여기서는 '어떻게 짰는지' 를 답한다 — 섬유를 왜 낮게 잡았는지,
+ * 왜 저녁이 크지 않은지 같은 것이다.
+ * 화면 맨 위에 함께 적어, 앱이 조용히 다르게 굴지 않도록 한다.
+ */
+export function planNotes(patient: PatientContext): { label: string; reason: string }[] {
+  const out: { label: string; reason: string }[] = []
+  const profile = CANCER_BY_ID[patient.cancer]
+
+  const fiber = fiberGoal(patient, profile)
+  if (fiber.lowResidue) {
+    out.push({
+      label: `식이섬유 목표를 ${fiber.range[0]}~${fiber.range[1]} g 으로 낮췄습니다`,
+      reason:
+        '설사나 장루가 있는 동안에는 잔사를 줄이는 것이 목표입니다. ' +
+        '거친 나물·통곡·생채소를 늘리는 시기가 아닙니다. 증상이 가라앉으면 원래 목표로 돌아갑니다.'
+    })
+  }
+
+  const shares = mealShares(patient)
+  if (shares['간식'] >= 0.2) {
+    out.push({
+      label: '한 끼를 크게 만들지 않고 나눠 담았습니다',
+      reason:
+        '한 번에 많이 드시기 어려운 상태입니다. 저녁을 크게 잡으면 그 끼니를 통째로 남기시게 되므로, ' +
+        '네 끼니를 고르게 하고 간식 몫을 키웠습니다.'
+    })
+  }
+
+  const cuisines = patient.cuisines ?? []
+  const extra = cuisines.filter((c) => c !== '한식')
+  if (extra.length > 0) {
+    out.push({
+      label: `${extra.join('·')}도 함께 봅니다`,
+      reason: '제철 한식을 바탕으로 하고, 고르신 계통을 더해 후보를 넓혔습니다.'
+    })
+  }
+
+  return out
+}
+
 /** 끼니로 세는 자리. 간식은 이 틀에 넣지 않는다 — 없어도 하루가 성립한다. */
 const MAIN_SLOTS: MealSlot[] = ['아침', '점심', '저녁']
 

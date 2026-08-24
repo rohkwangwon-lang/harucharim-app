@@ -179,6 +179,18 @@ export const SUPPLEMENTS: Supplement[] = [
     note: '경관영양에도 사용되는 균형영양식'
   },
   {
+    /*
+     * 간암 규칙(liver-bcaa)이 이 id 를 가리키고 있었는데 영양제 목록에는 없었다.
+     * 같은 이름이 식품 쪽에만 있어서, 간성뇌증이 반복되는 분께 BCAA 를 고려하라는
+     * 권고가 영영 뜨지 않았다. 처방 맥락에서 판단할 것이라 일반 판매는 아니다.
+     */
+    id: 'bcaa-supplement', name: '분지사슬아미노산(BCAA) 제제', brand: '-', category: '단백질보충',
+    dosageLabel: '1일 1~3포 (제품·처방에 따라)',
+    otc: false,
+    perDay: { kcal: 50, protein: 9, carb: 2, na: 15 },
+    note: '간경변·간성뇌증에서 근거가 있는 몇 안 되는 보충제. 처방 맥락에서 판단한다'
+  },
+  {
     id: 'wpi-powder', name: '유청단백분말(WPI)', brand: '-', category: '단백질보충',
     dosageLabel: '1일 1~2스쿱(30 g)', otc: true,
     perDay: { kcal: 111, protein: 25.5, carb: 1.8, fat: 0.6, ca: 150, na: 90 },
