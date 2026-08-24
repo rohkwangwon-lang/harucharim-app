@@ -811,8 +811,17 @@ export function buildDayMenu(
      * (아침 429 · 몫 398 · 저녁 294 처럼). 그래도 아침이 저녁보다 무거운 것은 그대로다.
      * 지켜야 할 것은 그 순서 자체이므로 마지막으로 한 번 더 본다.
      */
-    const grazing = shares['간식'] >= 0.2
-    if (!grazing) {
+    /*
+     * 잦은 소량 식사(식욕부진·체중감소·위절제후)에서도 이 순서는 지킨다.
+     *
+     * 처음에는 여기를 건너뛰었다. 그분들은 넷을 고르게 나누는 것이 목적이니
+     * 저녁을 무겁게 만들 이유가 없다고 본 것이다. 그런데 고르게 나눈다는 것과
+     * 아침이 저녁보다 무거워도 좋다는 것은 다른 말이다.
+     * 실제로 아침에 흑임자죽 440 kcal, 저녁에 닭백숙 390 kcal 이 놓인 날이 나왔다 —
+     * 둘을 맞바꾸기만 하면 되는 것을, 이 갈래 때문에 그냥 두고 있었다.
+     * 몫이 25 : 27 로 거의 같으니 뒤집힌 날에만 손이 가고, 갈 때마다 나아진다.
+     */
+    {
       for (let pass = 0; pass < 5 && load('아침') > load('저녁'); pass++) {
         /*
          * 끼니를 비워 가며 균형을 맞추지는 않는다. 빈 아침은 균형이 아니라 결식이다.
@@ -843,6 +852,21 @@ export function buildDayMenu(
            * 그럴 때는 옮기는 대신 맞바꾼다 — 아침의 무거운 것과 저녁의 가벼운 것을
            * 자리만 바꾸면 두 끼니의 가짓수도 식품군 상한도 그대로다.
            */
+          /*
+           * 저녁으로 못 가는 것이 아침에 남아 있는 날이 있다.
+           * 우유는 아침 아니면 간식이고, 과일도 갈 곳이 정해져 있다.
+           * 아침 418(녹두죽 288 + 우유 130) · 저녁 390 인 날이 그랬다 —
+           * 우유만 간식으로 내리면 끝나는데, 저녁만 쳐다보느라 손을 못 대고 있었다.
+           * 그래서 저녁이 막히면 점심·간식도 받아 준다. 순서를 지키는 것이 목적이지
+           * 저녁으로 보내는 것이 목적이 아니다.
+           */
+          const sideways = canMove ? moveBreakfastElsewhere(meals, load, quota) : null
+          if (sideways) {
+            const [i, to] = sideways
+            const [e] = meals['아침'].splice(i, 1)
+            meals[to].push(e)
+            continue
+          }
           const swap = swapToLightenBreakfast(meals, load)
           if (!swap) break
           const [bi, di] = swap
@@ -964,6 +988,37 @@ const MAIN_SLOTS: MealSlot[] = ['아침', '점심', '저녁']
  * 자리만 바꾸므로 두 끼니의 가짓수는 그대로고, 서로의 식품군 상한만 확인하면 된다.
  * 바꾼 뒤 아침이 저녁보다 가벼워지는 짝 중 차이가 가장 크게 줄어드는 것을 고른다.
  */
+/**
+ * 아침에서 점심이나 간식으로 한 접시를 내린다.
+ *
+ * 저녁으로 옮기지도, 저녁의 무엇과 맞바꾸지도 못하는 날을 위한 마지막 길이다.
+ * 옮긴 뒤에 아침이 저녁보다 가벼워지는 것 중에서, 받는 끼니가 제 몫을 덜 넘는 쪽을 고른다.
+ */
+function moveBreakfastElsewhere(
+  meals: Record<MealSlot, MenuEntry[]>,
+  load: (slot: MealSlot) => number,
+  quota: Record<MealSlot, number>
+): [number, MealSlot] | null {
+  const dinner = load('저녁')
+  let best: { pick: [number, MealSlot]; over: number } | null = null
+
+  for (let i = 0; i < meals['아침'].length; i++) {
+    const e = meals['아침'][i]
+    const k = foodContribution(e.food, e.servings).kcal ?? 0
+    if (load('아침') - k > dinner) continue // 하나로 순서가 뒤집히지 않으면 뜻이 없다
+    for (const to of ['간식', '점심'] as MealSlot[]) {
+      if (!slotsFor(e.food).includes(to)) continue
+      if (meals[to].some((x) => x.food.id === e.food.id)) continue
+      const capG = SLOT_GROUP_CAP[e.food.group] ?? SLOT_GROUP_CAP_DEFAULT
+      if (meals[to].filter((x) => x.food.group === e.food.group).length >= capG) continue
+      if (load(to) + k > quota[to] * 1.8) continue
+      const over = (load(to) + k) / Math.max(1, quota[to])
+      if (!best || over < best.over) best = { pick: [i, to], over }
+    }
+  }
+  return best ? best.pick : null
+}
+
 function swapToLightenBreakfast(
   meals: Record<MealSlot, MenuEntry[]>,
   load: (slot: MealSlot) => number
