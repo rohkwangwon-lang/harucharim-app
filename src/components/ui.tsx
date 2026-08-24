@@ -83,9 +83,24 @@ export function EvidenceBadge({ level }: { level: EvidenceLevel }) {
         onClick={(e) => { e.stopPropagation(); setOpen((v) => !v) }}
         className={`chip ${info.chip} ring-1 ring-inset ring-black/5`}
         aria-expanded={open}
+        aria-label={`근거 ${level} — 뜻 ${open ? '접기' : '보기'}`}
       >
         근거 {level}
-        <span aria-hidden className="ml-0.5 opacity-50">?</span>
+        {/*
+          * 물음표를 쓰지 않는다.
+          * "근거 B ?" 는 눌러 보라는 뜻으로 읽히기도 하지만,
+          * "근거가 불확실한가?" 로도 읽힌다. 임상 정보를 다루는 화면에서
+          * 그런 두 갈래는 두면 안 된다.
+          * 펼침은 아래를 가리키는 꺾쇠로만 말한다 — 뜻이 하나뿐이다.
+          */}
+        <svg
+          viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round"
+          aria-hidden
+          className={`ml-1 inline-block h-2.5 w-2.5 opacity-55 transition-transform ${open ? 'rotate-180' : ''}`}
+        >
+          <path d="M5 9l7 7 7-7" />
+        </svg>
       </button>
       {open && (
         <span className="mt-1 block w-full rounded-lg bg-stone-50 px-2.5 py-2 text-[11px] leading-relaxed text-stone-600">

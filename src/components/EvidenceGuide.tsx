@@ -42,7 +42,8 @@ export function EvidenceGuide({ patient }: { patient: PatientContext }) {
         <p className="mt-1 text-sm font-semibold text-stone-900">이 앱의 모든 말에는 출처가 붙습니다</p>
         <p className="mt-1 text-xs leading-relaxed text-stone-600">
           권하거나 피하라는 문장 옆의 <strong>근거 A·B·C·G</strong>는 그 말이
-          <strong> 무엇을 바탕으로 하는지</strong>를 나타냅니다. 눌러 보시면 그 자리에서도 뜻이 펼쳐집니다.
+          <strong> 무엇을 바탕으로 하는지</strong>를 나타냅니다.
+          배지를 누르시면 그 자리에서도 뜻이 펼쳐집니다.
         </p>
       </div>
 
