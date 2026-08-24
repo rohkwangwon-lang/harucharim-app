@@ -136,6 +136,7 @@ export default function App() {
             selected={selected}
             supplements={state.supplements}
             diary={state.diary}
+            weights={state.weights}
             onAddTo={(meal) => { setPendingMeal(meal); setTab('search') }}
             onSetServings={setServings}
             onSetMeal={setMeal}

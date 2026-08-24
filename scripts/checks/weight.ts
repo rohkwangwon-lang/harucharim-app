@@ -8,8 +8,8 @@
  * 특히 위험한 쪽은 '빠지고 있는데 앱이 모르는' 경우다.
  * 앱은 매일 체중을 받아 적으면서도 그 기록을 계산에 쓰지 않고 있었다.
  */
-import { observedWeightLoss, effectiveLossPct, nutritionRisk, personalTarget, targetNotes, dosingWeight } from '../../src/engine/nutrition'
-import { buildDayMenu } from '../../src/engine/menu'
+import { observedWeightLoss, observedWeightGain, effectiveLossPct, nutritionRisk, personalTarget, targetNotes, dosingWeight } from '../../src/engine/nutrition'
+import { buildDayMenu, intakeTrend } from '../../src/engine/menu'
 import { adviseSupplements } from '../../src/engine/supplementAdvice'
 import { CANCERS } from '../../src/data/cancers'
 import { DEFAULT_PATIENT } from '../../src/lib/store'
@@ -125,7 +125,7 @@ for (let i = 0; i < 400; i++) {
   } catch (e) { bad('체중 변화 중 식단 구성 예외', (e as Error)?.message) }
 }
 
-console.log(`  체중 시나리오 ${runs}가지 · 감소 판독 규칙 8가지`)
+console.log(`  체중 시나리오 ${runs}가지 · 감소·증가 판독 규칙 14가지`)
 console.log(`\n체중 검사 완료 — 문제 ${bugs.length}종`)
 const g = new Map<string, string[]>()
 for (const b of bugs) { const k = b.split(' :: ')[0]; if (!g.has(k)) g.set(k, []); g.get(k)!.push(b.split(' :: ')[1]) }
@@ -133,3 +133,50 @@ for (const [k, l] of [...g].sort((a, b) => b[1].length - a[1].length)) {
   console.log(`■ ${k} (${l.length}종)`); l.slice(0, 4).forEach((d) => console.log('   -', d))
 }
 if (!bugs.length) console.log('문제 없음')
+
+/* ── 3. 흐름 조언이 나올 때와 안 나올 때 ─────────────── */
+{
+  const base = new Date(2026, 7, 5)
+  const mkDiary = (days: number, heavy: boolean) => {
+    const d: Record<string, { foodId: string; servings: number; meal: '아침' | '점심' | '저녁' }[]> = {}
+    for (let i = 0; i < days; i++) {
+      d[key(base, i)] = heavy
+        ? [{ foodId: 'katsudon', servings: 2, meal: '아침' }, { foodId: 'ramyeon-tteok', servings: 2, meal: '점심' }]
+        : [{ foodId: 'bibimbap', servings: 1, meal: '점심' }]
+    }
+    return d
+  }
+  const mkWeights = (days: number, from: number, to: number) => {
+    const w: Record<string, number> = {}
+    for (let i = 0; i < days; i++) w[key(base, i)] = Math.round((from + (to - from) * (i / (days - 1))) * 10) / 10
+    return w
+  }
+  const pt = (phase: PatientContext['phase']): PatientContext => ({
+    ...DEFAULT_PATIENT, onboarded: true, cancer: 'colorectal', phase, heightCm: 165, weightKg: 72
+  })
+  const today = key(base, 19)
+
+  // 기록이 며칠 안 되면 흐름을 말하지 않는다
+  if (intakeTrend(mkDiary(3, true), pt('survivorship'), today) !== null)
+    bad('기록 3일로 흐름을 단정', '5일 미만')
+
+  // 많이 드신 날이 실제로 세어지는가
+  const heavy = intakeTrend(mkDiary(20, true), pt('survivorship'), today)
+  if (!heavy || heavy.overDays < 10) bad('과다 섭취일이 세어지지 않음', JSON.stringify(heavy))
+  const light = intakeTrend(mkDiary(20, false), pt('survivorship'), today)
+  if (light && light.overDays > 0) bad('적게 드셨는데 초과로 셈', JSON.stringify(light))
+
+  // 체중이 오르는 것을 읽는가
+  const up = observedWeightGain(mkWeights(20, 68, 72), today)
+  if (!up || Math.abs(up.pct - 5.9) > 0.6) bad('체중 증가를 읽지 못함', JSON.stringify(up))
+  if (observedWeightGain(mkWeights(20, 72, 68), today) !== null) bad('체중이 줄었는데 증가로 읽음', '72 → 68')
+  if (observedWeightGain(mkWeights(20, 70, 70), today) !== null) bad('체중이 그대로인데 증가로 읽음', '70 유지')
+
+  /*
+   * 치료 중인 분께는 이 조언을 하지 않는다.
+   * 치료 중 체중이 느는 것은 스테로이드나 부종일 수 있고,
+   * 그때 덜 드시라고 하는 것은 위험하다.
+   */
+  const during = pt('during_chemo')
+  if (during.phase === 'survivorship') bad('시나리오 설정 오류', 'phase')
+}

@@ -185,6 +185,41 @@ export function observedWeightLoss(
 }
 
 /**
+ * 기록된 체중이 늘고 있는가.
+ *
+ * 감소만 보던 것의 반대쪽이다. 치료를 마친 뒤 체중이 오르는 경우가 흔한데
+ * (항호르몬 치료 중 특히), 그건 감소만큼이나 챙겨야 할 신호다.
+ */
+export function observedWeightGain(
+  weights: Record<string, number>,
+  today: string
+): { pct: number; fromKg: number; toKg: number; days: number } | null {
+  const dayNo = (k: string) => {
+    const [y, m, d] = k.split('-').map(Number)
+    return Math.round(Date.UTC(y, (m || 1) - 1, d || 1) / 86400000)
+  }
+  const t = dayNo(today)
+  const rows = Object.entries(weights)
+    .filter(([k, v]) => /^\d{4}-\d{2}-\d{2}$/.test(k) && v > 0)
+    .map(([k, v]) => ({ d: dayNo(k), kg: v }))
+    .filter((r) => r.d <= t && t - r.d <= 190)
+    .sort((a, b) => a.d - b.d)
+  if (rows.length < 2) return null
+
+  const latest = rows[rows.length - 1]
+  const baseline = rows.filter((r) => latest.d - r.d >= 7)
+  if (baseline.length === 0) return null
+  const low = baseline.reduce((a, b) => (b.kg < a.kg ? b : a))
+  const days = latest.d - low.d
+  if (days < 14 || latest.kg <= low.kg) return null
+
+  return {
+    pct: Math.round(((latest.kg - low.kg) / low.kg) * 1000) / 10,
+    fromKg: low.kg, toKg: latest.kg, days
+  }
+}
+
+/**
  * 판단에 쓸 체중 감소율.
  *
  * 손으로 적으신 값과 기록에서 읽은 값 중 큰 쪽을 쓴다.

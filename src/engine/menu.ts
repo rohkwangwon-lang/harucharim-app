@@ -253,6 +253,47 @@ export interface MenuOptions {
 }
 
 /**
+ * 며칠에 걸친 섭취 흐름.
+ *
+ * 하루만 보면 어제 잔치를 했는지, 몇 주째 그런지 구분할 수 없다.
+ * 하루 넘친 것은 흔한 일이고 조언할 거리가 아니다.
+ * 몇 주째 넘치고 체중까지 오르고 있다면 그건 다른 이야기다.
+ */
+export function intakeTrend(
+  diary: Record<string, SelectedItem[]>,
+  patient: PatientContext,
+  today: string,
+  days = 14
+): { recordedDays: number; avgKcal: number; avgProtein: number; overDays: number } | null {
+  const dayNo = (k: string) => {
+    const [y, m, d] = k.split('-').map(Number)
+    return Math.round(Date.UTC(y, (m || 1) - 1, d || 1) / 86400000)
+  }
+  const t = dayNo(today)
+  const profile = CANCER_BY_ID[patient.cancer]
+  const target = personalTarget(patient, profile.target.kcalPerKg, profile.target.proteinPerKg)
+
+  let sumK = 0, sumP = 0, n = 0, over = 0
+  for (const [key, items] of Object.entries(diary)) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key) || !items?.length) continue
+    const ago = t - dayNo(key)
+    if (ago < 0 || ago >= days) continue
+    let k = 0, pr = 0
+    for (const it of items) {
+      const f = FOOD_BY_ID[it.foodId]
+      if (!f) continue
+      const c = foodContribution(f, it.servings)
+      k += c.kcal ?? 0
+      pr += c.protein ?? 0
+    }
+    sumK += k; sumP += pr; n++
+    if (k > target.kcal[1]) over++
+  }
+  if (n < 5) return null   // 며칠 안 되는 기록으로 흐름을 말할 수는 없다
+  return { recordedDays: n, avgKcal: Math.round(sumK / n), avgProtein: Math.round(sumP / n), overDays: over }
+}
+
+/**
  * 최근 며칠간 기록에 남은 식품과 며칠 전인지.
  *
  * 어제 드신 것이 오늘 추천에 또 올라오면 추천으로 읽히지 않는다.

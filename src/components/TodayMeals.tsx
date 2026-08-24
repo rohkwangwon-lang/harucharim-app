@@ -5,9 +5,9 @@ import { MEAL_SLOTS } from '../data/types'
 import { FOOD_BY_ID } from '../data/foods'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
 import { CANCER_BY_ID } from '../data/cancers'
-import { buildDayMenu, currentSeason, dayNotes, fiberGoal, ideasFromIngredients, naUnknownNames, planNotes, recentFoods } from '../engine/menu'
+import { buildDayMenu, currentSeason, dayNotes, fiberGoal, ideasFromIngredients, intakeTrend, naUnknownNames, planNotes, recentFoods } from '../engine/menu'
 import { evaluateSelection } from '../engine/rules'
-import { foodContribution, personalTarget, sumIntake, targetNotes } from '../engine/nutrition'
+import { foodContribution, observedWeightGain, personalTarget, sumIntake, targetNotes } from '../engine/nutrition'
 import { BASE_EXERCISE, CONDITION_EXERCISE_NOTES, EXERCISE_BY_CANCER } from '../data/exercise'
 import { REF_BY_ID } from '../data/references'
 import { DayNoteList, EvidenceBadge, LevelBadge, NutrientPanel, NutrientRow, nutrientState, Section } from './ui'
@@ -37,6 +37,7 @@ export function TodayMeals({
   day,
   onBackToToday,
   diary,
+  weights,
   weight,
   onSetWeight
 }: {
@@ -60,6 +61,8 @@ export function TodayMeals({
   onBackToToday: () => void
   /** 날짜별 기록 — 최근에 드신 것을 피하는 데 쓴다 */
   diary: Record<string, SelectedItem[]>
+  /** 날짜별 체중 — 몇 주에 걸친 방향을 보는 데 쓴다 */
+  weights: Record<string, number>
   /** 그날 체중 */
   weight?: number
   onSetWeight: (kg: number) => void
@@ -71,6 +74,18 @@ export function TodayMeals({
   const totals = useMemo(() => sumIntake(selected, supps), [selected, supplements])
   const evalResult = useMemo(() => evaluateSelection(selected, patient), [selected, patient])
   const recent = useMemo(() => recentFoods(diary, day), [diary, day])
+  /*
+   * 며칠에 걸친 흐름.
+   *
+   * 하루 넘친 것은 흔한 일이라 조언할 거리가 아니다.
+   * 몇 주째 넘치면서 체중까지 오르고 있다면 그때는 말씀드릴 만하다.
+   */
+  const trend = useMemo(() => {
+    const intake = intakeTrend(diary, patient, day)
+    if (!intake) return null
+    const gain = observedWeightGain(weights ?? {}, day)
+    return { ...intake, gain }
+  }, [diary, patient, day, weights])
   const menu = useMemo(
     () => buildDayMenu(selected, patient, { supplements: supps, day, recent }),
     [selected, patient, supplements, day, recent]
@@ -478,7 +493,9 @@ export function TodayMeals({
       )}
 
       {/* ── 운동 조언 ─────────────────────────────────── */}
-      {selected.length > 0 && <ExerciseAdvice patient={patient} kcal={kcal} target={target.kcal} />}
+      {selected.length > 0 && (
+        <ExerciseAdvice patient={patient} kcal={kcal} target={target.kcal} trend={trend} />
+      )}
 
       <p className="px-1 pb-2 text-[11px] leading-relaxed text-stone-400">
         이 화면은 <strong>하루(24시간)</strong> 기준입니다. 담으신 음식과 입력하신 정보만으로 계산한 참고값이며,
@@ -493,12 +510,28 @@ export function TodayMeals({
  * 오늘 먹은 양에 맞춘 운동 조언.
  *
  * "몇 kcal 먹었으니 몇 분 뛰세요" 식의 계산은 하지 않는다.
- * 그런 식의 상쇄는 치료 중 환자에게 맞지 않고, 근거도 없다.
- * 대신 이 암종에서 근거가 있는 운동을 그날 상황에 맞춰 안내한다.
+ *
+ * 그렇게 하고 싶어지는 마음은 이해가 간다. 그런데 셈이 맞지 않는다 —
+ * 65 kg 인 분이 시속 5 km 로 한 시간을 걸으면 230 kcal 남짓이다.
+ * 하루 500 kcal 을 넘긴 것을 걷기로 지우려면 두 시간을 넘게 걸어야 한다.
+ * 게다가 음식을 갚아야 할 빚으로 만들면 식사가 벌이 된다.
+ *
+ * 운동을 권할 근거가 없다는 뜻이 아니다. 오히려 매우 강하다 —
+ * CHALLENGE 무작위배정 시험에서 대장암 보조항암 후 3 년 운동 프로그램이
+ * 5 년 무병생존을 73.9 % 에서 80.3 % 로 올렸다. 다만 그 개입은 3 년짜리 프로그램이었지
+ * 하루치 상쇄가 아니었다. 운동은 그 자체의 이익으로 권해야 한다.
+ *
+ * 그래서 하루가 아니라 흐름을 본다. 몇 주째 넘치고 체중도 오르고 있다면
+ * 그때는 섭취를 조정하면서 활동량도 함께 올리시라고 말씀드린다.
  */
 function ExerciseAdvice({
-  patient, kcal, target
-}: { patient: PatientContext; kcal: number; target: [number, number] }) {
+  patient, kcal, target, trend
+}: {
+  patient: PatientContext
+  kcal: number
+  target: [number, number]
+  trend: { recordedDays: number; avgKcal: number; overDays: number; gain: { pct: number; days: number } | null } | null
+}) {
   const plan = EXERCISE_BY_CANCER[patient.cancer]
   const main = plan.items[0] ?? BASE_EXERCISE[0]
   const walk = BASE_EXERCISE[0]
@@ -510,6 +543,19 @@ function ExerciseAdvice({
   const conditionNote = patient.conditions
     .map((c) => CONDITION_EXERCISE_NOTES[c])
     .find(Boolean)
+
+  /*
+   * 흐름으로 말할 수 있는 때만 말한다.
+   * 치료를 마치신 분이고, 기록한 날의 절반 넘게 목표를 넘었으며,
+   * 체중이 오르고 있거나 이미 과체중일 때다.
+   */
+  const h = patient.heightCm / 100
+  const bmi = h > 0 ? patient.weightKg / (h * h) : 22
+  const sustained =
+    patient.phase === 'survivorship' &&
+    trend !== null &&
+    trend.overDays >= Math.ceil(trend.recordedDays / 2) &&
+    (trend.gain !== null || bmi >= 23)
 
   return (
     <Section title="오늘 운동" desc="식단과 함께 봐야 의미가 있는 부분입니다.">
@@ -532,6 +578,39 @@ function ExerciseAdvice({
             </>
           )}
         </p>
+
+        {sustained && (
+          <div className="mt-3 rounded-lg border border-brand-200 bg-brand-50/60 px-3 py-2.5">
+            <p className="text-xs font-bold text-brand-800">
+              최근 {trend!.recordedDays}일 가운데 {trend!.overDays}일이 목표를 넘었습니다
+              {trend!.gain ? ` · 체중도 ${trend!.gain.pct} % 늘었습니다` : ''}
+            </p>
+            <p className="mt-1 text-[11px] leading-relaxed text-stone-600">
+              하루 넘친 것은 흔한 일이라 따로 말씀드리지 않지만, 몇 주째 이어지고 있습니다.
+              치료를 마친 뒤에는 체중 관리가 재발 위험과 연결되는 암종이 있습니다.
+              <strong className="text-stone-800"> 먹은 만큼 걸어서 지우는 방식은 권하지 않습니다</strong> —
+              시속 5 km 로 한 시간을 걸어도 230 kcal 남짓이라 셈이 맞지 않고, 식사가 갚아야 할 빚이 됩니다.
+            </p>
+            <p className="mt-1.5 text-[11px] leading-relaxed text-stone-600">
+              대신 두 가지를 함께 하시는 편이 낫습니다. 섭취는 조금씩 줄이시고,
+              <strong className="text-stone-800"> 활동은 주 150분에서 300분 쪽으로 늘리세요</strong>.
+              운동은 상쇄가 아니라 그 자체로 이득이 있습니다 — 대장암에서는 보조항암 후
+              3년 운동 프로그램이 5년 무병생존을 73.9 %에서 80.3 %로 올렸습니다.
+            </p>
+            <details className="mt-2">
+              <summary className="cursor-pointer text-[10px] font-medium text-brand-700/70">근거 2건</summary>
+              <ul className="mt-1 space-y-0.5">
+                {['challenge2025', 'acs2022'].map((id) => REF_BY_ID[id]).filter(Boolean).map((r) => (
+                  <li key={r.id} className="text-[10px] leading-relaxed text-stone-500">
+                    {r.url
+                      ? <a href={r.url} target="_blank" rel="noreferrer" className="underline decoration-stone-300">{r.citation}</a>
+                      : r.citation}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          </div>
+        )}
 
         <div className="mt-3 space-y-2">
           <ExerciseLine label="유산소" name={walk.name} dose={walk.dose} />
