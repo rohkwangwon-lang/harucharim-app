@@ -144,6 +144,58 @@ export function getDailyReference(sex: 'M' | 'F', age: number): DailyReference {
 }
 
 /**
+ * 기록된 체중에서 실제 감소율을 읽어 낸다.
+ *
+ * 앱은 매일 체중을 받아 적으면서도 그 기록을 계산에 쓰지 않고 있었다.
+ * 감소율은 처음 설정에서 손으로 적은 값 그대로였다.
+ * 그래서 치료 중 70 kg 에서 62 kg 으로 빠지신 분이 매일 체중을 적어도,
+ * 앱은 "체중 유지 중" 으로 보고 영양 위험을 알리지도, 경구영양보충을 권하지도 않았다.
+ *
+ * 기준선은 '평소 체중' 이다. 최근 6 개월 기록 가운데 가장 높았던 값을 쓰되,
+ * 최근 일주일은 기준선에서 뺀다 — 지금 빠지는 중이라면 그 값이 기준이 되어서는 안 된다.
+ * 한 번 잘못 적은 값에 흔들리지 않도록, 기간이 2 주 넘을 때만 본다.
+ */
+export function observedWeightLoss(
+  weights: Record<string, number>,
+  today: string
+): { pct: number; fromKg: number; toKg: number; days: number } | null {
+  const dayNo = (k: string) => {
+    const [y, m, d] = k.split('-').map(Number)
+    return Math.round(Date.UTC(y, (m || 1) - 1, d || 1) / 86400000)
+  }
+  const t = dayNo(today)
+  const rows = Object.entries(weights)
+    .filter(([k, v]) => /^\d{4}-\d{2}-\d{2}$/.test(k) && v > 0)
+    .map(([k, v]) => ({ d: dayNo(k), kg: v }))
+    .filter((r) => r.d <= t && t - r.d <= 190)
+    .sort((a, b) => a.d - b.d)
+  if (rows.length < 2) return null
+
+  const latest = rows[rows.length - 1]
+  const baseline = rows.filter((r) => latest.d - r.d >= 7)
+  if (baseline.length === 0) return null
+  const peak = baseline.reduce((a, b) => (b.kg > a.kg ? b : a))
+  const days = latest.d - peak.d
+  if (days < 14 || peak.kg <= latest.kg) return null
+
+  return {
+    pct: Math.round(((peak.kg - latest.kg) / peak.kg) * 1000) / 10,
+    fromKg: peak.kg, toKg: latest.kg, days
+  }
+}
+
+/**
+ * 판단에 쓸 체중 감소율.
+ *
+ * 손으로 적으신 값과 기록에서 읽은 값 중 큰 쪽을 쓴다.
+ * 처음 설정에서 적으신 값은 그때의 사실이고, 기록은 그 뒤의 사실이다.
+ * 어느 쪽이든 위험을 가리키면 위험한 것으로 본다.
+ */
+export function effectiveLossPct(patient: PatientContext): number {
+  return Math.max(patient.weightLossPct ?? 0, patient.observedLossPct ?? 0)
+}
+
+/**
  * 계산에 쓸 체중.
  *
  * kcal/kg 를 실제 체중에 그대로 곱하면 비만인 분에게 터무니없는 목표가 나온다.
@@ -185,7 +237,7 @@ export function personalTarget(
   const h = patient.heightCm / 100
   const bmi = h > 0 ? patient.weightKg / (h * h) : 22
   const gaining = patient.conditions.includes('체중증가') && bmi >= 23
-  const losing = (patient.weightLossPct ?? 0) >= 5
+  const losing = effectiveLossPct(patient) >= 5
 
   /*
    * 치료를 마치신 분은 유지 수준으로 본다.
@@ -216,7 +268,7 @@ export function nutritionRisk(patient: PatientContext): {
 } {
   const h = patient.heightCm / 100
   const bmi = patient.weightKg / (h * h)
-  const loss = patient.weightLossPct ?? 0
+  const loss = effectiveLossPct(patient)
 
   const bmiLabel =
     bmi < 18.5 ? '저체중' : bmi < 23 ? '정상' : bmi < 25 ? '과체중' : '비만'
@@ -292,7 +344,7 @@ export function targetNotes(patient: PatientContext): TargetNote[] {
   const out: TargetNote[] = []
   const h = patient.heightCm / 100
   const bmi = h > 0 ? patient.weightKg / (h * h) : 22
-  const loss = patient.weightLossPct ?? 0
+  const loss = effectiveLossPct(patient)
 
   const dosing = dosingWeight(patient)
   if (dosing !== patient.weightKg) {
@@ -324,9 +376,22 @@ export function targetNotes(patient: PatientContext): TargetNote[] {
   }
 
   if (loss >= 5) {
+    const fromRecord = (patient.observedLossPct ?? 0) >= (patient.weightLossPct ?? 0)
     out.push({
-      label: '체중이 줄고 있어 목표를 낮추지 않았습니다',
-      reason: `최근 ${loss} % 감소하셨습니다. 이 시점에는 열량과 단백질을 채우는 것이 먼저입니다.`
+      label: `체중이 ${loss} % 줄어 목표를 낮추지 않았습니다`,
+      reason:
+        (fromRecord && patient.observedLossNote
+          ? `기록해 주신 체중에서 읽었습니다 — ${patient.observedLossNote}. `
+          : '') +
+        '6개월 안에 5 % 이상 줄었다면 영양 위험 신호입니다(ESPEN/GLIM). ' +
+        '이 시점에는 열량과 단백질을 채우는 것이 먼저라, 다른 조건이 있어도 목표를 낮추지 않습니다.'
+    })
+  } else if (patient.observedLossPct !== undefined && patient.observedLossPct > 0) {
+    out.push({
+      label: `기록에서 체중 ${patient.observedLossPct} % 감소가 보입니다`,
+      reason:
+        `${patient.observedLossNote ?? ''} 아직 위험 기준(6개월 5 %)에는 못 미치지만 방향은 감소 쪽입니다. ` +
+        '이 시점부터 챙기는 것이 효과가 좋습니다. 같은 조건(아침 공복, 같은 옷차림)에서 계속 재 주세요.'
     })
   }
 

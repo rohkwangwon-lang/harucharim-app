@@ -3,7 +3,7 @@ import { MEAL_SLOTS } from '../data/types'
 import { CURATED_FOODS, FOOD_BY_ID } from '../data/foods'
 import { CANCER_BY_ID } from '../data/cancers'
 import { activeInteractions, activeRules, evaluateFood, type RuleHit, type InteractionHit } from './rules'
-import { addTotals, foodContribution, personalTarget, type NutrientTotals } from './nutrition'
+import { addTotals, effectiveLossPct, foodContribution, personalTarget, type NutrientTotals } from './nutrition'
 
 export type { MealSlot }
 export { MEAL_SLOTS }
@@ -1002,7 +1002,7 @@ function collectCandidates(
    */
   const bmi = patient.weightKg / Math.pow(patient.heightCm / 100, 2)
   const needsONS =
-    (patient.weightLossPct ?? 0) >= 5 || bmi < 18.5 ||
+    effectiveLossPct(patient) >= 5 || bmi < 18.5 ||
     patient.conditions.some((c) =>
       c === '식욕부진' || c === '체중감소' || c === '연하곤란' ||
       c === '구강점막염' || c === '오심·구토' || c === '위절제후')

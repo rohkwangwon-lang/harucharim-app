@@ -1,7 +1,7 @@
 import type { EvidenceLevel, PatientContext, Supplement, SupplementCategory } from '../data/types'
 import { SUPPLEMENTS, SUPPLEMENT_BY_ID } from '../data/supplements'
 import { activeInteractions, activeRules, evaluateSupplement } from './rules'
-import { nutritionRisk } from './nutrition'
+import { effectiveLossPct, nutritionRisk } from './nutrition'
 
 /**
  * 영양제 개인 맞춤 추천.
@@ -141,16 +141,16 @@ export function adviseSupplements(patient: PatientContext): SupplementAdvice[] {
 
   /* ── 체격·영양 상태 ─────────────────────────────────── */
 
-  if (risk.risk === 'high' || (patient.weightLossPct ?? 0) >= 5) {
+  if (risk.risk === 'high' || effectiveLossPct(patient) >= 5) {
     push({
       level: 'recommend', category: '경장영양(균형영양식)',
       title: '경구영양보충(ONS) — 지금이 시작할 시점입니다',
       reason:
-        `현재 BMI ${risk.bmi}, 최근 체중 감소 ${patient.weightLossPct ?? 0} % 입니다. ` +
+        `현재 BMI ${risk.bmi}, 최근 체중 감소 ${effectiveLossPct(patient)} % 입니다. ` +
         'ESPEN 은 경구 섭취가 필요량의 60 % 에 못 미치는 상태가 이어지면 경구영양보충을 권고합니다. ' +
         '"밥부터 어떻게든 먹어보자"며 시간을 보내는 사이 근육이 빠지는 편이 더 흔한 문제입니다.',
       evidence: 'G', refIds: ['espen2021', 'espen-cachexia'],
-      trigger: `체중 감소 ${patient.weightLossPct ?? 0} % · BMI ${risk.bmi}`
+      trigger: `체중 감소 ${effectiveLossPct(patient)} % · BMI ${risk.bmi}`
     })
     push({
       level: 'consider', category: '단백질보충',

@@ -372,6 +372,16 @@ export interface PatientContext {
   sex: 'M' | 'F'
   /** 최근 6개월 체중 감소율 (%) — 악액질 판정 */
   weightLossPct?: number
+  /**
+   * 기록된 체중에서 읽어 낸 감소율 (%).
+   *
+   * 위 값은 처음 설정에서 손으로 적으신 것이라 시간이 지나면 실제와 어긋난다.
+   * 체중을 적으실 때마다 이 값을 다시 계산해 둔다.
+   * 판단할 때는 둘 중 큰 쪽을 쓴다 — 어느 쪽이든 위험을 가리키면 위험한 것이다.
+   */
+  observedLossPct?: number
+  /** 그 감소가 언제부터 얼마 동안인지 — 화면에서 설명할 때 쓴다 */
+  observedLossNote?: string
   /** 동반 상태 — 추가 규칙 트리거 */
   conditions: PatientCondition[]
   /** 복용 중인 약제 — 상호작용 검사 */

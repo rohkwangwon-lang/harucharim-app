@@ -13,6 +13,7 @@ node_modules/.bin/jiti scripts/checks/season.ts   # 계절이 실제로 추천�
 node_modules/.bin/jiti scripts/checks/targets.ts  # 열량·단백질 목표와 조정 사유
 node_modules/.bin/jiti scripts/checks/rules.ts    # 임상 규칙·출처·상호작용 무결성
 node_modules/.bin/jiti scripts/checks/journey.ts  # 120명이 45일을 실제로 지나가 본다
+node_modules/.bin/jiti scripts/checks/weight.ts   # 체중이 오르내릴 때 목표·권고가 따라오는가
 ```
 
 검사가 헛돌지 않는지 보려면 engine.ts 가 찍는 커버리지 숫자를 본다.

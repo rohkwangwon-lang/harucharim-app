@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
 import { FOOD_BY_ID } from '../data/foods'
+import { observedWeightLoss } from '../engine/nutrition'
 import { defaultSlotFor } from '../engine/menu'
 import { today as todayKey, type DayKey } from './day'
 
@@ -81,10 +82,21 @@ function load(): AppState {
       diary[key as DayKey] = normalizeDay(diary[key as DayKey] ?? [])
     }
 
+    /*
+     * 이미 체중을 적어 오신 분들을 위해, 불러올 때 한 번 읽어 둔다.
+     * 이 계산이 없던 동안 쌓인 기록도 이제부터는 반영된다.
+     */
+    const weights = parsed.weights ?? {}
+    const observed = observedWeightLoss(weights, todayKey())
+
     return {
-      patient: { ...DEFAULT_PATIENT, ...parsed.patient },
+      patient: {
+        ...DEFAULT_PATIENT, ...parsed.patient,
+        observedLossPct: observed?.pct,
+        observedLossNote: observed ? `${observed.fromKg} → ${observed.toKg} kg (${observed.days}일)` : undefined
+      },
       diary,
-      weights: parsed.weights ?? {},
+      weights,
       supplements: parsed.supplements ?? []
     }
   } catch {
@@ -179,8 +191,25 @@ export function useAppState() {
       const next = { ...s.weights }
       if (kg > 0) next[forDay] = kg
       else delete next[forDay]
-      // 오늘 체중을 적으면 계산 기준도 함께 맞춘다
-      const patient = forDay === todayKey() && kg > 0 ? { ...s.patient, weightKg: kg } : s.patient
+
+      /*
+       * 체중을 적으실 때마다 감소율을 다시 읽는다.
+       *
+       * 예전에는 기록을 받아 적기만 하고 계산에는 쓰지 않았다.
+       * 감소율은 처음 설정에서 손으로 넣은 값 그대로여서,
+       * 치료 중 체중이 빠지는 분이 매일 기록해도 앱은 그걸 모르고 있었다.
+       * 영양 위험도 알리지 않고 경구영양보충도 권하지 않았다.
+       */
+      const observed = observedWeightLoss(next, todayKey())
+      const patient = {
+        ...s.patient,
+        // 오늘 체중을 적으면 계산 기준도 함께 맞춘다
+        ...(forDay === todayKey() && kg > 0 ? { weightKg: kg } : {}),
+        observedLossPct: observed?.pct,
+        observedLossNote: observed
+          ? `${observed.fromKg} → ${observed.toKg} kg (${observed.days}일)`
+          : undefined
+      }
       return { ...s, weights: next, patient }
     })
   }, [day])
