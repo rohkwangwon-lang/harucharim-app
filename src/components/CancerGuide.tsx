@@ -1,4 +1,5 @@
-import type { PatientContext, Phase } from '../data/types'
+import type { PatientContext, Phase, CancerSubtype } from '../data/types'
+import { SUBTYPE_OPTIONS } from '../data/types'
 import { CANCER_BY_ID } from '../data/cancers'
 import { REF_BY_ID } from '../data/references'
 import { EvidenceBadge, LevelBadge, Section } from './ui'
@@ -13,6 +14,25 @@ const PHASE_LABEL: Record<Exclude<Phase, 'all'>, string> = {
 
 export function CancerGuide({ patient }: { patient: PatientContext }) {
   const p = CANCER_BY_ID[patient.cancer]
+
+  /*
+   * 시기와 세부 사항은 다르게 다룬다.
+   *
+   * 치료 시기는 지나가는 것이라, 지금 방사선치료 중이시더라도 나중에 볼 것을
+   * 미리 읽어 두시는 편이 낫다. 그래서 시기는 걸러 내지 않는다.
+   *
+   * 세부 사항은 그렇지 않다. 삼중음성이신 분은 아로마타제 억제제를 쓰실 일이
+   * 없으니, 그 약 때문에 골밀도가 떨어진다는 이야기는 나중에도 해당되지 않는다.
+   * 게다가 내 정보 화면에서 "삼중음성이라고 알려 주시면 골밀도 관련 안내는
+   * 뜨지 않습니다" 라고 적어 두었으므로, 여기서 보여 주면 그 말이 거짓이 된다.
+   */
+  const mine = patient.subtypes ?? []
+  const shown = p.rules.filter(
+    (r) => !r.subtypes || mine.length === 0 || r.subtypes.some((t) => mine.includes(t))
+  )
+  const hidden = p.rules.length - shown.length
+  const labelOf = (t: CancerSubtype) =>
+    SUBTYPE_OPTIONS[patient.cancer]?.find((o) => o.id === t)?.label ?? t
 
   return (
     <div>
@@ -52,9 +72,15 @@ export function CancerGuide({ patient }: { patient: PatientContext }) {
         )}
       </Section>
 
-      <Section title="권고 목록" desc={`${p.rules.length}개 항목 — 현재 선택하신 시기와 무관하게 전부 보여 드립니다.`}>
+      <Section
+        title="권고 목록"
+        desc={
+          `${shown.length}개 항목 — 치료 시기와 무관하게 전부 보여 드립니다.` +
+          (hidden > 0 ? ` 고르신 세부 사항에 해당하지 않는 ${hidden}개는 뺐습니다.` : '')
+        }
+      >
         <div className="space-y-2">
-          {[...p.rules]
+          {[...shown]
             .sort((a, b) => {
               const rank = { avoid: 0, caution: 1, prefer: 2, info: 3 } as const
               return rank[a.level] - rank[b.level]
@@ -64,6 +90,11 @@ export function CancerGuide({ patient }: { patient: PatientContext }) {
                 <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
                   <LevelBadge level={r.level} />
                   <EvidenceBadge level={r.evidence} />
+                  {r.subtypes && (
+                    <span className="chip bg-brand-50 text-brand-700">
+                      {r.subtypes.map(labelOf).join(' · ')}
+                    </span>
+                  )}
                   {r.phases && !r.phases.includes('all') && (
                     <span className="chip bg-stone-100 text-stone-500">
                       {r.phases.map((ph) => (ph === 'all' ? '' : PHASE_LABEL[ph])).filter(Boolean).join(' · ')}

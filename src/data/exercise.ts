@@ -1,4 +1,4 @@
-import type { CancerId, PatientCondition, TreatmentHistory } from './types'
+import type { CancerId, CancerSubtype, PatientCondition, TreatmentHistory } from './types'
 
 /**
  * 암 환자 운동 처방.
@@ -21,6 +21,14 @@ export interface ExerciseItem {
   kind: '유산소' | '저항' | '유연성·균형' | '재활'
   evidence: 'A' | 'B' | 'C' | 'G'
   refIds: string[]
+  /**
+   * 이 세부 사항에 해당하는 분에게만 보인다. 비우면 모두에게 보인다.
+   *
+   * 골밀도 이야기는 아로마타제 억제제를 쓰는 분의 것이다.
+   * 삼중음성이라 그 약을 쓰실 일이 없는 분께 "골밀도가 빠르게 떨어집니다" 라고
+   * 말하는 것은 도움이 아니라 겁주기다.
+   */
+  subtypes?: CancerSubtype[]
 }
 
 export interface ExercisePlan {
@@ -142,7 +150,8 @@ export const EXERCISE_BY_CANCER: Record<CancerId, ExercisePlan> = {
           '칼슘·비타민 D 보충과 함께 골 소실을 늦춥니다. 관절통이 있으면 수중 운동으로 대체합니다.',
         kind: '저항',
         evidence: 'G',
-        refIds: ['acsm2019']
+        refIds: ['acsm2019'],
+        subtypes: ['호르몬수용체양성']
       }
     ],
     cautions: [

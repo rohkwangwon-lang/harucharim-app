@@ -15,6 +15,12 @@ const KIND_STYLE: Record<ExerciseItem['kind'], string> = {
 
 export function Exercise({ patient }: { patient: PatientContext }) {
   const plan = EXERCISE_BY_CANCER[patient.cancer]
+
+  /* 고르신 세부 사항에 해당하지 않는 항목은 빼고 본다 — 식이 가이드와 같은 원칙이다. */
+  const mine = patient.subtypes ?? []
+  const items = plan.items.filter(
+    (it) => !it.subtypes || mine.length === 0 || it.subtypes.some((t) => mine.includes(t))
+  )
   const conditionNotes = patient.conditions
     .map((c) => ({ c, note: CONDITION_EXERCISE_NOTES[c] }))
     .filter((x): x is { c: typeof patient.conditions[number]; note: string } => !!x.note)
@@ -31,11 +37,11 @@ export function Exercise({ patient }: { patient: PatientContext }) {
       </Section>
 
       <Section
-        title={`${plan.items.length > 0 ? '이 암종에 특히 권하는 운동' : '권장 운동'}`}
+        title={`${items.length > 0 ? '이 암종에 특히 권하는 운동' : '권장 운동'}`}
         desc="기준선은 ACSM 국제 원탁회의(2019)와 ASCO 2022 권고입니다. 여기에 암종별로 달라지는 부분을 더했습니다."
       >
         <div className="space-y-2">
-          {plan.items.map((it) => <ExerciseCard key={it.name} item={it} highlight />)}
+          {items.map((it) => <ExerciseCard key={it.name} item={it} highlight />)}
         </div>
       </Section>
 
