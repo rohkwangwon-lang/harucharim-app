@@ -5,7 +5,7 @@ import { MEAL_SLOTS } from '../data/types'
 import { FOOD_BY_ID } from '../data/foods'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
 import { CANCER_BY_ID } from '../data/cancers'
-import { buildDayMenu, currentSeason, dayNotes, fiberGoal, ideasFromIngredients, naUnknownNames } from '../engine/menu'
+import { buildDayMenu, currentSeason, dayNotes, fiberGoal, ideasFromIngredients, naUnknownNames, recentFoods } from '../engine/menu'
 import { evaluateSelection } from '../engine/rules'
 import { foodContribution, personalTarget, sumIntake } from '../engine/nutrition'
 import { BASE_EXERCISE, CONDITION_EXERCISE_NOTES, EXERCISE_BY_CANCER } from '../data/exercise'
@@ -36,6 +36,7 @@ export function TodayMeals({
   onSeeSuggestions,
   day,
   onBackToToday,
+  diary,
   weight,
   onSetWeight
 }: {
@@ -57,6 +58,8 @@ export function TodayMeals({
   day: string
   /** 오늘로 되돌아간다 */
   onBackToToday: () => void
+  /** 날짜별 기록 — 최근에 드신 것을 피하는 데 쓴다 */
+  diary: Record<string, SelectedItem[]>
   /** 그날 체중 */
   weight?: number
   onSetWeight: (kg: number) => void
@@ -67,7 +70,11 @@ export function TodayMeals({
 
   const totals = useMemo(() => sumIntake(selected, supps), [selected, supplements])
   const evalResult = useMemo(() => evaluateSelection(selected, patient), [selected, patient])
-  const menu = useMemo(() => buildDayMenu(selected, patient, supps), [selected, patient, supplements])
+  const recent = useMemo(() => recentFoods(diary, day), [diary, day])
+  const menu = useMemo(
+    () => buildDayMenu(selected, patient, { supplements: supps, day, recent }),
+    [selected, patient, supplements, day, recent]
+  )
   /*
    * 평가는 '추천으로 채워진 하루'가 아니라 '실제로 담으신 것'을 대상으로 한다.
    * 위쪽 숫자는 담은 것을 세고 아래쪽 평가는 추천까지 센다면, 같은 화면에서

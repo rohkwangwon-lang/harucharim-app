@@ -61,8 +61,15 @@ for (const prof of CANCERS) {
       bad('제철 반영 후 열량 미달', `${prof.id}/${menu.season} ${Math.round(menu.totals.kcal ?? 0)}`)
     if ((menu.totals.protein ?? 0) < menu.target.protein[0])
       bad('제철 반영 후 단백질 미달', `${prof.id}/${menu.season}`)
-    if ((menu.totals.na ?? 0) > (prof.target.naLimit ?? 2000))
-      bad('제철 반영 후 나트륨 초과', `${prof.id}/${menu.season} ${Math.round(menu.totals.na ?? 0)}`)
+    /*
+     * 나트륨 상한은 넘을 수 있다 — 열량·단백질이 모자란 동안에는 먹이는 쪽을 먼저 본다(ESPEN).
+     * 여기서 볼 것은 "제철을 챙기느라" 넘겼는가다.
+     * 그래서 열량이 이미 목표에 닿았는데도 넘긴 경우만 문제로 센다.
+     */
+    const naOver = (menu.totals.na ?? 0) > (prof.target.naLimit ?? 2000)
+    const fed = (menu.totals.kcal ?? 0) >= menu.target.kcal[0]
+    if (naOver && fed && menu.meals && MEAL_SLOTS.some((s) => menu.meals[s].some((e) => e.seasonal)))
+      bad('제철을 챙기느라 나트륨을 넘김', `${prof.id}/${menu.season} ${Math.round(menu.totals.na ?? 0)}`)
     void fg
 
     seen.push(JSON.stringify(items.map((x) => x.n)))

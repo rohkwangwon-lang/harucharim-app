@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { IconEvening, IconMorning, IconNoon, IconSnack } from './icons'
 import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
 import { MEAL_SLOTS } from '../data/types'
-import { buildDayMenu, fiberGoal } from '../engine/menu'
+import { buildDayMenu, fiberGoal, recentFoods } from '../engine/menu'
 import { foodContribution, personalTarget } from '../engine/nutrition'
 import { CANCER_BY_ID } from '../data/cancers'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
@@ -24,6 +24,8 @@ export function RecommendedMenu({
   patient,
   selected,
   supplements,
+  day,
+  diary,
   onApply,
   onApplyAll,
   onGoCompose
@@ -32,6 +34,10 @@ export function RecommendedMenu({
   selected: SelectedItem[]
   /** 복용 중인 영양제 id — 하루 합계에 함께 넣는다 */
   supplements: string[]
+  /** 지금 보고 있는 날짜 — 날마다 다른 식단이 나오게 한다 */
+  day: string
+  /** 날짜별 기록 — 최근에 드신 것을 피하는 데 쓴다 */
+  diary: Record<string, SelectedItem[]>
   onApply: (foodId: string, meal: MealSlot) => void
   onApplyAll: (items: { foodId: string; meal: MealSlot }[]) => void
   onGoCompose: () => void
@@ -46,7 +52,17 @@ export function RecommendedMenu({
     () => supplements.map((id) => SUPPLEMENT_BY_ID[id]).filter(Boolean),
     [supplements]
   )
-  const menu = useMemo(() => buildDayMenu(selected, patient, supps), [selected, patient, supps, seed])
+  /*
+   * 날짜와 최근 기록을 함께 넘긴다.
+   * 날짜를 넘기지 않으면 조건이 같은 한 언제 열어도 똑같은 식단이 나온다.
+   * 실제로 8월 한 달 동안 하루도 빠짐없이 같은 여섯 가지였다.
+   * '다시 구성'은 seed 를 올려 같은 날에도 다른 안을 보여 준다.
+   */
+  const recent = useMemo(() => recentFoods(diary, day), [diary, day])
+  const menu = useMemo(
+    () => buildDayMenu(selected, patient, { supplements: supps, day, nonce: seed, recent }),
+    [selected, patient, supps, seed, day, recent]
+  )
 
   const added = MEAL_SLOTS.flatMap((slot) =>
     menu.meals[slot].filter((e) => e.origin === 'added').map((e) => ({ foodId: e.food.id, meal: slot }))

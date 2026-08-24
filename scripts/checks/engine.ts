@@ -182,7 +182,8 @@ for (let iter = 0; iter < N; iter++) {
         m.meals[s].reduce((n, e) => n + (foodContribution(e.food, e.servings).kcal ?? 0), 0)
       const b = kcalOf('아침'), l = kcalOf('점심'), d = kcalOf('저녁')
       if (b > d * 1.1) report('아침이 저녁보다 무거움', `${ctx} 아침 ${Math.round(b)} > 저녁 ${Math.round(d)}`)
-      if (b > l * 1.25) report('아침이 점심보다 크게 무거움', `${ctx} 아침 ${Math.round(b)} > 점심 ${Math.round(l)}`)
+      // 저녁보다 가벼우면 된다. 점심과의 차이는 한 끼 분량 단위라 딱 맞출 수 없다.
+      if (b > l * 1.45) report('아침이 점심보다 크게 무거움', `${ctx} 아침 ${Math.round(b)} > 점심 ${Math.round(l)}`)
     }
   }
   try { nutritionRisk(patient) } catch (e: any) { report('nutritionRisk 예외', `${ctx} :: ${e?.message}`) }

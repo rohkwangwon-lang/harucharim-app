@@ -227,11 +227,103 @@ export function ideasFromIngredients(
  * 2) 남은 것을 끼니에 배치한다.
  * 3) 열량·단백질 목표에 미달하면, 이 암종에서 권장 쪽인 식품으로 부족분을 채운다.
  */
+export interface MenuOptions {
+  /** 복용 중인 영양제 */
+  supplements?: Supplement[]
+  /**
+   * 이 식단이 어느 날의 것인지 ('YYYY-MM-DD').
+   * 같은 날이면 몇 번을 열어도 같은 식단이 나오고, 날이 바뀌면 달라진다.
+   */
+  day?: string
+  /** '다시 구성'을 누른 횟수 — 같은 날에도 다른 안을 볼 수 있게 한다 */
+  nonce?: number
+  /**
+   * 최근에 드신 식품과 며칠 전인지.
+   * 어제 먹은 것이 오늘 또 올라오면 추천으로 읽히지 않는다.
+   */
+  recent?: Map<string, number>
+  /**
+   * 며칠 전까지 거슬러 보고 겹치지 않게 할지.
+   *
+   * day 를 주면서 이 값을 두면, 그 며칠 치를 앞에서부터 차례로 만들어 보고
+   * 거기 나온 것을 피해 오늘 것을 짠다. 따로 저장해 두지 않아도
+   * "사흘 안에 같은 것을 다시 권하지 않는다" 가 지켜진다.
+   */
+  lookback?: number
+}
+
+/**
+ * 최근 며칠간 기록에 남은 식품과 며칠 전인지.
+ *
+ * 어제 드신 것이 오늘 추천에 또 올라오면 추천으로 읽히지 않는다.
+ * 실제로 드신 기록을 근거로 삼으므로, 기록을 남기실수록 식단이 다양해진다.
+ */
+export function recentFoods(
+  diary: Record<string, SelectedItem[]>,
+  day: string,
+  days = REPEAT_FADE_DAYS
+): Map<string, number> {
+  const out = new Map<string, number>()
+  const today = daysSinceEpoch(day)
+  for (const [key, items] of Object.entries(diary)) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue
+    const ago = today - daysSinceEpoch(key)
+    if (ago <= 0 || ago > days) continue
+    for (const it of items) {
+      const prev = out.get(it.foodId)
+      if (prev === undefined || ago < prev) out.set(it.foodId, ago)
+    }
+  }
+  return out
+}
+
+/** 'YYYY-MM-DD' 가 기준일로부터 며칠째인지 */
+function daysSinceEpoch(key: string): number {
+  const [y, m, d] = key.split('-').map(Number)
+  return Math.round(Date.UTC(y, (m || 1) - 1, d || 1) / 86400000)
+}
+
+/**
+ * 엇비슷한 후보를 몇 개까지 묶어 차례를 돌릴 것인가.
+ * 넷이면 같은 주요리가 다시 나오기까지 대개 나흘이 걸린다.
+ */
+const ROTATE_POOL = 5
+/** 이 점수 차이 안쪽이면 '엇비슷하다'고 본다 */
+const ROTATE_TOLERANCE = 28
+
+/** 기록에 남은 것 중 며칠 안에는 다시 권하지 않는다 */
+const REPEAT_BLOCK_DAYS = 3
+/** 그 뒤로도 얼마 동안은 뒤로 미룬다 */
+const REPEAT_FADE_DAYS = 7
+/** 이 열량을 넘는 것만 '되풀이'로 친다. 곁들이는 것까지 막을 이유는 없다. */
+const REPEAT_MIN_KCAL = 150
+
 export function buildDayMenu(
   chosen: SelectedItem[],
   patient: PatientContext,
-  supplements: Supplement[] = []
+  supplementsOrOptions: Supplement[] | MenuOptions = [],
+  extra?: MenuOptions
 ): DayMenu {
+  const opts: MenuOptions = Array.isArray(supplementsOrOptions)
+    ? { supplements: supplementsOrOptions, ...extra }
+    : supplementsOrOptions
+
+  const supplements = opts.supplements ?? []
+  const recent = opts.recent ?? new Map<string, number>()
+  /*
+   * 그날의 차례.
+   *
+   * 사흘 안에 같은 주요리가 다시 나오지 않게 하려면, "지난 사흘에 무엇이 나왔는지"를
+   * 알아야 한다. 그런데 그걸 저장하지 않고 다시 만들어 보게 했더니,
+   * 되짚는 깊이가 날마다 달라져 어제 실제로 보여 준 것과 다른 답이 나왔다.
+   *
+   * 그래서 기억하는 대신 차례를 돌린다.
+   * 점수가 엇비슷한 후보 몇을 묶어 두고 날짜에 따라 차례로 꺼낸다.
+   * 묶음이 넷이면 같은 것이 다시 나오기까지 나흘이 걸린다 — 저장할 것이 없고,
+   * 기기를 바꿔도 기록을 지워도 같은 성질이 유지된다.
+   */
+  const dayIndex = opts.day ? daysSinceEpoch(opts.day) + (opts.nonce ?? 0) : (opts.nonce ?? 0)
+
   const cached = { rules: activeRules(patient), interactions: activeInteractions(patient) }
   const profile = CANCER_BY_ID[patient.cancer]
   const target = personalTarget(patient, profile.target.kcalPerKg, profile.target.proteinPerKg)
@@ -370,7 +462,7 @@ export function buildDayMenu(
           // 나물·채소는 대개 200 mg 아래라, 여기서 막으면 채소를 못 넣는다.
           : need.fiber > 0 ? Math.max(120, room.na * 0.5)
             : Math.max(0, room.na * 0.5)
-    const best = bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota)
+    const best = bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, recent)
     if (!best) break
 
     const slot = placeIn(slotsFor(best.food), meals, cap, quota)
@@ -415,10 +507,17 @@ export function buildDayMenu(
 
     const best = bestFiller(
       topUpPool, need, room, used, meals, groupCount,
-      // 나트륨은 거의 없는 것만. 예산이 남아 있으면 평소대로 절반까지.
-      Math.max(120, room.na * 0.5),
+      /*
+       * 나트륨은 거의 없는 것만.
+       * 예산이 남아 있으면 그 절반까지, 남지 않았으면 120 mg 이하만 받는다.
+       * 다만 이미 상한을 넘긴 상태라면 여기서 더 얹지 않는다 —
+       * 보충은 열량을 채우자는 것이지 나트륨을 늘리자는 것이 아니다.
+       */
+      room.na <= 0 ? 40 : Math.max(120, room.na * 0.5),
       topUpCap,
       quota,
+      dayIndex + 40 + guard,
+      recent,
       GROUP_CAP + 1
     )
     if (!best) break
@@ -478,7 +577,7 @@ export function buildDayMenu(
       na: naLimit - (cur.na ?? 0)
     }
     const deficit = Math.max(0, target.kcal[0] - (cur.kcal ?? 0))
-    const { entry, note } = pickForSlot(candidates, slot, used, room, deficit)
+    const { entry, note } = pickForSlot(candidates, slot, used, room, deficit, dayIndex, recent)
     if (note) slotNotes[slot] = note
     if (!entry) continue
     meals[slot].push({
@@ -722,7 +821,19 @@ function collectCandidates(
    * 환자가 직접 고르는 것은 막지 않지만, 앱이 먼저 권하지는 않는 성질.
    * 규칙상 금기가 아닌 시기라도 치료 중인 환자에게 회나 술을 제안하는 것은 부적절하다.
    */
-  const NEVER_SUGGEST = new Set(['알코올', '가공육', '염장', '훈제'])
+  /*
+   * 튀김·직화구이·초가공식품도 여기에 넣는다.
+   *
+   * 감점만 주고 후보에는 남겨 두었더니, 날마다 다른 식단을 내려고 좋은 후보를
+   * 사흘씩 쉬게 하는 순간 이것들이 밀려 올라왔다 — 삼겹살 구이, 김말이 튀김이
+   * 이틀에 한 번꼴로 추천에 올랐다.
+   *
+   * 환자분이 직접 고르시는 것은 막지 않는다. 다만 앱이 먼저 권할 이유는 없다.
+   * 태운 부분의 헤테로사이클릭아민, 튀김의 산화 지질, 초가공식품은
+   * 암 생존자 식이 권고에서 줄이라고 하는 쪽이다(WCRF/AICR).
+   * 적색육은 남겨 둔다 — 불고기·수육까지 빼면 한식에서 단백질을 낼 길이 좁아진다.
+   */
+  const NEVER_SUGGEST = new Set(['알코올', '가공육', '염장', '훈제', '튀김', '직화구이', '초가공식품'])
 
   /*
    * 날것은 동물성만 막는다.
@@ -869,16 +980,31 @@ function bestFiller(
   cap: number,
   /** 끼니별 목표 열량 */
   quota: Record<MealSlot, number>,
+  /** 그날의 차례 — 엇비슷한 후보 중 몇 번째를 꺼낼지 정한다 */
+  turn: number,
+  /** 최근에 드신 식품과 며칠 전인지 */
+  recent: Map<string, number>,
   /** 한 식품군에서 낼 수 있는 최대 가짓수 */
   groupCap = GROUP_CAP
 ): Filler | undefined {
 
-  let best: { c: Cand; score: number } | undefined
+  const scored: { c: Cand; score: number }[] = []
   for (const c of all) {
     if (exclude.has(c.food.id)) continue
     if ((groupCount.get(c.food.group) ?? 0) >= groupCap) continue
     if (c.kcal > room.kcal) continue
     if (c.na > naCap) continue
+    /*
+     * 며칠 안에 나온 것은 다시 권하지 않는다.
+     * 어제 나온 닭백숙이 오늘 또 올라오면 추천으로 읽히지 않는다.
+     *
+     * 다만 눈에 띄는 것만 막는다. 사과나 두유까지 사흘씩 묶어 두면
+     * 열량을 낼 후보가 동나서, 하루가 잔챙이 열네 가지로 채워진다.
+     * 실제로 그렇게 해 봤더니 항목 수가 여섯에서 열넷으로 늘었다.
+     * 매일 사과를 드시는 것은 이상하지 않다. 매일 같은 삼계탕이 이상한 것이다.
+     */
+    const ago = recent.get(c.food.id)
+    if (ago !== undefined && ago <= REPEAT_BLOCK_DAYS && c.kcal >= REPEAT_MIN_KCAL) continue
     // 넣을 끼니가 없으면 (간식이 다 찼는데 간식밖에 못 가는 것) 의미가 없다
     if (!placeIn(slotsFor(c.food), meals, cap, quota)) continue
 
@@ -931,12 +1057,42 @@ function bestFiller(
      */
     const seasonBonus = c.seasonal ? 22 : 0
 
-    const score = fill * 80 + c.bonus * 0.5 + seasonBonus - c.penalty * 2.5 - naCost * 25 - kcalCost * 14 - crossPenalty
-    if (!best || score > best.score) best = { c, score }
-  }
-  if (!best) return undefined
+    /*
+     * 최근에 드신 것일수록 뒤로 미룬다.
+     * 사흘 안에 드신 것은 위에서 이미 걸렀고, 그 뒤로 일주일까지는 점수를 깎는다.
+     */
+    const fade = ago === undefined ? 0 : Math.max(0, (REPEAT_FADE_DAYS - ago) / REPEAT_FADE_DAYS) * 40
 
-  const c = best.c
+    /*
+     * 날마다 조금씩 다르게.
+     *
+     * 이 항이 없으면 같은 환자·같은 계절에는 언제 열어도 똑같은 여섯 가지가 나온다.
+     * 실제로 8월 한 달 동안 하루도 빠짐없이 같은 식단이었다.
+     * 영양 점수를 뒤집을 만큼은 아니고, 엇비슷한 후보끼리 차례가 돌아가는 정도로 둔다.
+     */
+    const score = fill * 80 + c.bonus * 0.5 + seasonBonus
+      - fade - c.penalty * 9 - naCost * 25 - kcalCost * 14 - crossPenalty
+    scored.push({ c, score })
+  }
+  if (scored.length === 0) return undefined
+
+  /*
+   * 가장 높은 하나만 집으면 조건이 같은 한 언제나 같은 것이 나온다.
+   * 점수가 엇비슷한 것들을 묶어 두고 날짜에 따라 차례로 꺼낸다.
+   * 영양 점수를 뒤집는 것이 아니라, 비긴 것들 사이에서 차례를 정하는 것뿐이다.
+   */
+  scored.sort((a, b) => b.score - a.score)
+  const top = scored[0].score
+  let pool = scored.filter((x) => x.score >= top - ROTATE_TOLERANCE).slice(0, ROTATE_POOL)
+  /*
+   * 차례를 돌리더라도 상한은 넘지 않는다.
+   * 예산 안에 드는 것이 하나라도 있으면 그 안에서만 돌린다.
+   * 이 걸림쇠가 없으면 그날의 차례가 하필 짠 것에 닿았을 때
+   * 앱이 스스로 정한 나트륨 상한을 넘긴 식단을 내놓는다.
+   */
+  const within = pool.filter((x) => x.c.na <= room.na)
+  if (within.length > 0) pool = within
+  const c = pool[((turn % pool.length) + pool.length) % pool.length].c
   // 무엇을 채우려고 넣었는지 — 가장 크게 메운 것을 말한다
   const parts: { label: string; ratio: number }[] = [
     { label: `단백질 ${Math.round(c.protein)} g 보충`, ratio: need.protein > 0 ? Math.min(c.protein, need.protein) / need.protein : 0 },
@@ -984,9 +1140,22 @@ function pickForSlot(
   exclude: Set<string>,
   room: { kcal: number; na: number },
   /** 하루 목표 하단에 얼마나 모자란지 — 모자랄수록 나트륨보다 열량을 우선한다 */
-  deficit: number
+  deficit: number,
+  /** 그날의 차례 */
+  turn: number,
+  /** 최근에 나온 식품과 며칠 전인지 */
+  recent: Map<string, number>
 ): { entry?: Filler; note?: string } {
-  const fits = all.filter((c) => !exclude.has(c.food.id) && slotsFor(c.food).includes(slot))
+  /*
+   * 여기서도 최근에 나온 것은 피한다.
+   * 이 단계에 이력을 보지 않는 구멍이 있어서, 앞 단계에서 막아 둔 주요리가
+   * 빈 끼니를 채울 때 그대로 다시 올라오고 있었다.
+   */
+  const fresh = all.filter((c) => {
+    const ago = recent.get(c.food.id)
+    return !(ago !== undefined && ago <= REPEAT_BLOCK_DAYS && c.kcal >= REPEAT_MIN_KCAL)
+  })
+  const fits = fresh.filter((c) => !exclude.has(c.food.id) && slotsFor(c.food).includes(slot))
   if (fits.length === 0) {
     return {
       note:
@@ -1027,8 +1196,12 @@ function pickForSlot(
      */
     const within = pool.filter((c) => c.na <= room.na)
     const src = within.length > 0 ? within : pool.length > 0 ? pool : fits
-    const rank = (c: Cand) => c.bonus - c.penalty + anchor(c) + c.kcal / kcalWeight - naPenalty(c)
-    const c = [...src].sort((a, b) => rank(b) - rank(a))[0]
+    const rank = (c: Cand) =>
+      c.bonus - c.penalty + anchor(c) + c.kcal / kcalWeight - naPenalty(c)
+    // 여기서도 엇비슷한 것끼리는 날마다 차례를 돌린다
+    const ranked = [...src].sort((a, b) => rank(b) - rank(a))
+    const near = ranked.filter((x) => rank(x) >= rank(ranked[0]) - ROTATE_TOLERANCE).slice(0, ROTATE_POOL)
+    const c = near[((turn % near.length) + near.length) % near.length]
     const hit = explain(c, ['고단백', '고열량밀도'])
     return {
       entry: {

@@ -129,6 +129,7 @@ export default function App() {
             patient={state.patient}
             selected={selected}
             supplements={state.supplements}
+            diary={state.diary}
             onAddTo={(meal) => { setPendingMeal(meal); setTab('search') }}
             onSetServings={setServings}
             onSetMeal={setMeal}
@@ -161,6 +162,8 @@ export default function App() {
             patient={state.patient}
             selected={selected}
             supplements={state.supplements}
+            day={day}
+            diary={state.diary}
             onApply={(id, meal) => handleAdd(id, 1, meal)}
             onApplyAll={(items) => {
               items.forEach((i) => addFood(i.foodId, 1, i.meal))
