@@ -186,7 +186,19 @@ export function personalTarget(
   const bmi = h > 0 ? patient.weightKg / (h * h) : 22
   const gaining = patient.conditions.includes('체중증가') && bmi >= 23
   const losing = (patient.weightLossPct ?? 0) >= 5
-  const scale = gaining && !losing ? 0.87 : 1
+
+  /*
+   * 치료를 마치신 분은 유지 수준으로 본다.
+   *
+   * 암종별 30~35 kcal/kg 은 악액질 위험이 있는 치료 중 환자를 위한 값이다(ESPEN).
+   * 치료가 끝나고 체중도 지켜지고 있는 분께 그대로 적용하면,
+   * 100 kg 인 분에게 하루 3,000 kcal 을 채우라고 하게 된다.
+   * 그건 회복이 아니라 과식이고, 생존기에는 오히려 체중 관리가 재발 위험과 연결된다.
+   *
+   * 체중이 줄고 있거나 저체중이면 이 조정을 하지 않는다 — 그때는 채우는 것이 먼저다.
+   */
+  const settled = patient.phase === 'survivorship' && !losing && bmi >= 20
+  const scale = losing ? 1 : gaining ? 0.87 : settled ? 0.85 : 1
 
   return {
     kcal: [Math.round(w * kcalPerKg[0] * scale), Math.round(w * kcalPerKg[1] * scale)],
@@ -298,6 +310,16 @@ export function targetNotes(patient: PatientContext): TargetNote[] {
       reason:
         '체중 증가를 걱정하고 계시고 과체중 범위입니다. 암종별 기준값은 체중을 지키거나 회복시키기 위한 것이라 ' +
         '그대로 두면 매일 "열량이 모자랍니다" 라고 말하게 됩니다. 다만 치료 중 급격한 감량은 권하지 않아 13 %만 낮췄습니다.'
+    })
+  }
+
+  if (patient.phase === 'survivorship' && loss < 5 && bmi >= 20) {
+    out.push({
+      label: '치료를 마치셔서 유지 수준으로 잡았습니다',
+      reason:
+        '암종별 기준값(30~35 kcal/kg)은 치료 중 체중이 빠지는 것을 막기 위한 값입니다. ' +
+        '치료가 끝나고 체중도 지켜지고 계시면 그만큼 필요하지 않고, 생존기에는 오히려 ' +
+        '체중 관리가 재발 위험과 연결되는 암종이 있습니다. 체중이 줄기 시작하면 원래 목표로 돌아갑니다.'
     })
   }
 

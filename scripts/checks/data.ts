@@ -143,7 +143,7 @@ const bad = (k: string, d: string) => { const s = `${k} :: ${d}`; if (!seenB.has
     const patient: PatientContext = {
       ...DEFAULT_PATIENT, onboarded: true,
       cancer: pick(CANCERS).id as any,
-      phase: pick(['pre_op','post_op','during_rt','during_chemo','survivor']) as any,
+      phase: pick(['during_rt', 'during_chemo', 'neutropenia', 'post_op', 'survivorship']) as any,
       conditions: rnd() < 0.5 ? ['호중구감소증'] : rnd() < 0.5 ? ['와파린복용'] : [],
       medications: rnd() < 0.4 ? ['tamoxifen'] : []
     }

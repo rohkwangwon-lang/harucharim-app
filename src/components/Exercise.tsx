@@ -1,6 +1,6 @@
 import type { PatientContext } from '../data/types'
 import {
-  BASE_EXERCISE, CONDITION_EXERCISE_NOTES, EXERCISE_BY_CANCER,
+  BASE_EXERCISE, BONE_METS_NOTE, CONDITION_EXERCISE_NOTES, EXERCISE_BY_CANCER,
   HISTORY_EXERCISE_NOTES, STOP_SIGNS, type ExerciseItem
 } from '../data/exercise'
 import { REF_BY_ID } from '../data/references'
@@ -76,6 +76,42 @@ export function Exercise({ patient }: { patient: PatientContext }) {
             </li>
           ))}
         </ul>
+      </Section>
+
+      {/*
+        * 뼈 전이는 운동 처방을 통째로 바꾸는 조건이라 따로 낸다.
+        * 유방암·전립선암·폐암에서 흔한데 그동안 아무 안내가 없었다.
+        */}
+      <Section title="뼈 전이가 있으신 경우" desc="해당하시면 운동 방식이 달라집니다.">
+        <div className="card border-warn-200 p-3.5">
+          <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+            <span className="text-sm font-bold text-stone-900">{BONE_METS_NOTE.title}</span>
+            <EvidenceBadge level={BONE_METS_NOTE.evidence} />
+          </div>
+          <p className="text-xs leading-relaxed text-stone-600">{BONE_METS_NOTE.body}</p>
+          <ul className="mt-2.5 space-y-1.5">
+            {BONE_METS_NOTE.rules.map((r) => (
+              <li key={r} className="flex gap-2 text-xs leading-relaxed text-stone-700">
+                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-warn-500" />
+                {r}
+              </li>
+            ))}
+          </ul>
+          <details className="mt-2">
+            <summary className="cursor-pointer text-[10px] font-medium text-brand-700/70">
+              근거 {BONE_METS_NOTE.refIds.length}건
+            </summary>
+            <ul className="mt-1 space-y-0.5">
+              {BONE_METS_NOTE.refIds.map((id) => REF_BY_ID[id]).filter(Boolean).map((r) => (
+                <li key={r.id} className="text-[10px] leading-relaxed text-stone-500">
+                  {r.url
+                    ? <a href={r.url} target="_blank" rel="noreferrer" className="underline decoration-stone-300">{r.citation}</a>
+                    : r.citation}
+                </li>
+              ))}
+            </ul>
+          </details>
+        </div>
       </Section>
 
       <Section title="이럴 때는 멈추세요" desc="안전이 먼저입니다. 아래 상황에서는 운동을 미루고 확인부터 받으세요.">

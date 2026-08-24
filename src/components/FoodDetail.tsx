@@ -171,6 +171,17 @@ export function FoodDetail({
             </table>
           </div>
 
+          {/*
+            * 이 숫자가 어디서 왔는지 밝힌다.
+            * 성분값 출처를 참고문헌 목록에 넣어 두고도 화면 어디에서도 쓰지 않아,
+            * 환자분은 이 값이 어느 자료의 것인지 알 길이 없었다.
+            */}
+          <p className="mt-2 text-[10px] leading-relaxed text-stone-400">
+            {food.auto
+              ? REF_BY_ID['kfda-db']?.citation
+              : `${REF_BY_ID['rda-table']?.citation} · ${REF_BY_ID['kfda-db']?.citation}`}
+          </p>
+
           {missingMacros(food).length > 0 && (
             <p className="mt-2 rounded-lg bg-warn-50 px-3 py-2 text-[11px] leading-relaxed text-warn-700">
               이 제품은 원본 자료에 <strong>{missingMacros(food).join('·')}</strong> 값이 없어 표시하지 않았습니다.

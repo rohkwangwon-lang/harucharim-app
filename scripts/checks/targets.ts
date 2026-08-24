@@ -21,7 +21,9 @@ const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed
 const pick = <T,>(a: T[]): T => a[Math.floor(rnd() * a.length) % a.length]
 
 const CONDS: PatientCondition[] = ['체중증가', '체중감소', '식욕부진', '설사', '장루보유', '위절제후', '당뇨', '신기능저하']
-const PHASES = ['pre_op', 'post_op', 'during_rt', 'during_chemo', 'survivor'] as const
+// 실제로 쓰이는 값만 쓴다. 'survivor'·'pre_op' 는 존재하지 않는 값이라
+// 생존기·호중구감소증 규칙이 한 번도 검사되지 않고 있었다.
+const PHASES = ['during_rt', 'during_chemo', 'neutropenia', 'post_op', 'survivorship'] as const
 
 let n = 0, adjusted = 0, lowered = 0
 for (let i = 0; i < 3000; i++) {

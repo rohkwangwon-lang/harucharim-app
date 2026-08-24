@@ -11,6 +11,7 @@ import { INTERACTIONS, MEDICATIONS } from '../../src/data/interactions'
 import { INGREDIENT_RULES } from '../../src/data/ingredientRules'
 import { CANCERS } from '../../src/data/cancers'
 import { REF_BY_ID } from '../../src/data/references'
+import { BASE_EXERCISE, BONE_METS_NOTE, EXERCISE_BY_CANCER } from '../../src/data/exercise'
 import { CURATED_FOODS, FOOD_BY_ID } from '../../src/data/foods'
 import { SUPPLEMENTS } from '../../src/data/supplements'
 import { evaluateFood, activeRules, activeInteractions } from '../../src/engine/rules'
@@ -90,7 +91,7 @@ for (const r of INGREDIENT_RULES) {
 /* ── 4. 같은 음식을 두고 반대로 말하지 않는가 ──── */
 let conflicts = 0
 for (const prof of CANCERS) {
-  for (const ph of ['during_rt', 'during_chemo', 'survivor'] as const) {
+  for (const ph of ['during_rt', 'during_chemo', 'neutropenia', 'post_op', 'survivorship'] as const) {
     const patient = { ...DEFAULT_PATIENT, onboarded: true, cancer: prof.id, phase: ph }
     const cached = { rules: activeRules(patient), interactions: activeInteractions(patient) }
     for (const f of CURATED_FOODS) {
@@ -118,14 +119,33 @@ for (const r of [...COMMON_RULES, ...Object.values(CONDITION_RULES).flat(), ...C
   for (const ref of r.refIds ?? []) used.add(ref)
 for (const it of INTERACTIONS) for (const ref of it.refIds ?? []) used.add(ref)
 for (const r of INGREDIENT_RULES) for (const ref of r.refIds ?? []) used.add(ref)
+/*
+ * 운동 처방도 출처를 단다. 이걸 빼고 세었더니 멀쩡히 쓰이는 문헌 일곱 건이
+ * '쓰이지 않는 출처' 로 나왔다 — 데이터가 아니라 검사가 틀린 것이었다.
+ */
+for (const list of [BASE_EXERCISE, ...Object.values(EXERCISE_BY_CANCER).map((p) => p.items)])
+  for (const e of list) for (const ref of e.refIds ?? []) used.add(ref)
+for (const ref of BONE_METS_NOTE.refIds) used.add(ref)
 for (const [id, ref] of Object.entries(REF_BY_ID)) {
   if (!ref.citation?.trim()) bad('출처에 인용 문구 없음', id)
   if (ref.url && !/^https?:\/\//.test(ref.url)) bad('출처 주소 형식 이상', `${id} ${ref.url}`)
 }
-const orphan = Object.keys(REF_BY_ID).filter((id) => !used.has(id))
+/*
+ * 성분값 출처(kind: 'db')는 규칙이 인용하는 것이 아니라
+ * 이 앱에 실린 숫자가 어디서 왔는지를 밝히는 것이다. 화면에 나오면 된다.
+ */
+const orphan = Object.keys(REF_BY_ID).filter((id) => !used.has(id) && REF_BY_ID[id].kind !== 'db')
+const dbRefs = Object.values(REF_BY_ID).filter((r) => r.kind === 'db')
+if (dbRefs.length === 0) bad('성분값 출처가 하나도 없음', '숫자가 어디서 왔는지 밝힐 곳이 없다')
 
 console.log(`  규칙 ${ruleCount}건 · 상호작용 ${INTERACTIONS.length}건 · 성분규칙 ${INGREDIENT_RULES.length}건 · 출처 ${Object.keys(REF_BY_ID).length}건`)
 console.log(`  쓰이지 않는 출처 ${orphan.length}건${orphan.length ? ` (${orphan.slice(0, 4).join(', ')}…)` : ''}`)
+/*
+ * 인용되지 않는 문헌이 남아 있으면, 넣어 두고 화면에 쓰지 않은 내용이 있다는 뜻이다.
+ * 실제로 뼈 전이 운동 권고가 그랬다 — 문헌만 있고 안내가 없어,
+ * 가장 조심해야 할 분들이 아무 말도 듣지 못하고 있었다.
+ */
+for (const id of orphan) bad('아무 데서도 인용하지 않는 문헌', `${id} — 넣어 두고 안 쓰는 내용이 있다는 뜻이다`)
 
 console.log(`\n규칙 검사 완료 — 문제 ${bugs.length}종`)
 const g = new Map<string, string[]>()

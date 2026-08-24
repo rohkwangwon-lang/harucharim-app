@@ -291,6 +291,9 @@ const ROTATE_POOL = 5
 /** 이 점수 차이 안쪽이면 '엇비슷하다'고 본다 */
 const ROTATE_TOLERANCE = 28
 
+/** 고를 것이 동났을 때 쓰는 빈 이력 — 되풀이를 허용한다는 뜻이다 */
+const EMPTY_RECENT: Map<string, number> = new Map()
+
 /** 기록에 남은 것 중 며칠 안에는 다시 권하지 않는다 */
 const REPEAT_BLOCK_DAYS = 3
 /** 그 뒤로도 얼마 동안은 뒤로 미룬다 */
@@ -455,14 +458,36 @@ export function buildDayMenu(
      *    나트륨을 무한정 쌓게 된다.
      */
     const short = need.kcal > 0 || need.protein > 0
+    /*
+     * 나트륨 천장.
+     *
+     * 모자란 동안에는 상한을 넘겨서라도 먹인다는 원칙은 그대로다.
+     * 다만 어디까지나 '조금 넘는 것' 이어야 한다.
+     * 고를 것이 동났을 때 되풀이를 허용하도록 고친 뒤로 짠 음식이 더 들어와,
+     * 상한의 1.5 배를 넘는 날이 생겼다(2,000 mg 상한에 3,072 mg).
+     * 그건 열량을 채우자는 명분으로도 설명되지 않는다.
+     * 상한의 1.25 배부터는 거의 무염인 것만 받는다.
+     */
     const naCap =
-      na >= naLimit * 1.5 ? Math.max(40, room.na * 0.5)
+      na >= naLimit * 1.25 ? Math.max(25, room.na * 0.5)
         : short ? Math.max(250, room.na * 0.5)
           // 식이섬유만 모자란 경우에도 길은 열어 둔다.
           // 나물·채소는 대개 200 mg 아래라, 여기서 막으면 채소를 못 넣는다.
           : need.fiber > 0 ? Math.max(120, room.na * 0.5)
             : Math.max(0, room.na * 0.5)
-    const best = bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, recent)
+    /*
+     * 며칠 안에 나온 것을 피하다 보면 고를 것이 동날 때가 있다.
+     * 드실 수 있는 음식이 적은 암종에서 특히 그렇다 — 두경부암에 연하곤란이 겹치면
+     * 후보가 74 종이고 그중 열량이 되는 것은 스무 가지 남짓이다.
+     * 사흘씩 쉬게 하면 금세 바닥난다.
+     *
+     * 그때는 되풀이를 허용한다. 어제 먹은 것이 또 나오는 것과
+     * 하루가 목표의 3분의 2에 그치는 것 중에서는 앞쪽이 낫다.
+     * 다양성은 영양을 채운 다음의 이야기다.
+     */
+    const best =
+      bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, recent) ??
+      bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, EMPTY_RECENT)
     if (!best) break
 
     /*
@@ -510,6 +535,17 @@ export function buildDayMenu(
     const room = { kcal: target.kcal[1] - (cur.kcal ?? 0), na: naLimit - (cur.na ?? 0) }
     if (room.kcal <= 40) break
 
+    /*
+     * 보충 단계에서는 '며칠 안에 나온 것' 을 따지지 않는다.
+     *
+     * 날마다 다른 식단을 내려고 최근에 나온 주요리를 사흘씩 쉬게 하는데,
+     * 쓸 수 있는 음식이 적은 암종(두경부암처럼 연하곤란이 겹치는 경우)에서는
+     * 그러다 후보가 동나서 열량이 500 kcal 넘게 모자란 날이 생겼다.
+     * 여러 날에 걸쳐 돌려 보니 5,400 일 중 374 일이 그랬다.
+     *
+     * 다양성과 영양 중에서는 영양이 먼저다. 여기까지 왔다는 것은
+     * 앞 단계가 이미 할 수 있는 만큼 다양하게 짰다는 뜻이다.
+     */
     const best = bestFiller(
       topUpPool, need, room, used, meals, groupCount,
       /*
@@ -522,7 +558,7 @@ export function buildDayMenu(
       topUpCap,
       quota,
       dayIndex + 40 + guard,
-      recent,
+      new Map<string, number>(),
       GROUP_CAP + 2
     )
     if (!best) break
@@ -821,8 +857,17 @@ const SLOT_GROUP_CAP: Partial<Record<FoodGroup, number>> = {
   과일: 1,
   '우유·유제품': 1,
   음료: 1,
-  '간식·디저트': 1,
-  '경장영양·환자식': 1
+  '간식·디저트': 1
+  /*
+   * 경장영양(균형영양식)은 여기 넣지 않는다.
+   *
+   * 한 끼에 두 캔이 오르는 것이 보기 좋지는 않다. 그래서 하나로 묶어 두었는데,
+   * 목표가 높고 드실 수 있는 음식이 적은 분(두경부암에 연하곤란이 겹친 경우)에게는
+   * 그 제한이 그대로 열량 미달이 됐다. 여러 날에 걸쳐 보니 그런 날이 5 % 가까이 됐다.
+   *
+   * 이런 분께 열량을 채우는 임상적 답이 바로 경구영양보충이다.
+   * 모자랄 때는 한 자리를 더 열어 준다 — 아래 기본값(2)을 따른다.
+   */
 }
 /*
  * 나머지는 둘까지 둔다.

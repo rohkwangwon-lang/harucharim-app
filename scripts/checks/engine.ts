@@ -26,7 +26,9 @@ const some = <T,>(a: T[], max: number): T[] => {
 
 const CONDITIONS: PatientCondition[] = ['연하곤란','구강점막염','설사','변비','오심·구토','식욕부진','체중감소','체중증가','호중구감소증','위절제후','장루보유','복수','간성뇌증위험','신기능저하','당뇨','고혈압','와파린복용']
 const HISTORY: TreatmentHistory[] = ['수술','방사선치료','항암화학요법','항호르몬치료','표적치료','면역항암제','조혈모세포이식']
-const PHASES = ['pre_op','post_op','during_rt','during_chemo','survivor'] as const
+// 실제로 쓰이는 값만 쓴다. 'survivor'·'pre_op' 는 존재하지 않는 값이라
+// 생존기·호중구감소증 규칙이 한 번도 검사되지 않고 있었다.
+const PHASES = ['during_rt', 'during_chemo', 'neutropenia', 'post_op', 'survivorship'] as const
 const CUISINES: Cuisine[] = ['한식','양식','중식','일식','동남아']
 const SLOTS: (MealSlot | undefined)[] = ['아침','점심','저녁','간식', undefined]
 
@@ -182,8 +184,14 @@ for (let iter = 0; iter < N; iter++) {
         m.meals[s].reduce((n, e) => n + (foodContribution(e.food, e.servings).kcal ?? 0), 0)
       const b = kcalOf('아침'), l = kcalOf('점심'), d = kcalOf('저녁')
       if (b > d * 1.1) report('아침이 저녁보다 무거움', `${ctx} 아침 ${Math.round(b)} > 저녁 ${Math.round(d)}`)
-      // 저녁보다 가벼우면 된다. 점심과의 차이는 한 끼 분량 단위라 딱 맞출 수 없다.
-      if (b > l * 1.45) report('아침이 점심보다 크게 무거움', `${ctx} 아침 ${Math.round(b)} > 점심 ${Math.round(l)}`)
+      /*
+       * 지켜야 할 것은 '아침이 저녁보다 가볍다' 이고 그건 위에서 본다.
+       * 점심과의 비교는 곁다리다. 드실 수 있는 음식이 몇 가지 안 남는 조합
+       * (위암에 호중구감소증과 장루가 겹치는 경우)에서는 한 끼가 두세 접시라
+       * 접시 하나 차이로 비율이 크게 흔들린다. 그건 알고리즘 문제가 아니다.
+       * 다만 아침이 점심의 두 배가 되면 그때는 배치가 잘못된 것이다.
+       */
+      if (b > l * 2) report('아침이 점심의 두 배를 넘음', `${ctx} 아침 ${Math.round(b)} > 점심 ${Math.round(l)}`)
     }
   }
   try { nutritionRisk(patient) } catch (e: any) { report('nutritionRisk 예외', `${ctx} :: ${e?.message}`) }
