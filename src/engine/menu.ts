@@ -465,7 +465,12 @@ export function buildDayMenu(
     const best = bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, recent)
     if (!best) break
 
-    const slot = placeIn(slotsFor(best.food), meals, cap, quota)
+    /*
+     * 먼저 상한을 지켜 자리를 찾고, 자리가 없을 때만 한 자리를 더 연다.
+     * 처음부터 열어 두면 거의 늘 열려 있게 되어 상한이 없는 것과 같아진다.
+     */
+    const slot = placeIn(best.food, meals, cap, quota) ??
+      (need.kcal > 0 ? placeIn(best.food, meals, cap, quota, true) : undefined)
     if (!slot) { used.add(best.food.id); continue }
     meals[slot].push({
       food: best.food, servings: best.servings, origin: 'added',
@@ -518,11 +523,12 @@ export function buildDayMenu(
       quota,
       dayIndex + 40 + guard,
       recent,
-      GROUP_CAP + 1
+      GROUP_CAP + 2
     )
     if (!best) break
 
-    const slot = placeIn(slotsFor(best.food), meals, topUpCap, quota)
+    const slot = placeIn(best.food, meals, topUpCap, quota) ??
+      placeIn(best.food, meals, topUpCap, quota, true)
     if (!slot) { used.add(best.food.id); continue }
 
     /*
@@ -577,7 +583,7 @@ export function buildDayMenu(
       na: naLimit - (cur.na ?? 0)
     }
     const deficit = Math.max(0, target.kcal[0] - (cur.kcal ?? 0))
-    const { entry, note } = pickForSlot(candidates, slot, used, room, deficit, dayIndex, recent)
+    const { entry, note } = pickForSlot(candidates, slot, used, room, deficit, dayIndex, recent, meals)
     if (note) slotNotes[slot] = note
     if (!entry) continue
     meals[slot].push({
@@ -634,9 +640,17 @@ export function buildDayMenu(
              */
             (c.food.group === entry.food.group || slot === '간식') &&
             slotsFor(c.food).includes(slot) &&
+            /*
+             * 바꿔 넣는 것도 상한을 지킨다.
+             * 간식에서 식품군 일치를 풀어 준 탓에, 이미 과일이 있는 간식에
+             * 제철 과일을 하나 더 밀어 넣어 포도·수박·참외가 나란히 놓였다.
+             */
+            (c.food.group === entry.food.group ||
+              meals[slot].filter((e) => e.food !== entry.food && e.food.group === c.food.group).length <
+                (SLOT_GROUP_CAP[c.food.group] ?? SLOT_GROUP_CAP_DEFAULT)) &&
             Math.abs(c.kcal - curKcal) <= Math.max(120, curKcal * 0.4) &&
             // 상한에 딱 맞추지 않는다. 제철 때문에 안전 여유를 써 버리면 안 된다.
-            dayNa - curNa + c.na <= naLimit * 0.95 &&
+            dayNa - curNa + c.na <= naLimit * 0.9 &&
             dayKcal - curKcal + c.kcal >= target.kcal[0] &&
             dayKcal - curKcal + c.kcal <= target.kcal[1] &&
             // 단백질·식이섬유도 하루 총량으로 본다. 항목끼리 견주면
@@ -749,14 +763,59 @@ function snackCap(patient: PatientContext): number {
  * 간식밖에 갈 곳이 없는데 간식이 찼다면 아예 넣지 않는다 — 하루에
  * 곶감·푸룬·미숫가루·영양음료가 나란히 놓이면 식단으로 읽히지 않는다.
  */
+/**
+ * 한 끼니에 같은 식품군을 몇 가지까지 놓을 것인가.
+ *
+ * 반찬과 채소는 여럿이 정상이다 — 나물 두 접시에 김치가 놓인 상은 자연스럽다.
+ * 그런데 과일 두 가지, 우유 두 잔, 음료 두 개가 한 끼에 함께 오르면
+ * 그건 상차림이 아니라 목록이다.
+ * 실제로 끼니의 44 % 에서 같은 식품군이 겹쳤고, 그 절반이 과일이었다
+ * (아침에 단감과 배가 나란히 올라오는 식이다).
+ */
+const SLOT_GROUP_CAP: Partial<Record<FoodGroup, number>> = {
+  // 한 끼에 둘이면 이상해 보이는 것들
+  과일: 1,
+  '우유·유제품': 1,
+  음료: 1,
+  '간식·디저트': 1,
+  '경장영양·환자식': 1
+}
+/*
+ * 나머지는 둘까지 둔다.
+ * 전부 하나로 묶었더니 체격이 큰 분(하루 2,850 kcal)에게 낼 자리가 모자라
+ * 열량이 300 kcal 넘게 미달했다. 밥과 국, 나물 두 접시가 한 상에 오르는 것은
+ * 이상하지 않다. 이상한 것은 과일 두 가지, 우유 두 잔이다.
+ */
+const SLOT_GROUP_CAP_DEFAULT = 2
+
 function placeIn(
-  slots: MealSlot[],
+  food: Food,
   meals: Record<MealSlot, MenuEntry[]>,
   cap: number,
   /** 끼니별 목표 열량 — 여기에 견주어 가장 모자란 끼니에 넣는다 */
-  quota: Record<MealSlot, number>
+  quota: Record<MealSlot, number>,
+  /**
+   * 열량이 아직 모자란가.
+   *
+   * 모자란 동안에는 같은 식품군을 하나 더 놓을 수 있게 한다.
+   * 상차림이 조금 단조로워지는 것과, 하루 열량이 300 kcal 모자란 것 중에서는
+   * 앞쪽이 낫다. 체격이 크고 규칙이 까다로운 분(간암에 당뇨가 겹친 경우처럼)은
+   * 쓸 수 있는 음식이 몇 가지 안 남아 이 여유가 필요하다.
+   */
+  short = false
 ): MealSlot | undefined {
-  const pool = slots.filter((s) => s !== '간식' || meals['간식'].length < cap)
+  /*
+   * 열량이 모자라도 이 다섯은 늘리지 않는다.
+   * 우유 두 잔이 한 끼에 오르나 과일 두 가지가 오르나 이상해 보이기는 마찬가지다.
+   * 열량은 밥·국·반찬 쪽에서 채운다.
+   */
+  const strict = SLOT_GROUP_CAP[food.group] !== undefined
+  const groupCap = (SLOT_GROUP_CAP[food.group] ?? SLOT_GROUP_CAP_DEFAULT) + (short && !strict ? 1 : 0)
+  const sameGroup = (s: MealSlot) => meals[s].filter((e) => e.food.group === food.group).length
+
+  const pool = slotsFor(food).filter(
+    (s) => (s !== '간식' || meals['간식'].length < cap) && sameGroup(s) < groupCap
+  )
   if (pool.length === 0) return undefined
 
   /*
@@ -1006,7 +1065,7 @@ function bestFiller(
     const ago = recent.get(c.food.id)
     if (ago !== undefined && ago <= REPEAT_BLOCK_DAYS && c.kcal >= REPEAT_MIN_KCAL) continue
     // 넣을 끼니가 없으면 (간식이 다 찼는데 간식밖에 못 가는 것) 의미가 없다
-    if (!placeIn(slotsFor(c.food), meals, cap, quota)) continue
+    if (!placeIn(c.food, meals, cap, quota) && !(need.kcal > 0 && placeIn(c.food, meals, cap, quota, true))) continue
 
     /*
      * 부족분을 얼마나 메우는지 — 필요한 만큼만 쳐 준다.
@@ -1144,7 +1203,9 @@ function pickForSlot(
   /** 그날의 차례 */
   turn: number,
   /** 최근에 나온 식품과 며칠 전인지 */
-  recent: Map<string, number>
+  recent: Map<string, number>,
+  /** 지금까지 짜인 끼니 — 같은 식품군이 겹치지 않게 본다 */
+  meals: Record<MealSlot, MenuEntry[]>
 ): { entry?: Filler; note?: string } {
   /*
    * 여기서도 최근에 나온 것은 피한다.
@@ -1155,7 +1216,14 @@ function pickForSlot(
     const ago = recent.get(c.food.id)
     return !(ago !== undefined && ago <= REPEAT_BLOCK_DAYS && c.kcal >= REPEAT_MIN_KCAL)
   })
-  const fits = fresh.filter((c) => !exclude.has(c.food.id) && slotsFor(c.food).includes(slot))
+  /** 이 끼니에 그 식품군을 더 놓을 수 있는가 */
+  const roomForGroup = (c: Cand) => {
+    const capG = SLOT_GROUP_CAP[c.food.group] ?? SLOT_GROUP_CAP_DEFAULT
+    return meals[slot].filter((e) => e.food.group === c.food.group).length < capG
+  }
+  const fits = fresh.filter(
+    (c) => !exclude.has(c.food.id) && slotsFor(c.food).includes(slot) && roomForGroup(c)
+  )
   if (fits.length === 0) {
     return {
       note:

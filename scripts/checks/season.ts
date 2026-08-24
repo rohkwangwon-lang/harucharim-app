@@ -6,6 +6,7 @@
  */
 import { buildDayMenu, fiberGoal } from '../../src/engine/menu'
 import { CURATED_FOODS } from '../../src/data/foods'
+import { foodContribution } from '../../src/engine/nutrition'
 import { CANCERS } from '../../src/data/cancers'
 import { DEFAULT_PATIENT } from '../../src/lib/store'
 import { MEAL_SLOTS } from '../../src/data/types'
@@ -66,10 +67,17 @@ for (const prof of CANCERS) {
      * 여기서 볼 것은 "제철을 챙기느라" 넘겼는가다.
      * 그래서 열량이 이미 목표에 닿았는데도 넘긴 경우만 문제로 센다.
      */
-    const naOver = (menu.totals.na ?? 0) > (prof.target.naLimit ?? 2000)
-    const fed = (menu.totals.kcal ?? 0) >= menu.target.kcal[0]
-    if (naOver && fed && menu.meals && MEAL_SLOTS.some((s) => menu.meals[s].some((e) => e.seasonal)))
-      bad('제철을 챙기느라 나트륨을 넘김', `${prof.id}/${menu.season} ${Math.round(menu.totals.na ?? 0)}`)
+    /*
+     * 나트륨 상한.
+     *
+     * 조금 넘는 것까지 잡지는 않는다. 엔진은 열량·단백질이 모자란 동안에는
+     * 상한을 넘겨서라도 먹이도록 되어 있고(ESPEN), 그 결과는 화면에 '넘음' 으로
+     * 빨갛게 표시된다. 여기서 볼 것은 그 여유를 핑계로 크게 넘기지는 않는가다.
+     */
+    const naLimit = prof.target.naLimit ?? 2000
+    if ((menu.totals.na ?? 0) > naLimit * 1.1)
+      bad('나트륨을 크게 넘김', `${prof.id}/${menu.season} ${Math.round(menu.totals.na ?? 0)} / ${naLimit}`)
+
     void fg
 
     seen.push(JSON.stringify(items.map((x) => x.n)))

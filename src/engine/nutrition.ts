@@ -170,8 +170,26 @@ export function personalTarget(
   proteinPerKg: [number, number]
 ): { kcal: [number, number]; protein: [number, number]; fluid: number } {
   const w = dosingWeight(patient)
+
+  /*
+   * 체중이 늘고 있는 분에게 늘리라고 하면 안 된다.
+   *
+   * 암종별 kcal/kg 는 체중을 지키거나 회복시키기 위한 값이다.
+   * 그런데 체중 증가를 걱정하시는 분(유방암 항호르몬 치료 중에 흔하다)에게
+   * 그대로 곱하면 하루 2,850 kcal 을 채우라는 말이 된다.
+   * 앱은 매일 "열량이 모자랍니다" 라고 말하며 더 드시라고 권하게 된다.
+   *
+   * 치료 중 급격한 감량은 권하지 않으므로 크게 깎지는 않는다.
+   * 과체중 이상이면서 체중 증가를 걱정하시는 경우에만 한 단계 낮춘다.
+   */
+  const h = patient.heightCm / 100
+  const bmi = h > 0 ? patient.weightKg / (h * h) : 22
+  const gaining = patient.conditions.includes('체중증가') && bmi >= 23
+  const losing = (patient.weightLossPct ?? 0) >= 5
+  const scale = gaining && !losing ? 0.87 : 1
+
   return {
-    kcal: [Math.round(w * kcalPerKg[0]), Math.round(w * kcalPerKg[1])],
+    kcal: [Math.round(w * kcalPerKg[0] * scale), Math.round(w * kcalPerKg[1] * scale)],
     protein: [Math.round(w * proteinPerKg[0]), Math.round(w * proteinPerKg[1])],
     fluid: Math.round(w * 30)
   }
