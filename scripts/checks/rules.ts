@@ -16,7 +16,8 @@ import { CURATED_FOODS, FOOD_BY_ID } from '../../src/data/foods'
 import { SUPPLEMENTS } from '../../src/data/supplements'
 import { evaluateFood, activeRules, activeInteractions } from '../../src/engine/rules'
 import { DEFAULT_PATIENT } from '../../src/lib/store'
-import type { NutritionRule } from '../../src/data/types'
+import type { NutritionRule, CancerSubtype } from '../../src/data/types'
+import { SUBTYPE_OPTIONS } from '../../src/data/types'
 
 const bugs: string[] = []
 const seenB = new Set<string>()
@@ -146,6 +147,64 @@ console.log(`  쓰이지 않는 출처 ${orphan.length}건${orphan.length ? ` ($
  * 가장 조심해야 할 분들이 아무 말도 듣지 못하고 있었다.
  */
 for (const id of orphan) bad('아무 데서도 인용하지 않는 문헌', `${id} — 넣어 두고 안 쓰는 내용이 있다는 뜻이다`)
+
+/* ─────────────────── 암종 세부 변수 ───────────────────
+ *
+ * 세부 변수로 갈리는 규칙이 엉뚱한 분께 뜨는지 본다.
+ * 삼중음성 환자에게 "아로마타제 억제제를 쓰는 동안 칼슘을 챙기세요" 가 뜨던 것이
+ * 이 검사를 만든 이유다. 해당 없는 말이 섞이면 나머지 말의 무게까지 같이 떨어진다.
+ */
+{
+  const declared = new Set<string>()
+  for (const opts of Object.values(SUBTYPE_OPTIONS)) for (const o of opts ?? []) declared.add(o.id)
+
+  for (const c of CANCERS) {
+    const opts = SUBTYPE_OPTIONS[c.id] ?? []
+    for (const r of c.rules) {
+      for (const t of r.subtypes ?? []) {
+        if (!declared.has(t)) bad('없는 세부 변수를 가리키는 규칙', `${c.id}/${r.id} → ${t}`)
+        else if (!opts.some((o) => o.id === t))
+          bad('다른 암종의 세부 변수를 쓰는 규칙', `${c.id}/${r.id} → ${t} (${c.id}에서 고를 수 없음)`)
+      }
+    }
+    // 고를 수 있게 해 놓고 아무 규칙도 안 바뀌면, 물어볼 이유가 없는 질문이다
+    for (const o of opts) {
+      const used = c.rules.some((r) => (r.subtypes ?? []).includes(o.id))
+      if (!used) bad('묻기만 하고 쓰이지 않는 세부 변수', `${c.id} → ${o.id}`)
+    }
+  }
+
+  // 실제로 걸러지는지 — 골라 봤을 때와 안 골랐을 때를 견준다
+  const idsFor = (cancer: any, subtypes: CancerSubtype[]) =>
+    new Set(
+      activeRules({ ...DEFAULT_PATIENT, cancer, subtypes, onboarded: true } as any).map(
+        (h) => h.rule.id
+      )
+    )
+  const none = idsFor('breast', [])
+  const tnbc = idsFor('breast', ['삼중음성'])
+  const hr = idsFor('breast', ['호르몬수용체양성'])
+  if (tnbc.has('breast-calcium-vitd'))
+    bad('세부 변수가 걸러지지 않음', '삼중음성인데 아로마타제 억제제 골밀도 안내가 뜬다')
+  if (!hr.has('breast-calcium-vitd'))
+    bad('세부 변수가 지나치게 걸러짐', '호르몬 수용체 양성인데 골밀도 안내가 빠졌다')
+  if (!none.has('breast-calcium-vitd'))
+    bad('안 고르면 빠져 버림', '세부 사항을 안 고르셨는데 안내가 사라졌다 — 보여 주는 쪽이 맞다')
+  if (!tnbc.has('breast-tnbc-focus'))
+    bad('세부 변수 전용 규칙이 안 뜸', '삼중음성 전용 안내가 뜨지 않는다')
+  if (hr.has('breast-tnbc-focus'))
+    bad('세부 변수가 걸러지지 않음', '호르몬 수용체 양성인데 삼중음성 전용 안내가 뜬다')
+
+  const adtOff = idsFor('prostate', [])
+  const stomachTotal = idsFor('stomach', ['위전절제'])
+  const stomachPart = idsFor('stomach', ['위부분절제'])
+  if (!adtOff.has('prostate-adt-bone')) bad('안 고르면 빠져 버림', '전립선암 ADT 골밀도 안내가 사라졌다')
+  if (stomachPart.has('stomach-b12')) bad('세부 변수가 걸러지지 않음', '위 부분절제인데 전절제용 B12 안내가 뜬다')
+  if (stomachTotal.has('stomach-b12-partial'))
+    bad('세부 변수가 걸러지지 않음', '위 전절제인데 부분절제용 B12 안내가 뜬다')
+
+  console.log(`  세부 변수 ${declared.size}종 · 이를 쓰는 규칙 ${CANCERS.reduce((n, c) => n + c.rules.filter((r) => r.subtypes).length, 0)}건`)
+}
 
 console.log(`\n규칙 검사 완료 — 문제 ${bugs.length}종`)
 const g = new Map<string, string[]>()

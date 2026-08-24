@@ -91,6 +91,9 @@ export const REFERENCES: Reference[] = [
   { id: 'adt-bone', kind: 'guideline', year: 2020,
     citation: 'Saylor PJ, et al. Bone Health and Bone-Targeted Therapies for Prostate Cancer: ASCO Endorsement. — ADT 중 칼슘·비타민 D 보충 권고.' },
 
+  { id: 'asco-cardio', kind: 'guideline', year: 2017,
+    citation: 'Armenian SH, et al. Prevention and Monitoring of Cardiac Dysfunction in Survivors of Adult Cancers: ASCO Clinical Practice Guideline. J Clin Oncol. 2017;35(8):893-911. — 심장독성 약제 사용 중 혈압·체중·지질 등 심혈관 위험 요인 관리 권고.' },
+
   // ── 호중구감소증 식이 ────────────────────────────────────────
   { id: 'sonbol2015', kind: 'meta', year: 2015,
     citation: 'Sonbol MB, et al. Neutropenic diets to prevent cancer infections: updated systematic review and meta-analysis. BMJ Support Palliat Care. 2019;9(4):425-433.' },

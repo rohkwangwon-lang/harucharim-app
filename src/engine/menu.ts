@@ -511,7 +511,7 @@ export function buildDayMenu(
      */
     const naCap =
       na >= naLimit * 1.25 ? Math.max(25, room.na * 0.5)
-        : short ? Math.max(250, room.na * 0.5)
+        : short ? Math.max(85, room.na * 0.5)
           // 식이섬유만 모자란 경우에도 길은 열어 둔다.
           // 나물·채소는 대개 200 mg 아래라, 여기서 막으면 채소를 못 넣는다.
           : need.fiber > 0 ? Math.max(120, room.na * 0.5)
@@ -814,9 +814,15 @@ export function buildDayMenu(
     const grazing = shares['간식'] >= 0.2
     if (!grazing) {
       for (let pass = 0; pass < 5 && load('아침') > load('저녁'); pass++) {
-        // 끼니를 비워 가며 균형을 맞추지는 않는다. 빈 아침은 균형이 아니라 결식이다.
-        if (meals['아침'].length <= 1) break
-        const movable = meals['아침'].filter((e) => {
+        /*
+         * 끼니를 비워 가며 균형을 맞추지는 않는다. 빈 아침은 균형이 아니라 결식이다.
+         * 그래서 아침에 하나만 남았으면 '옮기기' 는 하지 않는다 —
+         * 다만 '맞바꾸기' 는 가짓수를 그대로 두므로 아래에서 그대로 시도한다.
+         * 예전에는 여기서 바로 멈춰 버려, 아침이 한 접시뿐인 마른 환자의 날이
+         * 뒤집힌 채로 남아 있었다(34 kg · 아침 192 · 저녁 165).
+         */
+        const canMove = meals['아침'].length > 1
+        const movable = (canMove ? meals['아침'] : []).filter((e) => {
           if (!slotsFor(e.food).includes('저녁')) return false
           if (meals['저녁'].some((x) => x.food.id === e.food.id)) return false
           const capG = SLOT_GROUP_CAP[e.food.group] ?? SLOT_GROUP_CAP_DEFAULT
@@ -830,7 +836,22 @@ export function buildDayMenu(
           const k = foodContribution(e.food, e.servings).kcal ?? 0
           return load('저녁') + k <= quota['저녁'] * 1.35
         })
-        if (movable.length === 0) break
+        if (movable.length === 0) {
+          /*
+           * 옮길 데가 없는 날이 남는다. 저녁이 이미 제 몫에 가까워 무엇을 더 얹어도
+           * 넘치거나, 아침에 남은 것이 아침 전용이라 저녁에 못 가는 경우다.
+           * 그럴 때는 옮기는 대신 맞바꾼다 — 아침의 무거운 것과 저녁의 가벼운 것을
+           * 자리만 바꾸면 두 끼니의 가짓수도 식품군 상한도 그대로다.
+           */
+          const swap = swapToLightenBreakfast(meals, load)
+          if (!swap) break
+          const [bi, di] = swap
+          const b = meals['아침'][bi]
+          const d = meals['저녁'][di]
+          meals['아침'][bi] = d
+          meals['저녁'][di] = b
+          continue
+        }
         // 가장 큰 것을 옮겨야 한 번에 뒤집힌다
         const move = movable.reduce((a, b) =>
           (foodContribution(b.food, b.servings).kcal ?? 0) > (foodContribution(a.food, a.servings).kcal ?? 0) ? b : a
@@ -935,6 +956,44 @@ const MAIN_SLOTS: MealSlot[] = ['아침', '점심', '저녁']
  * 한 끼를 크게 만들면 그 끼니를 통째로 남기신다. 그때는 넷을 고르게 하고
  * 간식 몫을 키운다.
  */
+/**
+ * 아침의 무거운 것과 저녁의 가벼운 것을 맞바꿀 짝을 찾는다.
+ *
+ * 옮기기(한쪽에서 빼서 다른 쪽에 넣기)로는 풀리지 않는 날 —
+ * 저녁이 이미 제 몫 가까이 차 있어 무엇을 더 얹을 수 없는 날 — 을 위한 것이다.
+ * 자리만 바꾸므로 두 끼니의 가짓수는 그대로고, 서로의 식품군 상한만 확인하면 된다.
+ * 바꾼 뒤 아침이 저녁보다 가벼워지는 짝 중 차이가 가장 크게 줄어드는 것을 고른다.
+ */
+function swapToLightenBreakfast(
+  meals: Record<MealSlot, MenuEntry[]>,
+  load: (slot: MealSlot) => number
+): [number, number] | null {
+  const kcal = (e: MenuEntry) => foodContribution(e.food, e.servings).kcal ?? 0
+  const fits = (e: MenuEntry, to: MealSlot, replacing: MenuEntry) => {
+    if (!slotsFor(e.food).includes(to)) return false
+    if (meals[to].some((x) => x !== replacing && x.food.id === e.food.id)) return false
+    const capG = SLOT_GROUP_CAP[e.food.group] ?? SLOT_GROUP_CAP_DEFAULT
+    const already = meals[to].filter((x) => x !== replacing && x.food.group === e.food.group).length
+    return already < capG
+  }
+
+  let best: { pair: [number, number]; gap: number } | null = null
+  const gapNow = load('아침') - load('저녁')
+  for (let bi = 0; bi < meals['아침'].length; bi++) {
+    for (let di = 0; di < meals['저녁'].length; di++) {
+      const b = meals['아침'][bi]
+      const d = meals['저녁'][di]
+      const diff = kcal(b) - kcal(d)
+      if (diff <= 0) continue // 가벼운 것을 아침으로 들여올 때만 뜻이 있다
+      if (!fits(b, '저녁', d) || !fits(d, '아침', b)) continue
+      const gap = gapNow - diff * 2
+      if (gap >= 0) continue // 바꿔도 아침이 여전히 무거우면 헛일이다
+      if (!best || gap > best.gap) best = { pair: [bi, di], gap }
+    }
+  }
+  return best ? best.pair : null
+}
+
 function mealShares(patient: PatientContext): Record<MealSlot, number> {
   const grazing = patient.conditions.some(
     (c) => c === '식욕부진' || c === '체중감소' || c === '위절제후' || c === '오심·구토'
@@ -1087,9 +1146,21 @@ function collectCandidates(
   /** 경구영양보충을 후보에 넣을지 — 보충 단계에서는 열량 미달 자체가 적응증이다 */
   forceONS = false
 ): Cand[] {
+  /*
+   * 점착성(떡류)에 감점을 준다 — 연하곤란으로 진단되지 않은 분에게도.
+   *
+   * 진단명이 붙은 분은 규칙이 따로 막는다. 문제는 그 앞이다.
+   * 항암·방사선치료 중 구강건조와 점막염만으로도 삼키기가 나빠지고,
+   * 본인은 그것을 '연하곤란' 이라고 부르지 않는다. 떡은 질식 사고의 첫손이라
+   * 그런 분께 앱이 먼저 권할 음식은 아니다.
+   *
+   * 다만 금기가 아니라 순서의 문제이므로, 직접 고르시는 것은 그대로 두고
+   * 감점만 준다. 실제로 이 값에서 떡이 상위 2·4위에서 밀려났다.
+   */
   const PENALTY: Partial<Record<string, number>> = {
     적색육: 12, 직화구이: 8, 초가공식품: 12, 튀김: 10, 가공육: 30,
-    고지방: 5, 포화지방높음: 5, 고나트륨: 8, 고당: 6, 염장: 20, 거친질감: 3
+    고지방: 5, 포화지방높음: 5, 고나트륨: 8, 고당: 6, 염장: 20,
+    거친질감: 3, 점착성: 14
   }
 
   /**
@@ -1157,11 +1228,28 @@ function collectCandidates(
      * 그래서 계절이 바뀌어도 늘 곶감만 나왔다 — 곶감만 form 이 snack 이었기 때문이다.
      * 아래 이름 규칙이 "(생것)·(삶은 것)" 같은 조리 상태 이름은 따로 걸러 준다.
      */
-    const eatenAsIs = f.group === '과일' || f.group === '경장영양·환자식'
+    /*
+     * 이미 조리된 단백질 급원은 그 자체로 한 접시다.
+     *
+     * '고등어(구이)' 는 구운 고등어이고 '새우(데친 것)' 은 삶은 새우다. 둘 다 상에 그대로 오른다.
+     * 그런데 이름에 조리 상태가 괄호로 붙어 있고 form 이 ingredient 라는 이유로 제외되어,
+     * 생선 요리가 추천에서 통째로 빠져 있었다. 남은 단백질 급원은 통조림 두 가지뿐이었다.
+     * 게다가 이것들은 나트륨이 낮다 — 고등어구이 90 mg, 연어구이 71 mg, 새우 89 mg.
+     * 앱이 나트륨 때문에 단백질을 못 채우던 일의 상당 부분이 여기서 왔다.
+     */
+    const PROTEIN_GROUPS = new Set<FoodGroup>(['어패류', '육류', '가금류·난류', '두류·대두가공'])
+    const cooked = /\((구이|데친 것|찐 것|삶은 것|조림|볶음|찜)\)/.test(f.name)
+    const eatenAsIs =
+      f.group === '과일' || f.group === '경장영양·환자식' ||
+      (PROTEIN_GROUPS.has(f.group) && cooked)
     if (f.form === 'ingredient' && !eatenAsIs) continue
-    // "(삶은 것)", "(데친 것)" 처럼 조리 상태만 적힌 이름은 재료에 가깝다.
-    // 간식 자리에 "밤(삶은 것)" 이 올라오면 메뉴로 읽히지 않는다.
-    if (/\((생것|삶은 것|데친 것|찐 것|말린 것|불린 것|생)\)/.test(f.name)) continue
+
+    /*
+     * 그래도 '생것·말린 것·불린 것' 은 재료다.
+     * 회는 따로 걸러진다(날것은 동물성만 막는 규칙이 위에 있다).
+     */
+    if (/\((생것|말린 것|불린 것|생)\)/.test(f.name)) continue
+    if (!eatenAsIs && /\((삶은 것|데친 것|찐 것)\)/.test(f.name)) continue
 
     const v = evaluateFood(f, patient, 1, cached)
     if (v.level === 'avoid' || v.level === 'caution') continue
@@ -1331,6 +1419,20 @@ function bestFiller(
      * 영양을 뒤집을 만큼은 아니고, 엇비슷한 후보끼리 갈릴 때 제철이 이기는 정도로 둔다.
      */
     const seasonBonus = c.seasonal ? 22 : 0
+    /*
+     * 국 한 그릇 가점.
+     *
+     * 한국 밥상은 밥과 국이 기본인데, 국은 완성품 한 그릇에 나트륨이 많아
+     * 후보 경쟁에서 늘 밀렸다. 건더기 위주 형태를 만들어 나트륨 문제는 풀었지만,
+     * 열량이 낮아(26~74 kcal) '모자란 만큼 채운다' 는 점수에서는 여전히 불리하다.
+     * 실제로 드시는 상차림에 가깝도록, 그날 아직 국이 없을 때만 가점한다.
+     * (이 단계에서는 어느 끼니에 놓일지가 아직 정해지지 않아 하루 단위로 본다.)
+     */
+    const soupsToday = MEAL_SLOTS.reduce(
+      (n, sl) => n + meals[sl].filter((e) => e.food.group === '국·탕·찌개').length,
+      0
+    )
+    const soupBonus = c.food.group === '국·탕·찌개' && soupsToday === 0 ? 26 : 0
 
     /*
      * 최근에 드신 것일수록 뒤로 미룬다.
@@ -1345,7 +1447,7 @@ function bestFiller(
      * 실제로 8월 한 달 동안 하루도 빠짐없이 같은 식단이었다.
      * 영양 점수를 뒤집을 만큼은 아니고, 엇비슷한 후보끼리 차례가 돌아가는 정도로 둔다.
      */
-    const score = fill * 80 + c.bonus * 0.5 + seasonBonus
+    const score = fill * 80 + c.bonus * 0.5 + seasonBonus + soupBonus
       - fade - c.penalty * 9 - naCost * 25 - kcalCost * 14 - crossPenalty
     scored.push({ c, score })
   }

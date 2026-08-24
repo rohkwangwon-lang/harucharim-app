@@ -115,10 +115,20 @@ for (let iter = 0; iter < N; iter++) {
      * 식재료를 끼니로 내놓으면 안 된다 — "대두(삶은 것)" 을 저녁으로 낼 수는 없다.
      * 다만 과일과 영양보충 음료는 재료로 분류돼 있어도 그대로 먹는 것이라 예외다.
      */
-    const eatenAsIs = e.food.group === '과일' || e.food.group === '경장영양·환자식'
+    /*
+     * 이미 조리된 단백질 급원('고등어(구이)', '새우(데친 것)')은 그 자체로 한 접시다.
+     * 엔진이 그렇게 보도록 고쳤으니 검사도 같은 눈으로 봐야 한다.
+     */
+    const PROT = ['어패류', '육류', '가금류·난류', '두류·대두가공']
+    const cooked = /\((구이|데친 것|찐 것|삶은 것|조림|볶음|찜)\)/.test(e.food.name)
+    const eatenAsIs =
+      e.food.group === '과일' || e.food.group === '경장영양·환자식' ||
+      (PROT.includes(e.food.group) && cooked)
     if (e.food.form === 'ingredient' && !eatenAsIs)
       report('식재료를 메뉴로 추천함', `${ctx} ${e.food.name}`)
-    if (/\((생것|삶은 것|데친 것|찐 것|말린 것|불린 것|생)\)/.test(e.food.name))
+    if (/\((생것|말린 것|불린 것|생)\)/.test(e.food.name))
+      report('손질 안 된 재료를 메뉴로 추천함', `${ctx} ${e.food.name}`)
+    if (!eatenAsIs && /\((삶은 것|데친 것|찐 것)\)/.test(e.food.name))
       report('조리 상태 이름을 메뉴로 추천함', `${ctx} ${e.food.name}`)
     if (!FOOD_BY_ID[e.food.id]) report('번들에 없는 식품 추천', `${ctx} ${e.food.name}`)
   }

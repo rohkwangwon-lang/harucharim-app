@@ -74,6 +74,23 @@ function appliesToPhase(rule: NutritionRule, patient: PatientContext): boolean {
   return rule.phases.includes(patient.phase)
 }
 
+/**
+ * 세부 변수가 맞는지.
+ *
+ * 아직 고르지 않았으면(빈 목록) 통과시킨다 — 자세히 적어 주신 분에게만
+ * 더 정확해지는 것이지, 안 적으면 아무 말도 안 해 주는 식이면 곤란하다.
+ */
+function appliesToSubtype(rule: NutritionRule, patient: PatientContext): boolean {
+  if (!rule.subtypes || rule.subtypes.length === 0) return true
+  const mine = patient.subtypes ?? []
+  if (mine.length === 0) return true
+  return rule.subtypes.some((t) => mine.includes(t))
+}
+
+function applies(rule: NutritionRule, patient: PatientContext): boolean {
+  return appliesToPhase(rule, patient) && appliesToSubtype(rule, patient)
+}
+
 /* ────────────────────────── 규칙 수집 ────────────────────────── */
 
 /** 현재 환자 맥락에서 유효한 모든 규칙 */
@@ -81,17 +98,17 @@ export function activeRules(patient: PatientContext): RuleHit[] {
   const hits: RuleHit[] = []
 
   for (const r of COMMON_RULES) {
-    if (appliesToPhase(r, patient)) hits.push({ rule: r, source: '공통' })
+    if (applies(r, patient)) hits.push({ rule: r, source: '공통' })
   }
 
   const profile = CANCER_BY_ID[patient.cancer]
   for (const r of profile.rules) {
-    if (appliesToPhase(r, patient)) hits.push({ rule: r, source: '암종' })
+    if (applies(r, patient)) hits.push({ rule: r, source: '암종' })
   }
 
   for (const cond of patient.conditions) {
     for (const r of CONDITION_RULES[cond] ?? []) {
-      if (appliesToPhase(r, patient)) hits.push({ rule: r, source: '증상', sourceLabel: cond })
+      if (applies(r, patient)) hits.push({ rule: r, source: '증상', sourceLabel: cond })
     }
   }
 

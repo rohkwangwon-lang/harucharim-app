@@ -7,7 +7,8 @@ import type { NutritionRule, PatientCondition } from './types'
 export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
   연하곤란: [
     {
-      id: 'cond-dys-soft', level: 'prefer', match: { tags: ['부드러움'] },
+      // 떡은 부드럽지만 삼키기 쉽지 않다. 권장 대상에서 뺀다.
+      id: 'cond-dys-soft', level: 'prefer', match: { tags: ['부드러움'], excludeTags: ['점착성'] },
       title: '삼키기 쉬운 형태로 바꾸는 것이 먼저입니다',
       reason:
         '먹는 양을 줄이는 대신 음식의 형태를 바꾸는 것이 원칙입니다. 곱게 갈고 소스나 국물로 촉촉하게 만들면 ' +
@@ -15,7 +16,8 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
       evidence: 'G', refIds: ['iddsi']
     },
     {
-      id: 'cond-dys-rough', level: 'avoid', match: { tags: ['거친질감'] },
+      // 규칙 문장에는 "떡처럼 끈적하게 뭉치는 것" 이라 적어 두고 정작 떡은 걸리지 않았다.
+      id: 'cond-dys-rough', level: 'avoid', match: { tags: ['거친질감', '점착성'] },
       title: '거칠거나 잘 뭉치는 음식은 사레와 막힘의 원인입니다',
       reason:
         '견과·튀김옷·질긴 나물처럼 거친 것, 떡처럼 끈적하게 뭉치는 것은 특히 위험합니다. ' +

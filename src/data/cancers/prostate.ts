@@ -62,6 +62,7 @@ export const prostate: CancerProfile = {
     },
     {
       id: 'prostate-adt-protein',
+      subtypes: ['안드로겐차단요법중'],
       level: 'prefer',
       match: { tags: ['고단백'] },
       title: 'ADT 중에는 단백질과 근력운동으로 근육을 지켜야 합니다',
@@ -74,6 +75,7 @@ export const prostate: CancerProfile = {
     },
     {
       id: 'prostate-adt-bone',
+      subtypes: ['안드로겐차단요법중'],
       level: 'prefer',
       match: { supplementCategories: ['칼슘·마그네슘', '비타민D'], tags: ['고칼슘'] },
       title: 'ADT 중 칼슘·비타민 D 는 골절 예방의 기본입니다',

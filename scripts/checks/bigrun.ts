@@ -120,7 +120,7 @@ for (let person = 0; person < PEOPLE; person++) {
     for (const s of ['아침', '점심', '저녁'] as const)
       if (menu.meals[s].length === 0 && !menu.slotNotes[s]) bad('빈 끼니에 사유 없음', `${ctx} ${s}`)
     for (const [k, v] of Object.entries(menu.totals))
-      if (!Number.isFinite(v as number) || (v as number) < 0) bad('합계 이상값', `${ctx} ${k}=${v}`)
+      if (!Number.isFinite(v as number) || (v as number) < -1e-9) bad('합계 이상값', `${ctx} ${k}=${v}`)
 
     /* ── 끼니가 상차림으로 읽히는가 ── */
     const grazing = patient.conditions.some((c) => ['식욕부진', '체중감소', '위절제후', '오심·구토'].includes(c))
@@ -143,7 +143,13 @@ for (let person = 0; person < PEOPLE; person++) {
       const v = evaluateFood(e.food, patient, e.servings, cached)
       if (v.level === 'avoid' || v.level === 'caution')
         bad('피해야 할 것을 추천', `${ctx} ${e.food.name} ${v.level}`)
-      if (e.food.form === 'ingredient' && e.food.group !== '과일' && e.food.group !== '경장영양·환자식')
+      // 조리를 마친 단백질 급원('연어(구이)', '새우(데친 것)')은 그대로 한 접시다.
+      const PROT = ['어패류', '육류', '가금류·난류', '두류·대두가공']
+      const eatenAsIs =
+        e.food.group === '과일' || e.food.group === '경장영양·환자식' ||
+        (PROT.includes(e.food.group) &&
+          /\((구이|데친 것|찐 것|삶은 것|조림|볶음|찜)\)/.test(e.food.name))
+      if (e.food.form === 'ingredient' && !eatenAsIs)
         bad('식재료를 메뉴로 추천', `${ctx} ${e.food.name}`)
       if (e.food.tags.some((t) => ['알코올', '가공육', '염장', '훈제', '튀김', '직화구이', '초가공식품'].includes(t as string)))
         bad('먼저 권하지 않기로 한 것을 추천', `${ctx} ${e.food.name}`)

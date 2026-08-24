@@ -74,6 +74,7 @@ export const stomach: CancerProfile = {
     },
     {
       id: 'stomach-b12',
+      subtypes: ['위전절제'],
       level: 'prefer',
       match: { supplementCategories: ['비타민B군', '종합비타민'] },
       phases: ['post_op', 'survivorship'],
@@ -82,6 +83,26 @@ export const stomach: CancerProfile = {
         'B12 흡수에 필요한 내인자는 위 벽세포에서 만들어집니다. 전절제 후에는 경구 섭취만으로 흡수되지 않아 ' +
         '보통 주사(월 1회 등)로 보충합니다. 아절제 후에도 시간이 지나며 결핍이 오는 경우가 많아 정기적인 확인이 필요합니다. ' +
         '결핍은 빈혈뿐 아니라 되돌리기 어려운 신경 손상으로 이어질 수 있습니다.',
+      evidence: 'G',
+      refIds: ['gastrectomy-nutr', 'espen2021']
+    },
+    {
+      /*
+       * 부분절제 쪽. 전절제만큼 급하지는 않지만 없는 문제도 아니다.
+       * 남은 위가 위축되면서 몇 해에 걸쳐 서서히 모자라는 경우가 흔해,
+       * "괜찮다" 가 아니라 "확인하시라" 가 맞는 말이다.
+       */
+      id: 'stomach-b12-partial',
+      level: 'prefer',
+      match: { supplementCategories: ['비타민B군', '종합비타민'] },
+      subtypes: ['위부분절제'],
+      phases: ['post_op', 'survivorship'],
+      title: '위 부분절제 후에도 비타민 B12 는 정기적으로 확인하세요',
+      reason:
+        '위를 일부 남겼다면 내인자가 어느 정도 만들어지므로 전절제처럼 곧바로 결핍되지는 않습니다. ' +
+        '다만 남은 위 점막이 위축되면서 수술 몇 해 뒤에 서서히 부족해지는 경우가 드물지 않아, ' +
+        '증상이 없더라도 정기적으로 혈중 농도를 확인하는 것이 권고됩니다. ' +
+        '부족이 확인되면 그때 보충을 시작하면 되고, 미리 고용량을 드실 이유는 없습니다.',
       evidence: 'G',
       refIds: ['gastrectomy-nutr', 'espen2021']
     },

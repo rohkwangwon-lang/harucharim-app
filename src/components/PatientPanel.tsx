@@ -1,4 +1,5 @@
-import type { PatientContext, PatientCondition, Phase } from '../data/types'
+import type { PatientContext, PatientCondition, Phase, CancerSubtype } from '../data/types'
+import { SUBTYPE_OPTIONS } from '../data/types'
 import { CANCERS } from '../data/cancers'
 import { MEDICATIONS } from '../data/interactions'
 import { nutritionRisk, personalTarget } from '../engine/nutrition'
@@ -37,6 +38,30 @@ export function PatientPanel({
         : [...patient.conditions, c]
     })
 
+  /*
+   * 세부 변수는 서로 배타적인 것이 섞여 있다 — 위 전절제와 부분절제를 동시에 고를 수는 없고,
+   * 삼중음성은 호르몬 수용체 양성·HER2 양성과 같이 설 수 없다.
+   * 고르실 때 앞뒤가 맞지 않는 조합이 남지 않도록 여기서 정리한다.
+   */
+  const EXCLUSIVE: CancerSubtype[][] = [
+    ['위전절제', '위부분절제'],
+    ['삼중음성', '호르몬수용체양성'],
+    ['삼중음성', 'HER2양성']
+  ]
+  const toggleSubtype = (t: CancerSubtype) => {
+    const mine = patient.subtypes ?? []
+    if (mine.includes(t)) {
+      onChange({ subtypes: mine.filter((x) => x !== t) })
+      return
+    }
+    const conflicting = new Set(
+      EXCLUSIVE.filter((pair) => pair.includes(t)).flatMap((pair) => pair.filter((x) => x !== t))
+    )
+    onChange({ subtypes: [...mine.filter((x) => !conflicting.has(x)), t] })
+  }
+
+  const subtypeOptions = SUBTYPE_OPTIONS[patient.cancer]
+
   const toggleMed = (id: string) =>
     onChange({
       medications: patient.medications.includes(id)
@@ -51,7 +76,8 @@ export function PatientPanel({
           {CANCERS.map((c) => (
             <button
               key={c.id}
-              onClick={() => onChange({ cancer: c.id })}
+              // 암종을 바꾸면 이전 암종의 세부 사항은 뜻을 잃는다 — 같이 비운다
+              onClick={() => onChange({ cancer: c.id, subtypes: [] })}
               className={`rounded-xl border px-3 py-2.5 text-left text-sm font-medium transition-colors ${
                 patient.cancer === c.id
                   ? 'border-brand-500 bg-brand-50 text-brand-800'
@@ -63,6 +89,44 @@ export function PatientPanel({
           ))}
         </div>
       </Section>
+
+      {subtypeOptions && (
+        <Section
+          title={`${profile.name}의 세부 사항`}
+          desc="아시는 것만 고르셔도 됩니다. 고르지 않으면 해당 내용을 모두 보여 드립니다."
+        >
+          <div className="space-y-2">
+            {subtypeOptions.map((o) => {
+              const on = (patient.subtypes ?? []).includes(o.id)
+              return (
+                <button
+                  key={o.id}
+                  onClick={() => toggleSubtype(o.id)}
+                  className={`flex w-full items-start gap-3 rounded-xl border px-3.5 py-2.5 text-left transition-colors ${
+                    on ? 'border-brand-500 bg-brand-50' : 'border-stone-200 bg-white hover:bg-stone-50'
+                  }`}
+                >
+                  <span
+                    className={`mt-0.5 h-4 w-4 shrink-0 rounded border ${
+                      on ? 'border-brand-500 bg-brand-500' : 'border-stone-300 bg-white'
+                    }`}
+                  />
+                  <span>
+                    <span className={`block text-sm font-medium ${on ? 'text-brand-800' : 'text-stone-700'}`}>
+                      {o.label}
+                    </span>
+                    <span className="block text-xs text-stone-500">{o.hint}</span>
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+          <p className="mt-2 text-xs text-stone-500">
+            받으시는 치료가 달라지면 챙길 것도 달라집니다. 예를 들어 아로마타제 억제제는 호르몬 수용체
+            양성에만 쓰기 때문에, 삼중음성이라고 알려 주시면 골밀도 관련 안내는 뜨지 않습니다.
+          </p>
+        </Section>
+      )}
 
       <Section title="치료 시기" desc="같은 음식도 시기에 따라 권고가 반대로 바뀝니다.">
         <div className="space-y-2">

@@ -42,6 +42,7 @@ export const breast: CancerProfile = {
       id: 'breast-isoflavone-supp',
       level: 'caution',
       match: { supplementIds: ['red-ginseng'] },
+      subtypes: ['호르몬수용체양성'],
       title: '이소플라본·에스트로겐 유사 성분을 농축한 보충제는 별개 문제입니다',
       reason:
         '식품으로 먹는 대두와 달리, 이소플라본을 수십 배 농축한 보충제나 여성호르몬 유사 작용을 표방하는 건강기능식품은 ' +
@@ -77,6 +78,7 @@ export const breast: CancerProfile = {
       id: 'breast-calcium-vitd',
       level: 'prefer',
       match: { tags: ['고칼슘'], supplementCategories: ['칼슘·마그네슘', '비타민D'] },
+      subtypes: ['호르몬수용체양성'],
       title: '아로마타제 억제제를 쓰는 동안 칼슘과 비타민 D를 챙기세요',
       reason:
         '아로마타제 억제제는 에스트로겐을 거의 없애기 때문에 골밀도가 빠르게 떨어집니다. ' +
@@ -84,6 +86,50 @@ export const breast: CancerProfile = {
         '골다공증이 확인되면 별도의 약물치료가 필요합니다.',
       evidence: 'G',
       refIds: ['nccn-survivorship', 'kdri2020']
+    },
+    {
+      /*
+       * HER2 양성에서만 뜬다.
+       *
+       * 트라스투주맙·퍼투주맙은 심장에 부담을 준다. 안트라사이클린과 이어서 쓰면
+       * 더 그렇다. 항산화제로 막을 수 있다는 근거는 없고, 실제로 손댈 수 있는 것은
+       * 혈압·체중·지질 — 즉 나트륨과 식사 형태다.
+       */
+      id: 'breast-her2-cardiac',
+      level: 'caution',
+      match: {
+        tags: ['고나트륨'],
+        nutrient: { key: 'na', op: '>', value: 800, basis: 'serving' }
+      },
+      subtypes: ['HER2양성'],
+      title: 'HER2 표적치료 중에는 심장 쪽 위험 요인을 같이 관리하세요',
+      reason:
+        '트라스투주맙은 심장 기능(좌심실 구혈률)을 떨어뜨릴 수 있고, 안트라사이클린 계열 항암제를 함께 또는 앞서 쓴 경우 그 위험이 더 큽니다. ' +
+        '이 손상을 막아 준다고 입증된 보충제는 없습니다. 실제로 위험을 낮추는 것으로 확인된 것은 혈압·체중·혈당·지질 관리이며, ' +
+        '그중 식사에서 손댈 수 있는 부분이 나트륨입니다. 미국임상종양학회는 심장독성 약제를 쓰는 동안 이 위험 요인들을 적극적으로 관리하도록 권고합니다.',
+      evidence: 'G',
+      refIds: ['asco-cardio', 'nccn-survivorship']
+    },
+    {
+      /*
+       * 삼중음성에서만 뜬다.
+       *
+       * 항호르몬 치료를 받지 않으니 골밀도·대두 이야기가 해당되지 않는다.
+       * 대신 남는 것이 체중과 운동인데, 이 둘은 삼중음성에서도 그대로 유효하다.
+       * "해당 없음" 을 말해 주는 것만으로도 불필요한 걱정을 덜 수 있다.
+       */
+      id: 'breast-tnbc-focus',
+      level: 'info',
+      match: { tags: ['고식이섬유', '고단백'] },
+      subtypes: ['삼중음성'],
+      title: '삼중음성이라면 항호르몬 치료 관련 주의는 해당되지 않습니다',
+      reason:
+        '삼중음성 유방암은 타목시펜이나 아로마타제 억제제를 쓰지 않습니다. ' +
+        '그래서 아로마타제 억제제로 인한 골밀도 감소, 대두·이소플라본과 항호르몬제의 관계 같은 이야기는 해당되지 않습니다. ' +
+        '반대로 체중 관리와 규칙적인 운동은 삼중음성에서도 예후와 연결되어 있다는 관찰이 이어지고 있어, ' +
+        '이쪽에 집중하시는 것이 맞습니다. 단백질과 채소를 채우는 평범한 식사가 그 바탕입니다.',
+      evidence: 'C',
+      refIds: ['asco2022', 'acs2022']
     },
     {
       id: 'breast-fiber-veg',

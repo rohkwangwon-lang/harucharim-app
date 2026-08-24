@@ -65,6 +65,7 @@ export const liver: CancerProfile = {
       id: 'liver-lens',
       level: 'prefer',
       match: { tags: ['고열량밀도'] },
+      subtypes: ['간경변동반'],
       title: '자기 전 간단한 야식이 근육 손실을 줄입니다',
       reason:
         '간경변에서는 간의 글리코겐 저장 능력이 떨어져, 하룻밤 공복이 건강한 사람의 사흘 굶은 것과 비슷한 대사 상태를 만듭니다. ' +
@@ -101,6 +102,7 @@ export const liver: CancerProfile = {
     {
       id: 'liver-raw-seafood',
       level: 'avoid',
+      subtypes: ['간경변동반'],
       // 비브리오는 해산물에서 온다. '생식' 태그만 보면 사과·딸기까지 금기가 되어 버린다.
       match: { restrictGroups: ['어패류', '외식·프랜차이즈'], tags: ['생식'] },
       title: '간경변이 있으면 생굴·생선회는 특히 위험합니다',
