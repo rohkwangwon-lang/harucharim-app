@@ -755,6 +755,92 @@ export function buildDayMenu(
     }
   }
 
+  /*
+   * 4-3) 끼니 사이 옮겨 담기.
+   *
+   * 한 가지씩 '제 몫에 가장 모자란 끼니' 에 넣다 보면, 다 짜고 난 뒤에는
+   * 어긋나 있는 경우가 생긴다. 갈 수 있는 자리가 하나뿐인 것들 때문이다 —
+   * 영양음료·단백질분말·균형영양식은 간식에만 갈 수 있고, 우유는 아침 아니면 간식이다.
+   * 간식이 차면 그것들이 아침으로 밀려나, 가벼워야 할 아침이 저녁보다 무거워진다.
+   * 실제로 아침 540 kcal 에 저녁 383 kcal 인 날이 나왔다.
+   *
+   * 그래서 마지막에 한 번 옮겨 담는다. 넘치는 끼니에서 모자란 끼니로,
+   * 옮겨도 그 끼니의 식품군 상한을 넘지 않는 것만 고른다.
+   */
+  {
+    const load = (slot: MealSlot) =>
+      meals[slot].reduce((n, e) => n + (foodContribution(e.food, e.servings).kcal ?? 0), 0)
+
+    for (let pass = 0; pass < 6; pass++) {
+      const over = MEAL_SLOTS.filter((s) => load(s) > quota[s] * 1.15)
+        .sort((a, b) => load(b) - quota[b] - (load(a) - quota[a]))[0]
+      if (!over) break
+      const under = MEAL_SLOTS.filter((s) => s !== over && load(s) < quota[s] * 0.9)
+        .sort((a, b) => quota[b] - load(b) - (quota[a] - load(a)))[0]
+      if (!under) break
+
+      // 옮길 수 있는 것 중, 옮겼을 때 두 끼니가 가장 고르게 되는 것
+      // 끼니를 비우면서까지 옮기지 않는다
+      if (over !== '간식' && meals[over].length <= 1) break
+      const movable = meals[over]
+        .map((e, i) => ({ e, i, kcal: foodContribution(e.food, e.servings).kcal ?? 0 }))
+        .filter(({ e }) => {
+          if (!slotsFor(e.food).includes(under)) return false
+          // 옮길 곳에 같은 음식이 이미 있으면 안 된다 — 한 끼니에 배가 두 개 놓인다
+          if (meals[under].some((x) => x.food.id === e.food.id)) return false
+          const capG = SLOT_GROUP_CAP[e.food.group] ?? SLOT_GROUP_CAP_DEFAULT
+          return meals[under].filter((x) => x.food.group === e.food.group).length < capG
+        })
+      if (movable.length === 0) break
+
+      const gapOver = load(over) - quota[over]
+      const gapUnder = quota[under] - load(under)
+      const best = movable.reduce((a, b) =>
+        Math.abs(Math.min(gapOver, gapUnder) - b.kcal) < Math.abs(Math.min(gapOver, gapUnder) - a.kcal) ? b : a
+      )
+      // 옮겨서 오히려 뒤집히면 그대로 둔다
+      if (load(over) - best.kcal < quota[over] * 0.6) break
+
+      meals[over].splice(meals[over].indexOf(best.e), 1)
+      meals[under].push(best.e)
+    }
+
+    /*
+     * 몫으로 견주는 것만으로는 부족하다.
+     * 아침이 몫을 조금 넘고 저녁이 크게 모자란 경우, 위 규칙은 '넘침' 으로 보지 않는다
+     * (아침 429 · 몫 398 · 저녁 294 처럼). 그래도 아침이 저녁보다 무거운 것은 그대로다.
+     * 지켜야 할 것은 그 순서 자체이므로 마지막으로 한 번 더 본다.
+     */
+    const grazing = shares['간식'] >= 0.2
+    if (!grazing) {
+      for (let pass = 0; pass < 5 && load('아침') > load('저녁'); pass++) {
+        // 끼니를 비워 가며 균형을 맞추지는 않는다. 빈 아침은 균형이 아니라 결식이다.
+        if (meals['아침'].length <= 1) break
+        const movable = meals['아침'].filter((e) => {
+          if (!slotsFor(e.food).includes('저녁')) return false
+          if (meals['저녁'].some((x) => x.food.id === e.food.id)) return false
+          const capG = SLOT_GROUP_CAP[e.food.group] ?? SLOT_GROUP_CAP_DEFAULT
+          if (meals['저녁'].filter((x) => x.food.group === e.food.group).length >= capG) return false
+          /*
+           * 옮긴 뒤 저녁이 제 몫을 크게 넘지만 않으면 된다.
+           * 처음에는 '저녁이 아침보다 무거워지지 않게' 라고 적었는데, 그건 거꾸로다 —
+           * 저녁이 가장 무거운 것이 바로 원하는 결과다. 그 조건 때문에 옮길 것이
+           * 하나도 없어 이 단계가 아무 일도 하지 않고 있었다.
+           */
+          const k = foodContribution(e.food, e.servings).kcal ?? 0
+          return load('저녁') + k <= quota['저녁'] * 1.35
+        })
+        if (movable.length === 0) break
+        // 가장 큰 것을 옮겨야 한 번에 뒤집힌다
+        const move = movable.reduce((a, b) =>
+          (foodContribution(b.food, b.servings).kcal ?? 0) > (foodContribution(a.food, a.servings).kcal ?? 0) ? b : a
+        )
+        meals['아침'].splice(meals['아침'].indexOf(move), 1)
+        meals['저녁'].push(move)
+      }
+    }
+  }
+
   // 5) 끼니별 소계 — 화면에서 항목을 더한 값과 정확히 같아야 한다
   const slotTotals: Record<MealSlot, NutrientTotals> = { 아침: {}, 점심: {}, 저녁: {}, 간식: {} }
   for (const slot of MEAL_SLOTS) {
