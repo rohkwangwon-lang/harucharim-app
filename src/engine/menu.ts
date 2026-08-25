@@ -3,7 +3,7 @@ import { MEAL_SLOTS } from '../data/types'
 import { CURATED_FOODS, FOOD_BY_ID } from '../data/foods'
 import { CANCER_BY_ID } from '../data/cancers'
 import { activeInteractions, activeRules, evaluateFood, type RuleHit, type InteractionHit } from './rules'
-import { addTotals, effectiveLossPct, foodContribution, microTargets, personalTarget, type MicroTarget, type NutrientTotals } from './nutrition'
+import { addTotals, dosingWeight, effectiveLossPct, foodContribution, microTargets, personalTarget, type MicroTarget, type NutrientTotals } from './nutrition'
 
 export type { MealSlot }
 export { MEAL_SLOTS }
@@ -53,24 +53,45 @@ const SLOT_BY_GROUP: Record<FoodGroup, MealSlot[]> = {
   '곡류·전분': ['아침', '점심', '저녁'],
   '두류·대두가공': ['아침', '점심', '저녁'],
   '견과·종실': ['간식'],
-  채소: ['점심', '저녁'],
+  /*
+   * 나물·김치는 아침상의 기본이다.
+   *
+   * 처음에는 채소와 반찬을 점심·저녁에만 두었다. 서양식 아침(빵·우유·달걀)을
+   * 그대로 옮겨 놓은 셈인데, 한국 아침상은 밥·국·나물이다.
+   * 그 바람에 아침에 놓을 수 있는 것이 죽·우유·과일·달걀뿐이라,
+   * 아침에 포도 한 송이(101 kcal)만 놓인 채 끝나는 날이 나왔다.
+   * 저녁의 두부부침을 아침으로 옮기려 해도 '반찬' 이라 갈 수가 없었다.
+   */
+  채소: ['아침', '점심', '저녁'],
   '해조·버섯': ['아침', '점심', '저녁'],
   // 과일은 식후 후식으로도 먹는다. 간식으로만 묶어 두면 간식이 차는 순간
   // 아침으로 몰려, 가벼워야 할 아침이 가장 무거운 끼니가 된다.
   과일: ['아침', '점심', '저녁', '간식'],
   육류: ['점심', '저녁'],
   '가금류·난류': ['아침', '점심', '저녁'],
-  어패류: ['점심', '저녁'],
+  // 생선구이 한 토막은 아침상에 흔하다. 무거운 것은 아래 HEAVY_MAIN 에서 걸린다
+  어패류: ['아침', '점심', '저녁'],
   '우유·유제품': ['아침', '간식'],
   '유지·당류': ['점심', '저녁'],
   '국·탕·찌개': ['아침', '점심', '저녁'],
   '밥·면·죽 요리': ['아침', '점심', '저녁'],
-  '반찬·조림·볶음': ['점심', '저녁'],
+  '반찬·조림·볶음': ['아침', '점심', '저녁'],
   가공식품: ['간식'],
-  음료: ['간식'],
+  음료: ['점심', '저녁', '간식'],
   '간식·디저트': ['간식'],
   '외식·프랜차이즈': ['점심', '저녁'],
-  '경장영양·환자식': ['간식']
+  /*
+   * 경구영양보충은 끼니와 함께 드시는 것이지 군것질이 아니다.
+   *
+   * 간식에만 갈 수 있게 묶어 두었더니 간식이 쓰레기통이 됐다.
+   * 균형영양식 두 팩에 미숫가루에 단백질음료까지 몰려 간식이 976 kcal —
+   * 하루의 61 % 였다. 그 대신 아침 128 · 점심 104 kcal 로,
+   * 그건 식사가 아니라 결식이다. 실제로 하루의 27 % 에서 이런 일이 났다.
+   *
+   * 위를 잘라 내신 분이 점심에 균형영양식을 곁들이는 것은 이상한 일이 아니라
+   * 오히려 표준적인 방법이다. 갈 수 있는 자리를 넓혀 준다.
+   */
+  '경장영양·환자식': ['아침', '점심', '저녁', '간식']
 }
 
 /** 오늘 날짜로 계절을 판정한다. 제철 재료를 우선 배치하기 위한 것이다. */
@@ -375,6 +396,8 @@ export function buildDayMenu(
   const supplements = opts.supplements ?? []
   /* 이분에게만 세는 미량영양소 — 해당 사항이 없으면 빈 배열이라 아래가 그대로 돈다 */
   const micros = microTargets(patient)
+  /* 신장이 걸리는 분만 단백질에 뚜껑을 씌운다 */
+  const renalCap = patient.conditions.includes('신기능저하')
   const recent = opts.recent ?? new Map<string, number>()
   /*
    * 그날의 차례.
@@ -524,7 +547,21 @@ export function buildDayMenu(
      * 견과·과일·채소는 대개 100 mg 아래라 이 문으로 들어온다.
      */
     const na = cur.na ?? 0
-    const room = { kcal: target.kcal[1] - (cur.kcal ?? 0), na: naLimit - na }
+    const room = {
+      kcal: target.kcal[1] - (cur.kcal ?? 0),
+      na: naLimit - na,
+      /* 단백질에도 위가 있다 — ESPEN 은 1.0~1.5 g/kg, 많아도 2.0 g/kg 을 넘기지 않는다 */
+      protein: target.protein[1] - (cur.protein ?? 0),
+      /*
+       * 설사·장루가 있는 동안에는 식이섬유에도 위가 있다.
+       *
+       * 앱은 "지금은 8~15 g 정도가 적당합니다" 라고 말해 놓고
+       * 정작 추천에서는 섬유를 막지 않아, 저잔사 대상인 날의 56 % 가
+       * 그 상한을 넘겼다(평균 16.3 g). 말과 행동이 어긋나 있었다.
+       * 저잔사가 아닌 분에게는 위가 없다(Infinity).
+       */
+      fiber: fiber.lowResidue ? fiber.range[1] - (cur.fiber ?? 0) : Infinity
+    }
     /*
      * 한 가지가 가져가도 되는 나트륨의 최대치.
      *  - 예산이 남아 있으면 그 절반까지. 뒤에 올 것의 자리를 남겨야 한다.
@@ -544,9 +581,23 @@ export function buildDayMenu(
      * 그건 열량을 채우자는 명분으로도 설명되지 않는다.
      * 상한의 1.25 배부터는 거의 무염인 것만 받는다.
      */
+    /*
+     * 모자란 정도에 따라 문을 연다.
+     *
+     * 한 값으로 고정했더니 어느 쪽이든 한쪽이 무너졌다 —
+     * 넉넉히 잡으면 나트륨이 상한을 넘는 날이 5.5 % 로 늘고,
+     * 빠듯하게 잡으면 체격이 큰 분(하루 3,120 kcal)이 2,183 kcal 에서 멈췄다.
+     * 조금 모자란 날과 크게 모자란 날에 같은 잣대를 댈 이유가 없다.
+     *
+     * 목표의 8 % 쯤 모자란 정도면 짜지 않은 것으로 채우면 되고,
+     * 3분의 1이 비어 있으면 그건 나트륨을 아낄 자리가 아니다.
+     */
+    const gap = target.kcal[0] > 0 ? Math.max(0, need.kcal) / target.kcal[0] : 0
+    const shortCap = 45 + Math.min(1, gap / 0.25) * 55
+
     const naCap =
       na >= naLimit * 1.25 ? Math.max(25, room.na * 0.5)
-        : short ? Math.max(85, room.na * 0.5)
+        : short ? Math.max(shortCap, room.na * 0.5)
           // 식이섬유만 모자란 경우에도 길은 열어 둔다.
           // 나물·채소는 대개 200 mg 아래라, 여기서 막으면 채소를 못 넣는다.
           : need.fiber > 0 ? Math.max(120, room.na * 0.5)
@@ -562,8 +613,8 @@ export function buildDayMenu(
      * 다양성은 영양을 채운 다음의 이야기다.
      */
     const best =
-      bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, recent, GROUP_CAP, microRoom) ??
-      bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, EMPTY_RECENT, GROUP_CAP, microRoom)
+      bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, recent, GROUP_CAP, microRoom, renalCap) ??
+      bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, EMPTY_RECENT, GROUP_CAP, microRoom, renalCap)
     if (!best) break
 
     /*
@@ -608,7 +659,12 @@ export function buildDayMenu(
     }
     if (need.kcal <= 25 && need.protein <= 2) break
 
-    const room = { kcal: target.kcal[1] - (cur.kcal ?? 0), na: naLimit - (cur.na ?? 0) }
+    const room = {
+      kcal: target.kcal[1] - (cur.kcal ?? 0),
+      na: naLimit - (cur.na ?? 0),
+      protein: target.protein[1] - (cur.protein ?? 0),
+      fiber: fiber.lowResidue ? fiber.range[1] - (cur.fiber ?? 0) : Infinity
+    }
     if (room.kcal <= 40) break
 
     /*
@@ -636,7 +692,8 @@ export function buildDayMenu(
       dayIndex + 40 + guard,
       new Map<string, number>(),
       GROUP_CAP + 2,
-      microBudget(micros, cur)
+      microBudget(micros, cur),
+      renalCap
     )
     if (!best) break
 
@@ -808,37 +865,75 @@ export function buildDayMenu(
       meals[slot].reduce((n, e) => n + (foodContribution(e.food, e.servings).kcal ?? 0), 0)
 
     for (let pass = 0; pass < 6; pass++) {
-      const over = MEAL_SLOTS.filter((s) => load(s) > quota[s] * 1.15)
-        .sort((a, b) => load(b) - quota[b] - (load(a) - quota[a]))[0]
-      if (!over) break
-      const under = MEAL_SLOTS.filter((s) => s !== over && load(s) < quota[s] * 0.9)
-        .sort((a, b) => quota[b] - load(b) - (quota[a] - load(a)))[0]
-      if (!under) break
+      /*
+       * 어느 끼니가 굶고 있으면 '넘침' 의 기준을 낮춘다.
+       *
+       * 예전에는 제 몫의 1.15배를 넘는 끼니가 있어야만 옮겨 담았다.
+       * 그런데 아침 101 · 점심 603 · 저녁 642 인 날이 있었다 —
+       * 저녁 몫이 589 이라 1.15배(677)에 닿지 않으니, 옮길 곳을 찾지 못하고
+       * 그대로 끝났다. 아침에 포도 한 송이만 놓인 채로.
+       *
+       * 한쪽이 제 몫의 절반도 못 채우고 있으면, 다른 쪽이 '조금 많은' 정도라도
+       * 나눠 주는 것이 맞다. 주는 쪽이 제 몫 아래로 내려가지만 않으면 된다.
+       */
+      /*
+       * 어느 끼니가 굶고 있으면 '넘침' 의 기준을 낮춘다.
+       *
+       * 예전에는 제 몫의 1.15배를 넘는 끼니가 있어야만 옮겨 담았다.
+       * 그런데 아침 101 · 점심 603 · 저녁 642 인 날이 있었다 —
+       * 저녁 몫이 589 이라 1.15배(677)에 닿지 않으니 옮길 곳을 찾지 못하고
+       * 아침에 포도 한 송이만 놓인 채로 끝났다.
+       *
+       * 한쪽이 제 몫의 절반도 못 채우고 있으면, 다른 쪽이 '조금 많은' 정도라도
+       * 나눠 주는 것이 맞다. 주는 쪽이 제 몫 아래로 내려가지만 않으면 된다.
+       */
+      const starving = (['아침', '점심', '저녁'] as MealSlot[]).some((s) => load(s) < quota[s] * 0.45)
+      const overLine = starving ? 0.95 : 1.15
+      const overs = MEAL_SLOTS.filter((s) => load(s) > quota[s] * overLine)
+        .sort((a, b) => load(b) - quota[b] - (load(a) - quota[a]))
+      if (overs.length === 0) break
 
-      // 옮길 수 있는 것 중, 옮겼을 때 두 끼니가 가장 고르게 되는 것
-      // 끼니를 비우면서까지 옮기지 않는다
-      if (over !== '간식' && meals[over].length <= 1) break
-      const movable = meals[over]
-        .map((e, i) => ({ e, i, kcal: foodContribution(e.food, e.servings).kcal ?? 0 }))
-        .filter(({ e }) => {
-          if (!slotsFor(e.food).includes(under)) return false
-          // 옮길 곳에 같은 음식이 이미 있으면 안 된다 — 한 끼니에 배가 두 개 놓인다
-          if (meals[under].some((x) => x.food.id === e.food.id)) return false
-          const capG = SLOT_GROUP_CAP[e.food.group] ?? SLOT_GROUP_CAP_DEFAULT
-          return meals[under].filter((x) => x.food.group === e.food.group).length < capG
-        })
-      if (movable.length === 0) break
+      /*
+       * 가장 많이 넘친 끼니 하나만 보고 포기하지 않는다.
+       *
+       * 예전에는 첫 후보에서 막히면 그대로 끝냈다. 위의 그 날이 그랬다 —
+       * 점심에서 흑임자죽을 빼면 점심이 163 kcal 로 무너지니 옮길 수 없었고,
+       * 거기서 멈춰 버려 저녁의 두부부침은 쳐다보지도 않았다.
+       * 한 곳이 안 되면 다음 곳을 본다.
+       */
+      let moved = false
+      for (const over of overs) {
+        const under = MEAL_SLOTS.filter((s) => s !== over && load(s) < quota[s] * 0.9)
+          .sort((a, b) => quota[b] - load(b) - (quota[a] - load(a)))[0]
+        if (!under) continue
 
-      const gapOver = load(over) - quota[over]
-      const gapUnder = quota[under] - load(under)
-      const best = movable.reduce((a, b) =>
-        Math.abs(Math.min(gapOver, gapUnder) - b.kcal) < Math.abs(Math.min(gapOver, gapUnder) - a.kcal) ? b : a
-      )
-      // 옮겨서 오히려 뒤집히면 그대로 둔다
-      if (load(over) - best.kcal < quota[over] * 0.6) break
+        // 끼니를 비우면서까지 옮기지 않는다
+        if (over !== '간식' && meals[over].length <= 1) continue
+        const movable = meals[over]
+          .map((e, i) => ({ e, i, kcal: foodContribution(e.food, e.servings).kcal ?? 0 }))
+          .filter(({ e }) => {
+            if (!slotsFor(e.food).includes(under)) return false
+            // 옮길 곳에 같은 음식이 이미 있으면 안 된다 — 한 끼니에 배가 두 개 놓인다
+            if (meals[under].some((x) => x.food.id === e.food.id)) return false
+            const capG = SLOT_GROUP_CAP[e.food.group] ?? SLOT_GROUP_CAP_DEFAULT
+            return meals[under].filter((x) => x.food.group === e.food.group).length < capG
+          })
+          // 옮겨서 주는 쪽이 무너지면 그것도 뺀다
+          .filter(({ kcal }) => load(over) - kcal >= quota[over] * 0.6)
+        if (movable.length === 0) continue
 
-      meals[over].splice(meals[over].indexOf(best.e), 1)
-      meals[under].push(best.e)
+        const gapOver = load(over) - quota[over]
+        const gapUnder = quota[under] - load(under)
+        const best = movable.reduce((a, b) =>
+          Math.abs(Math.min(gapOver, gapUnder) - b.kcal) < Math.abs(Math.min(gapOver, gapUnder) - a.kcal) ? b : a
+        )
+
+        meals[over].splice(meals[over].indexOf(best.e), 1)
+        meals[under].push(best.e)
+        moved = true
+        break
+      }
+      if (!moved) break
     }
 
     /*
@@ -1191,9 +1286,22 @@ function placeIn(
   const groupCap = (SLOT_GROUP_CAP[food.group] ?? SLOT_GROUP_CAP_DEFAULT) + (short && !strict ? 1 : 0)
   const sameGroup = (s: MealSlot) => meals[s].filter((e) => e.food.group === food.group).length
 
-  const pool = slotsFor(food).filter(
-    (s) => (s !== '간식' || meals['간식'].length < cap) && sameGroup(s) < groupCap
-  )
+  const loadOf = (s: MealSlot) =>
+    meals[s].reduce((n, e) => n + (foodContribution(e.food, e.servings).kcal ?? 0), 0)
+  const kcalOf = (foodContribution(food, 1).kcal ?? 0)
+
+  const pool = slotsFor(food).filter((s) => {
+    if (sameGroup(s) >= groupCap) return false
+    if (s !== '간식') return true
+    /*
+     * 간식에는 가짓수만이 아니라 열량으로도 뚜껑을 덮는다.
+     *
+     * 예전에는 가짓수만 세었다. 그래서 300 kcal 짜리 균형영양식 두 팩이
+     * '두 가지' 로만 잡혀 간식이 하루의 60 % 를 차지했다.
+     * 간식은 끼니 사이를 메우는 것이지 하루를 지고 가는 자리가 아니다.
+     */
+    return meals['간식'].length < cap && loadOf('간식') + kcalOf <= quota['간식'] * 1.6
+  })
   if (pool.length === 0) return undefined
 
   /*
@@ -1468,7 +1576,7 @@ const GROUP_CAP = 3
 function bestFiller(
   all: Cand[],
   need: { kcal: number; protein: number; fiber: number },
-  room: { kcal: number; na: number },
+  room: { kcal: number; na: number; protein: number; fiber: number },
   exclude: Set<string>,
   meals: Record<MealSlot, MenuEntry[]>,
   groupCount: Map<string, number>,
@@ -1490,7 +1598,15 @@ function bestFiller(
    * need = 채워야 남은 양(칼슘·철), room = 아직 쓸 수 있는 양(칼륨·인).
    * 해당 사항이 없으면 빈 배열이라 점수가 그대로다.
    */
-  micro: { key: NutrientKey; need: number; room: number }[] = []
+  micro: { key: NutrientKey; need: number; room: number }[] = [],
+  /**
+   * 단백질에 뚜껑을 씌울지 — 신기능이 떨어진 분에게만 참이다.
+   *
+   * 모두에게 씌워 봤더니 열량 미달이 0.1 % 에서 0.9 % 로 늘었다.
+   * 열량을 낼 만한 것이 대개 단백질도 함께 지고 오기 때문이다.
+   * 그 맞바꿈은 하지 않는다 — 자세한 사정은 아래 걸러 내는 자리에 적어 두었다.
+   */
+  renalCap = false
 ): Filler | undefined {
 
   const scored: { c: Cand; score: number }[] = []
@@ -1499,6 +1615,43 @@ function bestFiller(
     if ((groupCount.get(c.food.group) ?? 0) >= groupCap) continue
     if (c.kcal > room.kcal) continue
     if (c.na > naCap) continue
+    /*
+     * 단백질에도 뚜껑을 씌운다.
+     *
+     * 값을 매기는 것만으로는 모자랐다. 벌점을 여덟 배로 올려도 하루 단백질이
+     * 목표 상단의 1.2배에 머물렀다 — 한 접시가 지고 오는 단백질이 워낙 커서,
+     * 열량을 채우려고 한 가지를 더 집을 때마다 20~50 g 씩 따라 들어온 탓이다.
+     * 상한을 이미 채웠으면 단백질이 적은 것 중에서 고르게 한다.
+     * 죽·과일·채소·미숫가루는 그대로 통과하므로 열량을 채울 길은 남아 있다.
+     */
+    /*
+     * 단백질 뚜껑은 신장이 걸리는 분에게만 씌운다.
+     *
+     * 처음에는 모두에게 씌웠다. 그랬더니 단백질 과다가 48 % 에서 38 % 로 줄기는 했는데,
+     * 열량 미달이 0.1 % 에서 0.9 % 로 늘었다. 열량을 낼 만한 것이 대개
+     * 단백질도 함께 지고 오기 때문이다.
+     *
+     * 그 맞바꿈은 하면 안 된다. 여기서 '과다' 라고 부른 1.25배는 체중 1 kg 당
+     * 1.9 g 쯤이고, ESPEN 은 2.0 g/kg 까지를 안전하다고 본다.
+     * 반면 열량 부족은 암 환자에게 악액질로 이어지는 첫 단계다.
+     * 안전한 것을 줄이자고 위험한 것을 늘릴 이유가 없다.
+     *
+     * 신기능이 떨어진 분은 다르다. 그분께는 단백질이 실제로 부담이므로
+     * 그때만 뚜껑을 씌우고, 나머지 분께는 아래 protCost 로 값만 매긴다.
+     */
+    /*
+     * 신장이 걸리는 분에게도 열량은 필요하다.
+     *
+     * 뚜껑만 꽉 조였더니 130 kg 이신 분(신기능저하·복수·설사·와파린)이
+     * 2,670 kcal 목표에 2,123 에서 멈췄다. 단백질을 아끼자고 열량을 굶기면
+     * 그것대로 위험하다. 크게 모자란 동안에는 조금 열어 둔다.
+     */
+    if (renalCap && c.protein > Math.max(6, room.protein + (need.kcal > 700 ? 14 : 0))) continue
+    /*
+     * 저잔사 기간에는 섬유가 많은 것을 받지 않는다.
+     * 남은 여유를 크게 넘기지만 않으면 되므로, 조금씩 여러 가지는 그대로 들어온다.
+     */
+    if (c.fiber > Math.max(1.0, room.fiber)) continue
     /*
      * 며칠 안에 나온 것은 다시 권하지 않는다.
      * 어제 나온 닭백숙이 오늘 또 올라오면 추천으로 읽히지 않는다.
@@ -1556,6 +1709,19 @@ function bestFiller(
 
     // 나트륨은 남은 예산에 견주어 값을 매긴다. 예산이 빠듯할수록 비싸진다.
     const naCost = c.na / Math.max(150, room.na)
+    /*
+     * 단백질도 위가 있다.
+     *
+     * 모자란 쪽만 보고 있었더니, 열량을 채우려고 고단백 식품을 계속 집어
+     * 하루 단백질이 목표 상단의 1.3배까지 갔다. 체중 1 kg 당 2.3~2.7 g 이면
+     * ESPEN 이 말하는 상한(2.0)을 넘고, 신기능이 떨어진 분께는 위험하다.
+     * 이미 넘긴 뒤에 물리면 늦다. 처음에는 그렇게 했는데 소용이 없었다 —
+     * 닭가슴살 31 g 을 놓을 때도, 닭백숙 51 g 을 얹을 때도 아직 상한 아래라
+     * 아무 값이 붙지 않았고, 값이 붙기 시작할 때는 이미 120 g 을 넘긴 뒤였다.
+     * 그러니 '이 한 가지가 상한을 얼마나 밀어내는가' 로 물린다.
+     * 모자란 동안에는 fill 항이 훨씬 크므로 이 비용이 방해가 되지 않는다.
+     */
+    const protCost = Math.max(0, c.protein - Math.max(0, room.protein)) / 20
     /*
      * 열량 상한도 예산이다.
      * 열량이 이미 찼는데 식이섬유가 남았다면, 남은 열량으로 섬유를 최대한 사야 한다.
@@ -1624,7 +1790,7 @@ function bestFiller(
      * 칼슘이 조금 모자란 것은 그 다음 문제다.
      */
     const score = fill * 80 + microFill * 60 + c.bonus * 0.5 + seasonBonus + soupBonus
-      - fade - c.penalty * 9 - naCost * 25 - kcalCost * 14 - crossPenalty - microCost * 30
+      - fade - c.penalty * 9 - naCost * 25 - kcalCost * 14 - crossPenalty - microCost * 30 - protCost * 40
     scored.push({ c, score })
   }
   if (scored.length === 0) return undefined
@@ -1854,9 +2020,32 @@ export function dayNotes(
   const na = totals.na ?? 0
 
   if (kcal < target.kcal[0]) {
-    notes.push({ tone: 'low', topic: '에너지',
-      text: `목표(${target.kcal[0]}~${target.kcal[1]} kcal)보다 ${Math.round(target.kcal[0] - kcal)} kcal 부족합니다. ` +
-        '견과·유제품·경구영양보충 음료처럼 부피 대비 열량이 높은 것을 간식으로 더해 보세요.' })
+    /*
+     * 제한이 여러 겹으로 걸린 분은 채우고 싶어도 채울 것이 없다.
+     *
+     * 신기능이 떨어져 단백질·칼륨·인을 눌러야 하고, 설사로 섬유까지 줄여야 하며,
+     * 복수가 있으면 나트륨도 낮춰야 한다. 그 넷을 다 지키고 남는 음식이
+     * 몇 가지 되지 않는다. 실제로 130 kg 이신 분이 2,670 kcal 목표에
+     * 2,124 에서 멈췄다.
+     *
+     * 그럴 때 "더 드세요" 만 적으면, 지키라는 대로 지킨 분께 못 지켰다고 하는 셈이다.
+     * 왜 채우기 어려운지 밝히고, 그 답이 식사 밖에 있다는 것까지 말한다.
+     */
+    const limits: string[] = []
+    if (patient.conditions.includes('신기능저하')) limits.push('신장(단백질·칼륨·인)')
+    if (patient.conditions.includes('설사') || patient.conditions.includes('장루보유')) limits.push('저잔사(식이섬유)')
+    if (patient.conditions.includes('복수')) limits.push('복수(나트륨)')
+    if (patient.conditions.includes('간성뇌증위험')) limits.push('간성뇌증')
+
+    notes.push(limits.length >= 2
+      ? { tone: 'low', topic: '에너지',
+          text: `목표(${target.kcal[0]}~${target.kcal[1]} kcal)보다 ${Math.round(target.kcal[0] - kcal)} kcal 부족합니다. ` +
+            `${limits.join(' · ')} 제한이 함께 걸려 있어, 그 조건을 다 지키면서 열량을 채울 만한 음식이 많지 않습니다. ` +
+            '식사만으로 메우기 어려우니 담당 선생님·영양팀과 경구영양보충제나 경관영양을 상의해 보세요. ' +
+            '어느 제한을 얼마나 풀지는 채혈 결과를 보고 정할 일입니다.' }
+      : { tone: 'low', topic: '에너지',
+          text: `목표(${target.kcal[0]}~${target.kcal[1]} kcal)보다 ${Math.round(target.kcal[0] - kcal)} kcal 부족합니다. ` +
+            '견과·유제품·경구영양보충 음료처럼 부피 대비 열량이 높은 것을 간식으로 더해 보세요.' })
   } else if (kcal > target.kcal[1] * 1.15) {
     notes.push({ tone: 'over', topic: '에너지',
       text: `목표 상단(${target.kcal[1]} kcal)을 넘습니다. 치료 중이라면 문제가 아닐 수 있으나, 체중 관리기라면 조정이 필요합니다.` })
@@ -1869,6 +2058,27 @@ export function dayNotes(
     notes.push({ tone: 'low', topic: '단백질',
       text: `목표(${target.protein[0]}~${target.protein[1]} g)보다 ${Math.round(target.protein[0] - protein)} g 부족합니다. ` +
         '계란·두부·생선·닭가슴살 중 하나를 한 끼에 더하면 대개 채워집니다.' })
+  } else if (protein > target.protein[1] * 1.25) {
+    /*
+     * 넘친 것도 말해야 한다.
+     *
+     * 예전에는 하단만 보고 "충족합니다" 로 끝냈다. 그래서 목표 62~78 g 인 분께
+     * 111 g 을 내놓고도 '적정' 이라고 적었다. 위험해서가 아니라,
+     * 앱이 제 입으로 세운 목표를 스스로 부정하면 나머지 숫자도 믿기 어려워진다.
+     *
+     * 다만 겁을 주지는 않는다 — 암 환자에게 단백질이 조금 넘치는 것은
+     * 모자란 것보다 훨씬 나은 쪽이다. 신장이 걸리는 분만 따로 짚는다.
+     */
+    const perKg = protein / Math.max(1, dosingWeight(patient))
+    const renal = patient.conditions.includes('신기능저하')
+    notes.push({ tone: renal ? 'over' : 'info', topic: '단백질',
+      text: `${Math.round(protein)} g — 목표(${target.protein[0]}~${target.protein[1]} g)보다 많습니다. ` +
+        `체중 1 kg 당 ${perKg.toFixed(1)} g 입니다. ` +
+        (renal
+          ? '신장 기능이 떨어져 있으면 단백질이 많을수록 부담이 됩니다. ' +
+            '치료 중 단백질을 줄이는 것도 위험하므로, 얼마가 맞는지는 채혈 결과를 보고 담당 선생님과 정하셔야 합니다.'
+          : '암 환자에게는 모자란 것보다 나은 쪽이고 2.0 g/kg 까지는 대체로 안전하다고 봅니다. ' +
+            '다만 신장 기능이 떨어져 있다면 이야기가 달라지니, 해당되시면 내 정보에 표시해 주세요.') })
   } else {
     notes.push({ tone: 'good', topic: '단백질',
       text: `${Math.round(protein)} g — 목표(${target.protein[0]} g 이상)를 충족합니다.` })

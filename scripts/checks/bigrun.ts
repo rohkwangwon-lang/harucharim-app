@@ -128,6 +128,44 @@ for (let person = 0; person < PEOPLE; person++) {
       const kc = (s: MealSlot) => menu.meals[s].reduce((n, e) => n + (foodContribution(e.food, e.servings).kcal ?? 0), 0)
       if (kc('아침') > kc('저녁') * 1.1) bad('아침이 저녁보다 무거움', `${ctx} ${Math.round(kc('아침'))} > ${Math.round(kc('저녁'))}`)
     }
+
+    /*
+     * 하루가 어떻게 나뉘었는지 — 순서만이 아니라 크기도 본다.
+     *
+     * 여태 아침과 저녁의 '순서' 만 견주고 있었다. 그래서 아침 128 · 점심 104 ·
+     * 저녁 390 · 간식 976 인 날이 아무 신고 없이 지나갔다. 순서는 맞았기 때문이다.
+     * 간식이 하루의 61 % 를 지고 있었고 아침·점심은 식사라고 부를 수 없었다.
+     * 경장영양·음료가 간식에만 갈 수 있어 거기로 몰린 탓이었다.
+     *
+     * 잦은 소량 식사를 하시는 분에게도 이 기준은 그대로다 —
+     * 넷으로 고르게 나누자는 것이지 간식 하나에 몰자는 것이 아니다.
+     */
+    {
+      const kc = (s: MealSlot) => menu.meals[s].reduce((n, e) => n + (foodContribution(e.food, e.servings).kcal ?? 0), 0)
+      const day = MEAL_SLOTS.reduce((n, s) => n + kc(s), 0)
+      if (day > 400) {
+        if (kc('간식') > day * 0.35)
+          bad('간식이 하루를 지고 있음', `${ctx} 간식 ${Math.round(kc('간식'))} / 하루 ${Math.round(day)}`)
+        for (const s of ['아침', '점심', '저녁'] as MealSlot[]) {
+          if (kc(s) < day * 0.08)
+            bad('한 끼가 식사라고 하기 어려움', `${ctx} ${s} ${Math.round(kc(s))} / 하루 ${Math.round(day)}`)
+        }
+      }
+
+      /*
+       * 단백질은 아래만 보고 있었다. 그래서 목표 62~78 g 인 분께 111 g 을 내놓고도
+       * '적정' 이라고 적었다. 위험해서라기보다, 앱이 제 목표를 스스로 부정하면
+       * 나머지 숫자도 믿기 어려워진다. 신장이 걸리는 분에게는 실제로 위험하다.
+       */
+      const prot = menu.totals.protein ?? 0
+      const hi = menu.target.protein[1]
+      if (patient.conditions.includes('신기능저하') && prot > hi * 1.3)
+        bad('신기능이 떨어진 분께 단백질이 과함', `${ctx} ${Math.round(prot)} g / 목표 ${hi} g`)
+      if (prot > hi * 1.25) {
+        const told = menu.notes.some((n) => n.topic === '단백질' && /보다 많습니다/.test(n.text))
+        if (!told) bad('단백질이 넘쳤는데 말하지 않음', `${ctx} ${Math.round(prot)} g / 목표 ${hi} g`)
+      }
+    }
     for (const s of MEAL_SLOTS) {
       const ids = menu.meals[s].map((e) => e.food.id)
       if (new Set(ids).size !== ids.length) bad('한 끼니에 같은 음식 중복', `${ctx} ${s}`)

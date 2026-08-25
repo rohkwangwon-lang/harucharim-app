@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { displayName, PROVIDER_LABEL, signIn, useSession, type Provider } from '../lib/auth'
 import type { CancerId, Cuisine, PatientCondition, PatientContext, Phase, TreatmentHistory } from '../data/types'
+import { SUBTYPE_OPTIONS } from '../data/types'
 import { CANCERS, CANCER_BY_ID } from '../data/cancers'
 import { nutritionRisk, personalTarget } from '../engine/nutrition'
 
@@ -59,6 +60,11 @@ export function Onboarding({
    */
   const needsLogin = isSupabaseConfigured && !user
   const canNext = step === 0 ? !needsLogin : step === 1 ? !!patient.cancer : true
+
+  /* 넣으신 숫자를 그 자리에서 되비춰 준다 */
+  const risk = nutritionRisk(patient)
+  const cancerTarget = CANCER_BY_ID[patient.cancer].target
+  const preview = personalTarget(patient, cancerTarget.kcalPerKg, cancerTarget.proteinPerKg)
 
   const toggle = <T,>(list: T[], v: T): T[] =>
     list.includes(v) ? list.filter((x) => x !== v) : [...list, v]
@@ -165,6 +171,49 @@ export function Onboarding({
                 </button>
               ))}
             </div>
+
+            {/*
+              * 세부 사항도 여기서 묻는다.
+              *
+              * 내 정보 화면에는 있었는데 처음 설정에는 없었다. 그래서 위암을 고르신 분이
+              * 전절제인지 부분절제인지 묻지 않은 채로 넘어갔다 —
+              * 그게 B12 를 평생 맞으셔야 하는지를 가르는 변수인데도.
+              * 알아서 내 정보에 들어가 고치실 분은 많지 않다.
+              */}
+            {(SUBTYPE_OPTIONS[patient.cancer] ?? []).length > 0 && (
+              <div className="mt-5 rounded-xl bg-white p-3.5 ring-1 ring-stone-200">
+                <p className="text-sm font-bold text-stone-900">아시는 것이 있으면 알려 주세요</p>
+                <p className="mt-1 text-[11px] leading-relaxed text-stone-500">
+                  고르지 않으셔도 됩니다. 알려 주시면 해당되지 않는 안내는 빼 드립니다.
+                </p>
+                <div className="mt-2.5 space-y-1.5">
+                  {(SUBTYPE_OPTIONS[patient.cancer] ?? []).map((o) => {
+                    const on = (patient.subtypes ?? []).includes(o.id)
+                    return (
+                      <button
+                        key={o.id}
+                        onClick={() => {
+                          /* 위 전절제와 부분절제처럼 함께 고를 수 없는 것은 하나만 남긴다 */
+                          const others = (SUBTYPE_OPTIONS[patient.cancer] ?? [])
+                            .map((x) => x.id)
+                            .filter((x) => x !== o.id)
+                          const kept = (patient.subtypes ?? []).filter((x) => !others.includes(x))
+                          onChange({ subtypes: on ? kept.filter((x) => x !== o.id) : [...kept, o.id] })
+                        }}
+                        className={`w-full rounded-lg border px-3 py-2 text-left transition-colors ${
+                          on ? 'border-brand-500 bg-brand-50' : 'border-stone-200 bg-white'
+                        }`}
+                      >
+                        <span className={`block text-sm font-medium ${on ? 'text-brand-800' : 'text-stone-700'}`}>
+                          {o.label}
+                        </span>
+                        <span className="mt-0.5 block text-[11px] leading-relaxed text-stone-500">{o.hint}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </Step>
         )}
 
@@ -250,6 +299,43 @@ export function Onboarding({
                   없으면 0. 예: 60 kg 에서 57 kg 이 되었다면 5 %
                 </p>
               </div>
+            </div>
+
+            {/*
+              * 넣으신 숫자가 무슨 뜻인지 그 자리에서 보여 준다.
+              *
+              * 예전에는 체중·신장·감소율을 받아 놓고 화면이 아무 반응도 하지 않았다.
+              * 52 kg · 163 cm · 8 % 를 넣어도 BMI 도, 목표도, 위험 신호도 없이
+              * '다음' 만 있었다. 마지막 화면에 가서야 요약이 나왔는데,
+              * 그때는 이미 되돌아가 고치기 번거로운 자리다.
+              * 무엇보다 잘못 넣은 숫자(163 을 16 으로)를 알아챌 방법이 없었다.
+              */}
+            <div className="mt-4 rounded-xl bg-white p-3.5 ring-1 ring-stone-200">
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="text-xs font-semibold text-stone-500">지금 값으로 보면</span>
+                <span className="text-sm font-bold tabular-nums text-stone-900">
+                  BMI {risk.bmi} · {risk.bmiLabel}
+                </span>
+              </div>
+              <div className="mt-2 grid grid-cols-2 gap-2 text-[11px]">
+                <div className="rounded-lg bg-stone-50 px-2.5 py-2">
+                  <div className="text-stone-500">하루 열량</div>
+                  <div className="mt-0.5 text-sm font-bold tabular-nums text-stone-900">
+                    {preview.kcal[0].toLocaleString()}~{preview.kcal[1].toLocaleString()} kcal
+                  </div>
+                </div>
+                <div className="rounded-lg bg-stone-50 px-2.5 py-2">
+                  <div className="text-stone-500">하루 단백질</div>
+                  <div className="mt-0.5 text-sm font-bold tabular-nums text-stone-900">
+                    {preview.protein[0]}~{preview.protein[1]} g
+                  </div>
+                </div>
+              </div>
+              {(patient.weightLossPct ?? 0) >= 5 && (
+                <p className="mt-2 rounded-lg bg-warn-50 px-2.5 py-2 text-[11px] leading-relaxed text-warn-800">
+                  6개월간 5 % 이상 줄었습니다. 영양 개입 기준에 해당하며, 이 시점부터 손대는 것이 효과가 좋습니다.
+                </p>
+              )}
             </div>
 
             <div className="mt-5">

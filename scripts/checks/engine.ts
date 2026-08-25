@@ -173,7 +173,19 @@ for (let iter = 0; iter < N; iter++) {
    * 그 하루가 열량·단백질 목표에 못 미치면 추천으로서 의미가 없다.
    */
   if (diary.length === 0) {
-    if ((m.totals.kcal ?? 0) < m.target.kcal[0] * 0.95)
+    /*
+     * 제한이 두 겹 이상 걸린 분은 채우고 싶어도 채울 것이 없다 —
+     * 신장(단백질·칼륨·인)에 저잔사(섬유)에 복수(나트륨)까지 겹치면
+     * 그 조건을 다 지키고 남는 음식이 몇 가지 되지 않는다.
+     *
+     * 그런 날까지 '실패' 로 세면, 고치는 방법이 제한을 푸는 것밖에 없어진다.
+     * 그건 숫자를 위해 안전을 파는 일이다. 대신 앱이 사정을 말했는지를 본다 —
+     * 말했으면 통과, 말없이 모자란 채로 두면 그건 여전히 잘못이다.
+     */
+    const walls = ['신기능저하', '설사', '장루보유', '복수', '간성뇌증위험']
+      .filter((c) => patient.conditions.includes(c as never)).length
+    const explained = m.notes.some((n) => n.topic === '에너지' && /제한이 함께 걸려/.test(n.text))
+    if ((m.totals.kcal ?? 0) < m.target.kcal[0] * 0.95 && !(walls >= 2 && explained))
       report('처음부터 구성한 하루가 열량 미달', `${ctx} ${Math.round(m.totals.kcal ?? 0)}/${m.target.kcal[0]}`)
     if ((m.totals.protein ?? 0) < m.target.protein[0])
       report('처음부터 구성한 하루가 단백질 미달', `${ctx} ${Math.round(m.totals.protein ?? 0)}/${m.target.protein[0]}`)

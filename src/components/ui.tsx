@@ -214,7 +214,16 @@ export function nutrientState(
    * 88 g 을 '주의'로 칠하면 잘 드신 날에 경고를 보게 된다.
    * 다만 신장 기능이 떨어진 분에게는 반대이므로, 그때는 이 예외를 끈다.
    */
-  if (opts?.overOk) return 'ok'
+  /*
+   * 넘어도 괜찮다는 것과 얼마가 됐든 괜찮다는 것은 다르다.
+   *
+   * 예전에는 overOk 면 무조건 '적정' 으로 칠했다. 그래서 목표 62~78 g 인 분께
+   * 92 g 을 내놓고도 초록으로 표시했는데, 같은 화면 아래 평가는
+   * "목표보다 많습니다" 라고 적혀 있었다. 앱이 제 말과 어긋난 셈이다.
+   * 겁을 줄 일은 아니니 빨강까지 가지 않고, 아래 평가와 같은 눈금에서
+   * 노랑으로만 바꾼다.
+   */
+  if (opts?.overOk) return value > max * 1.25 ? 'high' : 'ok'
   if (value > max * 1.15) return 'over'
   if (value > max) return 'high'
   return 'ok'
