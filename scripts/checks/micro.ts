@@ -17,7 +17,7 @@ import { buildDayMenu, dayNotes, microUnknownNames } from '../../src/engine/menu
 import { adviseSupplements } from '../../src/engine/supplementAdvice'
 import { activeInteractions, activeRules, evaluateFood, evaluateSupplement } from '../../src/engine/rules'
 import { ingredientKeywords, judgeProduct } from '../../src/engine/ingredientVerdict'
-import { CURATED_FOODS } from '../../src/data/foods'
+import { CURATED_FOODS, mealIsComplete, mealRole } from '../../src/data/foods'
 import { REF_BY_ID } from '../../src/data/references'
 import { DEFAULT_PATIENT } from '../../src/lib/store'
 import type { CancerId, CancerSubtype, PatientCondition, PatientContext, Phase } from '../../src/data/types'
@@ -455,6 +455,51 @@ for (let i = 0; i < N; i++) {
     bad('반찬이 상에 잘 오르지 않음', `${banchan.hit}/${banchan.days}일`)
 
   console.log(`  상차림 20일 · 밥 ${rice.hit}일 · 죽 ${porridge.hit}일 · 반찬 ${banchan.hit}일`)
+
+  /*
+   * 한 상이 한 상다운가.
+   *
+   * 영양만 맞추다 보니 억지스러운 조합이 나왔다 —
+   * 아침에 흑미밥 한 공기만, 저녁에 찹쌀밥과 복숭아 두 가지.
+   * 열량도 단백질도 맞았지만 그건 밥상이 아니다.
+   *
+   * 한국 상차림은 밥·국·반찬이 한 벌이다. 밥은 혼자 서지 못하고,
+   * 과일은 아무리 놓아도 반찬 자리를 대신하지 못하며, 한 끼에 밥은 하나다.
+   * 죽이나 국수 한 그릇은 그것만으로 한 끼이므로 여기서 따지지 않는다.
+   */
+  {
+    const CANCER_LIST: CancerId[] = ['breast', 'stomach', 'colorectal', 'lung', 'pancreas', 'liver']
+    let meals = 0
+    let broken = 0
+    let twoStaples = 0
+    for (let i = 0; i < 180; i++) {
+      const who = {
+        ...DEFAULT_PATIENT,
+        cancer: CANCER_LIST[i % CANCER_LIST.length],
+        phase: (['during_rt', 'during_chemo', 'post_op', 'survivorship'] as Phase[])[i % 4],
+        sex: i % 2 ? 'M' : 'F', age: 55,
+        weightKg: 45 + ((i * 7) % 50), heightCm: 165,
+        weightLossPct: 0, conditions: [], medications: [], subtypes: []
+      } as PatientContext
+      const m = buildDayMenu([], who, { dayKey: `2026-${String(1 + (i % 12)).padStart(2, '0')}-${String(1 + (i % 27)).padStart(2, '0')}` })
+      for (const slot of ['아침', '점심', '저녁'] as const) {
+        const items = m.meals[slot]
+        if (items.length === 0) continue
+        meals++
+        if (!mealIsComplete(items.map((e) => e.food))) broken++
+        const staples = items.filter((e) => {
+          const r = mealRole(e.food)
+          return r === 'staple' || r === 'onedish'
+        }).length
+        if (staples >= 2) twoStaples++
+      }
+    }
+    if (broken > meals * 0.03)
+      bad('한 끼로 보기 어려운 상이 잦음', `${broken}/${meals} — 밥만 놓였거나 후식뿐인 끼니`)
+    if (twoStaples > 0)
+      bad('한 끼에 주식이 둘 이상', `${twoStaples}/${meals}`)
+    console.log(`  한 상 ${meals}건 · 짜임새 어긋남 ${broken}건 · 주식 중복 ${twoStaples}건`)
+  }
 }
 
 /* ── 곁들여 든 것으로 제품을 권하지 않는가 ───────────────── */

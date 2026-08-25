@@ -110,3 +110,72 @@ export function isIngredientOnly(f: Food): boolean {
   if (/^(생크림|탈지분유)$/.test(f.name)) return true
   return false
 }
+
+/* ────────────────── 상에서 맡는 자리 ────────────────── */
+
+/**
+ * 한 상에서 이것이 맡는 자리.
+ *
+ * 이 앱은 여태 영양소만 맞추고 상차림은 보지 않았다. 그래서 아침에 흑미밥 한 공기만
+ * 올라가거나, 저녁이 찹쌀밥과 복숭아 두 가지로 끝나는 일이 생겼다.
+ * 열량과 단백질은 맞았지만 그건 밥상이 아니다.
+ *
+ * 한국 상차림은 밥·국·반찬이 한 벌이다. 밥은 혼자 서지 못하고 반드시 무언가와
+ * 함께 오르며, 과일은 후식이지 반찬이 아니다.
+ * 그 관계를 알려면 음식마다 '어느 자리에 놓이는가' 를 알아야 한다.
+ *
+ *  · staple  주식 — 밥·면. 혼자서는 한 끼가 되지 않는다
+ *  · onedish  한 그릇 — 죽·국수·비빔밥처럼 그것만으로 한 끼가 되는 것
+ *  · soup    국·탕·찌개
+ *  · main    주찬 — 고기·생선·두부·달걀
+ *  · side    부찬 — 나물·김치·해조·버섯
+ *  · dessert 후식 — 과일·유제품·견과·음료. 끼니를 이루는 자리가 아니다
+ *  · supp    보충 — 경장영양·단백질분말
+ */
+export type MealRole = 'staple' | 'onedish' | 'soup' | 'main' | 'side' | 'dessert' | 'supp'
+
+const ONE_DISH = /죽$|미음|국수|냉면|비빔밥|덮밥|볶음밥|김밥|우동|라면|파스타|리소토|쌈밥|카레|짜장|짬뽕|초밥|백반|정식/
+
+export function mealRole(f: Food): MealRole {
+  switch (f.group) {
+    case '경장영양·환자식':
+      return 'supp'
+    case '국·탕·찌개':
+      return 'soup'
+    case '육류': case '가금류·난류': case '어패류':
+      return 'main'
+    case '두류·대두가공':
+      /* 두유·두유라떼는 마시는 것이라 반찬이 아니다 — 두부·콩자반은 주찬이다 */
+      return /두유|음료|라떼/.test(f.name) ? 'dessert' : 'main'
+    case '채소': case '해조·버섯': case '반찬·조림·볶음':
+      return 'side'
+    case '과일': case '우유·유제품': case '견과·종실': case '음료': case '간식·디저트':
+      return 'dessert'
+    case '밥·면·죽 요리': case '외식·프랜차이즈':
+      /* 죽 한 그릇, 국수 한 그릇은 그것만으로 한 끼다 */
+      return ONE_DISH.test(f.name) ? 'onedish' : 'staple'
+    case '곡류·전분':
+      /* 밥은 주식, 감자·고구마·빵은 곁들이로 본다 */
+      return /밥/.test(f.name) ? 'staple' : ONE_DISH.test(f.name) ? 'onedish' : 'side'
+    default:
+      return 'side'
+  }
+}
+
+/**
+ * 이만하면 한 끼로 볼 수 있는가.
+ *
+ * 밥만 있으면 아니다. 밥에 국이든 반찬이든 하나는 붙어야 상이 된다.
+ * 죽이나 국수 한 그릇은 그것만으로 한 끼다 — 죽상에 반찬을 요구할 일은 아니다.
+ * 과일은 몇 가지가 오르든 끼니를 이루지 못한다. 후식이기 때문이다.
+ */
+export function mealIsComplete(foods: Food[]): boolean {
+  if (foods.length === 0) return true // 비어 있는 끼니는 여기서 따질 일이 아니다
+  const roles = foods.map(mealRole)
+  if (roles.includes('onedish')) return true
+  const hasStaple = roles.includes('staple')
+  const hasDish = roles.some((r) => r === 'soup' || r === 'main' || r === 'side')
+  if (hasStaple) return hasDish
+  /* 밥이 없어도 반찬과 주찬이 있으면 한 끼로 본다 — 빵과 달걀, 두부와 나물처럼 */
+  return hasDish
+}
