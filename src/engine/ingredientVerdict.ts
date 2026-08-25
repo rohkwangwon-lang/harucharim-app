@@ -1,5 +1,5 @@
 import type { EvidenceLevel, PatientContext, RuleLevel } from '../data/types'
-import { findIngredients, INGREDIENT_RULES, type IngredientRule } from '../data/ingredientRules'
+import { findIngredients, findPrimaryIngredients, INGREDIENT_RULES, type IngredientRule } from '../data/ingredientRules'
 
 /**
  * 시판 건강기능식품 판정.
@@ -11,6 +11,15 @@ import { findIngredients, INGREDIENT_RULES, type IngredientRule } from '../data/
 
 export interface IngredientVerdict {
   ingredient: string
+  /**
+   * 이 제품이 '무엇을 위한' 것인지 — 제품 이름에 드러난 주성분인가.
+   *
+   * 함량이 공개 자료에 없으니 이름으로 가른다. '칼슘 마그네슘 비타민D' 는
+   * 칼슘을 사는 것이고, '100억 유산균 아연&비타민D' 는 유산균을 사는 것이다.
+   * 둘 다 비타민 D 를 기능성 원료로 신고했지만, 비타민 D 를 채우러
+   * 유산균을 사시라고 할 수는 없다.
+   */
+  primary: boolean
   level: RuleLevel
   reason: string
   evidence: EvidenceLevel
@@ -52,12 +61,19 @@ function judge(rule: IngredientRule, patient: PatientContext): IngredientVerdict
     if (r) apply(r, `${m} 복용 중`)
   }
 
-  return { ingredient: rule.name, level, reason, evidence: rule.evidence, refIds: rule.refIds, because }
+  return { ingredient: rule.name, level, reason, evidence: rule.evidence, refIds: rule.refIds, because, primary: false }
 }
 
 export interface ProductVerdict {
   /** 가장 강한 판정 */
   level: RuleLevel | null
+  /**
+   * 주성분만 놓고 본 판정.
+   *
+   * "나에게 권장되는 것만" 을 고를 때 쓴다. 곁들여 든 것까지 세면
+   * 유산균 한 통이 칼슘 권장 목록에 오른다.
+   */
+  primaryLevel: RuleLevel | null
   /** 원료별 판정 */
   items: IngredientVerdict[]
   /** 원료를 하나도 알아보지 못한 경우 */
@@ -71,9 +87,11 @@ export function judgeProduct(
   patient: PatientContext
 ): ProductVerdict {
   const rules = findIngredients(`${name} ${functionText}`)
-  if (rules.length === 0) return { level: null, items: [], unknown: true }
+  if (rules.length === 0) return { level: null, primaryLevel: null, items: [], unknown: true }
 
-  const items = rules.map((r) => judge(r, patient))
+  /* 제품 이름에 드러난 것이 주성분이다 */
+  const primary = new Set(findPrimaryIngredients(name, functionText).map((r) => r.name))
+  const items = rules.map((r) => ({ ...judge(r, patient), primary: primary.has(r.name) }))
   const level = items.reduce<RuleLevel>(
     (acc, v) => (RANK[v.level] > RANK[acc] ? v.level : acc),
     'info'
@@ -86,7 +104,12 @@ export function judgeProduct(
   }
   const uniq = [...byName.values()].sort((a, b) => RANK[b.level] - RANK[a.level])
 
-  return { level, items: uniq, unknown: false }
+  const prim = uniq.filter((v) => v.primary)
+  const primaryLevel = prim.length === 0
+    ? null
+    : prim.reduce<RuleLevel>((acc, v) => (RANK[v.level] > RANK[acc] ? v.level : acc), 'info')
+
+  return { level, primaryLevel, items: uniq, unknown: false }
 }
 
 /* ────────────────── 원료를 먼저 보고 제품을 찾는다 ────────────────── */

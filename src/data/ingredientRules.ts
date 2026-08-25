@@ -478,8 +478,86 @@ export const INGREDIENT_RULES: IngredientRule[] = [
   }
 ]
 
+/*
+ * 기능성 '설명문' 에는 원료 이름이 아닌 낱말이 그대로 들어 있다.
+ *
+ * 식약처 표시 문구는 정해져 있다 — 비타민 D 는 "칼슘과 인이 흡수되고 이용되는데 필요",
+ * 비타민 B6 는 "단백질 및 아미노산 이용에 필요", 비타민 C 는 "철의 흡수에 필요".
+ * 그래서 낱말만 훑으면 비타민 D 제품이 칼슘 제품이 되고, B6 제품이 단백질 보충제가 된다.
+ * 실제로 유산균 제품이 "칼슘과 인이 흡수되고…" 한 줄 때문에 칼슘 권장 목록에 올랐고,
+ * 마그네슘+B6 제품이 단백질 보충으로 잡혔다. 4만 5천 종 중 5,317종이 이 경우다.
+ *
+ * 원료를 찾기 전에 이 문구들을 먼저 걷어낸다. 걷어내고도 남는 '칼슘' 은 진짜 칼슘이다.
+ */
+const CLAIM_PHRASES = [
+  '칼슘과인이흡수되고이용되는데필요',
+  '단백질및아미노산이용에필요',
+  '지방,탄수화물,단백질대사와에너지생성에필요',
+  '지방탄수화물단백질대사와에너지생성에필요',
+  '단백질대사와에너지생성에필요',
+  '철의흡수에필요',
+  '철의운반과이용에필요',
+  '탄수화물과에너지대사에필요',
+  '체내에서단백질과아미노산이용에필요'
+]
+
+function stripClaims(t: string): string {
+  let out = t
+  for (const p of CLAIM_PHRASES) out = out.split(p).join(' ')
+  return out
+}
+
 /** 제품 이름과 기능성 문구에서 해당하는 원료를 찾는다 */
 export function findIngredients(text: string): IngredientRule[] {
-  const t = text.replace(/\s+/g, '')
+  const t = stripClaims(text.replace(/\s+/g, ''))
   return INGREDIENT_RULES.filter((r) => r.match.some((m) => t.includes(m.replace(/\s+/g, ''))))
+}
+
+/**
+ * 이 제품이 '무엇을 위한' 것인지 — 주된 성분을 가려낸다.
+ *
+ * 함량이 공개 자료에 없으니 대신 쓸 것이 필요했다.
+ *
+ * 먼저 제품 이름을 본다. 사람도 그렇게 읽는다 —
+ * '칼슘 마그네슘 비타민D' 는 칼슘을 사는 것이고,
+ * '100억 유산균 아연&비타민D' 는 유산균을 사는 것이다.
+ * 둘 다 비타민 D 를 기능성 원료로 신고했지만, 비타민 D 를 채우러
+ * 유산균을 사시라고 할 수는 없다.
+ *
+ * 다만 이름만 보면 너무 좁다. '(구)본포뮬러젤리' 처럼 이름에 원료가
+ * 전혀 드러나지 않는 제품이 많은데, 그 제품의 기능성 표시에는
+ * "[칼슘] 뼈와 치아 형성에 필요" 라고 또렷이 적혀 있다.
+ * 대괄호 안의 이름은 신고된 기능성 원료이지 설명문이 아니다.
+ * 그래서 이름에서 아무것도 찾지 못했을 때만 그쪽을 본다.
+ */
+export function findPrimaryIngredients(name: string, functionText = ''): IngredientRule[] {
+  /*
+   * 이름에 여러 원료가 적혀 있으면 가장 먼저 나오는 것이 그 제품의 성격이다.
+   *
+   * '100억 유산균 아연&비타민D' 는 유산균을 사는 것이고
+   * '칼슘 마그네슘 비타민D' 는 칼슘을 사는 것이다.
+   * 뒤에 붙은 것은 곁들임이지 그것을 사러 가는 이유가 아니다.
+   * 한국 제품명은 대체로 이 순서를 지킨다.
+   */
+  const t = stripClaims(name.replace(/\s+/g, ''))
+  const at = (r: IngredientRule) => {
+    let best = -1
+    for (const m of r.match) {
+      const i = t.indexOf(m.replace(/\s+/g, ''))
+      if (i >= 0 && (best < 0 || i < best)) best = i
+    }
+    return best
+  }
+  const hits = INGREDIENT_RULES.map((r) => ({ r, i: at(r) })).filter((x) => x.i >= 0)
+  if (hits.length > 0) {
+    const first = Math.min(...hits.map((x) => x.i))
+    return hits.filter((x) => x.i === first).map((x) => x.r)
+  }
+
+  /* 대괄호·소괄호로 표기된 기능성 원료명만 모은다 */
+  const declared = (functionText.match(/[[(][^\])]{1,40}[\])]/g) ?? [])
+    .join(' ')
+    .replace(/\s+/g, '')
+  if (declared.length === 0) return []
+  return INGREDIENT_RULES.filter((r) => r.match.some((m) => declared.includes(m.replace(/\s+/g, ''))))
 }

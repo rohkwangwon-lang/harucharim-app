@@ -80,8 +80,22 @@ export function Supplements({
         scanSupplements(kw, 400)
           .then((rows) => {
             const kept = rows.filter((r) => {
-              const v = judgeProduct(r.name, r.fn, patient).level
-              return pick === 'good' ? v === 'prefer' : v === 'caution' || v === 'avoid'
+              const v = judgeProduct(r.name, r.fn, patient)
+              /*
+               * 권할 때와 말릴 때의 잣대를 다르게 둔다.
+               *
+               * 권하는 쪽은 '이 제품이 무엇을 위한 것인가' 로 본다.
+               * 유산균 한 통에 비타민 D 가 곁들여 들었다고 해서
+               * 비타민 D 를 채우러 그것을 사시라고 할 수는 없다.
+               * 함량이 공개 자료에 없으니 제품 이름에 드러난 주성분으로 가른다.
+               *
+               * 말리는 쪽은 반대로 곁들여 든 것까지 본다.
+               * 치료 중 피해야 할 것이 조금이라도 들어 있으면 알려 드리는 편이 안전하다.
+               * 놓쳐서 생기는 손해가 한쪽은 헛걸음이고 다른 쪽은 해가 되는 일이다.
+               */
+              return pick === 'good'
+                ? v.primaryLevel === 'prefer'
+                : v.level === 'caution' || v.level === 'avoid'
             })
             setMarket(kept.slice(0, 60))
           })
@@ -188,8 +202,9 @@ export function Supplements({
               )}
             </p>
             <p className="mt-1 text-[11px] leading-relaxed text-stone-400">
-              제품에 표시된 이름과 기능성으로 고른 것입니다. 같은 원료라도 함량에 따라 판단이 달라질 수 있으니,
-              드시기 전에 성분표를 확인하고 담당 선생님과 상의하세요.
+              {pick === 'good'
+                ? '그 원료가 제품의 주된 성분인 것만 골랐습니다 — 유산균에 비타민 D 가 곁들여 들었다고 비타민 D 를 채우러 사실 일은 아니니까요. 공개 자료에 함량이 없어 제품 이름과 표시된 기능성으로 판단했으니, 드시기 전에 성분표를 확인하고 담당 선생님과 상의하세요.'
+                : '곁들여 든 것까지 넓게 보았습니다 — 피해야 할 것은 조금이라도 알려 드리는 편이 안전하기 때문입니다. 제품 이름과 표시된 기능성으로 판단한 것이니 성분표를 함께 확인하세요.'}
             </p>
           </div>
         )}

@@ -399,6 +399,72 @@ for (let i = 0; i < N; i++) {
   }
 }
 
+/* ── 곁들여 든 것으로 제품을 권하지 않는가 ───────────────── */
+
+/*
+ * "칼슘이 필요하시다" 고 유산균 한 통을 권할 수는 없다.
+ *
+ * 공개 자료에는 함량이 없다. 그래서 두 가지로 갈랐다.
+ *  1) 기능성 '설명문' 의 낱말을 원료로 오인하지 않는다.
+ *     비타민 D 의 표시 문구가 "칼슘과 인이 흡수되고 이용되는데 필요" 이고
+ *     비타민 B6 는 "단백질 및 아미노산 이용에 필요" 라서,
+ *     낱말만 훑으면 비타민 D 제품이 칼슘 제품이 되고 B6 제품이 단백질 보충제가 됐다.
+ *  2) 권할 때는 그 원료가 이 제품의 주된 성분일 때만 권한다.
+ *     말릴 때는 반대로 곁들여 든 것까지 본다 — 놓쳐서 생기는 손해가
+ *     한쪽은 헛걸음이고 다른 쪽은 해가 되는 일이기 때문이다.
+ */
+{
+  const p = {
+    ...DEFAULT_PATIENT, cancer: 'breast', phase: 'survivorship',
+    conditions: [], medications: ['ai'], subtypes: ['호르몬수용체양성']
+  } as PatientContext
+
+  /* 설명문을 원료로 읽으면 안 된다 */
+  const CLAIM_ONLY: [string, string, string][] = [
+    ['비타민 D 설명문의 칼슘', '비타민D 1000IU', '칼슘과 인이 흡수되고 이용되는데 필요'],
+    ['비타민 B6 설명문의 단백질', '뉴 마그네슘350+B6', '[비타민B6] 단백질 및 아미노산 이용에 필요'],
+    ['비타민 C 설명문의 철', '비타민C 1000', '결합조직 형성과 기능유지에 필요 철의 흡수에 필요']
+  ]
+  for (const [label, name, fn] of CLAIM_ONLY) {
+    const v = judgeProduct(name, fn, p)
+    const names = v.items.map((x) => x.ingredient)
+    if (names.includes('칼슘') && !/칼슘/.test(name))
+      bad('설명문을 원료로 잘못 읽음', `${label} — 칼슘으로 잡힘`)
+    if (names.includes('단백질 보충') && !/단백질|프로틴/.test(name))
+      bad('설명문을 원료로 잘못 읽음', `${label} — 단백질 보충으로 잡힘`)
+    if (names.includes('철분') && !/철/.test(name))
+      bad('설명문을 원료로 잘못 읽음', `${label} — 철분으로 잡힘`)
+  }
+
+  /* 곁들여 든 것으로 권하지 않는다 */
+  const SIDE: [string, string][] = [
+    ['100억 유산균 아연&비타민D', '[프로바이오틱스] 유산균 증식 및 유해균 억제 [아연] 정상적인 면역기능에 필요 [비타민D] 뼈의 형성과 유지에 필요'],
+    ['100억 생 유산균 프리미엄', '* 비타민D 뼈의 형성과 유지에 필요 * 프로바이오틱스 유산균 증식']
+  ]
+  for (const [name, fn] of SIDE) {
+    const v = judgeProduct(name, fn, p)
+    if (v.primaryLevel === 'prefer')
+      bad('곁들여 든 원료로 제품을 권함', `${name}`)
+  }
+
+  /* 반대로, 이름에 안 드러나도 신고된 기능성 원료면 권해야 한다 */
+  const REAL: [string, string][] = [
+    ['(구)본포뮬러젤리', '[칼슘] 뼈와 치아 형성에 필요 골다공증발생 위험 감소에 도움을 줌'],
+    ['아스타·오메가', '[EPA 및 DHA 함유 유지] 혈중 중성지질 개선, 혈행 개선']
+  ]
+  for (const [name, fn] of REAL) {
+    const v = judgeProduct(name, fn, p)
+    if (v.primaryLevel !== 'prefer')
+      bad('신고된 기능성 원료인데 권하지 않음', `${name} → ${v.primaryLevel}`)
+  }
+
+  /* 말리는 쪽은 곁들여 든 것도 잡아야 한다 */
+  const rt = { ...p, phase: 'during_rt' } as PatientContext
+  const mixed = judgeProduct('오메가3 골드', '[EPA 및 DHA 함유 유지] 혈행 개선 [비타민E] 유해산소로부터 세포를 보호', rt)
+  if (mixed.level !== 'avoid' && mixed.level !== 'caution')
+    bad('치료 중 피해야 할 것이 곁들여 들었는데 놓침', `오메가3+비타민E → ${mixed.level}`)
+}
+
 /* ── '다시 구성' 이 실제로 다시 구성하는가 ───────────────── */
 
 /*
