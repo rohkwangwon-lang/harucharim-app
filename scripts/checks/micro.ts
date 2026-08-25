@@ -16,6 +16,7 @@ import { microTargets, foodContribution, nutritionRisk } from '../../src/engine/
 import { buildDayMenu, dayNotes, microUnknownNames } from '../../src/engine/menu'
 import { adviseSupplements } from '../../src/engine/supplementAdvice'
 import { evaluateSupplement } from '../../src/engine/rules'
+import { ingredientKeywords, judgeProduct } from '../../src/engine/ingredientVerdict'
 import { CURATED_FOODS } from '../../src/data/foods'
 import { REF_BY_ID } from '../../src/data/references'
 import { DEFAULT_PATIENT } from '../../src/lib/store'
@@ -234,6 +235,92 @@ for (let i = 0; i < N; i++) {
         bad('해당 없는 분께 결핍 권고가 뜸', `${p.cancer}/${p.phase} — ${a.title}`)
     }
   }
+}
+
+/* ── 판정으로 영양제를 걸러 보기 ───────────────────── */
+
+/*
+ * 시판 제품 4만 5천 종에서 "나한테 괜찮은 것" 과 "피해야 할 것" 만 골라 보는 기능.
+ *
+ * 제품을 하나씩 판정해 거르지 않고, 원료를 먼저 판정한 뒤 그 원료가 든 제품을 찾는다.
+ * 원료는 서른 몇 가지뿐이라 빠르기도 하고, 무엇보다 왜 나왔는지 말할 수 있다.
+ *
+ * 여기서 지켜야 할 것은 하나다 — 같은 원료가 권장 목록과 금기 목록에 동시에
+ * 오르면 안 된다. 그러면 앱이 같은 화면에서 반대되는 말을 하게 된다.
+ */
+{
+  let checked = 0
+  for (let i = 0; i < 1500; i++) {
+    const p = randomPatient()
+    /*
+     * 이름을 good/bad 로 두었더니 bad 가 위에서 만든 신고 함수 bad() 를 가려 버렸다.
+     * 그래서 이 블록은 문제를 찾아도 신고하지 못하고 그 자리에서 죽었다 —
+     * 검사가 통과했다는 것이 문제가 없다는 뜻이 아니었다.
+     */
+    const ok = ingredientKeywords(p, ['prefer'])
+    const no = ingredientKeywords(p, ['caution', 'avoid'])
+    checked++
+
+    const overlap = ok.names.filter((n) => no.names.includes(n))
+    if (overlap.length > 0)
+      bad('같은 원료가 권장과 금기에 동시에 오름', `${p.cancer}/${p.phase} — ${overlap.join('·')}`)
+
+    /* 검색어가 비면 아무것도 못 찾는다 — 이름만 있고 낱말이 없으면 화면이 빈다 */
+    if (ok.names.length > 0 && ok.keywords.length === 0)
+      bad('권장 원료에 검색 낱말이 없음', ok.names.join('·'))
+    if (no.names.length > 0 && no.keywords.length === 0)
+      bad('금기 원료에 검색 낱말이 없음', no.names.join('·'))
+
+    /*
+     * 원료 판정과 제품 판정이 어긋나면 안 된다.
+     * 권장 원료 이름 그대로인 제품을 판정해 보면 '권장' 이 나와야 한다.
+     */
+    if (i % 50 === 0) {
+      for (const name of ok.names.slice(0, 3)) {
+        const v = judgeProduct(name, '', p)
+        if (v.unknown) { bad('권장 원료인데 제품에서 못 알아봄', name); continue }
+        if (v.level === 'avoid' || v.level === 'caution')
+          bad('원료는 권장인데 제품 판정은 반대', `${name} → ${v.level} (${p.cancer}/${p.phase})`)
+      }
+      for (const name of no.names.slice(0, 3)) {
+        const v = judgeProduct(name, '', p)
+        if (v.unknown) { bad('금기 원료인데 제품에서 못 알아봄', name); continue }
+        if (v.level === 'prefer')
+          bad('원료는 금기인데 제품 판정은 권장', `${name} → ${v.level} (${p.cancer}/${p.phase})`)
+      }
+    }
+  }
+
+  /*
+   * 한 제품에 원료가 여럿 들어 있는 것이 오히려 흔하다.
+   *
+   * 낱말만 보고 고르면 '오메가3 + 비타민 E' 제품이 오메가3 때문에 권장 목록에 오른다.
+   * 그런데 치료 중이라면 그 제품의 판정은 비타민 E 때문에 '피하세요' 다.
+   * "권장되는 것만" 이라고 써 놓고 피해야 할 것을 보여 주게 된다.
+   * 실제로 화면에 그렇게 떠 있었다. 화면은 마지막 판정으로 한 번 더 거르고 있으니,
+   * 그 판정이 정말 강한 쪽을 따르는지 여기서 못 박아 둔다.
+   */
+  for (let i = 0; i < 400; i++) {
+    const p = randomPatient()
+    /* 이름을 bad 로 두면 위에서 만든 신고 함수 bad() 를 가려 버린다 */
+    const okNames = ingredientKeywords(p, ['prefer']).names
+    const noNames = ingredientKeywords(p, ['caution', 'avoid']).names
+    if (okNames.length === 0 || noNames.length === 0) continue
+    const mixed = judgeProduct(`${okNames[0]} ${noNames[0]}`, '', p)
+    if (mixed.level === 'prefer')
+      bad('좋은 원료와 나쁜 원료가 섞였는데 권장으로 나옴', `${okNames[0]} + ${noNames[0]} (${p.cancer}/${p.phase})`)
+    if (mixed.unknown)
+      bad('원료 이름을 그대로 붙였는데 못 알아봄', `${okNames[0]} + ${noNames[0]}`)
+  }
+
+  /* 아무에게도 권장이 하나도 없으면 기능이 빈 껍데기가 된다 */
+  const plain = { ...DEFAULT_PATIENT, conditions: [], medications: [], subtypes: [] } as PatientContext
+  if (ingredientKeywords(plain, ['prefer']).names.length === 0)
+    bad('권장으로 나오는 원료가 하나도 없음', '기능이 빈 채로 뜬다')
+  if (ingredientKeywords(plain, ['caution', 'avoid']).names.length === 0)
+    bad('주의·금기로 나오는 원료가 하나도 없음', '기능이 빈 채로 뜬다')
+
+  console.log(`  원료 걸러 보기 ${checked.toLocaleString()}명 확인`)
 }
 
 /* ── 값이 있어야 셀 수 있다 ───────────────────────── */

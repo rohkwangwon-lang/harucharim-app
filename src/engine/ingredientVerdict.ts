@@ -1,5 +1,5 @@
 import type { EvidenceLevel, PatientContext, RuleLevel } from '../data/types'
-import { findIngredients, type IngredientRule } from '../data/ingredientRules'
+import { findIngredients, INGREDIENT_RULES, type IngredientRule } from '../data/ingredientRules'
 
 /**
  * 시판 건강기능식품 판정.
@@ -87,4 +87,30 @@ export function judgeProduct(
   const uniq = [...byName.values()].sort((a, b) => RANK[b.level] - RANK[a.level])
 
   return { level, items: uniq, unknown: false }
+}
+
+/* ────────────────── 원료를 먼저 보고 제품을 찾는다 ────────────────── */
+
+/**
+ * 어떤 판정에 해당하는 원료들의 검색어를 모은다.
+ *
+ * 제품이 4만 5천 종이라 하나씩 판정해 걸러 내려면 매번 전부를 훑어야 한다.
+ * 그런데 판정을 가르는 것은 제품이 아니라 그 안에 든 원료이고, 원료는 서른 몇 가지뿐이다.
+ * 그러니 원료를 먼저 판정하고, 그 원료가 든 제품을 찾는 편이 빠르기도 하고
+ * 무엇보다 사용자에게 이유를 보여 줄 수 있다 —
+ * "왜 이 제품이 나왔나" 가 아니라 "이 원료가 권장이라서" 라고 말할 수 있다.
+ *
+ * 제품명과 기능성 문구에서 이 낱말이 보이면 그 원료가 든 것으로 본다 —
+ * findIngredients 가 쓰는 것과 같은 방식이라 결과가 어긋나지 않는다.
+ */
+export function ingredientKeywords(
+  patient: PatientContext,
+  levels: RuleLevel[]
+): { keywords: string[]; names: string[] } {
+  const want = new Set(levels)
+  const hit = INGREDIENT_RULES.filter((r) => want.has(judge(r, patient).level))
+  return {
+    keywords: hit.flatMap((r) => r.match.map((m) => m.replace(/\s+/g, ''))),
+    names: hit.map((r) => r.name)
+  }
 }

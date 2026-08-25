@@ -432,3 +432,44 @@ export async function lookupBarcode(code: string): Promise<BarcodeHit | null> {
   }
   return { barcode: code, productName: rec.p, reportNo: rec.n, food, stale: rec.old === 1 }
 }
+
+/**
+ * 제품을 낱말로 훑는다.
+ *
+ * 이름 앞부분으로만 찾는 색인(nm)으로는 안 되는 것이 있다.
+ * "비타민D" 는 제품 이름 한가운데 있기도 하고, 아예 이름에는 없고
+ * 기능성 문구에만 적혀 있기도 하다. 그럴 때는 처음부터 훑는 수밖에 없다.
+ *
+ * 4만 5천 건을 다 보지는 않는다. 찾는 만큼 채워지면 거기서 멈춘다.
+ * 낱말은 미리 공백을 지운 것으로 받는다 — 제품명 표기가 제각각이라
+ * '비타민 D' 와 '비타민D' 가 섞여 있다.
+ */
+export async function scanSupplements(
+  /** 공백을 지운 검색 낱말들. 하나라도 걸리면 담는다 */
+  keywords: string[],
+  limit = 60
+): Promise<ExtSupplement[]> {
+  if (keywords.length === 0) return []
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const out: ExtSupplement[] = []
+    const t = db.transaction(STORE_SUPP, 'readonly')
+    const cur = t.objectStore(STORE_SUPP).openCursor()
+    const seen = new Set<number>()
+    cur.onsuccess = () => {
+      const c = cur.result
+      if (!c || out.length >= limit) return resolve(out)
+      const rec = c.value as { i: number; r: [string, string, string, string, string] }
+      if (!seen.has(rec.i)) {
+        seen.add(rec.i)
+        const [name, maker, fn, no, use] = rec.r
+        const hay = `${name}${fn}`.replace(/\s+/g, '')
+        if (keywords.some((k) => hay.includes(k))) {
+          out.push({ id: `sx-${rec.i}`, name, maker, fn, reportNo: no, use })
+        }
+      }
+      c.continue()
+    }
+    cur.onerror = () => reject(cur.error)
+  })
+}

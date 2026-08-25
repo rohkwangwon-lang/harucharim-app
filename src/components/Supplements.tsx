@@ -8,9 +8,9 @@ import { REF_BY_ID } from '../data/references'
 import { EvidenceBadge, LevelBadge, LevelDot, Section } from './ui'
 import { adviseSupplements, type AdviceLevel } from '../engine/supplementAdvice'
 import { nutritionRisk } from '../engine/nutrition'
-import { getStatus, lookupSupplementByBarcode, searchSupplements, type ExtSupplement } from '../lib/foodStore'
+import { getStatus, lookupSupplementByBarcode, scanSupplements, searchSupplements, type ExtSupplement } from '../lib/foodStore'
 import { BarcodeScanner } from './BarcodeScanner'
-import { judgeProduct } from '../engine/ingredientVerdict'
+import { ingredientKeywords, judgeProduct } from '../engine/ingredientVerdict'
 
 const CATEGORIES: (SupplementCategory | '전체')[] = [
   '전체', '종합비타민', '비타민B군', '비타민C', '비타민D', '오메가3',
@@ -36,6 +36,19 @@ export function Supplements({
 
   const [scanning, setScanning] = useState(false)
   const [scanMsg, setScanMsg] = useState<string | null>(null)
+  /*
+   * 판정으로 걸러 보기.
+   *
+   * 4만 5천 종 앞에서 이름을 쳐 넣어야만 무언가 나오는 것은,
+   * 무엇을 찾아야 할지 이미 아시는 분에게만 쓸모가 있다.
+   * 정작 필요한 물음은 "나한테 뭐가 괜찮은가" 와 "뭘 피해야 하나" 다.
+   */
+  const [pick, setPick] = useState<'none' | 'good' | 'bad'>('none')
+  const [picking, setPicking] = useState(false)
+
+  /* 이 환자에게 어떤 원료가 권장이고 어떤 원료가 주의·금기인지 */
+  const goodIng = useMemo(() => ingredientKeywords(patient, ['prefer']), [patient])
+  const badIng = useMemo(() => ingredientKeywords(patient, ['caution', 'avoid']), [patient])
 
   useEffect(() => { getStatus().then((st) => setHasExt(st.installed && st.suppCount > 0)) }, [])
   /*
@@ -45,11 +58,41 @@ export function Supplements({
    */
   useEffect(() => {
     const t = setTimeout(() => {
-      if (!hasExt || q.trim().length === 1) { setMarket([]); return }
+      if (!hasExt) { setMarket([]); return }
+      if (pick !== 'none') {
+        /*
+         * 이름 앞부분 색인으로는 안 된다 — '비타민D' 는 이름 한가운데 있기도 하고
+         * 아예 기능성 문구에만 적혀 있기도 하다. 처음부터 훑되 채워지면 멈춘다.
+         */
+        setPicking(true)
+        const kw = pick === 'good' ? goodIng.keywords : badIng.keywords
+        /*
+         * 낱말로 걸러 낸 뒤 제품으로 한 번 더 판정한다.
+         *
+         * 낱말만 보면 '오메가3 + 비타민 E' 제품이 오메가3 때문에 권장 목록에 오른다.
+         * 그런데 치료 중이라면 그 제품의 판정은 비타민 E 때문에 '피하세요' 다.
+         * "권장되는 것만" 이라고 써 놓고 피해야 할 것을 보여 주는 셈이 된다.
+         * 제품 하나에 여러 원료가 든 것이 오히려 흔하므로, 마지막 판정으로 거른다.
+         *
+         * 그래서 넉넉히 훑고 걸러 낸 뒤 잘라 낸다 —
+         * 걸러지고 나면 예순 개를 못 채우는 경우가 있다.
+         */
+        scanSupplements(kw, 400)
+          .then((rows) => {
+            const kept = rows.filter((r) => {
+              const v = judgeProduct(r.name, r.fn, patient).level
+              return pick === 'good' ? v === 'prefer' : v === 'caution' || v === 'avoid'
+            })
+            setMarket(kept.slice(0, 60))
+          })
+          .finally(() => setPicking(false))
+        return
+      }
+      if (q.trim().length === 1) { setMarket([]); return }
       searchSupplements(q.trim(), 30).then(setMarket)
     }, 250)
     return () => clearTimeout(t)
-  }, [q, hasExt])
+  }, [q, hasExt, pick, goodIng, badIng, patient])
 
   const cached = useMemo(
     () => ({ rules: activeRules(patient), interactions: activeInteractions(patient) }),
@@ -104,12 +147,59 @@ export function Supplements({
             : '내 정보에서 상품 데이터를 받으시면 시판 제품 45,618종을 검색할 수 있습니다.'
         }
       >
+        {/*
+          * 판정으로 걸러 보기.
+          *
+          * 이름을 쳐 넣어야만 무언가 나오는 검색은, 무엇을 찾을지 이미 아시는 분에게만
+          * 쓸모가 있다. 정작 물으시는 것은 "나한테 뭐가 괜찮은가" 와 "뭘 피해야 하나" 다.
+          * 제품이 아니라 그 안에 든 원료로 고른다 — 그래야 왜 나왔는지 말할 수 있다.
+          */}
+        {hasExt && (
+          <div className="mb-3 flex gap-1.5">
+            {([
+              ['good', '나에게 권장되는 것만', goodIng, 'border-brand-500 bg-brand-500 text-white'],
+              ['bad', '주의·피해야 할 것만', badIng, 'border-danger-500 bg-danger-500 text-white']
+            ] as const).map(([id, label, ing, on]) => (
+              <button
+                key={id}
+                disabled={ing.names.length === 0}
+                onClick={() => { setPick(pick === id ? 'none' : id); setQ('') }}
+                className={`flex-1 rounded-xl border-2 px-2.5 py-2 text-xs font-bold transition-colors disabled:opacity-40 ${
+                  pick === id ? on : 'border-stone-200 bg-white text-stone-700 hover:bg-stone-50'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {pick !== 'none' && (
+          <div className="mb-3 rounded-xl bg-stone-50 px-3 py-2.5 ring-1 ring-stone-200">
+            <p className="text-[11px] leading-relaxed text-stone-600">
+              {pick === 'good' ? (
+                <>지금 상태에서 <strong>권장</strong>으로 보는 원료{' '}
+                  <strong className="text-brand-700">{goodIng.names.join(' · ')}</strong>{' '}
+                  이(가) 든 제품입니다.</>
+              ) : (
+                <>지금 상태에서 <strong>주의하거나 피하시는 편이 좋은</strong> 원료{' '}
+                  <strong className="text-danger-700">{badIng.names.join(' · ')}</strong>{' '}
+                  이(가) 든 제품입니다.</>
+              )}
+            </p>
+            <p className="mt-1 text-[11px] leading-relaxed text-stone-400">
+              제품에 표시된 이름과 기능성으로 고른 것입니다. 같은 원료라도 함량에 따라 판단이 달라질 수 있으니,
+              드시기 전에 성분표를 확인하고 담당 선생님과 상의하세요.
+            </p>
+          </div>
+        )}
+
         <div className="mb-3 flex gap-1.5">
           <input
             className="input flex-1"
             placeholder={hasExt ? '제품명으로 검색 — 예: 락토핏, 오메가3, 홍삼' : '먼저 상품 데이터를 받아 주세요'}
             value={q}
-            onChange={(e) => setQ(e.target.value)}
+            onChange={(e) => { setQ(e.target.value); if (e.target.value) setPick('none') }}
             disabled={!hasExt}
           />
           {patient.useBarcode !== false && (
@@ -167,12 +257,18 @@ export function Supplements({
           />
         )}
 
-        {market.length > 0 && (
+        {picking && (
+          <p className="card px-4 py-6 text-center text-sm text-stone-400">4만 5천 종에서 고르는 중입니다…</p>
+        )}
+
+        {!picking && market.length > 0 && (
           <>
             <p className="mb-2 text-[11px] text-stone-400">
-              {q.trim()
-                ? <>&lsquo;{q.trim()}&rsquo; 검색 결과 {market.length}건{market.length >= 30 && ' 이상'}</>
-                : <>45,618종 가운데 처음 {market.length}건입니다. 위 단추나 검색으로 좁혀 보세요.</>}
+              {pick !== 'none'
+                ? <>{pick === 'good' ? '권장' : '주의·금기'} 원료가 든 제품 {market.length}건{market.length >= 60 && ' 이상'}</>
+                : q.trim()
+                  ? <>&lsquo;{q.trim()}&rsquo; 검색 결과 {market.length}건{market.length >= 30 && ' 이상'}</>
+                  : <>45,618종 가운데 처음 {market.length}건입니다. 위 단추나 검색으로 좁혀 보세요.</>}
             </p>
             <div className="space-y-2">
               {market.map((m) => (
@@ -181,9 +277,15 @@ export function Supplements({
             </div>
           </>
         )}
-        {hasExt && q.trim().length >= 2 && market.length === 0 && (
+        {!picking && hasExt && pick === 'none' && q.trim().length >= 2 && market.length === 0 && (
           <p className="card px-4 py-6 text-center text-sm text-stone-400">
             찾는 제품이 없습니다. 다른 이름으로 검색해 보세요.
+          </p>
+        )}
+        {!picking && pick !== 'none' && market.length === 0 && (
+          <p className="card px-4 py-6 text-center text-sm leading-relaxed text-stone-500">
+            해당하는 시판 제품을 찾지 못했습니다. 제품 이름과 표시된 기능성에서 원료를 읽어 고르는 방식이라,
+            이름에 원료가 드러나지 않는 제품은 걸리지 않습니다.
           </p>
         )}
       </Section>
