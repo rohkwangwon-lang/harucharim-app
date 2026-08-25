@@ -332,17 +332,6 @@ export function nutritionRisk(patient: PatientContext): {
   return { bmi: Math.round(bmi * 10) / 10, bmiLabel, risk, message }
 }
 
-/**
- * 성분값을 화면용 문자열로 바꾼다. 값이 없으면 '정보 없음'이다.
- *
- * 공공데이터의 가공식품은 신고된 항목만 값이 있다. 없는 것을 0 으로 적으면
- * "나트륨 0 mg" 이 되어 들어 있지 않다는 뜻이 되어 버린다.
- * 모르는 것은 모른다고 적는다.
- */
-export function fmtOrUnknown(value: number | undefined, digits: number): string {
-  return typeof value === 'number' ? fmt(value, digits) : '정보 없음'
-}
-
 /** 이 식품에서 값이 비어 있는 주요 성분들 */
 export function missingMacros(food: Food): string[] {
   const out: string[] = []

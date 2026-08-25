@@ -1,3 +1,4 @@
+import { readFileSync, readdirSync } from 'node:fs'
 /**
  * 두 번째 검사 — 날짜 계산, 기록 정규화, 성분 판정, 데이터 무결성.
  * 첫 검사(fuzz.ts)가 추천 엔진을 봤다면 여기는 그 바깥을 본다.
@@ -171,6 +172,46 @@ const bad = (k: string, d: string) => { const s = `${k} :: ${d}`; if (!seenB.has
       const s = fmt(v, m.digits)
       if (!s || s === 'NaN' || s.includes('undefined')) bad('숫자 표시 이상', `${m.key} ${v} → ${s}`)
     }
+  }
+}
+
+
+/* ─────────────────── 내보내고 안 쓰는 것 ─────────────────── */
+
+/*
+ * 아무 데서도 부르지 않는 함수가 남아 있으면, 읽는 사람은 그것이
+ * 어딘가 쓰이는 줄 알고 함부로 고치지 못한다. 실제로 아홉 개가 쌓여 있었다 —
+ * 화면을 고치면서 자리를 옮기고 옛 자리를 지우지 않은 것들이다.
+ *
+ * 쓰이지 않는 출처를 검사하는 것과 같은 이유다. 넣어 두고 안 쓰는 것이 있으면
+ * 그건 앱의 일부가 아니라 앱에 대한 잘못된 설명이 된다.
+ */
+{
+  const files: string[] = []
+  const walk = (dir: string) => {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      const full = `${dir}/${e.name}`
+      if (e.isDirectory()) walk(full)
+      else if (/\.tsx?$/.test(e.name)) files.push(full)
+    }
+  }
+  walk('src')
+  walk('scripts')
+
+  const text = files.map((f) => readFileSync(f, 'utf8')).join('\n')
+  const declared = new Map<string, string>()
+  for (const f of files) {
+    if (!f.startsWith('src/')) continue
+    const t = readFileSync(f, 'utf8')
+    for (const m of t.matchAll(/export (?:async )?(?:function|const) (\w+)/g)) declared.set(m[1], f)
+  }
+  /* 진입점은 스스로를 부르지 않는다 */
+  const ENTRY = new Set(['App'])
+  for (const [name, file] of declared) {
+    if (ENTRY.has(name)) continue
+    const uses = text.match(new RegExp(`\\b${name}\\b`, 'g'))?.length ?? 0
+    /* 선언 한 번 + 그 파일 안 쓰임까지 쳐서, 다른 데서 한 번도 안 부르면 죽은 것이다 */
+    if (uses <= 1) bad('내보내고 아무 데서도 쓰지 않음', `${name} — ${file}`)
   }
 }
 

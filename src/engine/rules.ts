@@ -1,5 +1,5 @@
 import type {
-  CancerId, Food, NutritionRule, PatientContext, RuleLevel, RuleMatch,
+  Food, NutritionRule, PatientContext, RuleLevel, RuleMatch,
   SelectedItem, Supplement, Interaction
 } from '../data/types'
 import { FOOD_BY_ID } from '../data/foods'
@@ -222,24 +222,4 @@ export function evaluateSelection(items: SelectedItem[], patient: PatientContext
   )
 
   return { verdicts, grouped, interactions: [...byInteraction.values()] }
-}
-
-/** 특정 암종에서 이 식품이 "권장" 대상인지 빠르게 확인 (메뉴 추천에서 사용) */
-export function preferenceScore(food: Food, patient: PatientContext, cached: { rules: RuleHit[]; interactions: InteractionHit[] }): number {
-  const v = evaluateFood(food, patient, 1, cached)
-  if (v.level === 'avoid') return -100
-  if (v.level === 'caution') return -20
-  const prefers = v.hits.filter((h) => h.rule.level === 'prefer').length
-  return prefers * 10
-}
-
-export const LEVEL_LABEL: Record<RuleLevel, string> = {
-  avoid: '피하세요',
-  caution: '주의',
-  prefer: '권장',
-  info: '참고'
-}
-
-export function cancerName(id: CancerId): string {
-  return CANCER_BY_ID[id].name
 }

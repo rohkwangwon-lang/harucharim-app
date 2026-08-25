@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { IconEvening, IconMorning, IconNoon, IconSnack } from './icons'
+import { IconEvening, IconMorning, IconNoon, IconShuffle, IconSnack } from './icons'
 import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
 import { MEAL_SLOTS } from '../data/types'
 import { buildDayMenu, fiberGoal, recentFoods } from '../engine/menu'
@@ -111,10 +111,26 @@ export function RecommendedMenu({
               )}
             </p>
           </div>
-          <button className="btn-ghost shrink-0 text-xs" onClick={() => setSeed((n) => n + 1)}>
-            다시 구성
+          {/*
+            * 마음에 안 들면 다시 받아 볼 수 있다는 것을 알려 주는 단추.
+            *
+            * 회색 바탕(btn-ghost)에 작은 글씨라 연둣빛 상자 위에서 눌리지 않는
+            * 설명 딱지처럼 보였다. 실제로 이 단추는 거의 눌리지 않았다.
+            * 누를 수 있는 것처럼 보이게 하고, 무엇을 하는 단추인지 아래에 한 줄 적는다.
+            */}
+          <button
+            className="shrink-0 rounded-xl border-2 border-brand-600 bg-white px-3.5 py-2 text-sm font-bold text-brand-700 shadow-sm transition-colors hover:bg-brand-50 active:bg-brand-100"
+            onClick={() => setSeed((n) => n + 1)}
+          >
+            <span className="flex items-center gap-1.5">
+              <IconShuffle className="h-4 w-4" />
+              다시 구성
+            </span>
           </button>
         </div>
+        <p className="mt-2.5 text-[11px] leading-relaxed text-brand-800/70">
+          마음에 드는 것이 없으면 <strong>다시 구성</strong>을 눌러 보세요. 같은 영양 목표로 다른 조합을 짜 드립니다.
+        </p>
       </div>
 
       <NutrientPanel states={[kcalState, proteinState, fiberState, naState]}>

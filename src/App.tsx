@@ -20,6 +20,7 @@ import { InquiryDialog } from './components/InquiryDialog'
 import { AdminInquiries } from './components/AdminInquiries'
 import { checkAdmin } from './lib/inquiry'
 import { displayName, useSession } from './lib/auth'
+import { isSupabaseConfigured } from './lib/supabase'
 
 /**
  * 탭은 5개로 고정한다.
@@ -29,11 +30,21 @@ import { displayName, useSession } from './lib/auth'
 type Tab = 'compose' | 'diary' | 'suggest' | 'search' | 'supp' | 'care' | 'me'
 type CareView = 'exercise' | 'guide' | 'evidence'
 
+/*
+ * 하루를 쓰는 순서대로 늘어놓는다.
+ *
+ * 오늘 무엇을 드실지 짜고(내 식단) → 막히면 추천을 받고 → 없는 것을 찾아 담고 →
+ * 지나간 날을 돌아본다(기록). 그 뒤가 가끔 보는 것들이다 —
+ * 영양제, 가이드, 마지막이 좀처럼 고칠 일 없는 내 정보.
+ *
+ * 예전에는 기록이 두 번째였는데, 오늘 식단을 짜다 말고 지난 기록으로 건너뛰는
+ * 일은 드물다. 자주 오가는 것끼리 붙여 두는 편이 손가락이 덜 움직인다.
+ */
 const TABS: { id: Tab; label: string; Icon: typeof IconMeal }[] = [
   { id: 'compose', label: '내 식단', Icon: IconMeal },
-  { id: 'diary', label: '기록', Icon: IconDiary },
   { id: 'suggest', label: '추천', Icon: IconSuggest },
   { id: 'search', label: '찾기', Icon: IconSearch },
+  { id: 'diary', label: '기록', Icon: IconDiary },
   { id: 'supp', label: '영양제', Icon: IconPill },
   /*
    * 운동과 암종 가이드는 '내 정보' 안에 있었다.
@@ -68,7 +79,7 @@ export default function App() {
   const [care, setCare] = useState<CareView>('exercise')
   const [toast, setToast] = useState<string | null>(null)
   const [asking, setAsking] = useState(false)
-  const { user } = useSession()
+  const { user, loading: sessionLoading } = useSession()
   // 관리자로 등록된 계정으로 로그인하면 문의 관리 화면이 나타난다
   const [isAdmin, setIsAdmin] = useState(false)
   useEffect(() => {
@@ -93,13 +104,28 @@ export default function App() {
     setTimeout(() => setToast(null), 1400)
   }
 
-  // 첫 실행이면 다른 화면을 보여주기 전에 기본 정보부터 받는다
-  if (!state.patient.onboarded) {
+  /*
+   * 로그아웃하시면 다시 로그인 화면으로 돌아간다.
+   *
+   * 첫 실행에서는 로그인을 거쳐야 넘어가게 해 두었는데, 한 번 넘어간 뒤에
+   * 로그아웃하면 그대로 앱을 쓸 수 있었다. 들어오는 문만 잠그고 나가는 문은
+   * 열어 둔 셈이라, 로그인을 필수로 둔 뜻이 반쯤 없어졌다.
+   *
+   * 다만 기록을 지우지는 않는다. 다시 로그인하시면 적어 두신 것이 그대로 있다 —
+   * 이 앱의 건강 정보는 원래 기기 안에만 있고 서버로 가지 않기 때문이다.
+   * 로그인 서버가 설정되지 않은 환경에서는 이 문이 아예 없다.
+   */
+  const loggedOut = isSupabaseConfigured && !sessionLoading && !user
+
+  // 첫 실행이거나 로그아웃 상태면 다른 화면을 보여주기 전에 로그인부터 받는다
+  if (!state.patient.onboarded || loggedOut) {
     return (
       <Onboarding
         patient={state.patient}
         onChange={setPatient}
         onDone={completeOnboarding}
+        /* 이미 설정을 마치신 분이 로그아웃만 하신 경우에는 로그인 화면만 보여 준다 */
+        loginOnly={state.patient.onboarded === true}
       />
     )
   }
@@ -203,13 +229,29 @@ export default function App() {
 
         {tab === 'care' && (
           <>
-            <div className="mb-4 flex gap-1 rounded-xl bg-stone-100 p-1">
+            {/*
+              * 세 갈래를 고르는 자리.
+              *
+              * 12 px 에 고르지 않은 쪽이 옅은 회색이라, 지금 무엇을 보고 있는지
+              * 한눈에 들어오지 않았다. 배경과의 대비가 3.4 : 1 로 기준(4.5)에 못 미쳤다 —
+              * 이 앱을 쓰시는 분 중에는 항암 중 눈이 침침해지신 분도 있다.
+              * 글자를 키우고, 고른 쪽은 색을 채워 분명히 하고, 손가락이 닿을 넓이를 준다.
+              */}
+            <div
+              className="mb-4 flex gap-1.5 rounded-2xl bg-stone-100 p-1.5"
+              role="tablist"
+              aria-label="가이드 종류"
+            >
               {CARE_VIEWS.map((v) => (
                 <button
                   key={v.id}
+                  role="tab"
+                  aria-selected={care === v.id}
                   onClick={() => { setCare(v.id); window.scrollTo({ top: 0 }) }}
-                  className={`flex-1 rounded-lg px-2 py-2 text-xs font-semibold transition-colors ${
-                    care === v.id ? 'bg-white text-brand-700 shadow-sm' : 'text-stone-500'
+                  className={`flex-1 rounded-xl px-2 py-2.5 text-sm font-bold transition-colors ${
+                    care === v.id
+                      ? 'bg-brand-600 text-white shadow-sm'
+                      : 'text-stone-700 hover:bg-white/70'
                   }`}
                 >
                   {v.label}

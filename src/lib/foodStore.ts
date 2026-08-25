@@ -222,19 +222,9 @@ export async function linkBarcode(code: string, foodId: string, foodName: string
   )
 }
 
-export async function unlinkBarcode(code: string) {
-  await tx(STORE_MYCODE, 'readwrite', (s) => s.delete(code.trim()))
-}
-
 export async function getLinkedBarcode(code: string) {
   return tx<{ b: string; foodId: string; name: string } | undefined>(STORE_MYCODE, 'readonly', (s) =>
     s.get(code.trim())
-  )
-}
-
-export async function listLinkedBarcodes() {
-  return tx<{ b: string; foodId: string; name: string; at: number }[]>(STORE_MYCODE, 'readonly', (s) =>
-    s.getAll()
   )
 }
 

@@ -35,15 +35,23 @@ const CUISINES: Cuisine[] = ['한식', '양식', '중식', '일식', '동남아'
 export function Onboarding({
   patient,
   onChange,
-  onDone
+  onDone,
+  loginOnly = false
 }: {
   patient: PatientContext
   onChange: (patch: Partial<PatientContext>) => void
   onDone: (patch: Partial<PatientContext>) => void
+  /**
+   * 설정은 이미 마치셨고 로그인만 다시 하시는 경우.
+   *
+   * 로그아웃하신 뒤 돌아오실 때 암종부터 다시 고르시게 하면,
+   * 이미 적어 두신 것을 처음부터 되묻는 셈이 된다.
+   */
+  loginOnly?: boolean
 }) {
   const [step, setStep] = useState(0)
   const { user } = useSession()
-  const steps = ['로그인', '암종', '치료 시기', '몸 상태', '식성']
+  const steps = loginOnly ? ['로그인'] : ['로그인', '암종', '치료 시기', '몸 상태', '식성']
   /*
    * 첫 화면은 로그인을 거쳐야 넘어간다.
    * 다만 로그인 서버가 설정되지 않은 환경(로컬 개발·미리보기)에서까지 막으면
@@ -76,8 +84,10 @@ export function Onboarding({
       <div className="flex-1 overflow-y-auto px-5 py-5">
         {step === 0 && (
           <Step
-            title="온코푸드를 시작합니다"
-            desc="먼저 로그인해 주세요. 기기를 바꾸셔도 설정이 유지되고, 문의하신 내용의 답변을 앱에서 바로 확인하실 수 있습니다."
+            title={loginOnly ? '다시 로그인해 주세요' : '온코푸드를 시작합니다'}
+            desc={loginOnly
+              ? '로그아웃하셨습니다. 다시 로그인하시면 적어 두신 기록이 그대로 있습니다.'
+              : '먼저 로그인해 주세요. 기기를 바꾸셔도 설정이 유지되고, 문의하신 내용의 답변을 앱에서 바로 확인하실 수 있습니다.'}
           >
             {user ? (
               <div className="rounded-2xl border border-brand-200 bg-brand-50/60 p-4">
@@ -302,6 +312,10 @@ export function Onboarding({
           {step < steps.length - 1 ? (
             <button className="btn-primary flex-[2]" disabled={!canNext} onClick={() => setStep(step + 1)}>
               {step === 0 && needsLogin ? '로그인이 필요합니다' : '다음'}
+            </button>
+          ) : loginOnly ? (
+            <button className="btn-primary flex-[2]" disabled>
+              {needsLogin ? '로그인이 필요합니다' : '들어가는 중…'}
             </button>
           ) : (
             <button className="btn-primary flex-[2]" onClick={() => onDone({})}>시작하기</button>

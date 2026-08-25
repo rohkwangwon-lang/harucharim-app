@@ -102,8 +102,28 @@ function allowedCuisine(food: Food, allowed: Cuisine[]): boolean {
   return allowed.includes(c)
 }
 
+/*
+ * 아침에 올리지 않을 무거운 주요리.
+ *
+ * 식품군만으로는 걸러지지 않는 것이 있다. '가금류·난류' 에는 삶은 달걀(85 kcal)도
+ * 있고 닭백숙(390 kcal)도 있어서, 달걀을 아침에 놓으려고 이 군을 열어 두면
+ * 백숙까지 따라 들어온다. 실제로 아침 516 · 저녁 371 인 날의 아침에 백숙이 있었다.
+ *
+ * 이 앱은 이미 "아침에 630 kcal 짜리 삼계탕을 놓아 봐야 실제로 드시지 않는다" 고
+ * 적어 두고서, 정작 백숙은 막지 않고 있었다. 숫자를 맞추는 문제가 아니라
+ * 아침상에 오를 만한 것인지의 문제다.
+ *
+ * 죽·국은 제외한다 — 아침에 죽 한 그릇은 열량이 높아도 이상하지 않다.
+ */
+const HEAVY_MAIN_GROUPS = new Set<FoodGroup>(['가금류·난류', '어패류', '육류', '외식·프랜차이즈'])
+const HEAVY_MAIN_KCAL = 250
+
 function slotsFor(food: Food): MealSlot[] {
-  return SLOT_BY_GROUP[food.group] ?? ['점심', '저녁']
+  const slots = SLOT_BY_GROUP[food.group] ?? ['점심', '저녁']
+  if (!slots.includes('아침')) return slots
+  if (!HEAVY_MAIN_GROUPS.has(food.group)) return slots
+  const kcal = (food.per100.kcal * food.serving.g) / 100
+  return kcal > HEAVY_MAIN_KCAL ? slots.filter((s) => s !== '아침') : slots
 }
 
 /**

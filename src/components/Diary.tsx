@@ -6,8 +6,8 @@ import {
   addDays, addMonths, calendarGrid, fromKey, label, monthLabel, today, weekOf
 } from '../lib/day'
 import { FOOD_BY_ID } from '../data/foods'
-import { GRADE_STYLE, summarizeDay } from '../engine/dayScore'
-import { Section, Stat } from './ui'
+import { GRADE_STYLE, summarizeDay, summarizePeriod } from '../engine/dayScore'
+import { DayNoteList, Section, Stat } from './ui'
 
 type View = 'day' | 'week' | 'month'
 
@@ -70,6 +70,7 @@ export function Diary({
           d={cursor} patient={patient} items={diary[cursor] ?? []}
           weight={weights[cursor]} supps={supps}
           onMove={(n) => setCursor(addDays(cursor, n))}
+          onToday={() => setCursor(today())}
           onSetWeight={(kg) => onSetWeight(kg, cursor)}
           onEdit={() => { onPickDay(cursor); onGoCompose() }}
         />
@@ -77,16 +78,18 @@ export function Diary({
 
       {view === 'week' && (
         <WeekView
-          anchor={cursor} summarize={summarize} weights={weights}
+          anchor={cursor} patient={patient} summarize={summarize} weights={weights}
           onMove={(n) => setCursor(addDays(cursor, n * 7))}
+          onToday={() => setCursor(today())}
           onPick={(d) => { setCursor(d); setView('day') }}
         />
       )}
 
       {view === 'month' && (
         <MonthView
-          anchor={cursor} summarize={summarize}
+          anchor={cursor} patient={patient} summarize={summarize}
           onMove={(n) => setCursor(addMonths(cursor, n))}
+          onToday={() => setCursor(today())}
           onPick={(d) => { setCursor(d); setView('day') }}
         />
       )}
@@ -99,7 +102,7 @@ export function Diary({
 /* ────────────────────────── 하루 ────────────────────────── */
 
 function DayView({
-  d, patient, items, weight, supps, onMove, onSetWeight, onEdit
+  d, patient, items, weight, supps, onMove, onToday, onSetWeight, onEdit
 }: {
   d: DayKey
   patient: PatientContext
@@ -107,6 +110,7 @@ function DayView({
   weight?: number
   supps: Supplement[]
   onMove: (n: number) => void
+  onToday: () => void
   onSetWeight: (kg: number) => void
   onEdit: () => void
 }) {
@@ -121,7 +125,10 @@ function DayView({
 
   return (
     <>
-      <Nav title={label(d)} onPrev={() => onMove(-1)} onNext={() => onMove(1)} canNext={d < today()} />
+      <Nav
+        title={label(d)} onPrev={() => onMove(-1)} onNext={() => onMove(1)} canNext={d < today()}
+        onToday={onToday} showToday={d !== today()}
+      />
 
       <div className={`mb-4 rounded-2xl px-4 py-3.5 ${st.bg}`}>
         <div className="flex items-center gap-2">
@@ -196,35 +203,40 @@ function DayView({
 /* ────────────────────────── 한 주 ────────────────────────── */
 
 function WeekView({
-  anchor, summarize, weights, onMove, onPick
+  anchor, patient, summarize, weights, onMove, onToday, onPick
 }: {
   anchor: DayKey
+  patient: PatientContext
   summarize: (d: DayKey) => ReturnType<typeof summarizeDay>
   weights: Record<DayKey, number>
   onMove: (n: number) => void
+  onToday: () => void
   onPick: (d: DayKey) => void
 }) {
   const days = weekOf(anchor)
-  const recorded = days.filter((d) => !summarize(d).empty)
-  const avgKcal = recorded.length
-    ? Math.round(recorded.reduce((s, d) => s + summarize(d).kcal, 0) / recorded.length)
-    : 0
-  const avgProtein = recorded.length
-    ? Math.round(recorded.reduce((s, d) => s + summarize(d).protein, 0) / recorded.length)
-    : 0
-  const t = summarize(days[0]).target
+  const sum = summarizePeriod(days, summarize, patient, '주')
+  const t = sum.target
 
   return (
     <>
       <Nav
         title={`${label(days[0], true)} ~ ${label(days[6], true)}`}
         onPrev={() => onMove(-1)} onNext={() => onMove(1)} canNext={days[6] < today()}
+        onToday={onToday} showToday={!days.includes(today())}
       />
 
-      <div className="mb-4 grid grid-cols-3 gap-2">
-        <Stat label="기록한 날" value={`${recorded.length}`} unit="/ 7일" />
-        <Stat label="하루 평균 열량" value={String(avgKcal)} unit="kcal" hint={`목표 ${t.kcal[0]}~${t.kcal[1]}`} />
-        <Stat label="하루 평균 단백질" value={String(avgProtein)} unit="g" hint={`목표 ${t.protein[0]} 이상`} />
+      <div className="mb-3 grid grid-cols-3 gap-2">
+        <Stat label="기록한 날" value={`${sum.recorded}`} unit="/ 7일" />
+        <Stat label="하루 평균 열량" value={String(sum.avgKcal)} unit="kcal" hint={`목표 ${t.kcal[0]}~${t.kcal[1]}`} />
+        <Stat label="하루 평균 단백질" value={String(sum.avgProtein)} unit="g" hint={`목표 ${t.protein[0]} 이상`} />
+      </div>
+
+      {/*
+        * 숫자만으로는 그게 좋은 건지 알 수 없다.
+        * "평균 1,640 kcal" 을 목표와 견주는 일을 사용자에게 시키지 않는다.
+        */}
+      <div className="mb-4">
+        <DayNoteList notes={sum.notes} />
       </div>
 
       <div className="card divide-y divide-stone-100 overflow-hidden">
@@ -259,17 +271,19 @@ function WeekView({
 /* ────────────────────────── 한 달 ────────────────────────── */
 
 function MonthView({
-  anchor, summarize, onMove, onPick
+  anchor, patient, summarize, onMove, onToday, onPick
 }: {
   anchor: DayKey
+  patient: PatientContext
   summarize: (d: DayKey) => ReturnType<typeof summarizeDay>
   onMove: (n: number) => void
+  onToday: () => void
   onPick: (d: DayKey) => void
 }) {
   const cells = calendarGrid(anchor)
   const days = cells.filter((c): c is DayKey => c !== null)
-  const counts = { good: 0, low: 0, high: 0, none: 0 }
-  for (const d of days) counts[summarize(d).grade]++
+  const sum = summarizePeriod(days, summarize, patient, '달')
+  const counts = sum.counts
 
   return (
     <>
@@ -278,12 +292,17 @@ function MonthView({
         onPrev={() => onMove(-1)} onNext={() => onMove(1)}
         canNext={fromKey(anchor).getMonth() < fromKey(today()).getMonth() ||
                  fromKey(anchor).getFullYear() < fromKey(today()).getFullYear()}
+        onToday={onToday} showToday={anchor.slice(0, 7) !== today().slice(0, 7)}
       />
 
       <div className="mb-3 grid grid-cols-3 gap-2">
         <Stat label="충분했던 날" value={String(counts.good)} unit="일" tone="good" />
         <Stat label="부족했던 날" value={String(counts.low)} unit="일" tone="warn" />
         <Stat label="초과한 날" value={String(counts.high)} unit="일" tone="bad" />
+      </div>
+
+      <div className="mb-3">
+        <DayNoteList notes={sum.notes} />
       </div>
 
       <div className="card p-3">
@@ -406,16 +425,45 @@ function WeightTrend({
 
 /* ────────────────────────── 공통 ────────────────────────── */
 
+/**
+ * 날짜를 오가는 줄.
+ *
+ * '오늘' 단추가 나중에 붙었다. 지난달을 뒤적이다 보면 오늘로 돌아오는 길이
+ * 화살표를 그만큼 다시 누르는 것뿐이었다. 석 달 전을 보고 있었다면 아흔 번이다.
+ * 오늘을 보고 있을 때는 나오지 않는다 — 눌러도 아무 일이 없는 단추는 없느니만 못하다.
+ */
 function Nav({
-  title, onPrev, onNext, canNext
-}: { title: string; onPrev: () => void; onNext: () => void; canNext: boolean }) {
+  title, onPrev, onNext, canNext, onToday, showToday
+}: {
+  title: string
+  onPrev: () => void
+  onNext: () => void
+  canNext: boolean
+  onToday?: () => void
+  showToday?: boolean
+}) {
   return (
-    <div className="mb-3 flex items-center justify-between">
-      <button className="h-9 w-9 rounded-lg bg-stone-100 text-stone-600 hover:bg-stone-200" onClick={onPrev}>‹</button>
-      <span className="text-sm font-bold text-stone-900">{title}</span>
+    <div className="mb-3 flex items-center justify-between gap-2">
       <button
-        className="h-9 w-9 rounded-lg bg-stone-100 text-stone-600 hover:bg-stone-200 disabled:opacity-30"
-        disabled={!canNext} onClick={onNext}
+        className="h-9 w-9 shrink-0 rounded-lg bg-stone-100 text-stone-600 hover:bg-stone-200"
+        onClick={onPrev} aria-label="이전"
+      >‹</button>
+
+      <div className="flex min-w-0 items-center gap-2">
+        <span className="truncate text-sm font-bold text-stone-900">{title}</span>
+        {showToday && onToday && (
+          <button
+            className="shrink-0 rounded-lg border border-brand-300 bg-brand-50 px-2.5 py-1 text-xs font-bold text-brand-700 hover:bg-brand-100"
+            onClick={onToday}
+          >
+            오늘로
+          </button>
+        )}
+      </div>
+
+      <button
+        className="h-9 w-9 shrink-0 rounded-lg bg-stone-100 text-stone-600 hover:bg-stone-200 disabled:opacity-30"
+        disabled={!canNext} onClick={onNext} aria-label="다음"
       >›</button>
     </div>
   )

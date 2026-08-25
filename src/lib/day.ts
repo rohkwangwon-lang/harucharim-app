@@ -48,10 +48,6 @@ export function label(k: DayKey, short = false): string {
     : `${d.getMonth() + 1}월 ${d.getDate()}일 (${WEEKDAY[d.getDay()]})`
 }
 
-export function weekday(k: DayKey): string {
-  return WEEKDAY[fromKey(k).getDay()]
-}
-
 /** 그 날이 속한 주의 일요일부터 7일 */
 export function weekOf(k: DayKey): DayKey[] {
   const d = fromKey(k)

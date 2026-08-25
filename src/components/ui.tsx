@@ -140,12 +140,6 @@ export function Section({
   )
 }
 
-export function Empty({ children }: { children: ReactNode }) {
-  return (
-    <div className="card px-4 py-10 text-center text-sm text-stone-400">{children}</div>
-  )
-}
-
 /** 값 하나를 크게 보여주는 통계 타일 */
 export function Stat({
   label,
@@ -173,33 +167,6 @@ export function Stat({
         {unit && <span className="ml-0.5 text-xs font-medium text-stone-400">{unit}</span>}
       </div>
       {hint && <div className="mt-0.5 text-[11px] leading-tight text-stone-400">{hint}</div>}
-    </div>
-  )
-}
-
-/** 목표 대비 진행 막대 */
-export function Meter({
-  value,
-  min,
-  max,
-  overLimit
-}: {
-  value: number
-  min: number
-  max: number
-  overLimit?: boolean
-}) {
-  const pct = Math.min(100, Math.max(0, (value / max) * 100))
-  const minPct = Math.min(100, (min / max) * 100)
-  const color = overLimit ? 'bg-danger-500' : value < min ? 'bg-warn-500' : 'bg-brand-500'
-  return (
-    <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-stone-200">
-      <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${pct}%` }} />
-      <div
-        className="absolute top-0 h-full w-px bg-stone-400/70"
-        style={{ left: `${minPct}%` }}
-        aria-hidden
-      />
     </div>
   )
 }
