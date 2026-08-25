@@ -1,4 +1,4 @@
-import type { Food, NutrientKey, PatientContext, SelectedItem, Supplement } from '../data/types'
+import type { EvidenceLevel, Food, NutrientKey, PatientContext, SelectedItem, Supplement } from '../data/types'
 import { FOOD_BY_ID } from '../data/foods'
 
 /** 화면 표시용 영양소 메타데이터 */
@@ -427,6 +427,134 @@ export function targetNotes(patient: PatientContext): TargetNote[] {
       reason:
         `${patient.observedLossNote ?? ''} 아직 위험 기준(6개월 5 %)에는 못 미치지만 방향은 감소 쪽입니다. ` +
         '이 시점부터 챙기는 것이 효과가 좋습니다. 같은 조건(아침 공복, 같은 옷차림)에서 계속 재 주세요.'
+    })
+  }
+
+  return out
+}
+
+/* ────────────────── 열량·단백질·식이섬유·나트륨 밖의 것 ────────────────── */
+
+/**
+ * 지금 이분에게만 의미가 있는 미량영양소 기준.
+ *
+ * 데이터에는 30가지가 들어 있지만 판정은 넷(열량·단백질·식이섬유·나트륨)만 하고 있었다.
+ * 그래서 앱이 제 입으로 말해 놓고 세지 않는 것들이 생겼다 —
+ * "칼슘 1,000~1,200 mg 을 맞추세요" 라고 해 놓고 칼슘을 더하지 않고,
+ * 신기능이 떨어진 분께 "칼륨이 높은 식품은 확인이 필요합니다" 라고 하면서
+ * 하루에 얼마나 드셨는지는 알려 주지 않았다.
+ *
+ * 모두를 세지는 않는다. 두 가지를 다 만족하는 것만 넣는다.
+ *  1) 이 환자에게 실제로 근거가 있을 것 — 모두에게 해당하는 값은 넣지 않는다
+ *  2) 음식에 값이 실제로 들어 있을 것 — 칼륨 99 %, 인 94 %, 칼슘 93 %, 철 82 %
+ * 비타민 D·B12 는 근거는 좋지만 값이 각각 9 %·13 % 뿐이고,
+ * 무엇보다 식품으로 채우는 것이 답이 아니라(햇빛·주사) 여기서 세는 뜻이 없다.
+ */
+export interface MicroTarget {
+  key: NutrientKey
+  label: string
+  unit: string
+  /** 넘지 말아야 할 값 */
+  max?: number
+  /** 이만큼은 채워야 하는 값 */
+  min?: number
+  /** 왜 이분에게 이 값인지 */
+  why: string
+  /**
+   * 이 기준이 다른 목표와 부딪치는 경우.
+   *
+   * 인이 그렇다. 암 환자의 단백질 목표(체중 1 kg 당 1.0~1.5 g)를 채우면
+   * 단백질 1 g 마다 인이 13~15 mg 씩 따라 들어와, 70 g 만 드셔도 인이 1,000 mg 에 닿는다.
+   * 즉 식품만으로 두 기준을 동시에 맞추는 것은 애초에 불가능하다.
+   * 그런데도 매일 빨간 '넘음' 을 띄우면, 정작 중요한 경고까지 같이 무뎌진다.
+   *
+   * 그래서 단백질이 목표에 닿아 있는 날의 초과는 '참고' 로 돌리고 사정을 설명한다.
+   * 단백질도 못 채우면서 인만 넘긴 날은 그냥 넘긴 것이므로 그대로 '넘음' 이다.
+   */
+  tensionWith?: 'protein'
+  evidence: EvidenceLevel
+  refIds: string[]
+}
+
+export function microTargets(patient: PatientContext): MicroTarget[] {
+  const out: MicroTarget[] = []
+  const meds = patient.medications
+  const subs = patient.subtypes ?? []
+  const conds = patient.conditions
+
+  /*
+   * 칼륨 — 신기능이 떨어진 분.
+   *
+   * 숫자를 하나 못박지 않는다. KDOQI 2020 은 "일률적인 칼륨 제한을 뒷받침할
+   * 근거가 충분하지 않으며 혈중 칼륨이 정상으로 유지되도록 조절하라" 고 본다.
+   * 그러니 이 값은 목표가 아니라 '이쯤부터는 채혈 결과와 함께 보셔야 한다' 는 표시다.
+   */
+  if (conds.includes('신기능저하')) {
+    out.push({
+      key: 'k', label: '칼륨', unit: 'mg', max: 3000,
+      why:
+        '신기능이 떨어지면 칼륨이 잘 빠져나가지 않아 혈중 농도가 올라갈 수 있습니다. ' +
+        '다만 모든 분께 일률적으로 제한하라는 근거는 아직 충분하지 않아서, 이 값은 지켜야 할 목표가 아니라 ' +
+        '"이 정도부터는 채혈 결과와 함께 보셔야 한다" 는 표시로 봐 주세요. 실제 기준은 혈중 칼륨 수치입니다. ' +
+        '채소는 잘게 썰어 데친 뒤 물을 버리면 칼륨이 상당히 줄어듭니다.',
+      evidence: 'G', refIds: ['kdoqi2020']
+    })
+    out.push({
+      key: 'p', label: '인', unit: 'mg', max: 1000, tensionWith: 'protein',
+      why:
+        '인은 신기능이 떨어지면 쌓이면서 뼈와 혈관에 영향을 줍니다. 신장내과 기준은 하루 800~1,000 mg 입니다. ' +
+        '같은 양이라도 가공식품에 든 인산염 첨가물은 거의 전부 흡수되는 반면 콩·통곡의 인은 절반 정도만 흡수됩니다. ' +
+        '줄이실 곳은 자연식품이 아니라 가공식품 쪽입니다.',
+      evidence: 'G', refIds: ['kdoqi2020']
+    })
+  }
+
+  /*
+   * 칼슘 — 골밀도를 떨어뜨리는 치료를 받는 분.
+   *
+   * 아로마타제 억제제와 안드로겐 차단요법이 여기 해당한다.
+   * 앱은 이미 두 곳에서 "1,000~1,200 mg" 이라고 말하고 있었는데 세지는 않았다.
+   */
+  const boneLoss =
+    meds.includes('아로마타제 억제제') || meds.includes('안드로겐 차단요법(ADT)') ||
+    subs.includes('안드로겐차단요법중') ||
+    (patient.cancer === 'breast' && subs.includes('호르몬수용체양성'))
+  if (boneLoss) {
+    /*
+     * 전립선암에서는 위아래가 다 있다.
+     * ADT 중 뼈를 지키려면 1,000 mg 이 필요하고, 동시에 칼슘 고섭취는
+     * 전립선암 위험 증가와 연관이 관찰되었다(WCRF, limited-suggestive).
+     * 세지 않으면 그 사이 구간을 안내할 방법이 없다.
+     */
+    const ceiling = patient.cancer === 'prostate'
+    out.push({
+      key: 'ca', label: '칼슘', unit: 'mg', min: 1000, max: ceiling ? 1500 : undefined,
+      why: ceiling
+        ? '안드로겐 차단요법 중에는 골밀도가 빠르게 떨어져 하루 1,000~1,200 mg 이 필요합니다. ' +
+          '한편 전립선암에서는 칼슘을 아주 많이 드시는 것이 위험 증가와 연관되어 관찰되었습니다. ' +
+          '그래서 1,000 mg 은 채우되 1,500 mg 은 넘기지 않는 구간을 봅니다. 식품으로 채우는 쪽이 우선입니다.'
+        : '아로마타제 억제제는 에스트로겐을 거의 없애기 때문에 골밀도가 빠르게 떨어집니다. ' +
+          '하루 1,000~1,200 mg 을 식품과 보충제로 맞추는 것이 표준적 관리입니다. ' +
+          '우유 1잔에 약 220 mg, 두부 반 모에 약 150 mg 들어 있습니다.',
+      evidence: 'G',
+      refIds: ceiling ? ['nccn-survivorship', 'wcrf-prostate'] : ['nccn-survivorship', 'kdri2020']
+    })
+  }
+
+  /*
+   * 철 — 위를 잘라 낸 분.
+   *
+   * 철은 위산이 있어야 흡수되는데 위절제 후에는 위산이 크게 준다.
+   * 철결핍빈혈이 수술하고 몇 해 지나 서서히 나타나는 일이 흔하다.
+   */
+  if (conds.includes('위절제후') || subs.includes('위전절제') || subs.includes('위부분절제')) {
+    out.push({
+      key: 'fe', label: '철', unit: 'mg', min: patient.sex === 'F' && patient.age < 50 ? 14 : 10,
+      why:
+        '철은 위산이 있어야 잘 흡수되는데 위를 잘라 낸 뒤에는 위산이 크게 줄어듭니다. ' +
+        '철결핍빈혈은 수술하고 몇 해가 지나 서서히 나타나는 경우가 많아, 식사에서 미리 챙겨 두시는 편이 좋습니다. ' +
+        '고기·간·조개류의 철은 곡물·채소의 철보다 훨씬 잘 흡수되고, 비타민 C 를 같이 드시면 흡수가 올라갑니다.',
+      evidence: 'G', refIds: ['gastrectomy-nutr', 'kdri2020']
     })
   }
 

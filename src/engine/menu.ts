@@ -3,7 +3,7 @@ import { MEAL_SLOTS } from '../data/types'
 import { CURATED_FOODS, FOOD_BY_ID } from '../data/foods'
 import { CANCER_BY_ID } from '../data/cancers'
 import { activeInteractions, activeRules, evaluateFood, type RuleHit, type InteractionHit } from './rules'
-import { addTotals, effectiveLossPct, foodContribution, personalTarget, type NutrientTotals } from './nutrition'
+import { addTotals, effectiveLossPct, foodContribution, microTargets, personalTarget, type MicroTarget, type NutrientTotals } from './nutrition'
 
 export type { MealSlot }
 export { MEAL_SLOTS }
@@ -353,6 +353,8 @@ export function buildDayMenu(
     : supplementsOrOptions
 
   const supplements = opts.supplements ?? []
+  /* 이분에게만 세는 미량영양소 — 해당 사항이 없으면 빈 배열이라 아래가 그대로 돈다 */
+  const micros = microTargets(patient)
   const recent = opts.recent ?? new Map<string, number>()
   /*
    * 그날의 차례.
@@ -476,7 +478,20 @@ export function buildDayMenu(
       protein: target.protein[0] - (cur.protein ?? 0),
       fiber: fiberTarget - (cur.fiber ?? 0)
     }
-    if (need.kcal <= 25 && need.protein <= 2 && need.fiber <= 0.5) break
+    const microRoom = microBudget(micros, cur)
+    /*
+     * 열량·단백질·식이섬유가 찼다고 바로 멈추면 미량영양소를 쫓아갈 기회가 없다.
+     *
+     * 실제로 아로마타제 억제제를 드시는 분의 하루가 늘 칼슘 817 mg 에서 끝났다.
+     * 목표를 다 채우고 루프가 끝나 버리니, 점수에 칼슘을 넣어 둔 것이 쓰이질 않았다.
+     *
+     * 그렇다고 열량을 넘겨 가며 채우지는 않는다. 칼슘을 맞추자고 과식을 시킬 수는 없다.
+     * 상한까지 여유가 있을 때만 한 가지 더 본다.
+     */
+    const microShort = microRoom.some((m) => m.need > 0)
+    if (need.kcal <= 25 && need.protein <= 2 && need.fiber <= 0.5) {
+      if (!microShort || target.kcal[1] - (cur.kcal ?? 0) <= 120) break
+    }
 
     /*
      * 나트륨 상한을 절대선으로 쓰면, 담으신 국·찌개 한 그릇이 예산을 다 써 버렸을 때
@@ -527,8 +542,8 @@ export function buildDayMenu(
      * 다양성은 영양을 채운 다음의 이야기다.
      */
     const best =
-      bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, recent) ??
-      bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, EMPTY_RECENT)
+      bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, recent, GROUP_CAP, microRoom) ??
+      bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, EMPTY_RECENT, GROUP_CAP, microRoom)
     if (!best) break
 
     /*
@@ -600,7 +615,8 @@ export function buildDayMenu(
       quota,
       dayIndex + 40 + guard,
       new Map<string, number>(),
-      GROUP_CAP + 2
+      GROUP_CAP + 2,
+      microBudget(micros, cur)
     )
     if (!best) break
 
@@ -897,7 +913,7 @@ export function buildDayMenu(
   const totals = running()
 
   // 6) 요약
-  notes.push(...dayNotes(totals, suppTotals, patient, naUnknownNames(chosen)))
+  notes.push(...dayNotes(totals, suppTotals, patient, naUnknownNames(chosen), microUnknownNames(chosen, patient)))
 
   return { scope: '하루(24시간) 전체', season, meals, totals, suppTotals, slotTotals, target, removed, notes, slotNotes }
 }
@@ -1181,6 +1197,13 @@ interface Cand {
   protein: number
   fiber: number
   na: number
+  /**
+   * 이 환자에게만 세는 미량영양소의 1회 제공량 기여.
+   *
+   * 세는 항목이 없으면 빈 객체다. 신기능이 떨어진 분의 칼륨·인,
+   * 골밀도가 떨어지는 치료를 받는 분의 칼슘, 위를 잘라 낸 분의 철.
+   */
+  micro: Partial<Record<NutrientKey, number>>
   /** 열량은 낮은데 배는 부른 정도 */
   satiety: number
 }
@@ -1193,6 +1216,26 @@ interface Cand {
  * ("삶아서 말린 나물" 100 g 처럼 실제로 먹지 않는 양), 이상치도 섞여 있다.
  * 검색해서 찾아보는 데는 쓸모가 있어도, 앱이 먼저 권하는 자리에는 맞지 않는다.
  */
+/**
+ * 지금 이 시점에서 미량영양소가 얼마나 모자라고 얼마나 남았는지.
+ *
+ * need 는 채워야 남은 양(칼슘·철), room 은 아직 쓸 수 있는 양(칼륨·인).
+ * 상한이 없으면 room 은 Infinity 라 벌점이 붙지 않는다.
+ */
+function microBudget(
+  micros: MicroTarget[],
+  cur: NutrientTotals
+): { key: NutrientKey; need: number; room: number }[] {
+  return micros.map((m) => {
+    const got = cur[m.key] ?? 0
+    return {
+      key: m.key,
+      need: m.min !== undefined ? Math.max(0, m.min - got) : 0,
+      room: m.max !== undefined ? m.max - got : Infinity
+    }
+  })
+}
+
 function collectCandidates(
   patient: PatientContext,
   cached: { rules: RuleHit[]; interactions: InteractionHit[] },
@@ -1201,6 +1244,8 @@ function collectCandidates(
   /** 경구영양보충을 후보에 넣을지 — 보충 단계에서는 열량 미달 자체가 적응증이다 */
   forceONS = false
 ): Cand[] {
+  /* 이분에게 세는 미량영양소 — 없으면 아래 루프가 빈 객체만 만든다 */
+  const micros = microTargets(patient)
   /*
    * 점착성(떡류)에 감점을 준다 — 연하곤란으로 진단되지 않은 분에게도.
    *
@@ -1340,7 +1385,10 @@ function collectCandidates(
      */
     const satiety = fiber * 4 + f.serving.g / 40 + protein * 0.3 - kcal / 25
 
-    out.push({ food: f, bonus, penalty, prefers, seasonal, kcal, protein, fiber, na: c.na ?? 0, satiety })
+    const micro: Partial<Record<NutrientKey, number>> = {}
+    for (const m of micros) micro[m.key] = c[m.key] ?? 0
+
+    out.push({ food: f, bonus, penalty, prefers, seasonal, kcal, protein, fiber, na: c.na ?? 0, micro, satiety })
   }
   return out
 }
@@ -1403,7 +1451,14 @@ function bestFiller(
   /** 최근에 드신 식품과 며칠 전인지 */
   recent: Map<string, number>,
   /** 한 식품군에서 낼 수 있는 최대 가짓수 */
-  groupCap = GROUP_CAP
+  groupCap = GROUP_CAP,
+  /**
+   * 이분에게만 세는 미량영양소의 남은 몫.
+   *
+   * need = 채워야 남은 양(칼슘·철), room = 아직 쓸 수 있는 양(칼륨·인).
+   * 해당 사항이 없으면 빈 배열이라 점수가 그대로다.
+   */
+  micro: { key: NutrientKey; need: number; room: number }[] = []
 ): Filler | undefined {
 
   const scored: { c: Cand; score: number }[] = []
@@ -1436,7 +1491,36 @@ function bestFiller(
       // 열량을 가장 무겁게 본다. 치료 중 가장 먼저 무너지는 것이 에너지다(ESPEN).
       (need.kcal > 0 ? Math.min(c.kcal, need.kcal) / need.kcal : 0) * 3.5
 
-    if (fill <= 0.01) continue
+    /*
+     * 미량영양소를 점수에 반영한다.
+     *
+     * 여기까지 오기 전에는 앱이 "칼슘 1,000 mg 을 맞추세요" 라고 말해 놓고
+     * 정작 추천에서는 칼슘을 한 번도 쳐다보지 않았다. 실제로 아로마타제 억제제를
+     * 드시는 분의 하루가 817 mg 으로 끝나곤 했다.
+     *
+     * 계산을 아래 게이트보다 먼저 한다. 열량·단백질이 다 찬 뒤에는 fill 이 0 이라
+     * 모든 후보가 그 자리에서 걸러졌고, 그래서 우유 한 잔(칼슘 226 mg)을 더할
+     * 기회조차 없었다. 남은 것이 칼슘뿐일 때는 칼슘이 통과 사유가 되어야 한다.
+     */
+    let microFill = 0
+    let microCost = 0
+    for (const m of micro) {
+      const got = c.micro[m.key] ?? 0
+      if (got <= 0) continue
+      if (m.need > 0) microFill += Math.min(got, m.need) / m.need
+      /*
+       * 상한이 있는 것(칼륨·인)은 남은 몫에 견주어 값을 매긴다.
+       * 이미 넘긴 뒤라면 더 얹는 것 자체가 비싸므로 고정 비용을 크게 준다.
+       */
+      if (m.room < Infinity) microCost += m.room > 0 ? got / m.room : got / 200
+    }
+
+    /*
+     * 열량·단백질이 다 찬 뒤(fill 이 0)에는 미량영양소만 남는다.
+     * 그때는 실제로 도움이 되는 것만 받는다 — 칼슘 13 mg 짜리 살구를
+     * "칼슘을 채우러" 올리는 것은 채우는 시늉일 뿐이다.
+     */
+    if (fill <= 0.01 ? microFill < 0.08 : fill + microFill <= 0.01) continue
 
     // 나트륨은 남은 예산에 견주어 값을 매긴다. 예산이 빠듯할수록 비싸진다.
     const naCost = c.na / Math.max(150, room.na)
@@ -1502,8 +1586,13 @@ function bestFiller(
      * 실제로 8월 한 달 동안 하루도 빠짐없이 같은 식단이었다.
      * 영양 점수를 뒤집을 만큼은 아니고, 엇비슷한 후보끼리 차례가 돌아가는 정도로 둔다.
      */
-    const score = fill * 80 + c.bonus * 0.5 + seasonBonus + soupBonus
-      - fade - c.penalty * 9 - naCost * 25 - kcalCost * 14 - crossPenalty
+    /*
+     * 다만 미량영양소를 열량·단백질보다 앞세우지는 않는다.
+     * 치료 중 먼저 무너지는 것은 에너지와 단백질이고(ESPEN),
+     * 칼슘이 조금 모자란 것은 그 다음 문제다.
+     */
+    const score = fill * 80 + microFill * 60 + c.bonus * 0.5 + seasonBonus + soupBonus
+      - fade - c.penalty * 9 - naCost * 25 - kcalCost * 14 - crossPenalty - microCost * 30
     scored.push({ c, score })
   }
   if (scored.length === 0) return undefined
@@ -1719,7 +1808,9 @@ export function dayNotes(
   suppTotals: NutrientTotals,
   patient: PatientContext,
   /** 나트륨 값이 없는 식품의 이름들 — 합계가 실제보다 적게 나온다 */
-  naUnknown: string[] = []
+  naUnknown: string[] = [],
+  /** 미량영양소별로 값이 없는 식품의 이름들 */
+  microUnknown: Partial<Record<NutrientKey, string[]>> = {}
 ): DayNote[] {
   const profile = CANCER_BY_ID[patient.cancer]
   const target = personalTarget(patient, profile.target.kcalPerKg, profile.target.proteinPerKg)
@@ -1789,6 +1880,62 @@ export function dayNotes(
   }
 
   /*
+   * 이분에게만 해당하는 미량영양소.
+   *
+   * 신기능이 떨어진 분의 칼륨·인, 골밀도가 떨어지는 치료를 받는 분의 칼슘,
+   * 위를 잘라 낸 분의 철. 해당 사항이 없으면 한 줄도 늘지 않는다.
+   * 늘 넷만 보던 화면에 갑자기 서른 줄이 뜨면 정작 중요한 것이 묻힌다.
+   */
+  for (const m of microTargets(patient)) {
+    const got = totals[m.key]
+    /*
+     * 값이 하나도 없으면 "0 mg 이라 부족합니다" 가 되어 버린다.
+     * 담으신 것이 없는 것과 자료에 값이 없는 것은 다른 이야기다.
+     */
+    if (got === undefined) continue
+    const v = Math.round(got)
+
+    if (m.max !== undefined && got > m.max) {
+      /*
+       * 단백질과 부딪치는 기준은, 단백질을 채운 날이면 사정을 설명한다.
+       * 인 1,000 mg 은 암 환자의 단백질 목표와 애초에 양립하지 않는다.
+       */
+      const met = m.tensionWith === 'protein' && protein >= target.protein[0]
+      notes.push(met
+        ? { tone: 'info', topic: m.label,
+            text: `${v} ${m.unit} 입니다. 신장내과 기준(${m.max} ${m.unit})보다 많지만, ` +
+              `오늘 단백질 ${Math.round(protein)} g 을 채우셨다면 이건 피하기 어렵습니다 — ` +
+              '단백질 1 g 마다 인이 13~15 mg 씩 따라 들어오기 때문입니다. ' +
+              '치료 중에는 단백질을 줄이는 쪽이 더 위험하므로, 인은 식사를 깎기보다 ' +
+              '가공식품의 인산염 첨가물을 줄이고 필요하면 인결합제로 잡는 것이 순서입니다. ' +
+              '실제 기준은 채혈에서 나오는 혈중 인 수치이니 담당 선생님과 함께 보세요.' }
+        : { tone: 'over', topic: m.label,
+            text: `${v} ${m.unit} — 기준(${m.max} ${m.unit})을 넘습니다. ${m.why}` })
+    } else if (m.min !== undefined && got < m.min) {
+      notes.push({ tone: 'low', topic: m.label,
+        text: `${v} ${m.unit} 으로 ${m.min} ${m.unit} 에 못 미칩니다. ${m.why}` })
+    } else {
+      const range = m.min !== undefined && m.max !== undefined
+        ? `${m.min}~${m.max} ${m.unit}`
+        : m.min !== undefined ? `${m.min} ${m.unit} 이상` : `${m.max} ${m.unit} 이하`
+      notes.push({ tone: 'good', topic: m.label, text: `${v} ${m.unit} — 기준(${range}) 안에 있습니다.` })
+    }
+
+    /*
+     * 그 영양소 값이 없는 음식이 섞여 있으면 합계가 실제보다 적다.
+     * "기준 안에 있습니다" 라고 안심시켜 놓고 실제로는 넘겼을 수 있으므로 밝힌다.
+     * 나트륨에서 하던 것과 같은 이유다.
+     */
+    const blind = microUnknown[m.key] ?? []
+    if (blind.length > 0) {
+      const head = blind.slice(0, 3).join('·')
+      const subject = blind.length > 3 ? `${head} 외 ${blind.length - 3}가지` : head
+      notes.push({ tone: 'info', topic: `${m.label} 빠진 값`,
+        text: `${subject}${topicParticle(subject)} 자료에 ${m.label} 값이 없어 위 합계에 잡히지 않았습니다.` })
+    }
+  }
+
+  /*
    * 나트륨을 신고하지 않은 가공식품이 섞여 있으면 합계가 실제보다 적게 나온다.
    * "상한 안에 들어옵니다" 라고 안심시켜 놓고 실제로는 넘겼을 수 있으므로 밝힌다.
    */
@@ -1821,6 +1968,28 @@ export function naUnknownNames(items: SelectedItem[]): string[] {
   for (const it of items) {
     const f = FOOD_BY_ID[it.foodId]
     if (f && f.per100.na === undefined && !out.includes(f.name)) out.push(f.name)
+  }
+  return out
+}
+
+/**
+ * 담으신 것 중, 각 미량영양소 값이 자료에 없는 음식의 이름.
+ *
+ * 나트륨에서 하던 것과 같다. 값이 없는 음식은 합계에 0 으로 잡히므로
+ * "기준 안에 있습니다" 가 사실이 아닐 수 있다. 그 사실을 감추지 않는다.
+ */
+export function microUnknownNames(
+  items: SelectedItem[],
+  patient: PatientContext
+): Partial<Record<NutrientKey, string[]>> {
+  const out: Partial<Record<NutrientKey, string[]>> = {}
+  for (const m of microTargets(patient)) {
+    const names: string[] = []
+    for (const it of items) {
+      const f = FOOD_BY_ID[it.foodId]
+      if (f && f.per100[m.key] === undefined && !names.includes(f.name)) names.push(f.name)
+    }
+    if (names.length > 0) out[m.key] = names
   }
   return out
 }

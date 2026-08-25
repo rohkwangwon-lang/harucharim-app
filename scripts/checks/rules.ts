@@ -16,7 +16,8 @@ import { CURATED_FOODS, FOOD_BY_ID } from '../../src/data/foods'
 import { SUPPLEMENTS } from '../../src/data/supplements'
 import { evaluateFood, activeRules, activeInteractions } from '../../src/engine/rules'
 import { DEFAULT_PATIENT } from '../../src/lib/store'
-import type { NutritionRule, CancerSubtype } from '../../src/data/types'
+import { microTargets } from '../../src/engine/nutrition'
+import type { NutritionRule, CancerSubtype, PatientContext } from '../../src/data/types'
 import { SUBTYPE_OPTIONS } from '../../src/data/types'
 
 const bugs: string[] = []
@@ -127,6 +128,20 @@ for (const r of INGREDIENT_RULES) for (const ref of r.refIds ?? []) used.add(ref
 for (const list of [BASE_EXERCISE, ...Object.values(EXERCISE_BY_CANCER).map((p) => p.items)])
   for (const e of list) for (const ref of e.refIds ?? []) used.add(ref)
 for (const ref of BONE_METS_NOTE.refIds) used.add(ref)
+/*
+ * 미량영양소 기준도 문헌을 인용한다.
+ * 규칙 목록에만 없다는 이유로 '안 쓰는 문헌' 이 되어서는 안 된다.
+ * 조건이 걸려 있어 환자를 만들어 봐야 나온다.
+ */
+for (const setup of [
+  { conditions: ['신기능저하'] },
+  { conditions: ['위절제후'] },
+  { conditions: [], medications: ['아로마타제 억제제'] },
+  { conditions: [], medications: ['안드로겐 차단요법(ADT)'], cancer: 'prostate' }
+] as any[]) {
+  const p = { ...DEFAULT_PATIENT, ...setup } as PatientContext
+  for (const m of microTargets(p)) for (const ref of m.refIds) used.add(ref)
+}
 for (const [id, ref] of Object.entries(REF_BY_ID)) {
   if (!ref.citation?.trim()) bad('출처에 인용 문구 없음', id)
   if (ref.url && !/^https?:\/\//.test(ref.url)) bad('출처 주소 형식 이상', `${id} ${ref.url}`)
@@ -213,3 +228,45 @@ for (const [k, l] of [...g].sort((a, b) => b[1].length - a[1].length)) {
   console.log(`■ ${k} (${l.length}종)`); l.slice(0, 5).forEach((d) => console.log('   -', d))
 }
 if (!bugs.length) console.log('문제 없음')
+
+/* ─────────────────── 미량영양소 기준 ─────────────────── */
+
+/*
+ * 열량·단백질·식이섬유·나트륨 밖의 기준은 조건이 맞는 분에게만 뜬다.
+ * 여기서 보는 것은 세 가지다.
+ *  1) 해당 사항이 없는 분께 괜히 뜨지 않는가 — 늘 넷만 보던 화면이 갑자기 길어지면 안 된다
+ *  2) 각 기준이 문헌을 달고 있는가
+ *  3) 세겠다고 한 영양소를 음식이 실제로 갖고 있는가 — 값이 없으면 세는 시늉만 하게 된다
+ */
+{
+  const plain = { ...DEFAULT_PATIENT, conditions: [], medications: [] } as PatientContext
+  if (microTargets(plain).length > 0)
+    bad('해당 없는 분께 미량영양소 기준이 뜸', microTargets(plain).map((m) => m.label).join('·'))
+
+  const setups: [string, Partial<PatientContext>][] = [
+    ['신기능저하', { conditions: ['신기능저하'] }],
+    ['위절제후', { conditions: ['위절제후'] }],
+    ['아로마타제 억제제', { medications: ['아로마타제 억제제'] }],
+    ['ADT', { cancer: 'prostate', medications: ['안드로겐 차단요법(ADT)'] }]
+  ]
+  for (const [label, setup] of setups) {
+    const p = { ...DEFAULT_PATIENT, conditions: [], medications: [], ...setup } as PatientContext
+    const ts = microTargets(p)
+    if (ts.length === 0) { bad('기준이 떠야 하는데 안 뜸', label); continue }
+    for (const m of ts) {
+      if (m.min === undefined && m.max === undefined) bad('위아래가 다 없는 기준', `${label} ${m.label}`)
+      if (m.min !== undefined && m.max !== undefined && m.min >= m.max)
+        bad('하한이 상한보다 큰 기준', `${label} ${m.label} ${m.min}~${m.max}`)
+      if (m.refIds.length === 0) bad('문헌 없는 미량영양소 기준', `${label} ${m.label}`)
+      for (const id of m.refIds) if (!REF_BY_ID[id]) bad('없는 문헌을 가리킴', `${label} ${m.label} → ${id}`)
+
+      /*
+       * 값이 있는 음식이 너무 적으면 합계가 늘 실제보다 적게 나온다.
+       * "기준 안에 있습니다" 라고 안심시켜 놓고 사실이 아닌 것이 가장 나쁘다.
+       */
+      const have = CURATED_FOODS.filter((f) => typeof f.per100[m.key] === 'number').length
+      const pct = Math.round((have / CURATED_FOODS.length) * 100)
+      if (pct < 70) bad('값이 너무 적은 영양소를 셈', `${label} ${m.label} — 음식의 ${pct} % 만 값이 있다`)
+    }
+  }
+}

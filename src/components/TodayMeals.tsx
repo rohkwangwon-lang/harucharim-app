@@ -5,7 +5,7 @@ import { MEAL_SLOTS } from '../data/types'
 import { FOOD_BY_ID } from '../data/foods'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
 import { CANCER_BY_ID } from '../data/cancers'
-import { buildDayMenu, currentSeason, dayNotes, fiberGoal, ideasFromIngredients, intakeTrend, naUnknownNames, planNotes, recentFoods } from '../engine/menu'
+import { buildDayMenu, currentSeason, dayNotes, fiberGoal, ideasFromIngredients, intakeTrend, microUnknownNames, naUnknownNames, planNotes, recentFoods } from '../engine/menu'
 import { evaluateSelection } from '../engine/rules'
 import { foodContribution, observedWeightGain, personalTarget, sumIntake, targetNotes } from '../engine/nutrition'
 import { BASE_EXERCISE, CONDITION_EXERCISE_NOTES, EXERCISE_BY_CANCER } from '../data/exercise'
@@ -99,7 +99,7 @@ export function TodayMeals({
     () => supps.reduce((t, x) => ({ ...t, na: (t.na ?? 0) + ((x.perDay as { na?: number }).na ?? 0) }), {} as { na?: number }),
     [supplements]
   )
-  const notes = useMemo(() => dayNotes(totals, suppTotals, patient, naUnknownNames(selected)), [totals, suppTotals, patient, selected])
+  const notes = useMemo(() => dayNotes(totals, suppTotals, patient, naUnknownNames(selected), microUnknownNames(selected, patient)), [totals, suppTotals, patient, selected])
   /** 담아 두신 식재료로 만들 수 있는 요리 */
   const ideas = useMemo(() => ideasFromIngredients(selected, patient), [selected, patient])
 
