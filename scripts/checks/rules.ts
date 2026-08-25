@@ -19,7 +19,7 @@ import { evaluateFood, activeRules, activeInteractions } from '../../src/engine/
 import { DEFAULT_PATIENT } from '../../src/lib/store'
 import { microTargets } from '../../src/engine/nutrition'
 import { adviseSupplements } from '../../src/engine/supplementAdvice'
-import type { NutritionRule, CancerSubtype, PatientContext } from '../../src/data/types'
+import type { NutritionRule, CancerSubtype, PatientContext, Phase } from '../../src/data/types'
 import { SUBTYPE_OPTIONS } from '../../src/data/types'
 
 const bugs: string[] = []
@@ -284,6 +284,59 @@ for (const id of orphan) bad('아무 데서도 인용하지 않는 문헌', `${i
       const have = CURATED_FOODS.filter((f) => typeof f.per100[m.key] === 'number').length
       const pct = Math.round((have / CURATED_FOODS.length) * 100)
       if (pct < 70) bad('값이 너무 적은 영양소를 셈', `${label} ${m.label} — 음식의 ${pct} % 만 값이 있다`)
+    }
+  }
+}
+
+/* ─────────────────── 문장이 전제하는 시기 ─────────────────── */
+
+/*
+ * "치료 중에는 단백질을 평소보다 더 챙겨야 합니다" 가 치료를 마치신 분께 떴다.
+ *
+ * 규칙은 언제 뜰지를 phases 로 정하는데, 문장은 그와 따로 놀 수 있다.
+ * 어느 시기에나 뜨는 규칙이 제목에서 "치료 중" 이라고 못박으면,
+ * 그 시기가 아닌 분께는 사실이 아닌 말이 된다.
+ * 체중 관리처럼 시기에 따라 권고가 뒤집히는 주제에서는 정반대로 읽히기까지 한다 —
+ * 치료를 마치고 감량이 권고인 분께 "무리한 감량은 근육부터 빠진다" 고 하던 것이 그랬다.
+ *
+ * 고치는 길은 둘이다. phases 로 그 시기에만 뜨게 하거나,
+ * 문장에서 다른 시기도 함께 말하거나. 둘 중 아무것도 하지 않은 것을 찾는다.
+ */
+{
+  const PREMISE: { re: RegExp; label: string; ok: Phase[] }[] = [
+    { re: /치료\s*중(에|에는|이라면|이면|인)/, label: '치료 중', ok: ['during_rt', 'during_chemo', 'neutropenia'] },
+    { re: /방사선치료\s*중/, label: '방사선치료 중', ok: ['during_rt'] },
+    { re: /항암(치료|화학요법)\s*중/, label: '항암 중', ok: ['during_chemo', 'neutropenia'] },
+    { re: /수술\s*직후/, label: '수술 직후', ok: ['post_op'] },
+    { re: /치료(가|를)?\s*(끝난|마친|마치신|종료)/, label: '치료 종료 후', ok: ['survivorship'] }
+  ]
+  /*
+   * 두 시기를 함께 적어 두었으면 어느 쪽에도 맞는다 —
+   * "치료 기간과 그 이후 모두", "치료 중이라면 …, 치료를 마치셨더라도 …" 같은 것.
+   */
+  const SPANS_BOTH = [
+    /치료\s*기간과\s*그\s*이후/,
+    /치료\s*중[\s\S]{0,220}(마친|마치셨|끝난|종료)/,
+    /(마친|마치신|끝난|종료)[\s\S]{0,220}치료\s*중/,
+    /받는\s*동안에도[\s\S]{0,120}(마친|뒤)/,
+    /어느\s*시기/
+  ]
+
+  const everyRule: { r: NutritionRule; src: string }[] = [
+    ...COMMON_RULES.map((r) => ({ r, src: '공통' })),
+    ...CANCERS.flatMap((c) => c.rules.map((r) => ({ r, src: c.name }))),
+    ...Object.entries(CONDITION_RULES).flatMap(([k, v]) => (v ?? []).map((r) => ({ r, src: `증상:${k}` })))
+  ]
+
+  for (const { r, src } of everyRule) {
+    const text = `${r.title} ${r.reason}`
+    if (SPANS_BOTH.some((re) => re.test(text))) continue
+    const phases = (r.phases ?? []).filter((p) => p !== 'all')
+    for (const p of PREMISE) {
+      if (!p.re.test(text)) continue
+      const covered = phases.length > 0 && phases.every((ph) => p.ok.includes(ph))
+      if (covered) continue
+      bad('문장은 시기를 못박는데 그 시기로 제한하지 않음', `${src} ${r.id} — '${p.label}' · ${r.title}`)
     }
   }
 }
