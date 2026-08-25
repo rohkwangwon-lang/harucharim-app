@@ -268,7 +268,7 @@ export function PatientPanel({
               title={m.aliases.join(', ')}
               className={`chip border transition-colors ${
                 patient.medications.includes(m.id)
-                  ? 'border-sky-500 bg-sky-500 text-white'
+                  ? 'border-accent-600 bg-accent-600 text-white'
                   : 'border-stone-300 bg-white text-stone-600 hover:bg-stone-50'
               }`}
             >

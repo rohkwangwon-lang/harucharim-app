@@ -41,6 +41,16 @@ export function LevelDot({ level }: { level: RuleLevel | null }) {
  * 마우스를 올렸을 때 뜨는 풍선말뿐이었다 — 휴대폰에서는 볼 방법이 없다.
  * 뜻과 '그래서 어떻게 받아들이면 되는지' 를 함께 둔다.
  */
+/*
+ * 근거 등급의 색.
+ *
+ * 예전에는 A 초록·B 파랑·C 주황·G 보라로 네 색을 썼다. 서로 구분은 됐지만
+ * 화면 어디에도 없는 색이 넷이나 들어와, 배지만 따로 붙여 놓은 것처럼 보였다.
+ *
+ * 등급에는 원래 순서가 있다 — A 가 가장 단단하고 C 로 갈수록 약해진다.
+ * 그러니 다른 색으로 나눌 것이 아니라 같은 색의 진하기로 나누는 편이 맞는다.
+ * G 만 성격이 다르므로(연구 하나가 아니라 합의) 보조색을 쓴다.
+ */
 export const EVIDENCE_INFO: Record<
   EvidenceLevel,
   { what: string; how: string; chip: string; dot: string }
@@ -48,22 +58,22 @@ export const EVIDENCE_INFO: Record<
   A: {
     what: '무작위배정 임상시험, 또는 그런 시험들을 모은 메타분석',
     how: '사람을 무작위로 나눠 직접 비교한 결과입니다. 이 앱에서 가장 단단한 근거이며, 웬만하면 따르시는 편이 좋습니다.',
-    chip: 'bg-emerald-100 text-emerald-800', dot: 'bg-emerald-500'
+    chip: 'bg-brand-600 text-white', dot: 'bg-brand-600'
   },
   B: {
     what: '많은 사람을 오래 따라간 관찰 연구 (코호트·환자대조군)',
     how: '무작위로 나누지 않았기 때문에 "이것 때문"이라고 단정하기는 어렵지만, 규모가 크고 방향이 일관됩니다. 참고하실 만합니다.',
-    chip: 'bg-sky-100 text-sky-800', dot: 'bg-sky-500'
+    chip: 'bg-brand-200 text-brand-800', dot: 'bg-brand-400'
   },
   C: {
     what: '규모가 작거나 되돌아본 연구, 또는 세포·동물 수준의 기전 연구',
     how: '아직 사람에서 확인되지 않았거나 결과가 엇갈립니다. 참고만 하시고, 이것만 보고 식습관을 크게 바꾸지는 마세요.',
-    chip: 'bg-amber-100 text-amber-800', dot: 'bg-amber-500'
+    chip: 'bg-stone-200 text-stone-700', dot: 'bg-stone-400'
   },
   G: {
     what: '주요 학회 가이드라인의 합의 권고 (WCRF/AICR · ASCO · ESPEN · NCCN 등)',
     how: '연구 하나를 가리키는 것이 아니라, 전문가들이 근거를 모아 합의한 내용입니다. 실제 진료에서 쓰는 기준입니다.',
-    chip: 'bg-violet-100 text-violet-800', dot: 'bg-violet-500'
+    chip: 'bg-accent-100 text-accent-800', dot: 'bg-accent-500'
   }
 }
 
@@ -129,8 +139,18 @@ export function Section({
   return (
     <section className="mb-5">
       <div className="mb-2.5 flex items-end justify-between gap-3 px-1">
-        <div>
-          <h2 className="text-base font-bold text-stone-900">{title}</h2>
+        <div className="min-w-0">
+          {/*
+            * 제목 앞의 짧은 막대.
+            *
+            * 예전에는 제목도 본문도 같은 검정 계열이라, 화면을 훑을 때
+            * 어디서 새 이야기가 시작되는지 눈이 짚을 데가 없었다.
+            * 선 하나로 시작점을 표시하면 읽는 리듬이 생긴다.
+            */}
+          <h2 className="flex items-center gap-2 text-base font-bold text-stone-900">
+            <span className="h-4 w-1 shrink-0 rounded-full bg-brand-500" />
+            {title}
+          </h2>
           {desc && <p className="mt-0.5 text-xs leading-relaxed text-stone-500">{desc}</p>}
         </div>
         {right}
@@ -259,9 +279,10 @@ export function NutrientRow({
           {label}
           <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${st.chip}`}>{st.label}</span>
         </span>
-        <span className={`text-sm font-bold tabular-nums ${st.text}`}>
+        {/* 이 앱은 숫자를 읽으러 오는 화면이다 — 숫자가 가장 커야 한다 */}
+        <span className={`num text-lg ${st.text}`}>
           {Math.round(value).toLocaleString('ko-KR')}
-          <span className="ml-0.5 text-[10px] font-medium text-stone-400">{unit}</span>
+          <span className="ml-0.5 text-[10px] font-medium tracking-normal text-stone-400">{unit}</span>
         </span>
       </div>
 

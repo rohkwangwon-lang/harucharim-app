@@ -75,7 +75,7 @@ export function summarizeDay(
 }
 
 export const GRADE_STYLE: Record<DayGrade, { bg: string; text: string; dot: string; label: string }> = {
-  none: { bg: 'bg-slate-100', text: 'text-slate-400', dot: 'bg-slate-300', label: '기록 없음' },
+  none: { bg: 'bg-stone-100', text: 'text-stone-400', dot: 'bg-stone-300', label: '기록 없음' },
   low:  { bg: 'bg-warn-100',  text: 'text-warn-700',  dot: 'bg-warn-500',  label: '부족' },
   good: { bg: 'bg-brand-100', text: 'text-brand-700', dot: 'bg-brand-500', label: '충분' },
   high: { bg: 'bg-danger-100', text: 'text-danger-700', dot: 'bg-danger-500', label: '초과' }

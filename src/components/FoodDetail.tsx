@@ -46,10 +46,10 @@ export function FoodDetail({
                   <span className="chip bg-stone-100 text-stone-500">{food.cuisine}</span>
                 )}
                 {food.season && food.season.length > 0 && (
-                  <span className="chip bg-emerald-100 text-emerald-700">제철 {food.season.join('·')}</span>
+                  <span className="chip bg-accent-100 text-accent-700">제철 {food.season.join('·')}</span>
                 )}
                 {food.form === 'ingredient' && (
-                  <span className="chip bg-amber-100 text-amber-700">식재료</span>
+                  <span className="chip bg-warn-100 text-warn-700">식재료</span>
                 )}
                 {food.maker && <span className="chip bg-stone-100 text-stone-500">{food.maker}</span>}
               </div>
@@ -136,11 +136,11 @@ export function FoodDetail({
                   </div>
                 ))}
                 {verdict.interactions.map((h) => (
-                  <div key={h.interaction.id} className="rounded-xl border border-sky-200 bg-sky-50/50 p-3">
+                  <div key={h.interaction.id} className="rounded-xl border border-accent-200 bg-accent-50/50 p-3">
                     <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
                       <LevelBadge level={h.interaction.level} />
                       <EvidenceBadge level={h.interaction.evidence} />
-                      <span className="chip bg-sky-100 text-sky-700">약물 상호작용</span>
+                      <span className="chip bg-accent-100 text-accent-700">약물 상호작용</span>
                     </div>
                     <p className="text-sm font-semibold text-stone-900">{h.interaction.title}</p>
                     <p className="mt-1 text-xs leading-relaxed text-stone-600">{h.interaction.reason}</p>

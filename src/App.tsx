@@ -141,8 +141,15 @@ export default function App() {
     )
   }
 
+  /*
+   * 폭.
+   *
+   * 아이폰에서는 화면이 곧 폭이지만, 아이패드에서는 672 px 이 1,024 px 한가운데
+   * 놓여 양옆이 크게 빈다. 그렇다고 끝까지 늘리면 한 줄이 길어져 읽기 나빠진다 —
+   * 본문은 한 줄에 65~75자가 편하다. 태블릿부터 한 단계만 넓힌다.
+   */
   return (
-    <div className="mx-auto flex min-h-full max-w-2xl flex-col">
+    <div className="mx-auto flex min-h-full max-w-2xl flex-col md:max-w-3xl">
       <header className="safe-top sticky top-0 z-20 border-b border-stone-200 bg-white/90 backdrop-blur">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2.5">
@@ -373,7 +380,7 @@ export default function App() {
       )}
 
       <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-stone-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-2xl">
+        <div className="mx-auto flex max-w-2xl md:max-w-3xl">
           {TABS.map((t) => {
             const on = tab === t.id
             return (
@@ -399,8 +406,8 @@ export default function App() {
 /** 검수 단계임을 방문자에게 알린다. 정식 공개 시 config 의 REVIEW_MODE 를 끄면 사라진다. */
 function ReviewBanner() {
   return (
-    <div className="border-b border-amber-200 bg-amber-50 px-4 py-2">
-      <p className="text-[11px] leading-relaxed text-amber-800">
+    <div className="border-b border-warn-200 bg-warn-50 px-4 py-2">
+      <p className="text-[11px] leading-relaxed text-warn-700">
         <strong className="font-bold">검수용 시험 버전입니다.</strong> 아직 공개 배포 전이며 내용을 검토하는 중입니다.
         치료 관련 결정은 반드시 담당 의료진과 상의하세요.
       </p>

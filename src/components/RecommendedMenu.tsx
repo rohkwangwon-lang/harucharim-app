@@ -281,7 +281,7 @@ export function RecommendedMenu({
                           <span className="min-w-0 flex-1 truncate text-sm font-medium text-stone-900">
                             {e.food.name}
                           </span>
-                          {e.seasonal && <span className="chip shrink-0 bg-emerald-100 text-emerald-700">제철</span>}
+                          {e.seasonal && <span className="chip shrink-0 bg-accent-100 text-accent-700">제철</span>}
                           {e.origin === 'chosen' ? (
                             <span className="chip shrink-0 bg-stone-100 text-stone-500">내가 담음</span>
                           ) : (

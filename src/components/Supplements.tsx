@@ -408,10 +408,10 @@ export function Supplements({
                           </div>
                         ))}
                         {v.interactions.map((h) => (
-                          <div key={h.interaction.id} className="rounded-lg border border-sky-200 bg-white p-2.5">
+                          <div key={h.interaction.id} className="rounded-lg border border-accent-200 bg-white p-2.5">
                             <div className="mb-1 flex flex-wrap items-center gap-1.5">
                               <LevelBadge level={h.interaction.level} />
-                              <span className="chip bg-sky-100 text-sky-700">약물 상호작용</span>
+                              <span className="chip bg-accent-100 text-accent-700">약물 상호작용</span>
                             </div>
                             <p className="text-xs font-semibold text-stone-900">{h.interaction.title}</p>
                             <p className="mt-1 text-[11px] leading-relaxed text-stone-600">{h.interaction.reason}</p>
@@ -555,7 +555,7 @@ function MarketProduct({ product, patient }: { product: ExtSupplement; patient: 
                     <LevelBadge level={v.level} />
                     <EvidenceBadge level={v.evidence} />
                     <span className="chip bg-stone-100 text-stone-600">{v.ingredient}</span>
-                    {v.because && <span className="chip bg-sky-100 text-sky-700">{v.because}</span>}
+                    {v.because && <span className="chip bg-accent-100 text-accent-700">{v.because}</span>}
                   </div>
                   <p className="text-[11px] leading-relaxed text-stone-600">{v.reason}</p>
                   <Cites ids={v.refIds} />

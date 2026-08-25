@@ -459,7 +459,7 @@ export function TodayMeals({
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-xs font-medium text-stone-800">
                               {e.food.name}
-                              {e.seasonal && <span className="ml-1 text-[10px] text-emerald-600">제철</span>}
+                              {e.seasonal && <span className="ml-1 text-[10px] text-brand-600">제철</span>}
                             </p>
                             <p className="truncate text-[11px] text-stone-500">{e.contribution}</p>
                           </div>

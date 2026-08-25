@@ -371,7 +371,7 @@ export function FoodSearch({
             onClick={() => setOnlyIngredient((v) => !v)}
             className={`chip shrink-0 border ${
               onlyIngredient
-                ? 'border-amber-500 bg-amber-500 text-white'
+                ? 'border-accent-600 bg-accent-600 text-white'
                 : 'border-stone-200 bg-white text-stone-600'
             }`}
           >
@@ -386,7 +386,7 @@ export function FoodSearch({
                   setCuisines((prev) => (on ? prev.filter((x) => x !== c) : [...prev, c]))
                 }
                 className={`chip shrink-0 border ${
-                  on ? 'border-sky-500 bg-sky-500 text-white' : 'border-stone-200 bg-white text-stone-600'
+                  on ? 'border-accent-600 bg-accent-600 text-white' : 'border-stone-200 bg-white text-stone-600'
                 }`}
               >
                 {c}

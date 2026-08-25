@@ -7,10 +7,10 @@ import { REF_BY_ID } from '../data/references'
 import { EvidenceBadge, Section } from './ui'
 
 const KIND_STYLE: Record<ExerciseItem['kind'], string> = {
-  유산소: 'bg-sky-100 text-sky-800',
-  저항: 'bg-violet-100 text-violet-800',
-  '유연성·균형': 'bg-amber-100 text-amber-800',
-  재활: 'bg-emerald-100 text-emerald-800'
+  유산소: 'bg-brand-100 text-brand-800',
+  저항: 'bg-accent-100 text-accent-800',
+  '유연성·균형': 'bg-warn-100 text-warn-700',
+  재활: 'bg-accent-100 text-accent-700'
 }
 
 export function Exercise({ patient }: { patient: PatientContext }) {
@@ -64,8 +64,8 @@ export function Exercise({ patient }: { patient: PatientContext }) {
               </div>
             ))}
             {historyNotes.map(({ h, note }) => (
-              <div key={h} className="card border-sky-200 bg-sky-50/40 p-3.5">
-                <span className="chip bg-sky-500 text-white">{h}</span>
+              <div key={h} className="card border-accent-200 bg-accent-50/50 p-3.5">
+                <span className="chip bg-accent-600 text-white">{h}</span>
                 <p className="mt-2 text-xs leading-relaxed text-stone-700">{note}</p>
               </div>
             ))}
