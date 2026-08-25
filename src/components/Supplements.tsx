@@ -70,6 +70,7 @@ export function Supplements({
   const rec = advice.filter((a) => a.level === 'recommend')
   const con = advice.filter((a) => a.level === 'consider')
   const avo = advice.filter((a) => a.level === 'avoid')
+  const cau = advice.filter((a) => a.level === 'caution')
 
   return (
     <div>
@@ -85,6 +86,7 @@ export function Supplements({
           <div className="space-y-4">
             {rec.length > 0 && <AdviceGroup title="챙기시면 좋습니다" level="recommend" items={rec} />}
             {avo.length > 0 && <AdviceGroup title="피하시는 편이 좋습니다" level="avoid" items={avo} />}
+            {cau.length > 0 && <AdviceGroup title="드셔도 되지만 방법을 지키세요" level="caution" items={cau} />}
             {con.length > 0 && <AdviceGroup title="상황에 따라 고려" level="consider" items={con} />}
           </div>
         )}
@@ -334,6 +336,7 @@ const CANCER_LABEL: Record<string, string> = {
 const ADVICE_STYLE: Record<AdviceLevel, { cls: string; chip: string; label: string }> = {
   recommend: { cls: 'border-brand-200 bg-brand-50/40', chip: 'bg-brand-600 text-white', label: '권장' },
   consider: { cls: 'border-stone-200', chip: 'bg-stone-500 text-white', label: '고려' },
+  caution: { cls: 'border-warn-200 bg-warn-50/40', chip: 'bg-warn-600 text-white', label: '주의' },
   avoid: { cls: 'border-danger-200 bg-danger-50/40', chip: 'bg-danger-600 text-white', label: '피하세요' }
 }
 

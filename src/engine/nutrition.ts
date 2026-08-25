@@ -470,8 +470,13 @@ export interface MicroTarget {
    *
    * 그래서 단백질이 목표에 닿아 있는 날의 초과는 '참고' 로 돌리고 사정을 설명한다.
    * 단백질도 못 채우면서 인만 넘긴 날은 그냥 넘긴 것이므로 그대로 '넘음' 이다.
+   *
+   * 칼륨은 단백질이 아니라 먹는 양 자체와 부딪친다. 특정 음식에 몰려 있지 않고
+   * 거의 모든 음식에 퍼져 있어서, 하루 2,800 kcal 이 필요한 분은 무엇을 고르셔도
+   * 3,000 mg 을 넘게 된다. 추천 점수의 벌점을 다섯 배로 올려 봐도 평균이 움직이지
+   * 않았다(3,078 → 3,108 mg). 엔진이 풀 수 있는 문제가 아니었다.
    */
-  tensionWith?: 'protein'
+  tensionWith?: 'protein' | 'kcal'
   evidence: EvidenceLevel
   refIds: string[]
 }
@@ -491,7 +496,7 @@ export function microTargets(patient: PatientContext): MicroTarget[] {
    */
   if (conds.includes('신기능저하')) {
     out.push({
-      key: 'k', label: '칼륨', unit: 'mg', max: 3000,
+      key: 'k', label: '칼륨', unit: 'mg', max: 3000, tensionWith: 'kcal',
       why:
         '신기능이 떨어지면 칼륨이 잘 빠져나가지 않아 혈중 농도가 올라갈 수 있습니다. ' +
         '다만 모든 분께 일률적으로 제한하라는 근거는 아직 충분하지 않아서, 이 값은 지켜야 할 목표가 아니라 ' +

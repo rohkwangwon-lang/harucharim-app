@@ -913,7 +913,19 @@ export function buildDayMenu(
   const totals = running()
 
   // 6) 요약
-  notes.push(...dayNotes(totals, suppTotals, patient, naUnknownNames(chosen), microUnknownNames(chosen, patient)))
+  /*
+   * 값이 빠진 것을 밝힐 때는 '상에 오른 전부' 를 봐야 한다.
+   *
+   * 여기서 담으신 것(chosen)만 보고 있었다. 그런데 합계에는 앱이 추천한 것도
+   * 함께 들어간다. 그러니 앱이 골라 온 음식에 나트륨 값이 없으면,
+   * 합계는 실제보다 적게 나오면서 "상한 안에 들어옵니다" 라고 말하게 된다.
+   * 사용자가 직접 담은 것만 정직하게 밝히고 앱이 고른 것은 숨기는 셈이었다.
+   */
+  const onPlate: SelectedItem[] = []
+  for (const slot of MEAL_SLOTS)
+    for (const e of meals[slot]) onPlate.push({ foodId: e.food.id, servings: e.servings, meal: slot })
+
+  notes.push(...dayNotes(totals, suppTotals, patient, naUnknownNames(onPlate), microUnknownNames(onPlate, patient)))
 
   return { scope: '하루(24시간) 전체', season, meals, totals, suppTotals, slotTotals, target, removed, notes, slotNotes }
 }
@@ -1900,15 +1912,25 @@ export function dayNotes(
        * 단백질과 부딪치는 기준은, 단백질을 채운 날이면 사정을 설명한다.
        * 인 1,000 mg 은 암 환자의 단백질 목표와 애초에 양립하지 않는다.
        */
-      const met = m.tensionWith === 'protein' && protein >= target.protein[0]
+      const met =
+        (m.tensionWith === 'protein' && protein >= target.protein[0]) ||
+        (m.tensionWith === 'kcal' && kcal >= target.kcal[0])
+      const tension =
+        m.tensionWith === 'protein'
+          ? `오늘 단백질 ${Math.round(protein)} g 을 채우셨다면 이건 피하기 어렵습니다 — ` +
+            '단백질 1 g 마다 인이 13~15 mg 씩 따라 들어오기 때문입니다. ' +
+            '치료 중에는 단백질을 줄이는 쪽이 더 위험하므로, 인은 식사를 깎기보다 ' +
+            '가공식품의 인산염 첨가물을 줄이고 필요하면 인결합제로 잡는 것이 순서입니다. ' +
+            '실제 기준은 채혈에서 나오는 혈중 인 수치이니 담당 선생님과 함께 보세요.'
+          : `오늘 ${Math.round(kcal)} kcal 을 채우셨다면 이 정도는 따라옵니다 — ` +
+            '칼륨은 특정 음식에 몰려 있지 않고 거의 모든 음식에 조금씩 들어 있어서, ' +
+            '드시는 양이 늘면 함께 늘어납니다. 치료 중에 열량을 줄이는 쪽이 더 위험합니다. ' +
+            '그래도 손댈 곳은 있습니다 — 채소는 잘게 썰어 데친 뒤 물을 버리면 칼륨이 상당히 줄고, ' +
+            '바나나·감자·건과일·저염소금(염화칼륨)처럼 특히 높은 것은 빈도를 줄일 수 있습니다. ' +
+            '실제 기준은 채혈에서 나오는 혈중 칼륨 수치이니 담당 선생님과 함께 보세요.'
       notes.push(met
         ? { tone: 'info', topic: m.label,
-            text: `${v} ${m.unit} 입니다. 신장내과 기준(${m.max} ${m.unit})보다 많지만, ` +
-              `오늘 단백질 ${Math.round(protein)} g 을 채우셨다면 이건 피하기 어렵습니다 — ` +
-              '단백질 1 g 마다 인이 13~15 mg 씩 따라 들어오기 때문입니다. ' +
-              '치료 중에는 단백질을 줄이는 쪽이 더 위험하므로, 인은 식사를 깎기보다 ' +
-              '가공식품의 인산염 첨가물을 줄이고 필요하면 인결합제로 잡는 것이 순서입니다. ' +
-              '실제 기준은 채혈에서 나오는 혈중 인 수치이니 담당 선생님과 함께 보세요.' }
+            text: `${v} ${m.unit} 입니다. 신장내과 기준(${m.max} ${m.unit})보다 많지만, ${tension}` }
         : { tone: 'over', topic: m.label,
             text: `${v} ${m.unit} — 기준(${m.max} ${m.unit})을 넘습니다. ${m.why}` })
     } else if (m.min !== undefined && got < m.min) {

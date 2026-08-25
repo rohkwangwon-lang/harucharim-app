@@ -16,7 +16,17 @@ import { effectiveLossPct, nutritionRisk } from './nutrition'
  * 근거 없이 "면역력에 좋다"는 식의 추천은 만들지 않는다.
  */
 
-export type AdviceLevel = 'recommend' | 'consider' | 'avoid'
+/**
+ * 영양제 권고의 세기.
+ *
+ * 'caution' 이 나중에 생겼다. 그전에는 상호작용이 '주의' 든 '금기' 든 모두
+ * '피하세요' 로 나갔는데, 그 둘은 전혀 다른 말이다.
+ * "갑상선호르몬제는 칼슘과 4시간 이상 띄워 드세요" 는 복용법 안내이지
+ * 칼슘을 드시지 말라는 뜻이 아니다. 그런데 화면에는 빨간 '피하세요' 로 떴고,
+ * 항호르몬 치료를 함께 받으시는 분은 같은 칼슘을 두고
+ * '권장' 과 '피하세요' 를 나란히 보게 됐다.
+ */
+export type AdviceLevel = 'recommend' | 'consider' | 'caution' | 'avoid'
 
 export interface SupplementAdvice {
   level: AdviceLevel
@@ -30,6 +40,14 @@ export interface SupplementAdvice {
   trigger: string
   /** 해당 분류의 실제 제품들 */
   products: Supplement[]
+  /**
+   * 분류가 아니라 이 제품 하나에 대한 말일 때.
+   *
+   * "셀레늄 보충제는 권하지 않습니다" 는 셀레늄에 대한 말이지
+   * '아연·미네랄' 전체를 피하라는 뜻이 아니다. 그 구분이 없어서
+   * 아연을 권해 드린 분이 같은 분류의 금기를 나란히 보게 됐다.
+   */
+  product?: Supplement
 }
 
 /**
@@ -47,7 +65,7 @@ function productsIn(category: SupplementCategory, patient: PatientContext): Supp
   )
 }
 
-const ORDER: Record<AdviceLevel, number> = { avoid: 0, recommend: 1, consider: 2 }
+const ORDER: Record<AdviceLevel, number> = { avoid: 0, caution: 1, recommend: 2, consider: 3 }
 
 export function adviseSupplements(patient: PatientContext): SupplementAdvice[] {
   const out: SupplementAdvice[] = []
@@ -296,7 +314,16 @@ export function adviseSupplements(patient: PatientContext): SupplementAdvice[] {
     })
   }
 
-  if (risk.bmi >= 25 && patient.phase === 'survivorship') {
+  /*
+   * 과체중이라도 체중이 줄고 있으면 이 말을 하지 않는다.
+   *
+   * BMI 26 인 분이 석 달 사이 8 % 빠지고 계실 수 있다. 그때 "과체중이니
+   * 영양보충 음료는 필요 없습니다" 라고 하면, 바로 위에서 같은 음료를
+   * 권해 놓고 아래에서 그것을 무르는 꼴이 된다.
+   * 영양불량이 과체중보다 급한 문제라는 것은 이 앱이 다른 곳에서도 쓰는 순서다(ESPEN).
+   */
+  if (risk.bmi >= 25 && patient.phase === 'survivorship' &&
+      effectiveLossPct(patient) < 5 && !cond('체중감소')) {
     push({
       level: 'avoid', category: '경장영양(균형영양식)',
       title: '균형영양식은 지금 필요하지 않습니다',
@@ -310,7 +337,19 @@ export function adviseSupplements(patient: PatientContext): SupplementAdvice[] {
 
   /* ── 증상 ───────────────────────────────────────────── */
 
-  if (cond('식욕부진') && risk.risk !== 'high') {
+  /*
+   * 입맛이 없다고 늘 영양보충 음료가 답은 아니다.
+   *
+   * 치료를 마치신 뒤 과체중이고 체중도 지켜지고 있는 분이라면, 입맛이 없다는 것이
+   * 곧 영양부족은 아니다. 그런데도 권해 드리는 바람에, 바로 아래에서
+   * "과체중이니 필요하지 않습니다" 라고 무르는 말이 같이 떴다 —
+   * 125 kg 이신 분이 한 화면에서 권장과 금기를 나란히 보게 됐다.
+   * 채워야 할 이유가 있을 때만 권한다.
+   */
+  const settledOverweight =
+    patient.phase === 'survivorship' && risk.bmi >= 25 &&
+    effectiveLossPct(patient) < 5 && !cond('체중감소')
+  if (cond('식욕부진') && risk.risk !== 'high' && !settledOverweight) {
     push({
       level: 'consider', category: '경장영양(균형영양식)',
       title: '경구영양보충 — 식사량이 줄어든 날의 보완책으로',
@@ -337,7 +376,15 @@ export function adviseSupplements(patient: PatientContext): SupplementAdvice[] {
     })
   }
 
-  if (cond('변비')) {
+  /*
+   * 설사와 변비가 함께 적혀 있으면 섬유는 설사 쪽을 따른다.
+   *
+   * 실제로 둘 다 겪으시는 분이 있다 — 마약성 진통제와 항암제를 함께 쓰면
+   * 며칠씩 번갈아 오기도 한다. 그런데 그때 섬유를 늘리라는 말과 멈추라는 말이
+   * 한 화면에 같이 뜨면 어느 쪽도 따를 수가 없다.
+   * 지금 설사가 있는 동안에는 멈추는 쪽이 먼저다.
+   */
+  if (cond('변비') && !cond('설사')) {
     push({
       level: 'recommend', category: '식이섬유',
       title: '차전자피 — 물과 함께 드셔야 효과가 납니다',
@@ -400,12 +447,26 @@ export function adviseSupplements(patient: PatientContext): SupplementAdvice[] {
       const level: AdviceLevel | null =
         h.rule.level === 'avoid' ? 'avoid' : h.rule.level === 'prefer' ? 'recommend' : null
       if (!level) continue
-      const key = s.category + '|' + level
+      /*
+       * 특정 제품을 지목한 금기는 분류 전체의 이름을 달지 않는다.
+       *
+       * "셀레늄 보충제는 권하지 않습니다" 는 셀레늄 하나에 대한 말인데,
+       * 셀레늄이 '아연·미네랄' 분류에 있다는 이유로 그 분류 전체가 '피하세요' 로 떴다.
+       * 그 바람에 장루가 있어 아연을 권해 드린 분이
+       * 같은 '아연·미네랄' 을 두고 권장과 금기를 나란히 보게 됐다.
+       * 어느 제품 이야기인지 제목에 밝히고, 분류끼리 부딪치지 않게 한다.
+       */
+      const byProduct =
+        level === 'avoid' &&
+        (h.rule.match.supplementIds?.includes(s.id) ?? false) &&
+        !(h.rule.match.supplementCategories?.includes(s.category) ?? false)
+      const key = s.category + '|' + level + (byProduct ? '|' + s.id : '')
       if (seen.has(key)) continue
       seen.add(key)
       push({
         level, category: s.category,
-        title: h.rule.title,
+        product: byProduct ? s : undefined,
+        title: byProduct ? `${s.name} — ${h.rule.title}` : h.rule.title,
         reason: h.rule.reason,
         evidence: h.rule.evidence,
         refIds: h.rule.refIds,
@@ -414,11 +475,13 @@ export function adviseSupplements(patient: PatientContext): SupplementAdvice[] {
     }
     for (const h of v.interactions) {
       if (h.interaction.level !== 'avoid' && h.interaction.level !== 'caution') continue
-      const key = s.category + '|avoid'
+      /* 금기와 복용법 안내를 같은 칸에 넣지 않는다 */
+      const level: AdviceLevel = h.interaction.level === 'avoid' ? 'avoid' : 'caution'
+      const key = s.category + '|' + level
       if (seen.has(key)) continue
       seen.add(key)
       push({
-        level: 'avoid', category: s.category,
+        level, category: s.category,
         title: h.interaction.title,
         reason: h.interaction.reason,
         evidence: h.interaction.evidence,
@@ -428,7 +491,36 @@ export function adviseSupplements(patient: PatientContext): SupplementAdvice[] {
     }
   }
 
-  return out.sort((a, b) => ORDER[a.level] - ORDER[b.level])
+  /*
+   * 마지막으로 같은 분류에서 부딪치는 말을 정리한다.
+   *
+   * 암종 규칙은 대체로 치료 중을 염두에 둔 일반론이다 —
+   * "식사만으로 부족하면 경구영양보충을 미루지 마세요" 같은 것.
+   * 그런데 그 앞에 서 계신 분이 치료를 마치고 BMI 53 이며 체중도 지켜지고 있다면,
+   * 그 일반론은 이분께 맞지 않는다. 그런데도 둘 다 내보내는 바람에
+   * 한 화면에서 '권장' 과 '피하세요' 를 나란히 보게 됐다.
+   *
+   * 이럴 때는 상황을 보고 쓴 쪽이 이긴다 — 그쪽이 이분에 대해 더 많이 알고 있다.
+   * 다만 조용히 지우지는 않는다. 무엇을 물렸는지 한 줄 덧붙인다.
+   * 제품 하나를 지목한 금기는 분류 전체를 막는 것이 아니므로 여기서 제외한다.
+   */
+  const blocked = new Set(out.filter((a) => a.level === 'avoid' && !a.product).map((a) => a.category))
+  const dropped = new Map<string, string[]>()
+  const kept = out.filter((a) => {
+    if (a.level === 'avoid' || a.level === 'caution') return true
+    if (!blocked.has(a.category)) return true
+    dropped.set(a.category, [...(dropped.get(a.category) ?? []), a.title])
+    return false
+  })
+  for (const a of kept) {
+    const lost = dropped.get(a.category)
+    if (a.level !== 'avoid' || a.product || !lost?.length) continue
+    a.reason +=
+      ` (다른 암종에서는 "${lost[0]}" 처럼 권해 드리기도 하지만, ` +
+      '지금 상태에서는 그쪽이 맞지 않아 여기서는 빼 두었습니다.)'
+  }
+
+  return kept.sort((a, b) => ORDER[a.level] - ORDER[b.level])
 }
 
 /** 현재 복용 중인 것 가운데 이 환자에게 문제가 되는 것 */
