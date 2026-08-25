@@ -12,7 +12,8 @@ import { SUPPLEMENTS } from '../../src/data/supplements'
 import { CANCERS } from '../../src/data/cancers'
 import { MEAL_SLOTS } from '../../src/data/types'
 import { DEFAULT_PATIENT } from '../../src/lib/store'
-import type { PatientContext } from '../../src/data/types'
+import type { NutrientKey, PatientContext } from '../../src/data/types'
+import { evaluateFood } from '../../src/engine/rules'
 
 let seed = 777
 const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff }
@@ -212,6 +213,43 @@ const bad = (k: string, d: string) => { const s = `${k} :: ${d}`; if (!seenB.has
     const uses = text.match(new RegExp(`\\b${name}\\b`, 'g'))?.length ?? 0
     /* 선언 한 번 + 그 파일 안 쓰임까지 쳐서, 다른 데서 한 번도 안 부르면 죽은 것이다 */
     if (uses <= 1) bad('내보내고 아무 데서도 쓰지 않음', `${name} — ${file}`)
+  }
+}
+
+
+/* ─────────────────── 위험한 성분을 실제로 잡는가 ─────────────────── */
+
+/*
+ * 처음에는 "값이 높은데 태그가 없다" 를 셌다. 그런데 131건이 나왔고,
+ * 그걸 다 손으로 붙이는 것은 또 다른 사람이 또 빠뜨릴 일을 만드는 것뿐이었다.
+ * 라벨은 사람이 붙이니 언제든 빠진다.
+ *
+ * 그래서 규칙이 성분표의 숫자로도 걸리게 고치고, 여기서는 라벨이 아니라
+ * 결과를 본다 — 이 환자에게 위험한 양이 든 음식을 앱이 실제로 잡아내는가.
+ * 시금치된장국(건더기 위주)이 와파린 드시는 분께 '권장' 으로 나가던 것이
+ * 이 검사에 걸린다.
+ */
+{
+  const CASES: { what: string; key: NutrientKey; over: number; patient: Partial<PatientContext> }[] = [
+    { what: '와파린 · 비타민 K', key: 'vitK', over: 100, patient: { medications: ['warfarin'] } },
+    { what: '신기능저하 · 칼륨', key: 'k', over: 400, patient: { conditions: ['신기능저하'] } },
+    { what: '신기능저하 · 인', key: 'p', over: 300, patient: { conditions: ['신기능저하'] } }
+  ]
+  for (const c of CASES) {
+    const p = { ...DEFAULT_PATIENT, conditions: [], medications: [], subtypes: [], ...c.patient } as PatientContext
+    let missed = 0
+    for (const f of CURATED_FOODS) {
+      const v = f.per100[c.key]
+      if (typeof v !== 'number') continue
+      /* 규칙은 '초과' 로 걸린다. 검사도 같은 눈금을 써야 경계값에서 헛돌지 않는다 */
+      if ((v * f.serving.g) / 100 <= c.over) continue
+      const verdict = evaluateFood(f, p, 1)
+      if (verdict.level === 'caution' || verdict.level === 'avoid') continue
+      missed++
+      if (missed <= 3)
+        bad('위험한 양인데 아무 말도 하지 않음', `${c.what} — ${f.name} ${Math.round((v * f.serving.g) / 100)}`)
+    }
+    if (missed > 3) bad('위험한 양인데 아무 말도 하지 않음', `${c.what} — 외 ${missed - 3}종`)
   }
 }
 

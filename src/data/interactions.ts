@@ -79,7 +79,8 @@ export const INTERACTIONS: Interaction[] = [
   {
     id: 'int-warfarin-vitk',
     agent: 'warfarin',
-    match: { tags: ['고비타민K'] },
+    /* 태그가 빠진 음식도 성분표의 숫자로 걸리게 한다 — 시금치된장국 건더기가 그랬다 */
+    match: { tags: ['고비타민K'], nutrient: { key: 'vitK', op: '>', value: 100, basis: 'serving' } },
     level: 'caution',
     title: '비타민 K 섭취량을 갑자기 바꾸지 마세요',
     reason:

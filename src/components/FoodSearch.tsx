@@ -55,7 +55,16 @@ export function FoodSearch({
   const [meal, setMeal] = useState<MealSlot>(initialMeal ?? '점심')
   /** 식재료만 보기 — 조리된 메뉴가 아니라 재료 단위로 짜고 싶을 때 */
   const [onlyIngredient, setOnlyIngredient] = useState(false)
-  const [cuisine, setCuisine] = useState<Cuisine | '전체'>('전체')
+  /*
+   * 요리 계통은 여러 개를 함께 고를 수 있어야 한다.
+   *
+   * 하나만 고르게 두었더니 "한식과 일식을 같이 보고 싶다" 를 할 수가 없었다.
+   * 실제로 드시는 것은 한 계통으로 나뉘지 않는다.
+   * 아무것도 고르지 않으면 전부 보여 준다 — '전체' 라는 칸을 따로 두지 않아도 된다.
+   */
+  const [cuisines, setCuisines] = useState<Cuisine[]>([])
+  const cuisineOk = (c: string | undefined) =>
+    cuisines.length === 0 || c === '무관' || cuisines.includes((c ?? '한식') as Cuisine)
   /**
    * 기기에 받아 둔 확장 데이터에서 찾은 결과.
    * 저장소 조회는 비동기라 늦게 도착한다. 어떤 검색어의 결과인지 함께 담아 두지 않으면
@@ -95,7 +104,7 @@ export function FoodSearch({
     return () => clearTimeout(t)
   }, [q])
 
-  useEffect(() => { setLimit(60) }, [q, group, onlyIngredient, cuisine])
+  useEffect(() => { setLimit(60) }, [q, group, onlyIngredient, cuisines])
 
   const cached = useMemo(
     () => ({ rules: activeRules(patient), interactions: activeInteractions(patient) }),
@@ -108,17 +117,17 @@ export function FoodSearch({
       (f) =>
         (group === '전체' || f.group === group) &&
         (!onlyIngredient || f.form === 'ingredient') &&
-        (cuisine === '전체' || (f.cuisine ?? '한식') === cuisine || f.cuisine === '무관') &&
+        cuisineOk(f.cuisine) &&
         matches(f, q.trim())
     ).length
-  }, [q, group, onlyIngredient, cuisine])
+  }, [q, group, onlyIngredient, cuisines])
 
   const results = useMemo(() => {
     const list = FOODS.filter(
       (f) =>
         (group === '전체' || f.group === group) &&
         (!onlyIngredient || f.form === 'ingredient') &&
-        (cuisine === '전체' || (f.cuisine ?? '한식') === cuisine || f.cuisine === '무관') &&
+        cuisineOk(f.cuisine) &&
         matches(f, q.trim())
     )
     // 임상 규칙 평가는 한 건당 비용이 있다. 1만 8천 건 전부에 돌리면 입력이 버벅이므로
@@ -170,13 +179,13 @@ export function FoodSearch({
         if (group !== '전체' && f.group !== group) continue
         // 앱에 든 결과와 같은 조건을 적용한다.
         // 요리 계통만 빠져 있어서, 중식으로 걸러 놓아도 확장분은 그대로 나왔다.
-        if (cuisine !== '전체' && (f.cuisine ?? '한식') !== cuisine && f.cuisine !== '무관') continue
+        if (!cuisineOk(f.cuisine)) continue
         have.add(f.name)
         scored.push({ food: f, verdict: evaluateFood(f, patient, 1, cached) })
       }
     }
     return scored
-  }, [q, group, onlyIngredient, cuisine, patient, cached, extra, limit])
+  }, [q, group, onlyIngredient, cuisines, patient, cached, extra, limit])
 
   return (
     <div>
@@ -368,19 +377,30 @@ export function FoodSearch({
           >
             식재료만
           </button>
-          {(['전체', '한식', '양식', '중식', '일식', '동남아'] as const).map((c) => (
+          {(['한식', '양식', '중식', '일식', '동남아'] as const).map((c) => {
+            const on = cuisines.includes(c)
+            return (
+              <button
+                key={c}
+                onClick={() =>
+                  setCuisines((prev) => (on ? prev.filter((x) => x !== c) : [...prev, c]))
+                }
+                className={`chip shrink-0 border ${
+                  on ? 'border-sky-500 bg-sky-500 text-white' : 'border-stone-200 bg-white text-stone-600'
+                }`}
+              >
+                {c}
+              </button>
+            )
+          })}
+          {cuisines.length > 0 && (
             <button
-              key={c}
-              onClick={() => setCuisine(c)}
-              className={`chip shrink-0 border ${
-                cuisine === c
-                  ? 'border-sky-500 bg-sky-500 text-white'
-                  : 'border-stone-200 bg-white text-stone-600'
-              }`}
+              onClick={() => setCuisines([])}
+              className="chip shrink-0 border border-stone-300 bg-stone-100 text-stone-600"
             >
-              {c}
+              계통 해제
             </button>
-          ))}
+          )}
         </div>
 
         <div className="mt-1.5 flex gap-1.5 overflow-x-auto pb-1">

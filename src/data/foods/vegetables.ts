@@ -59,7 +59,7 @@ export const vegetables = [
     ['생식', '고비타민K', '고식이섬유'], {}),
   F('water-parsley', '미나리', '채소', 'ingredient', 50, '1줌',
     { kcal: 17, carb: 2.8, protein: 1.9, fat: 0.2, fiber: 2.5, na: 20, k: 410, ca: 24, p: 40, mg: 24, fe: 1.6, vitA: 160, vitC: 20, vitK: 160 },
-    ['고식이섬유'], {}),
+    ['고식이섬유', '고비타민K'], {}),
   F('mugwort', '쑥', '채소', 'ingredient', 30, '1줌',
     { kcal: 46, carb: 8.7, protein: 5.2, fat: 0.4, fiber: 7.5, na: 10, k: 890, ca: 230, p: 55, mg: 60, fe: 4.3, vitA: 730, vitC: 33, vitK: 340 },
     ['고식이섬유', '고칼륨', '고비타민K'], {}),

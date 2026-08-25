@@ -10,7 +10,23 @@ import { evaluateSelection } from '../engine/rules'
 import { foodContribution, observedWeightGain, personalTarget, sumIntake, targetNotes } from '../engine/nutrition'
 import { BASE_EXERCISE, CONDITION_EXERCISE_NOTES, EXERCISE_BY_CANCER } from '../data/exercise'
 import { REF_BY_ID } from '../data/references'
-import { DayNoteList, EvidenceBadge, LevelBadge, NutrientPanel, NutrientRow, nutrientState, Section } from './ui'
+import { ChipGroup, DayNoteList, EvidenceBadge, LevelBadge, NutrientPanel, NutrientRow, nutrientState, Section, TodayStatus } from './ui'
+import { MEDICATIONS } from '../data/interactions'
+import type { Phase, PatientCondition } from '../data/types'
+
+/* 화면에 보여 줄 이름. 저장은 id 로 한다 — 약을 이름으로 견주면 규칙이 비켜 간다. */
+const PHASE_LABELS: { id: Phase; name: string }[] = [
+  { id: 'during_rt', name: '방사선치료 중' },
+  { id: 'during_chemo', name: '항암치료 중' },
+  { id: 'neutropenia', name: '호중구감소증' },
+  { id: 'post_op', name: '수술 후 회복기' },
+  { id: 'survivorship', name: '치료를 마쳤습니다' }
+]
+
+const CONDITION_LABELS: { id: PatientCondition; name: string }[] = ([
+  '식욕부진', '체중감소', '체중증가', '오심·구토', '구강점막염', '설사', '변비',
+  '연하곤란', '위절제후', '장루보유', '호중구감소증', '복수', '신기능저하', '당뇨', '고혈압'
+] as PatientCondition[]).map((c) => ({ id: c, name: c }))
 import { label as dayLabel, today as todayKey } from '../lib/day'
 
 const SLOT_ICON: Record<MealSlot, typeof IconMorning> = {
@@ -39,9 +55,12 @@ export function TodayMeals({
   diary,
   weights,
   weight,
-  onSetWeight
+  onSetWeight,
+  onPatch
 }: {
   patient: PatientContext
+  /** 치료 시기·증상·약을 이 화면에서 바로 고칠 때 쓴다 */
+  onPatch: (patch: Partial<PatientContext>) => void
   selected: SelectedItem[]
   supplements: string[]
   /** 해당 끼니로 음식을 담으러 간다 */
@@ -150,6 +169,51 @@ export function TodayMeals({
           <span className="shrink-0 text-xs font-semibold text-warn-800">오늘로 →</span>
         </button>
       )}
+
+      {/*
+        * 오늘의 몸 상태.
+        *
+        * 치료 시기·증상·약은 다른 설정과 성격이 다르다 — 자주 바뀌고,
+        * 바뀌면 추천이 크게 달라진다. 그런데 고치려면 내 정보 탭까지
+        * 들어가야 했다. 매일 여는 화면에서 매일 바뀌는 것을 못 고치고 있었다.
+        */}
+      <TodayStatus
+        phaseLabel={PHASE_LABELS.find((p) => p.id === patient.phase)?.name ?? '치료 시기'}
+        conditions={patient.conditions}
+        medications={patient.medications}
+      >
+        <ChipGroup
+          label="지금 어느 단계인가요"
+          options={PHASE_LABELS}
+          value={[patient.phase]}
+          single
+          onToggle={(id) => onPatch({ phase: id })}
+        />
+        <ChipGroup
+          label="지금 겪고 계신 증상"
+          options={CONDITION_LABELS}
+          value={patient.conditions}
+          onToggle={(id) =>
+            onPatch({
+              conditions: patient.conditions.includes(id)
+                ? patient.conditions.filter((c) => c !== id)
+                : [...patient.conditions, id]
+            })
+          }
+        />
+        <ChipGroup
+          label="복용 중인 약"
+          options={MEDICATIONS.map((m) => ({ id: m.id, name: m.name }))}
+          value={patient.medications}
+          onToggle={(id) =>
+            onPatch({
+              medications: patient.medications.includes(id)
+                ? patient.medications.filter((m) => m !== id)
+                : [...patient.medications, id]
+            })
+          }
+        />
+      </TodayStatus>
 
       {/* ── 오늘 요약 ─────────────────────────────────── */}
       <div className="mb-4 rounded-2xl border border-brand-200 bg-brand-50/60 px-4 py-3.5">

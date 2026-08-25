@@ -15,7 +15,7 @@
 import { microTargets, foodContribution, nutritionRisk } from '../../src/engine/nutrition'
 import { buildDayMenu, dayNotes, microUnknownNames } from '../../src/engine/menu'
 import { adviseSupplements } from '../../src/engine/supplementAdvice'
-import { evaluateSupplement } from '../../src/engine/rules'
+import { activeInteractions, activeRules, evaluateFood, evaluateSupplement } from '../../src/engine/rules'
 import { ingredientKeywords, judgeProduct } from '../../src/engine/ingredientVerdict'
 import { CURATED_FOODS } from '../../src/data/foods'
 import { REF_BY_ID } from '../../src/data/references'
@@ -321,6 +321,82 @@ for (let i = 0; i < N; i++) {
     bad('주의·금기로 나오는 원료가 하나도 없음', '기능이 빈 채로 뜬다')
 
   console.log(`  원료 걸러 보기 ${checked.toLocaleString()}명 확인`)
+}
+
+/* ── 상태를 바꾸면 추천도 바뀌는가 ───────────────────── */
+
+/*
+ * 치료 시기·증상·복용 약은 자주 바뀐다. 방사선치료는 어느 날 끝나고,
+ * 설사는 어제 없다가 오늘 있고, 약은 중간에 더해지거나 빠진다.
+ * 그래서 내 식단 화면에서 바로 고칠 수 있게 했는데,
+ * 고쳐도 추천이 그대로면 고칠 수 있게 한 뜻이 없다.
+ *
+ * 여기서 보는 것은 '무엇으로 바뀌는가' 가 아니라 '바뀌기는 하는가' 다.
+ * 무엇으로 바뀌어야 하는지는 각 규칙이 정할 일이다.
+ */
+{
+  const base = {
+    ...DEFAULT_PATIENT, cancer: 'breast', phase: 'during_rt',
+    sex: 'F', age: 55, weightKg: 70, heightCm: 163,
+    weightLossPct: 0, conditions: [], medications: [], subtypes: []
+  } as PatientContext
+  const day = (p: PatientContext) => buildDayMenu([], p, { dayKey: '2026-08-25' })
+  const menuOf = (p: PatientContext) => {
+    const m = day(p)
+    return (['아침', '점심', '저녁', '간식'] as const)
+      .flatMap((s) => m.meals[s].map((e) => e.food.id)).sort().join(',')
+  }
+
+  /* 치료가 끝나면 목표가 내려간다 — 체중이 지켜지고 있고 저체중이 아닐 때 */
+  const beforeT = day(base).target.kcal
+  const afterT = day({ ...base, phase: 'survivorship' }).target.kcal
+  if (afterT[0] >= beforeT[0])
+    bad('치료 시기를 바꿔도 목표가 그대로', `${beforeT[0]} → ${afterT[0]}`)
+
+  /* 체중이 줄고 있으면 그 조정을 하지 않는다 — 굶리면 안 된다 */
+  const losing = day({ ...base, phase: 'survivorship', weightLossPct: 8 }).target.kcal
+  if (losing[0] !== beforeT[0])
+    bad('체중이 줄고 있는데 치료 종료를 이유로 목표를 낮춤', `${beforeT[0]} → ${losing[0]}`)
+
+  /* 증상을 켜면 목표든 식단이든 무언가 달라져야 한다 */
+  const CHANGES: [string, Partial<PatientContext>][] = [
+    ['설사', { conditions: ['설사'] }],
+    ['연하곤란', { conditions: ['연하곤란'] }],
+    ['신기능저하', { conditions: ['신기능저하'] }],
+    ['호중구감소증', { phase: 'neutropenia' }],
+    ['와파린', { medications: ['warfarin'] }],
+    ['아로마타제 억제제', { medications: ['ai'] }]
+  ]
+  /*
+   * '그날 식단이 바뀌었는가' 로만 보면 안 된다.
+   *
+   * 와파린을 더해도 그날 상에 시금치가 없으면 식단은 그대로다.
+   * 그건 규칙이 잠든 것이 아니라 그날 걸릴 음식이 없었을 뿐이다.
+   * 봐야 할 것은 '이 상태에서 판정이 달라지는 음식이 실제로 있는가' 다.
+   */
+  const verdictOf = (p: PatientContext) => {
+    const cached = { rules: activeRules(p), interactions: activeInteractions(p) }
+    return new Map(CURATED_FOODS.map((f) => [f.id, evaluateFood(f, p, 1, cached).level]))
+  }
+  const baseV = verdictOf(base)
+  const baseMenu = menuOf(base)
+  const baseNotes = day(base).notes.length
+
+  for (const [label, patch] of CHANGES) {
+    const p = { ...base, ...patch } as PatientContext
+    const m = day(p)
+    const v = verdictOf(p)
+    let flipped = 0
+    for (const [id, level] of v) if (baseV.get(id) !== level) flipped++
+
+    const changed =
+      flipped > 0 ||
+      menuOf(p) !== baseMenu ||
+      m.target.kcal[0] !== beforeT[0] ||
+      m.notes.length !== baseNotes ||
+      m.removed.length > 0
+    if (!changed) bad('상태를 바꿨는데 아무것도 달라지지 않음', label)
+  }
 }
 
 /* ── 값이 있어야 셀 수 있다 ───────────────────────── */

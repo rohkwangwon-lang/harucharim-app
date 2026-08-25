@@ -358,3 +358,91 @@ export function DayNoteList({
     </div>
   )
 }
+
+/* ────────────────── 오늘의 몸 상태를 그 자리에서 ────────────────── */
+
+/**
+ * 치료 시기·증상·복용 약을 내 식단 화면에서 바로 고친다.
+ *
+ * 이 셋은 다른 설정과 성격이 다르다. 키와 이름은 좀처럼 바뀌지 않지만,
+ * 설사는 어제 없다가 오늘 있고, 방사선치료는 어느 날 끝난다.
+ * 그런데 고치려면 내 정보 탭까지 들어가야 했다 —
+ * 매일 여는 화면에서 매일 바뀌는 것을 못 고치고 있었던 셈이다.
+ *
+ * 게다가 이 셋은 추천을 가장 크게 바꾼다. 설사 하나로 식이섬유 목표가
+ * 25~35 g 에서 8~15 g 으로 뒤집히고, 와파린 하나로 시금치가 주의가 된다.
+ * 오늘 상태가 어제와 다르면 오늘 식단도 달라야 한다.
+ *
+ * 접어 두는 것이 기본이다 — 평소에는 자리만 차지하고,
+ * 달라진 날에만 펴서 고치시면 된다.
+ */
+export function TodayStatus({
+  phaseLabel, conditions, medications, children
+}: {
+  phaseLabel: string
+  conditions: string[]
+  medications: string[]
+  children: ReactNode
+}) {
+  const bits = [
+    phaseLabel,
+    conditions.length > 0 ? `증상 ${conditions.length}가지` : '증상 없음',
+    medications.length > 0 ? `약 ${medications.length}가지` : '약 없음'
+  ]
+  return (
+    <details className="card mb-3 overflow-hidden">
+      <summary className="flex cursor-pointer items-center gap-2 px-3.5 py-2.5">
+        <span className="h-2 w-2 shrink-0 rounded-full bg-brand-500" />
+        <span className="min-w-0 flex-1 truncate text-xs font-semibold text-stone-700">
+          {bits.join(' · ')}
+        </span>
+        <span className="shrink-0 text-[11px] font-medium text-brand-700">달라졌나요?</span>
+      </summary>
+      <div className="border-t border-stone-100 px-3.5 py-3">
+        <p className="mb-2.5 text-[11px] leading-relaxed text-stone-500">
+          오늘 상태가 어제와 다르면 여기서 바로 고치세요. 고치는 즉시 아래 목표와 추천이 함께 바뀝니다.
+        </p>
+        {children}
+      </div>
+    </details>
+  )
+}
+
+/** 눌러서 켜고 끄는 알약 단추 묶음 */
+export function ChipGroup<T extends string>({
+  label, options, value, onToggle, single = false
+}: {
+  label: string
+  options: readonly { id: T; name: string }[]
+  value: T[]
+  onToggle: (id: T) => void
+  /** 하나만 고를 수 있는가 (치료 시기) */
+  single?: boolean
+}) {
+  return (
+    <div className="mb-3 last:mb-0">
+      <p className="mb-1.5 text-[11px] font-semibold text-stone-500">{label}</p>
+      <div className="flex flex-wrap gap-1.5">
+        {options.map((o) => {
+          const on = value.includes(o.id)
+          return (
+            <button
+              key={o.id}
+              onClick={() => onToggle(o.id)}
+              aria-pressed={on}
+              className={`chip border ${
+                on
+                  ? single
+                    ? 'border-brand-600 bg-brand-600 text-white'
+                    : 'border-warn-500 bg-warn-500 text-white'
+                  : 'border-stone-300 bg-white text-stone-600'
+              }`}
+            >
+              {o.name}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}

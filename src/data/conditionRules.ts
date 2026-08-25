@@ -260,7 +260,16 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
 
   신기능저하: [
     {
-      id: 'cond-ckd-k', level: 'caution', match: { tags: ['고칼륨'] },
+      /*
+       * 태그만 믿지 않는다.
+       *
+       * '고칼륨' 은 사람이 손으로 붙인 표시라 빠질 수 있다.
+       * 실제로 배(428 mg)와 참외(440 mg)에는 붙어 있지 않았다 —
+       * 신기능이 떨어진 분께는 확인이 필요한 양인데도 규칙이 조용히 비켜 갔다.
+       * 성분표의 숫자로도 걸리게 해 둔다. 둘 중 하나만 맞아도 걸린다.
+       */
+      id: 'cond-ckd-k', level: 'caution',
+      match: { tags: ['고칼륨'], nutrient: { key: 'k', op: '>', value: 400, basis: 'serving' } },
       title: '칼륨이 높은 식품은 확인이 필요합니다',
       reason:
         '사구체여과율이 떨어지면 칼륨 배설이 줄어 고칼륨혈증이 생길 수 있습니다. ' +
@@ -269,7 +278,8 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
       evidence: 'G', refIds: ['kdri2020']
     },
     {
-      id: 'cond-ckd-p', level: 'caution', match: { tags: ['고인'] },
+      id: 'cond-ckd-p', level: 'caution',
+      match: { tags: ['고인'], nutrient: { key: 'p', op: '>', value: 300, basis: 'serving' } },
       title: '인이 높은 식품과 가공식품의 인산염 첨가물에 주의하세요',
       reason:
         '가공식품에 첨가된 무기 인산염은 자연 식품의 인보다 흡수율이 훨씬 높습니다. ' +

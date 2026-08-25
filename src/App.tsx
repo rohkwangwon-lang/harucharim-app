@@ -159,6 +159,7 @@ export default function App() {
         {tab === 'compose' && (
           <TodayMeals
             patient={state.patient}
+            onPatch={setPatient}
             selected={selected}
             supplements={state.supplements}
             diary={state.diary}

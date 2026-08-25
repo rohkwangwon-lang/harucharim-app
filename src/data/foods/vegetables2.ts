@@ -19,7 +19,7 @@ export const vegetables2 = [
     ['생식', '거친질감', '수분보충'], {}),
   F('sprout-broccoli', '브로콜리 새싹', '채소', 'ingredient', 20, '1줌',
     { kcal: 35, carb: 4.0, protein: 3.5, fat: 0.6, fiber: 2.5, na: 10, k: 200, ca: 40, p: 60, fe: 1.0, vitC: 40, vitK: 100 },
-    ['십자화과', '생식'], { note: '설포라판 전구체가 성숙한 브로콜리보다 훨씬 높다' }),
+    ['십자화과', '생식', '고비타민K'], { note: '설포라판 전구체가 성숙한 브로콜리보다 훨씬 높다' }),
   F('cabbage-red', '적양배추', '채소', 'ingredient', 60, '1줌',
     { kcal: 31, carb: 7.4, protein: 1.4, fat: 0.2, fiber: 2.1, na: 27, k: 243, ca: 45, p: 30, mg: 16, fe: 0.8, vitC: 57, vitK: 38 },
     ['십자화과', '폴리페놀', '생식', '가스유발'], {}),
