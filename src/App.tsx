@@ -21,6 +21,7 @@ import { AdminInquiries } from './components/AdminInquiries'
 import { checkAdmin } from './lib/inquiry'
 import { displayName, useSession } from './lib/auth'
 import { isSupabaseConfigured } from './lib/supabase'
+import { Credentials } from './components/ui'
 
 /**
  * 탭은 5개로 고정한다.
@@ -70,7 +71,7 @@ export default function App() {
   const {
     state, day, setDay, selected, setWeight,
     setPatient, adoptName, addFood, setServings, setMeal, removeFood, clearFoods,
-    toggleSupplement, completeOnboarding, resetOnboarding
+    toggleSupplement, completeOnboarding, resetOnboarding, setTextSize
   } = useAppState()
 
   const [tab, setTabState] = useState<Tab>('compose')
@@ -80,6 +81,16 @@ export default function App() {
   const [toast, setToast] = useState<string | null>(null)
   const [asking, setAsking] = useState(false)
   const { user, loading: sessionLoading } = useSession()
+
+  /*
+   * 고르신 글자 크기를 문서에 적용한다.
+   * Tailwind 가 rem 을 쓰므로 이 한 줄이 글자·여백·아이콘을 한꺼번에 키운다.
+   */
+  useEffect(() => {
+    const size = state.textSize ?? 'normal'
+    if (size === 'normal') document.documentElement.removeAttribute('data-text')
+    else document.documentElement.setAttribute('data-text', size)
+  }, [state.textSize])
   // 관리자로 등록된 계정으로 로그인하면 문의 관리 화면이 나타난다
   const [isAdmin, setIsAdmin] = useState(false)
   useEffect(() => {
@@ -310,6 +321,40 @@ export default function App() {
                 문의 남기기 · 내 문의 보기
               </button>
             </div>
+            {/*
+              * 글자 크기 고르기.
+              *
+              * 기본값은 그대로 두고 필요하신 분만 키우신다.
+              * 미리보기 문장을 함께 두어, 고르기 전에 얼마나 커지는지 보이게 한다.
+              */}
+            <div className="card mb-4 p-4">
+              <p className="text-sm font-bold text-stone-900">글자 크기</p>
+              <p className="mt-1 text-xs leading-relaxed text-stone-500">
+                눈이 침침하시면 키워 보세요. 글자와 함께 여백도 커지므로 화면이 흐트러지지 않습니다.
+              </p>
+              <div className="mt-3 flex gap-1.5">
+                {([
+                  ['normal', '보통'],
+                  ['large', '크게'],
+                  ['xlarge', '더 크게']
+                ] as const).map(([id, label]) => {
+                  const on = (state.textSize ?? 'normal') === id
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => setTextSize(id)}
+                      aria-pressed={on}
+                      className={`flex-1 rounded-xl border-2 px-2 py-2.5 font-bold transition-colors ${
+                        id === 'normal' ? 'text-sm' : id === 'large' ? 'text-base' : 'text-lg'
+                      } ${on ? 'border-brand-600 bg-brand-600 text-white' : 'border-stone-200 bg-white text-stone-700'}`}
+                    >
+                      {label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
             <button className="btn-outline mb-4 w-full" onClick={resetOnboarding}>
               처음부터 다시 설정하기
             </button>
@@ -365,6 +410,8 @@ function ReviewBanner() {
 
 function Disclaimer() {
   return (
+    <>
+    <Credentials />
     <div className="card mt-2 border-stone-200 bg-stone-50 p-4">
       <h3 className="text-sm font-bold text-stone-800">이 앱을 쓰실 때 알아 두실 것</h3>
       <ul className="mt-2 space-y-1.5 text-xs leading-relaxed text-stone-600">
@@ -391,5 +438,6 @@ function Disclaimer() {
         </li>
       </ul>
     </div>
+    </>
   )
 }

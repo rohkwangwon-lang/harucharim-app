@@ -18,6 +18,15 @@ export interface AppState {
   weights: Record<DayKey, number>
   /** 복용 중인 영양제 id */
   supplements: string[]
+  /**
+   * 글자 크기.
+   *
+   * 이 앱을 쓰시는 분 중에는 예순 넘으신 분이 많고, 항암 중에는 눈이 침침해지기도 한다.
+   * 기본값은 지금 그대로 두고, 필요하신 분만 키우실 수 있게 한다.
+   * Tailwind 가 rem 을 쓰므로 뿌리 글자 크기만 바꾸면 여백과 아이콘까지 함께 커진다 —
+   * 글자만 키우면 상자를 뚫고 나가지만, 함께 키우면 짜임새가 그대로다.
+   */
+  textSize?: 'normal' | 'large' | 'xlarge'
 }
 
 export const DEFAULT_PATIENT: PatientContext = {
@@ -39,7 +48,8 @@ const DEFAULT_STATE: AppState = {
   patient: DEFAULT_PATIENT,
   diary: {},
   weights: {},
-  supplements: []
+  supplements: [],
+  textSize: 'normal'
 }
 
 /**
@@ -122,6 +132,16 @@ export function useAppState() {
 
   const setPatient = useCallback((patch: Partial<PatientContext>) => {
     setState((s) => ({ ...s, patient: { ...s.patient, ...patch } }))
+  }, [])
+
+  /**
+   * 글자 크기를 바꾼다.
+   *
+   * 화면에 곧바로 적용되도록 <html> 의 글자 크기를 함께 바꾼다.
+   * Tailwind 가 rem 을 쓰므로 이 한 줄이 글자·여백·아이콘을 한꺼번에 키운다.
+   */
+  const setTextSize = useCallback((size: NonNullable<AppState['textSize']>) => {
+    setState((s) => ({ ...s, textSize: size }))
   }, [])
 
   /**
@@ -247,6 +267,7 @@ export function useAppState() {
     selected,
     setWeight,
     setPatient,
+    setTextSize,
     adoptName,
     addFood,
     setServings,

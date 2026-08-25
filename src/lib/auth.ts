@@ -45,8 +45,34 @@ const SCOPES: Partial<Record<Provider, string>> = {
   kakao: 'profile_nickname'
 }
 
+/*
+ * 지난번에 어느 쪽으로 들어오셨는지 기억한다.
+ *
+ * 로그인 자체는 이미 기기에 남아 자동으로 이어진다(persistSession).
+ * 그래도 앱을 오래 열지 않아 세션이 만료되면 다시 고르셔야 하는데,
+ * 그때 "내가 카카오였나 구글이었나" 를 떠올려야 한다.
+ * 다른 쪽으로 들어가면 아예 다른 계정이 되니, 그 기억은 사용자 몫으로 두면 안 된다.
+ *
+ * 저장하는 것은 '어느 쪽' 뿐이다 — 아이디도 비밀번호도 이 앱은 받지 않는다.
+ */
+const LAST_PROVIDER = 'oncofood.lastProvider'
+
+export function lastProvider(): Provider | null {
+  try {
+    const v = localStorage.getItem(LAST_PROVIDER)
+    return v === 'kakao' || v === 'google' ? v : null
+  } catch {
+    return null
+  }
+}
+
 export async function signIn(provider: Provider) {
   if (!supabase) throw new Error('로그인이 아직 준비되지 않았습니다.')
+  try {
+    localStorage.setItem(LAST_PROVIDER, provider)
+  } catch {
+    /* 사파리 프라이빗 모드 등 — 기억하지 못할 뿐 로그인은 그대로 된다 */
+  }
   // 로그인 후 이 앱으로 정확히 돌아오게 한다 (GitHub Pages 하위 경로 대응)
   const redirectTo = new URL(import.meta.env.BASE_URL || '/', window.location.origin).toString()
   const { error } = await supabase.auth.signInWithOAuth({

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { IconEvening, IconMorning, IconNoon, IconShuffle, IconSnack } from './icons'
 import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
 import { MEAL_SLOTS } from '../data/types'
@@ -59,8 +59,44 @@ export function RecommendedMenu({
    * '다시 구성'은 seed 를 올려 같은 날에도 다른 안을 보여 준다.
    */
   const recent = useMemo(() => recentFoods(diary, day), [diary, day])
+
+  /*
+   * 직전 안의 '주요리' 는 다음 안에서 피한다.
+   *
+   * 점수 폭을 넓히는 것만으로는 부족했다. 닭백숙은 저녁 한 접시에
+   * 단백질 51 g 을 지고 오니 다른 후보와 점수 차가 워낙 커서, 폭을 넓혀도 늘 1등이었다 —
+   * 다섯 번을 눌러도 저녁 주요리가 그대로인 경우가 절반(49 %)이었고,
+   * 저녁 주요리 1,000번 중 732번이 닭백숙이었다.
+   * 곁들이만 바뀌니 "아무리 눌러도 변화가 없다" 는 말이 나왔다.
+   *
+   * 이 앱에는 이미 '며칠 안에 드신 것은 다시 권하지 않는다' 는 장치가 있으니 그것을 쓴다 —
+   * 직전 안에 나온 것을 '방금 드신 것' 으로 본다.
+   *
+   * 다만 전부를 피하면 안 된다. 처음에 그렇게 해 봤더니 큰 것이 모두 막혀
+   * 잔챙이로 채우느라 가짓수가 여덟에서 열여섯으로 불었다.
+   * 다른 조합을 보고 싶으신 것이지 반찬 열여섯 가지를 원하시는 것이 아니다.
+   * 열량이 큰 두 가지만 피하면 주요리는 바뀌고 상차림의 짜임새는 그대로다.
+   */
+  const AVOID_TOP = 2
+  const prevRef = useRef<{ id: string; kcal: number }[]>([])
+  const roundKey = `${patient.cancer}|${patient.phase}|${day}|${selected.length}`
+  const lastKey = useRef(roundKey)
+  if (lastKey.current !== roundKey) { prevRef.current = []; lastKey.current = roundKey }
+
   const menu = useMemo(
-    () => buildDayMenu(selected, patient, { supplements: supps, day, nonce: seed, recent }),
+    () => {
+      const avoid = new Map(recent)
+      if (seed > 0) {
+        for (const e of [...prevRef.current].sort((a, b) => b.kcal - a.kcal).slice(0, AVOID_TOP))
+          avoid.set(e.id, 0)
+      }
+      const m = buildDayMenu(selected, patient, { supplements: supps, day, nonce: seed, recent: avoid })
+      /* 이번에 내놓은 것을 다음 차례를 위해 적어 둔다 */
+      prevRef.current = MEAL_SLOTS.flatMap((slot) =>
+        m.meals[slot].map((e) => ({ id: e.food.id, kcal: foodContribution(e.food, e.servings).kcal ?? 0 }))
+      )
+      return m
+    },
     [selected, patient, supps, seed, day, recent]
   )
 

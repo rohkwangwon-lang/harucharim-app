@@ -49,3 +49,17 @@
   ::-webkit-scrollbar-thumb { @apply bg-stone-300 rounded-full; }
   ::-webkit-scrollbar-track { background: transparent; }
 }
+
+/*
+ * 글자 크기.
+ *
+ * 노안이신 분과 항암 중 눈이 침침해지신 분을 위해 키울 수 있게 한다.
+ * 글자만 키우면 상자를 뚫고 나가므로 뿌리 글자 크기를 바꾼다 —
+ * Tailwind 는 크기를 rem 으로 적으니 여백·아이콘·모서리까지 같은 비율로 커지고,
+ * 짜임새가 그대로 유지된다.
+ *
+ * 20 px 까지만 둔다. 그 이상은 좁은 화면에서 가로로 넘치기 시작한다.
+ */
+html { font-size: 16px; }
+html[data-text='large'] { font-size: 18px; }
+html[data-text='xlarge'] { font-size: 20px; }

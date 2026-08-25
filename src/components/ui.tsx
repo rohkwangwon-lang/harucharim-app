@@ -446,3 +446,44 @@ export function ChipGroup<T extends string>({
     </div>
   )
 }
+
+/**
+ * 누가 만들고 누가 보았는지.
+ *
+ * 이 앱은 판정마다 근거 등급과 출처를 달아 두었지만, 그 판단을 누가 했는지는
+ * 어디에도 적지 않았다. 암 환자에게 "이건 드셔도 됩니다" 라고 말하는 앱이라면
+ * 그 말의 출처가 문헌만이어서는 부족하다 — 문헌을 고르고 이 환자에게
+ * 무엇이 해당하는지 정한 사람이 누구인지가 함께 있어야 한다.
+ *
+ * 다만 이것이 진료를 대신한다는 뜻으로 읽히면 안 되므로, 같은 자리에서
+ * 담당 의료진과 상의하시라는 말을 함께 둔다.
+ */
+export function Credentials({ compact = false }: { compact?: boolean }) {
+  if (compact) {
+    return (
+      <p className="text-[11px] leading-relaxed text-stone-500">
+        암 환자를 25년간 치료해 온 <strong className="text-stone-700">방사선종양학과 전문의</strong>가
+        내용을 감수하고 검토했습니다.
+      </p>
+    )
+  }
+  return (
+    <div className="card border-brand-200 bg-brand-50/50 p-4">
+      <h3 className="text-sm font-bold text-brand-900">누가 만들고 누가 보았나</h3>
+      <p className="mt-1.5 text-xs leading-relaxed text-stone-700">
+        암 환자를 <strong>25년간 치료해 온 방사선종양학과 전문의</strong>가 이 앱의 모든 권고를
+        직접 감수하고 검토했습니다. 어떤 문헌을 근거로 삼을지, 그 근거가 이 암종·이 시기·이 증상에
+        해당하는지는 진료 경험을 바탕으로 판단했습니다.
+      </p>
+      <ul className="mt-2.5 space-y-1 text-[11px] leading-relaxed text-stone-600">
+        <li>· 권고마다 근거 수준(A·B·C·G)과 출처를 함께 밝혔습니다.</li>
+        <li>· 근거가 엇갈리는 주제는 한쪽으로 몰지 않고 그 사실을 적었습니다.</li>
+        <li>· 판단이 바뀌면 규칙을 고칩니다 — 근거가 먼저이고 일관성은 그다음입니다.</li>
+      </ul>
+      <p className="mt-2.5 border-t border-brand-200/70 pt-2 text-[11px] leading-relaxed text-stone-500">
+        그래도 이 앱은 <strong>진료를 대신하지 않습니다.</strong> 여기 적힌 것은 담당 선생님과
+        이야기하실 거리이지 결론이 아닙니다.
+      </p>
+    </div>
+  )
+}

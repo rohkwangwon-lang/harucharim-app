@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { isSupabaseConfigured } from '../lib/supabase'
-import { displayName, PROVIDER_LABEL, signIn, useSession, type Provider } from '../lib/auth'
+import { displayName, lastProvider, PROVIDER_LABEL, signIn, useSession, type Provider } from '../lib/auth'
 import type { CancerId, Cuisine, PatientCondition, PatientContext, Phase, TreatmentHistory } from '../data/types'
 import { SUBTYPE_OPTIONS } from '../data/types'
+import { Credentials } from './ui'
 import { CANCERS, CANCER_BY_ID } from '../data/cancers'
 import { nutritionRisk, personalTarget } from '../engine/nutrition'
 
@@ -52,6 +53,8 @@ export function Onboarding({
 }) {
   const [step, setStep] = useState(0)
   const { user } = useSession()
+  /* 지난번에 쓰신 로그인 방법 — 아이디·비밀번호는 이 앱이 받지 않는다 */
+  const last = lastProvider()
   const steps = loginOnly ? ['로그인'] : ['로그인', '암종', '치료 시기', '몸 상태', '식성']
   /*
    * 첫 화면은 로그인을 거쳐야 넘어간다.
@@ -106,21 +109,41 @@ export function Onboarding({
               </div>
             ) : isSupabaseConfigured ? (
               <>
+                {/*
+                  * 지난번에 쓰신 쪽을 위로 올리고 표시해 둔다.
+                  *
+                  * 로그인은 기기에 남아 자동으로 이어지지만, 오래 열지 않아 만료되면
+                  * 다시 고르셔야 한다. 그때 "내가 카카오였나 구글이었나" 를 떠올리는 일은
+                  * 사용자 몫으로 둘 것이 아니다 — 다른 쪽으로 들어가면 아예 다른 계정이 되어
+                  * 적어 두신 것과 문의 내역이 사라진 것처럼 보인다.
+                  */}
                 <div className="flex flex-col gap-2">
-                  {(['kakao', 'google'] as Provider[]).map((p) => (
+                  {([...(['kakao', 'google'] as Provider[])]
+                    .sort((a, b) => (a === last ? -1 : b === last ? 1 : 0))
+                  ).map((p) => (
                     <button
                       key={p}
-                      className={`btn py-3 text-sm ${
+                      className={`btn relative py-3 text-sm ${
                         p === 'kakao'
                           ? 'bg-[#FEE500] text-[#191600] hover:bg-[#f5dc00]'
                           : 'border border-stone-300 bg-white text-stone-700 hover:bg-stone-50'
-                      }`}
+                      } ${p === last ? 'ring-2 ring-brand-500 ring-offset-2' : ''}`}
                       onClick={() => signIn(p).catch(() => undefined)}
                     >
                       {PROVIDER_LABEL[p]}
+                      {p === last && (
+                        <span className="ml-2 rounded-full bg-brand-600 px-2 py-0.5 text-[10px] font-bold text-white">
+                          지난번에 쓰신 방법
+                        </span>
+                      )}
                     </button>
                   ))}
                 </div>
+                {last && (
+                  <p className="mt-2 text-center text-[11px] leading-relaxed text-stone-500">
+                    같은 방법으로 들어오셔야 적어 두신 기록과 문의 내역이 그대로 이어집니다.
+                  </p>
+                )}
                 <p className="mt-4 text-center text-xs text-stone-400">
                   처음이시면 위 버튼으로 바로 가입됩니다. 따로 아이디를 만들지 않으셔도 됩니다.
                 </p>
@@ -134,7 +157,12 @@ export function Onboarding({
               </div>
             )}
 
-            <div className="mt-6 rounded-xl bg-stone-50 px-4 py-3">
+            {/* 누가 만든 앱인지 처음 화면에서 밝힌다 */}
+            <div className="mt-5 rounded-xl bg-brand-50/60 px-4 py-3 ring-1 ring-brand-200">
+              <Credentials compact />
+            </div>
+
+            <div className="mt-3 rounded-xl bg-stone-50 px-4 py-3">
               <p className="text-[11px] leading-relaxed text-stone-500">
                 암종·체중·식단 같은 <strong className="text-stone-700">건강 정보는 이 기기 안에만</strong> 저장되며
                 서버로 전송되지 않습니다. 로그인은 문의 답변을 확인하기 위한 것입니다.{' '}

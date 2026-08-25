@@ -419,6 +419,7 @@ for (let i = 0; i < N; i++) {
   let tried = 0
   let tooSimilar = 0
   let shortfall = 0
+  let sameMain = 0
   let sumChanged = 0
 
   for (let i = 0; i < 240; i++) {
@@ -431,13 +432,21 @@ for (let i = 0; i < N; i++) {
       weightLossPct: 0, conditions: COND_SETS[i % COND_SETS.length], medications: [], subtypes: []
     } as PatientContext
 
+    /*
+     * 화면이 하는 것과 같은 방식으로 돌린다 —
+     * 직전 안의 큰 두 가지를 피하고 다음 안을 받는다.
+     * 화면만 그렇게 하고 검사는 그냥 nonce 만 올리면, 검사가 실제와 다른 것을 본다.
+     */
+    let prev: { id: string; kcal: number }[] = []
     const ids = (nonce: number) => {
-      const m = buildDayMenu([], p, { dayKey: '2026-08-25', nonce })
-      return {
-        list: (['아침', '점심', '저녁', '간식'] as const).flatMap((s) => m.meals[s].map((e) => e.food.id)),
-        kcal: m.totals.kcal ?? 0,
-        target: m.target.kcal
-      }
+      const avoid = new Map<string, number>()
+      if (nonce > 0)
+        for (const e of [...prev].sort((a, b) => b.kcal - a.kcal).slice(0, 2)) avoid.set(e.id, 0)
+      const m = buildDayMenu([], p, { dayKey: '2026-08-25', nonce, recent: avoid })
+      const entries = (['아침', '점심', '저녁', '간식'] as const)
+        .flatMap((s) => m.meals[s].map((e) => ({ id: e.food.id, kcal: foodContribution(e.food, e.servings).kcal ?? 0 })))
+      prev = entries
+      return { list: entries.map((e) => e.id), kcal: m.totals.kcal ?? 0, target: m.target.kcal }
     }
     const a = ids(0)
     if (a.list.length === 0) continue
@@ -455,9 +464,28 @@ for (let i = 0; i < N; i++) {
     if (changed < 0.15) tooSimilar++
 
     /* 다시 구성한 안도 목표를 채워야 한다 */
-    for (const r of [b, ids(3)]) {
+    for (const r of [b, ids(2)]) {
       if (r.kcal < r.target[0] * 0.85) shortfall++
     }
+
+    /*
+     * 저녁의 주요리가 바뀌는가.
+     *
+     * 곁들이만 바뀌면 사용자에게는 아무 일도 없는 것과 같다.
+     * 실제로 다섯 번을 눌러도 저녁 주요리가 그대로인 경우가 절반이었고,
+     * 그때 나온 말이 "아무리 눌러도 변화가 없다" 였다.
+     */
+    const dinnerMain = (nonce: number) => {
+      const m = buildDayMenu([], p, { dayKey: '2026-08-25', nonce, recent: mainAvoid })
+      const d = m.meals['저녁']
+      if (d.length === 0) return '—'
+      const big = d.reduce((x, y) =>
+        (foodContribution(y.food, y.servings).kcal ?? 0) > (foodContribution(x.food, x.servings).kcal ?? 0) ? y : x)
+      mainAvoid = new Map([[big.food.id, 0]])
+      return big.food.id
+    }
+    let mainAvoid = new Map<string, number>()
+    if (dinnerMain(0) === dinnerMain(1) && dinnerMain(2) === dinnerMain(3)) sameMain++
   }
 
   const avg = tried > 0 ? sumChanged / tried : 0
@@ -471,8 +499,10 @@ for (let i = 0; i < N; i++) {
     bad("'다시 구성' 인데 거의 그대로인 경우가 잦음", `${tooSimilar}/${tried}`)
   if (shortfall > tried * 0.1)
     bad("다시 구성한 안이 목표를 못 채움", `${shortfall}/${tried * 2}`)
+  if (sameMain > tried * 0.1)
+    bad("다시 구성해도 저녁 주요리가 그대로", `${sameMain}/${tried}`)
 
-  console.log(`  다시 구성 ${tried}건 · 평균 ${Math.round(avg * 100)} % 달라짐 · 거의 그대로 ${tooSimilar}건`)
+  console.log(`  다시 구성 ${tried}건 · 평균 ${Math.round(avg * 100)} % 달라짐 · 거의 그대로 ${tooSimilar}건 · 주요리 고정 ${sameMain}건`)
 }
 
 /* ── 값이 있어야 셀 수 있다 ───────────────────────── */
