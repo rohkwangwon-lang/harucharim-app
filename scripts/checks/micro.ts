@@ -463,6 +463,31 @@ for (let i = 0; i < N; i++) {
   const mixed = judgeProduct('오메가3 골드', '[EPA 및 DHA 함유 유지] 혈행 개선 [비타민E] 유해산소로부터 세포를 보호', rt)
   if (mixed.level !== 'avoid' && mixed.level !== 'caution')
     bad('치료 중 피해야 할 것이 곁들여 들었는데 놓침', `오메가3+비타민E → ${mixed.level}`)
+
+  /*
+   * 좋은 것과 피할 것이 한 통에 담겨 오면 권하지 않는다.
+   *
+   * 화면이 쓰는 것과 같은 잣대를 여기서도 쓴다 —
+   * 주된 성분이 권장이면서, 제품 어디에도 주의·금기 원료가 없어야 한다.
+   * 앞의 조건만 두었더니 방사선치료 중인 분께 오메가3+비타민E 제품이 권장으로 나갔다.
+   * 오메가3 는 권장이 맞지만 치료 중 고용량 비타민 E 는 재발을 늘린 성분이고,
+   * 한 통에 담겨 오는 이상 따로 뗄 수가 없다.
+   */
+  const recommendable = (v: ReturnType<typeof judgeProduct>) =>
+    v.primaryLevel === 'prefer' && v.level !== 'caution' && v.level !== 'avoid'
+
+  const MIXED: [string, string, PatientContext][] = [
+    ['알티지 오메가3 골드', '[EPA 및 DHA 함유 유지] 혈행 개선 [비타민E] 유해산소로부터 세포를 보호하는데 필요', rt],
+    ['칼슘 마그네슘 비타민D 아연', '[칼슘] 뼈와 치아 형성에 필요 [셀레늄] 유해산소로부터 세포를 보호', rt]
+  ]
+  for (const [name, fn, who] of MIXED) {
+    if (recommendable(judgeProduct(name, fn, who)))
+      bad('주의 성분이 함께 든 제품을 권함', name)
+  }
+
+  /* 반대로 섞이지 않은 것은 그대로 권해야 한다 */
+  const clean = judgeProduct('오메가3 프리미엄', '[EPA 및 DHA 함유 유지] 혈중 중성지질 개선', rt)
+  if (!recommendable(clean)) bad('섞이지 않은 제품인데 권하지 않음', `오메가3 프리미엄 → ${clean.level}`)
 }
 
 /* ── '다시 구성' 이 실제로 다시 구성하는가 ───────────────── */
