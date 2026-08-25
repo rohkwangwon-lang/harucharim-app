@@ -399,6 +399,64 @@ for (let i = 0; i < N; i++) {
   }
 }
 
+/* ── 한식 상차림이 상차림다운가 ───────────────── */
+
+/*
+ * 밥이 없었다.
+ *
+ * 자료의 form: 'ingredient' 를 그대로 '추천하면 안 되는 것' 으로 써 온 탓에
+ * 쌀밥도 김치도 두부도 김도 후보에서 빠져 있었다 — 488종 중 148종이 그랬다.
+ * 게다가 죽은 한 그릇에 단백질이 12 g 이라 밥(5~7 g)보다 점수가 높아서,
+ * 치료를 마치고 잘 지내시는 분께도 아침에 녹두죽 점심에 흑임자죽이 매일 올라왔다.
+ * 스무 날을 돌려도 밥이 한 번도 나오지 않았다.
+ *
+ * 한식 식단이라면 밥이 상에 올라야 하고, 죽은 아플 때 나와야 한다.
+ */
+{
+  const wellPatient = {
+    ...DEFAULT_PATIENT, cancer: 'breast', phase: 'survivorship',
+    sex: 'F', age: 55, weightKg: 60, heightCm: 163,
+    weightLossPct: 0, conditions: [], medications: [], subtypes: []
+  } as PatientContext
+  const softPatient = { ...wellPatient, conditions: ['연하곤란'] } as PatientContext
+
+  const countIn = (who: PatientContext, match: (name: string, group: string) => boolean) => {
+    let hit = 0
+    let days = 0
+    for (let d = 0; d < 20; d++) {
+      const m = buildDayMenu([], who, { dayKey: `2026-${String(1 + (d % 12)).padStart(2, '0')}-${String(1 + d).padStart(2, '0')}` })
+      days++
+      const names = (['아침', '점심', '저녁', '간식'] as const)
+        .flatMap((s) => m.meals[s].map((e) => ({ n: e.food.name, g: e.food.group })))
+      if (names.some((x) => match(x.n, x.g))) hit++
+    }
+    return { hit, days }
+  }
+
+  const isStaple = (n: string, g: string) => g === '곡류·전분' && /밥/.test(n)
+  const isPorridge = (n: string, g: string) => g === '밥·면·죽 요리' && /죽$|미음/.test(n)
+
+  const rice = countIn(wellPatient, isStaple)
+  if (rice.hit < rice.days * 0.5)
+    bad('한식인데 밥이 상에 잘 오르지 않음', `${rice.hit}/${rice.days}일`)
+
+  const porridge = countIn(wellPatient, isPorridge)
+  if (porridge.hit > porridge.days * 0.5)
+    bad('잘 지내시는 분께 죽이 너무 잦음', `${porridge.hit}/${porridge.days}일`)
+
+  /* 반대로 삼키기 어려운 분께는 죽이 나와야 한다 */
+  const softPorridge = countIn(softPatient, isPorridge)
+  if (softPorridge.hit === 0)
+    bad('삼키기 어려운 분께 죽이 한 번도 안 나옴', `${softPorridge.hit}/${softPorridge.days}일`)
+
+  /* 김치·나물 같은 반찬도 상에 올라야 한다 */
+  const banchan = countIn(wellPatient, (_n, g) => g === '반찬·조림·볶음' || g === '채소' || g === '해조·버섯')
+  if (banchan.hit < banchan.days * 0.4)
+    bad('반찬이 상에 잘 오르지 않음', `${banchan.hit}/${banchan.days}일`)
+
+  console.log(`  상차림 20일 · 밥 ${rice.hit}일 · 죽 ${porridge.hit}일 · 반찬 ${banchan.hit}일`)
+}
+
 /* ── 곁들여 든 것으로 제품을 권하지 않는가 ───────────────── */
 
 /*

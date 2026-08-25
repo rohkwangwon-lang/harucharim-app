@@ -15,6 +15,7 @@ import { summarizeDay } from '../../src/engine/dayScore'
 import { evaluateFood, activeRules, activeInteractions, evaluateSelection } from '../../src/engine/rules'
 import { foodContribution, personalTarget, targetNotes, nutritionRisk, effectiveLossPct } from '../../src/engine/nutrition'
 import { adviseSupplements } from '../../src/engine/supplementAdvice'
+import { isIngredientOnly } from '../../src/data/foods'
 import { CANCERS } from '../../src/data/cancers'
 import { SUPPLEMENTS } from '../../src/data/supplements'
 import { MEDICATIONS } from '../../src/data/interactions'
@@ -181,14 +182,8 @@ for (let person = 0; person < PEOPLE; person++) {
       const v = evaluateFood(e.food, patient, e.servings, cached)
       if (v.level === 'avoid' || v.level === 'caution')
         bad('피해야 할 것을 추천', `${ctx} ${e.food.name} ${v.level}`)
-      // 조리를 마친 단백질 급원('연어(구이)', '새우(데친 것)')은 그대로 한 접시다.
-      const PROT = ['어패류', '육류', '가금류·난류', '두류·대두가공']
-      const eatenAsIs =
-        e.food.group === '과일' || e.food.group === '경장영양·환자식' ||
-        (PROT.includes(e.food.group) &&
-          /\((구이|데친 것|찐 것|삶은 것|조림|볶음|찜)\)/.test(e.food.name))
-      if (e.food.form === 'ingredient' && !eatenAsIs)
-        bad('식재료를 메뉴로 추천', `${ctx} ${e.food.name}`)
+      /* 엔진이 쓰는 것과 같은 함수로 본다 — 따로 적어 두면 고칠 때마다 어긋난다 */
+      if (isIngredientOnly(e.food)) bad('재료를 메뉴로 추천', `${ctx} ${e.food.name}`)
       if (e.food.tags.some((t) => ['알코올', '가공육', '염장', '훈제', '튀김', '직화구이', '초가공식품'].includes(t as string)))
         bad('먼저 권하지 않기로 한 것을 추천', `${ctx} ${e.food.name}`)
 

@@ -1,6 +1,6 @@
 import type { Cuisine, EvidenceLevel, Food, FoodGroup, MealSlot, NutrientKey, PatientContext, Season, SelectedItem, Supplement } from '../data/types'
 import { MEAL_SLOTS } from '../data/types'
-import { CURATED_FOODS, FOOD_BY_ID } from '../data/foods'
+import { CURATED_FOODS, FOOD_BY_ID, isIngredientOnly } from '../data/foods'
 import { CANCER_BY_ID } from '../data/cancers'
 import { activeInteractions, activeRules, evaluateFood, type RuleHit, type InteractionHit } from './rules'
 import { addTotals, dosingWeight, effectiveLossPct, foodContribution, microTargets, personalTarget, type MicroTarget, type NutrientTotals } from './nutrition'
@@ -1408,6 +1408,16 @@ function collectCandidates(
 ): Cand[] {
   /* 이분에게 세는 미량영양소 — 없으면 아래 루프가 빈 객체만 만든다 */
   const micros = microTargets(patient)
+
+  /*
+   * 부드러운 식사가 필요하신가 — 죽을 앞세울지 밥을 앞세울지 가른다.
+   * 급성기(방사선·항암 중)에는 증상이 없더라도 언제든 나빠질 수 있어 함께 본다.
+   */
+  const needsSoft =
+    patient.phase === 'during_rt' || patient.phase === 'during_chemo' ||
+    patient.conditions.some((c) =>
+      c === '연하곤란' || c === '구강점막염' || c === '오심·구토' ||
+      c === '위절제후' || c === '식욕부진' || c === '설사')
   /*
    * 점착성(떡류)에 감점을 준다 — 연하곤란으로 진단되지 않은 분에게도.
    *
@@ -1491,27 +1501,19 @@ function collectCandidates(
      * 아래 이름 규칙이 "(생것)·(삶은 것)" 같은 조리 상태 이름은 따로 걸러 준다.
      */
     /*
-     * 이미 조리된 단백질 급원은 그 자체로 한 접시다.
+     * 상에 오르는 것만 후보로 둔다.
      *
-     * '고등어(구이)' 는 구운 고등어이고 '새우(데친 것)' 은 삶은 새우다. 둘 다 상에 그대로 오른다.
-     * 그런데 이름에 조리 상태가 괄호로 붙어 있고 form 이 ingredient 라는 이유로 제외되어,
-     * 생선 요리가 추천에서 통째로 빠져 있었다. 남은 단백질 급원은 통조림 두 가지뿐이었다.
-     * 게다가 이것들은 나트륨이 낮다 — 고등어구이 90 mg, 연어구이 71 mg, 새우 89 mg.
-     * 앱이 나트륨 때문에 단백질을 못 채우던 일의 상당 부분이 여기서 왔다.
+     * 예전에는 자료의 form: 'ingredient' 를 그대로 '추천하면 안 되는 것' 으로 썼다.
+     * 그런데 그 둘은 다른 이야기였다 — 쌀밥도 김치도 두부도 김도 자료에서는
+     * 재료로 적혀 있다. 그래서 한식 식단이라면서 밥이 스무 날 동안 한 번도
+     * 나오지 않았고 김치와 나물도 함께 빠졌다. 488종 중 148종이 그렇게 사라졌다.
+     *
+     * 과일에서 한 번, 조리된 생선·고기에서 또 한 번, 이번이 세 번째다.
+     * 그때마다 예외를 덧붙여 왔는데 그 방식으로는 다음번에 또 놓친다.
+     * 이제는 반대로 적는다 — 무엇이 재료인지를 한곳(isIngredientOnly)에 밝히고
+     * 나머지는 상에 오른다고 본다.
      */
-    const PROTEIN_GROUPS = new Set<FoodGroup>(['어패류', '육류', '가금류·난류', '두류·대두가공'])
-    const cooked = /\((구이|데친 것|찐 것|삶은 것|조림|볶음|찜)\)/.test(f.name)
-    const eatenAsIs =
-      f.group === '과일' || f.group === '경장영양·환자식' ||
-      (PROTEIN_GROUPS.has(f.group) && cooked)
-    if (f.form === 'ingredient' && !eatenAsIs) continue
-
-    /*
-     * 그래도 '생것·말린 것·불린 것' 은 재료다.
-     * 회는 따로 걸러진다(날것은 동물성만 막는 규칙이 위에 있다).
-     */
-    if (/\((생것|말린 것|불린 것|생)\)/.test(f.name)) continue
-    if (!eatenAsIs && /\((삶은 것|데친 것|찐 것)\)/.test(f.name)) continue
+    if (isIngredientOnly(f)) continue
 
     const v = evaluateFood(f, patient, 1, cached)
     if (v.level === 'avoid' || v.level === 'caution') continue
@@ -1529,6 +1531,19 @@ function collectCandidates(
     for (const h of prefers) bonus += h.source === '공통' ? 6 : 14
     let penalty = 0
     for (const t of f.tags) penalty += PENALTY[t] ?? 0
+
+    /*
+     * 죽은 아플 때 먹는 것이다.
+     *
+     * 죽 한 그릇은 단백질이 12 g 이라 밥 한 공기(5~7 g)보다 점수가 높다.
+     * 그래서 치료를 마치고 잘 지내시는 분께도 아침에 녹두죽, 점심에 흑임자죽이
+     * 매일 올라왔다 — 한식 식단이라면서 밥이 스무 날 동안 한 번도 나오지 않았다.
+     *
+     * 삼키기 어렵거나 입안이 헐었거나 속이 메스꺼운 분께는 죽이 맞다.
+     * 그렇지 않은 분께는 밥이 맞다. 금기가 아니라 순서의 문제이므로 감점만 준다 —
+     * 직접 고르시는 것은 그대로 두고, 다른 것이 없으면 여전히 나온다.
+     */
+    if (!needsSoft && f.group === '밥·면·죽 요리' && /죽$|미음/.test(f.name)) penalty += 22
 
     // 제철 가산은 bestFiller 에서 따로 센다. 여기서 더하면 두 번 세는 셈이 된다.
     const seasonal = isSeasonal(f, season)

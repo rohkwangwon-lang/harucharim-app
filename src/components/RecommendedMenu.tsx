@@ -1,8 +1,8 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { IconEvening, IconMorning, IconNoon, IconShuffle, IconSnack } from './icons'
 import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
 import { MEAL_SLOTS } from '../data/types'
-import { buildDayMenu, fiberGoal, recentFoods } from '../engine/menu'
+import { buildDayMenu, fiberGoal, recentFoods, type DayMenu } from '../engine/menu'
 import { foodContribution, personalTarget } from '../engine/nutrition'
 import { CANCER_BY_ID } from '../data/cancers'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
@@ -42,7 +42,6 @@ export function RecommendedMenu({
   onApplyAll: (items: { foodId: string; meal: MealSlot }[]) => void
   onGoCompose: () => void
 }) {
-  const [seed, setSeed] = useState(0)
   const profile = CANCER_BY_ID[patient.cancer]
   const naLimit = profile.target.naLimit ?? 2000
   // 신장 기능이 떨어진 분에게는 단백질 과다가 문제가 된다
@@ -56,49 +55,56 @@ export function RecommendedMenu({
    * 날짜와 최근 기록을 함께 넘긴다.
    * 날짜를 넘기지 않으면 조건이 같은 한 언제 열어도 똑같은 식단이 나온다.
    * 실제로 8월 한 달 동안 하루도 빠짐없이 같은 여섯 가지였다.
-   * '다시 구성'은 seed 를 올려 같은 날에도 다른 안을 보여 준다.
    */
   const recent = useMemo(() => recentFoods(diary, day), [diary, day])
 
   /*
-   * 직전 안의 '주요리' 는 다음 안에서 피한다.
+   * 지금까지 보여 드린 안을 모두 들고 있는다.
    *
-   * 점수 폭을 넓히는 것만으로는 부족했다. 닭백숙은 저녁 한 접시에
-   * 단백질 51 g 을 지고 오니 다른 후보와 점수 차가 워낙 커서, 폭을 넓혀도 늘 1등이었다 —
-   * 다섯 번을 눌러도 저녁 주요리가 그대로인 경우가 절반(49 %)이었고,
-   * 저녁 주요리 1,000번 중 732번이 닭백숙이었다.
-   * 곁들이만 바뀌니 "아무리 눌러도 변화가 없다" 는 말이 나왔다.
+   * 예전에는 번호(seed)만 올리고 결과는 버렸다. 그래서 '다시 구성' 을 눌러
+   * 지나친 안으로 돌아갈 방법이 없었다 — 앞의 것이 나았다는 것은
+   * 다음 것을 보고 나서야 알게 되는데, 그때는 이미 사라진 뒤였다.
    *
-   * 이 앱에는 이미 '며칠 안에 드신 것은 다시 권하지 않는다' 는 장치가 있으니 그것을 쓴다 —
-   * 직전 안에 나온 것을 '방금 드신 것' 으로 본다.
-   *
-   * 다만 전부를 피하면 안 된다. 처음에 그렇게 해 봤더니 큰 것이 모두 막혀
-   * 잔챙이로 채우느라 가짓수가 여덟에서 열여섯으로 불었다.
-   * 다른 조합을 보고 싶으신 것이지 반찬 열여섯 가지를 원하시는 것이 아니다.
-   * 열량이 큰 두 가지만 피하면 주요리는 바뀌고 상차림의 짜임새는 그대로다.
+   * 번호를 되돌리는 것만으로는 안 된다. 다음 안을 만들 때 직전 안의 주요리를
+   * 피하도록 해 두어서, 같은 번호라도 만들 때마다 다른 것이 나오기 때문이다.
+   * 그러니 만든 것을 그대로 들고 있다가 앞뒤로 오간다.
    */
   const AVOID_TOP = 2
-  const prevRef = useRef<{ id: string; kcal: number }[]>([])
-  const roundKey = `${patient.cancer}|${patient.phase}|${day}|${selected.length}`
-  const lastKey = useRef(roundKey)
-  if (lastKey.current !== roundKey) { prevRef.current = []; lastKey.current = roundKey }
+  const [drafts, setDrafts] = useState<DayMenu[]>([])
+  const [cursor, setCursor] = useState(0)
 
-  const menu = useMemo(
-    () => {
-      const avoid = new Map(recent)
-      if (seed > 0) {
-        for (const e of [...prevRef.current].sort((a, b) => b.kcal - a.kcal).slice(0, AVOID_TOP))
-          avoid.set(e.id, 0)
-      }
-      const m = buildDayMenu(selected, patient, { supplements: supps, day, nonce: seed, recent: avoid })
-      /* 이번에 내놓은 것을 다음 차례를 위해 적어 둔다 */
-      prevRef.current = MEAL_SLOTS.flatMap((slot) =>
-        m.meals[slot].map((e) => ({ id: e.food.id, kcal: foodContribution(e.food, e.servings).kcal ?? 0 }))
-      )
-      return m
-    },
-    [selected, patient, supps, seed, day, recent]
+  /* 첫 안 — 조건이 바뀌면 이것부터 다시 만들어진다 */
+  const first = useMemo(
+    () => buildDayMenu(selected, patient, { supplements: supps, day, nonce: 0, recent }),
+    [selected, patient, supps, day, recent]
   )
+
+  /* 조건이 달라지면 지금까지 만든 안은 버린다 — 다른 사람의 식단이 되기 때문이다 */
+  useEffect(() => { setDrafts([]); setCursor(0) }, [selected, patient, supps, day, recent])
+
+  const menu = cursor === 0 ? first : (drafts[cursor - 1] ?? first)
+  const seed = cursor
+
+  /** 열량이 큰 두 가지 — 다음 안에서는 이것을 피한다 */
+  const bigTwo = (m: DayMenu) =>
+    MEAL_SLOTS
+      .flatMap((slot) => m.meals[slot].map((e) => ({
+        id: e.food.id, kcal: foodContribution(e.food, e.servings).kcal ?? 0
+      })))
+      .sort((a, b) => b.kcal - a.kcal)
+      .slice(0, AVOID_TOP)
+
+  const rebuild = () => {
+    /* 앞으로 가 본 적이 있으면 만들지 않고 그때 것을 다시 보여 드린다 */
+    if (cursor < drafts.length) { setCursor(cursor + 1); return }
+    const avoid = new Map(recent)
+    for (const e of bigTwo(menu)) avoid.set(e.id, 0)
+    const next = buildDayMenu(selected, patient, {
+      supplements: supps, day, nonce: cursor + 1, recent: avoid
+    })
+    setDrafts((d) => [...d, next])
+    setCursor(cursor + 1)
+  }
 
   const added = MEAL_SLOTS.flatMap((slot) =>
     menu.meals[slot].filter((e) => e.origin === 'added').map((e) => ({ foodId: e.food.id, meal: slot }))
@@ -154,15 +160,32 @@ export function RecommendedMenu({
             * 설명 딱지처럼 보였다. 실제로 이 단추는 거의 눌리지 않았다.
             * 누를 수 있는 것처럼 보이게 하고, 무엇을 하는 단추인지 아래에 한 줄 적는다.
             */}
-          <button
-            className="shrink-0 rounded-xl border-2 border-brand-600 bg-white px-3.5 py-2 text-sm font-bold text-brand-700 shadow-sm transition-colors hover:bg-brand-50 active:bg-brand-100"
-            onClick={() => setSeed((n) => n + 1)}
-          >
-            <span className="flex items-center gap-1.5">
-              <IconShuffle className="h-4 w-4" />
-              다시 구성
-            </span>
-          </button>
+          <div className="flex shrink-0 items-center gap-1.5">
+            {/*
+              * 앞의 안으로 돌아가는 단추.
+              *
+              * 앞의 것이 나았다는 것은 다음 것을 보고 나서야 알게 되는데,
+              * 예전에는 그때 이미 사라진 뒤였다. 처음 안을 보고 계실 때는 나오지 않는다 —
+              * 눌러도 아무 일이 없는 단추는 없느니만 못하다.
+              */}
+            {cursor > 0 && (
+              <button
+                className="rounded-xl border-2 border-stone-300 bg-white px-3 py-2 text-sm font-bold text-stone-600 transition-colors hover:bg-stone-50"
+                onClick={() => setCursor((c) => Math.max(0, c - 1))}
+              >
+                ‹ 이전 안
+              </button>
+            )}
+            <button
+              className="rounded-xl border-2 border-brand-600 bg-white px-3.5 py-2 text-sm font-bold text-brand-700 shadow-sm transition-colors hover:bg-brand-50 active:bg-brand-100"
+              onClick={rebuild}
+            >
+              <span className="flex items-center gap-1.5">
+                <IconShuffle className="h-4 w-4" />
+                다시 구성
+              </span>
+            </button>
+          </div>
         </div>
         <p className="mt-2.5 text-[11px] leading-relaxed text-brand-800/70">
           {seed === 0 ? (
@@ -175,8 +198,8 @@ export function RecommendedMenu({
               * 실제로 그런 말을 들었다. 폭을 넓혀 절반 가까이 바뀌게 고쳤지만,
               * 그래도 무엇이 달라졌는지 눈으로 찾게 두기보다 세어 드리는 편이 낫다.
               */
-            <><strong>{seed + 1}번째 안</strong>입니다. 계속 누르시면 다른 조합을 더 보여 드립니다.
-              {' '}처음 것이 나으셨다면 화면을 새로 고치시면 됩니다.</>
+            <><strong>{cursor + 1}번째 안</strong>입니다{drafts.length > cursor ? ` (지금까지 ${drafts.length + 1}가지)` : ''}.
+              {' '}계속 누르시면 다른 조합을 더 보여 드리고, <strong>이전 안</strong>으로 돌아가실 수도 있습니다.</>
           )}
         </p>
       </div>

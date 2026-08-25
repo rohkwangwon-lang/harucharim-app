@@ -8,7 +8,7 @@ import { evaluateFood, evaluateSelection, activeRules, activeInteractions, evalu
 import { foodContribution, sumIntake, personalTarget, nutritionRisk, getDailyReference } from '../../src/engine/nutrition'
 import { summarizeDay } from '../../src/engine/dayScore'
 import { adviseSupplements, reviewCurrentSupplements } from '../../src/engine/supplementAdvice'
-import { FOODS, CURATED_FOODS, FOOD_BY_ID } from '../../src/data/foods'
+import { FOODS, CURATED_FOODS, FOOD_BY_ID, isIngredientOnly } from '../../src/data/foods'
 import { SUPPLEMENTS } from '../../src/data/supplements'
 import { CANCERS } from '../../src/data/cancers'
 import { MEDICATIONS } from '../../src/data/interactions'
@@ -116,20 +116,15 @@ for (let iter = 0; iter < N; iter++) {
      * 다만 과일과 영양보충 음료는 재료로 분류돼 있어도 그대로 먹는 것이라 예외다.
      */
     /*
-     * 이미 조리된 단백질 급원('고등어(구이)', '새우(데친 것)')은 그 자체로 한 접시다.
-     * 엔진이 그렇게 보도록 고쳤으니 검사도 같은 눈으로 봐야 한다.
+     * 상에 오르는 것만 추천해야 한다.
+     *
+     * 예전에는 이 검사가 엔진과 따로 판단했다 — 엔진은 엔진대로, 검사는 검사대로
+     * '무엇이 재료인가' 를 적어 두었고, 그래서 엔진을 고칠 때마다 검사도 같이
+     * 고쳐야 했다. 어느 한쪽만 고치면 검사가 헛돌거나 멀쩡한 것을 잡는다.
+     * 이제는 엔진이 쓰는 것과 같은 함수를 부른다.
      */
-    const PROT = ['어패류', '육류', '가금류·난류', '두류·대두가공']
-    const cooked = /\((구이|데친 것|찐 것|삶은 것|조림|볶음|찜)\)/.test(e.food.name)
-    const eatenAsIs =
-      e.food.group === '과일' || e.food.group === '경장영양·환자식' ||
-      (PROT.includes(e.food.group) && cooked)
-    if (e.food.form === 'ingredient' && !eatenAsIs)
-      report('식재료를 메뉴로 추천함', `${ctx} ${e.food.name}`)
-    if (/\((생것|말린 것|불린 것|생)\)/.test(e.food.name))
-      report('손질 안 된 재료를 메뉴로 추천함', `${ctx} ${e.food.name}`)
-    if (!eatenAsIs && /\((삶은 것|데친 것|찐 것)\)/.test(e.food.name))
-      report('조리 상태 이름을 메뉴로 추천함', `${ctx} ${e.food.name}`)
+    if (isIngredientOnly(e.food))
+      report('재료를 메뉴로 추천함', `${ctx} ${e.food.name}`)
     if (!FOOD_BY_ID[e.food.id]) report('번들에 없는 식품 추천', `${ctx} ${e.food.name}`)
   }
 
