@@ -515,8 +515,14 @@ export function microTargets(patient: PatientContext): MicroTarget[] {
    * 아로마타제 억제제와 안드로겐 차단요법이 여기 해당한다.
    * 앱은 이미 두 곳에서 "1,000~1,200 mg" 이라고 말하고 있었는데 세지는 않았다.
    */
+  /*
+   * 약은 화면에 보이는 이름이 아니라 id 로 저장된다('ai', 'adt').
+   * 처음에 '아로마타제 억제제' 라고 적어 두어 실제 사용자에게는 한 번도 걸리지 않았다.
+   * 내가 만든 시험도 같은 이름을 넣어 통과했으니, 시험이 통과했다는 것이
+   * 동작한다는 뜻은 아니었다.
+   */
   const boneLoss =
-    meds.includes('아로마타제 억제제') || meds.includes('안드로겐 차단요법(ADT)') ||
+    meds.includes('ai') || meds.includes('adt') ||
     subs.includes('안드로겐차단요법중') ||
     (patient.cancer === 'breast' && subs.includes('호르몬수용체양성'))
   if (boneLoss) {

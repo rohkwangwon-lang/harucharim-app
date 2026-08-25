@@ -13,10 +13,12 @@ import { CANCERS } from '../../src/data/cancers'
 import { REF_BY_ID } from '../../src/data/references'
 import { BASE_EXERCISE, BONE_METS_NOTE, EXERCISE_BY_CANCER } from '../../src/data/exercise'
 import { CURATED_FOODS, FOOD_BY_ID } from '../../src/data/foods'
+import { readFileSync } from 'node:fs'
 import { SUPPLEMENTS } from '../../src/data/supplements'
 import { evaluateFood, activeRules, activeInteractions } from '../../src/engine/rules'
 import { DEFAULT_PATIENT } from '../../src/lib/store'
 import { microTargets } from '../../src/engine/nutrition'
+import { adviseSupplements } from '../../src/engine/supplementAdvice'
 import type { NutritionRule, CancerSubtype, PatientContext } from '../../src/data/types'
 import { SUBTYPE_OPTIONS } from '../../src/data/types'
 
@@ -133,11 +135,34 @@ for (const ref of BONE_METS_NOTE.refIds) used.add(ref)
  * 규칙 목록에만 없다는 이유로 '안 쓰는 문헌' 이 되어서는 안 된다.
  * 조건이 걸려 있어 환자를 만들어 봐야 나온다.
  */
+/*
+ * 영양제 권고도 문헌을 인용한다. 조건이 맞는 분에게만 뜨므로
+ * 환자를 만들어 봐야 어떤 문헌을 쓰는지 알 수 있다.
+ */
+for (const setup of [
+  { conditions: ['위절제후'] },
+  { medications: ['ppi'] },
+  { medications: ['steroid'] },
+  { medications: ['ai'] },
+  { medications: ['cisplatin'], phase: 'during_chemo' },
+  { medications: ['methotrexate'], phase: 'during_chemo' },
+  { conditions: ['장루보유'] },
+  { conditions: ['설사'] },
+  { conditions: ['식욕부진'], phase: 'during_chemo' },
+  { cancer: 'headneck', phase: 'during_rt' },
+  { cancer: 'liver', subtypes: ['간경변동반'] },
+  { weightKg: 38, heightCm: 160 },
+  { conditions: ['체중감소'], weightLossPct: 12 }
+] as any[]) {
+  const p = { ...DEFAULT_PATIENT, conditions: [], medications: [], subtypes: [], ...setup } as PatientContext
+  for (const a of adviseSupplements(p)) for (const ref of a.refIds) used.add(ref)
+}
+
 for (const setup of [
   { conditions: ['신기능저하'] },
   { conditions: ['위절제후'] },
-  { conditions: [], medications: ['아로마타제 억제제'] },
-  { conditions: [], medications: ['안드로겐 차단요법(ADT)'], cancer: 'prostate' }
+  { conditions: [], medications: ['ai'] },
+  { conditions: [], medications: ['adt'], cancer: 'prostate' }
 ] as any[]) {
   const p = { ...DEFAULT_PATIENT, ...setup } as PatientContext
   for (const m of microTargets(p)) for (const ref of m.refIds) used.add(ref)
@@ -221,14 +246,6 @@ for (const id of orphan) bad('아무 데서도 인용하지 않는 문헌', `${i
   console.log(`  세부 변수 ${declared.size}종 · 이를 쓰는 규칙 ${CANCERS.reduce((n, c) => n + c.rules.filter((r) => r.subtypes).length, 0)}건`)
 }
 
-console.log(`\n규칙 검사 완료 — 문제 ${bugs.length}종`)
-const g = new Map<string, string[]>()
-for (const b of bugs) { const k = b.split(' :: ')[0]; if (!g.has(k)) g.set(k, []); g.get(k)!.push(b.split(' :: ')[1]) }
-for (const [k, l] of [...g].sort((a, b) => b[1].length - a[1].length)) {
-  console.log(`■ ${k} (${l.length}종)`); l.slice(0, 5).forEach((d) => console.log('   -', d))
-}
-if (!bugs.length) console.log('문제 없음')
-
 /* ─────────────────── 미량영양소 기준 ─────────────────── */
 
 /*
@@ -246,8 +263,8 @@ if (!bugs.length) console.log('문제 없음')
   const setups: [string, Partial<PatientContext>][] = [
     ['신기능저하', { conditions: ['신기능저하'] }],
     ['위절제후', { conditions: ['위절제후'] }],
-    ['아로마타제 억제제', { medications: ['아로마타제 억제제'] }],
-    ['ADT', { cancer: 'prostate', medications: ['안드로겐 차단요법(ADT)'] }]
+    ['아로마타제 억제제', { medications: ['ai'] }],
+    ['ADT', { cancer: 'prostate', medications: ['adt'] }]
   ]
   for (const [label, setup] of setups) {
     const p = { ...DEFAULT_PATIENT, conditions: [], medications: [], ...setup } as PatientContext
@@ -270,3 +287,106 @@ if (!bugs.length) console.log('문제 없음')
     }
   }
 }
+
+/* ─────────────────── 결핍이 예상되는 상황 ─────────────────── */
+
+/*
+ * 식품 자료에 값이 없는 영양소가 많다 — 비타민 D 9 %, B12 13 %, 아연 25 %.
+ * 값이 없다고 아무 말도 하지 않는 것과, 셀 수 없으니 상황을 보고 말하는 것은 다르다.
+ * 검사 수치로 나타나는 결핍은 대개 드시는 것이 아니라 약과 잘라 낸 장기에서 온다.
+ *
+ * 여기 적힌 상황에서 아무 말도 나오지 않으면, 그건 앱이 침묵하기로 한 것이 아니라
+ * 잊어버린 것이다. 나중에 규칙을 고치다 조용히 사라지는 일이 없도록 못 박아 둔다.
+ */
+{
+  const SHOULD: [string, Partial<PatientContext>, RegExp][] = [
+    ['위 절제 후 · B12', { conditions: ['위절제후'] }, /B12/],
+    ['위 절제 후 · 철분', { conditions: ['위절제후'] }, /철분/],
+    ['위산분비억제제 · B12', { medications: ['ppi'] }, /B12/],
+    ['위산분비억제제 · 마그네슘', { medications: ['ppi'] }, /마그네슘/],
+    ['스테로이드 · 칼슘', { medications: ['steroid'] }, /칼슘/],
+    ['스테로이드 · 비타민 D', { medications: ['steroid'] }, /비타민 D/],
+    ['항호르몬 · 칼슘', { medications: ['ai'] }, /칼슘/],
+    ['장루 · 마그네슘아연', { conditions: ['장루보유'] }, /마그네슘·아연/],
+    ['두경부 방사선 · 아연', { cancer: 'headneck', phase: 'during_rt' }, /아연/],
+    ['간경변 · 비타민 D', { cancer: 'liver', subtypes: ['간경변동반'] }, /비타민 D/],
+    ['심한 저체중 · 티아민', { weightKg: 38, heightCm: 160 }, /티아민/]
+  ]
+  for (const [label, setup, want] of SHOULD) {
+    const p = {
+      ...DEFAULT_PATIENT, conditions: [], medications: [], subtypes: [], ...setup
+    } as PatientContext
+    const hits = adviseSupplements(p).filter((a) => want.test(a.title))
+    if (hits.length === 0) { bad('결핍이 예상되는데 아무 말도 없음', label); continue }
+    for (const h of hits) {
+      if (h.refIds.length === 0) bad('문헌 없는 영양제 권고', `${label} — ${h.title}`)
+      for (const id of h.refIds) if (!REF_BY_ID[id]) bad('없는 문헌을 가리킴', `${label} → ${id}`)
+      /*
+       * 권하면서 그 분류에 내놓을 제품이 하나도 없으면 화면이 빈 채로 남는다.
+       * 실제로 셀레늄이 걸러지면서 '아연·미네랄' 이 통째로 비던 적이 있다.
+       */
+      if (h.products.length === 0) bad('권했는데 보여 줄 제품이 없음', `${label} — ${h.category}`)
+    }
+  }
+
+  /* 해당 사항이 없는 분께 이것들이 뜨면 안 된다 */
+  const plain = {
+    ...DEFAULT_PATIENT, cancer: 'breast', phase: 'survivorship',
+    conditions: [], medications: [], subtypes: [], weightKg: 60, heightCm: 165, weightLossPct: 0
+  } as PatientContext
+  for (const a of adviseSupplements(plain)) {
+    if (/티아민|마그네슘·아연/.test(a.title))
+      bad('해당 없는 분께 결핍 권고가 뜸', `${a.title}`)
+  }
+}
+
+/* ─────────────────── 약제·증상 id 오타 ─────────────────── */
+
+/*
+ * 약은 화면에 보이는 이름이 아니라 id 로 저장된다('ai', 'cisplatin').
+ * 코드에서 실수로 표시 이름을 적으면 그 가지는 영원히 실행되지 않는다.
+ * 조용히 아무 일도 일어나지 않으므로 눈으로는 찾기 어렵다.
+ *
+ * 실제로 microTargets 에서 '아로마타제 억제제' 라고 적어 두어,
+ * 아로마타제 억제제를 드시는 분께 칼슘 기준이 한 번도 뜨지 않았다.
+ * 게다가 내가 만든 시험도 같은 이름을 넣어 통과했다 —
+ * 시험이 통과했다는 것이 동작한다는 뜻은 아니었다.
+ */
+{
+  /*
+   * import.meta.url 은 jiti 가 CJS 로 바꾸면서 엉뚱한 곳을 가리킨다.
+   * 검사가 빈 문자열을 읽고 조용히 통과했다 — 검사도 검사받아야 한다.
+   * 실행 위치(저장소 뿌리)에서 곧장 찾는다.
+   */
+  const FILES = [
+    'src/engine/supplementAdvice.ts',
+    'src/engine/nutrition.ts',
+    'src/engine/menu.ts',
+    'src/engine/rules.ts'
+  ]
+  const src = FILES.map((f) => [f, readFileSync(f, 'utf8')] as const)
+  for (const [f, text] of src) if (text.length === 0) bad('검사가 원본을 읽지 못함', f)
+
+  for (const [file, text] of src) {
+    for (const m of MEDICATIONS) {
+      /*
+       * 주석에는 약 이름이 나와도 된다. includes 로 견주는 것만 본다.
+       *
+       * 처음에는 'medications' 라는 낱말이 앞에 있는 경우만 찾았는데,
+       * 정작 문제였던 코드는 `meds.includes(...)` 라 그물에 걸리지 않았다.
+       * 받는 쪽 이름은 무엇이든 될 수 있으니 이름 쪽만 본다.
+       * 증상·세부 사항은 실제로 한국어로 저장되지만 약 이름과 겹치는 것이 없다.
+       */
+      const re = new RegExp(`includes\\(\\s*'${m.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}'`, 'g')
+      if (re.test(text)) bad('약을 id 가 아니라 이름으로 견줌', `${file} — '${m.name}' 은 id '${m.id}' 로 저장된다`)
+    }
+  }
+}
+
+console.log(`\n규칙 검사 완료 — 문제 ${bugs.length}종`)
+const g = new Map<string, string[]>()
+for (const b of bugs) { const k = b.split(' :: ')[0]; if (!g.has(k)) g.set(k, []); g.get(k)!.push(b.split(' :: ')[1]) }
+for (const [k, l] of [...g].sort((a, b) => b[1].length - a[1].length)) {
+  console.log(`■ ${k} (${l.length}종)`); l.slice(0, 5).forEach((d) => console.log('   -', d))
+}
+if (!bugs.length) console.log('문제 없음')
