@@ -399,6 +399,82 @@ for (let i = 0; i < N; i++) {
   }
 }
 
+/* ── '다시 구성' 이 실제로 다시 구성하는가 ───────────────── */
+
+/*
+ * 마음에 안 드셔서 다시 청하셨는데 곁들이 한둘만 바뀌면,
+ * 사용자에게는 아무 일도 일어나지 않은 것과 같다. 실제로 그런 말을 들었다.
+ *
+ * 엔진은 처음부터 조금씩 바꾸고 있었다 — 96 % 에서 무언가 달라졌다.
+ * 문제는 크기였다. 평균 36 % 만 바뀌었고 가장 흔한 것이 일곱 가지 중 둘이었으며,
+ * 그 둘이 대개 곁들이라 저녁의 주요리는 그대로였다.
+ * '바뀌었는가' 만 세었으면 통과했을 검사다. 그래서 크기를 센다.
+ *
+ * 동시에 영양이 무너지면 안 된다 — 다양하게 보여 드리자고
+ * 목표를 못 맞추는 식단을 내놓을 수는 없다.
+ */
+{
+  const CANCER_LIST: CancerId[] = ['breast', 'stomach', 'colorectal', 'lung', 'pancreas', 'liver']
+  const COND_SETS: PatientCondition[][] = [[], ['설사'], ['신기능저하'], ['연하곤란'], ['호중구감소증']]
+  let tried = 0
+  let tooSimilar = 0
+  let shortfall = 0
+  let sumChanged = 0
+
+  for (let i = 0; i < 240; i++) {
+    const p = {
+      ...DEFAULT_PATIENT,
+      cancer: CANCER_LIST[i % CANCER_LIST.length],
+      phase: (['during_rt', 'during_chemo', 'post_op', 'survivorship'] as Phase[])[i % 4],
+      sex: i % 2 ? 'M' : 'F', age: 55,
+      weightKg: 45 + ((i * 7) % 50), heightCm: 165,
+      weightLossPct: 0, conditions: COND_SETS[i % COND_SETS.length], medications: [], subtypes: []
+    } as PatientContext
+
+    const ids = (nonce: number) => {
+      const m = buildDayMenu([], p, { dayKey: '2026-08-25', nonce })
+      return {
+        list: (['아침', '점심', '저녁', '간식'] as const).flatMap((s) => m.meals[s].map((e) => e.food.id)),
+        kcal: m.totals.kcal ?? 0,
+        target: m.target.kcal
+      }
+    }
+    const a = ids(0)
+    if (a.list.length === 0) continue
+    tried++
+
+    const b = ids(1)
+    const keep = new Set(b.list)
+    const changed = a.list.filter((x) => !keep.has(x)).length / a.list.length
+    sumChanged += changed
+    /*
+     * 절반 넘게 그대로면 '다시 구성' 이라고 부르기 어렵다.
+     * 다만 고를 것이 몇 가지 없는 분(제한이 겹친 경우)은 어쩔 수 없으므로
+     * 한 건씩이 아니라 전체 비율로 본다.
+     */
+    if (changed < 0.15) tooSimilar++
+
+    /* 다시 구성한 안도 목표를 채워야 한다 */
+    for (const r of [b, ids(3)]) {
+      if (r.kcal < r.target[0] * 0.85) shortfall++
+    }
+  }
+
+  const avg = tried > 0 ? sumChanged / tried : 0
+  /*
+   * 눈금은 고쳐 본 결과에서 가져왔다.
+   * 넓히기 전이 35 %, 넓힌 뒤가 47 % 였다. 그 사이에 선을 긋는다 —
+   * 30 % 로 두었더니 예전 동작이 그대로 통과해서, 검사가 아무 일도 하지 않았다.
+   */
+  if (avg < 0.42) bad("'다시 구성' 이 너무 조금 바꿈", `평균 ${Math.round(avg * 100)} % 만 달라짐`)
+  if (tooSimilar > tried * 0.15)
+    bad("'다시 구성' 인데 거의 그대로인 경우가 잦음", `${tooSimilar}/${tried}`)
+  if (shortfall > tried * 0.1)
+    bad("다시 구성한 안이 목표를 못 채움", `${shortfall}/${tried * 2}`)
+
+  console.log(`  다시 구성 ${tried}건 · 평균 ${Math.round(avg * 100)} % 달라짐 · 거의 그대로 ${tooSimilar}건`)
+}
+
 /* ── 값이 있어야 셀 수 있다 ───────────────────────── */
 
 {

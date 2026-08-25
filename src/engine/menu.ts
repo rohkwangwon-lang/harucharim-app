@@ -373,6 +373,20 @@ const ROTATE_POOL = 5
 /** 이 점수 차이 안쪽이면 '엇비슷하다'고 본다 */
 const ROTATE_TOLERANCE = 28
 
+/*
+ * '다시 구성' 을 누르셨을 때는 더 과감하게 돌린다.
+ *
+ * 날마다 조금씩 다르게 하는 것과, 마음에 안 들어 다시 청하시는 것은 다른 요구다.
+ * 앞의 값으로는 평균 36 % 만 바뀌었고 가장 흔한 것이 일곱 가지 중 두 가지였다.
+ * 그런데 그 둘이 대개 곁들이라, 저녁의 주요리가 그대로면
+ * 눌러도 아무 일이 없는 것처럼 보인다. 실제로 "변화가 없다" 는 말을 들었다.
+ *
+ * 점수가 가장 높은 하나만 옳은 답이 아니다 — 엇비슷한 것들 중 무엇을 내놓아도
+ * 영양은 비슷하게 맞는다. 다시 청하실 때는 그 폭을 넓게 본다.
+ */
+const RETRY_POOL = 12
+const RETRY_TOLERANCE = 75
+
 /** 고를 것이 동났을 때 쓰는 빈 이력 — 되풀이를 허용한다는 뜻이다 */
 const EMPTY_RECENT: Map<string, number> = new Map()
 
@@ -398,6 +412,13 @@ export function buildDayMenu(
   const micros = microTargets(patient)
   /* 신장이 걸리는 분만 단백질에 뚜껑을 씌운다 */
   const renalCap = patient.conditions.includes('신기능저하')
+  /*
+   * '다시 구성' 을 누르셨는가.
+   *
+   * nonce 는 그 단추를 누를 때마다 하나씩 올라간다. 날마다 다르게 하는 것과
+   * 마음에 안 들어 다시 청하시는 것은 다른 요구이므로, 이때는 폭을 넓게 본다.
+   */
+  const retry = (opts.nonce ?? 0) > 0
   const recent = opts.recent ?? new Map<string, number>()
   /*
    * 그날의 차례.
@@ -613,8 +634,8 @@ export function buildDayMenu(
      * 다양성은 영양을 채운 다음의 이야기다.
      */
     const best =
-      bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, recent, GROUP_CAP, microRoom, renalCap) ??
-      bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, EMPTY_RECENT, GROUP_CAP, microRoom, renalCap)
+      bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, recent, GROUP_CAP, microRoom, renalCap, retry) ??
+      bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, EMPTY_RECENT, GROUP_CAP, microRoom, renalCap, retry)
     if (!best) break
 
     /*
@@ -693,7 +714,8 @@ export function buildDayMenu(
       new Map<string, number>(),
       GROUP_CAP + 2,
       microBudget(micros, cur),
-      renalCap
+      renalCap,
+      retry
     )
     if (!best) break
 
@@ -753,7 +775,7 @@ export function buildDayMenu(
       na: naLimit - (cur.na ?? 0)
     }
     const deficit = Math.max(0, target.kcal[0] - (cur.kcal ?? 0))
-    const { entry, note } = pickForSlot(candidates, slot, used, room, deficit, dayIndex, recent, meals)
+    const { entry, note } = pickForSlot(candidates, slot, used, retry, room, deficit, dayIndex, recent, meals)
     if (note) slotNotes[slot] = note
     if (!entry) continue
     meals[slot].push({
@@ -1606,7 +1628,9 @@ function bestFiller(
    * 열량을 낼 만한 것이 대개 단백질도 함께 지고 오기 때문이다.
    * 그 맞바꿈은 하지 않는다 — 자세한 사정은 아래 걸러 내는 자리에 적어 두었다.
    */
-  renalCap = false
+  renalCap = false,
+  /** '다시 구성' 을 누르셨는가 — 그때는 엇비슷한 후보를 넓게 본다 */
+  retry = false
 ): Filler | undefined {
 
   const scored: { c: Cand; score: number }[] = []
@@ -1646,7 +1670,7 @@ function bestFiller(
      * 2,670 kcal 목표에 2,123 에서 멈췄다. 단백질을 아끼자고 열량을 굶기면
      * 그것대로 위험하다. 크게 모자란 동안에는 조금 열어 둔다.
      */
-    if (renalCap && c.protein > Math.max(6, room.protein + (need.kcal > 700 ? 14 : 0))) continue
+    if (renalCap && c.protein > Math.max(6, room.protein + (need.kcal > 1200 ? 14 : 0))) continue
     /*
      * 저잔사 기간에는 섬유가 많은 것을 받지 않는다.
      * 남은 여유를 크게 넘기지만 않으면 되므로, 조금씩 여러 가지는 그대로 들어온다.
@@ -1802,7 +1826,9 @@ function bestFiller(
    */
   scored.sort((a, b) => b.score - a.score)
   const top = scored[0].score
-  let pool = scored.filter((x) => x.score >= top - ROTATE_TOLERANCE).slice(0, ROTATE_POOL)
+  const tol = retry ? RETRY_TOLERANCE : ROTATE_TOLERANCE
+  const width = retry ? RETRY_POOL : ROTATE_POOL
+  let pool = scored.filter((x) => x.score >= top - tol).slice(0, width)
   /*
    * 차례를 돌리더라도 상한은 넘지 않는다.
    * 예산 안에 드는 것이 하나라도 있으면 그 안에서만 돌린다.
@@ -1857,6 +1883,8 @@ function pickForSlot(
   all: Cand[],
   slot: MealSlot,
   exclude: Set<string>,
+  /** '다시 구성' 을 누르셨는가 */
+  retry: boolean,
   room: { kcal: number; na: number },
   /** 하루 목표 하단에 얼마나 모자란지 — 모자랄수록 나트륨보다 열량을 우선한다 */
   deficit: number,
@@ -1928,7 +1956,9 @@ function pickForSlot(
       c.bonus - c.penalty + anchor(c) + c.kcal / kcalWeight - naPenalty(c)
     // 여기서도 엇비슷한 것끼리는 날마다 차례를 돌린다
     const ranked = [...src].sort((a, b) => rank(b) - rank(a))
-    const near = ranked.filter((x) => rank(x) >= rank(ranked[0]) - ROTATE_TOLERANCE).slice(0, ROTATE_POOL)
+    const near = ranked
+      .filter((x) => rank(x) >= rank(ranked[0]) - (retry ? RETRY_TOLERANCE : ROTATE_TOLERANCE))
+      .slice(0, retry ? RETRY_POOL : ROTATE_POOL)
     const c = near[((turn % near.length) + near.length) % near.length]
     const hit = explain(c, ['고단백', '고열량밀도'])
     return {
