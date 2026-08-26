@@ -132,11 +132,35 @@ no(unknown.length > 0, `목록에 없는 이름을 보냄: ${unknown.join(', ')}
 no(used.size < 6, `실제로 세는 것이 ${used.size}종뿐 — 통계로 쓸 수 없다`)
 
 /* ── 6. SQL 쪽 방어 ─────────────────────────────────────── */
-const sql = readFileSync('supabase/stats.sql', 'utf-8')
+/*
+ * 나눠 두었던 SQL 을 setup.sql 하나로 합쳤다.
+ * 예전에는 stats.sql 을 읽었는데, 파일을 옮기자 이 검사가 통째로 죽었다 —
+ * 아무 말도 없이 죽어서 '통과' 처럼 보였다. 그래서 읽은 뒤 내용을 한 번 확인한다.
+ */
+const SQL_FILE = 'supabase/setup.sql'
+const sql = readFileSync(SQL_FILE, 'utf-8')
+no(!/create or replace function public\.of_track/.test(sql),
+   `${SQL_FILE} 에 통계 부분이 없음 — 검사가 엉뚱한 파일을 보고 있다`)
 no(!/having count\(\*\) >= 5/.test(sql), '작은 칸을 가리지 않음 — 다섯 명 미만이 그대로 나온다')
 no(!/of_is_admin\(\)/.test(sql), '집계 함수가 관리자 확인을 안 함')
 no(!/of_forget/.test(sql), '동의를 거두셨을 때 지우는 길이 없음')
-no(/references auth\.users|auth\.uid\(\)\s*(as|,)?\s*pid/.test(sql), '통계 표가 계정과 이어져 있음')
+/*
+ * 통계 표만 본다.
+ *
+ * 처음에는 파일 전체를 훑었는데, SQL 을 하나로 합치자 문의 표의
+ * `user_id uuid references auth.users(id)` 가 걸려 멀쩡한 코드를 잡았다.
+ * 문의는 원래 계정과 이어져야 한다 — 답변을 드려야 하기 때문이다.
+ * 계정과 이어지면 안 되는 것은 통계 쪽 네 표다.
+ */
+const STAT_TABLES = ['of_users', 'of_active', 'of_events', 'of_demand']
+for (const t of STAT_TABLES) {
+  const at = sql.indexOf(`create table if not exists public.${t}`)
+  no(at < 0, `통계 표 ${t} 를 못 찾음 — 검사가 헛돌고 있다`)
+  if (at < 0) continue
+  const body = sql.slice(at, sql.indexOf(');', at))
+  no(/references auth\.users/.test(body), `통계 표 ${t} 가 계정과 이어져 있음`)
+  no(/auth\.uid\(\)/.test(body), `통계 표 ${t} 가 계정 식별자를 담고 있음`)
+}
 
 /* 집계 함수마다 관리자 확인이 붙어 있는가 — 하나만 빠져도 다 새는 문이 된다 */
 for (const fn of sql.matchAll(/create or replace function public\.(of_stat_\w+)/g)) {
@@ -313,10 +337,19 @@ for (const [name, at] of defAt) {
   }
 }
 
-/* 만든 함수마다 권한을 주었는가 — 빠뜨리면 앱에서 부를 때만 조용히 실패한다 */
+/*
+ * 만든 함수마다 권한을 정해 두었는가.
+ *
+ * grant 도 revoke 도 없으면 앱에서 부를 때만 조용히 실패한다.
+ * 다만 일부러 막아 둔 것도 있다 — of_answer 는 관리자가 대시보드에서만 부르므로
+ * revoke all 이 맞다. 둘 중 하나라도 적혀 있으면 뜻이 있는 것이고,
+ * 아무것도 없는 것만 실수다.
+ */
 for (const name of defAt.keys()) {
-  const re = new RegExp(`grant execute on function public\\.${name}\\s*\\(`)
-  no(!re.test(sql), `${name} 에 grant execute 가 없음 — 앱에서 부르면 권한 오류가 난다`)
+  const granted = new RegExp(`grant execute on function public\\.${name}\\s*\\(`).test(sql)
+  const revoked = new RegExp(`revoke all on function public\\.${name}\\s*\\(`).test(sql)
+  no(!granted && !revoked,
+     `${name} 에 grant 도 revoke 도 없음 — 앱에서 부르면 권한 오류가 난다`)
 }
 
 console.log(bads.length
