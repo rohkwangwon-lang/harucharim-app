@@ -15,6 +15,7 @@ node_modules/.bin/jiti scripts/checks/rules.ts    # 임상 규칙·출처·상�
 node_modules/.bin/jiti scripts/checks/journey.ts  # 120명이 45일을 실제로 지나가 본다
 node_modules/.bin/jiti scripts/checks/weight.ts   # 체중이 오르내릴 때 목표·권고가 따라오는가
 node_modules/.bin/jiti scripts/checks/micro.ts    # 칼륨·인·칼슘·철과 결핍 영양제 권고가 서로 부딪치지 않는가
+node_modules/.bin/jiti scripts/checks/intent.ts   # 하기로 한 일이 실제로 일어나는가 (오류 찾기가 아니라 동작 확인표)
 
 # 대규모 실행 — 위 규칙들을 한자리에 모아 훨씬 큰 표본으로 돌린다.
 # 돌면서 무엇이 얼마나 자주 추천되는지 세어 docs/추천-식단-top100.md 에 적는다.

@@ -268,6 +268,18 @@ export function ideasFromIngredients(
  * 2) 남은 것을 끼니에 배치한다.
  * 3) 열량·단백질 목표에 미달하면, 이 암종에서 권장 쪽인 식품으로 부족분을 채운다.
  */
+/*
+ * 옵션 이름을 잘못 적으면 조용히 무시된다.
+ *
+ * 검사 아홉 곳이 day 를 dayKey 라고 적고 있었다. 타입이 그것을 잡아 주지 못한 것은
+ * MenuOptions 가 넓은 자리(supplementsOrOptions)로 들어오기 때문인데,
+ * 그 바람에 '날마다 다른가' 를 묻는 검사들이 모두 같은 날을 보고 있었고
+ * 그런 줄도 모른 채 통과하고 있었다.
+ *
+ * 모르는 열쇠가 들어오면 알아채도록 남겨 둔다.
+ */
+export const MENU_OPTION_KEYS = ['supplements', 'day', 'nonce', 'recent'] as const
+
 export interface MenuOptions {
   /** 복용 중인 영양제 */
   supplements?: Supplement[]
@@ -407,6 +419,13 @@ export function buildDayMenu(
     ? { supplements: supplementsOrOptions, ...extra }
     : supplementsOrOptions
 
+  /* 오타로 넘긴 열쇠는 조용히 사라지지 않고 여기서 드러난다 */
+  for (const k of Object.keys(opts)) {
+    if (!(MENU_OPTION_KEYS as readonly string[]).includes(k)) {
+      throw new Error(`buildDayMenu: 모르는 옵션 '${k}' — ${MENU_OPTION_KEYS.join(', ')} 중 하나여야 합니다`)
+    }
+  }
+
   const supplements = opts.supplements ?? []
   /* 이분에게만 세는 미량영양소 — 해당 사항이 없으면 빈 배열이라 아래가 그대로 돈다 */
   const micros = microTargets(patient)
@@ -439,7 +458,14 @@ export function buildDayMenu(
   const target = personalTarget(patient, profile.target.kcalPerKg, profile.target.proteinPerKg)
   const naLimit = profile.target.naLimit ?? 2000
 
-  const season = currentSeason()
+  /*
+   * 계절은 그 식단이 놓인 날짜에서 읽는다.
+   *
+   * 예전에는 늘 오늘 날짜로 판정했다. 오늘 식단만 볼 때는 맞았지만,
+   * 기록에서 지난 겨울의 하루를 열면 '여름 제철' 이 붙어 있었다.
+   * 날짜를 받아 두고 쓰지 않고 있었던 셈이다.
+   */
+  const season = currentSeason(opts.day ? new Date(`${opts.day}T12:00:00`) : new Date())
   const cuisines: Cuisine[] = patient.cuisines && patient.cuisines.length ? patient.cuisines : ['한식']
 
   const meals: Record<MealSlot, MenuEntry[]> = { 아침: [], 점심: [], 저녁: [], 간식: [] }
@@ -768,7 +794,19 @@ export function buildDayMenu(
    * 간식은 그 부담을 나누는 자리이므로 하루 식단에 들어가야 한다.
    */
   for (const slot of [...MAIN_SLOTS, '간식' as MealSlot]) {
-    if (meals[slot].length > 0) continue
+    /*
+     * 잦은 소량으로 드셔야 하는 분은 간식이 '비어 있지 않기만' 해서는 부족하다.
+     *
+     * 위를 잘라 내셨거나 입맛이 없는 분께는 하루를 넷으로 고르게 나누는 것이 목표라
+     * 간식 몫을 22 % 로 잡아 두었다. 그런데 이 단계는 '비어 있는 끼니' 만 채워서,
+     * 간식에 213 kcal 짜리 하나가 놓이면 그것으로 끝났다 — 하루의 12 % 다.
+     * 그래서 제 몫의 절반도 못 채운 간식은 한 번 더 본다.
+     */
+    const graze = shares['간식'] >= 0.2
+    const thin = graze && slot === '간식' &&
+      meals['간식'].reduce((n, e) => n + (foodContribution(e.food, e.servings).kcal ?? 0), 0) < quota['간식'] * 0.55
+    if (meals[slot].length > 0 && !thin) continue
+    if (thin && meals['간식'].length >= cap) continue
     const cur = running()
     const room = {
       kcal: target.kcal[1] - (cur.kcal ?? 0),
@@ -951,6 +989,53 @@ export function buildDayMenu(
   }
 
   /*
+   * 4-2-3) 잦은 소량으로 드셔야 하는 분의 간식을 채운다.
+   *
+   * 위를 잘라 내셨거나 입맛이 없는 분께는 하루를 넷으로 고르게 나누는 것이 목표라
+   * 간식 몫을 22 % 로 잡아 두었다. 그런데 하루 열량이 이미 찬 날에는
+   * 간식에 무엇을 더 얹을 수가 없어 5 % 에서 끝나곤 했다.
+   *
+   * 더 얹을 수 없으면 옮기면 된다. 끼니에 놓인 것 중 간식으로도 갈 수 있는 것
+   * — 과일·유제품·견과·영양음료 — 을 가장 무거운 끼니에서 내린다.
+   * 하루 총량은 그대로이고 나뉘는 모양만 달라진다.
+   */
+  {
+    const graze = shares['간식'] >= 0.2
+    const load = (slot: MealSlot) =>
+      meals[slot].reduce((n, e) => n + (foodContribution(e.food, e.servings).kcal ?? 0), 0)
+
+    for (let pass = 0; graze && pass < 3 && load('간식') < quota['간식'] * 0.6; pass++) {
+      if (meals['간식'].length >= cap) break
+      /* 가장 무거운 끼니부터 — 거기서 덜어 내는 것이 균형에도 맞는다 */
+      const from = MAIN_SLOTS
+        .filter((s) => meals[s].length > 1)
+        .sort((a, b) => load(b) - load(a))[0]
+      if (!from) break
+
+      const movable = meals[from].filter((e) => {
+        if (!slotsFor(e.food).includes('간식')) return false
+        if (meals['간식'].some((x) => x.food.id === e.food.id)) return false
+        const capG = SLOT_GROUP_CAP[e.food.group] ?? SLOT_GROUP_CAP_DEFAULT
+        if (meals['간식'].filter((x) => x.food.group === e.food.group).length >= capG) return false
+        /* 끼니의 짜임새를 무너뜨리면서까지 옮기지는 않는다 */
+        const rest = meals[from].filter((x) => x !== e).map((x) => x.food)
+        return mealIsComplete(rest)
+      })
+      if (movable.length === 0) break
+
+      /* 옮겼을 때 간식이 제 몫에 가장 가까워지는 것 */
+      const want = quota['간식'] - load('간식')
+      const best = movable.reduce((a, b) => {
+        const ka = foodContribution(a.food, a.servings).kcal ?? 0
+        const kb = foodContribution(b.food, b.servings).kcal ?? 0
+        return Math.abs(want - kb) < Math.abs(want - ka) ? b : a
+      })
+      meals[from].splice(meals[from].indexOf(best), 1)
+      meals['간식'].push(best)
+    }
+  }
+
+  /*
    * 4-3) 끼니 사이 옮겨 담기.
    *
    * 한 가지씩 '제 몫에 가장 모자란 끼니' 에 넣다 보면, 다 짜고 난 뒤에는
@@ -990,7 +1075,13 @@ export function buildDayMenu(
        * 나눠 주는 것이 맞다. 주는 쪽이 제 몫 아래로 내려가지만 않으면 된다.
        */
       const starving = (['아침', '점심', '저녁'] as MealSlot[]).some((s) => load(s) < quota[s] * 0.45)
-      const overLine = starving ? 0.95 : 1.15
+      /*
+       * 잦은 소량으로 드셔야 하는 분은 한 끼가 커지는 것 자체가 문제다.
+       * 위를 잘라 내신 분께 저녁 660 kcal 은 한 번에 드시기 어려운 양이다.
+       * 그분들께는 '넘침' 의 기준을 낮춰 더 부지런히 나눈다.
+       */
+      const graze = shares['간식'] >= 0.2
+      const overLine = starving ? 0.95 : graze ? 1.05 : 1.15
       const overs = MEAL_SLOTS.filter((s) => load(s) > quota[s] * overLine)
         .sort((a, b) => load(b) - quota[b] - (load(a) - quota[a]))
       if (overs.length === 0) break
@@ -1529,6 +1620,11 @@ function collectCandidates(
    * 부드러운 식사가 필요하신가 — 죽을 앞세울지 밥을 앞세울지 가른다.
    * 급성기(방사선·항암 중)에는 증상이 없더라도 언제든 나빠질 수 있어 함께 본다.
    */
+  /* 잦은 소량으로 드셔야 하는가 — 큰 접시를 덜 고르게 한다 */
+  const grazing = patient.conditions.some(
+    (c) => c === '식욕부진' || c === '체중감소' || c === '위절제후' || c === '오심·구토'
+  )
+
   const needsSoft =
     patient.phase === 'during_rt' || patient.phase === 'during_chemo' ||
     patient.conditions.some((c) =>
@@ -1660,6 +1756,20 @@ function collectCandidates(
      * 직접 고르시는 것은 그대로 두고, 다른 것이 없으면 여전히 나온다.
      */
     if (!needsSoft && f.group === '밥·면·죽 요리' && /죽$|미음/.test(f.name)) penalty += 22
+
+    /*
+     * 잦은 소량으로 드셔야 하는 분께는 큰 접시 자체를 덜 권한다.
+     *
+     * 위를 잘라 내셨거나 입맛이 없는 분께 닭백숙 한 그릇(390 kcal)이 저녁에 놓이면,
+     * 거기에 밥이 더해져 한 끼가 하루의 40 % 를 넘는다. 다 짜고 나서 옮겨 담아
+     * 고치려 했지만, 옮길 곳마다 이미 밥이 있어 갈 데가 없었다.
+     * 나중에 나누는 것보다 처음부터 작은 것을 고르는 편이 낫다.
+     * 같은 닭이라도 백숙 대신 닭가슴살 한 접시(165 kcal)면 충분하다.
+     */
+    if (grazing) {
+      const per = (f.per100.kcal * f.serving.g) / 100
+      if (per > 300) penalty += Math.min(30, (per - 300) / 12)
+    }
 
     // 제철 가산은 bestFiller 에서 따로 센다. 여기서 더하면 두 번 세는 셈이 된다.
     const seasonal = isSeasonal(f, season)

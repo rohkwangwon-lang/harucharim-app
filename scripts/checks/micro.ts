@@ -171,7 +171,7 @@ for (let i = 0; i < N; i++) {
 
   if (targets.length > 0 && i % 3 === 0) {
     daysBuilt++
-    const day = buildDayMenu([], p, { dayKey: `2026-${String(1 + (i % 12)).padStart(2, '0')}-${String(1 + (i % 27)).padStart(2, '0')}` })
+    const day = buildDayMenu([], p, { day: `2026-${String(1 + (i % 12)).padStart(2, '0')}-${String(1 + (i % 27)).padStart(2, '0')}` })
 
     for (const m of targets) {
       const got = day.totals[m.key]
@@ -340,7 +340,7 @@ for (let i = 0; i < N; i++) {
     sex: 'F', age: 55, weightKg: 70, heightCm: 163,
     weightLossPct: 0, conditions: [], medications: [], subtypes: []
   } as PatientContext
-  const day = (p: PatientContext) => buildDayMenu([], p, { dayKey: '2026-08-25' })
+  const day = (p: PatientContext) => buildDayMenu([], p, { day: '2026-08-25' })
   const menuOf = (p: PatientContext) => {
     const m = day(p)
     return (['아침', '점심', '저녁', '간식'] as const)
@@ -424,7 +424,7 @@ for (let i = 0; i < N; i++) {
     let hit = 0
     let days = 0
     for (let d = 0; d < 20; d++) {
-      const m = buildDayMenu([], who, { dayKey: `2026-${String(1 + (d % 12)).padStart(2, '0')}-${String(1 + d).padStart(2, '0')}` })
+      const m = buildDayMenu([], who, { day: `2026-${String(1 + (d % 12)).padStart(2, '0')}-${String(1 + d).padStart(2, '0')}` })
       days++
       const names = (['아침', '점심', '저녁', '간식'] as const)
         .flatMap((s) => m.meals[s].map((e) => ({ n: e.food.name, g: e.food.group })))
@@ -481,7 +481,7 @@ for (let i = 0; i < N; i++) {
         weightKg: 45 + ((i * 7) % 50), heightCm: 165,
         weightLossPct: 0, conditions: [], medications: [], subtypes: []
       } as PatientContext
-      const m = buildDayMenu([], who, { dayKey: `2026-${String(1 + (i % 12)).padStart(2, '0')}-${String(1 + (i % 27)).padStart(2, '0')}` })
+      const m = buildDayMenu([], who, { day: `2026-${String(1 + (i % 12)).padStart(2, '0')}-${String(1 + (i % 27)).padStart(2, '0')}` })
       for (const slot of ['아침', '점심', '저녁'] as const) {
         const items = m.meals[slot]
         if (items.length === 0) continue
@@ -636,7 +636,7 @@ for (let i = 0; i < N; i++) {
       const avoid = new Map<string, number>()
       if (nonce > 0)
         for (const e of [...prev].sort((a, b) => b.kcal - a.kcal).slice(0, 2)) avoid.set(e.id, 0)
-      const m = buildDayMenu([], p, { dayKey: '2026-08-25', nonce, recent: avoid })
+      const m = buildDayMenu([], p, { day: '2026-08-25', nonce, recent: avoid })
       const entries = (['아침', '점심', '저녁', '간식'] as const)
         .flatMap((s) => m.meals[s].map((e) => ({ id: e.food.id, kcal: foodContribution(e.food, e.servings).kcal ?? 0 })))
       prev = entries
@@ -670,7 +670,7 @@ for (let i = 0; i < N; i++) {
      * 그때 나온 말이 "아무리 눌러도 변화가 없다" 였다.
      */
     const dinnerMain = (nonce: number) => {
-      const m = buildDayMenu([], p, { dayKey: '2026-08-25', nonce, recent: mainAvoid })
+      const m = buildDayMenu([], p, { day: '2026-08-25', nonce, recent: mainAvoid })
       const d = m.meals['저녁']
       if (d.length === 0) return '—'
       const big = d.reduce((x, y) =>
