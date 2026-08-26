@@ -18,7 +18,7 @@ import { adviseSupplements, adviseForShortfall } from '../../src/engine/suppleme
 import { summarizePeriod, reportNutrients } from '../../src/engine/dayScore'
 import { sumIntake } from '../../src/engine/nutrition'
 import { ideasFromIngredients } from '../../src/engine/menu'
-import { isIngredientOnly } from '../../src/data/foods'
+import { isIngredientOnly, mealIsComplete, isAnchorDish, mealRole } from '../../src/data/foods'
 import { CANCERS } from '../../src/data/cancers'
 import { SUPPLEMENTS } from '../../src/data/supplements'
 import { MEDICATIONS } from '../../src/data/interactions'
@@ -226,6 +226,27 @@ for (let person = 0; person < PEOPLE; person++) {
       : mood < 0.7 ? eaten.filter(() => rnd() > 0.35)                 // 몇 가지 남기신 날
       : mood < 0.9 ? eaten.filter((x) => x.meal !== pick(MEAL_SLOTS)) // 한 끼 거르신 날
       : eaten.map((x) => ({ ...x, servings: x.servings * 0.5 }))      // 반만 드신 날
+
+    /*
+     * ── 밥상이 서는가 ──
+     *
+     * 밥 한 공기에 삶은 콩이나 옥수수만 곁들인 것은 상이 아니다.
+     * 국이든 조리된 반찬이든 하나는 있어야 한다.
+     * 이 검사가 없던 동안 끼니의 4분의 1이 그랬다.
+     */
+    for (const s of ['아침', '점심', '저녁'] as MealSlot[]) {
+      const foods = menu.meals[s].map((e) => e.food)
+      if (foods.length === 0) continue
+      if (!mealIsComplete(foods)) {
+        bad('밥상이 서지 않음', `${ctx} ${s}: ${foods.map((f) => f.name).join('+')}`)
+      }
+      /* 곁들임만 여럿 늘어놓지 않았는가 */
+      const garnish = foods.filter((f) => !isAnchorDish(f) &&
+        (mealRole(f) === 'side' || mealRole(f) === 'main'))
+      if (garnish.length > 1) {
+        bad('곁들임이 몰림', `${ctx} ${s}: ${garnish.map((f) => f.name).join('+')}`)
+      }
+    }
 
     /* ── 부속 계산도 함께 굴린다 ── */
     try {

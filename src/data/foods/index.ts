@@ -204,9 +204,16 @@ export function mealRole(f: Food): MealRole {
       return 'side'
     case '과일': case '우유·유제품': case '견과·종실': case '음료': case '간식·디저트':
       return 'dessert'
-    case '밥·면·죽 요리': case '외식·프랜차이즈':
+    case '밥·면·죽 요리':
       /* 죽 한 그릇, 국수 한 그릇은 그것만으로 한 끼다 */
       return ONE_DISH.test(f.name) ? 'onedish' : 'staple'
+    case '외식·프랜차이즈':
+      /*
+       * 사 먹는 것은 대개 이미 차려진 한 끼이거나 한 접시다.
+       * 보쌈을 '주식' 으로 두었더니 밥 자리를 차지하고도 반찬이 없어
+       * '보쌈 + 수박' 이 한 끼로 나갔다. 밥이 아니면 주찬으로 본다.
+       */
+      return ONE_DISH.test(f.name) ? 'onedish' : /밥$|공기밥/.test(f.name) ? 'staple' : 'main'
     case '곡류·전분':
       /* 밥은 주식, 감자·고구마·빵은 곁들이로 본다 */
       return /밥/.test(f.name) ? 'staple' : ONE_DISH.test(f.name) ? 'onedish' : 'side'
@@ -215,10 +222,47 @@ export function mealRole(f: Food): MealRole {
   }
 }
 
+/*
+ * 조리된 반찬인가, 그냥 곁들이는 것인가.
+ *
+ * 역할(mealRole)만으로는 모자랐다. 삶은 콩과 찐 고구마와 생토마토가
+ * 전부 main·side 로 잡히는 바람에 "쌀밥 + 옥수수 + 복숭아" 나
+ * "현미밥 + 대두(삶은 것)" 가 한 끼로 통과했다. 한국 사람은 그렇게 먹지 않는다.
+ *
+ * 밥상을 이루는 것은 국이거나 조리된 반찬이다.
+ * 삶은 콩·찐 고구마·옥수수·생채소는 곁들여 놓을 수는 있어도
+ * 그것만으로 밥상을 세우지는 못한다.
+ */
+const COOKED_DISH = /찌개|국$|탕$|전골|나물|무침|볶음|조림|찜|구이|전$|튀김|김치|장아찌|쌈|절임|자반|강정|산적|불고기|수육|편육|숙회|회$|샐러드/
+
+/** 그냥 익히기만 한 단품 — 곁들임이지 반찬이 아니다 */
+const PLAIN_ITEM = /\((삶은 것|찐 것|생것|데친 것|구운 것|불린 것)\)$/
+
+export function isAnchorDish(f: Food): boolean {
+  const r = mealRole(f)
+  if (r === 'soup') return true                       // 국·탕·찌개는 그 자체로 상을 세운다
+  if (r === 'dessert' || r === 'supp' || r === 'staple' || r === 'onedish') return false
+
+  if (COOKED_DISH.test(f.name)) return true           // 이름이 조리를 말하면 반찬이다
+  if (f.group === '반찬·조림·볶음') return true
+
+  /*
+   * 고기·생선·달걀·두부는 조리 표시가 없어도 주찬으로 본다 —
+   * '닭가슴살(삶은 것)' 은 한 접시가 되지만 '대두(삶은 것)' 은 그렇지 않다.
+   * 다만 그중에서도 그냥 익히기만 한 콩류는 곁들임으로 남긴다.
+   */
+  if (f.group === '육류' || f.group === '가금류·난류' || f.group === '어패류') return true
+  if (f.group === '외식·프랜차이즈') return true          // 사 먹는 것은 이미 차려진 한 접시다
+  if (f.group === '두류·대두가공') return !PLAIN_ITEM.test(f.name)
+
+  return false                                        // 채소·해조·곡류 단품은 곁들임
+}
+
 /**
  * 이만하면 한 끼로 볼 수 있는가.
  *
- * 밥만 있으면 아니다. 밥에 국이든 반찬이든 하나는 붙어야 상이 된다.
+ * 밥만 있으면 아니다. 밥에는 국이든 조리된 반찬이든 하나는 붙어야 상이 된다.
+ * 옥수수나 삶은 콩을 곁들인 것은 상이 아니라 밥에 무언가를 얹은 것이다.
  * 죽이나 국수 한 그릇은 그것만으로 한 끼다 — 죽상에 반찬을 요구할 일은 아니다.
  * 과일은 몇 가지가 오르든 끼니를 이루지 못한다. 후식이기 때문이다.
  */
@@ -226,9 +270,5 @@ export function mealIsComplete(foods: Food[]): boolean {
   if (foods.length === 0) return true // 비어 있는 끼니는 여기서 따질 일이 아니다
   const roles = foods.map(mealRole)
   if (roles.includes('onedish')) return true
-  const hasStaple = roles.includes('staple')
-  const hasDish = roles.some((r) => r === 'soup' || r === 'main' || r === 'side')
-  if (hasStaple) return hasDish
-  /* 밥이 없어도 반찬과 주찬이 있으면 한 끼로 본다 — 빵과 달걀, 두부와 나물처럼 */
-  return hasDish
+  return foods.some(isAnchorDish)
 }
