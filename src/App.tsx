@@ -14,6 +14,7 @@ import { IconDiary, IconGuide, IconMe, IconMeal, IconPill, IconSearch, IconSugge
 import { label as dayLabel, today } from './lib/day'
 import { CancerGuide } from './components/CancerGuide'
 import { EvidenceGuide } from './components/EvidenceGuide'
+import { HowTo } from './components/HowTo'
 import { Exercise } from './components/Exercise'
 import { DataManager } from './components/DataManager'
 import { InquiryDialog } from './components/InquiryDialog'
@@ -29,7 +30,7 @@ import { Credentials } from './components/ui'
  * 그래서 성격이 비슷한 영양제·운동·가이드는 '관리' 안에서 나눈다.
  */
 type Tab = 'compose' | 'diary' | 'suggest' | 'search' | 'supp' | 'care' | 'me'
-type CareView = 'exercise' | 'guide' | 'evidence'
+type CareView = 'howto' | 'exercise' | 'guide' | 'evidence'
 
 /*
  * 하루를 쓰는 순서대로 늘어놓는다.
@@ -58,6 +59,12 @@ const TABS: { id: Tab; label: string; Icon: typeof IconMeal }[] = [
 ]
 
 const CARE_VIEWS: { id: CareView; label: string }[] = [
+  /*
+   * 화면마다 그 자리에 필요한 말은 적어 두었지만 전체를 한 번에 훑을 데가 없어서,
+   * '다시 구성' 이나 주간 보고처럼 눌러 보아야 아는 기능은 있는 줄도 모르고 지나쳤다.
+   * 처음 여신 분이 먼저 볼 자리이므로 맨 앞에 둔다.
+   */
+  { id: 'howto', label: '사용법' },
   { id: 'exercise', label: '운동' },
   { id: 'guide', label: '암종 가이드' },
   /*
@@ -77,7 +84,7 @@ export default function App() {
   const [tab, setTabState] = useState<Tab>('compose')
   /** 음식 찾기로 넘어갈 때 어느 끼니에 담을지 미리 정해 둔다 */
   const [pendingMeal, setPendingMeal] = useState<MealSlot>('점심')
-  const [care, setCare] = useState<CareView>('exercise')
+  const [care, setCare] = useState<CareView>('howto')
   const [toast, setToast] = useState<string | null>(null)
   const [asking, setAsking] = useState(false)
   const { user, loading: sessionLoading } = useSession()
@@ -255,9 +262,13 @@ export default function App() {
               * 한눈에 들어오지 않았다. 배경과의 대비가 3.4 : 1 로 기준(4.5)에 못 미쳤다 —
               * 이 앱을 쓰시는 분 중에는 항암 중 눈이 침침해지신 분도 있다.
               * 글자를 키우고, 고른 쪽은 색을 채워 분명히 하고, 손가락이 닿을 넓이를 준다.
+              *
+              * '사용법' 이 들어와 네 칸이 되자 375 px 화면에서 '암종 가이드' 가 두 줄로 접혔다.
+              * 칸을 균등히 나누는 대신 글자 길이만큼만 차지하게 하고, 모자라면 옆으로 밀리게 둔다.
+              * 접힌 글자는 줄 높이가 어긋나 눌러야 할 자리가 흐려진다.
               */}
             <div
-              className="mb-4 flex gap-1.5 rounded-2xl bg-stone-100 p-1.5"
+              className="mb-4 flex gap-1.5 overflow-x-auto rounded-2xl bg-stone-100 p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               role="tablist"
               aria-label="가이드 종류"
             >
@@ -267,7 +278,7 @@ export default function App() {
                   role="tab"
                   aria-selected={care === v.id}
                   onClick={() => { setCare(v.id); window.scrollTo({ top: 0 }) }}
-                  className={`flex-1 rounded-xl px-2 py-2.5 text-sm font-bold transition-colors ${
+                  className={`flex-1 whitespace-nowrap rounded-xl px-2.5 py-2.5 text-sm font-bold transition-colors ${
                     care === v.id
                       ? 'bg-brand-600 text-white shadow-sm'
                       : 'text-stone-700 hover:bg-white/70'
@@ -277,6 +288,7 @@ export default function App() {
                 </button>
               ))}
             </div>
+            {care === 'howto' && <HowTo />}
             {care === 'exercise' && <Exercise patient={state.patient} />}
             {care === 'guide' && <CancerGuide patient={state.patient} />}
             {care === 'evidence' && <EvidenceGuide patient={state.patient} />}
