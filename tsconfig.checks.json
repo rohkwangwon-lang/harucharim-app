@@ -1,0 +1,20 @@
+{
+  /*
+   * 검사 코드도 타입 검사를 받는다.
+   *
+   * scripts/ 가 어느 tsconfig 에도 들어 있지 않아서, 검사 코드가 틀려도
+   * 컴파일에서 걸리지 않았다. 실제로 reportNutrients 에 식품 목록을 넘겨
+   * 늘 빈 결과를 받고 있었는데 120번을 돌도록 아무도 몰랐고,
+   * 범위 밖 변수(ctx)를 쓴 곳은 평소엔 try/catch 에 삼켜지다가
+   * 다른 것을 건드렸을 때 검사가 통째로 죽었다.
+   *
+   * 틀린 검사는 없는 검사보다 나쁘다. 통과했다고 믿게 만들기 때문이다.
+   */
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.checks.tsbuildinfo",
+    "types": ["node", "vite/client"],
+    "noUnusedLocals": false
+  },
+  "include": ["scripts", "src/vite-env.d.ts"]
+}

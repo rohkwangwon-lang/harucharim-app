@@ -159,9 +159,14 @@ const bad = (k: string, d: string) => { const s = `${k} :: ${d}`; if (!seenB.has
     if (v.unknown) { unknown++; continue }
     if (!v.items.length) bad('판정했는데 근거 항목 없음', `${v.level}`)
     for (const it of v.items) {
-      if (!it.reason?.trim()) bad('성분 판정에 사유 없음', `${it.name}`)
-      if (!it.evidence) bad('성분 판정에 근거수준 없음', `${it.name}`)
-      if (!['avoid','caution','prefer','info'].includes(it.level)) bad('성분 판정 등급 이상', `${it.name}=${it.level}`)
+      /*
+       * 이름 칸은 name 이 아니라 ingredient 다.
+       * 타입 검사를 안 받던 동안 여기가 늘 undefined 로 찍혔다 —
+       * 문제를 잡아도 '무엇이' 인지 알 수 없는 메시지가 나갔다.
+       */
+      if (!it.reason?.trim()) bad('성분 판정에 사유 없음', `${it.ingredient}`)
+      if (!it.evidence) bad('성분 판정에 근거수준 없음', `${it.ingredient}`)
+      if (!['avoid','caution','prefer','info'].includes(it.level)) bad('성분 판정 등급 이상', `${it.ingredient}=${it.level}`)
     }
     // 개별 성분 중 avoid 가 있으면 전체도 avoid 여야 한다
     if (v.items.some(i => i.level === 'avoid') && v.level !== 'avoid') bad('금기 성분인데 전체 판정이 완화됨', `${v.level}`)

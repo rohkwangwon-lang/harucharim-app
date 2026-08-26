@@ -26,8 +26,13 @@ function showBanner(onUpdate: () => void) {
     'max-width:640px', 'margin:0 auto',
     'display:flex', 'align-items:center', 'gap:10px',
     'padding:12px 14px', 'border-radius:14px',
-    'background:#0f766a', 'color:#fff',
-    'box-shadow:0 6px 24px rgba(15,118,106,.35)',
+    /*
+     * 색은 지금 디자인(brand-600 솔잎빛)에서 가져온다.
+     * 이 배너는 화면 밖에서 만들어지므로 Tailwind 를 못 쓰고 값을 적어야 하는데,
+     * 그래서 디자인을 바꿀 때 여기만 예전 청록으로 남아 있었다.
+     */
+    'background:#4b6936', 'color:#fff',
+    'box-shadow:0 6px 24px rgba(75,105,54,.35)',
     'font-size:13px', 'line-height:1.45'
   ].join(';')
 
@@ -38,7 +43,7 @@ function showBanner(onUpdate: () => void) {
   const btn = document.createElement('button')
   btn.textContent = '지금 갱신'
   btn.style.cssText =
-    'flex-shrink:0;padding:6px 12px;border:0;border-radius:9px;background:#fff;color:#0f766a;font-weight:700;font-size:12px;cursor:pointer'
+    'flex-shrink:0;padding:6px 12px;border:0;border-radius:9px;background:#fff;color:#4b6936;font-weight:700;font-size:12px;cursor:pointer'
   btn.onclick = onUpdate
 
   const later = document.createElement('button')

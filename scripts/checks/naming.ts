@@ -27,6 +27,8 @@ const OLD_SLUG = 'oncofood'
 /** 예전 이름이 남아 있어야 하는 곳 — 옮기는 장치와, 그것을 보는 이 검사 자신 */
 const MIGRATOR = 'src/lib/migrate.ts'
 const SELF = 'scripts/checks/naming.ts'
+/* 옮기기를 시험하는 검사도 예전 이름을 알아야 한다 */
+const MIG_TEST = 'scripts/checks/migrate.ts'
 
 const bads: string[] = []
 function no(cond: boolean, msg: string) { if (cond) bads.push(msg) }
@@ -49,7 +51,7 @@ const files = [
 /* ── 1. 예전 이름이 남아 있지 않은가 ────────────────────── */
 const left: string[] = []
 for (const f of files) {
-  if (f === MIGRATOR || f === SELF) continue
+  if (f === MIGRATOR || f === SELF || f === MIG_TEST) continue
   let t: string
   try { t = readFileSync(f, 'utf-8') } catch { continue }
   const hits = [...t.matchAll(new RegExp(`${OLD_NAME}|${OLD_SLUG}|ONCOFOOD`, 'gi'))]
@@ -201,6 +203,48 @@ no(Boolean(dbName) && dbName !== SLUG,
    `기기 저장소 이름이 앱 이름과 다름 — "${dbName}" (${SLUG} 여야)`)
 no(!/deleteDatabase/.test(mig),
    '예전 기기 저장소를 지우지 않음 — 쓰이지 않는 14 MB 가 브라우저에 남는다')
+
+/*
+ * 소스 어디에도 예전 색이 남아 있지 않은가.
+ *
+ * 매니페스트와 index.html 만 보았더니, 갱신 배너(updatePrompt.ts)가
+ * 예전 청록(#0f766a)을 그대로 쓰고 있는 것을 놓쳤다.
+ * 그 배너는 Tailwind 를 못 쓰고 색을 직접 적어야 해서, 디자인을 바꿀 때 빠지기 쉽다.
+ * 지금 팔레트에 없는 색이 소스에 박혀 있으면 잡는다.
+ */
+const PALETTE = new Set(
+  [...tw.matchAll(/'(#[0-9a-fA-F]{6})'/g)].map((m2) => m2[1].toLowerCase())
+)
+no(PALETTE.size < 20, `tailwind 에서 색을 ${PALETTE.size}개밖에 못 읽음 — 검사가 헛돌고 있다`)
+
+/*
+ * 남의 브랜드색은 마음대로 바꿀 수 없다.
+ * 카카오는 로그인 단추 색을 규정해 두었고, 다르게 칠하면 심사에서 걸린다.
+ */
+const BRAND_OK = new Set(['#fee500', '#191600', '#f5dc00'])
+
+const strayColors: string[] = []
+for (const f of files) {
+  /*
+   * 소스만 본다.
+   *
+   * 처음에는 files 전부를 훑었는데, 바코드가 담긴 데이터 파일에서
+   * 우연히 여섯 자리 16진수처럼 보이는 문자열이 잡혀 186곳을 잘못 셌다.
+   * 색을 칠하는 곳은 화면 소스와 설정뿐이다.
+   */
+  if (!/^(src\/.*\.tsx?|index\.html|vite\.config\.ts)$/.test(f)) continue
+  let t: string
+  try { t = readFileSync(f, 'utf-8') } catch { continue }
+  for (const m2 of t.matchAll(/#[0-9a-fA-F]{6}\b/g)) {
+    const c = m2[0].toLowerCase()
+    if (PALETTE.has(c) || BRAND_OK.has(c)) continue
+    if (c === '#ffffff' || c === '#000000') continue      // 흰색·검정은 팔레트 밖이라도 쓴다
+    const line = t.slice(t.lastIndexOf('\n', m2.index!) + 1, t.indexOf('\n', m2.index!)).trim()
+    strayColors.push(`${f}: ${c}  (${line.slice(0, 60)})`)
+  }
+}
+no(strayColors.length > 0,
+   `팔레트에 없는 색이 박혀 있음 (${strayColors.length}곳)\n   - ${strayColors.slice(0, 8).join('\n   - ')}`)
 
 /* ── 9. 화면에 부르는 이름이 하나로 통일됐는가 ──────────── */
 const app = readFileSync('src/App.tsx', 'utf-8')

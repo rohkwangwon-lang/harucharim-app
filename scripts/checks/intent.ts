@@ -382,7 +382,11 @@ for (let i = 0; i < N; i++) {
   const extra = (p.cuisines ?? ['한식']).filter((c) => c !== '한식')
   if (extra.length > 0) {
     cCuisine.n++
-    if (items.some((e) => extra.includes((e.food.cuisine ?? '한식') as Cuisine))) cCuisine.hit++
+    /*
+     * Food.cuisine 은 '한식' 을 담지 않는다(기본값이라 비워 둔다).
+     * extra 는 사용자가 더 고른 계통이므로 서로 다른 타입이다 — 문자열로 견준다.
+     */
+    if (items.some((e) => (extra as readonly string[]).includes(String(e.food.cuisine ?? '한식')))) cCuisine.hit++
   }
 }
 

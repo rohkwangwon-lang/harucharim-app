@@ -14,7 +14,10 @@ import { buildDayMenu, recentFoods, fiberGoal, dayNotes, naUnknownNames, intakeT
 import { summarizeDay } from '../../src/engine/dayScore'
 import { evaluateFood, activeRules, activeInteractions, evaluateSelection } from '../../src/engine/rules'
 import { foodContribution, personalTarget, targetNotes, nutritionRisk, effectiveLossPct } from '../../src/engine/nutrition'
-import { adviseSupplements } from '../../src/engine/supplementAdvice'
+import { adviseSupplements, adviseForShortfall } from '../../src/engine/supplementAdvice'
+import { summarizePeriod, reportNutrients } from '../../src/engine/dayScore'
+import { sumIntake } from '../../src/engine/nutrition'
+import { ideasFromIngredients } from '../../src/engine/menu'
 import { isIngredientOnly } from '../../src/data/foods'
 import { CANCERS } from '../../src/data/cancers'
 import { SUPPLEMENTS } from '../../src/data/supplements'
@@ -206,7 +209,23 @@ for (let person = 0; person < PEOPLE; person++) {
       st.cancers.set(patient.cancer, (st.cancers.get(patient.cancer) ?? 0) + 1)
     }
 
-    diary[key] = MEAL_SLOTS.flatMap((s) => menu.meals[s].map((e) => ({ foodId: e.food.id, servings: e.servings, meal: s })))
+    /*
+     * 기록에는 '추천받은 대로 다 드신 것' 을 넣지 않는다.
+     *
+     * 예전에는 추천을 그대로 기록으로 되먹였다. 그러면 목표를 늘 맞추게 되어
+     * 부족한 날이 한 번도 생기지 않고, 주간 보고와 거기서 나오는 보충 권고가
+     * 아예 굴러가지 않는다 — 방어를 꺼 놓고 돌려도 아무 말이 없었다.
+     *
+     * 실제로는 추천대로 다 드시지 않는다. 끼니를 거르고, 반만 드시고,
+     * 입맛이 없어 몇 가지만 드신다. 그 쪽이 보고가 다루어야 할 현실이다.
+     */
+    const eaten = MEAL_SLOTS.flatMap((s) => menu.meals[s].map((e) => ({ foodId: e.food.id, servings: e.servings, meal: s })))
+    const mood = rnd()
+    diary[key] =
+      mood < 0.35 ? eaten                                             // 그대로 드신 날
+      : mood < 0.7 ? eaten.filter(() => rnd() > 0.35)                 // 몇 가지 남기신 날
+      : mood < 0.9 ? eaten.filter((x) => x.meal !== pick(MEAL_SLOTS)) // 한 끼 거르신 날
+      : eaten.map((x) => ({ ...x, servings: x.servings * 0.5 }))      // 반만 드신 날
 
     /* ── 부속 계산도 함께 굴린다 ── */
     try {
@@ -217,6 +236,84 @@ for (let person = 0; person < PEOPLE; person++) {
       fiberGoal(patient, prof); adviseSupplements(patient); intakeTrend(diary, patient, key)
     } catch (e) { bad('부속 계산 중 예외', `${ctx} :: ${(e as Error)?.message}`) }
   }
+
+  /*
+   * ── 여러 날을 모아야 보이는 것 ──
+   *
+   * 주간·월간 보고와 거기서 나오는 보충 권고는 하루치로는 나오지 않는다.
+   * 이 대규모 실행이 그것을 전혀 굴리지 않고 있었다 —
+   * 석 달 치 기록을 만들어 놓고 하루씩만 보고 버린 셈이다.
+   */
+  /*
+   * ctx 는 하루 루프 안에서 만들어지므로 여기서는 쓸 수 없다.
+   * 처음에 그걸 그대로 썼더니 ReferenceError 로 검사가 통째로 죽었는데,
+   * 평소에는 try/catch 에 삼켜져 조용히 넘어가고 무언가 어긋났을 때만 터졌다.
+   * scripts/ 가 타입 검사를 안 받고 있어서 컴파일에서도 안 걸렸다.
+   */
+  const who = `${patient.cancer}/${patient.phase}/${patient.sex}${patient.age}/${patient.weightKg}kg cond=[${patient.conditions}]`
+  const keys = Object.keys(diary).sort()
+  for (const [unit, n] of [['주', 7], ['달', 30]] as const) {
+    const span = keys.slice(-n)
+    if (span.length < 2) continue
+    try {
+      summarizePeriod(span, (d) => summarizeDay(diary[d] ?? [], patient, supps), patient, unit)
+      /*
+       * intakeOf 는 '그날 드신 것의 영양소 합계' 를 내야 한다.
+       * 처음에는 식품 목록을 그대로 넘겼는데, 그러면 함수가 조용히 빈 배열을 낸다 —
+       * 120번 돌려도 항목이 0개라 새 검사가 한 번도 굴러가지 않았다.
+       * 방어를 꺼 놓고 돌려도 아무 말이 없어서 그때 알았다.
+       */
+      const rows = reportNutrients(
+        span,
+        (d) => (diary[d]?.length ? sumIntake(diary[d], supps) : null),
+        patient,
+        unit
+      )
+
+      for (const r of rows) {
+        if (!Number.isFinite(r.under) || !Number.isFinite(r.over) || !Number.isFinite(r.days)) {
+          bad('보고 숫자가 이상함', `${who} ${unit} :: ${r.label} under=${r.under} over=${r.over}`)
+        }
+        if (r.under + r.over > r.days) {
+          bad('모자란 날+넘친 날이 전체보다 많음', `${who} ${unit} :: ${r.label} ${r.under}+${r.over}>${r.days}`)
+        }
+        if (!r.label?.trim()) bad('보고 항목에 이름이 없음', `${who} ${unit}`)
+      }
+
+      /* 기록에서 드러난 부족을 채우는 권고 */
+      const advice = adviseForShortfall(rows, patient)
+      for (const a of advice) {
+        if (!a.products?.length) bad('보충 권고에 보여 줄 제품이 없음', `${who} :: ${a.nutrient}`)
+        if (!a.byFood?.trim()) bad('보충 권고에 식품으로 채우는 길이 없음', `${who} :: ${a.nutrient}`)
+        if (!a.refIds?.length) bad('보충 권고에 근거가 없음', `${who} :: ${a.nutrient}`)
+
+        /*
+         * 지금 상태에서 늘리면 해로운 것을 권하지 않는가.
+         * 이것이 이 기능의 핵심이고, 어긋나면 앱이 다른 화면에서 하는 말과 정면으로 부딪힌다.
+         */
+        const c = patient.conditions
+        if (a.nutrient === '식이섬유' && (c.includes('설사') || c.includes('장루보유')))
+          bad('해로운 보충을 권함', `${who} :: 설사·장루에 식이섬유`)
+        if (a.nutrient === '단백질' && (c.includes('신기능저하') || c.includes('간성뇌증위험')))
+          bad('해로운 보충을 권함', `${who} :: 신기능·간성뇌증에 단백질`)
+        if (a.nutrient === '칼슘' && patient.cancer === 'prostate' && !patient.medications.includes('adt'))
+          bad('해로운 보충을 권함', `${who} :: 전립선암(ADT 아님)에 칼슘`)
+        if (a.nutrient === '철' && !c.some((x) => /위절제|위전절제|위부분절제/.test(x)))
+          bad('해로운 보충을 권함', `${who} :: 위절제 없이 철분`)
+      }
+    } catch (e) { bad('보고 계산 중 예외', `${who} ${unit} :: ${(e as Error)?.message}`) }
+  }
+
+  /* ── 재료를 담았을 때 요리를 일러 주는가 ── */
+  try {
+    const some = (diary[keys[keys.length - 1]] ?? []).slice(0, 3)
+    if (some.length) {
+      const ideas = ideasFromIngredients(some, patient)
+      for (const it of ideas) {
+        if (!it.dishes?.length) bad('재료만 알려 주고 요리를 못 댐', `${who} :: ${it.source.name}`)
+      }
+    }
+  } catch (e) { bad('재료→요리 중 예외', `${who} :: ${(e as Error)?.message}`) }
 }
 ;(globalThis as { Date: DateConstructor }).Date = RealDate
 process.stdout.write('\r' + ' '.repeat(70) + '\r')
