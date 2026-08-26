@@ -262,6 +262,63 @@ if (entry >= 0) {
      '관리자 입구가 모두에게 보임')
 }
 
+/* ── 12. SQL 이 순서대로 실행되는가 ──────────────────────
+ *
+ * of_stat_return 이 of_return_rate 를 부르는데 그게 아래에 정의되어 있었다.
+ * PostgreSQL 은 SQL 함수의 본문을 '만드는 시점' 에 검사하므로,
+ * 아직 없는 함수를 부르면 그 자리에서 설치가 통째로 멈춘다.
+ *
+ *   ERROR: 42883: function public.of_return_rate(integer) does not exist
+ *
+ * 붙여넣고 실행하는 파일이라 한 줄만 어긋나도 아무것도 설치되지 않는다.
+ * 여기서 미리 잡는다 — 실제 데이터베이스 없이도 순서는 확인할 수 있다.
+ */
+/*
+ * 표 이름을 함수 호출로 세지 않는다.
+ * insert into public.of_active (pid, day) 의 괄호가 호출처럼 보인다 —
+ * 처음 쓴 검사가 여기에 걸려 멀쩡한 코드를 세 줄이나 잡아냈다.
+ */
+const TABLES = new Set(
+  [...sql.matchAll(/create table if not exists public\.(of_\w+)/g)].map((m2) => m2[1])
+)
+
+const defAt = new Map<string, number>()
+for (const m2 of sql.matchAll(/create or replace function public\.(of_\w+)/g)) {
+  if (!defAt.has(m2[1])) defAt.set(m2[1], m2.index!)
+}
+
+for (const [name, at] of defAt) {
+  const end = sql.indexOf('$$;', at)
+  const body = sql.slice(at, end < 0 ? sql.length : end)
+  for (const call of body.matchAll(/public\.(of_\w+)\s*\(/g)) {
+    const callee = call[1]
+    if (callee === name || TABLES.has(callee) || !defAt.has(callee)) continue
+    if (defAt.get(callee)! > at) {
+      /* 같은 함수를 여러 번 불러도 한 줄로만 알린다 */
+      const msg = `${name} 이 아래에 정의된 ${callee} 을 부름 — 설치가 그 자리에서 멈춘다`
+      if (!bads.includes(msg)) bads.push(msg)
+    }
+  }
+}
+
+/* 부르는데 이 파일에도 admin.sql 에도 없는 함수는 없는가 */
+const KNOWN_OUTSIDE = ['of_is_admin']
+for (const [name, at] of defAt) {
+  const end = sql.indexOf('$$;', at)
+  const body = sql.slice(at, end < 0 ? sql.length : end)
+  for (const call of body.matchAll(/public\.(of_\w+)\s*\(/g)) {
+    if (!defAt.has(call[1]) && !TABLES.has(call[1]) && !KNOWN_OUTSIDE.includes(call[1])) {
+      bads.push(`${name} 이 어디에도 없는 ${call[1]} 을 부름`)
+    }
+  }
+}
+
+/* 만든 함수마다 권한을 주었는가 — 빠뜨리면 앱에서 부를 때만 조용히 실패한다 */
+for (const name of defAt.keys()) {
+  const re = new RegExp(`grant execute on function public\\.${name}\\s*\\(`)
+  no(!re.test(sql), `${name} 에 grant execute 가 없음 — 앱에서 부르면 권한 오류가 난다`)
+}
+
 console.log(bads.length
   ? `개인정보 검사 — 문제 ${bads.length}종\n` + bads.map((b) => '■ ' + b).join('\n')
   : `개인정보 검사 완료 — 동의·뭉개기·집계 방어 확인, 문제 없음 (세는 항목 ${used.size}종)`)

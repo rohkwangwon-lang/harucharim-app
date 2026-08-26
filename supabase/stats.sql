@@ -306,21 +306,13 @@ as $$
               group by name) t), '[]'::jsonb) end
 $$;
 
-/* 다시 오시는지 — 처음 오신 날로부터 며칠 뒤에 다시 오셨나 */
-create or replace function public.of_stat_return()
-returns jsonb
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select case when not public.of_is_admin() then null else jsonb_build_object(
-    'd1', public.of_return_rate(1),
-    'd7', public.of_return_rate(7),
-    'd30', public.of_return_rate(30)
-  ) end
-$$;
-
+/*
+ * 그 간격을 지날 만큼 시간이 흐른 분들만 분모에 넣는다.
+ *
+ * 아래 of_stat_return 이 이 함수를 부르므로 반드시 먼저 정의되어야 한다.
+ * 순서를 바꿔 두었더니 설치가 통째로 실패했다 — PostgreSQL 은 SQL 함수의 본문을
+ * 만드는 시점에 검사하므로, 아직 없는 함수를 부르면 그 자리에서 멈춘다.
+ */
 create or replace function public.of_return_rate(p_gap int)
 returns jsonb
 language sql
@@ -339,6 +331,22 @@ as $$
               where exists (select 1 from public.of_active a
                              where a.pid = b.pid and a.day >= b.first_seen + p_gap))
   )
+$$;
+
+
+/* 다시 오시는지 — 처음 오신 날로부터 며칠 뒤에 다시 오셨나 */
+create or replace function public.of_stat_return()
+returns jsonb
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select case when not public.of_is_admin() then null else jsonb_build_object(
+    'd1', public.of_return_rate(1),
+    'd7', public.of_return_rate(7),
+    'd30', public.of_return_rate(30)
+  ) end
 $$;
 
 /* 영양제 수요 — 수익 사업을 가늠하는 자리 */
