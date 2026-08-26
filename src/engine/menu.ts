@@ -1,6 +1,7 @@
 import type { Cuisine, EvidenceLevel, Food, FoodGroup, MealSlot, NutrientKey, PatientContext, Season, SelectedItem, Supplement } from '../data/types'
 import { MEAL_SLOTS } from '../data/types'
 import { CURATED_FOODS, FOOD_BY_ID, isIngredientOnly, mealIsComplete, mealRole, type MealRole } from '../data/foods'
+import { INGREDIENT_DISHES } from '../data/foods/ingredientDishes'
 import { CANCER_BY_ID } from '../data/cancers'
 import { activeInteractions, activeRules, evaluateFood, type RuleHit, type InteractionHit } from './rules'
 import { addTotals, dosingWeight, effectiveLossPct, foodContribution, microTargets, personalTarget, type MicroTarget, type NutrientTotals } from './nutrition'
@@ -237,21 +238,38 @@ export function ideasFromIngredients(
     if (!src || src.form !== 'ingredient') continue
 
     const key = coreWord(src.name)
-    if (key.length < 2) continue
 
-    const dishes = CURATED_FOODS.filter((f) => {
+    /*
+     * 손으로 적어 둔 것을 먼저 본다.
+     *
+     * 이름이 겹치는 것만 찾던 때에는 재료 97종 가운데 8종만 제안이 나왔다 —
+     * '시금치' 로 '시금치나물' 은 찾아도, 무·배추·양파처럼 이름이 요리에 드러나지 않는 것은
+     * 한 건도 잇지 못했다. 무로 깍두기를 담근다는 것은 표에 적어 두는 수밖에 없다.
+     */
+    const listed = (INGREDIENT_DISHES[src.name] ?? [])
+      .map((n) => CURATED_FOODS.find((f) => f.name === n))
+      .filter((f): f is Food => !!f)
+
+    const byName = key.length >= 2
+      ? CURATED_FOODS.filter((f) => f.id !== src.id && !f.form.includes('ingredient') && f.name.includes(key))
+      : []
+
+    const seenDish = new Set<string>()
+    const dishes = [...listed, ...byName].filter((f) => {
       if (f.id === src.id || chosenIds.has(f.id)) return false
-      if (f.form === 'ingredient') return false
-      if (!f.name.includes(key)) return false
+      if (seenDish.has(f.id)) return false
       if (!allowedCuisine(f, cuisines)) return false
       const v = evaluateFood(f, patient, 1, cached)
-      return v.level !== 'avoid'
+      if (v.level === 'avoid') return false
+      seenDish.add(f.id)
+      return true
     })
       .sort((a, b) => {
         // 이 암종에서 권장되는 것을 먼저
         const av = evaluateFood(a, patient, 1, cached).hits.filter((h) => h.rule.level === 'prefer').length
         const bv = evaluateFood(b, patient, 1, cached).hits.filter((h) => h.rule.level === 'prefer').length
         if (av !== bv) return bv - av
+        // 그다음은 싱거운 쪽 — 같은 재료로도 덜 짜게 드실 수 있다
         return (a.per100.na ?? 0) - (b.per100.na ?? 0)
       })
       .slice(0, limitPerItem)

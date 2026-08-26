@@ -6,8 +6,9 @@ import {
   addDays, addMonths, calendarGrid, fromKey, label, monthLabel, today, weekOf
 } from '../lib/day'
 import { FOOD_BY_ID } from '../data/foods'
-import { GRADE_STYLE, summarizeDay, summarizePeriod } from '../engine/dayScore'
-import { DayNoteList, Section, Stat } from './ui'
+import { GRADE_STYLE, reportNutrients, summarizeDay, summarizePeriod } from '../engine/dayScore'
+import { sumIntake } from '../engine/nutrition'
+import { DayNoteList, NutrientReportList, Section, Stat } from './ui'
 
 type View = 'day' | 'week' | 'month'
 
@@ -49,6 +50,21 @@ export function Diary({
     [diary, patient, supps]
   )
 
+  /*
+   * 기간 보고는 하루 요약을 늘려 놓은 것이 아니라, 기록에서 영양소를 다시 센다.
+   * 하루 요약에는 열량·단백질·나트륨만 들어 있어서 칼슘이나 식이섬유는 알 수 없다.
+   */
+  const report = useMemo(
+    () => (days: DayKey[], unit: '주' | '달') =>
+      reportNutrients(
+        days,
+        (d) => (diary[d]?.length ? sumIntake(diary[d], supps) : null),
+        patient,
+        unit
+      ),
+    [diary, patient, supps]
+  )
+
   return (
     <div>
       <div className="mb-4 flex gap-1 rounded-xl bg-stone-100 p-1">
@@ -78,7 +94,7 @@ export function Diary({
 
       {view === 'week' && (
         <WeekView
-          anchor={cursor} patient={patient} summarize={summarize} weights={weights}
+          anchor={cursor} patient={patient} summarize={summarize} report={report} weights={weights}
           onMove={(n) => setCursor(addDays(cursor, n * 7))}
           onToday={() => setCursor(today())}
           onPick={(d) => { setCursor(d); setView('day') }}
@@ -87,7 +103,7 @@ export function Diary({
 
       {view === 'month' && (
         <MonthView
-          anchor={cursor} patient={patient} summarize={summarize}
+          anchor={cursor} patient={patient} summarize={summarize} report={report}
           onMove={(n) => setCursor(addMonths(cursor, n))}
           onToday={() => setCursor(today())}
           onPick={(d) => { setCursor(d); setView('day') }}
@@ -203,10 +219,11 @@ function DayView({
 /* ────────────────────────── 한 주 ────────────────────────── */
 
 function WeekView({
-  anchor, patient, summarize, weights, onMove, onToday, onPick
+  anchor, patient, summarize, report, weights, onMove, onToday, onPick
 }: {
   anchor: DayKey
   patient: PatientContext
+  report: (days: DayKey[], unit: '주' | '달') => ReturnType<typeof reportNutrients>
   summarize: (d: DayKey) => ReturnType<typeof summarizeDay>
   weights: Record<DayKey, number>
   onMove: (n: number) => void
@@ -238,6 +255,8 @@ function WeekView({
       <div className="mb-4">
         <DayNoteList notes={sum.notes} />
       </div>
+
+      <NutrientReportList rows={report(days, '주')} unit="주" />
 
       <div className="card divide-y divide-stone-100 overflow-hidden">
         {days.map((d) => {
@@ -271,10 +290,11 @@ function WeekView({
 /* ────────────────────────── 한 달 ────────────────────────── */
 
 function MonthView({
-  anchor, patient, summarize, onMove, onToday, onPick
+  anchor, patient, summarize, report, onMove, onToday, onPick
 }: {
   anchor: DayKey
   patient: PatientContext
+  report: (days: DayKey[], unit: '주' | '달') => ReturnType<typeof reportNutrients>
   summarize: (d: DayKey) => ReturnType<typeof summarizeDay>
   onMove: (n: number) => void
   onToday: () => void
@@ -304,6 +324,8 @@ function MonthView({
       <div className="mb-3">
         <DayNoteList notes={sum.notes} />
       </div>
+
+      <NutrientReportList rows={report(days, '달')} unit="달" />
 
       <div className="card p-3">
         <div className="mb-1.5 grid grid-cols-7 gap-1 text-center">

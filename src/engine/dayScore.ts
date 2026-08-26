@@ -1,6 +1,9 @@
 import type { PatientContext, SelectedItem, Supplement } from '../data/types'
 import { CANCER_BY_ID } from '../data/cancers'
-import { personalTarget, sumIntake } from './nutrition'
+import { microTargets, personalTarget, sumIntake } from './nutrition'
+import { fiberGoal } from './menu'
+import type { NutrientKey } from '../data/types'
+import type { NutrientTotals } from './nutrition'
 
 /**
  * 하루치 식사를 한눈에 보이는 등급으로 요약한다.
@@ -191,4 +194,109 @@ export function summarizePeriod(
   }
 
   return { recorded: kept.length, days: days.length, avgKcal, avgProtein, avgNa, counts, worstStreak, target, naLimit, notes }
+}
+
+/* ────────────────────────── 기간 영양 보고 ────────────────────────── */
+
+/**
+ * 한 주·한 달 동안 무엇이 모자라고 무엇이 넘쳤나.
+ *
+ * 지금까지 기간 화면은 열량·단백질·나트륨 셋만 평균으로 보여 주었다.
+ * 그건 하루 화면이 하는 일을 여러 날치로 늘려 놓은 것일 뿐이라,
+ * 정작 여러 날을 모아야만 보이는 것은 보여 주지 못했다 —
+ * 칼슘이 줄곧 모자란다든지, 식이섬유가 한 번도 목표에 닿지 못했다든지.
+ *
+ * 하루는 원래 오르내린다. 어제 칼슘이 적었다고 문제가 아니다.
+ * 그런데 스무 날 중 열여덟 날이 그랬다면 그건 습관이고, 습관은 고칠 수 있다.
+ * 그래서 평균이 아니라 '며칠이나 그랬는지' 로 센다.
+ */
+export interface NutrientReport {
+  key: NutrientKey
+  label: string
+  unit: string
+  /** 적으신 날의 하루 평균 */
+  avg: number
+  /** 목표(또는 상한) */
+  low?: number
+  high?: number
+  /** 목표에 못 미친 날 · 넘긴 날 */
+  under: number
+  over: number
+  days: number
+  tone: 'good' | 'low' | 'over' | 'info'
+  text: string
+}
+
+export function reportNutrients(
+  days: string[],
+  intakeOf: (d: string) => NutrientTotals | null,
+  patient: PatientContext,
+  unit: '주' | '달'
+): NutrientReport[] {
+  const profile = CANCER_BY_ID[patient.cancer]
+  const target = personalTarget(patient, profile.target.kcalPerKg, profile.target.proteinPerKg)
+  const naLimit = profile.target.naLimit ?? 2000
+  const fiber = fiberGoal(patient, profile)
+
+  const rows = days.map(intakeOf).filter((t): t is NutrientTotals => t !== null)
+  if (rows.length === 0) return []
+
+  /*
+   * 무엇을 볼 것인가.
+   *
+   * 열량·단백질·식이섬유·나트륨은 늘 본다. 거기에 이분에게만 해당하는 것을 더한다 —
+   * 신장이 걸리는 분의 칼륨·인, 항호르몬 치료 중인 분의 칼슘처럼.
+   * 해당 없는 분께 서른 줄을 늘어놓으면 정작 볼 것이 묻힌다.
+   */
+  const specs: { key: NutrientKey; label: string; unit: string; low?: number; high?: number }[] = [
+    { key: 'kcal', label: '에너지', unit: 'kcal', low: target.kcal[0], high: target.kcal[1] },
+    { key: 'protein', label: '단백질', unit: 'g', low: target.protein[0], high: target.protein[1] * 1.25 },
+    { key: 'fiber', label: '식이섬유', unit: 'g',
+      low: fiber.lowResidue ? undefined : fiber.range[0],
+      high: fiber.lowResidue ? fiber.range[1] : undefined },
+    { key: 'na', label: '나트륨', unit: 'mg', high: naLimit }
+  ]
+  for (const m of microTargets(patient)) {
+    specs.push({ key: m.key, label: m.label, unit: m.unit, low: m.min, high: m.max })
+  }
+
+  const out: NutrientReport[] = []
+  for (const s of specs) {
+    const vals = rows.map((t) => t[s.key]).filter((v): v is number => typeof v === 'number')
+    if (vals.length === 0) continue
+    const avg = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length)
+    const under = s.low === undefined ? 0 : vals.filter((v) => v < s.low!).length
+    const over = s.high === undefined ? 0 : vals.filter((v) => v > s.high!).length
+    const days = vals.length
+
+    /*
+     * 어느 쪽이 더 급한지 정한다.
+     * 절반을 넘겼으면 습관이고, 그보다 적으면 참고다.
+     */
+    let tone: NutrientReport['tone'] = 'good'
+    let text = ''
+    const most = (n: number) => n > days / 2
+
+    if (most(under) && s.low !== undefined) {
+      tone = 'low'
+      text = `${days}일 중 ${under}일이 목표(${s.low} ${s.unit})에 못 미쳤습니다. 평균 ${avg.toLocaleString()} ${s.unit}.`
+    } else if (most(over) && s.high !== undefined) {
+      tone = 'over'
+      text = `${days}일 중 ${over}일이 기준(${s.high.toLocaleString()} ${s.unit})을 넘었습니다. 평균 ${avg.toLocaleString()} ${s.unit}.`
+    } else if (under > 0 || over > 0) {
+      tone = 'info'
+      const bits: string[] = []
+      if (under > 0) bits.push(`모자란 날 ${under}일`)
+      if (over > 0) bits.push(`넘친 날 ${over}일`)
+      text = `평균 ${avg.toLocaleString()} ${s.unit} — ${bits.join(' · ')}. 하루씩 오르내리는 정도입니다.`
+    } else {
+      text = `평균 ${avg.toLocaleString()} ${s.unit} — 이 ${unit} 내내 범위 안에 있었습니다.`
+    }
+
+    out.push({ key: s.key, label: s.label, unit: s.unit, avg, low: s.low, high: s.high, under, over, days, tone, text })
+  }
+
+  /* 급한 것부터 위로 */
+  const order = { low: 0, over: 1, info: 2, good: 3 }
+  return out.sort((a, b) => order[a.tone] - order[b.tone])
 }

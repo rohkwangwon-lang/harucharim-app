@@ -317,7 +317,11 @@ export function TodayMeals({
       {ideas.length > 0 && (
         <Section
           title="담으신 재료로 이런 메뉴는 어떠세요"
-          desc="고르신 식재료를 쓰는 요리입니다. 나트륨이 낮고 이 암종에 맞는 것부터 보여 드립니다."
+          desc={
+            '재료만으로는 한 끼가 되지 않아, 그것을 쓰는 요리를 찾아 드렸습니다. ' +
+            '싱거운 것과 이 암종에 맞는 것을 먼저 보여 드립니다. ' +
+            '담으시면 재료 대신 그 요리로 셈합니다.'
+          }
         >
           <div className="space-y-2.5">
             {ideas.map((idea) => (

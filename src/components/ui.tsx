@@ -508,3 +508,66 @@ export function Credentials({ compact = false }: { compact?: boolean }) {
     </div>
   )
 }
+
+/**
+ * 한 주·한 달 영양 보고.
+ *
+ * 하루 화면과 다르게 '며칠이나 그랬는지' 를 보여 준다.
+ * 하루는 원래 오르내리므로 어제 칼슘이 적었다고 문제가 아니지만,
+ * 스무 날 중 열여덟 날이 그랬다면 그건 습관이고 습관은 고칠 수 있다.
+ */
+export function NutrientReportList({
+  rows, unit
+}: {
+  rows: { label: string; unit: string; avg: number; low?: number; high?: number
+    under: number; over: number; days: number; tone: 'good' | 'low' | 'over' | 'info'; text: string }[]
+  unit: '주' | '달'
+}) {
+  if (rows.length === 0) return null
+  const STYLE = {
+    over: { bar: 'bg-danger-500', chip: 'bg-danger-100 text-danger-700', label: '넘침' },
+    low:  { bar: 'bg-warn-500',   chip: 'bg-warn-100 text-warn-700',     label: '부족' },
+    info: { bar: 'bg-stone-300',  chip: 'bg-stone-100 text-stone-600',   label: '오르내림' },
+    good: { bar: 'bg-brand-400',  chip: 'bg-brand-100 text-brand-800',   label: '좋음' }
+  } as const
+
+  return (
+    <Section
+      title={`이 ${unit}의 영양 보고`}
+      desc={`평균만으로는 보이지 않는 것을 함께 봅니다 — 며칠이나 모자랐고 며칠이나 넘쳤는지.`}
+    >
+      <div className="card divide-y divide-stone-100 overflow-hidden">
+        {rows.map((r) => {
+          const st = STYLE[r.tone]
+          /* 모자란 날과 넘친 날을 띠로 그린다 — 숫자보다 눈에 먼저 들어온다 */
+          const okDays = Math.max(0, r.days - r.under - r.over)
+          const w = (n: number) => `${(n / Math.max(1, r.days)) * 100}%`
+          return (
+            <div key={r.label} className="flex gap-3 px-3.5 py-3">
+              <span className={`mt-0.5 w-1 shrink-0 rounded-full ${st.bar}`} />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm font-bold text-stone-900">{r.label}</span>
+                  <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${st.chip}`}>{st.label}</span>
+                  <span className="ml-auto num text-sm text-stone-800">
+                    {r.avg.toLocaleString('ko-KR')}
+                    <span className="ml-0.5 text-[10px] font-medium tracking-normal text-stone-400">{r.unit}</span>
+                  </span>
+                </div>
+                <div className="mt-1.5 flex h-1.5 overflow-hidden rounded-full bg-stone-100">
+                  {r.under > 0 && <div className="bg-warn-400" style={{ width: w(r.under) }} />}
+                  {okDays > 0 && <div className="bg-brand-400" style={{ width: w(okDays) }} />}
+                  {r.over > 0 && <div className="bg-danger-400" style={{ width: w(r.over) }} />}
+                </div>
+                <p className="mt-1.5 text-[11px] leading-relaxed text-stone-600">{r.text}</p>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      <p className="mt-2 px-1 text-[11px] leading-relaxed text-stone-400">
+        띠는 적으신 날을 나눈 것입니다 — 왼쪽 노랑이 모자란 날, 가운데 초록이 알맞은 날, 오른쪽 빨강이 넘친 날.
+      </p>
+    </Section>
+  )
+}

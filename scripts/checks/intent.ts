@@ -14,12 +14,13 @@
  * 숫자를 표로 보여 주는 것이 이 검사의 본래 목적이고,
  * 기준에 못 미칠 때만 신고한다.
  */
-import { buildDayMenu, fiberGoal } from '../../src/engine/menu'
+import { buildDayMenu, fiberGoal, ideasFromIngredients } from '../../src/engine/menu'
 import { adviseSupplements } from '../../src/engine/supplementAdvice'
 import { evaluateFood, activeRules, activeInteractions } from '../../src/engine/rules'
-import { microTargets, personalTarget, foodContribution } from '../../src/engine/nutrition'
+import { microTargets, personalTarget, foodContribution, sumIntake } from '../../src/engine/nutrition'
+import { reportNutrients } from '../../src/engine/dayScore'
 import { ingredientKeywords } from '../../src/engine/ingredientVerdict'
-import { CURATED_FOODS, mealRole, mealIsComplete } from '../../src/data/foods'
+import { CURATED_FOODS, isIngredientOnly, mealRole, mealIsComplete } from '../../src/data/foods'
 import { CANCER_BY_ID } from '../../src/data/cancers'
 import { SUBTYPE_OPTIONS } from '../../src/data/types'
 import { DEFAULT_PATIENT } from '../../src/lib/store'
@@ -149,6 +150,20 @@ const cRetry = claim('다양성', "'다시 구성' 이 절반 가까이 바꾼�
 
 /* ── 요리 계통 ── */
 const cCuisine = claim('요리 계통', '고르신 계통이 실제로 섞인다', 0.5)
+
+/* ── 재료 ── */
+/*
+ * 0.75 인 이유.
+ *
+ * 새우젓·멸치젓·멸치액젓처럼 젓갈로만 쓰이는 재료는, 그 재료를 쓰는 요리가
+ * 대부분 염장이라 위암이나 고혈압이 있는 분께는 통째로 걸러진다.
+ * 그건 결함이 아니라 제대로 도는 것이다 — 짠 것을 권하지 않는 쪽이 옳다.
+ * 그런 재료를 담으시면 제안이 비는 것이 맞고, 그 몫만큼 눈금을 낮춘다.
+ */
+const cIdea = claim('재료', '재료를 담으면 그것으로 만들 요리를 알려 준다', 0.75)
+
+/* ── 기간 보고 ── */
+const cRep = claim('기간 보고', '여러 날을 모으면 모자란 것을 짚어 준다', 0.9)
 
 /* ─────────────────── 돌린다 ─────────────────── */
 
@@ -323,6 +338,44 @@ for (let i = 0; i < N; i++) {
     const keep = new Set((['아침', '점심', '저녁', '간식'] as const).flatMap((s) => second.meals[s].map((e) => e.food.id)))
     const changed = prev.filter((e) => !keep.has(e.id)).length / Math.max(1, prev.length)
     if (changed >= 0.3) cRetry.hit++
+  }
+
+  /*
+   * ── 재료를 담으셨을 때 ──
+   *
+   * 재료는 그 자체로 한 끼가 되지 않는다. 무 한 개를 담으셨다면
+   * 그것으로 무엇을 만드는지 알려 드려야 한다 — 깍두기든 무국이든.
+   * 예전에는 이름이 겹치는 것만 찾아서 97종 중 8종만 제안이 나왔다.
+   */
+  if (i % 3 === 0) {
+    const ings = CURATED_FOODS.filter((f) => isIngredientOnly(f))
+    const src = ings[i % ings.length]
+    cIdea.n++
+    const got = ideasFromIngredients([{ foodId: src.id, servings: 1, meal: '점심' }], p)
+    if (got.length > 0 && got[0].dishes.length > 0) cIdea.hit++
+  }
+
+  /*
+   * ── 한 주를 모으면 무엇이 보이나 ──
+   *
+   * 하루 화면은 열량·단백질·나트륨 셋만 본다. 여러 날을 모아야만 보이는 것이 있다 —
+   * 칼슘이 줄곧 모자란다든지, 식이섬유가 한 번도 목표에 닿지 못했다든지.
+   * 그런 것을 짚어 주지 못하면 기간 화면은 하루 화면을 늘려 놓은 것에 지나지 않는다.
+   */
+  if (i % 5 === 0) {
+    cRep.n++
+    const diary: Record<string, { foodId: string; servings: number; meal: '아침' }[]> = {}
+    const week: string[] = []
+    for (let d = 1; d <= 7; d++) {
+      const dk = `2026-08-0${d}`
+      week.push(dk)
+      const mm = buildDayMenu([], p, { day: dk })
+      diary[dk] = (['아침', '점심', '저녁', '간식'] as const)
+        .flatMap((s) => mm.meals[s].map((e) => ({ foodId: e.food.id, servings: e.servings, meal: '아침' as const })))
+    }
+    const rows = reportNutrients(week, (d) => (diary[d]?.length ? sumIntake(diary[d], []) : null), p, '주')
+    /* 적어도 넷은 보여 줘야 한다 — 늘 보는 열량·단백질·식이섬유·나트륨 */
+    if (rows.length >= 4) cRep.hit++
   }
 
   /* ── 요리 계통 ── */
