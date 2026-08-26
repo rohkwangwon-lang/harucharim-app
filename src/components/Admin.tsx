@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Section } from './ui'
 import {
-  statOverview, statDaily, statWho, statUse, statReturn, statDemand,
+  statOverview, statDaily, statWho, statUse, statReturn, statDemand, statSource,
   type Overview, type DailyRow, type WhoStat, type UseRow,
-  type ReturnStat, type DemandRow, type Bucket
+  type ReturnStat, type DemandRow, type Bucket, type SourceRow
 } from '../lib/stats'
 
 /**
@@ -108,6 +108,7 @@ export function Admin() {
   const [use, setUse] = useState<UseRow[]>([])
   const [ret, setRet] = useState<ReturnStat | null>(null)
   const [dem, setDem] = useState<DemandRow[]>([])
+  const [src, setSrc] = useState<SourceRow[]>([])
   const [err, setErr] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -115,11 +116,13 @@ export function Admin() {
     let live = true
     ;(async () => {
       try {
-        const [o, d, w, u, r, m] = await Promise.all([
-          statOverview(), statDaily(30), statWho(), statUse(30), statReturn(), statDemand(30)
+        const [o, d, w, u, r, m, sc] = await Promise.all([
+          statOverview(), statDaily(30), statWho(), statUse(30),
+          statReturn(), statDemand(30), statSource()
         ])
         if (!live) return
-        setOv(o); setDaily(d ?? []); setWho(w); setUse(u ?? []); setRet(r); setDem(m ?? [])
+        setOv(o); setDaily(d ?? []); setWho(w); setUse(u ?? [])
+        setRet(r); setDem(m ?? []); setSrc(sc ?? [])
       } catch (e) {
         if (live) setErr(e instanceof Error ? e.message : '불러오지 못했습니다.')
       } finally {
@@ -158,6 +161,39 @@ export function Admin() {
 
       <Section title="흐름" desc="최근 30일">
         <div className="card overflow-hidden"><Spark rows={daily} /></div>
+      </Section>
+
+      <Section
+        title="어디서 오시는지"
+        desc="링크 뒤에 ?from=이름 을 붙여 두면 카페마다 나뉘어 보입니다. 사람 수보다 오른쪽 '남으심' 이 중요합니다."
+      >
+        <div className="card overflow-hidden">
+          {src.length === 0 ? (
+            <p className="px-3.5 py-3 text-[11px] text-stone-400">아직 보여 드릴 만큼 모이지 않았습니다.</p>
+          ) : (
+            <ul className="divide-y divide-stone-100">
+              {src.map((s2) => (
+                <li key={s2.k} className="flex items-center gap-2.5 px-3.5 py-2.5">
+                  <span className="w-24 shrink-0 truncate text-[11px] font-semibold text-stone-700">{s2.k}</span>
+                  <span className="h-3 flex-1 overflow-hidden rounded-full bg-stone-100">
+                    <span className="block h-full rounded-full bg-brand-500"
+                      style={{ width: `${Math.max(3, (s2.n / Math.max(...src.map((x) => x.n), 1)) * 100)}%` }} />
+                  </span>
+                  <span className="w-10 shrink-0 text-right text-[11px] font-bold tabular-nums text-stone-700">
+                    {s2.n}명
+                  </span>
+                  <span className="w-20 shrink-0 text-right text-[11px] tabular-nums text-stone-500">
+                    {s2.base7 ? `남으심 ${pct(s2.kept7, s2.base7)}` : '—'}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="border-t border-stone-100 px-3.5 py-2 text-[10px] leading-relaxed text-stone-500">
+            백 명이 들어와 다 나가는 곳보다 스무 명이 들어와 남는 곳이 낫습니다.
+            '남으심' 은 일주일 뒤에도 오신 비율이고, 그만큼 시간이 흐른 분들만 셉니다.
+          </p>
+        </div>
       </Section>
 
       <Section

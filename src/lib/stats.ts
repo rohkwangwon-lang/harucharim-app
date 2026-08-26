@@ -22,6 +22,7 @@ import { CANCER_BY_ID } from '../data/cancers'
  */
 
 const PID_KEY = 'oncofood.stats.pid'
+const SOURCE_KEY = 'oncofood.stats.source'
 const CONSENT_KEY = 'oncofood.stats.consent'
 const QUEUE_KEY = 'oncofood.stats.queue'
 const SENT_KEY = 'oncofood.stats.sentOn'
@@ -60,6 +61,7 @@ export function setConsent(on: boolean) {
       localStorage.removeItem(PID_KEY)
       localStorage.removeItem(QUEUE_KEY)
       localStorage.removeItem(SENT_KEY)
+      localStorage.removeItem(SOURCE_KEY)
     }
   } catch { /* 저장이 막힌 브라우저 — 통계만 안 될 뿐 앱은 그대로 쓰신다 */ }
 }
@@ -71,6 +73,45 @@ function pid(): string | null {
     if (!v) { v = crypto.randomUUID(); localStorage.setItem(PID_KEY, v) }
     return v
   } catch { return null }
+}
+
+/* ── 어디서 오셨는지 ─────────────────────────────────────
+ *
+ * 카페마다 링크 뒤에 ?from=... 을 붙여 두면, 어느 쪽에서 오신 분들이
+ * 실제로 남으시는지 볼 수 있다. 사람 수만 세는 것보다 이쪽이 중요하다 —
+ * 백 명이 들어와 다 나가는 곳과 스무 명이 들어와 남는 곳은 전혀 다르다.
+ *
+ * 다만 주소창의 글자를 그대로 서버에 실으면 안 된다.
+ * 누가 ?from=김OO소개 같은 걸 붙이면 그 순간 신원 단서가 되어 버린다.
+ * 그래서 영문·숫자만, 짧게 잘라서 남긴다.
+ */
+/*
+ * 반드시 영문자로 시작해야 한다.
+ *
+ * 처음에는 [a-z0-9_-] 로 두었는데, 검사가 '010-1234-5678' 이 통과하는 것을 잡았다.
+ * 숫자와 붙임표만으로도 전화번호가 되고, 그건 유입 경로가 아니라 신원 단서다.
+ */
+const SOURCE_OK = /^[a-z][a-z0-9_-]{0,23}$/
+
+export function cleanSource(raw: string | null): string | null {
+  if (!raw) return null
+  const v = raw.trim().toLowerCase()
+  return SOURCE_OK.test(v) ? v : null
+}
+
+/** 처음 오셨을 때 한 번만 기억한다 — 나중 방문으로 덮이면 유입 경로가 아니게 된다 */
+export function rememberSource() {
+  try {
+    /* 거절하신 분의 기기에는 쓰지도 않을 값을 남겨 두지 않는다 */
+    if (localStorage.getItem(CONSENT_KEY) === 'no') return
+    if (localStorage.getItem(SOURCE_KEY)) return
+    const v = cleanSource(new URLSearchParams(location.search).get('from'))
+    if (v) localStorage.setItem(SOURCE_KEY, v)
+  } catch { /* 저장이 막힌 브라우저 */ }
+}
+
+function source(): string | null {
+  try { return cleanSource(localStorage.getItem(SOURCE_KEY)) } catch { return null }
 }
 
 /* ── 뭉개기 ──────────────────────────────────────────────
@@ -160,6 +201,7 @@ export async function flush(patient: PatientContext, signedIn: boolean, provider
       p_med_n: (patient.medications ?? []).length,
       p_signed_in: signedIn,
       p_provider: provider,
+      p_source: source(),
       p_version: __APP_VERSION__,
       p_events: events,
       p_demand: demand
@@ -181,6 +223,7 @@ export interface DailyRow { day: string; active: number; new: number }
 export interface Bucket { k: string; n: number }
 export interface UseRow { k: string; n: number; users: number }
 export interface DemandRow { k: string; rec: number; short: number }
+export interface SourceRow { k: string; n: number; kept7: number; base7: number }
 export interface WhoStat {
   cancer: Bucket[]; phase: Bucket[]; age: Bucket[]
   sex: Bucket[]; bmi: Bucket[]; hidden: number
@@ -204,3 +247,4 @@ export const statWho = () => rpc<WhoStat>('of_stat_who')
 export const statUse = (days = 30) => rpc<UseRow[]>('of_stat_use', { p_days: days })
 export const statReturn = () => rpc<ReturnStat>('of_stat_return')
 export const statDemand = (days = 30) => rpc<DemandRow[]>('of_stat_demand', { p_days: days })
+export const statSource = () => rpc<SourceRow[]>('of_stat_source')

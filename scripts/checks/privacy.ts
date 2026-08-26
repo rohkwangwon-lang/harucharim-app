@@ -15,7 +15,11 @@
  * 나중에 누가(나를 포함해) 편하려고 원본을 실으면 여기서 걸린다.
  */
 import { readFileSync } from 'node:fs'
-import { ageBand, bmiBand, hasConsent, track, setConsent, EVENTS } from '../../src/lib/stats'
+import {
+  ageBand, bmiBand, hasConsent, track, setConsent, EVENTS, cleanSource, rememberSource
+} from '../../src/lib/stats'
+
+const CONSENT_KEY_T = 'oncofood.stats.consent'
 
 const bads: string[] = []
 function no(cond: boolean, msg: string) { if (cond) bads.push(msg) }
@@ -180,6 +184,56 @@ for (const must of ['민감정보', '제23조', '별도의 동의', '연령대',
 for (const must of ['무작위 식별자', '5명 미만']) {
   no(!policy.includes(must), `처리방침에 "${must}" 가 없음`)
 }
+
+/* ── 9. 유입 경로가 신원 단서가 되지 않는가 ──────────────
+ *
+ * 카페마다 링크 뒤에 ?from=... 을 붙여 어디서 오셨는지 본다.
+ * 그런데 주소창 글자를 그대로 실으면, 누가 ?from=김OO소개 를 붙이는 순간
+ * 그게 서버에 남아 신원 단서가 된다. 영문·숫자만, 짧게 잘라서 받는다.
+ */
+const SRC_BAD = ['김철수', 'a@b.com', '010-1234-5678', '01012345678', '1965',
+                 'x'.repeat(40), '<script>', 'a b', '환자', '-cafe']
+for (const v of SRC_BAD) {
+  no(cleanSource(v) !== null, `유입 경로가 위험한 값을 통과시킴: "${v.slice(0, 20)}"`)
+}
+for (const v of ['cafe1', 'naver-cafe', 'blog_2026', 'A']) {
+  no(cleanSource(v) === null, `유입 경로가 멀쩡한 값을 막음: "${v}"`)
+}
+no(cleanSource('CAFE1') !== 'cafe1', '유입 경로가 대소문자를 통일하지 않음 — 같은 곳이 두 줄로 갈린다')
+
+/* 거절하신 분의 기기에 쓰지도 않을 값을 남기지 않는가 */
+mem.clear()
+mem.set(CONSENT_KEY_T, 'no')
+;(globalThis as Record<string, unknown>).location = { search: '?from=cafe1' }
+rememberSource()
+no(mem.has('oncofood.stats.source'), '거절하셨는데 유입 경로를 기기에 남김')
+no(!/source\s*~\s*'\^\[a-z\]\[a-z0-9_-\]\{0,23\}\$'/.test(sql),
+   'SQL 쪽에 유입 경로 형식 제한이 없음 — 앱이 뚫려도 막을 자리가 필요하다')
+
+/* ── 10. 동의를 여쭙는 방식이 강요가 아닌가 ──────────────
+ *
+ * 개인정보보호법 제22조 제5항은 선택 동의를 하지 않았다는 이유로
+ * 서비스 제공을 거부하지 못하게 한다. 곧 거절이 동의만큼 쉽고 잘 보여야 한다.
+ * 거절을 회색 잔글씨로 밀어 두는 흔한 방식은 형식만 동의이지 실은 동의가 아니다.
+ */
+const ask = readFileSync('src/components/StatsAsk.tsx', 'utf-8')
+no(!/모든 기능을[^<]*그대로|그대로<\/strong>\s*쓰실/.test(ask),
+   '동의 요청 화면이 "거절해도 그대로 쓸 수 있다" 고 말하지 않음')
+
+/* 두 단추가 같은 무게인가 — 한쪽만 flex-1 이면 크기가 어긋난다 */
+const btns = [...ask.matchAll(/className="(btn-[a-z]+ [^"]*)"[^>]*onClick=\{\(\) => answer\((true|false)\)\}/g)]
+no(btns.length !== 2, `동의/거절 단추를 ${btns.length}개 찾음 — 둘이어야 한다`)
+if (btns.length === 2) {
+  const [a1, a2] = btns.map((b) => b[1].replace(/btn-[a-z]+/, '').trim())
+  no(a1 !== a2, `두 단추의 크기가 다름 — "${a1}" 대 "${a2}". 거절이 작으면 동의가 아니다`)
+  no(!btns.some((b) => b[2] === 'false'), '거절 단추가 없음')
+}
+/* 거절을 잔글씨·연회색으로 밀어 두지 않았는가 */
+const refuse = ask.slice(ask.indexOf('answer(false)') - 220, ask.indexOf('answer(false)') + 120)
+no(/text-\[1[01]px\]|text-stone-[34]00/.test(refuse), '거절 단추가 잔글씨나 연회색으로 밀려 있음')
+
+/* 켜실 때까지 되묻지 않는가 */
+no(!/asked|ASKED_KEY/.test(ask), '한 번 답하셨는지 기억하지 않음 — 되묻는 것도 강요다')
 
 console.log(bads.length
   ? `개인정보 검사 — 문제 ${bads.length}종\n` + bads.map((b) => '■ ' + b).join('\n')

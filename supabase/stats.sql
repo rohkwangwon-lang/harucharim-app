@@ -36,6 +36,9 @@ create table if not exists public.of_users (
   -- 계정을 만드셨는지 (누구인지는 모른다)
   signed_in    boolean     not null default false,
   provider     text,
+  -- 어디서 오셨는지. 링크 뒤 ?from=... 을 걸러 받는다.
+  -- 반드시 영문자로 시작해야 한다 — 숫자와 붙임표만이면 전화번호가 그대로 들어온다.
+  source       text        check (source ~ '^[a-z][a-z0-9_-]{0,23}$'),
   app_version  text,
   consent_at   timestamptz not null default now(),
   updated_at   timestamptz not null default now()
@@ -103,6 +106,7 @@ create or replace function public.of_track(
   p_med_n      smallint,
   p_signed_in  boolean,
   p_provider   text,
+  p_source     text,
   p_version    text,
   p_events     jsonb,   -- {"name": n, ...}
   p_demand     jsonb    -- [{"category": "...", "level": "...", "n": 1}, ...]
@@ -126,10 +130,11 @@ begin
 
   insert into public.of_users as u (
     pid, cancer, phase, sex, age_band, bmi_band, subtypes,
-    cond_n, med_n, signed_in, provider, app_version, last_seen, updated_at
+    cond_n, med_n, signed_in, provider, source, app_version, last_seen, updated_at
   ) values (
     p_pid, p_cancer, p_phase, p_sex, p_age_band, p_bmi_band, p_subtypes,
-    p_cond_n, p_med_n, coalesce(p_signed_in, false), p_provider, p_version, d, now()
+    p_cond_n, p_med_n, coalesce(p_signed_in, false), p_provider,
+    nullif(lower(trim(p_source)), ''), p_version, d, now()
   )
   on conflict (pid) do update set
     cancer = excluded.cancer, phase = excluded.phase, sex = excluded.sex,
@@ -137,6 +142,8 @@ begin
     subtypes = excluded.subtypes, cond_n = excluded.cond_n, med_n = excluded.med_n,
     signed_in = excluded.signed_in or u.signed_in,
     provider = coalesce(excluded.provider, u.provider),
+    /* 유입 경로는 처음 것을 지킨다 — 나중 방문으로 덮이면 유입 경로가 아니게 된다 */
+    source = coalesce(u.source, excluded.source),
     app_version = excluded.app_version, last_seen = d, updated_at = now();
 
   insert into public.of_active (pid, day) values (p_pid, d)
@@ -161,7 +168,7 @@ $$;
 
 grant execute on function public.of_track(
   uuid, text, text, text, text, text, text[], smallint, smallint,
-  boolean, text, text, jsonb, jsonb
+  boolean, text, text, text, jsonb, jsonb
 ) to anon, authenticated;
 
 
@@ -331,6 +338,38 @@ as $$
               group by category) t), '[]'::jsonb) end
 $$;
 
+/*
+ * 어디서 오신 분들이 남으시는가.
+ *
+ * 사람 수만 세면 판단을 그르친다. 백 명이 들어와 다 나가는 곳보다
+ * 스무 명이 들어와 남는 곳이 낫다. 그래서 유입 경로마다 7일 재방문을 함께 낸다.
+ * 다섯 명 미만인 경로는 가린다 — 다른 집계와 같은 기준이다.
+ */
+create or replace function public.of_stat_source()
+returns jsonb
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select case when not public.of_is_admin() then null else coalesce(
+    (select jsonb_agg(jsonb_build_object('k', k, 'n', n, 'kept7', kept7, 'base7', base7) order by n desc)
+       from (
+         select coalesce(u.source, '(직접)') k,
+                count(*) n,
+                count(*) filter (
+                  where u.first_seen <= (now() at time zone 'Asia/Seoul')::date - 7
+                    and exists (select 1 from public.of_active a
+                                 where a.pid = u.pid and a.day >= u.first_seen + 7)) kept7,
+                count(*) filter (
+                  where u.first_seen <= (now() at time zone 'Asia/Seoul')::date - 7) base7
+           from public.of_users u
+          group by 1
+         having count(*) >= 5
+       ) t), '[]'::jsonb) end
+$$;
+
+grant execute on function public.of_stat_source()    to authenticated;
 grant execute on function public.of_stat_overview()   to authenticated;
 grant execute on function public.of_stat_daily(int)   to authenticated;
 grant execute on function public.of_stat_who()        to authenticated;

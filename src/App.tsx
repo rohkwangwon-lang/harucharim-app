@@ -21,7 +21,8 @@ import { InquiryDialog } from './components/InquiryDialog'
 import { AdminInquiries } from './components/AdminInquiries'
 import { Admin } from './components/Admin'
 import { StatsConsent } from './components/StatsConsent'
-import { track, flush } from './lib/stats'
+import { track, flush, rememberSource } from './lib/stats'
+import { StatsAsk, shouldAsk } from './components/StatsAsk'
 import { checkAdmin } from './lib/inquiry'
 import { displayName, useSession, lastProvider } from './lib/auth'
 import { isSupabaseConfigured } from './lib/supabase'
@@ -116,7 +117,20 @@ export default function App() {
    * 열 때 한 번 세고, 하루에 한 번 모아서 올린다.
    * 누를 때마다 보내면 시각까지 남아 그 자체가 사람을 따라다니는 기록이 된다.
    */
-  useEffect(() => { track('open') }, [])
+  useEffect(() => { rememberSource(); track('open') }, [])
+
+  /*
+   * 처음 설정을 마치신 뒤 한 번 여쭙는다.
+   * 스위치를 '내 정보' 깊은 곳에만 두면 법은 지키지만 아무도 켜지 않고,
+   * 그러면 무엇을 고쳐야 할지 알 길이 없어진다.
+   */
+  const [asking2, setAsking2] = useState(false)
+  useEffect(() => {
+    if (state.patient.onboarded && shouldAsk()) {
+      const t = setTimeout(() => setAsking2(true), 1200)
+      return () => clearTimeout(t)
+    }
+  }, [state.patient.onboarded])
   useEffect(() => {
     const t = setTimeout(() => {
       void flush(state.patient, Boolean(user), lastProvider())
@@ -413,6 +427,7 @@ export default function App() {
       </main>
 
       {asking && <InquiryDialog onClose={() => setAsking(false)} />}
+      {asking2 && <StatsAsk onClose={() => setAsking2(false)} />}
 
       {toast && (
         <div className="pointer-events-none fixed bottom-24 left-1/2 z-40 -translate-x-1/2 rounded-full bg-stone-900/90 px-4 py-2 text-xs font-medium text-white shadow-lg">
