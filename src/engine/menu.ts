@@ -959,7 +959,13 @@ export function buildDayMenu(
            * 곁들이는 나물·국이 대개 100 kcal 아래이므로,
            * 남은 여유 안에서만 고르게 해도 대개 찾아진다.
            */
-          .filter((c) => c.kcal <= Math.max(60, Math.min(160, room.kcal)) &&
+          /*
+           * 남은 여유를 크게 넘기지 않는다.
+           * 목표가 작은 분(하루 1,140 kcal)에게는 60 kcal 도 여유가 없을 때가 있어,
+           * 곁들임 하나로 하루가 1,388 까지 올라갔다. 여유가 없으면 그냥 두는 편이 낫다 —
+           * 상을 갖추자고 목표를 넘기는 것은 앞뒤가 바뀐 일이다.
+           */
+          .filter((c) => c.kcal <= Math.min(160, Math.max(0, room.kcal)) &&
                          c.na <= Math.max(200, room.na * 0.4))
         if (fits.length === 0) continue
         /* 엇비슷하면 날마다 다르게 — 같은 자리에 늘 같은 나물이 오르지 않게 */

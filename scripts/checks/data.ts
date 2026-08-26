@@ -7,13 +7,16 @@ import { toKey, fromKey, addDays, addMonths, daysAgo, label, weekOf, monthOf, ca
 import { judgeProduct } from '../../src/engine/ingredientVerdict'
 import { defaultSlotFor } from '../../src/engine/menu'
 import { foodContribution, fmt, NUTRIENT_META } from '../../src/engine/nutrition'
-import { FOODS, CURATED_FOODS, FOOD_BY_ID } from '../../src/data/foods'
+import { FOODS, CURATED_FOODS, FOOD_BY_ID, isIngredientOnly } from '../../src/data/foods'
 import { SUPPLEMENTS } from '../../src/data/supplements'
 import { CANCERS } from '../../src/data/cancers'
 import { MEAL_SLOTS } from '../../src/data/types'
 import { DEFAULT_PATIENT } from '../../src/lib/store'
 import type { NutrientKey, PatientContext } from '../../src/data/types'
 import { evaluateFood } from '../../src/engine/rules'
+
+/** 조미료처럼 이름에 조리가 들어가도 재료인 것 */
+const SEASONING_LIKE = /^(고춧가루|참기름|들기름|멸치액젓|새우젓|멸치젓|멸치육수)$/
 
 let seed = 777
 const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff }
@@ -251,6 +254,54 @@ const bad = (k: string, d: string) => { const s = `${k} :: ${d}`; if (!seenB.has
     }
     if (missed > 3) bad('위험한 양인데 아무 말도 하지 않음', `${c.what} — 외 ${missed - 3}종`)
   }
+}
+
+
+/* ─────────────────── 재료를 반찬으로 내놓지 않는가 ─────────────────── */
+
+/*
+ * 쑥·냉이·물냉이·건표고버섯이 반찬으로 추천되었다.
+ * 쑥은 떡이나 국에 넣는 것이지 한 접시로 놓는 것이 아니고,
+ * 마른 표고는 불려서 볶아야 반찬이 된다.
+ *
+ * 과일에서 한 번, 조리된 생선·고기에서 한 번, 밥과 김치에서 한 번,
+ * 그리고 이번이 네 번째다. 매번 '무엇이 재료인가' 를 손으로 고쳐 왔는데
+ * 그 판단이 맞는지 확인할 길이 없어서 같은 일이 되풀이됐다.
+ *
+ * 손으로 적은 판단이라 규칙으로 검사할 수는 없다. 대신 눈으로 볼 수 있게
+ * 목록을 뽑아 두고, 뻔한 것만 못 박는다 —
+ * 조리 표시가 붙었는데 재료라고 하거나, 그 반대인 경우.
+ */
+{
+  /* 이름에 조리·저장이 드러나면 상에 오르는 것이다 */
+  const COOKED = /나물|무침|볶음|조림|찜$|구이|김치|장아찌|\((데친 것|삶은 것|찐 것|구운 것|가열)/
+  /* 이름에 손질 전이 드러나면 재료다 */
+  const RAW = /\((생것|생|말린 것|가루|건면|생쌀)\)$/
+
+  for (const f of CURATED_FOODS) {
+    const ing = isIngredientOnly(f)
+    /*
+     * '(생)' 이 붙었으면 이름에 '나물' 이 있어도 아직 재료다 — 콩나물(생).
+     * 손질 전이라는 표시가 조리 표시보다 앞선다.
+     */
+    if (RAW.test(f.name)) {
+      if (!ing) bad('손질 전인데 상에 오른다고 봄', f.name)
+      continue
+    }
+    if (COOKED.test(f.name) && ing && !SEASONING_LIKE.test(f.name))
+      bad('조리한 음식인데 재료로 봄', f.name)
+  }
+
+  /*
+   * 채소·버섯 가운데 상에 오른다고 본 것을 모두 적어 둔다.
+   * 숫자가 크게 움직이면 누군가 분류를 건드린 것이고, 그때 이 목록을 보면 된다.
+   */
+  const produce = CURATED_FOODS
+    .filter((f) => (f.group === '채소' || f.group === '해조·버섯') && !isIngredientOnly(f))
+    .map((f) => f.name)
+  console.log(`  채소·해조 중 그대로 상에 오르는 것 ${produce.length}종`)
+  console.log(`    ${produce.join(', ')}`)
+  if (produce.length > 30) bad('채소를 너무 많이 상에 올림', `${produce.length}종 — 대부분은 조리해야 반찬이 된다`)
 }
 
 console.log(`\n두 번째 검사 완료 — 문제 ${bugs.length}종`)
