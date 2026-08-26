@@ -49,6 +49,29 @@ if (hasLogin) {
   no(Boolean(del) && !/되돌릴 수 없/.test(del), '계정 삭제가 되돌릴 수 없다는 안내가 없음')
 }
 
+/* ── 1-2. 오류가 나도 화면이 남는가 ──────────────────────
+ *
+ * 리액트는 그리다 멈추면 화면을 통째로 지운다. 아무 말 없이 하얘진다.
+ * 심사자가 그 화면을 만나면 그 자리에서 반려이고,
+ * 항암 중에 앱을 여신 분은 기록이 날아간 줄 아신다.
+ */
+no(!existsSync('src/components/Guard.tsx'), '오류를 받아 내는 자리가 없음 — 한 번 어긋나면 화면이 하얘진다')
+const main = readFileSync('src/main.tsx', 'utf-8')
+no(!/<Guard>/.test(main), 'Guard 를 만들어 놓고 App 을 감싸지 않음')
+if (existsSync('src/components/Guard.tsx')) {
+  const g = readFileSync('src/components/Guard.tsx', 'utf-8')
+  no(!/getDerivedStateFromError/.test(g), 'Guard 가 오류를 받아 내지 못함')
+  /* 기록이 남아 있다는 것과 나갈 길을 알려야 한다 */
+  no(!/그대로 있습니다/.test(g), '기록이 무사하다는 안내가 없음 — 그 말이 가장 먼저 필요하다')
+  no(!/location\.reload/.test(g), '다시 여는 길이 없음')
+}
+
+/* ── 1-3. 앱 판 번호 ──────────────────────────────────────
+ * 문의와 통계에 함께 실려, 어느 판에서 난 일인지 가리는 유일한 단서다.
+ */
+const pkg = JSON.parse(readFileSync('package.json', 'utf-8')) as { version?: string }
+no(!pkg.version || pkg.version === '0.0.0', `앱 판 번호가 ${pkg.version} — 문의·통계에 그대로 찍힌다`)
+
 /* ── 2. 개인정보 — 애플 5.1.1, 구글 데이터 안전 ──────────── */
 no(!existsSync('public/privacy.html'), '개인정보처리방침 문서가 없음 — 두 스토어 모두 필수')
 no(!/개인정보처리방침/.test(app), '앱 안에서 개인정보처리방침으로 가는 길이 없음')

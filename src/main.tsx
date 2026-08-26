@@ -4,6 +4,7 @@ import App from './App'
 import './index.css'
 import { setupUpdatePrompt } from './lib/updatePrompt'
 import { migrateStorage } from './lib/migrate'
+import { Guard } from './components/Guard'
 
 /*
  * 예전 이름으로 저장된 것을 지금 이름으로 옮긴다.
@@ -14,7 +15,14 @@ migrateStorage()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    {/*
+      * 오류가 나도 화면이 통째로 사라지지 않게 감싼다.
+      * 리액트는 그리다 멈추면 아무 말 없이 하얘진다 —
+      * 항암 중에 앱을 여신 분이 그 화면을 보면 기록이 날아간 줄 아신다.
+      */}
+    <Guard>
+      <App />
+    </Guard>
   </StrictMode>
 )
 
