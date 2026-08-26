@@ -1,0 +1,165 @@
+/**
+ * 이름 검사.
+ *
+ * 앱 이름을 온코푸드에서 하루차림으로 바꿨다.
+ * 이런 일은 한 번에 끝나는 것처럼 보이지만 실제로는 늘 몇 군데가 남는다 —
+ * 화면에는 새 이름인데 브라우저 탭에는 옛 이름이 뜨거나,
+ * 홈 화면에 추가하면 옛 이름으로 저장되는 식이다.
+ *
+ * 실제로 이번에도 하나 빠질 뻔했다.
+ * .github/workflows/deploy.yml 이 ONCOFOOD_BASE 를 넘기고 있었는데
+ * vite 쪽 변수명만 바꾸는 바람에, 그대로 나갔으면 배포된 앱의
+ * 모든 파일 경로가 깨져 흰 화면이 됐을 것이다.
+ *
+ * 그리고 저장소 열쇠.
+ * 이 앱의 건강 정보는 서버에 사본이 없어서, 열쇠 이름이 어긋나면
+ * 이미 쓰시던 분의 설정·식단·체중이 조용히 사라진다.
+ * 옮기는 장치(migrate.ts)가 제대로 붙어 있는지 함께 본다.
+ */
+import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { join } from 'node:path'
+
+const NAME = '하루차림'
+const SLUG = 'harucharim'
+const OLD_NAME = '온코푸드'
+const OLD_SLUG = 'oncofood'
+
+/** 예전 이름이 남아 있어야 하는 곳 — 옮기는 장치와, 그것을 보는 이 검사 자신 */
+const MIGRATOR = 'src/lib/migrate.ts'
+const SELF = 'scripts/checks/naming.ts'
+
+const bads: string[] = []
+function no(cond: boolean, msg: string) { if (cond) bads.push(msg) }
+
+function walk(dir: string, out: string[] = []): string[] {
+  for (const e of readdirSync(dir)) {
+    if (e === 'node_modules' || e === 'dist' || e === '.git') continue
+    const p = join(dir, e)
+    if (statSync(p).isDirectory()) walk(p, out)
+    else if (/\.(tsx?|html|json|ya?ml|css)$/.test(p)) out.push(p)
+  }
+  return out
+}
+
+const files = [
+  ...walk('src'), ...walk('public'), ...walk('scripts'), ...walk('.github'),
+  'index.html', 'vite.config.ts', 'package.json'
+]
+
+/* ── 1. 예전 이름이 남아 있지 않은가 ────────────────────── */
+const left: string[] = []
+for (const f of files) {
+  if (f === MIGRATOR || f === SELF) continue
+  let t: string
+  try { t = readFileSync(f, 'utf-8') } catch { continue }
+  const hits = [...t.matchAll(new RegExp(`${OLD_NAME}|${OLD_SLUG}|ONCOFOOD`, 'gi'))]
+  if (hits.length) left.push(`${f} (${hits.length}곳)`)
+}
+no(left.length > 0, `예전 이름이 남아 있음\n   - ${left.join('\n   - ')}`)
+
+/* 옮기는 장치에는 반대로 남아 있어야 한다 */
+const mig = readFileSync(MIGRATOR, 'utf-8')
+no(!mig.includes(`${OLD_SLUG}.`), '옮기는 장치가 예전 열쇠 이름을 모름 — 옮길 대상을 못 찾는다')
+no(!mig.includes(`${SLUG}.`), '옮기는 장치가 새 열쇠 이름을 모름')
+
+/* ── 2. 옮기는 장치가 실제로 불리는가 ───────────────────── */
+const main = readFileSync('src/main.tsx', 'utf-8')
+no(!/migrateStorage\(\)/.test(main), 'migrateStorage 를 부르지 않음 — 만들어 두고 안 쓰면 기록이 사라진다')
+
+/*
+ * render 보다 먼저 불려야 한다 — 앱이 저장소를 읽기 전이어야 하기 때문.
+ *
+ * 처음에는 indexOf('createRoot') 로 찾았는데, 그러면 맨 윗줄의 import 가 잡혀
+ * 멀쩡한 코드를 빨간불로 만든다. 부르는 자리는 괄호가 붙는다.
+ */
+const callAt = main.indexOf('migrateStorage()')
+const renderAt = main.search(/^createRoot\(/m)
+no(callAt > renderAt && renderAt >= 0,
+   'migrateStorage 가 render 뒤에 있음 — 앱이 먼저 저장소를 읽어 빈 값을 본다')
+
+/* ── 3. 저장소 열쇠가 모두 새 이름인가 ──────────────────── */
+const keys = new Set<string>()
+for (const f of files) {
+  if (f === MIGRATOR) continue
+  let t: string
+  try { t = readFileSync(f, 'utf-8') } catch { continue }
+  for (const m of t.matchAll(/localStorage(?:\.getItem|\.setItem|\.removeItem)?\[?\(?\s*['"`]([\w.]+)['"`]/g)) {
+    keys.add(m[1])
+  }
+  for (const m of t.matchAll(/=\s*['"`]((?:harucharim|oncofood)\.[\w.]+)['"`]/g)) keys.add(m[1])
+}
+const strayKeys = [...keys].filter((k) => k.includes('.') && !k.startsWith(`${SLUG}.`))
+no(strayKeys.length > 0, `새 이름을 안 쓰는 저장소 열쇠: ${strayKeys.join(', ')}`)
+no(keys.size < 5, `저장소 열쇠를 ${keys.size}개밖에 못 찾음 — 검사가 헛돌고 있다`)
+
+/* ── 4. 사용자 눈에 보이는 자리 ─────────────────────────── */
+const SPOTS: [string, string, string][] = [
+  ['index.html', '<title>', '브라우저 탭 제목'],
+  ['index.html', 'apple-mobile-web-app-title', '아이폰 홈 화면 이름'],
+  ['vite.config.ts', 'short_name', '안드로이드 홈 화면 이름'],
+  ['vite.config.ts', "name:", 'PWA 설치 이름'],
+  ['public/privacy.html', NAME, '개인정보처리방침']
+]
+for (const [file, marker, what] of SPOTS) {
+  const t = readFileSync(file, 'utf-8')
+  const i = t.indexOf(marker)
+  no(i < 0, `${what}: "${marker}" 를 ${file} 에서 못 찾음`)
+  if (i >= 0) {
+    const line = t.slice(i, t.indexOf('\n', i) + 1)
+    no(!line.includes(NAME) && marker !== NAME, `${what} 이 아직 새 이름이 아님 — ${line.trim()}`)
+  }
+}
+
+/* ── 5. 배포 설정이 짝이 맞는가 ─────────────────────────── */
+const vite = readFileSync('vite.config.ts', 'utf-8')
+const wf = readFileSync('.github/workflows/deploy.yml', 'utf-8')
+const envName = vite.match(/process\.env\.(\w+)/)?.[1]
+no(!envName, 'vite.config.ts 에서 base 환경변수 이름을 못 찾음')
+if (envName) {
+  no(!wf.includes(envName),
+     `배포 워크플로가 ${envName} 을 넘기지 않음 — base 가 '/' 로 잡혀 배포된 앱의 모든 경로가 깨진다`)
+}
+
+/* ── 6. 이름 뒤 조사가 맞는가 ───────────────────────────
+ *
+ * 이름을 바꾸면 받침이 달라져서 뒤따르는 조사가 전부 어긋난다.
+ * '온코푸드'는 받침이 없어 를·는·가·와·로 를 쓰지만,
+ * '하루차림'은 ㅁ 받침이라 을·은·이·과·으로 를 써야 한다.
+ *
+ * 실제로 이번에 다섯 군데가 어긋났다. 화면에 "하루차림를 시작합니다" 라고 떴다.
+ * 코드는 멀쩡히 돌고 검사도 통과하므로, 이걸 잡는 자리는 여기밖에 없다.
+ */
+const lastCh = NAME.charCodeAt(NAME.length - 1)
+/* 한글 음절은 (초성×21 + 중성)×28 + 종성 으로 짜인다. 나머지가 0 이면 받침이 없다. */
+const hasFinal = lastCh >= 0xac00 && lastCh <= 0xd7a3 && (lastCh - 0xac00) % 28 !== 0
+
+/* 받침이 있으면 왼쪽이 틀린 것, 없으면 오른쪽이 틀린 것 */
+const WRONG: [string, string][] = hasFinal
+  ? [['를', '을'], ['는', '은'], ['가', '이'], ['와', '과'], ['로', '으로']]
+  : [['을', '를'], ['은', '는'], ['이', '가'], ['과', '와'], ['으로', '로']]
+
+const badParticles: string[] = []
+for (const f of files) {
+  if (f === MIGRATOR || f === SELF) continue
+  let t: string
+  try { t = readFileSync(f, 'utf-8') } catch { continue }
+  for (const [bad, good] of WRONG) {
+    /* '로' 는 '으로' 의 뒷부분과 겹치므로 이름 바로 뒤만 본다 */
+    let at = t.indexOf(NAME + bad)
+    while (at >= 0) {
+      const line = t.slice(t.lastIndexOf('\n', at) + 1, t.indexOf('\n', at))
+      badParticles.push(`${f}: "${NAME}${bad}" → "${NAME}${good}"  (${line.trim().slice(0, 50)})`)
+      at = t.indexOf(NAME + bad, at + 1)
+    }
+  }
+}
+no(badParticles.length > 0,
+   `이름 뒤 조사가 어긋남 (${badParticles.length}곳)\n   - ${badParticles.join('\n   - ')}`)
+
+/* ── 7. 화면에 부르는 이름이 하나로 통일됐는가 ──────────── */
+const app = readFileSync('src/App.tsx', 'utf-8')
+no(!app.includes(NAME), `App.tsx 에 앱 이름(${NAME})이 없음`)
+
+console.log(bads.length
+  ? `이름 검사 — 문제 ${bads.length}종\n` + bads.map((b) => '■ ' + b).join('\n')
+  : `이름 검사 완료 — ${files.length}개 파일·저장소 열쇠 ${keys.size}개 대조, 문제 없음`)

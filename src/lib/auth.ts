@@ -55,7 +55,7 @@ const SCOPES: Partial<Record<Provider, string>> = {
  *
  * 저장하는 것은 '어느 쪽' 뿐이다 — 아이디도 비밀번호도 이 앱은 받지 않는다.
  */
-const LAST_PROVIDER = 'oncofood.lastProvider'
+const LAST_PROVIDER = 'harucharim.lastProvider'
 
 export function lastProvider(): Provider | null {
   try {

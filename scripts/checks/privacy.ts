@@ -39,18 +39,18 @@ if (!globalThis.crypto?.randomUUID) {
 no(hasConsent(), '동의를 받기도 전에 통계가 켜져 있음')
 
 track('open')
-no(mem.has('oncofood.stats.queue'), '동의 전인데 세기 시작함 — 큐에 쌓였다')
-no(mem.has('oncofood.stats.pid'), '동의 전인데 추적 번호를 만들었다')
+no(mem.has('harucharim.stats.queue'), '동의 전인데 세기 시작함 — 큐에 쌓였다')
+no(mem.has('harucharim.stats.pid'), '동의 전인데 추적 번호를 만들었다')
 
 /* ── 2. 켜면 세되, 끄면 지우는가 ────────────────────────── */
 setConsent(true)
 track('open')
 track('menu_build', 3)
-no(!mem.has('oncofood.stats.queue'), '동의했는데 세지 않음')
+no(!mem.has('harucharim.stats.queue'), '동의했는데 세지 않음')
 
 setConsent(false)
-no(mem.has('oncofood.stats.pid'), '동의를 거두셨는데 추적 번호가 남아 있음')
-no(mem.has('oncofood.stats.queue'), '동의를 거두셨는데 쌓인 것이 남아 있음')
+no(mem.has('harucharim.stats.pid'), '동의를 거두셨는데 추적 번호가 남아 있음')
+no(mem.has('harucharim.stats.queue'), '동의를 거두셨는데 쌓인 것이 남아 있음')
 no(hasConsent(), '동의를 거두었는데 여전히 켜져 있음')
 
 /* ── 3. 나이·체중이 뭉개지는가 ──────────────────────────── */

@@ -82,7 +82,7 @@ export function Onboarding({
       {/* 진행 표시 */}
       <div className="safe-top shrink-0 border-b border-stone-200 bg-white px-5 pb-3 pt-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-base font-bold text-stone-900">온코푸드 시작하기</h1>
+          <h1 className="text-base font-bold text-stone-900">하루차림 시작하기</h1>
           <span className="text-xs tabular-nums text-stone-400">{step + 1} / {steps.length}</span>
         </div>
         <div className="mt-3 flex gap-1.5">
@@ -98,7 +98,7 @@ export function Onboarding({
       <div className="flex-1 overflow-y-auto px-5 py-5">
         {step === 0 && (
           <Step
-            title={loginOnly ? '다시 로그인해 주세요' : '온코푸드를 시작합니다'}
+            title={loginOnly ? '다시 로그인해 주세요' : '하루차림을 시작합니다'}
             desc={loginOnly
               ? '로그아웃하셨습니다. 다시 로그인하시면 적어 두신 기록이 그대로 있습니다.'
               : '먼저 로그인해 주세요. 기기를 바꾸셔도 설정이 유지되고, 문의하신 내용의 답변을 앱에서 바로 확인하실 수 있습니다.'}
@@ -434,7 +434,7 @@ export function Onboarding({
           */}
         {step === 5 && (
           <Step
-            title="온코푸드를 어떻게 알게 되셨어요?"
+            title="하루차림을 어떻게 알게 되셨어요?"
             desc="어디에 힘을 쏟을지 정하는 데만 씁니다. 답하지 않으셔도 됩니다."
           >
             <div className="flex flex-col gap-1.5">

@@ -267,7 +267,7 @@ export function HowTo() {
   return (
     <div>
       <Section
-        title="온코푸드 사용하는 법"
+        title="하루차림 사용하는 법"
         desc="하루를 쓰는 순서대로 적었습니다. 필요하신 곳만 펴서 보셔도 됩니다."
       >
         <div className="card border-brand-200 bg-brand-50/50 p-4">

@@ -13,7 +13,7 @@ import type { PackedFoods } from '../data/foods/generated'
  * 중간 낱말로도 찾히도록 이름을 토막 내어 함께 색인한다.
  */
 
-const DB_NAME = 'oncofood'
+const DB_NAME = 'harucharim'
 const DB_VERSION = 4
 const STORE_FOOD = 'extFoods'
 const STORE_BARCODE = 'barcodes'

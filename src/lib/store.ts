@@ -5,7 +5,7 @@ import { observedWeightLoss } from '../engine/nutrition'
 import { defaultSlotFor } from '../engine/menu'
 import { today as todayKey, type DayKey } from './day'
 
-const STORAGE_KEY = 'oncofood.state.v1'
+const STORAGE_KEY = 'harucharim.state.v1'
 
 export interface AppState {
   patient: PatientContext

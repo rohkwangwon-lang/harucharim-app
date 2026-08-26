@@ -4,9 +4,9 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 /**
  * GitHub Pages 같은 하위 경로 배포를 위해 base 를 환경변수로 받는다.
- *   ONCOFOOD_BASE=/oncofood-app/ npm run build
+ *   HARUCHARIM_BASE=/harucharim-app/ npm run build
  */
-const base = process.env.ONCOFOOD_BASE ?? '/'
+const base = process.env.HARUCHARIM_BASE ?? '/'
 
 
 export default defineConfig({
@@ -23,8 +23,8 @@ export default defineConfig({
       injectRegister: null,
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: '온코푸드 — 암 환자 식이·영양 도우미',
-        short_name: '온코푸드',
+        name: '하루차림 — 암 환자 식이·영양 도우미',
+        short_name: '하루차림',
         description:
           '한국 음식과 약국 영양제를 암종별로 확인하고, 근거와 함께 하루 식단을 구성합니다.',
         lang: 'ko',

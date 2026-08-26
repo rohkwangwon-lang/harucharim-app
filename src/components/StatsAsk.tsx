@@ -17,12 +17,12 @@ import { setConsent } from '../lib/stats'
  * 한 번 답하시면 다시 묻지 않는다 — 켜실 때까지 되묻는 것도 같은 종류의 강요다.
  */
 
-const ASKED_KEY = 'oncofood.stats.asked'
+const ASKED_KEY = 'harucharim.stats.asked'
 
 export function shouldAsk(): boolean {
   try {
     return localStorage.getItem(ASKED_KEY) !== 'yes'
-      && localStorage.getItem('oncofood.stats.consent') === null
+      && localStorage.getItem('harucharim.stats.consent') === null
   } catch { return false }
 }
 

@@ -223,7 +223,7 @@ export default function App() {
           <div className="flex items-center gap-2.5">
             <Logo className="h-9 w-9 shrink-0 text-brand-600" />
             <div>
-              <h1 className="text-base font-bold tracking-tight text-stone-900">온코푸드</h1>
+              <h1 className="text-base font-bold tracking-tight text-stone-900">하루차림</h1>
               <p className="text-[11px] text-stone-500">암 환자를 위한 식이·영양 도우미</p>
             </div>
           </div>

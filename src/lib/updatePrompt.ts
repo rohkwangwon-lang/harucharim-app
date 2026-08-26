@@ -17,10 +17,10 @@ export function setupUpdatePrompt() {
 }
 
 function showBanner(onUpdate: () => void) {
-  if (document.getElementById('oncofood-update')) return
+  if (document.getElementById('harucharim-update')) return
 
   const bar = document.createElement('div')
-  bar.id = 'oncofood-update'
+  bar.id = 'harucharim-update'
   bar.style.cssText = [
     'position:fixed', 'left:12px', 'right:12px', 'bottom:80px', 'z-index:60',
     'max-width:640px', 'margin:0 auto',

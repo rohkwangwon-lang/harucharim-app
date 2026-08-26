@@ -231,7 +231,7 @@ const top = ranked.slice(0, 100)
 const dayPct = (n: number) => ((n / totalDays) * 100).toFixed(1)
 
 const lines: string[] = []
-lines.push('# 온코푸드 — 가장 자주 추천되는 식단 100')
+lines.push('# 하루차림 — 가장 자주 추천되는 식단 100')
 lines.push('')
 lines.push(`무작위로 만든 환자 ${PEOPLE.toLocaleString()}명이 ${DAYS}일씩 지내게 하고(${totalDays.toLocaleString()}일),`)
 lines.push(`앱이 실제로 내놓은 ${totalItems.toLocaleString()}건을 세었습니다. 암종·치료 시기·증상·계절은 모두 무작위입니다.`)

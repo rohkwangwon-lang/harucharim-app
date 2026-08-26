@@ -21,11 +21,11 @@ import { CANCER_BY_ID } from '../data/cancers'
  * 다만 그 필요가 환자분의 건강 정보를 원본으로 쌓을 이유는 되지 못한다.
  */
 
-const PID_KEY = 'oncofood.stats.pid'
-const SOURCE_KEY = 'oncofood.stats.source'
-const CONSENT_KEY = 'oncofood.stats.consent'
-const QUEUE_KEY = 'oncofood.stats.queue'
-const SENT_KEY = 'oncofood.stats.sentOn'
+const PID_KEY = 'harucharim.stats.pid'
+const SOURCE_KEY = 'harucharim.stats.source'
+const CONSENT_KEY = 'harucharim.stats.consent'
+const QUEUE_KEY = 'harucharim.stats.queue'
+const SENT_KEY = 'harucharim.stats.sentOn'
 
 /** 앱이 세는 것들 — 여기 없는 이름은 보내지 않는다 */
 export const EVENTS = [
