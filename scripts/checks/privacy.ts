@@ -16,10 +16,8 @@
  */
 import { readFileSync } from 'node:fs'
 import {
-  ageBand, bmiBand, hasConsent, track, setConsent, EVENTS, cleanSource, rememberSource
+  ageBand, bmiBand, hasConsent, track, setConsent, EVENTS, cleanSource, SOURCES
 } from '../../src/lib/stats'
-
-const CONSENT_KEY_T = 'oncofood.stats.consent'
 
 const bads: string[] = []
 function no(cond: boolean, msg: string) { if (cond) bads.push(msg) }
@@ -192,23 +190,25 @@ for (const must of ['무작위 식별자', '5명 미만']) {
  * 그게 서버에 남아 신원 단서가 된다. 영문·숫자만, 짧게 잘라서 받는다.
  */
 const SRC_BAD = ['김철수', 'a@b.com', '010-1234-5678', '01012345678', '1965',
-                 'x'.repeat(40), '<script>', 'a b', '환자', '-cafe']
+                 'x'.repeat(40), '<script>', 'cafe1', 'naver-cafe', '환자']
 for (const v of SRC_BAD) {
-  no(cleanSource(v) !== null, `유입 경로가 위험한 값을 통과시킴: "${v.slice(0, 20)}"`)
+  no(cleanSource(v) !== null, `알게 된 경로가 정해지지 않은 값을 통과시킴: "${v.slice(0, 20)}"`)
 }
-for (const v of ['cafe1', 'naver-cafe', 'blog_2026', 'A']) {
-  no(cleanSource(v) === null, `유입 경로가 멀쩡한 값을 막음: "${v}"`)
+for (const s2 of SOURCES) {
+  no(cleanSource(s2.id) === null, `알게 된 경로가 제 항목을 막음: "${s2.id}"`)
+  no(!s2.label.trim(), `알게 된 경로 "${s2.id}" 에 화면에 보일 이름이 없음`)
 }
-no(cleanSource('CAFE1') !== 'cafe1', '유입 경로가 대소문자를 통일하지 않음 — 같은 곳이 두 줄로 갈린다')
+no(cleanSource('CAFE') !== 'cafe', '알게 된 경로가 대소문자를 통일하지 않음')
 
-/* 거절하신 분의 기기에 쓰지도 않을 값을 남기지 않는가 */
-mem.clear()
-mem.set(CONSENT_KEY_T, 'no')
-;(globalThis as Record<string, unknown>).location = { search: '?from=cafe1' }
-rememberSource()
-no(mem.has('oncofood.stats.source'), '거절하셨는데 유입 경로를 기기에 남김')
-no(!/source\s*~\s*'\^\[a-z\]\[a-z0-9_-\]\{0,23\}\$'/.test(sql),
-   'SQL 쪽에 유입 경로 형식 제한이 없음 — 앱이 뚫려도 막을 자리가 필요하다')
+/* SQL 쪽도 같은 목록으로 묶여 있는가 — 앱이 뚫려도 막을 자리가 필요하다 */
+const sqlSrc = sql.match(/source\s+text\s+check \(source in \(([^)]*)\)\)/)
+no(!sqlSrc, 'SQL 쪽에 알게 된 경로 목록 제한이 없음')
+if (sqlSrc) {
+  const inSql = [...sqlSrc[1].matchAll(/'([a-z]+)'/g)].map((m2) => m2[1]).sort()
+  const inApp = SOURCES.map((s2) => s2.id).sort()
+  no(inSql.join() !== inApp.join(),
+     `앱과 SQL 의 경로 목록이 다름 — 앱 [${inApp.join(',')}] / SQL [${inSql.join(',')}]`)
+}
 
 /* ── 10. 동의를 여쭙는 방식이 강요가 아닌가 ──────────────
  *
@@ -234,6 +234,33 @@ no(/text-\[1[01]px\]|text-stone-[34]00/.test(refuse), '거절 단추가 잔글�
 
 /* 켜실 때까지 되묻지 않는가 */
 no(!/asked|ASKED_KEY/.test(ask), '한 번 답하셨는지 기억하지 않음 — 되묻는 것도 강요다')
+
+/* ── 11. 관리자 화면이 일반 사용자에게 새지 않는가 ───────
+ *
+ * 앱 화면 안에 관리자 숫자를 섞어 두면 언젠가 실수로 노출된다.
+ * 별도 화면으로 빼되, 두 가지를 확인한다 —
+ * 관리자 판별 없이는 열리지 않을 것, 그리고 일반 화면에 입구가 없을 것.
+ */
+/* 주석을 걷고 본다 — 주석에 적힌 말이 방어 노릇을 해서는 안 된다 */
+const appSrc = app.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/^\s*\/\/.*$/gm, ' ')
+
+no(!/adminOpen && isAdmin/.test(appSrc),
+   '관리자 페이지가 관리자 판별 없이 열림 — 주소만 알면 누구나 본다')
+
+/* 관리자 덩어리가 일반 화면에 남아 있지 않은가 */
+no(/<Admin\s*\/>/.test(appSrc), '일반 화면에 <Admin /> 이 그대로 남아 있음')
+for (const m2 of appSrc.matchAll(/<AdminInquiries\s*\/>|<AdminPage/g)) {
+  const before = appSrc.slice(Math.max(0, m2.index! - 300), m2.index!)
+  no(!/isAdmin/.test(before), `${m2[0]} 가 관리자 판별 밖에 놓여 있음`)
+}
+
+/* 관리자가 아닌 분께 입구가 보이지 않는가 */
+const entry = appSrc.indexOf('관리자 페이지 열기')
+no(entry < 0, '관리자에게 입구가 없음 — 만들어도 열 길이 없다')
+if (entry >= 0) {
+  no(!/isAdmin && \(/.test(appSrc.slice(Math.max(0, entry - 400), entry)),
+     '관리자 입구가 모두에게 보임')
+}
 
 console.log(bads.length
   ? `개인정보 검사 — 문제 ${bads.length}종\n` + bads.map((b) => '■ ' + b).join('\n')

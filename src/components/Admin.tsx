@@ -35,6 +35,12 @@ const EVENT_LABEL: Record<string, string> = {
   inquiry: '문의'
 }
 
+const SOURCE_LABEL: Record<string, string> = {
+  cafe: '암 환우 카페', search: '인터넷 검색', sns: '블로그·SNS',
+  video: '유튜브·영상', person: '아는 분 소개', clinic: '병원·의료진',
+  etc: '그 밖에', '(직접)': '답하지 않으심'
+}
+
 function pct(kept: number, base: number): string {
   return base ? `${Math.round((kept / base) * 100)}%` : '—'
 }
@@ -164,8 +170,8 @@ export function Admin() {
       </Section>
 
       <Section
-        title="어디서 오시는지"
-        desc="링크 뒤에 ?from=이름 을 붙여 두면 카페마다 나뉘어 보입니다. 사람 수보다 오른쪽 '남으심' 이 중요합니다."
+        title="어떻게 알고 오시는지"
+        desc="처음 설정에서 여쭌 것입니다. 사람 수보다 오른쪽 '남으심' 이 중요합니다."
       >
         <div className="card overflow-hidden">
           {src.length === 0 ? (
@@ -174,7 +180,9 @@ export function Admin() {
             <ul className="divide-y divide-stone-100">
               {src.map((s2) => (
                 <li key={s2.k} className="flex items-center gap-2.5 px-3.5 py-2.5">
-                  <span className="w-24 shrink-0 truncate text-[11px] font-semibold text-stone-700">{s2.k}</span>
+                  <span className="w-24 shrink-0 truncate text-[11px] font-semibold text-stone-700">
+                    {SOURCE_LABEL[s2.k] ?? s2.k}
+                  </span>
                   <span className="h-3 flex-1 overflow-hidden rounded-full bg-stone-100">
                     <span className="block h-full rounded-full bg-brand-500"
                       style={{ width: `${Math.max(3, (s2.n / Math.max(...src.map((x) => x.n), 1)) * 100)}%` }} />
@@ -270,6 +278,31 @@ export function Admin() {
           </p>
         </div>
       </Section>
+    </div>
+  )
+}
+
+/**
+ * 관리자 페이지.
+ *
+ * 앱 화면 안에 섞어 두면 환자분이 쓰시는 자리에 운영자용 숫자가 함께 놓인다.
+ * 실수로 노출될 자리를 아예 만들지 않는 편이 낫다.
+ * 주소 뒤 #admin 으로만 열리고, 관리자 계정이 아니면 열리지 않는다.
+ */
+export function AdminPage({ onClose, children }: { onClose: () => void; children?: React.ReactNode }) {
+  return (
+    <div className="fixed inset-0 z-40 overflow-y-auto bg-stone-50">
+      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-stone-200 bg-white/95 px-4 py-3 backdrop-blur">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">관리자</p>
+          <h1 className="text-base font-bold text-stone-900">이용 현황</h1>
+        </div>
+        <button className="btn-outline text-xs" onClick={onClose}>앱으로 돌아가기</button>
+      </div>
+      <div className="mx-auto max-w-3xl px-4 pb-16 pt-2">
+        <Admin />
+        {children}
+      </div>
     </div>
   )
 }

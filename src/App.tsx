@@ -19,9 +19,9 @@ import { Exercise } from './components/Exercise'
 import { DataManager } from './components/DataManager'
 import { InquiryDialog } from './components/InquiryDialog'
 import { AdminInquiries } from './components/AdminInquiries'
-import { Admin } from './components/Admin'
+import { AdminPage } from './components/Admin'
 import { StatsConsent } from './components/StatsConsent'
-import { track, flush, rememberSource } from './lib/stats'
+import { track, flush } from './lib/stats'
 import { StatsAsk, shouldAsk } from './components/StatsAsk'
 import { checkAdmin } from './lib/inquiry'
 import { displayName, useSession, lastProvider } from './lib/auth'
@@ -117,7 +117,7 @@ export default function App() {
    * 열 때 한 번 세고, 하루에 한 번 모아서 올린다.
    * 누를 때마다 보내면 시각까지 남아 그 자체가 사람을 따라다니는 기록이 된다.
    */
-  useEffect(() => { rememberSource(); track('open') }, [])
+  useEffect(() => { track('open') }, [])
 
   /*
    * 처음 설정을 마치신 뒤 한 번 여쭙는다.
@@ -125,6 +125,23 @@ export default function App() {
    * 그러면 무엇을 고쳐야 할지 알 길이 없어진다.
    */
   const [asking2, setAsking2] = useState(false)
+
+  /*
+   * 관리자 페이지는 주소 뒤 #admin 으로만 열린다.
+   * 관리자가 아니면 열리지 않고, 흔적도 남기지 않는다 —
+   * 남의 기기에서 주소를 쳐 봐도 아무 일도 일어나지 않아야 한다.
+   */
+  const [adminOpen, setAdminOpen] = useState(false)
+  useEffect(() => {
+    const sync = () => setAdminOpen(location.hash.replace('#', '') === 'admin')
+    sync()
+    window.addEventListener('hashchange', sync)
+    return () => window.removeEventListener('hashchange', sync)
+  }, [])
+  const closeAdmin = () => {
+    history.replaceState(null, '', location.pathname + location.search)
+    setAdminOpen(false)
+  }
   useEffect(() => {
     if (state.patient.onboarded && shouldAsk()) {
       const t = setTimeout(() => setAsking2(true), 1200)
@@ -180,6 +197,15 @@ export default function App() {
         /* 이미 설정을 마치신 분이 로그아웃만 하신 경우에는 로그인 화면만 보여 준다 */
         loginOnly={state.patient.onboarded === true}
       />
+    )
+  }
+
+  /* 관리자 페이지 — 앱과 겹치지 않는 별도 화면 */
+  if (adminOpen && isAdmin) {
+    return (
+      <AdminPage onClose={closeAdmin}>
+        <AdminInquiries />
+      </AdminPage>
     )
   }
 
@@ -334,11 +360,19 @@ export default function App() {
           <>
               <>
             {/*
-              * 관리자에게는 통계가 먼저 볼 것이라 위에 둔다.
-              * 환자 설정 아래에 묻어 두면 매번 한 화면을 넘겨 내려가야 한다.
+              * 관리자 화면은 앱 안에 섞지 않는다.
+              * 환자분이 쓰시는 자리에 운영자용 숫자가 함께 놓이면
+              * 언젠가 실수로 노출된다. 그 자리를 아예 만들지 않는 편이 낫다.
+              * 관리자 계정으로 로그인했을 때만 이 단추가 보이고, 별도 화면으로 열린다.
               */}
-            {isAdmin && <Admin />}
-            {isAdmin && <AdminInquiries />}
+            {isAdmin && (
+              <button
+                className="btn-outline mb-5 w-full text-xs"
+                onClick={() => { location.hash = 'admin'; setAdminOpen(true) }}
+              >
+                관리자 페이지 열기
+              </button>
+            )}
 
             <PatientPanel patient={state.patient} onChange={setPatient} />
 

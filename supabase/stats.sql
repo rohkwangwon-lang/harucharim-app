@@ -1,5 +1,26 @@
 -- ═══════════════════════════════════════════════════════════
---  이용 통계 — 가입자의 상황과 쓰임새를 본다
+--  온코푸드 — 이용 통계 설치
+--
+--  ▶ 한 번만 하면 됩니다.
+--
+--    1. supabase.com 에 로그인 → 이 프로젝트 선택
+--    2. 왼쪽 메뉴에서 SQL Editor → New query
+--    3. 이 파일 전체를 붙여넣고 오른쪽 아래 Run (또는 Ctrl+Enter)
+--    4. 아래쪽에 "Success. No rows returned" 가 나오면 끝입니다
+--
+--  ▶ 먼저 supabase/admin.sql 을 실행하셨어야 합니다.
+--    이 파일은 거기서 만든 of_is_admin() 을 씁니다.
+--    아직이면 admin.sql 을 먼저 같은 방법으로 실행하세요.
+--
+--  ▶ 두 번 실행해도 괜찮습니다. 표가 이미 있으면 건너뜁니다.
+--
+--  ▶ 다 되었는지 확인하려면 앱에서 관리자 계정으로 로그인한 뒤
+--    내 정보 → 관리자 페이지 열기 를 누르세요.
+--    숫자가 0 으로라도 나오면 설치된 것입니다.
+-- ═══════════════════════════════════════════════════════════
+
+-- ═══════════════════════════════════════════════════════════
+--  왜 이렇게 만들었는지
 --
 --  이 앱이 다루는 것은 암종·치료 시기·체중이다. 개인정보보호법 제23조의
 --  민감정보(건강에 관한 정보)에 해당하고, 다른 개인정보와 달리 '별도의 동의'
@@ -36,9 +57,9 @@ create table if not exists public.of_users (
   -- 계정을 만드셨는지 (누구인지는 모른다)
   signed_in    boolean     not null default false,
   provider     text,
-  -- 어디서 오셨는지. 링크 뒤 ?from=... 을 걸러 받는다.
-  -- 반드시 영문자로 시작해야 한다 — 숫자와 붙임표만이면 전화번호가 그대로 들어온다.
-  source       text        check (source ~ '^[a-z][a-z0-9_-]{0,23}$'),
+  -- 어떻게 알게 되셨는지. 처음 설정에서 고르신 항목이며, 정해진 값만 들어온다.
+  -- 자유 입력을 받지 않으므로 이 칸이 신원 단서가 될 여지가 없다.
+  source       text        check (source in ('cafe','search','sns','video','person','clinic','etc')),
   app_version  text,
   consent_at   timestamptz not null default now(),
   updated_at   timestamptz not null default now()
@@ -377,3 +398,12 @@ grant execute on function public.of_stat_use(int)     to authenticated;
 grant execute on function public.of_stat_return()     to authenticated;
 grant execute on function public.of_return_rate(int)  to authenticated;
 grant execute on function public.of_stat_demand(int)  to authenticated;
+
+
+-- ═══════════════════════════════════════════════════════════
+--  설치 확인 — 여기까지 실행되면 아래 한 줄이 결과로 나옵니다
+-- ═══════════════════════════════════════════════════════════
+select '설치 완료 — 표 ' || count(*) || '개가 준비되었습니다' as 결과
+  from information_schema.tables
+ where table_schema = 'public'
+   and table_name in ('of_users', 'of_active', 'of_events', 'of_demand');

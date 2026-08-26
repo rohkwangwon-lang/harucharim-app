@@ -75,42 +75,47 @@ function pid(): string | null {
   } catch { return null }
 }
 
-/* ── 어디서 오셨는지 ─────────────────────────────────────
+/* ── 어떻게 알게 되셨는지 ────────────────────────────────
  *
- * 카페마다 링크 뒤에 ?from=... 을 붙여 두면, 어느 쪽에서 오신 분들이
- * 실제로 남으시는지 볼 수 있다. 사람 수만 세는 것보다 이쪽이 중요하다 —
- * 백 명이 들어와 다 나가는 곳과 스무 명이 들어와 남는 곳은 전혀 다르다.
+ * 처음에는 링크 뒤 ?from=... 으로 받으려 했는데, 카페마다 링크를 따로 만들어
+ * 관리하는 일이 번거롭고, 무엇보다 주소창 글자를 그대로 받으면
+ * 누가 ?from=010-1234-5678 을 붙이는 순간 신원 단서가 된다.
  *
- * 다만 주소창의 글자를 그대로 서버에 실으면 안 된다.
- * 누가 ?from=김OO소개 같은 걸 붙이면 그 순간 신원 단서가 되어 버린다.
- * 그래서 영문·숫자만, 짧게 잘라서 남긴다.
+ * 처음 설정에서 직접 여쭙는 편이 낫다. 고르는 항목이 정해져 있으니
+ * 아예 다른 값이 들어올 수 없고, 링크를 따로 만들지 않아도 된다.
+ * 카페 이름까지는 모르지만 '어느 갈래에서 오시는가' 는 알 수 있고,
+ * 홍보처를 정하는 데는 그 정도면 충분하다.
  */
-/*
- * 반드시 영문자로 시작해야 한다.
- *
- * 처음에는 [a-z0-9_-] 로 두었는데, 검사가 '010-1234-5678' 이 통과하는 것을 잡았다.
- * 숫자와 붙임표만으로도 전화번호가 되고, 그건 유입 경로가 아니라 신원 단서다.
- */
-const SOURCE_OK = /^[a-z][a-z0-9_-]{0,23}$/
+export const SOURCES = [
+  { id: 'cafe',   label: '암 환우 카페·커뮤니티' },
+  { id: 'search', label: '인터넷 검색' },
+  { id: 'sns',    label: '블로그·SNS' },
+  { id: 'video',  label: '유튜브·영상' },
+  { id: 'person', label: '아는 분 소개' },
+  { id: 'clinic', label: '병원·의료진' },
+  { id: 'etc',    label: '그 밖에' }
+] as const
 
-export function cleanSource(raw: string | null): string | null {
+export type SourceId = (typeof SOURCES)[number]['id']
+
+const SOURCE_IDS: readonly string[] = SOURCES.map((s) => s.id)
+
+/** 정해진 항목이 아니면 버린다 — 앱이 잘못 보내도 서버에 이상한 값이 남지 않게 */
+export function cleanSource(raw: string | null): SourceId | null {
   if (!raw) return null
   const v = raw.trim().toLowerCase()
-  return SOURCE_OK.test(v) ? v : null
+  return SOURCE_IDS.includes(v) ? (v as SourceId) : null
 }
 
-/** 처음 오셨을 때 한 번만 기억한다 — 나중 방문으로 덮이면 유입 경로가 아니게 된다 */
-export function rememberSource() {
+export function setSource(id: string) {
   try {
-    /* 거절하신 분의 기기에는 쓰지도 않을 값을 남겨 두지 않는다 */
-    if (localStorage.getItem(CONSENT_KEY) === 'no') return
-    if (localStorage.getItem(SOURCE_KEY)) return
-    const v = cleanSource(new URLSearchParams(location.search).get('from'))
+    const v = cleanSource(id)
     if (v) localStorage.setItem(SOURCE_KEY, v)
+    else localStorage.removeItem(SOURCE_KEY)
   } catch { /* 저장이 막힌 브라우저 */ }
 }
 
-function source(): string | null {
+export function getSource(): SourceId | null {
   try { return cleanSource(localStorage.getItem(SOURCE_KEY)) } catch { return null }
 }
 
@@ -201,7 +206,7 @@ export async function flush(patient: PatientContext, signedIn: boolean, provider
       p_med_n: (patient.medications ?? []).length,
       p_signed_in: signedIn,
       p_provider: provider,
-      p_source: source(),
+      p_source: getSource(),
       p_version: __APP_VERSION__,
       p_events: events,
       p_demand: demand

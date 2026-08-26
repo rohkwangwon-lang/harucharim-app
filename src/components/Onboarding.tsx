@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { SOURCES, setSource } from '../lib/stats'
 import { track } from '../lib/stats'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { displayName, lastProvider, PROVIDER_LABEL, signIn, useSession, type Provider } from '../lib/auth'
@@ -56,13 +57,16 @@ export function Onboarding({
   const { user } = useSession()
   /* 지난번에 쓰신 로그인 방법 — 아이디·비밀번호는 이 앱이 받지 않는다 */
   const last = lastProvider()
-  const steps = loginOnly ? ['로그인'] : ['로그인', '암종', '치료 시기', '몸 상태', '식성']
+  const steps = loginOnly
+    ? ['로그인']
+    : ['로그인', '암종', '치료 시기', '몸 상태', '식성', '알게 된 경로']
   /*
    * 첫 화면은 로그인을 거쳐야 넘어간다.
    * 다만 로그인 서버가 설정되지 않은 환경(로컬 개발·미리보기)에서까지 막으면
    * 앱을 아예 쓸 수 없게 되므로, 그때는 그대로 통과시킨다.
    */
   const needsLogin = isSupabaseConfigured && !user
+  const [pickedSource, setPickedSource] = useState<string | null>(null)
   const canNext = step === 0 ? !needsLogin : step === 1 ? !!patient.cancer : true
 
   /* 넣으신 숫자를 그 자리에서 되비춰 준다 */
@@ -416,6 +420,49 @@ export function Onboarding({
             <Preview patient={patient} />
           </Step>
         )}
+
+        {/*
+          * 어떻게 알게 되셨는지.
+          *
+          * 홍보를 어디에 할지 정하려면 이게 있어야 한다.
+          * 처음에는 링크 뒤 ?from=... 으로 받으려 했는데, 카페마다 링크를 따로
+          * 만들어 관리하는 일이 번거롭고 주소창 글자가 그대로 들어오면 위험하다.
+          * 여쭙는 편이 낫다 — 고르는 항목이 정해져 있으니 이상한 값이 들어올 수 없다.
+          *
+          * 답하지 않고 넘어가실 수 있어야 한다. 이건 선생님이 궁금한 것이지
+          * 환자분께 필요한 것이 아니기 때문이다.
+          */}
+        {step === 5 && (
+          <Step
+            title="온코푸드를 어떻게 알게 되셨어요?"
+            desc="어디에 힘을 쏟을지 정하는 데만 씁니다. 답하지 않으셔도 됩니다."
+          >
+            <div className="flex flex-col gap-1.5">
+              {SOURCES.map((s) => {
+                const on = pickedSource === s.id
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => setPickedSource(on ? null : s.id)}
+                    className={`flex items-center gap-2.5 rounded-xl border px-3.5 py-3 text-left text-sm transition-colors ${
+                      on
+                        ? 'border-brand-500 bg-brand-50 font-semibold text-brand-800'
+                        : 'border-stone-200 bg-white text-stone-700'
+                    }`}
+                  >
+                    <span className={`h-4 w-4 shrink-0 rounded-full border-2 ${
+                      on ? 'border-brand-500 bg-brand-500' : 'border-stone-300'
+                    }`} />
+                    {s.label}
+                  </button>
+                )
+              })}
+            </div>
+            <p className="mt-2.5 text-[11px] leading-relaxed text-stone-400">
+              고르신 항목은 이용 통계에 동의하신 경우에만 전해지고, 그때도 어느 갈래인지만 남습니다.
+            </p>
+          </Step>
+        )}
       </div>
 
       {/* 하단 버튼 */}
@@ -433,7 +480,7 @@ export function Onboarding({
               {needsLogin ? '로그인이 필요합니다' : '들어가는 중…'}
             </button>
           ) : (
-            <button className="btn-primary flex-[2]" onClick={() => { track('onboard_done'); onDone({}) }}>시작하기</button>
+            <button className="btn-primary flex-[2]" onClick={() => { if (pickedSource) setSource(pickedSource); track('onboard_done'); onDone({}) }}>시작하기</button>
           )}
         </div>
         {step === 1 && (
