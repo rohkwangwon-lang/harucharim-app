@@ -888,6 +888,35 @@ export function buildDayMenu(
              */
             (c.food.group === entry.food.group || slot === '간식') &&
             slotsFor(c.food).includes(slot) &&
+            /*
+             * 제철로 갈아 끼울 때도 상차림을 본다.
+             *
+             * 여기는 항목의 내용만 바꾸므로 placeIn 을 지나지 않는다.
+             * 그래서 곁들임 상한이 걸리지 않았고, 실제로 이 자리가
+             * "단호박(찐 것) + 군고구마" 같은 끼니를 만든 유일한 통로였다.
+             * 하나뿐인 반찬이 과일로 갈리면 밥상이 무너지지만, 그것까지 여기서 막지는 않는다.
+             * 막아 보았더니 신장이 걸리는 분의 단백질 초과가 0.4 % 에서 1.8 % 로 올랐다 —
+             * 고기 한 접시가 과일로 갈리는 것이 그분께는 이득인데 그 길을 닫은 셈이다.
+             * 무너진 상은 뒤의 마지막 단계가 낮은 단백질 반찬으로 다시 세운다.
+             */
+            /*
+             * 상차림과 신장 사이에서.
+             *
+             * 이 상한을 걸면 곁들임 몰림이 8.4 % 에서 0 으로 떨어지는데,
+             * 신장이 걸리는 분의 단백질 초과가 0.3 % 에서 1.8 % 로 올랐다.
+             * 제철로 갈아 끼우는 이 자리가 고기 한 접시를 과일로 바꾸는 통로이기도 해서,
+             * 막으면 그 길까지 함께 닫힌다.
+             *
+             * 둘이 부딪히면 신장이 먼저다. 상이 조금 성긴 것과 단백질이 40 g 넘치는 것은
+             * 무게가 다르다. 그래서 단백질을 낮추는 갈아 끼우기는 막지 않는다.
+             */
+            /*
+             * 제철로 갈아 끼울 때도 상차림을 본다.
+             * 여기는 항목의 내용만 바꾸므로 placeIn 을 지나지 않아,
+             * 곁들임 상한이 걸리지 않는 유일한 통로였다.
+             */
+            (!sideClash(meals, slot, c.food, entry) ||
+              (renalCap && c.protein < (foodContribution(entry.food, entry.servings).protein ?? 0))) &&
               /*
                * 바꿔 넣는 것도 상한을 지킨다.
                * 간식에서 식품군 일치를 풀어 준 탓에, 이미 과일이 있는 간식에
@@ -1307,12 +1336,22 @@ export function buildDayMenu(
     if (here.length === 0) continue
     if (mealIsComplete(here.map((e) => e.food))) continue
 
+    /*
+     * 바꿀 곁들임조차 없는 경우 — 밥 한 공기만 놓인 상.
+     *
+     * 사용자가 가장 먼저 말씀하신 모습이 이것이다. 바꿀 것이 없으니
+     * 여기서는 더하는 수밖에 없다. 하루 상한 안에서 가벼운 반찬 하나를 놓는다.
+     */
     const drop = here.find((e) => !isAnchorDish(e.food) && mealRole(e.food) !== 'staple')
-    if (!drop) continue
-    const freed = foodContribution(drop.food, drop.servings)
+    const freed = drop
+      ? foodContribution(drop.food, drop.servings)
+      : ({ kcal: 0, protein: 0, fiber: 0, na: 0 } as NutrientTotals)
     const swap = candidates
       .filter((c) => !used.has(c.food.id))
       .filter((c) => isAnchorDish(c.food))
+      /* 신장이 걸리는 분께는 바꿔 넣는 것도 단백질을 늘리지 않아야 한다 */
+      .filter((c) => !renalCap || c.protein <= (freed.protein ?? 0) +
+        Math.max(4, target.protein[1] - (running().protein ?? 0)))
       .filter((c) => slotsFor(c.food).includes(slot))
       .filter((c) => !sideClash(meals, slot, c.food, drop))
       /*
@@ -1342,15 +1381,19 @@ export function buildDayMenu(
       .sort((a, b) => (b.bonus - b.penalty) - (a.bonus - a.penalty))[0]
     if (!swap) continue
 
-    here.splice(here.indexOf(drop), 1)
-    foodTotals = addTotals(foodTotals, negate(freed))
+    if (drop) {
+      here.splice(here.indexOf(drop), 1)
+      foodTotals = addTotals(foodTotals, negate(freed))
+    }
     used.add(swap.food.id)
     foodTotals = addTotals(foodTotals, foodContribution(swap.food, 1))
     const h = swap.prefers[0]
     here.push({
       food: swap.food, servings: 1, origin: 'added',
-      contribution: '밥상을 세우려고 곁들임 하나를 반찬으로 바꿨습니다',
-      ruleTitle: h?.rule.title ?? '밥만으로는 한 끼가 되지 않아 반찬으로 바꿨습니다.',
+      contribution: drop
+        ? '밥상을 세우려고 곁들임 하나를 반찬으로 바꿨습니다'
+        : '밥만으로는 한 끼가 되지 않아 반찬을 곁들였습니다',
+      ruleTitle: h?.rule.title ?? '밥만으로는 한 끼가 되지 않아 반찬을 놓았습니다.',
       evidence: h?.rule.evidence, refIds: h?.rule.refIds ?? [],
       seasonal: swap.seasonal
     })
