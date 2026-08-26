@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { DeleteAccount } from './components/DeleteAccount'
 import { REVIEW_MODE } from './config'
 import { useAppState } from './lib/store'
 import { CANCER_BY_ID } from './data/cancers'
@@ -454,6 +455,20 @@ export default function App() {
             <button className="btn-outline mb-4 w-full" onClick={resetOnboarding}>
               처음부터 다시 설정하기
             </button>
+
+            {/*
+              * 계정 삭제.
+              *
+              * 애플 심사 기준 5.1.1(v) 는 계정을 만들 수 있는 앱에
+              * 앱 안에서의 계정 삭제를 요구한다 — 예외가 없다.
+              * 개인정보보호법 제36조도 같은 것을 요구한다.
+              * 로그인하신 분에게만 보인다.
+              */}
+            {user && (
+              <div className="mb-5">
+                <DeleteAccount onDone={() => setTab('compose')} />
+              </div>
+            )}
             <Disclaimer />
               </>
           </>

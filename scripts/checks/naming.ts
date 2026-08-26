@@ -156,7 +156,38 @@ for (const f of files) {
 no(badParticles.length > 0,
    `이름 뒤 조사가 어긋남 (${badParticles.length}곳)\n   - ${badParticles.join('\n   - ')}`)
 
-/* ── 7. 화면에 부르는 이름이 하나로 통일됐는가 ──────────── */
+/* ── 7. 설치했을 때 색이 화면과 맞는가 ──────────────────
+ *
+ * 디자인을 쑥·솔잎빛으로 바꾼 뒤에도 매니페스트와 index.html 의 색은
+ * 예전 청록(#0d9482)으로 남아 있었다. 브라우저로 열면 안 보이지만,
+ * 홈 화면에 설치해 여시면 상태바와 실행 화면만 청록이라 어긋나 보인다.
+ *
+ * 스토어에 올릴 앱에서는 이게 그대로 심사자 눈에 띈다.
+ * 색은 tailwind 에 적힌 값에서만 가져오게 묶는다.
+ */
+const tw = readFileSync('tailwind.config.js', 'utf-8')
+function twColor(name: string, step: string): string | null {
+  const block = tw.match(new RegExp(`${name}:\\s*\\{([^}]*)\\}`, 's'))?.[1]
+  return block?.match(new RegExp(`${step}:\\s*'(#[0-9a-f]{6})'`, 'i'))?.[1] ?? null
+}
+const brand600 = twColor('brand', '600')
+const stone50 = twColor('stone', '50')
+no(!brand600 || !stone50, 'tailwind.config.js 에서 색을 읽지 못함 — 검사가 헛돌고 있다')
+
+if (brand600 && stone50) {
+  const themes = [
+    ['vite.config.ts', vite.match(/theme_color:\s*'(#[0-9a-f]{6})'/i)?.[1], brand600, '매니페스트 상태바 색'],
+    ['vite.config.ts', vite.match(/background_color:\s*'(#[0-9a-f]{6})'/i)?.[1], stone50, '매니페스트 실행 화면 색'],
+    ['index.html', readFileSync('index.html', 'utf-8').match(/name="theme-color"\s+content="(#[0-9a-f]{6})"/i)?.[1], brand600, 'index.html 상태바 색']
+  ] as const
+  for (const [file, got, want, what] of themes) {
+    no(!got, `${what} 을 ${file} 에서 못 찾음`)
+    no(Boolean(got) && got!.toLowerCase() !== want.toLowerCase(),
+       `${what} 이 지금 디자인과 다름 — ${got} (tailwind 는 ${want})`)
+  }
+}
+
+/* ── 8. 화면에 부르는 이름이 하나로 통일됐는가 ──────────── */
 const app = readFileSync('src/App.tsx', 'utf-8')
 no(!app.includes(NAME), `App.tsx 에 앱 이름(${NAME})이 없음`)
 

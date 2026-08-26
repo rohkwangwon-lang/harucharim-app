@@ -31,8 +31,15 @@ export default defineConfig({
         start_url: base,
         scope: base,
         display: 'standalone',
-        background_color: '#f8fafc',
-        theme_color: '#0d9482',
+        /*
+         * 안드로이드 상태바와 실행 화면 색.
+         *
+         * 디자인을 쑥·솔잎빛으로 바꾼 뒤에도 여기가 예전 청록색으로 남아 있었다.
+         * 화면 안은 초록인데 상태바만 청록이라 설치해 여신 분께는 어긋나 보인다.
+         * stone-50(쌀뜨물)과 brand-600(솔잎)으로 맞춘다.
+         */
+        background_color: '#faf9f4',
+        theme_color: '#4b6936',
         icons: [
           { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
