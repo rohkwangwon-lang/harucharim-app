@@ -187,7 +187,22 @@ if (brand600 && stone50) {
   }
 }
 
-/* ── 8. 화면에 부르는 이름이 하나로 통일됐는가 ──────────── */
+/* ── 8. 기기 저장소를 갈아탈 때 예전 것을 치우는가 ────────
+ *
+ * 이름을 바꾸면 IndexedDB 이름도 함께 바뀐다.
+ * 상품 데이터 27만 종(14 MB)이 거기 들어 있는데, 예전 저장소를 지우지 않으면
+ * 아무도 쓰지 않는 채로 브라우저에 남아 자리만 차지한다.
+ * 일괄 치환으로 이름을 바꾸면 이 뒷정리가 조용히 빠진다 — 실제로 이번에 빠졌다.
+ */
+const store = readFileSync('src/lib/foodStore.ts', 'utf-8')
+const dbName = store.match(/DB_NAME\s*=\s*'([\w-]+)'/)?.[1]
+no(!dbName, 'foodStore.ts 에서 저장소 이름을 못 찾음')
+no(Boolean(dbName) && dbName !== SLUG,
+   `기기 저장소 이름이 앱 이름과 다름 — "${dbName}" (${SLUG} 여야)`)
+no(!/deleteDatabase/.test(mig),
+   '예전 기기 저장소를 지우지 않음 — 쓰이지 않는 14 MB 가 브라우저에 남는다')
+
+/* ── 9. 화면에 부르는 이름이 하나로 통일됐는가 ──────────── */
 const app = readFileSync('src/App.tsx', 'utf-8')
 no(!app.includes(NAME), `App.tsx 에 앱 이름(${NAME})이 없음`)
 

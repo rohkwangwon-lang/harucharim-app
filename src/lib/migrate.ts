@@ -20,6 +20,26 @@ const NEW = 'harucharim.'
 /** 옮긴 적이 있는지 — 두 번 돌아도 해가 없지만, 굳이 매번 훑지 않는다 */
 const DONE = `${NEW}migrated`
 
+/**
+ * 예전 이름으로 만들어진 기기 저장소(IndexedDB)를 치운다.
+ *
+ * 상품 데이터 27만 종은 이 저장소에 들어 있고 14 MB 남짓 된다.
+ * 이름이 바뀌면 앱은 새 저장소를 보므로 예전 것은 아무도 쓰지 않는데,
+ * 지우지 않으면 그대로 브라우저에 남아 자리만 차지한다.
+ *
+ * 옮기지 않고 지우는 이유는, 이 자료가 기기에서 만든 것이 아니라
+ * 서버에서 받아 온 사본이기 때문이다. 27만 줄을 저장소끼리 옮기는 것보다
+ * 다시 받는 편이 간단하고 덜 위험하다.
+ * 앱은 자료가 없으면 원래대로 '받기' 를 안내한다.
+ */
+function dropOldDatabase(): void {
+  try {
+    indexedDB?.deleteDatabase(OLD.slice(0, -1))
+  } catch {
+    /* 지우지 못해도 앱 동작에는 지장이 없다 — 자리만 남는다 */
+  }
+}
+
 export function migrateStorage(): void {
   try {
     if (localStorage.getItem(DONE)) return
@@ -37,6 +57,7 @@ export function migrateStorage(): void {
     const moved = olds.every((k) => localStorage.getItem(NEW + k.slice(OLD.length)) !== null)
     if (moved) for (const k of olds) localStorage.removeItem(k)
 
+    dropOldDatabase()
     localStorage.setItem(DONE, '1')
   } catch {
     /*
