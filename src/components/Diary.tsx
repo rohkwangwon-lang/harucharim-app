@@ -8,7 +8,8 @@ import {
 import { FOOD_BY_ID } from '../data/foods'
 import { GRADE_STYLE, reportNutrients, summarizeDay, summarizePeriod } from '../engine/dayScore'
 import { sumIntake } from '../engine/nutrition'
-import { DayNoteList, NutrientReportList, Section, Stat } from './ui'
+import { DayNoteList, NutrientReportList, Section, ShortfallAdviceList, Stat } from './ui'
+import { adviseForShortfall } from '../engine/supplementAdvice'
 
 type View = 'day' | 'week' | 'month'
 
@@ -257,6 +258,7 @@ function WeekView({
       </div>
 
       <NutrientReportList rows={report(days, '주')} unit="주" />
+      <ShortfallAdviceList rows={adviseForShortfall(report(days, '주'), patient)} unit="주" />
 
       <div className="card divide-y divide-stone-100 overflow-hidden">
         {days.map((d) => {
@@ -326,6 +328,7 @@ function MonthView({
       </div>
 
       <NutrientReportList rows={report(days, '달')} unit="달" />
+      <ShortfallAdviceList rows={adviseForShortfall(report(days, '달'), patient)} unit="달" />
 
       <div className="card p-3">
         <div className="mb-1.5 grid grid-cols-7 gap-1 text-center">

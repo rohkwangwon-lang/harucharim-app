@@ -532,3 +532,181 @@ export function reviewCurrentSupplements(patient: PatientContext, takingIds: str
     .map((s) => evaluateSupplement(s, patient, cached))
     .filter((v) => v.level === 'avoid' || v.level === 'caution')
 }
+
+/* ────────────── 기록에서 드러난 부족을 채우는 영양제 ────────────── */
+
+/**
+ * 이 주에 실제로 모자랐던 것을 채워 줄 영양제.
+ *
+ * 위의 adviseSupplements 는 '이런 분은 모자라기 쉽습니다' 라고 상황을 보고 말한다.
+ * 여기는 다르다 — 열네 날을 적으셨고 그중 열세 날 칼슘이 목표에 못 미쳤다는,
+ * 이미 일어난 일을 근거로 삼는다. 추정이 아니라 기록이므로 훨씬 단단하다.
+ *
+ * 다만 두 가지를 지킨다.
+ *
+ * 하나, 식품이 먼저다. 우유 한 잔에 칼슘 220 mg 이 들어 있고, 그것이
+ * 보충제보다 나은 이유는 칼슘만 들어 있지 않기 때문이다.
+ * 보충제는 식사로 메우기 어려울 때 보태는 것이지 대신하는 것이 아니다.
+ *
+ * 둘, 이 앱이 스스로 말리는 것은 권하지 않는다. 전립선암에서 칼슘을 많이 드시는 것,
+ * 치료 중 고용량 항산화제가 그렇다. 모자란다고 아무거나 채울 일이 아니다.
+ */
+export interface ShortfallAdvice {
+  /** 무엇이 모자랐나 */
+  nutrient: string
+  /** 며칠 중 며칠 */
+  under: number
+  days: number
+  category: SupplementCategory
+  title: string
+  reason: string
+  /** 식품으로 먼저 채우는 길 */
+  byFood: string
+  evidence: EvidenceLevel
+  refIds: string[]
+  products: Supplement[]
+}
+
+/** 영양소마다, 그것을 채워 줄 자리와 식품 쪽 길 */
+const FILLS: Record<string, {
+  category: SupplementCategory
+  title: string
+  reason: string
+  byFood: string
+  evidence: EvidenceLevel
+  refIds: string[]
+}> = {
+  에너지: {
+    category: '경장영양(균형영양식)',
+    title: '식사만으로 열량이 채워지지 않으면 경구영양보충을 더합니다',
+    reason:
+      '먹는 양 자체가 줄어 있을 때는 밥을 늘리기 어렵습니다. 균형영양식 한 팩이 200~300 kcal 이라 ' +
+      '부피를 크게 늘리지 않고 보탤 수 있습니다. ESPEN 은 식사로 목표를 채우지 못하는 암 환자에게 이것을 권고합니다.',
+    byFood: '견과 한 줌(약 180 kcal), 우유 한 잔(130), 미숫가루 한 컵(210)처럼 부피 대비 열량이 높은 것을 간식으로 더해 보세요.',
+    evidence: 'G',
+    refIds: ['espen2021', 'espen-cachexia']
+  },
+  단백질: {
+    category: '단백질보충',
+    title: '단백질 분말은 식사량을 늘리지 않고 단백질만 올립니다',
+    reason:
+      '죽·우유·국에 섞으면 부피를 거의 늘리지 않고 단백질만 더할 수 있습니다. 1스쿱이 약 25 g 입니다. ' +
+      '근육량은 치료 완주율과 회복 속도에 직접 연결됩니다.',
+    byFood: '계란 한 개(6 g), 두부 반 모(14), 닭가슴살 한 접시(31), 생선 한 토막(20~26)을 한 끼에 더하면 대개 채워집니다.',
+    evidence: 'G',
+    refIds: ['espen2021']
+  },
+  칼슘: {
+    category: '칼슘·마그네슘',
+    title: '칼슘은 식품으로 먼저, 모자라는 만큼만 보충제로',
+    reason:
+      '항호르몬 치료나 스테로이드로 골밀도가 떨어지는 동안에는 하루 1,000~1,200 mg 이 기준입니다. ' +
+      '식품에서 이미 충분하다면 보충제를 더할 필요는 없고, 모자라는 만큼만 채우는 것이 표준적인 방법입니다. ' +
+      '비타민 D 가 없으면 칼슘을 먹어도 흡수되지 않으므로 함께 보십시오.',
+    byFood: '우유 한 잔 220 mg, 두부 반 모 150 mg, 뱅어포·멸치·요거트도 좋은 급원입니다.',
+    evidence: 'G',
+    refIds: ['nccn-survivorship', 'kdri2020']
+  },
+  식이섬유: {
+    category: '식이섬유',
+    title: '섬유는 식품이 먼저입니다 — 보충제는 그다음입니다',
+    reason:
+      '차전자피 같은 수용성 섬유는 물과 함께 드셔야 효과가 납니다. 물 없이 섬유만 늘리면 변이 오히려 단단해집니다. ' +
+      '설사나 장루가 있는 동안에는 반대로 줄여야 하므로 이 권고가 뜨지 않습니다.',
+    byFood: '채소 한 접시, 통곡 밥, 과일 한 개를 하루에 나눠 드시면 대개 채워집니다.',
+    evidence: 'G',
+    refIds: ['espen2021', 'wcrf2018']
+  },
+  철: {
+    category: '철분',
+    title: '철분제는 수치를 확인하고 시작하는 편이 좋습니다',
+    reason:
+      '위를 잘라 내신 뒤에는 위산이 줄어 철 흡수가 떨어집니다. 다만 철분제는 변비와 속쓰림이 잦고, ' +
+      '필요 없는데 오래 드시면 철이 쌓입니다. 채혈로 확인하고 시작하시는 편이 좋습니다.',
+    byFood: '고기·간·조개류의 철은 곡물·채소의 철보다 훨씬 잘 흡수되고, 비타민 C 를 함께 드시면 더 올라갑니다.',
+    evidence: 'G',
+    refIds: ['gastrectomy-nutr', 'kdri2020']
+  }
+}
+
+/**
+ * 지금 이분께 그 영양소를 늘리는 것이 맞는가.
+ *
+ * 기록에 '모자람' 으로 찍혔다고 늘 채워야 하는 것은 아니다.
+ * 설사 중에는 섬유를 줄이는 것이 목표이고, 신장이 걸리는 분께는 단백질이 부담이며,
+ * 전립선암에서 칼슘을 많이 드시는 것은 위험 증가와 연관이 관찰되었다.
+ * 그런 자리에서는 채우라고 말하지 않는다.
+ */
+function wanted(nutrient: string, p: PatientContext): boolean {
+  const has = (c: string) => p.conditions.includes(c as never)
+
+  if (nutrient === '식이섬유') {
+    /* 지금은 잔사를 줄이는 시기다 — 늘릴 때가 아니다 */
+    if (has('설사') || has('장루보유')) return false
+  }
+  if (nutrient === '단백질') {
+    /* 신장이 걸리면 단백질은 채혈 결과를 보고 정할 일이지 보충제로 밀 일이 아니다 */
+    if (has('신기능저하') || has('간성뇌증위험')) return false
+  }
+  if (nutrient === '칼슘') {
+    /*
+     * 전립선암에서는 칼슘 고섭취가 위험 증가와 연관되어 관찰되었다(WCRF, limited-suggestive).
+     * 골 보호가 필요한 ADT 중에는 그래도 채워야 하므로, 그때만 연다.
+     */
+    if (p.cancer === 'prostate') {
+      const adt = p.medications.includes('adt') || (p.subtypes ?? []).includes('안드로겐차단요법중')
+      if (!adt) return false
+    }
+  }
+  if (nutrient === '철') {
+    /* 위를 잘라 내셨거나 철이 실제로 모자란 분에게만 — 철은 남으면 쌓인다 */
+    if (!has('위절제후') && !(p.subtypes ?? []).some((t) => t === '위전절제' || t === '위부분절제')) return false
+  }
+  return true
+}
+
+export function adviseForShortfall(
+  /** reportNutrients 가 낸 것 중 모자란 것 */
+  shortfalls: { label: string; under: number; days: number; tone: string }[],
+  patient: PatientContext
+): ShortfallAdvice[] {
+  const out: ShortfallAdvice[] = []
+  for (const s of shortfalls) {
+    if (s.tone !== 'low') continue
+    const fill = FILLS[s.label]
+    if (!fill) continue
+
+    /*
+     * 모자란다고 아무거나 채울 일이 아니다.
+     *
+     * 지금 상태에서 그 영양소를 늘리는 것이 오히려 해가 되는 경우가 있다.
+     * 설사 중에 섬유를 늘리는 것이 그렇고, 신장이 걸리는 분께 단백질을 더하는 것이 그렇다.
+     * 기록에 '모자람' 으로 찍혔더라도 그때는 권하지 않는다 —
+     * 목표 자체가 그 상황에서는 다르게 잡혀 있어야 하기 때문이다.
+     */
+    if (!wanted(s.label, patient)) continue
+
+    /*
+     * 이 앱이 스스로 말리는 것은 권하지 않는다.
+     * 그 분류에 내놓을 제품이 하나도 남지 않으면 권고 자체를 접는다 —
+     * 권해 놓고 보여 줄 것이 없으면 화면이 빈 채로 남는다.
+     */
+    const products = productsIn(fill.category, patient)
+    if (products.length === 0) continue
+
+    out.push({
+      nutrient: s.label,
+      under: s.under,
+      days: s.days,
+      category: fill.category,
+      title: fill.title,
+      reason: fill.reason,
+      byFood: fill.byFood,
+      evidence: fill.evidence,
+      refIds: fill.refIds,
+      products
+    })
+  }
+  /* 오래 모자란 것부터 */
+  return out.sort((a, b) => b.under / b.days - a.under / a.days)
+}

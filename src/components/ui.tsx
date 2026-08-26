@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import type { EvidenceLevel, RuleLevel } from '../data/types'
+import { REF_BY_ID } from '../data/references'
 
 /* ── 권고 수준 배지 ─────────────────────────────────────────── */
 
@@ -569,5 +570,101 @@ export function NutrientReportList({
         띠는 적으신 날을 나눈 것입니다 — 왼쪽 노랑이 모자란 날, 가운데 초록이 알맞은 날, 오른쪽 빨강이 넘친 날.
       </p>
     </Section>
+  )
+}
+
+/**
+ * 기록에서 모자랐던 것을 채우는 영양제.
+ *
+ * 상황을 보고 "이런 분은 모자라기 쉽습니다" 라고 말하는 것과,
+ * 열네 날을 적으셨고 그중 열세 날 칼슘이 목표에 못 미쳤다고 말하는 것은 무게가 다르다.
+ * 뒤쪽은 추정이 아니라 이미 일어난 일이다.
+ *
+ * 그래도 식품이 먼저다. 보충제 이야기보다 식품으로 채우는 길을 먼저 적는다.
+ */
+export function ShortfallAdviceList({
+  rows, unit
+}: {
+  rows: {
+    nutrient: string; under: number; days: number; category: string
+    title: string; reason: string; byFood: string
+    evidence: EvidenceLevel; refIds: string[]
+    products: { id: string; name: string; brand: string; dosageLabel: string }[]
+  }[]
+  unit: '주' | '달'
+}) {
+  if (rows.length === 0) return null
+  return (
+    <Section
+      title="모자랐던 것을 채우려면"
+      desc={`이 ${unit}의 기록에서 실제로 모자랐던 것만 골랐습니다. 식품으로 채우는 길을 먼저 보시고, 그래도 어려우면 보충제를 생각해 보세요.`}
+    >
+      <div className="space-y-2.5">
+        {rows.map((r) => (
+          <div key={r.nutrient} className="card overflow-hidden">
+            <div className="flex flex-wrap items-center gap-1.5 border-b border-stone-100 bg-warn-50/50 px-3.5 py-2">
+              <span className="chip bg-warn-500 text-white">{r.nutrient} 부족</span>
+              <span className="text-[11px] font-medium text-stone-600">
+                {r.days}일 중 {r.under}일
+              </span>
+              <EvidenceBadge level={r.evidence} />
+            </div>
+            <div className="px-3.5 py-3">
+              {/* 식품이 먼저 — 그래서 위에 둔다 */}
+              <div className="rounded-xl bg-brand-50/60 px-3 py-2.5 ring-1 ring-brand-200/70">
+                <p className="text-[11px] font-bold text-brand-800">먼저 식품으로</p>
+                <p className="mt-1 text-[11px] leading-relaxed text-stone-700">{r.byFood}</p>
+              </div>
+
+              <p className="mt-3 text-sm font-semibold text-stone-900">{r.title}</p>
+              <p className="mt-1 text-[11px] leading-relaxed text-stone-600">{r.reason}</p>
+
+              <div className="mt-2.5 border-t border-stone-100 pt-2.5">
+                <p className="text-[11px] font-semibold text-stone-500">{r.category} · {r.products.length}종</p>
+                <ul className="mt-1 space-y-0.5">
+                  {r.products.slice(0, 3).map((s) => (
+                    <li key={s.id} className="text-[11px] text-stone-600">
+                      · {s.name}
+                      {s.brand !== '-' && <span className="text-stone-400"> ({s.brand})</span>}
+                      <span className="text-stone-400"> — {s.dosageLabel}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <Cites ids={r.refIds} />
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="mt-2 px-1 text-[11px] leading-relaxed text-stone-400">
+        제품이 아니라 <strong>분류</strong> 단위로 보여 드립니다. 어떤 브랜드를 사야 한다는 뜻이 아니며,
+        드시기 전에 담당 선생님과 상의하세요.
+      </p>
+    </Section>
+  )
+}
+
+/** 근거 목록 — 접어 두었다가 눌러서 본다 */
+function Cites({ ids }: { ids: string[] }) {
+  if (ids.length === 0) return null
+  return (
+    <details className="mt-2">
+      <summary className="cursor-pointer text-[11px] font-medium text-stone-400">근거 {ids.length}건</summary>
+      <ul className="mt-1.5 space-y-1">
+        {ids.map((id) => {
+          const ref = REF_BY_ID[id]
+          if (!ref) return null
+          return (
+            <li key={id} className="text-[11px] leading-relaxed text-stone-500">
+              {ref.url ? (
+                <a href={ref.url} target="_blank" rel="noreferrer" className="underline decoration-stone-300">
+                  {ref.citation}
+                </a>
+              ) : ref.citation}
+            </li>
+          )
+        })}
+      </ul>
+    </details>
   )
 }

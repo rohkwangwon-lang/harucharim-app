@@ -14,7 +14,7 @@
  */
 import { microTargets, foodContribution, nutritionRisk } from '../../src/engine/nutrition'
 import { buildDayMenu, dayNotes, microUnknownNames } from '../../src/engine/menu'
-import { adviseSupplements } from '../../src/engine/supplementAdvice'
+import { adviseSupplements, adviseForShortfall } from '../../src/engine/supplementAdvice'
 import { activeInteractions, activeRules, evaluateFood, evaluateSupplement } from '../../src/engine/rules'
 import { ingredientKeywords, judgeProduct } from '../../src/engine/ingredientVerdict'
 import { CURATED_FOODS, mealIsComplete, mealRole } from '../../src/data/foods'
@@ -396,6 +396,62 @@ for (let i = 0; i < N; i++) {
       m.notes.length !== baseNotes ||
       m.removed.length > 0
     if (!changed) bad('상태를 바꿨는데 아무것도 달라지지 않음', label)
+  }
+}
+
+/* ── 모자란 것을 채우라는 말이 해로울 때 ───────────────── */
+
+/*
+ * 기록에서 모자란 것이 드러나면 그것을 채워 줄 영양제를 권한다.
+ * 상황을 보고 짐작하는 것과 달리 이미 일어난 일이 근거라 훨씬 단단하다.
+ *
+ * 그런데 모자란다고 늘 채워야 하는 것은 아니다.
+ * 설사 중에는 섬유를 줄이는 것이 목표이고, 신장이 걸리는 분께는 단백질이 부담이며,
+ * 전립선암에서 칼슘 고섭취는 위험 증가와 연관되어 관찰되었다.
+ * 그런 자리에서 "모자라니 채우세요" 라고 하면 앱이 스스로 반대되는 말을 하는 셈이다.
+ */
+{
+  const ALL_LOW = [
+    { label: '에너지', under: 12, days: 14, tone: 'low' },
+    { label: '단백질', under: 12, days: 14, tone: 'low' },
+    { label: '식이섬유', under: 12, days: 14, tone: 'low' },
+    { label: '칼슘', under: 12, days: 14, tone: 'low' },
+    { label: '철', under: 12, days: 14, tone: 'low' }
+  ]
+  const has = (rows: ReturnType<typeof adviseForShortfall>, n: string) => rows.some((r) => r.nutrient === n)
+
+  const MUST_NOT: [string, Partial<PatientContext>, string][] = [
+    ['설사 중에 섬유를 채우라고 함', { conditions: ['설사'] }, '식이섬유'],
+    ['장루가 있는데 섬유를 채우라고 함', { conditions: ['장루보유'] }, '식이섬유'],
+    ['신기능저하인데 단백질을 채우라고 함', { conditions: ['신기능저하'] }, '단백질'],
+    ['간성뇌증 위험인데 단백질을 채우라고 함', { conditions: ['간성뇌증위험'] }, '단백질'],
+    ['전립선암(ADT 아님)인데 칼슘을 채우라고 함', { cancer: 'prostate' }, '칼슘'],
+    ['위를 자르지 않았는데 철분을 권함', { cancer: 'breast' }, '철']
+  ]
+  for (const [label, over, nutrient] of MUST_NOT) {
+    const who = { ...DEFAULT_PATIENT, conditions: [], medications: [], subtypes: [], ...over } as PatientContext
+    if (has(adviseForShortfall(ALL_LOW, who), nutrient)) bad('해로울 수 있는 보충을 권함', label)
+  }
+
+  const MUST: [string, Partial<PatientContext>, string][] = [
+    ['ADT 중에는 칼슘을 권해야 한다', { cancer: 'prostate', medications: ['adt'] }, '칼슘'],
+    ['위절제 후에는 철분을 권해야 한다', { cancer: 'stomach', conditions: ['위절제후'] }, '철'],
+    ['열량이 모자라면 경구영양보충을 권해야 한다', { cancer: 'breast' }, '에너지'],
+    ['단백질이 모자라면 단백질 보충을 권해야 한다', { cancer: 'breast' }, '단백질']
+  ]
+  for (const [label, over, nutrient] of MUST) {
+    const who = { ...DEFAULT_PATIENT, conditions: [], medications: [], subtypes: [], ...over } as PatientContext
+    if (!has(adviseForShortfall(ALL_LOW, who), nutrient)) bad('채워야 하는데 권하지 않음', label)
+  }
+
+  /* 권해 놓고 보여 줄 제품이 없으면 화면이 빈다 */
+  for (const c of ['breast', 'stomach', 'colorectal', 'prostate'] as const) {
+    const who = { ...DEFAULT_PATIENT, cancer: c, conditions: [], medications: [], subtypes: [] } as PatientContext
+    for (const r of adviseForShortfall(ALL_LOW, who)) {
+      if (r.products.length === 0) bad('권했는데 보여 줄 제품이 없음', `${c} ${r.nutrient}`)
+      if (r.refIds.length === 0) bad('문헌 없는 보충 권고', `${c} ${r.nutrient}`)
+      if (!r.byFood) bad('식품으로 채우는 길을 적지 않음', `${c} ${r.nutrient}`)
+    }
   }
 }
 
