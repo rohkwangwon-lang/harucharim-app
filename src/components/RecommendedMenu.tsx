@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { track } from '../lib/stats'
 import { IconEvening, IconMorning, IconNoon, IconShuffle, IconSnack } from './icons'
 import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
 import { MEAL_SLOTS } from '../data/types'
@@ -81,6 +82,7 @@ export function RecommendedMenu({
 
   /* 조건이 달라지면 지금까지 만든 안은 버린다 — 다른 사람의 식단이 되기 때문이다 */
   useEffect(() => { setDrafts([]); setCursor(0) }, [selected, patient, supps, day, recent])
+  useEffect(() => { track('menu_build') }, [])
 
   const menu = cursor === 0 ? first : (drafts[cursor - 1] ?? first)
   const seed = cursor
@@ -178,7 +180,7 @@ export function RecommendedMenu({
             )}
             <button
               className="rounded-xl border-2 border-brand-600 bg-white px-3.5 py-2 text-sm font-bold text-brand-700 shadow-sm transition-colors hover:bg-brand-50 active:bg-brand-100"
-              onClick={rebuild}
+              onClick={() => { track('menu_retry'); rebuild() }}
             >
               <span className="flex items-center gap-1.5">
                 <IconShuffle className="h-4 w-4" />
@@ -217,7 +219,7 @@ export function RecommendedMenu({
       </NutrientPanel>
 
       {added.length > 0 && (
-        <button className="btn-primary mb-4 w-full" onClick={() => onApplyAll(added)}>
+        <button className="btn-primary mb-4 w-full" onClick={() => { track('menu_take'); onApplyAll(added) }}>
           추천 {added.length}가지를 내 식단에 담기
         </button>
       )}

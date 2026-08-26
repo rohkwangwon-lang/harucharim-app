@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { track, trackDemand } from '../lib/stats'
 import type { PatientContext, SelectedItem, Supplement } from '../data/types'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
 import type { DayKey } from '../lib/day'
@@ -19,6 +20,43 @@ type View = 'day' | 'week' | 'month'
  * 하루하루의 숫자를 다 읽게 하면 아무도 보지 않는다.
  * 먼저 색으로 "충분/부족/초과"를 보여 주고, 궁금한 날을 눌렀을 때 숫자를 편다.
  */
+
+/**
+ * 주간·월간 보고.
+ *
+ * 그리는 김에 통계도 여기서 센다 — 보고를 여신 분이 몇이나 되는지,
+ * 그리고 어떤 영양제 분류가 '실제로 모자란 것' 으로 잡혔는지.
+ *
+ * 뒤쪽이 중요하다. 상황을 보고 짐작한 수요가 아니라 기록에서 드러난 수요라서,
+ * 무엇을 갖춰야 할지 가늠할 때 근거가 훨씬 단단하다.
+ * 사람에 붙이지 않고 분류별 횟수만 센다.
+ */
+function ReportBlock({
+  days, unit, report, patient
+}: {
+  days: DayKey[]
+  unit: '주' | '달'
+  report: (days: DayKey[], unit: '주' | '달') => ReturnType<typeof reportNutrients>
+  patient: PatientContext
+}) {
+  const rows = report(days, unit)
+  const advice = adviseForShortfall(rows, patient)
+
+  useEffect(() => {
+    track('report_view')
+    if (advice.length) {
+      trackDemand(advice.map((a) => ({ category: a.category, level: 'shortfall' as const, n: 1 })))
+    }
+  }, [advice])
+
+  return (
+    <>
+      <NutrientReportList rows={rows} unit={unit} />
+      <ShortfallAdviceList rows={advice} unit={unit} />
+    </>
+  )
+}
+
 export function Diary({
   patient,
   diary,
@@ -257,8 +295,7 @@ function WeekView({
         <DayNoteList notes={sum.notes} />
       </div>
 
-      <NutrientReportList rows={report(days, '주')} unit="주" />
-      <ShortfallAdviceList rows={adviseForShortfall(report(days, '주'), patient)} unit="주" />
+      <ReportBlock days={days} unit="주" report={report} patient={patient} />
 
       <div className="card divide-y divide-stone-100 overflow-hidden">
         {days.map((d) => {
@@ -327,8 +364,7 @@ function MonthView({
         <DayNoteList notes={sum.notes} />
       </div>
 
-      <NutrientReportList rows={report(days, '달')} unit="달" />
-      <ShortfallAdviceList rows={adviseForShortfall(report(days, '달'), patient)} unit="달" />
+      <ReportBlock days={days} unit="달" report={report} patient={patient} />
 
       <div className="card p-3">
         <div className="mb-1.5 grid grid-cols-7 gap-1 text-center">

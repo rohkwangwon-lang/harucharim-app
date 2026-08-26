@@ -19,8 +19,11 @@ import { Exercise } from './components/Exercise'
 import { DataManager } from './components/DataManager'
 import { InquiryDialog } from './components/InquiryDialog'
 import { AdminInquiries } from './components/AdminInquiries'
+import { Admin } from './components/Admin'
+import { StatsConsent } from './components/StatsConsent'
+import { track, flush } from './lib/stats'
 import { checkAdmin } from './lib/inquiry'
-import { displayName, useSession } from './lib/auth'
+import { displayName, useSession, lastProvider } from './lib/auth'
 import { isSupabaseConfigured } from './lib/supabase'
 import { Credentials } from './components/ui'
 
@@ -107,9 +110,26 @@ export default function App() {
     if (n && n !== '사용자') adoptName(n)
   }, [user, adoptName])
 
+  /*
+   * 통계 — 동의하신 분만.
+   *
+   * 열 때 한 번 세고, 하루에 한 번 모아서 올린다.
+   * 누를 때마다 보내면 시각까지 남아 그 자체가 사람을 따라다니는 기록이 된다.
+   */
+  useEffect(() => { track('open') }, [])
+  useEffect(() => {
+    const t = setTimeout(() => {
+      void flush(state.patient, Boolean(user), lastProvider())
+    }, 4000)
+    return () => clearTimeout(t)
+  }, [state.patient, user])
+
   // 탭을 바꿨는데 이전 화면의 스크롤 위치가 남아 있으면 빈 화면처럼 보인다
   const setTab = (next: Tab) => {
     setTabState(next)
+    if (next === 'care') track('guide_view')
+    if (next === 'search') track('food_search')
+    if (next === 'diary') track('diary_write')
     window.scrollTo({ top: 0 })
   }
 
@@ -117,6 +137,7 @@ export default function App() {
   const selectedIds = new Set<string>(selected.map((x) => x.foodId))
 
   const handleAdd = (foodId: string, servings: number, meal: MealSlot) => {
+    track('food_add')
     addFood(foodId, servings, meal)
     setToast(`${meal}에 담았습니다`)
     setTimeout(() => setToast(null), 1400)
@@ -298,8 +319,16 @@ export default function App() {
         {tab === 'me' && (
           <>
               <>
-            <PatientPanel patient={state.patient} onChange={setPatient} />
+            {/*
+              * 관리자에게는 통계가 먼저 볼 것이라 위에 둔다.
+              * 환자 설정 아래에 묻어 두면 매번 한 화면을 넘겨 내려가야 한다.
+              */}
+            {isAdmin && <Admin />}
             {isAdmin && <AdminInquiries />}
+
+            <PatientPanel patient={state.patient} onChange={setPatient} />
+
+            <StatsConsent />
 
             <DataManager />
 
@@ -438,11 +467,16 @@ function Disclaimer() {
         <li>· 모든 권고에는 근거 수준(A/B/C/G)과 출처를 함께 표시했습니다. 근거가 엇갈리는 주제는 그 사실 자체를 적었습니다.</li>
         <li>· 영양성분 값은 국가표준식품성분표와 제품 표시값을 기준으로 정리한 대표값입니다. 조리법과 제품에 따라 실제 값은 달라집니다.</li>
         <li>
-          · 암종·체중·식단 같은 <strong>건강 정보는 이 기기 안에만</strong> 저장되며 어디로도 전송되지 않습니다.
+          · 암종·체중·식단 같은 <strong>건강 정보는 이 기기 안에만</strong> 저장됩니다.
+          체중·나이의 실제 수치와 드신 음식은 어떤 경우에도 전송되지 않습니다.
         </li>
         <li>
-          · 다만 <strong>문의를 보내실 때만</strong> 적어 주신 내용과 연락처가 서버로 전송됩니다.
-          답변 외의 목적으로 쓰지 않으며, 문의하지 않으시면 아무것도 전송되지 않습니다.
+          · <strong>문의를 보내실 때만</strong> 적어 주신 내용과 연락처가 서버로 전송됩니다.
+          답변 외의 목적으로 쓰지 않습니다.
+        </li>
+        <li>
+          · <strong>이용 통계에 동의하신 경우에만</strong> 암종·치료 시기·연령대 같은 뭉갠 값이
+          하루 한 번 전송됩니다. 기본은 꺼져 있고, 켜지 않으시면 아무것도 전송되지 않습니다.
         </li>
         <li>
           ·{' '}

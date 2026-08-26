@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { track } from '../lib/stats'
 import { IconBarcode } from './icons'
 import type { PatientContext, SupplementCategory } from '../data/types'
 import { SUPPLEMENTS } from '../data/supplements'
@@ -183,7 +184,7 @@ export function Supplements({
               <button
                 key={id}
                 disabled={ing.names.length === 0}
-                onClick={() => { setPick(pick === id ? 'none' : id); setQ('') }}
+                onClick={() => { track('supp_filter'); setPick(pick === id ? 'none' : id); setQ('') }}
                 className={`flex-1 rounded-xl border-2 px-2.5 py-2 text-xs font-bold transition-colors disabled:opacity-40 ${
                   pick === id ? on : 'border-stone-200 bg-white text-stone-700 hover:bg-stone-50'
                 }`}

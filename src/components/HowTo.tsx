@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { track } from '../lib/stats'
 import { Section } from './ui'
 
 /**
@@ -255,11 +256,12 @@ const CAUTIONS: { q: string; a: string }[] = [
   },
   {
     q: '건강 정보는 이 기기 안에만',
-    a: '암종·체중·식단은 어디로도 전송되지 않습니다. 문의를 보내실 때만 적어 주신 내용이 서버로 갑니다.'
+    a: '체중·나이의 실제 수치와 드신 음식은 어떤 경우에도 나가지 않습니다. 문의를 보내실 때 적어 주신 내용, 그리고 이용 통계에 동의하신 경우 뭉갠 값(암종·연령대 등)만 서버로 갑니다. 통계는 기본이 꺼져 있고 내 정보에서 켜고 끄실 수 있습니다.'
   }
 ]
 
 export function HowTo() {
+  useEffect(() => { track('howto_view') }, [])
   const [open, setOpen] = useState<string | null>('내 식단')
 
   return (

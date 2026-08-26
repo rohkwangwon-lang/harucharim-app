@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { track } from '../lib/stats'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { displayName, lastProvider, PROVIDER_LABEL, signIn, useSession, type Provider } from '../lib/auth'
 import type { CancerId, Cuisine, PatientCondition, PatientContext, Phase, TreatmentHistory } from '../data/types'
@@ -432,7 +433,7 @@ export function Onboarding({
               {needsLogin ? '로그인이 필요합니다' : '들어가는 중…'}
             </button>
           ) : (
-            <button className="btn-primary flex-[2]" onClick={() => onDone({})}>시작하기</button>
+            <button className="btn-primary flex-[2]" onClick={() => { track('onboard_done'); onDone({}) }}>시작하기</button>
           )}
         </div>
         {step === 1 && (
