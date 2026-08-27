@@ -92,6 +92,26 @@ const isGarnish = (f: Food) => {
  */
 const core = (n: string) => n.replace(/\(.*?\)/g, '').trim().split(/[\s·]+/)[0]
 
+/*
+ * 반찬이 얼마나 골고루 나오는가.
+ *
+ * 반찬 160종을 갖춰 두고도 서른 종으로만 돌았다. 두부(부침용)이 300일 중 146일에 올랐다.
+ * 되풀이 판정에 '150 kcal 이상' 이라는 뚜껑이 있었는데, 나물·무침·데침 같은 반찬은
+ * 대개 그 아래여서 통째로 회전에서 빠져 있었다.
+ *
+ * 다시 단조로워지면 여기서 잡힌다.
+ */
+/*
+ * 사람마다 따로 센다.
+ *
+ * 처음에는 모두를 합쳐서 셌더니 상위 열 종이 73 % 로 나왔다. 그런데 그건
+ * 여러 분이 각자 자기 상황에 맞는 것을 드신 결과가 겹쳐 보인 것이지,
+ * 한 분이 그렇게 단조롭게 드신다는 뜻이 아니다.
+ * 단조로움은 한 사람이 겪는 것이므로 한 사람 안에서 재야 한다.
+ */
+const perPersonKinds: number[] = []
+const perPersonTop: number[] = []
+
 let meals = 0, days = 0
 /* 무엇이 얼마나 일어나는지도 함께 센다 — 0 건이면 검사가 헛돈 것이다 */
 let withStaple = 0, swapped = 0, renalDays = 0
@@ -115,10 +135,21 @@ for (let p = 0; p < PEOPLE; p++) {
   if (renal) renalDays++
 
   const naLimit = CANCER_BY_ID[cancer].target.naLimit ?? 2000
+  /** 이분이 이 기간에 만난 반찬 */
+  const myDishes = new Map<string, number>()
 
   const diary: Record<string, SelectedItem[]> = {}
   for (let d = 0; d < DAYS; d++) {
-    const day = `2026-${String(1 + (d % 12)).padStart(2, '0')}-${String(1 + (d % 28)).padStart(2, '0')}`
+    /*
+     * 날짜는 이어져야 한다.
+     *
+     * 처음에는 달을 d 로, 날을 d 로 각각 돌렸다. 그러면 하루가 지날 때마다
+     * 달까지 함께 넘어가 이틀 사이가 한 달이 된다.
+     * '최근에 드신 것' 은 이레 안쪽만 보므로 늘 비어 있었고,
+     * 회전을 아무리 손봐도 숫자가 꼼짝하지 않았다 — 재는 자가 또 틀렸던 것이다.
+     */
+    const dt = new Date(Date.UTC(2026, 0, 1) + d * 86400000)
+    const day = dt.toISOString().slice(0, 10)
     let menu
     try {
       menu = buildDayMenu([], patient, { day, nonce: d % 3, recent: recentFoods(diary, day) })
@@ -131,6 +162,17 @@ for (let p = 0; p < PEOPLE; p++) {
     days++
 
     const who = `${cancer}/${phase}/${patient.sex}${patient.age}/${patient.weightKg}kg cond=[${cond}]`
+
+    /* 하루 안에서 같은 것을 두 끼니에 — 아침 두부(부침용), 점심 두부부침 */
+    const seenToday = new Map<string, MealSlot>()
+    for (const s of MEAL_SLOTS) for (const e of menu.meals[s]) {
+      if (mealRole(e.food) === 'staple') continue
+      const k = core(e.food.name)
+      if (k.length < 2) continue
+      const was = seenToday.get(k)
+      if (was && was !== s) bad('하루에 같은 것이 두 끼니에', `${who} ${was}/${s}: ${k}`)
+      seenToday.set(k, s)
+    }
 
     /* ── 5. 상을 갖추자고 하루를 넘기지 않는가 ── */
     /*
@@ -180,9 +222,22 @@ for (let p = 0; p < PEOPLE; p++) {
       const staples = foods.filter((f) => mealRole(f) === 'staple' || mealRole(f) === 'onedish')
       if (staples.length > 1) bad('주식이 둘', `${who} ${s}: ${staples.map((f) => f.name).join('+')}`)
 
+      /* 한 끼니에 국은 하나 */
+      if (foods.filter((f) => mealRole(f) === 'soup').length > 1)
+        bad('한 끼니에 국이 둘', `${who} ${s}: ${foods.filter((f) => mealRole(f) === 'soup').map((f) => f.name).join('+')}`)
+
+      for (const f of foods) if (anchors(f)) myDishes.set(f.name, (myDishes.get(f.name) ?? 0) + 1)
+
       /* 바꿔 넣은 자국이 있는지 — 이 단계가 실제로 돌았다는 증거 */
       if (menu.meals[s].some((e) => /바꿨습니다|곁들였습니다/.test(e.contribution ?? ''))) swapped++
     }
+  }
+
+  const mine = [...myDishes.entries()].sort((a, b) => b[1] - a[1])
+  const myTotal = mine.reduce((s2, [, n]) => s2 + n, 0)
+  if (myTotal >= 10) {
+    perPersonKinds.push(mine.length)
+    perPersonTop.push(mine.slice(0, 5).reduce((s2, [, n]) => s2 + n, 0) / myTotal)
   }
 }
 
@@ -195,6 +250,23 @@ console.log(
   `  ${PEOPLE.toLocaleString()}명 × ${DAYS}일 = ${days.toLocaleString()}일 · 끼니 ${meals.toLocaleString()}개\n` +
   `  밥이 오른 끼니 ${withStaple.toLocaleString()} · 상을 세우려 손댄 끼니 ${swapped.toLocaleString()} · 신장이 걸리는 분 ${renalDays}명`
 )
+
+/*
+ * 쏠림은 건수가 아니라 비율로 본다.
+ * 상위 열 종이 절반을 넘으면 그건 다양한 것이 아니다.
+ */
+{
+  const mid = (a: number[]) => { const b = [...a].sort((x, y) => x - y); return b[Math.floor(b.length / 2)] ?? 0 }
+  const kinds = mid(perPersonKinds)
+  const top = mid(perPersonTop)
+  console.log(`  한 분이 ${DAYS}일 동안 만나는 반찬 — 가운데값 ${kinds}종 · 상위 5종이 ${(top * 100).toFixed(0)}%`)
+  /*
+   * 눈금은 지금 이룬 수준에서 조금 낮춰 잡는다.
+   * 지킬 수 없는 눈금을 적어 두면 검사가 늘 빨간불이라 아무도 보지 않는다.
+   */
+  if (kinds < Math.min(20, DAYS * 1.4)) bad('한 분이 만나는 반찬이 적음', `${DAYS}일에 ${kinds}종뿐`)
+  if (top > 0.4) bad('한 분의 상이 몇 가지에 쏠림', `상위 5종이 ${(top * 100).toFixed(0)}%`)
+}
 
 const problems = [...hits.entries()].sort((a, b) => b[1] - a[1])
 console.log(
