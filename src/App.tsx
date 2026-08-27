@@ -83,7 +83,8 @@ export default function App() {
   const {
     state, day, setDay, selected, setWeight,
     setPatient, adoptName, addFood, setServings, setMeal, removeFood, clearFoods,
-    toggleSupplement, completeOnboarding, resetOnboarding, setTextSize
+    toggleSupplement, completeOnboarding, resetOnboarding, setTextSize,
+    rememberShown
   } = useAppState()
 
   const [tab, setTabState] = useState<Tab>('compose')
@@ -285,6 +286,8 @@ export default function App() {
             supplements={state.supplements}
             day={day}
             diary={state.diary}
+            shown={state.shown}
+            onShown={rememberShown}
             onApply={(id, meal) => handleAdd(id, 1, meal)}
             onApplyAll={(items) => {
               items.forEach((i) => addFood(i.foodId, 1, i.meal))

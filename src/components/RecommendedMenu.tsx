@@ -28,6 +28,8 @@ export function RecommendedMenu({
   supplements,
   day,
   diary,
+  shown,
+  onShown,
   onApply,
   onApplyAll,
   onGoCompose
@@ -40,6 +42,10 @@ export function RecommendedMenu({
   day: string
   /** 날짜별 기록 — 최근에 드신 것을 피하는 데 쓴다 */
   diary: Record<string, SelectedItem[]>
+  /** 날짜별로 보여 드린 추천 — 적어 두지 않으셔도 되풀이를 막기 위한 것 */
+  shown?: Record<string, string[]>
+  /** 오늘 보여 드린 상을 적어 둔다 */
+  onShown?: (day: string, foodIds: string[]) => void
   onApply: (foodId: string, meal: MealSlot) => void
   onApplyAll: (items: { foodId: string; meal: MealSlot }[]) => void
   onGoCompose: () => void
@@ -58,7 +64,7 @@ export function RecommendedMenu({
    * 날짜를 넘기지 않으면 조건이 같은 한 언제 열어도 똑같은 식단이 나온다.
    * 실제로 8월 한 달 동안 하루도 빠짐없이 같은 여섯 가지였다.
    */
-  const recent = useMemo(() => recentFoods(diary, day), [diary, day])
+  const recent = useMemo(() => recentFoods(diary, day, undefined, shown), [diary, day, shown])
 
   /*
    * 지금까지 보여 드린 안을 모두 들고 있는다.
@@ -112,6 +118,20 @@ export function RecommendedMenu({
   const added = MEAL_SLOTS.flatMap((slot) =>
     menu.meals[slot].filter((e) => e.origin === 'added').map((e) => ({ foodId: e.food.id, meal: slot }))
   )
+
+  /*
+   * 지금 보여 드리고 있는 상을 적어 둔다.
+   *
+   * 되풀이를 막는 잣대가 적어 두신 기록뿐이었다. 매일 적으시는 분은 드물어서,
+   * 대부분의 화면에서는 그 잣대가 늘 비어 있었다 — 스무하루 내내 같은 닭백숙이었다.
+   * 오늘 것은 오늘 추천에 영향을 주지 않는다(recentFoods 가 오늘 날짜를 건너뛴다).
+   * 내일부터 어제 보신 것을 피하게 될 뿐이다.
+   */
+  const shownIds = MEAL_SLOTS.flatMap((slot) => menu.meals[slot].map((e) => e.food.id)).join(',')
+  useEffect(() => {
+    if (!onShown) return
+    onShown(day, shownIds ? shownIds.split(',') : [])
+  }, [onShown, day, shownIds])
 
   /*
    * 화면에 보이는 숫자끼리 더해도 합계가 나오도록, 항목별로 반올림한 값을 그대로 쌓는다.

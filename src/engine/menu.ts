@@ -380,18 +380,34 @@ export function intakeTrend(
 export function recentFoods(
   diary: Record<string, SelectedItem[]>,
   day: string,
-  days = REPEAT_FADE_DAYS
+  days = REPEAT_FADE_DAYS,
+  /**
+   * 날짜별로 보여 드린 추천.
+   *
+   * 되풀이를 막는 잣대가 적어 두신 기록뿐이었다. 그런데 대부분은 매일 적지 않으신다.
+   * 그러면 이 지도가 늘 비어 있어 회전이 아예 걸리지 않았고,
+   * 스무하루 동안 반찬 열네 가지만 돌면서 닭백숙이 날마다 올라갔다.
+   * 드신 것과 보신 것을 함께 본다 — 어느 쪽이든 눈에 익은 것은 매한가지다.
+   */
+  shown: Record<string, string[]> = {}
 ): Map<string, number> {
   const out = new Map<string, number>()
   const today = daysSinceEpoch(day)
+  const note = (id: string, ago: number) => {
+    const prev = out.get(id)
+    if (prev === undefined || ago < prev) out.set(id, ago)
+  }
   for (const [key, items] of Object.entries(diary)) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue
     const ago = today - daysSinceEpoch(key)
     if (ago <= 0 || ago > days) continue
-    for (const it of items) {
-      const prev = out.get(it.foodId)
-      if (prev === undefined || ago < prev) out.set(it.foodId, ago)
-    }
+    for (const it of items) note(it.foodId, ago)
+  }
+  for (const [key, ids] of Object.entries(shown)) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue
+    const ago = today - daysSinceEpoch(key)
+    if (ago <= 0 || ago > days) continue
+    for (const id of ids) note(id, ago)
   }
   return out
 }
@@ -1222,10 +1238,8 @@ export function buildDayMenu(
                            c.na <= Math.max(200, room.na * 0.4))
           if (fits.length === 0) continue
           /* 엇비슷하면 날마다 다르게 — 같은 자리에 늘 같은 나물이 오르지 않게 */
-          /* 최근에 드신 것은 뒤로 — 없을 때만 다시 쓴다 */
-        const ranked = fits.sort((a, b) =>
-          (Number(tooSoon(a.food, recent)) - Number(tooSoon(b.food, recent))) ||
-          ((b.bonus - b.penalty) - (a.bonus - a.penalty)))
+          /* 최근에 나온 것은 아예 뺀다 — 다 빠지면 그때만 되돌린다 */
+        const ranked = freshFirst(fits, recent).sort(byScore)
           const near = ranked.filter((x) => (x.bonus - x.penalty) >= (ranked[0].bonus - ranked[0].penalty) - 12)
           picked = near[((dayIndex % near.length) + near.length) % near.length]
           break
@@ -1241,16 +1255,15 @@ export function buildDayMenu(
           const drop = here.find((e) => !isAnchorDish(e.food) && mealRole(e.food) !== 'staple')
           if (!drop) continue
           const freed = foodContribution(drop.food, drop.servings)
-          const swap = candidates
+          const swapPool = candidates
             .filter((c) => !used.has(c.food.id))
             .filter((c) => isAnchorDish(c.food))
             .filter((c) => slotsFor(c.food).includes(slot))
             .filter((c) => !sideClash(meals, slot, c.food, drop))
             .filter((c) => c.kcal <= (freed.kcal ?? 0) + Math.max(0, room.kcal) + 60)
             .filter((c) => c.na <= (freed.na ?? 0) + Math.max(150, room.na))
-            .sort((a, b) =>
-              (Number(tooSoon(a.food, recent)) - Number(tooSoon(b.food, recent))) ||
-              ((b.bonus - b.penalty) - (a.bonus - a.penalty)))[0]
+          const swapPick = freshFirst(swapPool, recent).sort(byScore)[0]
+          const swap = swapPick
           if (!swap) continue
           here.splice(here.indexOf(drop), 1)
           foodTotals = addTotals(foodTotals, negate(freed))
@@ -1549,7 +1562,7 @@ export function buildDayMenu(
     const freed = drop
       ? foodContribution(drop.food, drop.servings)
       : ({ kcal: 0, protein: 0, fiber: 0, na: 0 } as NutrientTotals)
-    const swap = candidates
+    const swapPool2 = candidates
       .filter((c) => !used.has(c.food.id))
       .filter((c) => isAnchorDish(c.food))
       /* 신장이 걸리는 분께는 바꿔 넣는 것도 단백질을 늘리지 않아야 한다 */
@@ -1581,9 +1594,7 @@ export function buildDayMenu(
        */
       .filter((c) => (running().kcal ?? 0) - (freed.kcal ?? 0) + c.kcal <= kcalCeiling)
       .filter((c) => (running().na ?? 0) - (freed.na ?? 0) + c.na <= naCeiling)
-      .sort((a, b) =>
-        (Number(tooSoon(a.food, recent)) - Number(tooSoon(b.food, recent))) ||
-        ((b.bonus - b.penalty) - (a.bonus - a.penalty)))[0]
+    const swap = freshFirst(swapPool2, recent).sort(byScore)[0]
     if (!swap) continue
 
     if (drop) {
@@ -1679,7 +1690,7 @@ export function buildDayMenu(
         room.protein += back.protein ?? 0
       }
 
-      const add = candidates
+      const addPool = candidates
         .filter((c) => !used.has(c.food.id))
         .filter((c) => isAnchorDish(c.food) && mealRole(c.food) !== 'soup')
         .filter((c) => slotsFor(c.food).includes(slot))
@@ -1689,16 +1700,23 @@ export function buildDayMenu(
           return here.filter((x) => x.food.group === c.food.group).length < capG
         })
         .filter((c) => c.kcal * (halve ? 0.5 : 1) <= Math.min(150, room.kcal) &&
-                       c.na * (halve ? 0.5 : 1) <= Math.max(150, room.na * 0.35) &&
+                       c.na * (halve ? 0.5 : 1) <= Math.max(280, room.na * 0.5) &&
                        c.protein * (halve ? 0.5 : 1) <= room.protein)
         /* 반찬 한 가지를 더 놓을 때는 가벼운 쪽이 낫다 — 상은 갖추되 하루는 지킨다 */
-        .filter((c) => c.kcal <= 150)
+        .filter((c) => c.kcal <= (halve ? 150 : 200))
         /* 나눠 담을 때는 덜어낸 만큼은 채워야 한다 — 접시만 늘고 밥상이 헐거워지면 안 된다 */
         .filter((c) => !halve || !victim ||
           c.kcal * 0.5 >= (foodContribution(victim.food, 0.5).kcal ?? 0) * 0.75)
-        .sort((a, b) =>
-          (Number(tooSoon(a.food, recent)) - Number(tooSoon(b.food, recent))) ||
-          ((b.bonus - b.penalty) - (a.bonus - a.penalty)))[0]
+      /*
+       * 이 자리에서는 되풀이를 허용하지 않는다.
+       *
+       * 다른 자리들은 고를 것이 없으면 최근 것이라도 다시 쓴다 — 상이 서지 않는 것보다는 낫기 때문이다.
+       * 그런데 이 자리는 '있으면 좋은' 두 번째 반찬이라 그럴 까닭이 없다.
+       * 문이 좁아(열량·나트륨·단백질 여유가 모두 걸린다) 통과하는 후보가 몇 안 되다 보니,
+       * 되풀이를 열어 준 그 몇 가지가 늘 뽑혔다 — 꽃게(찐 것)와 취나물이 스무여드레 중 아홉 번씩이었다.
+       * 반찬이 하나뿐인 조촐한 상이, 사흘마다 같은 꽃게가 오르는 상보다 낫다.
+       */
+      const add = addPool.filter((c) => !tooSoon(c.food, recent)).sort(byScore)[0]
       if (!add) {
         /* 놓을 것을 못 찾았으면 줄여 둔 접시를 도로 채운다 — 반찬만 반쪽이 되면 안 된다 */
         if (halve && victim) {
@@ -1977,6 +1995,29 @@ function sideClash(meals: Record<MealSlot, MenuEntry[]>, to: MealSlot, food: Foo
  * 도로 집어 왔다. 회전 창을 엿새로 늘리고 회전 폭을 넓혀도 숫자가 꼼짝 않던 이유가 이것이다 —
  * 정작 자주 손대는 자리가 회전 밖에 있었다.
  */
+/**
+ * 최근에 나온 것을 빼고 고른다. 빼고 나니 아무것도 안 남으면 그때만 되풀이를 허용한다.
+ *
+ * 상차림을 맞추는 자리들은 최근 여부를 '정렬 기준' 으로만 썼다.
+ * 그러면 뒤로 밀릴 뿐 빠지지는 않아서, 열량·나트륨 걸림돌을 통과하는 후보가
+ * 몇 안 될 때 어제 것이 그대로 다시 1등이 된다.
+ * 취나물이 스무하루 중 아홉 번, 두부(부침용)가 여덟 번 오른 까닭이 이것이었다 —
+ * 반찬을 엿새 동안 막아 두었는데도 이 자리에서 번번이 새어 나갔다.
+ *
+ * 실제로 빼고 고른다. 다만 빼서 텅 비면 상이 헐거워지므로, 그때는 되돌린다.
+ */
+function freshFirst<T extends { food: Food; bonus: number; penalty: number }>(
+  list: T[], recent: Map<string, number>
+): T[] {
+  const fresh = list.filter((c) => !tooSoon(c.food, recent))
+  return fresh.length > 0 ? fresh : list
+}
+
+/** 점수가 높은 순 — 되풀이를 걸러 낸 다음에 쓴다 */
+function byScore<T extends { bonus: number; penalty: number }>(a: T, b: T): number {
+  return (b.bonus - b.penalty) - (a.bonus - a.penalty)
+}
+
 function tooSoon(f: Food, recent: Map<string, number>): boolean {
   const ago = recent.get(f.id)
   return ago !== undefined && ago <= blockDays(f)

@@ -320,6 +320,51 @@ console.log(
   if (top > 0.4) bad('한 분의 상이 몇 가지에 쏠림', `상위 5종이 ${(top * 100).toFixed(0)}%`)
 }
 
+/*
+ * 적어 두지 않으시는 분께도 반찬이 돌아가는가.
+ *
+ * 되풀이를 막는 잣대가 '적어 두신 기록' 뿐이던 때가 있었다. 그런데 대부분은
+ * 매일 적지 않으신다 — 추천만 보고 장을 보신다. 그러면 그 잣대가 늘 비어 있어
+ * 회전이 아예 걸리지 않았고, 스무하루 내내 같은 닭백숙이 올라갔다(21일 중 21일).
+ * 위의 검사들은 날마다 기록을 채워 넣으므로 이 구멍을 볼 수 없었다.
+ *
+ * 여기서는 '한 번도 적지 않으신 분' 을 흉내 낸다.
+ * 엔진의 회전 장치를 들여다보지 않고, 나온 상만 세어서 따진다.
+ */
+{
+  const DAYS2 = 28
+  for (const [label, extra] of [
+    ['유방암·수술후', { cancer: 'breast', phase: 'post_op', weightKg: 62, heightCm: 158, age: 58, sex: 'F' }],
+    ['위암·항암', { cancer: 'stomach', phase: 'during_chemo', weightKg: 47, heightCm: 168, age: 64, sex: 'M' }],
+    ['대장암·회복', { cancer: 'colorectal', phase: 'survivorship', weightKg: 55, heightCm: 160, age: 45, sex: 'F' }]
+  ] as [string, Record<string, unknown>][]) {
+    const who2 = {
+      ...DEFAULT_PATIENT, onboarded: true, conditions: [], medications: [], cuisines: ['한식'], ...extra
+    } as unknown as Parameters<typeof buildDayMenu>[1]
+    const shown: Record<string, string[]> = {}
+    const seen = new Map<string, number>()
+    for (let d = 0; d < DAYS2; d++) {
+      const day2 = new Date(Date.UTC(2026, 0, 1) + d * 86400000).toISOString().slice(0, 10)
+      /* 기록은 끝까지 비워 둔다 — 적지 않으시는 분이다 */
+      const m2 = buildDayMenu([], who2, { day: day2, recent: recentFoods({}, day2, undefined, shown) })
+      for (const s of MEAL_SLOTS) for (const e of m2.meals[s]) {
+        if (!anchors(e.food) || isStaple(e.food)) continue
+        seen.set(e.food.name, (seen.get(e.food.name) ?? 0) + 1)
+      }
+      shown[day2] = MEAL_SLOTS.flatMap((s) => m2.meals[s].map((e) => e.food.id))
+    }
+    const ranked = [...seen].sort((a, b) => b[1] - a[1])
+    const worst = ranked[0]
+    const sum2 = [...seen.values()].reduce((a, b) => a + b, 0)
+    const share = ranked.slice(0, 5).reduce((a, b) => a + b[1], 0) / Math.max(1, sum2)
+    console.log(`  적지 않으시는 분(${label}) ${DAYS2}일 — 반찬 ${seen.size}종 · 가장 잦은 것 ${worst?.[0]} ${worst?.[1]}회 · 상위 5종 ${Math.round(share * 100)}%`)
+    if (seen.size < 20) bad('적지 않으시는 분께 반찬이 돌지 않음', `${label}: ${DAYS2}일에 ${seen.size}종뿐`)
+    /* 한 가지가 사나흘마다 오르면 물린다 — 이레에 한 번꼴(28일에 7회)까지로 본다 */
+    if (worst && worst[1] > 7) bad('같은 반찬이 너무 잦음', `${label}: ${worst[0]}가 ${DAYS2}일에 ${worst[1]}회`)
+    if (share > 0.4) bad('몇 가지 반찬에 쏠림', `${label}: 상위 5종이 ${Math.round(share * 100)}%`)
+  }
+}
+
 const problems = [...hits.entries()].sort((a, b) => b[1] - a[1])
 console.log(
   problems.length === 0

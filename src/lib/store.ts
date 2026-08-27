@@ -14,6 +14,17 @@ export interface AppState {
    * 하루치만 두면 어제 무엇을 먹었는지 알 수 없어, 처음부터 날짜별로 쌓는다.
    */
   diary: Record<DayKey, SelectedItem[]>
+  /**
+   * 날짜별로 '보여 드린' 추천 식단의 식품 id.
+   *
+   * 되풀이를 막는 잣대가 적어 두신 기록뿐이었다. 그런데 대부분은 매일 적지 않으신다 —
+   * 추천만 보고 장을 보신다. 그러면 어제 무엇을 보셨는지 앱이 알 길이 없어,
+   * 스무하루 내내 같은 닭백숙이 올라갔다(실제로 21일 중 21일이었다).
+   *
+   * 그래서 드신 것과 별개로 '보여 드린 것' 도 남긴다.
+   * 드셨는지는 알 수 없지만, 어제 본 것을 오늘 또 보시는 일은 이것으로 막힌다.
+   */
+  shown?: Record<DayKey, string[]>
   /** 날짜별 체중 (kg) */
   weights: Record<DayKey, number>
   /** 복용 중인 영양제 id */
@@ -47,6 +58,7 @@ export const DEFAULT_PATIENT: PatientContext = {
 const DEFAULT_STATE: AppState = {
   patient: DEFAULT_PATIENT,
   diary: {},
+  shown: {},
   weights: {},
   supplements: [],
   textSize: 'normal'
@@ -106,12 +118,32 @@ function load(): AppState {
         observedLossNote: observed ? `${observed.fromKg} → ${observed.toKg} kg (${observed.days}일)` : undefined
       },
       diary,
+      shown: pruneShown(parsed.shown ?? {}),
       weights,
       supplements: parsed.supplements ?? []
     }
   } catch {
     return DEFAULT_STATE
   }
+}
+
+/**
+ * 오래된 '보여 드린 것' 은 버린다.
+ *
+ * 되풀이를 따지는 창이 이레 남짓이므로 그보다 오래된 것은 쓸 데가 없다.
+ * 날마다 스무 남짓씩 쌓이는 것을 그대로 두면 저장 공간만 먹는다.
+ */
+const SHOWN_KEEP_DAYS = 14
+function pruneShown(shown: Record<string, string[]>): Record<DayKey, string[]> {
+  const out: Record<string, string[]> = {}
+  const today = Math.round(Date.parse(todayKey()) / 86400000)
+  for (const [key, ids] of Object.entries(shown)) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue
+    const ago = today - Math.round(Date.parse(key) / 86400000)
+    if (ago < 0 || ago > SHOWN_KEEP_DAYS) continue
+    if (Array.isArray(ids)) out[key] = ids.filter((x) => typeof x === 'string')
+  }
+  return out as Record<DayKey, string[]>
 }
 
 export function useAppState() {
@@ -129,6 +161,22 @@ export function useAppState() {
       // 저장 실패는 기능을 막지 않는다 (사파리 프라이빗 모드 등)
     }
   }, [state])
+
+  /**
+   * 오늘 보여 드린 추천을 적어 둔다.
+   *
+   * '다시 구성' 을 누르시면 그날 것을 덮어쓴다 — 지나간 안까지 모두 쌓으면
+   * 며칠 만에 고를 것이 동나고, 정작 오늘 보시는 상이 초라해진다.
+   * 마지막으로 보신 것 하나만 남긴다.
+   */
+  const rememberShown = useCallback((forDay: DayKey, foodIds: string[]) => {
+    setState((s) => {
+      const prev = s.shown?.[forDay]
+      /* 같은 것을 다시 적느라 저장을 깨우지 않는다 */
+      if (prev && prev.length === foodIds.length && prev.every((x, i) => x === foodIds[i])) return s
+      return { ...s, shown: pruneShown({ ...(s.shown ?? {}), [forDay]: foodIds }) }
+    })
+  }, [])
 
   const setPatient = useCallback((patch: Partial<PatientContext>) => {
     setState((s) => ({ ...s, patient: { ...s.patient, ...patch } }))
@@ -272,6 +320,7 @@ export function useAppState() {
     addFood,
     setServings,
     setMeal,
+    rememberShown,
     removeFood,
     clearFoods,
     toggleSupplement,
