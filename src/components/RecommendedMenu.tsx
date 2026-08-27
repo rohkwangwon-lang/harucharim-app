@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { portionLabel } from '../lib/portion'
+import { menuConditionKey } from '../lib/menuIdentity'
 import { track } from '../lib/stats'
 import { IconEvening, IconMorning, IconNoon, IconShuffle, IconSnack } from './icons'
 import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
@@ -64,6 +65,18 @@ export function RecommendedMenu({
    * 날짜를 넘기지 않으면 조건이 같은 한 언제 열어도 똑같은 식단이 나온다.
    * 실제로 8월 한 달 동안 하루도 빠짐없이 같은 여섯 가지였다.
    */
+  /*
+   * 내용이 같으면 같은 것으로 본다.
+   *
+   * 이 지도는 아래에서 '조건이 바뀌었나' 를 재는 잣대로도 쓰인다.
+   * 그런데 지금 보여 드리는 상을 적어 두기 시작하면서(shown), 상을 하나 보여 드릴 때마다
+   * shown 이 새로 만들어지고 이 지도도 새 것이 되었다. 담긴 내용은 똑같은데도 —
+   * recentFoods 는 오늘 것을 건너뛰므로 오늘 무엇을 보여 드렸든 오늘의 내용은 그대로다.
+   *
+   * 그 바람에 '다시 구성' 을 누르면 새 안을 만들자마자 '조건이 바뀌었다' 로 읽혀
+   * 그 안이 곧바로 버려졌다. 누르면 아무 일도 일어나지 않는 것처럼 보였다.
+   * 그래서 껍데기가 아니라 내용으로 견준다.
+   */
   const recent = useMemo(() => recentFoods(diary, day, undefined, shown), [diary, day, shown])
 
   /*
@@ -87,8 +100,17 @@ export function RecommendedMenu({
     [selected, patient, supps, day, recent]
   )
 
-  /* 조건이 달라지면 지금까지 만든 안은 버린다 — 다른 사람의 식단이 되기 때문이다 */
-  useEffect(() => { setDrafts([]); setCursor(0) }, [selected, patient, supps, day, recent])
+  /*
+   * 조건이 달라지면 지금까지 만든 안은 버린다 — 다른 사람의 식단이 되기 때문이다.
+   *
+   * 무엇이 '달라진 것' 인지는 menuIdentity 에 적어 두었다. 값을 그대로 의존성에 넣으면
+   * 내용이 같아도 껍데기가 새것이면 달라진 것으로 읽혀, '다시 구성' 이 먹통이 된다.
+   */
+  const conditionKey = useMemo(
+    () => menuConditionKey(patient, selected, supplements, day, recent),
+    [patient, selected, supplements, day, recent]
+  )
+  useEffect(() => { setDrafts([]); setCursor(0) }, [conditionKey])
   useEffect(() => { track('menu_build') }, [])
 
   const menu = cursor === 0 ? first : (drafts[cursor - 1] ?? first)

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
 import { FOOD_BY_ID } from '../data/foods'
 import { observedWeightLoss } from '../engine/nutrition'
@@ -146,13 +146,25 @@ function pruneShown(shown: Record<string, string[]>): Record<DayKey, string[]> {
   return out as Record<DayKey, string[]>
 }
 
+/** 빈 날에 돌려줄 고정된 빈 목록 — 그릴 때마다 새로 만들지 않는다 */
+const EMPTY_DAY: SelectedItem[] = []
+
 export function useAppState() {
   const [state, setState] = useState<AppState>(load)
   /** 지금 보고 있는 날짜. 기본은 오늘이고, 기록에서 다른 날로 옮겨 갈 수 있다. */
   const [day, setDay] = useState<DayKey>(todayKey())
 
   /** 그날의 식단 */
-  const selected = state.diary[day] ?? []
+  /*
+   * 그날의 식단.
+   *
+   * 예전에는 `state.diary[day] ?? []` 였다. 아직 아무것도 담지 않으신 날에는
+   * 그릴 때마다 새 빈 배열이 만들어져, 이 값을 지켜보는 쪽에서는
+   * '식단이 바뀌었다' 로 읽혔다. 추천 화면은 그 신호에 지금까지 만든 안을 버리므로,
+   * 앱의 다른 무엇이든(체중을 적으셔도) 바뀌면 '다시 구성' 이 처음으로 되돌아갔다.
+   * 빈 날에는 늘 같은 빈 배열을 돌려준다.
+   */
+  const selected = useMemo(() => state.diary[day] ?? EMPTY_DAY, [state.diary, day])
 
   useEffect(() => {
     try {

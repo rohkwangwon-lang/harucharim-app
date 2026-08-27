@@ -54,6 +54,7 @@ export function TodayMeals({
   day,
   onBackToToday,
   diary,
+  shown,
   weights,
   weight,
   onSetWeight,
@@ -81,6 +82,8 @@ export function TodayMeals({
   onBackToToday: () => void
   /** 날짜별 기록 — 최근에 드신 것을 피하는 데 쓴다 */
   diary: Record<string, SelectedItem[]>
+  /** 날짜별로 보여 드린 추천 — 적어 두지 않으셔도 되풀이를 막기 위한 것 */
+  shown?: Record<string, string[]>
   /** 날짜별 체중 — 몇 주에 걸친 방향을 보는 데 쓴다 */
   weights: Record<string, number>
   /** 그날 체중 */
@@ -93,7 +96,17 @@ export function TodayMeals({
 
   const totals = useMemo(() => sumIntake(selected, supps), [selected, supplements])
   const evalResult = useMemo(() => evaluateSelection(selected, patient), [selected, patient])
-  const recent = useMemo(() => recentFoods(diary, day), [diary, day])
+  /*
+   * 여기서도 '보여 드린 것' 을 함께 본다.
+   *
+   * 추천 탭에만 붙여 놓았더니, 이 화면의 '이렇게 채워 보세요' 는 그대로
+   * 적어 두신 기록만 보고 있었다. 적지 않으시는 분께는 잣대가 늘 비어 있어
+   * 같은 것이 날마다 올라온다 — 고친 자리 옆에 고치지 않은 자리가 남은 셈이다.
+   *
+   * 적어 두는 것은 추천 탭 한 곳에서만 한다. 두 화면이 서로 덮어쓰면
+   * 나중에 연 쪽이 이겨서 무엇이 남을지 알 수 없게 된다.
+   */
+  const recent = useMemo(() => recentFoods(diary, day, undefined, shown), [diary, day, shown])
   /*
    * 며칠에 걸친 흐름.
    *

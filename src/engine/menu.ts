@@ -1142,7 +1142,8 @@ export function buildDayMenu(
         /*
          * 밥이 없으면 밥부터 앉힌다 — 자리를 비워서라도.
          *
-         * 위 단계는 남은 여유 안에서만 고르기 때문에, 하루가 이미 찬 끼니에는
+         * 밥은 3-0 에서 먼저 앉힌다. 여기는 그때 자리가 없어 못 앉힌 끼니를 위한 마지막 자리다.
+         * 3-0 도 이 자리도 남은 여유 안에서만 고르기 때문에, 하루가 이미 찬 끼니에는
          * 밥 한 공기(300 kcal 남짓)가 들어갈 자리가 없다. 그러면 국과 고기만 남는데
          * 그것은 상이 아니다 — 한국에서 밥 없는 저녁은 없다.
          * 그래서 가장 가벼운 곁들임 하나를 내리고 그 자리에 밥을 놓는다.
@@ -1262,8 +1263,7 @@ export function buildDayMenu(
             .filter((c) => !sideClash(meals, slot, c.food, drop))
             .filter((c) => c.kcal <= (freed.kcal ?? 0) + Math.max(0, room.kcal) + 60)
             .filter((c) => c.na <= (freed.na ?? 0) + Math.max(150, room.na))
-          const swapPick = freshFirst(swapPool, recent).sort(byScore)[0]
-          const swap = swapPick
+          const swap = freshFirst(swapPool, recent).sort(byScore)[0]
           if (!swap) continue
           here.splice(here.indexOf(drop), 1)
           foodTotals = addTotals(foodTotals, negate(freed))
@@ -1531,7 +1531,7 @@ export function buildDayMenu(
   }
 
   /*
-   * 5-마지막) 상을 한 번 더 본다.
+   * 5-1) 상을 한 번 더 본다.
    *
    * 짜임새는 4-2-2 에서 맞추는데, 그 뒤의 옮겨 담기와 간식 채우기가
    * 상을 도로 흐트러뜨린다. 반찬을 간식으로 옮겨 놓고 밥만 남기는 식이다.
@@ -1562,7 +1562,7 @@ export function buildDayMenu(
     const freed = drop
       ? foodContribution(drop.food, drop.servings)
       : ({ kcal: 0, protein: 0, fiber: 0, na: 0 } as NutrientTotals)
-    const swapPool2 = candidates
+    const lastChance = candidates
       .filter((c) => !used.has(c.food.id))
       .filter((c) => isAnchorDish(c.food))
       /* 신장이 걸리는 분께는 바꿔 넣는 것도 단백질을 늘리지 않아야 한다 */
@@ -1594,7 +1594,7 @@ export function buildDayMenu(
        */
       .filter((c) => (running().kcal ?? 0) - (freed.kcal ?? 0) + c.kcal <= kcalCeiling)
       .filter((c) => (running().na ?? 0) - (freed.na ?? 0) + c.na <= naCeiling)
-    const swap = freshFirst(swapPool2, recent).sort(byScore)[0]
+    const swap = freshFirst(lastChance, recent).sort(byScore)[0]
     if (!swap) continue
 
     if (drop) {
@@ -1616,7 +1616,7 @@ export function buildDayMenu(
   }
 
   /*
-   * 5-3) 반찬을 두 가지쯤으로 맞추고, 후식을 뒤로 물린다.
+   * 5-2) 반찬을 두 가지쯤으로 맞춘다.
    *
    * 한식 한 상은 밥에 반찬 두세 가지, 그리고 경우에 따라 국이다.
    * 앞 단계는 "상이 서는가" 만 보아서, 밥에 나물 하나면 통과였다 —
@@ -1741,7 +1741,7 @@ export function buildDayMenu(
   }
 
   /*
-   * 5-4) 상에 놓는 차례대로 줄을 세운다.
+   * 5-3) 상에 놓는 차례대로 줄을 세운다.
    *
    * 단감과 방울토마토가 나물 사이에 끼어 있었다. 담기는 차례가 곧 드시는 차례로 읽히는데,
    * 후식이 가운데 있으면 상차림이 아니라 목록으로 보인다.
