@@ -307,7 +307,16 @@ for (let person = 0; person < PEOPLE; person++) {
 
     /* ── 추천이 이 환자에게 맞는가 · 그리고 무엇이 나왔는지 센다 ── */
     for (const s of MEAL_SLOTS) for (const e of menu.meals[s]) {
+      /*
+       * 앱이 권한 것만 따진다.
+       *
+       * 처음에는 상에 오른 것을 모두 보았다. 그런데 거기에는 직접 담으신 것도 섞여 있다 —
+       * 장루가 있으신 분이 현미밥을 담으셨다고 해서 앱이 그것을 권한 것은 아니다.
+       * 앱은 담으신 것을 지우지 않고 곁에서 일러 드린다. 그것이 옳다.
+       * 36만 일을 돌려 나온 '주의 항목을 추천' 221건이 모두 이 경우였다.
+       */
       const v = evaluateFood(e.food, patient, e.servings, cached)
+      if (e.origin !== 'added') continue
       if (v.level === 'avoid') bad('피해야 할 것을 추천', `${ctx} ${e.food.name}`)
       /*
        * '주의' 라고 다 같은 '주의' 가 아니다.
@@ -323,7 +332,10 @@ for (let person = 0; person < PEOPLE; person++) {
       for (const t of ['가공육', '초가공식품', '염장'] as const)
         if (e.food.tags.includes(t)) bad('올려서는 안 될 것을 추천', `${ctx} ${e.food.name} — ${t}`)
       const hard = v.hits.filter((x) => x.rule.level === 'caution' && !x.rule.advisory)
-      if (hard.length > 0) bad('주의 항목을 추천', `${ctx} ${e.food.name} — ${hard[0].rule.title}`)
+      if (hard.length > 0) {
+        bad('주의 항목을 추천', `${ctx} ${e.food.name} — ${hard[0].rule.title}`)
+        if (process.env.DBG_CAU) console.log('[주의]', e.origin, '|', e.food.name, '|', hard[0].rule.id, '|', `servings=${e.servings}`)
+      }
       /* 엔진이 쓰는 것과 같은 함수로 본다 — 따로 적어 두면 고칠 때마다 어긋난다 */
       if (isIngredientOnly(e.food)) bad('재료를 메뉴로 추천', `${ctx} ${e.food.name}`)
       if (e.food.tags.some((t) => ['알코올', '가공육', '염장', '훈제', '튀김', '직화구이', '초가공식품'].includes(t as string)))
@@ -405,8 +417,9 @@ for (let person = 0; person < PEOPLE; person++) {
       }
 
       /* 곁들임만 여럿 늘어놓지 않았는가 */
-      const garnish = foods.filter((f) => !myAnchor(f) && !myStaple(f) && !myDessert(f) &&
-        (mealRole(f) === 'side' || mealRole(f) === 'main'))
+      const garnish = entries.filter((e) => e.origin === 'added' &&
+        !myAnchor(e.food) && !myStaple(e.food) && !myDessert(e.food) &&
+        (mealRole(e.food) === 'side' || mealRole(e.food) === 'main')).map((e) => e.food)
       if (garnish.length > 1)
         bad('곁들임이 몰림', `${ctx} ${s}: ${garnish.map((f) => f.name).join('+')}`)
 
@@ -428,11 +441,13 @@ for (let person = 0; person < PEOPLE; person++) {
         bad('후식이 주메뉴 앞에 끼어 있음', `${ctx} ${s}: ${plate.map((f) => f.name).join(' → ')}`)
 
       /* 같은 재료가 한 상에 둘 — '브로콜리(데친 것)' 과 '브로콜리 데침' */
-      const plain = foods.filter((f) => !myStaple(f) && mealRole(f) !== 'supp')
+      /* 둘 다 직접 담으신 것이면 앱의 잘못이 아니다 — 한쪽이라도 앱이 놓은 것일 때만 따진다 */
+      const plain = entries.filter((e) => !myStaple(e.food) && mealRole(e.food) !== 'supp')
       for (let i = 0; i < plain.length; i++)
         for (let j = i + 1; j < plain.length; j++)
-          if (samePlant(plain[i], plain[j]))
-            bad('같은 재료가 한 상에 둘', `${ctx} ${s}: ${plain[i].name} + ${plain[j].name}`)
+          if (samePlant(plain[i].food, plain[j].food) &&
+              (plain[i].origin === 'added' || plain[j].origin === 'added'))
+            bad('같은 재료가 한 상에 둘', `${ctx} ${s}: ${plain[i].food.name} + ${plain[j].food.name}`)
 
       /* 담는 양이 잘못 읽히지 않는가 — '밥 1공기' 의 절반이 '밥 1공기 반' 이면 안 된다 */
       for (const e of entries) {

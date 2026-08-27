@@ -1073,6 +1073,19 @@ export function buildDayMenu(
               (slot === '간식' ||
                 mealIsComplete(meals[slot].map((e) => (e === entry ? c.food : e.food)))) &&
               /*
+               * 담는 양 그대로 다시 판정한다.
+               *
+               * 후보는 1인분 기준으로 걸러 둔다. 그런데 이 자리는 바꿔 넣는 것에
+               * 원래 항목의 인분 수를 그대로 물려준다 — 두 인분이던 자리에는 두 인분이 간다.
+               * 무화과 한 접시는 칼륨이 기준 아래지만 두 접시는 넘는다.
+               * 그래서 신장이 걸리는 분께 '칼륨이 높은 식품은 확인이 필요합니다' 가
+               * 붙은 무화과가 그대로 상에 올랐다.
+               */
+              (entry.servings <= 1 ||
+                !evaluateFood(c.food, patient, entry.servings, cached).hits
+                  .some((h) => h.rule.level === 'avoid' ||
+                    (h.rule.level === 'caution' && !h.rule.advisory))) &&
+              /*
                * 바꿔 넣는 것도 상한을 지킨다.
                * 간식에서 식품군 일치를 풀어 준 탓에, 이미 과일이 있는 간식에
                * 제철 과일을 하나 더 밀어 넣어 포도·수박·참외가 나란히 놓였다.
