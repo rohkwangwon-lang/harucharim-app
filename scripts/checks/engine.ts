@@ -13,6 +13,29 @@ import { SUPPLEMENTS } from '../../src/data/supplements'
 import { CANCERS } from '../../src/data/cancers'
 import { MEDICATIONS } from '../../src/data/interactions'
 import type { CancerId, MealSlot, PatientCondition, PatientContext, SelectedItem, TreatmentHistory, Cuisine } from '../../src/data/types'
+import type { Food } from '../../src/data/types'
+
+/*
+ * 무엇을 상에 올려서는 안 되는가 — 검사 쪽 기준.
+ *
+ * 예전에는 '주의' 등급이면 무조건 걸었다. 그런데 '주의' 에는 두 가지가 섞여 있다.
+ * 하나는 음식 자체가 문제인 것(가공육·초가공식품·아주 짠 것)이고,
+ * 다른 하나는 앱이 알지 못하는 조건에 걸린 안내다
+ * ('HER2 표적치료를 받으셨다면 심장 쪽 위험 요인을 같이 관리하세요').
+ * 뒤엣것까지 막았더니 유방암 환자분께 시금치나물·무생채가 한 번도 안 나왔다.
+ *
+ * 그래서 등급이나 엔진의 표시(advisory)를 그대로 믿지 않고, 여기서 직접 따진다 —
+ * 이 세 가지는 어떤 사정이 있어도 추천에 올라오면 안 된다.
+ */
+const NEVER_RECOMMEND_NA = 800
+function mustNotServe(f: Food, servings: number): string | null {
+  const na = (f.per100.na ?? 0) * f.serving.g * servings / 100
+  if (na > NEVER_RECOMMEND_NA) return `1회 나트륨 ${Math.round(na)}mg`
+  if (f.tags.includes('가공육')) return '가공육'
+  if (f.tags.includes('초가공식품')) return '초가공식품'
+  if (f.tags.includes('염장')) return '염장'
+  return null
+}
 
 // 재현 가능한 난수
 let seed = 20260821
@@ -110,7 +133,11 @@ for (let iter = 0; iter < N; iter++) {
     if (e.origin !== 'added') continue
     const v = evaluateFood(e.food, patient, e.servings, cached)
     if (v.level === 'avoid') report('피해야 할 것을 추천함', `${ctx} ${e.food.name}`)
-    if (v.level === 'caution') report('주의 항목을 추천함', `${ctx} ${e.food.name}`)
+    const no = mustNotServe(e.food, e.servings)
+    if (no) report('올려서는 안 될 것을 추천함', `${ctx} ${e.food.name} — ${no}`)
+    /* 안내가 아닌 '주의' 는 여전히 막는다 */
+    const hard = v.hits.filter((h) => h.rule.level === 'caution' && !h.rule.advisory)
+    if (hard.length > 0) report('주의 항목을 추천함', `${ctx} ${e.food.name} — ${hard[0].rule.title}`)
     /*
      * 식재료를 끼니로 내놓으면 안 된다 — "대두(삶은 것)" 을 저녁으로 낼 수는 없다.
      * 다만 과일과 영양보충 음료는 재료로 분류돼 있어도 그대로 먹는 것이라 예외다.

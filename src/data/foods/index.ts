@@ -1,4 +1,4 @@
-import type { Food, FoodGroup } from '../types'
+import type { Food, FoodGroup, FoodTag } from '../types'
 import { grains } from './grains'
 import { legumes } from './legumes'
 import { nuts } from './nuts'
@@ -30,6 +30,32 @@ import { CUISINE_MAP, SEASON_MAP } from './seasonCuisine'
 import { GENERATED_CORE } from './generated'
 
 /** 손으로 검토해 태그를 붙인 식품. 검색에서 먼저 보여 준다. */
+/**
+ * '고나트륨' 을 실제로 드시는 양으로 다시 매긴다.
+ *
+ * 이 태그는 손으로 붙여 왔고, 기준이 100 g 농도였다. 그래서 한 접시가 70 g 인
+ * 시금치나물(1회 210 mg)과 한 봉지가 5 g 인 김자반(1회 110 mg)도 '고나트륨' 이 되었다.
+ * 태그가 붙은 190종 가운데 37종이 1회 제공량 400 mg 아래였다.
+ *
+ * 이것이 조용히 큰 일을 하고 있었다. 유방암 규칙 하나가 '고나트륨' 태그 전체에
+ * '주의' 를 걸어 두었는데, 엔진은 '주의' 를 추천 후보에서 통째로 뺀다.
+ * 그래서 유방암 환자분께 시금치나물·가지나물·무생채·배추김치·콩자반이
+ * 한 번도 추천되지 않았다 — 국이 아닌 반찬 128종 중 79종이 그렇게 사라졌다.
+ *
+ * 나트륨은 농도가 아니라 드신 총량이 문제다. 실제로 드시는 한 번의 양으로 본다.
+ */
+const HIGH_SODIUM_PER_SERVING = 400
+function withSodiumTag(f: Food): FoodTag[] {
+  const na = f.per100.na
+  /* 나트륨 값이 없는 것은 손으로 붙인 판단을 그대로 둔다 */
+  if (na === undefined) return f.tags
+  const perServing = (na * f.serving.g) / 100
+  const high = perServing >= HIGH_SODIUM_PER_SERVING
+  const has = f.tags.includes('고나트륨')
+  if (high === has) return f.tags
+  return high ? [...f.tags, '고나트륨'] : f.tags.filter((t) => t !== '고나트륨')
+}
+
 export const CURATED_FOODS: Food[] = [
   ...grains, ...legumes, ...nuts, ...vegetables, ...seaweedMushroom, ...fruits,
   ...meat, ...poultryEgg, ...seafood, ...dairy, ...fatsSugar,
@@ -40,6 +66,7 @@ export const CURATED_FOODS: Food[] = [
 ].map((f) => ({
   // 제철·요리 계통은 seasonCuisine.ts 한 곳에서 관리하고 여기서 붙인다
   ...f,
+  tags: withSodiumTag(f),
   season: f.season ?? SEASON_MAP[f.id],
   cuisine: f.cuisine ?? CUISINE_MAP[f.id] ?? '한식'
 }))

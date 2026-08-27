@@ -97,6 +97,15 @@ export const breast: CancerProfile = {
        */
       id: 'breast-her2-cardiac',
       level: 'caution',
+      /*
+       * 안내이지 금지가 아니다.
+       *
+       * 이 규칙의 match 에는 '고나트륨' 태그와 '1회 800 mg 초과' 가 함께 적혀 있는데,
+       * 엔진은 둘을 OR 로 본다. 그래서 태그만 붙어도 걸리고,
+       * 태그가 붙은 음식이 통째로 추천에서 빠졌다.
+       * 여기서 하려는 말은 '나트륨을 살피시라' 이지 '나물을 드시지 마시라' 가 아니다.
+       */
+      advisory: true,
       match: {
         tags: ['고나트륨'],
         nutrient: { key: 'na', op: '>', value: 800, basis: 'serving' }

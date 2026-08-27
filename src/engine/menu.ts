@@ -2409,7 +2409,23 @@ function collectCandidates(
     if (isIngredientOnly(f)) continue
 
     const v = evaluateFood(f, patient, 1, cached)
-    if (v.level === 'avoid' || v.level === 'caution') continue
+    /*
+     * '주의' 라고 다 같은 '주의' 가 아니다.
+     *
+     * 예전에는 등급만 보고 통째로 뺐다. 그래서 'HER2 표적치료를 받으셨다면
+     * 심장 쪽 위험 요인을 같이 관리하세요' 라는 안내 하나에 걸려,
+     * 유방암 환자분께 시금치나물·가지나물·무생채·배추김치가 한 번도 추천되지 않았다.
+     * 국이 아닌 반찬 128종 중 79종이 그렇게 사라졌고, 남은 것으로만 돌다 보니
+     * 같은 반찬이 사나흘마다 올라왔다.
+     *
+     * 음식 자체가 문제인 규칙(가공육·초가공식품·1회 800 mg 넘는 나트륨)은 그대로 뺀다.
+     * 앱이 알지 못하는 조건에 걸린 안내(advisory)는 말씀만 드리고 상에는 올린다 —
+     * 다만 아래에서 감점을 준다.
+     */
+    if (v.level === 'avoid') continue
+    const blocking = v.hits.filter((h) => h.rule.level === 'caution' && !h.rule.advisory)
+    if (blocking.length > 0) continue
+    const advisories = v.hits.filter((h) => h.rule.level === 'caution' && h.rule.advisory)
 
     const prefers = v.hits.filter((h) => h.rule.level === 'prefer')
 
@@ -2424,6 +2440,13 @@ function collectCandidates(
     for (const h of prefers) bonus += h.source === '공통' ? 6 : 14
     let penalty = 0
     for (const t of f.tags) penalty += PENALTY[t] ?? 0
+    /*
+     * 안내에 걸린 것은 뒤로 미룬다.
+     *
+     * 빼지는 않되 앞자리를 주지도 않는다. 점수 차이가 12점 안쪽이면 '엇비슷하다' 로
+     * 보고 돌려 쓰므로, 그보다 크게 잡아야 실제로 뒤로 간다.
+     */
+    penalty += advisories.length * 16
 
     /*
      * 죽은 아플 때 먹는 것이다.
