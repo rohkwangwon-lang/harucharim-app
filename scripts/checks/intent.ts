@@ -17,7 +17,7 @@
 import { buildDayMenu, fiberGoal, ideasFromIngredients } from '../../src/engine/menu'
 import { adviseSupplements } from '../../src/engine/supplementAdvice'
 import { evaluateFood, activeRules, activeInteractions } from '../../src/engine/rules'
-import { microTargets, personalTarget, foodContribution, sumIntake } from '../../src/engine/nutrition'
+import { microTargets, personalTarget, foodContribution, sumIntake, restingEnergy } from '../../src/engine/nutrition'
 import { reportNutrients } from '../../src/engine/dayScore'
 import { ingredientKeywords } from '../../src/engine/ingredientVerdict'
 import { CURATED_FOODS, isIngredientOnly, mealRole, mealIsComplete } from '../../src/data/foods'
@@ -269,7 +269,16 @@ for (let i = 0; i < N; i++) {
   const bmi = h > 0 ? p.weightKg / (h * h) : 22
   if (p.phase === 'survivorship' && (p.weightLossPct ?? 0) === 0 && bmi >= 20) {
     cSettle.n++
-    if (target.kcal[0] < plain.kcal[0]) cSettle.hit++
+    /*
+     * 낮추되, 휴식대사량 난간 아래로는 못 내려간다.
+     *
+     * 처음에는 '낮아졌는가' 만 보았다. 그런데 목표에 난간이 생기면서,
+     * 이미 난간에 닿아 있는 분은 더 낮출 자리가 없어 그대로 남는다 —
+     * 그것은 하기로 한 일을 안 한 것이 아니라, 안전선을 지킨 것이다.
+     * 낮아졌거나, 난간에 걸려 더 못 낮춘 경우를 함께 센다.
+     */
+    const rail = Math.round(restingEnergy(p) * 1.05)
+    if (target.kcal[0] < plain.kcal[0] || target.kcal[0] === rail) cSettle.hit++
   }
   if (p.conditions.includes('신기능저하')) {
     cMicro.n++

@@ -59,7 +59,21 @@ for (let i = 0; i < 3000; i++) {
   const h = patient.heightCm / 100
   const bmi = patient.weightKg / (h * h)
   if (dw > patient.weightKg) bad('보정체중이 실제 체중보다 큼', `${ctx} ${dw}`)
-  if (bmi < 30 && dw !== patient.weightKg) bad('비만이 아닌데 보정체중을 씀', `${ctx} BMI ${bmi.toFixed(1)}`)
+  /*
+   * 보정은 BMI 28 부터 32 사이에 걸쳐 천천히 걸린다.
+   *
+   * 예전에는 BMI 30 에서 곧바로 갈아탔는데, 그러면 200 g 늘었다고 하루 500 kcal 을
+   * 덜 드시라는 말이 되었다. 이제는 걸쳐서 걸리므로 '28 아래에서는 손대지 않는다' 만 본다.
+   */
+  if (bmi < 28 && dw !== patient.weightKg) bad('보정할 체격이 아닌데 보정체중을 씀', `${ctx} BMI ${bmi.toFixed(1)}`)
+  /*
+   * 깎을 때는 표준체중 아래로 내려가지 않는다.
+   *
+   * 마르신 분은 실제 체중이 표준체중보다 낮은 것이 당연하므로 보정이 걸리는 쪽만 본다 —
+   * 처음에는 그 구분 없이 걸어 두었다가 저체중인 분 600명을 문제로 잡았다.
+   */
+  if (bmi > 28 && dw < 22 * h * h - 0.5)
+    bad('보정체중이 표준체중보다 낮음', `${ctx} ${dw} < ${(22 * h * h).toFixed(1)}`)
   if (bmi >= 30 && dw >= patient.weightKg) bad('비만인데 보정하지 않음', `${ctx} BMI ${bmi.toFixed(1)}`)
 
   /* ── 조정했으면 반드시 밝혀야 한다 ── */

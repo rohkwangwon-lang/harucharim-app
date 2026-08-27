@@ -245,9 +245,37 @@ export function dosingWeight(patient: PatientContext): number {
   const h = patient.heightCm / 100
   if (!(h > 0)) return patient.weightKg
   const bmi = patient.weightKg / (h * h)
-  if (bmi < 30) return patient.weightKg
+  if (bmi <= ADJ_FROM) return patient.weightKg
+
   const ideal = 22 * h * h          // 한국인 표준체중 기준
-  return Math.round(ideal + (patient.weightKg - ideal) * 0.25)
+  const adjusted = ideal + (patient.weightKg - ideal) * 0.25
+  /*
+   * 경계에서 툭 떨어지지 않게 한다.
+   *
+   * 예전에는 BMI 30 에서 곧바로 보정체중으로 갈아탔다. 그래서 170 cm 인 분이
+   * 86.5 kg 일 때 2,163~2,595 kcal 이던 목표가 86.7 kg 이 되자 1,725~2,070 으로 떨어졌다 —
+   * 200 g 늘었는데 하루 500 kcal 을 덜 드시라는 말이 된다.
+   * 체중은 날마다 오르내리는데 목표가 그때마다 뛰면 믿고 따르실 수가 없다.
+   * BMI 28 에서 32 사이에 걸쳐 천천히 옮겨 간다.
+   */
+  const t = Math.min(1, (bmi - ADJ_FROM) / (ADJ_TO - ADJ_FROM))
+  return Math.round(patient.weightKg * (1 - t) + adjusted * t)
+}
+
+/** 보정체중으로 옮겨 가기 시작하는 BMI 와 다 옮겨 가는 BMI */
+const ADJ_FROM = 28
+const ADJ_TO = 32
+
+/**
+ * 휴식대사량 (Mifflin-St Jeor).
+ *
+ * 목표가 이 아래로 내려가지 않게 막는 바닥으로 쓴다.
+ * 보정체중을 쓰면 비만인 분의 목표 하한이 휴식대사량과 같아지거나 그보다 낮아지는데,
+ * 그것은 치료 중에 살을 빼시라는 말과 같다. 치료 중 감량은 권장되지 않는다.
+ */
+export function restingEnergy(patient: PatientContext): number {
+  const { weightKg: w, heightCm: hc, age, sex } = patient
+  return 10 * w + 6.25 * hc - 5 * age + (sex === 'M' ? 5 : -161)
 }
 
 /** 환자 상태에 따른 개인별 열량·단백질 목표 (ESPEN 기반, 암종 프로필의 target 을 받아 계산) */
@@ -271,8 +299,18 @@ export function personalTarget(
    */
   const h = patient.heightCm / 100
   const bmi = h > 0 ? patient.weightKg / (h * h) : 22
-  const gaining = patient.conditions.includes('체중증가') && bmi >= 23
   const losing = effectiveLossPct(patient) >= 5
+  const underweight = bmi < 18.5
+
+  /*
+   * 조정은 경계에서 툭 떨어지지 않게 걸쳐서 건다.
+   *
+   * 예전에는 BMI 20 에서 곧바로 생존기 하향(×0.85)이 걸렸다. 그래서 158 cm 인 분이
+   * 49 kg 일 때 1,225~1,470 이던 목표가 50 kg 이 되자 1,063~1,275 로 떨어졌다.
+   * 1 kg 늘었다고 하루 180 kcal 을 덜 드시라는 말이 된다.
+   */
+  const ramp = (v: number, from: number, to: number) =>
+    Math.max(0, Math.min(1, (v - from) / (to - from)))
 
   /*
    * 치료를 마치신 분은 유지 수준으로 본다.
@@ -284,12 +322,51 @@ export function personalTarget(
    *
    * 체중이 줄고 있거나 저체중이면 이 조정을 하지 않는다 — 그때는 채우는 것이 먼저다.
    */
-  const settled = patient.phase === 'survivorship' && !losing && bmi >= 20
-  const scale = losing ? 1 : gaining ? 0.87 : settled ? 0.85 : 1
+  /* 체중이 늘고 있는 분(BMI 22~24 에 걸쳐) · 치료를 마치고 자리 잡으신 분(BMI 19~21 에 걸쳐) */
+  const gainCut = patient.conditions.includes('체중증가') ? 0.13 * ramp(bmi, 22, 24) : 0
+  const settleCut = patient.phase === 'survivorship' && !losing ? 0.15 * ramp(bmi, 19, 21) : 0
+  const scale = losing ? 1 : 1 - Math.max(gainCut, settleCut)
+
+  /*
+   * 30~35 kcal/kg 은 실제로 마르고 계신 분께만 쓴다.
+   *
+   * 상부위장관·두경부·췌장·폐·간에는 30~35 를 걸어 두었다. ESPEN 의 25~30 을 넘는 값인데,
+   * 그 근거는 '악액질 위험이 크다' 는 것이었다. 그런데 위험군이라는 것과
+   * 지금 마르고 계시다는 것은 다른 말이다 — 체중이 잘 지켜지는 분께 그대로 곱하면
+   * 휴식대사량의 1.85 배가 되어, 활동적인 사람의 하루치를 드시라고 하게 된다.
+   * 체중이 줄고 있거나 저체중일 때만 높은 쪽을 쓴다.
+   */
+  const kk: [number, number] =
+    kcalPerKg[1] > 30 && !losing && !underweight ? [25, 30] : kcalPerKg
+
+  /*
+   * 수술 후에는 단백질 하한을 올린다.
+   *
+   * 여태 치료 단계가 단백질을 전혀 바꾸지 않았다 — 방사선치료 중이든 수술 직후든 같았다.
+   * ESPEN 수술 지침은 1.5 g/kg(영양불량 시 2.0)을 권한다. 여기서는 한 단계만 올려
+   * 하한을 1.2 로 둔다. 상한은 그대로여서 신장·간 제한이 걸리는 분께는 그쪽이 먼저 잡는다.
+   */
+  const pk: [number, number] =
+    patient.phase === 'post_op' ? [Math.max(proteinPerKg[0], 1.2), proteinPerKg[1]] : proteinPerKg
+
+  const lo = Math.round(w * kk[0] * scale)
+  const hi = Math.round(w * kk[1] * scale)
+
+  /*
+   * 휴식대사량 아래로는 내려가지 않는다.
+   *
+   * 바닥이 없으면 다섯 분 중 한 분(21.5 %)의 목표 하한이 휴식대사량보다 낮아진다.
+   * 그것은 치료 중에 살을 빼시라는 말과 같은데, 치료 중 감량은 권장되지 않는다.
+   *
+   * 배수는 1.05 로 둔다. 이 바닥은 난간이지 목표가 아니다 —
+   * 1.1 로 잡았더니 열 분 중 넷의 목표를 이 값이 정해 버려,
+   * 암종별로 다르게 잡아 둔 kcal/kg 이 묻혔다.
+   */
+  const floor = Math.round(restingEnergy(patient) * 1.05)
 
   return {
-    kcal: [Math.round(w * kcalPerKg[0] * scale), Math.round(w * kcalPerKg[1] * scale)],
-    protein: [Math.round(w * proteinPerKg[0]), Math.round(w * proteinPerKg[1])],
+    kcal: [Math.max(lo, floor), Math.max(hi, floor + 200)],
+    protein: [Math.round(w * pk[0]), Math.round(w * pk[1])],
     fluid: Math.round(w * 30)
   }
 }
@@ -519,6 +596,27 @@ export function microTargets(patient: PatientContext): MicroTarget[] {
     meds.includes('ai') || meds.includes('adt') ||
     subs.includes('안드로겐차단요법중') ||
     (patient.cancer === 'breast' && subs.includes('호르몬수용체양성'))
+  /*
+   * 칼슘 — 모든 분께.
+   *
+   * 여태 항호르몬 치료나 안드로겐 차단요법을 받는 분께만 보았다. 그런데 실제로 만들어지는
+   * 식단의 하위 10 % 가 하루 383 mg 이었다 — 권장섭취량(700~800 mg)의 절반이다.
+   * 그런 날이 조용히 지나가고 있었다.
+   *
+   * 칼슘은 성분 자료가 93 % 채워져 있어 합계를 믿을 만하다. 골 소실이 걸리는 분께는
+   * 아래에서 1,000 mg 으로 올려 잡으므로, 여기서는 일반 권장선만 깔아 둔다.
+   */
+  if (!boneLoss) {
+    out.push({
+      key: 'ca', label: '칼슘', unit: 'mg', min: 700,
+      why: '한국인 영양소섭취기준의 권장섭취량은 하루 700~800 mg 입니다. ' +
+        '치료 중에는 유제품을 멀리하게 되는 일이 잦아 모르는 사이에 모자라기 쉽습니다. ' +
+        '우유·요구르트·두부·뼈째 먹는 생선·진한 녹색 채소로 채우시는 쪽이 먼저입니다.',
+      evidence: 'G',
+      refIds: ['kdri2020']
+    })
+  }
+
   if (boneLoss) {
     /*
      * 전립선암에서는 위아래가 다 있다.

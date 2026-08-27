@@ -256,9 +256,24 @@ for (const id of orphan) bad('아무 데서도 인용하지 않는 문헌', `${i
  *  3) 세겠다고 한 영양소를 음식이 실제로 갖고 있는가 — 값이 없으면 세는 시늉만 하게 된다
  */
 {
+  /*
+   * 칼슘은 조건과 무관하게 모든 분께 뜬다.
+   *
+   * 처음에는 항호르몬 치료나 안드로겐 차단요법을 받는 분께만 보았는데,
+   * 실제로 만들어지는 식단의 하위 10 % 가 하루 383 mg 이었다 —
+   * 권장섭취량의 절반이 조용히 지나가고 있었다.
+   * 칼슘은 성분 자료가 93 % 채워져 있어 합계를 믿을 만하므로 상시 항목으로 두었다.
+   * 나머지(칼륨·인·철)는 여전히 해당하는 분께만 떠야 한다.
+   */
+  const ALWAYS_ON = ['칼슘']
   const plain = { ...DEFAULT_PATIENT, conditions: [], medications: [] } as PatientContext
-  if (microTargets(plain).length > 0)
-    bad('해당 없는 분께 미량영양소 기준이 뜸', microTargets(plain).map((m) => m.label).join('·'))
+  const extra = microTargets(plain).filter((m) => !ALWAYS_ON.includes(m.label))
+  if (extra.length > 0)
+    bad('해당 없는 분께 미량영양소 기준이 뜸', extra.map((m) => m.label).join('·'))
+  /* 상시 항목은 반대로, 조건이 없어도 반드시 떠야 한다 */
+  for (const label of ALWAYS_ON)
+    if (!microTargets(plain).some((m) => m.label === label))
+      bad('모든 분께 떠야 할 기준이 빠짐', label)
 
   const setups: [string, Partial<PatientContext>][] = [
     ['신기능저하', { conditions: ['신기능저하'] }],
