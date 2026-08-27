@@ -23,15 +23,88 @@ import { CANCERS } from '../../src/data/cancers'
 import { SUPPLEMENTS } from '../../src/data/supplements'
 import { MEDICATIONS } from '../../src/data/interactions'
 import { DEFAULT_PATIENT } from '../../src/lib/store'
-import { MEAL_SLOTS } from '../../src/data/types'
-import type { MealSlot, PatientCondition, PatientContext, SelectedItem } from '../../src/data/types'
+import { MEAL_SLOTS, SUBTYPE_OPTIONS } from '../../src/data/types'
+import { portionLabel } from '../../src/lib/portion'
+import type { Food, MealSlot, PatientCondition, PatientContext, SelectedItem } from '../../src/data/types'
 
 const PEOPLE = Number(process.env.PEOPLE ?? 2000)
 const DAYS = Number(process.env.DAYS ?? 90)
 
+/*
+ * 난수.
+ *
+ * 예전에는 선형합동(LCG)을 썼다. 그 방식은 자리별로 주기가 짧아,
+ * 확률이 낮은 갈래가 뜻대로 나오지 않는다 — 옮기기 검사에서 5% 로 잡은 갈래가
+ * 실제로는 0.2% 만 일어난 적이 있다. 드문 조합을 찾자는 검사에서 그것은 치명적이다.
+ * mulberry32 는 32비트 전체를 고르게 섞는다.
+ */
 let seed = 19700101
-const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff }
+const rnd = () => {
+  seed |= 0; seed = (seed + 0x6d2b79f5) | 0
+  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed)
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+}
 const pick = <T,>(a: readonly T[]): T => a[Math.floor(rnd() * a.length) % a.length]
+const times = <T,>(n: number, f: () => T): T[] => Array.from({ length: n }, f)
+const uniq = <T,>(a: T[]): T[] => [...new Set(a)]
+
+
+/*
+ * 상차림을 재는 잣대 — 검사 쪽에서 따로 적는다.
+ *
+ * 엔진의 판정 함수(mealIsComplete·isAnchorDish)를 그대로 부르면,
+ * 그 판정을 푸는 순간 검사도 함께 풀려 아무것도 못 잡는다.
+ * 같은 실수를 두 번 했으므로 여기서는 처음부터 따로 적는다.
+ */
+const COOKED = /찌개|국$|탕$|전골|나물|무침|볶음|조림|찜|구이|전$|튀김|김치|장아찌|쌈|절임|자반|강정|산적|불고기|수육|편육|숙회|회$|샐러드/
+const PLAIN = /\((삶은 것|찐 것|생것|데친 것|구운 것|불린 것)\)$/
+const DISH_GROUPS = ['국·탕·찌개', '반찬·조림·볶음', '육류', '가금류·난류', '어패류', '외식·프랜차이즈']
+const BREAD = /^(식빵|통밀식빵|바게트|모닝빵|베이글|사워도우|토르티야\(밀\)|크루아상)$/
+const DRINK = /두유|우유|요구르트|요거트|주스|스무디|차\(우린/
+
+/** 밥 노릇을 하는가 */
+function myStaple(f: Food): boolean {
+  if (BREAD.test(f.name)) return true
+  return (f.group === '곡류·전분' || f.group === '밥·면·죽 요리') && /밥$|밥\(|공기밥/.test(f.name)
+}
+/** 상을 세우는 반찬인가 */
+function myAnchor(f: Food): boolean {
+  const r = mealRole(f)
+  if (r === 'soup') return true
+  if (r === 'dessert' || r === 'supp' || r === 'onedish' || myStaple(f)) return false
+  if (COOKED.test(f.name)) return true
+  if (DISH_GROUPS.includes(f.group)) return true
+  if (f.group === '두류·대두가공') return !PLAIN.test(f.name)
+  return false
+}
+/** 후식인가 — 밥 노릇을 하는 빵은 뺀다 */
+function myDessert(f: Food): boolean {
+  if (myStaple(f)) return false
+  if (DRINK.test(f.name)) return true
+  return ['과일', '간식·디저트', '우유·유제품', '음료', '견과·종실'].includes(f.group)
+}
+/**
+ * 같은 재료를 두 번 놓았는가 — 검사 쪽 잣대.
+ *
+ * 엔진은 이름에서 조리법 꼬리말을 벗겨 견준다. 여기서 같은 방식을 쓰면
+ * 그 벗기기가 잘못되었을 때 검사도 똑같이 잘못 본다 —
+ * 실제로 '콩나물' 이 '콩' 으로 줄어드는 바람에 엔진의 겹침 검사가 통째로 빠져나갔는데,
+ * 검사가 같은 식이었다면 그것을 놓쳤을 것이다.
+ *
+ * 그래서 아주 다른 방식으로 본다 — 괄호를 걷고 나서
+ * 한쪽 이름이 다른 쪽 이름으로 시작하면 같은 재료로 친다.
+ * '콩나물' 과 '콩나물무침', '두부' 와 '두부부침', '브로콜리' 와 '브로콜리 데침'.
+ * 놓치는 짝이 있어도 좋다 — 틀리게 잡지만 않으면 된다.
+ */
+function bareName(f: Food): string {
+  return f.name.replace(/\(.*?\)/g, '').replace(/\s+/g, '').trim()
+}
+function samePlant(a: Food, b: Food): boolean {
+  const x = bareName(a), y = bareName(b)
+  if (x.length < 2 || y.length < 2 || x === y) return x === y
+  return x.startsWith(y) || y.startsWith(x)
+}
 
 const bugs: string[] = []
 const seenB = new Set<string>()
@@ -77,27 +150,67 @@ for (let person = 0; person < PEOPLE; person++) {
     process.stdout.write(`\r  ${person}/${PEOPLE}명 · ${totalDays.toLocaleString()}일 · ${Math.round((realNow() - now0) / 1000)}초   `)
 
   const h = 142 + Math.floor(rnd() * 52)
+  const cancerId = pick(CANCERS).id
   const patient: PatientContext = {
     ...DEFAULT_PATIENT, onboarded: true,
-    cancer: pick(CANCERS).id,
+    cancer: cancerId,
     phase: pick(PHASES) as PatientContext['phase'],
     weightKg: 34 + Math.floor(rnd() * 96),
     heightCm: h,
     age: 19 + Math.floor(rnd() * 76),
     sex: rnd() < 0.5 ? 'M' : 'F',
     weightLossPct: [0, 0, 0, 3, 7, 12, 18][Math.floor(rnd() * 7)],
-    conditions: rnd() < 0.55 ? [pick(CONDS)] : rnd() < 0.4 ? [pick(CONDS), pick(CONDS)] : [],
-    medications: rnd() < 0.35 ? [pick(MEDICATIONS).id] : [],
-    cuisines: rnd() < 0.28 ? ['한식', pick(CUISINES)] : ['한식']
+    conditions: uniq(times(rnd() < 0.45 ? 1 : rnd() < 0.6 ? 2 : rnd() < 0.85 ? 0 : 3, () => pick(CONDS))),
+    medications: uniq(times(rnd() < 0.3 ? 1 : rnd() < 0.5 ? 2 : 0, () => pick(MEDICATIONS).id)),
+    /*
+     * 식성.
+     *
+     * 예전에는 늘 한식이 들어 있었다. 그런데 한식을 빼고 고르실 수도 있고,
+     * 여럿 고르실 수도 있다 — 그때 후보가 얼마나 남는지는 돌려 봐야 안다.
+     */
+    cuisines: (() => {
+      const r = rnd()
+      if (r < 0.55) return ['한식'] as PatientContext['cuisines']
+      if (r < 0.8) return ['한식', pick(CUISINES)] as PatientContext['cuisines']
+      if (r < 0.93) return uniq(['한식', pick(CUISINES), pick(CUISINES)]) as PatientContext['cuisines']
+      return [pick(CUISINES)] as PatientContext['cuisines']
+    })(),
+    /*
+     * 세부 변수.
+     *
+     * 여태 한 번도 넣지 않았다. 그래서 HER2 양성이신 분도, 위를 모두 떼신 분도,
+     * 간경변이 함께 있는 분도 이 검사에서는 존재하지 않았다 —
+     * 그분들에게만 걸리는 규칙이 스무 가지 넘게 있는데도 그랬다.
+     */
+    subtypes: (() => {
+      const opts = SUBTYPE_OPTIONS[cancerId] ?? []
+      if (opts.length === 0 || rnd() < 0.35) return []
+      return uniq(times(rnd() < 0.75 ? 1 : 2, () => pick(opts).id))
+    })()
   }
-  const supps = rnd() < 0.35 ? [pick(SUPPLEMENTS)] : []
+  /* 영양제도 여러 가지를 함께 드실 수 있다 */
+  const supps = times(rnd() < 0.3 ? 1 : rnd() < 0.5 ? 2 : rnd() < 0.58 ? 3 : 0, () => pick(SUPPLEMENTS))
+    .filter((x, i, a) => a.findIndex((y) => y.id === x.id) === i)
   const diary: Record<string, SelectedItem[]> = {}
+  /*
+   * 보여 드린 상 — 적어 두지 않으시는 분의 회전은 이것으로만 걸린다.
+   *
+   * 여태 이 검사는 날마다 기록을 채워 넣으며 돌았다. 그래서 '한 번도 적지 않으시는 분'
+   * 이라는, 실제로는 가장 흔한 경우가 표본에 아예 없었다.
+   * 그 구멍 때문에 스무하루 내내 닭백숙이 올라가는 것을 못 보고 지나쳤다.
+   */
+  const shown: Record<string, string[]> = {}
+  /** 열에 넷은 거의 적지 않으신다 */
+  const logs = rnd() < 0.6
   const start = new RealDate(2026, Math.floor(rnd() * 12), 1 + Math.floor(rnd() * 25))
 
   for (let i = 0; i < DAYS; i++) {
     const d = new RealDate(start); d.setDate(d.getDate() + i)
     useDate(d)
     const key = fmt(d)
+
+    const prevKey = fmt(new RealDate(d.getTime() - 86400000))
+    const preFill = rnd() < Number(process.env.PREFILL ?? 0.25)
 
     // 지내는 동안 상태가 바뀐다
     if (rnd() < 0.03) patient.phase = pick(PHASES) as PatientContext['phase']
@@ -106,7 +219,19 @@ for (let person = 0; person < PEOPLE; person++) {
 
     let menu: ReturnType<typeof buildDayMenu>
     try {
-      menu = buildDayMenu([], patient, { supplements: supps, day: key, recent: recentFoods(diary, key) })
+      /*
+       * 이미 담아 두신 것이 있는 날도 있다.
+       *
+       * 여태 늘 빈 손([])으로 불렀다. 그런데 실제로는 두어 가지 담아 두고
+       * 나머지를 추천받으시는 일이 흔하다 — 그 길은 한 번도 밟히지 않았다.
+       */
+      const already: SelectedItem[] = preFill
+        ? (diary[prevKey] ?? []).slice(0, 1 + Math.floor(rnd() * 3)).map((x) => ({ ...x }))
+        : []
+      menu = buildDayMenu(already, patient, {
+        supplements: supps, day: key,
+        recent: recentFoods(logs ? diary : {}, key, undefined, shown)
+      })
     } catch (e) { bad('식단 구성 중 예외', `${patient.cancer}/${patient.phase} :: ${(e as Error)?.message}`); continue }
     totalDays++
 
@@ -183,8 +308,22 @@ for (let person = 0; person < PEOPLE; person++) {
     /* ── 추천이 이 환자에게 맞는가 · 그리고 무엇이 나왔는지 센다 ── */
     for (const s of MEAL_SLOTS) for (const e of menu.meals[s]) {
       const v = evaluateFood(e.food, patient, e.servings, cached)
-      if (v.level === 'avoid' || v.level === 'caution')
-        bad('피해야 할 것을 추천', `${ctx} ${e.food.name} ${v.level}`)
+      if (v.level === 'avoid') bad('피해야 할 것을 추천', `${ctx} ${e.food.name}`)
+      /*
+       * '주의' 라고 다 같은 '주의' 가 아니다.
+       *
+       * 이 자리는 지난번 정책을 바꿀 때 빠졌다 — engine·journey 검사는 고쳤는데
+       * 여기만 옛 기준을 붙들고 있었다. 고친 자리 옆에 안 고친 자리가 남는 일이
+       * 이번에만 세 번째다(내 식단 탭, 단계 번호, 그리고 여기).
+       *
+       * 등급이나 엔진의 표시를 그대로 믿지 않고, 임상 기준을 여기에 직접 적는다.
+       */
+      const naServe = (e.food.per100.na ?? 0) * e.food.serving.g * e.servings / 100
+      if (naServe > 800) bad('아주 짠 것을 추천', `${ctx} ${e.food.name} ${Math.round(naServe)}mg`)
+      for (const t of ['가공육', '초가공식품', '염장'] as const)
+        if (e.food.tags.includes(t)) bad('올려서는 안 될 것을 추천', `${ctx} ${e.food.name} — ${t}`)
+      const hard = v.hits.filter((x) => x.rule.level === 'caution' && !x.rule.advisory)
+      if (hard.length > 0) bad('주의 항목을 추천', `${ctx} ${e.food.name} — ${hard[0].rule.title}`)
       /* 엔진이 쓰는 것과 같은 함수로 본다 — 따로 적어 두면 고칠 때마다 어긋난다 */
       if (isIngredientOnly(e.food)) bad('재료를 메뉴로 추천', `${ctx} ${e.food.name}`)
       if (e.food.tags.some((t) => ['알코올', '가공육', '염장', '훈제', '튀김', '직화구이', '초가공식품'].includes(t as string)))
@@ -221,8 +360,11 @@ for (let person = 0; person < PEOPLE; person++) {
      */
     const eaten = MEAL_SLOTS.flatMap((s) => menu.meals[s].map((e) => ({ foodId: e.food.id, servings: e.servings, meal: s })))
     const mood = rnd()
+    shown[key] = MEAL_SLOTS.flatMap((sl) => menu.meals[sl].map((e) => e.food.id))
+
     diary[key] =
-      mood < 0.35 ? eaten                                             // 그대로 드신 날
+      !logs ? []                                                      // 적지 않으시는 분
+      : mood < 0.35 ? eaten                                             // 그대로 드신 날
       : mood < 0.7 ? eaten.filter(() => rnd() > 0.35)                 // 몇 가지 남기신 날
       : mood < 0.9 ? eaten.filter((x) => x.meal !== pick(MEAL_SLOTS)) // 한 끼 거르신 날
       : eaten.map((x) => ({ ...x, servings: x.servings * 0.5 }))      // 반만 드신 날
@@ -235,16 +377,68 @@ for (let person = 0; person < PEOPLE; person++) {
      * 이 검사가 없던 동안 끼니의 4분의 1이 그랬다.
      */
     for (const s of ['아침', '점심', '저녁'] as MealSlot[]) {
-      const foods = menu.meals[s].map((e) => e.food)
+      const entries = menu.meals[s]
+      const foods = entries.map((e) => e.food)
       if (foods.length === 0) continue
-      if (!mealIsComplete(foods)) {
-        bad('밥상이 서지 않음', `${ctx} ${s}: ${foods.map((f) => f.name).join('+')}`)
+
+      /*
+       * 상이 서는가 — 엔진의 판정을 빌리지 않고 여기서 따진다.
+       *
+       * 예전에는 mealIsComplete 를 그대로 불렀다. 그러면 그 판정을 풀 때
+       * 검사도 함께 풀려 아무것도 못 잡는다(2026-08-26 에 실제로 겪었다).
+       */
+      const oneDish = foods.some((f) => mealRole(f) === 'onedish')
+      if (!oneDish) {
+        if (!foods.some(myStaple)) {
+          bad('주식 없이 반찬만', `${ctx} ${s}: ${foods.map((f) => f.name).join('+')}`)
+          if (process.env.DBG_ST && bugs.length < 400) console.log('[진단]', JSON.stringify({
+            slot: s, day: key, cancer: patient.cancer, phase: patient.phase,
+            cond: patient.conditions, meds: patient.medications, sub: patient.subtypes,
+            cuis: patient.cuisines, kg: patient.weightKg, supps: supps.map((x) => x.id),
+            logs,
+            kcal: Math.round(menu.totals.kcal ?? 0), sup: Math.round(menu.suppTotals.kcal ?? 0),
+            hi: target.kcal[1], items: foods.map((f) => f.name)
+          }))
+        }
+        else if (!foods.some(myAnchor))
+          bad('밥만 놓이고 반찬이 없음', `${ctx} ${s}: ${foods.map((f) => f.name).join('+')}`)
       }
+
       /* 곁들임만 여럿 늘어놓지 않았는가 */
-      const garnish = foods.filter((f) => !isAnchorDish(f) &&
+      const garnish = foods.filter((f) => !myAnchor(f) && !myStaple(f) && !myDessert(f) &&
         (mealRole(f) === 'side' || mealRole(f) === 'main'))
-      if (garnish.length > 1) {
+      if (garnish.length > 1)
         bad('곁들임이 몰림', `${ctx} ${s}: ${garnish.map((f) => f.name).join('+')}`)
+
+      /* 국은 한 그릇이면 족하다 */
+      const soups = foods.filter((f) => mealRole(f) === 'soup')
+      if (soups.length > 1)
+        bad('한 끼니에 국이 둘', `${ctx} ${s}: ${soups.map((f) => f.name).join('+')}`)
+
+      /* 주식이 둘이어도 곤란하다 */
+      const staples = foods.filter((f) => myStaple(f) || mealRole(f) === 'onedish')
+      if (staples.length > 1)
+        bad('주식이 둘', `${ctx} ${s}: ${staples.map((f) => f.name).join('+')}`)
+
+      /* 후식은 맨 뒤에 — 영양제는 차례에서 뺀다 */
+      const plate = entries.filter((e) => mealRole(e.food) !== 'supp').map((e) => e.food)
+      const lastReal = plate.map(myDessert).lastIndexOf(false)
+      const firstSweet = plate.findIndex(myDessert)
+      if (firstSweet >= 0 && lastReal >= 0 && firstSweet < lastReal)
+        bad('후식이 주메뉴 앞에 끼어 있음', `${ctx} ${s}: ${plate.map((f) => f.name).join(' → ')}`)
+
+      /* 같은 재료가 한 상에 둘 — '브로콜리(데친 것)' 과 '브로콜리 데침' */
+      const plain = foods.filter((f) => !myStaple(f) && mealRole(f) !== 'supp')
+      for (let i = 0; i < plain.length; i++)
+        for (let j = i + 1; j < plain.length; j++)
+          if (samePlant(plain[i], plain[j]))
+            bad('같은 재료가 한 상에 둘', `${ctx} ${s}: ${plain[i].name} + ${plain[j].name}`)
+
+      /* 담는 양이 잘못 읽히지 않는가 — '밥 1공기' 의 절반이 '밥 1공기 반' 이면 안 된다 */
+      for (const e of entries) {
+        const lab = portionLabel(e.food.serving.label, e.servings)
+        if (/\d\s*[가-힣]+\s*반$/.test(lab))
+          bad('담는 양 표기가 더 많은 양으로 읽힘', `${ctx} ${e.food.name} ${e.servings} → '${lab}'`)
       }
     }
 
@@ -313,13 +507,23 @@ for (let person = 0; person < PEOPLE; person++) {
          * 이것이 이 기능의 핵심이고, 어긋나면 앱이 다른 화면에서 하는 말과 정면으로 부딪힌다.
          */
         const c = patient.conditions
+        const sub = patient.subtypes ?? []
         if (a.nutrient === '식이섬유' && (c.includes('설사') || c.includes('장루보유')))
           bad('해로운 보충을 권함', `${who} :: 설사·장루에 식이섬유`)
         if (a.nutrient === '단백질' && (c.includes('신기능저하') || c.includes('간성뇌증위험')))
           bad('해로운 보충을 권함', `${who} :: 신기능·간성뇌증에 단백질`)
-        if (a.nutrient === '칼슘' && patient.cancer === 'prostate' && !patient.medications.includes('adt'))
+        /*
+         * 골 보호가 필요한 ADT 중에는 칼슘을 채워야 한다.
+         * ADT 는 약으로 적으실 수도 있고 세부 변수로 고르실 수도 있다 —
+         * 처음에는 약만 보았고, 세부 변수를 넣어 돌리자 멀쩡한 권고가 '해롭다' 로 잡혔다.
+         * 엔진(wanted)은 처음부터 둘 다 보고 있었다.
+         */
+        const onAdt = patient.medications.includes('adt') || sub.includes('안드로겐차단요법중')
+        if (a.nutrient === '칼슘' && patient.cancer === 'prostate' && !onAdt)
           bad('해로운 보충을 권함', `${who} :: 전립선암(ADT 아님)에 칼슘`)
-        if (a.nutrient === '철' && !c.some((x) => /위절제|위전절제|위부분절제/.test(x)))
+        /* 철도 마찬가지 — 증상으로 적으실 수도, 세부 변수로 고르실 수도 있다 */
+        const gastrectomy = c.includes('위절제후') || sub.some((t) => t === '위전절제' || t === '위부분절제')
+        if (a.nutrient === '철' && !gastrectomy)
           bad('해로운 보충을 권함', `${who} :: 위절제 없이 철분`)
       }
     } catch (e) { bad('보고 계산 중 예외', `${who} ${unit} :: ${(e as Error)?.message}`) }

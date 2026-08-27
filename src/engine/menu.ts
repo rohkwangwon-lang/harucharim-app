@@ -1061,6 +1061,18 @@ export function buildDayMenu(
             (!sideClash(meals, slot, c.food, entry) ||
               (renalCap && c.protein < (foodContribution(entry.food, entry.servings).protein ?? 0))) &&
               /*
+               * 갈아 끼운 뒤에도 상이 서야 한다.
+               *
+               * 이 자리는 항목의 내용만 바꾸므로 상차림을 아무도 보지 않았다.
+               * 그래서 저녁에 앉혀 둔 국수를 제철 나물로 바꿔 놓고, 주식 없는 상을 남겼다.
+               * 3-0 에서 세 끼 모두에 주식을 앉혀도 여기서 도로 빠져나갔다.
+               *
+               * 신장이 걸리는 분께는 sideClash 를 풀어 주지만 이것은 풀지 않는다 —
+               * 밥을 빼는 것이 신장에 이로울 까닭이 없기 때문이다.
+               */
+              (slot === '간식' ||
+                mealIsComplete(meals[slot].map((e) => (e === entry ? c.food : e.food)))) &&
+              /*
                * 바꿔 넣는 것도 상한을 지킨다.
                * 간식에서 식품군 일치를 풀어 준 탓에, 이미 과일이 있는 간식에
                * 제철 과일을 하나 더 밀어 넣어 포도·수박·참외가 나란히 놓였다.
@@ -1419,6 +1431,8 @@ export function buildDayMenu(
             // 옮길 곳에 같은 음식이 이미 있으면 안 된다 — 한 끼니에 배가 두 개 놓인다
             if (meals[under].some((x) => x.food.id === e.food.id)) return false
             if (stapleClash(meals, under, e.food) || sideClash(meals, under, e.food)) return false
+            /* 가져가는 쪽이 무너지면 옮기지 않는다 — 밥을 빼내 가면 그 끼니는 상이 아니다 */
+            if (breaksMeal(meals, over, e)) return false
             const capG = SLOT_GROUP_CAP[e.food.group] ?? SLOT_GROUP_CAP_DEFAULT
             return meals[under].filter((x) => x.food.group === e.food.group).length < capG
           })
@@ -1470,6 +1484,8 @@ export function buildDayMenu(
           if (!slotsFor(e.food).includes('저녁')) return false
           if (meals['저녁'].some((x) => x.food.id === e.food.id)) return false
           if (stapleClash(meals, '저녁', e.food) || sideClash(meals, '저녁', e.food)) return false
+          /* 아침을 가볍게 하자고 아침상을 무너뜨리지는 않는다 */
+          if (breaksMeal(meals, '아침', e)) return false
           const capG = SLOT_GROUP_CAP[e.food.group] ?? SLOT_GROUP_CAP_DEFAULT
           if (meals['저녁'].filter((x) => x.food.group === e.food.group).length >= capG) return false
           /*
@@ -1915,11 +1931,31 @@ function isGarnish(f: Food): boolean {
  * 한국 음식 이름은 대개 '재료 + 조리법' 이라 첫 낱말이 재료다.
  * 띄어쓰기가 없는 한 낱말이면 그때만 조리 표현을 떼어 본다.
  */
+/** 조리법을 나타내는 꼬리말 — 뒤에서부터 한 겹씩만 벗긴다 */
+const PREP_TAIL = /(구이|부침|조림|볶음|찜|무침|데침|삶음|전|나물|국|탕|찌개)$/
+
 function coreName(name: string): string {
   const bare = name.replace(/\(.*?\)/g, '').trim()
   const head = bare.split(/[\s·]+/)[0]
   if (head !== bare) return head            // '브로콜리 데침' → '브로콜리'
-  return bare.replace(/구이|부침|조림|볶음|찜|무침|나물|데침|삶음|전$/g, '').trim()
+
+  /*
+   * 꼬리말을 한 겹씩 벗기되, 두 글자 아래로는 내려가지 않는다.
+   *
+   * 예전에는 정규식 하나로 모든 자리에서 한꺼번에 지웠다.
+   * 그래서 '콩나물' 이 '콩' 이 되었고, 부르는 쪽에는 '두 글자 아래면 따지지 않는다' 는
+   * 걸림돌이 있어 겹침 검사가 통째로 빠져나갔다 —
+   * 콩나물(데친 것)과 콩나물무침이 한 상에 나란히 올랐다.
+   *
+   * 벗겨서 남는 것이 한 글자뿐이면 그것은 이미 너무 벗긴 것이다. 벗기기 전으로 돌린다.
+   */
+  let core = bare
+  for (;;) {
+    const next = core.replace(PREP_TAIL, '').trim()
+    if (next === core || next.length < 2) break
+    core = next
+  }
+  return core
 }
 
 /*
@@ -1966,6 +2002,21 @@ function sideClash(meals: Record<MealSlot, MenuEntry[]>, to: MealSlot, food: Foo
   const core = coreName(food.name)
   if (core.length < 2) return false
   if (here.some((e) => coreName(e.food.name) === core)) return true
+  /*
+   * 이름이 겹치는 것도 같은 재료로 본다.
+   *
+   * 꼬리말을 벗기는 방식만으로는 '두유라떼' 와 '두유(무가당)' 을 갈라 놓지 못한다 —
+   * '라떼' 는 조리법 꼬리말이 아니라서 그대로 남기 때문이다.
+   * 한 상에 두유가 두 잔 오르던 까닭이 이것이었다.
+   * 한쪽 이름이 다른 쪽으로 시작하면 같은 것을 두 번 놓은 것으로 친다.
+   */
+  const bare = (n: string) => n.replace(/\(.*?\)/g, '').replace(/\s+/g, '').trim()
+  const mine = bare(food.name)
+  if (mine.length >= 2 &&
+      here.some((e) => {
+        const other = bare(e.food.name)
+        return other.length >= 2 && (mine.startsWith(other) || other.startsWith(mine))
+      })) return true
 
   /*
    * 하루 안에서도 같은 것을 두 번 놓지 않는다.
@@ -2018,6 +2069,25 @@ function byScore<T extends { bonus: number; penalty: number }>(a: T, b: T): numb
   return (b.bonus - b.penalty) - (a.bonus - a.penalty)
 }
 
+/**
+ * 이것을 빼내면 그 끼니가 상으로서 무너지는가.
+ *
+ * 옮겨 담는 자리들은 '가는 쪽' 만 살피고 있었다 — 겹치지 않는가, 상한을 넘지 않는가.
+ * 정작 '가져가는 쪽' 이 어떻게 되는지는 아무도 보지 않았다.
+ * 그래서 아침에 앉혀 둔 밥을 점심으로 옮겨 놓고, 아침에는 달걀과 영양음료만 남겼다.
+ * 밥이 세 끼 모두에 앉았는데도 다 짜고 나면 두 끼에 밥이 없던 까닭이 이것이었다.
+ *
+ * 간식은 상이 아니므로 따지지 않는다. 통째로 비우는 것은 다른 걸림돌이 막는다.
+ */
+function breaksMeal(
+  meals: Record<MealSlot, MenuEntry[]>, from: MealSlot, taking: MenuEntry
+): boolean {
+  if (from === '간식') return false
+  const rest = meals[from].filter((x) => x !== taking)
+  if (rest.length === 0) return false
+  return !mealIsComplete(rest.map((x) => x.food))
+}
+
 function tooSoon(f: Food, recent: Map<string, number>): boolean {
   const ago = recent.get(f.id)
   return ago !== undefined && ago <= blockDays(f)
@@ -2039,6 +2109,7 @@ function moveBreakfastElsewhere(
       if (!slotsFor(e.food).includes(to)) continue
       if (meals[to].some((x) => x.food.id === e.food.id)) continue
       if (stapleClash(meals, to, e.food) || sideClash(meals, to, e.food)) continue
+      if (breaksMeal(meals, '아침', e)) continue
       const capG = SLOT_GROUP_CAP[e.food.group] ?? SLOT_GROUP_CAP_DEFAULT
       if (meals[to].filter((x) => x.food.group === e.food.group).length >= capG) continue
       if (load(to) + k > quota[to] * 1.8) continue
@@ -2072,6 +2143,15 @@ function swapToLightenBreakfast(
       const diff = kcal(b) - kcal(d)
       if (diff <= 0) continue // 가벼운 것을 아침으로 들여올 때만 뜻이 있다
       if (!fits(b, '저녁', d) || !fits(d, '아침', b)) continue
+      /*
+       * 맞바꾼 뒤에도 두 상이 서야 한다.
+       *
+       * 가는 쪽만 보고 있었다. 아침의 밥과 저녁의 나물을 맞바꾸면 겹치지도 넘치지도
+       * 않지만, 아침에는 나물만 남는다 — 그것은 상이 아니다.
+       */
+      const afterB = meals['아침'].map((x) => (x === b ? d : x)).map((x) => x.food)
+      const afterD = meals['저녁'].map((x) => (x === d ? b : x)).map((x) => x.food)
+      if (!mealIsComplete(afterB) || !mealIsComplete(afterD)) continue
       const gap = gapNow - diff * 2
       if (gap >= 0) continue // 바꿔도 아침이 여전히 무거우면 헛일이다
       if (!best || gap > best.gap) best = { pair: [bi, di], gap }
