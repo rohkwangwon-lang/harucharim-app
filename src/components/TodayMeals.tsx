@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { portionLabel } from '../lib/portion'
 import { IconEvening, IconMorning, IconNoon, IconSnack, IconSuggest } from './icons'
 import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
 import { MEAL_SLOTS } from '../data/types'
@@ -428,7 +429,7 @@ export function TodayMeals({
                               {v?.level === 'caution' && <LevelBadge level="caution" />}
                             </div>
                             <div className="mt-0.5 text-[11px] text-stone-400">
-                              {food.serving.label} × {item.servings} · {Math.round(per.kcal ?? 0)} kcal ·
+                              {portionLabel(food.serving.label, item.servings)} · {Math.round(per.kcal ?? 0)} kcal ·
                               나트륨 {per.na === undefined ? '정보 없음' : `${Math.round(per.na)} mg`}
                             </div>
                           </div>

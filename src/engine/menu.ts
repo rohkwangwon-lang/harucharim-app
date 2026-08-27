@@ -613,6 +613,84 @@ export function buildDayMenu(
     저녁: midKcal * shares['저녁'], 간식: midKcal * shares['간식']
   }
 
+  /*
+   * 3-0) 끼니마다 밥부터 앉힌다.
+   *
+   * 처음에는 다 채운 뒤에 빈 상을 찾아 밥을 끼워 넣었다. 그런데 밥 한 공기는 300 kcal 이고,
+   * 그때쯤이면 남은 여유가 50~240 kcal 이라 들어갈 자리가 없다.
+   * 곁들임 하나를 내려 자리를 만들어 보아도 모자랐다 — 스무 끼니 중 넷이 밥 없이 나갔다.
+   *
+   * 순서가 틀렸던 것이다. 상은 밥을 놓고 그 둘레를 채우는 것이지,
+   * 다 채운 다음 밥을 비집어 넣는 것이 아니다. 그래서 여기서 먼저 앉힌다.
+   * 뒤따르는 채우기가 남은 몫을 알아서 맞춘다.
+   */
+  {
+    for (const slot of ['아침', '점심', '저녁'] as MealSlot[]) {
+      const here = meals[slot]
+      const roles = here.map((e) => mealRole(e.food))
+      /* 한 그릇 음식을 고르셨으면 그것으로 족하다 — 국수에 밥을 얹지 않는다 */
+      if (roles.includes('staple') || roles.includes('onedish')) continue
+
+      const cur = running()
+      const room = target.kcal[1] - (cur.kcal ?? 0)
+      if (room <= 0) continue
+
+      /*
+       * 밥은 하루에 두 번 나와도 된다.
+       *
+       * 다른 음식은 같은 날 두 번 오르지 않게 막는다. 그런데 이분께 올릴 수 있는
+       * 밥이 세 종뿐인 경우가 있어, 세 끼를 채우고 나면 바닥이 났다 —
+       * 그래서 저녁상에 밥이 없었다.
+       * 한국에서 아침에도 쌀밥, 저녁에도 쌀밥은 조금도 이상하지 않다.
+       * 아직 안 쓴 것을 앞에 두되, 없으면 쓴 것을 다시 쓴다.
+       */
+      const rice = candidates
+        /*
+         * 죽과 국수도 주식이다.
+         *
+         * 밥만 앉혔더니, 삼키기 어려운 분께 죽이 스무 날 동안 한 번도 안 나왔다.
+         * 밥이 먼저 자리를 차지해 버려서 뒤에 죽이 올라올 길이 없었던 것이다.
+         * 그분들께는 죽이 밥보다 나은 주식이다 — 같은 자리를 두고 겨루게 둔다.
+         */
+        .filter((c) => mealRole(c.food) === 'staple' || mealRole(c.food) === 'onedish')
+        .filter((c) => slotsFor(c.food).includes(slot))
+        .filter((c) => !stapleClash(meals, slot, c.food))
+        .filter((c) => c.kcal <= room)
+        .sort((a, b) =>
+          (Number(used.has(a.food.id)) - Number(used.has(b.food.id))) ||
+          (Number(tooSoon(a.food, recent)) - Number(tooSoon(b.food, recent))) ||
+          ((b.bonus - b.penalty) - (a.bonus - a.penalty)))
+      /* 엇비슷하면 날마다 다르게 — 늘 같은 밥이 오르지 않게 */
+      /* 고를 때는 아직 안 쓴 것들 안에서만 섞는다 — 안 그러면 굳이 되풀이하게 된다 */
+      const fresh = rice.filter((c) => !used.has(c.food.id))
+      const pool = fresh.length > 0 ? fresh : rice
+      const near = pool.filter((x) => (x.bonus - x.penalty) >= ((pool[0]?.bonus ?? 0) - (pool[0]?.penalty ?? 0)) - 10)
+      const put = near[((dayIndex % Math.max(1, near.length)) + near.length) % Math.max(1, near.length)]
+      if (!put) continue
+
+      /*
+       * 밥도 그분 몫에 맞춰 담는다.
+       *
+       * 한 공기를 그대로 세 끼에 놓았더니, 목표가 1,140 kcal 인 38 kg 환자분의
+       * 하루 가운데 800 kcal 가 밥이 되었다. 남은 자리에 닭백숙 한 그릇이 들어가자
+       * 하루가 1,341 로 넘어갔다.
+       * 밥공기 크기는 사람마다 다르다 — 이 끼니 몫의 절반을 넘으면 반 공기로 담는다.
+       */
+      const part = put.kcal > quota[slot] * 0.55 ? 0.5 : 1
+      if (foodContribution(put.food, part).kcal! > room) continue
+
+      used.add(put.food.id)
+      groupCount.set(put.food.group, (groupCount.get(put.food.group) ?? 0) + 1)
+      foodTotals = addTotals(foodTotals, foodContribution(put.food, part))
+      here.push({
+        food: put.food, servings: part, origin: 'added',
+        contribution: '한 상의 바탕이 되는 밥입니다',
+        ruleTitle: '반찬은 밥에 곁들이는 것이라, 밥이 있어야 한 상이 됩니다.',
+        refIds: [], seasonal: put.seasonal
+      })
+    }
+  }
+
   for (let guard = 0; guard < 40; guard++) {
     const cur = running()
     const need = {
@@ -1019,7 +1097,13 @@ export function buildDayMenu(
      * 밥에 국 한 그릇이 붙는 것이 가장 흔한 모습이기 때문이다.
      */
     {
-      const order: MealRole[] = ['soup', 'main', 'side']
+      /*
+       * 채우는 차례.
+       *
+       * 주식이 먼저다 — 반찬은 곁들임이라 밥이 없으면 아무리 놓아도 상이 서지 않는다.
+       * 그다음이 국, 그다음이 주찬·부찬이다. 밥에 국 한 그릇이 가장 흔한 모습이다.
+       */
+      const order: MealRole[] = ['staple', 'soup', 'main', 'side']
       for (const slot of ['아침', '점심', '저녁'] as MealSlot[]) {
         const here = meals[slot]
         if (here.length === 0) continue
@@ -1037,8 +1121,59 @@ export function buildDayMenu(
          * 반찬 한 가지를 더한다고 하루가 무너지면 안 되므로, 가벼운 것 중에서 고른다.
          * 나물·국은 대개 100 kcal 아래라 이 정도로 충분히 찾아진다.
          */
+        const roles = here.map((e) => mealRole(e.food))
+
+        /*
+         * 밥이 없으면 밥부터 앉힌다 — 자리를 비워서라도.
+         *
+         * 위 단계는 남은 여유 안에서만 고르기 때문에, 하루가 이미 찬 끼니에는
+         * 밥 한 공기(300 kcal 남짓)가 들어갈 자리가 없다. 그러면 국과 고기만 남는데
+         * 그것은 상이 아니다 — 한국에서 밥 없는 저녁은 없다.
+         * 그래서 가장 가벼운 곁들임 하나를 내리고 그 자리에 밥을 놓는다.
+         */
+        if (!roles.includes('staple')) {
+          const spare = here
+            .filter((e) => mealRole(e.food) !== 'soup' && mealRole(e.food) !== 'supp')
+            /* 상을 세우는 반찬이 하나뿐이면 그것은 못 내린다 */
+            .filter((e) => !isAnchorDish(e.food) || here.filter((x) => isAnchorDish(x.food)).length > 1)
+            .sort((a, b) => (foodContribution(a.food, a.servings).kcal ?? 0) -
+                            (foodContribution(b.food, b.servings).kcal ?? 0))
+          for (const drop of [undefined, ...spare]) {
+            const freed = drop ? foodContribution(drop.food, drop.servings) : {}
+            const rice = candidates
+              .filter((c) => !used.has(c.food.id))
+              .filter((c) => mealRole(c.food) === 'staple')
+              .filter((c) => slotsFor(c.food).includes(slot))
+              .filter((c) => !stapleClash(meals, slot, c.food, drop))
+              .filter((c) => c.kcal <= (freed.kcal ?? 0) + Math.max(0, room.kcal))
+              .sort((a, b) =>
+                (Number(tooSoon(a.food, recent)) - Number(tooSoon(b.food, recent))) ||
+                ((b.bonus - b.penalty) - (a.bonus - a.penalty)))[0]
+            if (!rice) continue
+            if (drop) {
+              here.splice(here.indexOf(drop), 1)
+              foodTotals = addTotals(foodTotals, negate(freed))
+            }
+            used.add(rice.food.id)
+            foodTotals = addTotals(foodTotals, foodContribution(rice.food, 1))
+            here.push({
+              food: rice.food, servings: 1, origin: 'added',
+              contribution: drop
+                ? '밥을 놓으려고 가벼운 곁들임 하나를 내렸습니다'
+                : '반찬만으로는 한 끼가 되지 않아 밥을 놓았습니다',
+              ruleTitle: '반찬은 밥에 곁들이는 것이라, 밥이 있어야 한 상이 됩니다.',
+              refIds: [], seasonal: rice.seasonal
+            })
+            break
+          }
+          if (here.some((e) => mealRole(e.food) === 'staple')) continue
+        }
+
         let picked: Cand | undefined
         for (const role of order) {
+          /* 이미 있는 자리는 건너뛴다 — 밥에 밥, 국에 국을 얹지 않는다 */
+          if (role === 'staple' && roles.includes('staple')) continue
+          if (role === 'soup' && roles.includes('soup')) continue
           const fits = candidates
             .filter((c) => !used.has(c.food.id))
             .filter((c) => mealRole(c.food) === role)
@@ -1049,8 +1184,18 @@ export function buildDayMenu(
              * "쌀밥 + 옥수수" 를 채워 놓고 상을 갖췄다고 여겼다.
              * 국이거나 조리된 반찬이어야 밥상이 선다.
              */
-            .filter((c) => isAnchorDish(c.food))
+            /* 주식 자리에서는 반찬 여부를 따지지 않는다 — 밥은 반찬이 아니다 */
+            .filter((c) => (role === 'staple' ? true : isAnchorDish(c.food)))
             .filter((c) => slotsFor(c.food).includes(slot))
+            /*
+             * 여기에도 겹침 검사를 걸어야 한다.
+             *
+             * 이 걸러내기에 sideClash 가 빠져 있었다. 짜임새를 맞추는 자리가
+             * 드물게 돌 때는 드러나지 않다가, 상차림 기준을 조이자
+             * 한 끼에 국이 둘 오르는 일이 5.6% 로 튀어나왔다 —
+             * 미역국 옆에 콩나물국. 국은 한 그릇이면 족하다.
+             */
+            .filter((c) => !stapleClash(meals, slot, c.food) && !sideClash(meals, slot, c.food))
             .filter((c) => {
               const capG = SLOT_GROUP_CAP[c.food.group] ?? SLOT_GROUP_CAP_DEFAULT
               return here.filter((x) => x.food.group === c.food.group).length < capG
@@ -1069,7 +1214,11 @@ export function buildDayMenu(
              * 곁들임 하나로 하루가 1,388 까지 올라갔다. 여유가 없으면 그냥 두는 편이 낫다 —
              * 상을 갖추자고 목표를 넘기는 것은 앞뒤가 바뀐 일이다.
              */
-            .filter((c) => c.kcal <= Math.min(160, Math.max(0, room.kcal)) &&
+            /*
+             * 곁들임은 가볍지만 밥 한 공기는 300 kcal 쯤 된다.
+             * 같은 잣대로 재면 주식은 영영 못 올라가고, 반찬만 쌓인 상이 남는다.
+             */
+            .filter((c) => c.kcal <= Math.min(role === 'staple' ? 340 : 160, Math.max(0, room.kcal)) &&
                            c.na <= Math.max(200, room.na * 0.4))
           if (fits.length === 0) continue
           /* 엇비슷하면 날마다 다르게 — 같은 자리에 늘 같은 나물이 오르지 않게 */
@@ -1453,6 +1602,144 @@ export function buildDayMenu(
       evidence: h?.rule.evidence, refIds: h?.rule.refIds ?? [],
       seasonal: swap.seasonal
     })
+  }
+
+  /*
+   * 5-3) 반찬을 두 가지쯤으로 맞추고, 후식을 뒤로 물린다.
+   *
+   * 한식 한 상은 밥에 반찬 두세 가지, 그리고 경우에 따라 국이다.
+   * 앞 단계는 "상이 서는가" 만 보아서, 밥에 나물 하나면 통과였다 —
+   * 틀리지는 않지만 밥상 같지도 않다.
+   *
+   * 여유가 있을 때만 한 가지를 더 놓는다. 상을 차리자고 하루 열량을 넘기면
+   * 앞뒤가 바뀐 일이 되므로, 남은 여유 안에서만 고른다.
+   */
+  {
+    const naLimit2 = naLimit
+    for (const slot of ['아침', '점심', '저녁'] as MealSlot[]) {
+      const here = meals[slot]
+      if (here.length === 0) continue
+      const roles = here.map((e) => mealRole(e.food))
+      /* 한 그릇 음식은 그것으로 완결이다 — 국수에 반찬을 붙이지 않는다 */
+      if (roles.includes('onedish') || !roles.includes('staple')) continue
+
+      /* 국은 반찬 수에 넣지 않는다 — 밥·국은 따로 세고 반찬만 센다 */
+      const sides = here.filter((e) => isAnchorDish(e.food) && mealRole(e.food) !== 'soup')
+      if (sides.length >= 2) continue
+
+      const cur = running()
+      const room = {
+        kcal: target.kcal[1] - (cur.kcal ?? 0),
+        na: naLimit2 - (cur.na ?? 0),
+        /*
+         * 단백질 여유도 함께 본다.
+         *
+         * 열량과 나트륨만 보고 반찬을 한 가지 더 놓았더니, 신장이 걸리는 분의
+         * 단백질 초과가 0.79% 에서 1.50% 로 올라갔다. 반찬은 대개 단백질 식품이다 —
+         * 상 모양을 갖추자고 신장에 부담을 주는 것은 순서가 뒤바뀐 일이다.
+         */
+        protein: target.protein[1] - (cur.protein ?? 0)
+      }
+      /*
+       * 여유가 없으면 나눠 담는다.
+       *
+       * 열량 여유만 보고 반찬을 더하려니, 밥을 먼저 앉힌 뒤로는 남는 자리가 거의 없어
+       * 두 가지 이상인 상이 셋 중 하나에 그쳤다. 그런데 한식의 반찬 두세 가지는
+       * '더 먹는 것' 이 아니라 '나눠 먹는 것' 이다 — 접시가 늘면 한 접시가 작아진다.
+       * 그래서 있던 반찬을 반으로 줄이고 그 자리에 다른 반찬을 반접시 놓는다.
+       * 하루 합계는 그대로이면서 상은 한식다워진다.
+       */
+      const halve = room.kcal < 55 || room.protein < 3
+      const victim = sides.find((e) => e.origin !== 'chosen' && e.servings === 1)
+      if (halve && !victim) continue
+      /*
+       * 나누는 것은 하루 열량이 이미 찼을 때만 한다.
+       *
+       * 이 걸림돌을 빼놓았더니, 아직 목표에 못 미치는 날에도 접시를 반으로 갈랐다.
+       * 새로 놓는 반찬이 대개 더 가벼워서 하루 합계가 오히려 줄었고,
+       * 열량 미달이 계절·체중 검사에서 열일곱 자리로 늘었다.
+       * 상 모양은 배가 부른 다음의 이야기다 — 모자란 날에는 나누지 않는다.
+       */
+      if (halve && (cur.kcal ?? 0) < target.kcal[0]) continue
+
+      /*
+       * 나물 한 접시까지 단백질로 막지는 않는다.
+       *
+       * 단백질 여유가 0 이면 김치도 못 올라간다. 그런데 상을 갖추는 반찬은
+       * 대개 나물·김치·채소라 단백질이 2 g 안팎이다.
+       * 다만 신장이 걸리는 분께는 그 2 g 도 함부로 더하지 않는다 — 신장이 먼저다.
+       */
+      if (!renalCap) room.protein = Math.max(room.protein, 3)
+      if (halve && victim) {
+        const back = foodContribution(victim.food, 0.5)
+        victim.servings = 0.5
+        foodTotals = addTotals(foodTotals, negate(back))
+        room.kcal += back.kcal ?? 0
+        room.na += back.na ?? 0
+        room.protein += back.protein ?? 0
+      }
+
+      const add = candidates
+        .filter((c) => !used.has(c.food.id))
+        .filter((c) => isAnchorDish(c.food) && mealRole(c.food) !== 'soup')
+        .filter((c) => slotsFor(c.food).includes(slot))
+        .filter((c) => !stapleClash(meals, slot, c.food) && !sideClash(meals, slot, c.food))
+        .filter((c) => {
+          const capG = SLOT_GROUP_CAP[c.food.group] ?? SLOT_GROUP_CAP_DEFAULT
+          return here.filter((x) => x.food.group === c.food.group).length < capG
+        })
+        .filter((c) => c.kcal * (halve ? 0.5 : 1) <= Math.min(150, room.kcal) &&
+                       c.na * (halve ? 0.5 : 1) <= Math.max(150, room.na * 0.35) &&
+                       c.protein * (halve ? 0.5 : 1) <= room.protein)
+        /* 반찬 한 가지를 더 놓을 때는 가벼운 쪽이 낫다 — 상은 갖추되 하루는 지킨다 */
+        .filter((c) => c.kcal <= 150)
+        /* 나눠 담을 때는 덜어낸 만큼은 채워야 한다 — 접시만 늘고 밥상이 헐거워지면 안 된다 */
+        .filter((c) => !halve || !victim ||
+          c.kcal * 0.5 >= (foodContribution(victim.food, 0.5).kcal ?? 0) * 0.75)
+        .sort((a, b) =>
+          (Number(tooSoon(a.food, recent)) - Number(tooSoon(b.food, recent))) ||
+          ((b.bonus - b.penalty) - (a.bonus - a.penalty)))[0]
+      if (!add) {
+        /* 놓을 것을 못 찾았으면 줄여 둔 접시를 도로 채운다 — 반찬만 반쪽이 되면 안 된다 */
+        if (halve && victim) {
+          victim.servings = 1
+          foodTotals = addTotals(foodTotals, foodContribution(victim.food, 0.5))
+        }
+        continue
+      }
+
+      const part = halve ? 0.5 : 1
+      used.add(add.food.id)
+      foodTotals = addTotals(foodTotals, foodContribution(add.food, part))
+      const h3 = add.prefers[0]
+      here.push({
+        food: add.food, servings: part, origin: 'added',
+        contribution: '반찬이 하나뿐이라 한 가지를 더 놓았습니다',
+        ruleTitle: h3?.rule.title ?? '밥에 반찬 두어 가지가 통상적인 한 상입니다.',
+        evidence: h3?.rule.evidence, refIds: h3?.rule.refIds ?? [],
+        seasonal: add.seasonal
+      })
+    }
+  }
+
+  /*
+   * 5-4) 상에 놓는 차례대로 줄을 세운다.
+   *
+   * 단감과 방울토마토가 나물 사이에 끼어 있었다. 담기는 차례가 곧 드시는 차례로 읽히는데,
+   * 후식이 가운데 있으면 상차림이 아니라 목록으로 보인다.
+   * 밥, 국, 주찬, 반찬, 그리고 후식 — 실제로 상에 오르는 차례를 그대로 따른다.
+   */
+  {
+    const rank: Record<MealRole, number> = {
+      onedish: 0, staple: 0, soup: 1, main: 2, side: 3, dessert: 4, supp: 5
+    }
+    for (const slot of Object.keys(meals) as MealSlot[]) {
+      meals[slot] = meals[slot]
+        .map((e, i) => ({ e, i }))
+        /* 같은 자리끼리는 원래 차례를 지킨다 — 뒤섞으면 고르신 것이 밀려난다 */
+        .sort((a, b) => (rank[mealRole(a.e.food)] - rank[mealRole(b.e.food)]) || (a.i - b.i))
+        .map((x) => x.e)
+    }
   }
 
   const totals = tidy(running())

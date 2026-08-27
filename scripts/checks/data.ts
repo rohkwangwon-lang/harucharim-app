@@ -1,4 +1,5 @@
 import { readFileSync, readdirSync } from 'node:fs'
+import { portionLabel } from '../../src/lib/portion'
 import { INGREDIENT_DISHES } from '../../src/data/foods/ingredientDishes'
 /**
  * 두 번째 검사 — 날짜 계산, 기록 정규화, 성분 판정, 데이터 무결성.
@@ -321,6 +322,27 @@ const bad = (k: string, d: string) => { const s = `${k} :: ${d}`; if (!seenB.has
   console.log(`  채소·해조 중 그대로 상에 오르는 것 ${produce.length}종`)
   console.log(`    ${produce.join(', ')}`)
   if (produce.length > 30) bad('채소를 너무 많이 상에 올림', `${produce.length}종 — 대부분은 조리해야 반찬이 된다`)
+}
+
+/*
+ * 반 접시를 반 접시라고 읽히게 적는가.
+ *
+ * 엔진이 0.5 인분을 놓기 시작하자 화면에 '밥 1공기 반' 이 나왔다.
+ * 반 공기를 담으라는 말인데 한 공기 반으로 읽힌다 — 양을 세 배로 잘못 읽게 만든다.
+ * 담는 양을 잘못 읽으시면 하루 열량이 통째로 어긋나므로, 모든 담는 단위를 한 번씩 훑는다.
+ */
+{
+  const labels = [...new Set(CURATED_FOODS.map((f) => f.serving.label))]
+  for (const l of labels) {
+    const half = portionLabel(l, 0.5)
+    /* 숫자 뒤에 '반' 이 붙으면 '한 공기 반' 으로 읽힌다 */
+    if (/\d\s*[가-힣]+\s*반$/.test(half))
+      bad('반 접시 표기가 더 많은 양으로 읽힘', `'${l}' 의 절반이 '${half}' 로 나온다`)
+    /* 절반인데 '반' 도 '0.5' 도 없으면 몇을 담으라는 것인지 알 수 없다 */
+    if (!/반/.test(half) && !/0\.5/.test(half))
+      bad('절반인데 절반으로 보이지 않음', `'${l}' → '${half}'`)
+  }
+  console.log(`  담는 단위 ${labels.length}종의 절반 표기 확인`)
 }
 
 console.log(`\n두 번째 검사 완료 — 문제 ${bugs.length}종`)

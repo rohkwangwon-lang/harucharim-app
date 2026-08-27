@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { portionLabel } from '../lib/portion'
 import { track, trackDemand } from '../lib/stats'
 import type { PatientContext, SelectedItem, Supplement } from '../data/types'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
@@ -240,7 +241,7 @@ function DayView({
                       <li key={i.foodId + b.meal} className="px-3.5 py-2 text-sm text-stone-700">
                         {f.name}
                         <span className="ml-1.5 text-[11px] text-stone-400">
-                          {f.serving.label} × {i.servings}
+                          {portionLabel(f.serving.label, i.servings)}
                         </span>
                       </li>
                     )

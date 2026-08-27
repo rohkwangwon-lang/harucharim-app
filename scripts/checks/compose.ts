@@ -73,9 +73,41 @@ function anchors(f: Food): boolean {
   return false
 }
 
+/*
+ * 주식인가 — 검사 쪽 기준.
+ *
+ * 엔진의 mealRole 을 그대로 부르면, 빵을 다시 곁들임으로 되돌렸을 때
+ * 검사도 함께 되돌아가 아무것도 못 잡는다. 이름과 갈래로 따로 본다.
+ */
+const BREAD = /^(식빵|통밀식빵|바게트|모닝빵|베이글|사워도우|토르티야\(밀\)|크루아상)$/
+function isStaple(f: Food): boolean {
+  if (BREAD.test(f.name)) return true
+  return (f.group === '곡류·전분' || f.group === '밥·면·죽 요리') && /밥$|밥\(|공기밥/.test(f.name)
+}
+
+/*
+ * 후식인가 — 밥 노릇을 하는 빵은 뺀다.
+ *
+ * 갈래만으로 보았더니 두유가 빠졌다. 두유는 '두류·대두가공' 으로 묶여 있지만
+ * 상에서는 마시는 것이라 끝에 온다. 이름으로도 한 번 본다.
+ */
+const DRINK = /두유|우유|요구르트|요거트|주스|스무디|차\(우린/
+function isDessert(f: Food): boolean {
+  if (isStaple(f)) return false
+  if (DRINK.test(f.name)) return true
+  return ['과일', '간식·디저트', '우유·유제품', '음료', '견과·종실'].includes(f.group)
+}
+
 function standsAsMeal(foods: Food[]): boolean {
   if (foods.length === 0) return true
   if (foods.some((f) => mealRole(f) === 'onedish')) return true
+  /*
+   * 반찬은 곁들임이라 혼자 서지 못한다.
+   *
+   * '고구마(찐 것) + 단감 + 취나물' 이 아침으로 나갔다. 취나물만 드시지는 않는다.
+   * 나물·무침·국은 밥에 곁들이는 것이니, 밥이나 빵이 없으면 상이 아니다.
+   */
+  if (!foods.some(isStaple)) return false
   return foods.some(anchors)
 }
 
@@ -115,6 +147,7 @@ const perPersonTop: number[] = []
 let meals = 0, days = 0
 /* 무엇이 얼마나 일어나는지도 함께 센다 — 0 건이면 검사가 헛돈 것이다 */
 let withStaple = 0, swapped = 0, renalDays = 0
+const sideCounts: number[] = []
 
 for (let p = 0; p < PEOPLE; p++) {
   const cancer = pick(CANCERS).id
@@ -206,7 +239,7 @@ for (let p = 0; p < PEOPLE; p++) {
       meals++
 
       /* ── 1. 밥상이 서는가 ── */
-      if (foods.some((f) => mealRole(f) === 'staple')) withStaple++
+      if (foods.some(isStaple)) withStaple++
       if (!standsAsMeal(foods)) bad('밥상이 서지 않음', `${who} ${s}: ${foods.map((f) => f.name).join('+')}`)
 
       /* ── 2. 곁들임이 몰리지 않는가 ── */
@@ -221,6 +254,23 @@ for (let p = 0; p < PEOPLE; p++) {
       /* ── 4. 주식이 둘이거나, 사 먹는 것이 밥 자리를 차지하지 않는가 ── */
       const staples = foods.filter((f) => mealRole(f) === 'staple' || mealRole(f) === 'onedish')
       if (staples.length > 1) bad('주식이 둘', `${who} ${s}: ${staples.map((f) => f.name).join('+')}`)
+
+      /* ── 4-2. 후식이 주메뉴 앞이나 사이에 끼어 있지 않은가 ── */
+      /*
+       * 영양제는 음식의 차례에 넣지 않는다.
+       *
+       * 처음에는 넣었더니 '사과 → 유청단백분말' 이 어긋난 것으로 잡혔다.
+       * 순서는 옳았고 — 영양제는 늘 맨 끝이라 후식보다 뒤에 온다 — 자가 틀렸다.
+       */
+      const plate = foods.filter((f) => mealRole(f) !== 'supp')
+      const lastReal = plate.map(isDessert).lastIndexOf(false)
+      const firstSweet = plate.findIndex(isDessert)
+      if (firstSweet >= 0 && lastReal >= 0 && firstSweet < lastReal)
+        bad('후식이 앞에 끼어 있음', `${who} ${s}: ${plate.map((f) => f.name).join(' → ')}`)
+
+      /* ── 4-3. 밥상에 반찬이 몇 가지인가 (통계) ── */
+      if (foods.some(isStaple) && !foods.some((f) => mealRole(f) === 'onedish'))
+        sideCounts.push(foods.filter((f) => anchors(f) && mealRole(f) !== 'soup').length)
 
       /* 한 끼니에 국은 하나 */
       if (foods.filter((f) => mealRole(f) === 'soup').length > 1)
@@ -260,6 +310,8 @@ console.log(
   const kinds = mid(perPersonKinds)
   const top = mid(perPersonTop)
   console.log(`  한 분이 ${DAYS}일 동안 만나는 반찬 — 가운데값 ${kinds}종 · 상위 5종이 ${(top * 100).toFixed(0)}%`)
+  const two = sideCounts.filter((n) => n >= 2).length / Math.max(1, sideCounts.length)
+  console.log(`  밥이 오른 상의 반찬 — 가운데값 ${mid(sideCounts)}가지 · 두 가지 이상이 ${(two * 100).toFixed(0)}%`)
   /*
    * 눈금은 지금 이룬 수준에서 조금 낮춰 잡는다.
    * 지킬 수 없는 눈금을 적어 두면 검사가 늘 빨간불이라 아무도 보지 않는다.

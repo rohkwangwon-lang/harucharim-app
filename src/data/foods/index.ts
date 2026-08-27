@@ -223,6 +223,16 @@ export type MealRole = 'staple' | 'onedish' | 'soup' | 'main' | 'side' | 'desser
 
 const ONE_DISH = /죽$|미음|국수|냉면|비빔밥|덮밥|볶음밥|김밥|우동|라면|파스타|리소토|쌈밥|카레|짜장|짬뽕|초밥|백반|정식/
 
+/*
+ * 밥 노릇을 하는 빵.
+ *
+ * 이름으로 가르려 했더니 '마늘빵'·'단팥빵'·'도넛' 까지 주식이 되어 버렸다.
+ * 한 끼의 바탕이 되는 것만 손으로 적는다 — 나머지는 후식이다.
+ */
+const BREAD_STAPLE = new Set([
+  '식빵', '통밀식빵', '바게트', '모닝빵', '베이글', '사워도우', '토르티야(밀)', '크루아상'
+])
+
 export function mealRole(f: Food): MealRole {
   switch (f.group) {
     case '경장영양·환자식':
@@ -236,7 +246,10 @@ export function mealRole(f: Food): MealRole {
       return /두유|음료|라떼/.test(f.name) ? 'dessert' : 'main'
     case '채소': case '해조·버섯': case '반찬·조림·볶음':
       return 'side'
-    case '과일': case '우유·유제품': case '견과·종실': case '음료': case '간식·디저트':
+    case '간식·디저트':
+      /* 빵집 빵 중에도 끼니가 되는 것이 있다 — 베이글 한 개는 아침 한 끼다 */
+      return BREAD_STAPLE.has(f.name) ? 'staple' : 'dessert'
+    case '과일': case '우유·유제품': case '견과·종실': case '음료':
       return 'dessert'
     case '밥·면·죽 요리':
       /* 죽 한 그릇, 국수 한 그릇은 그것만으로 한 끼다 */
@@ -249,8 +262,16 @@ export function mealRole(f: Food): MealRole {
        */
       return ONE_DISH.test(f.name) ? 'onedish' : /밥$|공기밥/.test(f.name) ? 'staple' : 'main'
     case '곡류·전분':
-      /* 밥은 주식, 감자·고구마·빵은 곁들이로 본다 */
-      return /밥/.test(f.name) ? 'staple' : ONE_DISH.test(f.name) ? 'onedish' : 'side'
+      /*
+       * 밥과 빵은 주식, 감자·고구마·옥수수는 곁들이로 본다.
+       *
+       * 빵을 곁들임으로 두었더니 '식빵 + 계란말이' 가 주식 없는 상으로 잡혔다.
+       * 빵은 그 자리에서 밥 노릇을 한다 — 서양식 아침의 주식이다.
+       * 다만 스콘·머핀·도넛처럼 후식 쪽인 것은 아래 간식·디저트에서 따로 본다.
+       */
+      if (/밥/.test(f.name)) return 'staple'
+      if (ONE_DISH.test(f.name)) return 'onedish'
+      return BREAD_STAPLE.has(f.name) ? 'staple' : 'side'
     default:
       return 'side'
   }
@@ -304,5 +325,15 @@ export function mealIsComplete(foods: Food[]): boolean {
   if (foods.length === 0) return true // 비어 있는 끼니는 여기서 따질 일이 아니다
   const roles = foods.map(mealRole)
   if (roles.includes('onedish')) return true
+
+  /*
+   * 반찬은 곁들임이다 — 혼자 서지 못한다.
+   *
+   * '고구마(찐 것) + 단감 + 취나물' 이 아침으로 나갔다.
+   * 고구마는 혼자 드실 수 있고 단감은 후식이 되지만, 취나물을 그것만 드시지는 않는다.
+   * 나물·무침·조림·국은 밥에 곁들이는 것이라, 밥(또는 빵·죽·면)이 없으면 상이 아니다.
+   */
+  if (!roles.includes('staple')) return false
+
   return foods.some(isAnchorDish)
 }
