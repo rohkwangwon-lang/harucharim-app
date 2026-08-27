@@ -1550,9 +1550,22 @@ function isGarnish(f: Food): boolean {
   return (r === 'side' || r === 'main') && !isAnchorDish(f)
 }
 
-/** 이름의 알맹이 — 괄호와 조리 표현을 걷어낸 앞부분 */
+/**
+ * 이름의 알맹이 — 무엇으로 만든 것인가.
+ *
+ * 괄호와 조리 표현만 걷어냈더니 '브로콜리(데친 것)' 과 '브로콜리 데침' 이
+ * 서로 다른 것으로 잡혀 한 저녁에 나란히 올랐다. '데침' 이 목록에 없었기 때문이다.
+ * 조리 표현을 하나씩 적어 두는 방식으로는 늘 빠뜨린다.
+ *
+ * 그래서 뒤집는다 — 조리 표현을 지우는 대신 앞의 재료 이름만 남긴다.
+ * 한국 음식 이름은 대개 '재료 + 조리법' 이라 첫 낱말이 재료다.
+ * 띄어쓰기가 없는 한 낱말이면 그때만 조리 표현을 떼어 본다.
+ */
 function coreName(name: string): string {
-  return name.replace(/\(.*?\)/g, '').replace(/구이|부침|조림|볶음|찜|무침|나물|전$/g, '').trim()
+  const bare = name.replace(/\(.*?\)/g, '').trim()
+  const head = bare.split(/[\s·]+/)[0]
+  if (head !== bare) return head            // '브로콜리 데침' → '브로콜리'
+  return bare.replace(/구이|부침|조림|볶음|찜|무침|나물|데침|삶음|전$/g, '').trim()
 }
 
 /*

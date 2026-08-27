@@ -83,8 +83,14 @@ const isGarnish = (f: Food) => {
   const r = mealRole(f)
   return (r === 'side' || r === 'main') && !anchors(f)
 }
-/** 이름의 알맹이 — 엔진과 같은 방식으로 본다 */
-const core = (n: string) => n.replace(/\(.*?\)/g, '').replace(/구이|부침|조림|볶음|찜|무침|나물|전$/g, '').trim()
+/*
+ * 같은 재료인가 — 검사 쪽 기준.
+ *
+ * 엔진과 같은 함수를 쓰면 그 판정을 풀 때 검사도 함께 풀린다.
+ * 여기서는 더 단순하게 본다 — 괄호를 걷고 첫 낱말이 같으면 같은 재료로 친다.
+ * '브로콜리(데친 것)' 과 '브로콜리 데침' 이 한 상에 오른 것을 놓친 자리다.
+ */
+const core = (n: string) => n.replace(/\(.*?\)/g, '').trim().split(/[\s·]+/)[0]
 
 let meals = 0, days = 0
 /* 무엇이 얼마나 일어나는지도 함께 센다 — 0 건이면 검사가 헛돈 것이다 */
