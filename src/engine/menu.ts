@@ -235,7 +235,14 @@ export function ideasFromIngredients(
 
   for (const item of chosen) {
     const src = FOOD_BY_ID[item.foodId]
-    if (!src || src.form !== 'ingredient') continue
+    /*
+     * '재료' 인지는 form 이 아니라 isIngredientOnly 로 본다.
+     *
+     * form 은 자료를 만들 때 붙인 분류라 form:'processed' 인 것 중에도 재료가 있다 —
+     * 고등어통조림이 그렇다. 한국에서 그것은 시래기와 지지거나 무를 깔고 조리는 재료다.
+     * form 만 보다가, 메뉴에서는 빼 놓고 무엇을 만들 수 있는지는 알려 주지 못했다.
+     */
+    if (!src || !isIngredientOnly(src)) continue
 
     const key = coreWord(src.name)
 

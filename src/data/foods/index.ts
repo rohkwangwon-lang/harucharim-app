@@ -25,6 +25,7 @@ import { misc2 } from './misc2'
 import { western } from './western'
 import { ramyeon } from './ramyeon'
 import { gimbap } from './gimbap'
+import { ASIA_FOODS } from './asia'
 import { CUISINE_MAP, SEASON_MAP } from './seasonCuisine'
 import { GENERATED_CORE } from './generated'
 
@@ -35,7 +36,7 @@ export const CURATED_FOODS: Food[] = [
   ...soups, ...sidedish, ...riceNoodle, ...eatout,
   ...beverages, ...snacks, ...processed, ...clinical,
   ...vegetables2, ...fruits2, ...dishes2, ...misc2, ...western,
-  ...ramyeon, ...gimbap
+  ...ramyeon, ...gimbap, ...ASIA_FOODS
 ].map((f) => ({
   // 제철·요리 계통은 seasonCuisine.ts 한 곳에서 관리하고 여기서 붙인다
   ...f,
@@ -147,7 +148,14 @@ const FOR_FLAVOUR = new Set([
    * 실제로 "꽃게(찐 것) + 오리고기(구이) + 찹쌀밥 + 레몬" 이 점심으로 나갔다.
    * 레몬 한 개를 점심에 드시는 분은 없다.
    */
-  '레몬', '라임', '유자(청)'
+  '레몬', '라임', '유자(청)',
+  /*
+   * 고등어통조림 — 한국에서는 재료다.
+   *
+   * 그대로 상에 올리는 경우보다 시래기와 지지거나 무를 깔고 조리는 쪽이 훨씬 흔하다.
+   * 그런데 자주 추천되는 자리에 올라 있었다. 그 요리들을 자료에 넣고, 통조림은 재료로 옮긴다.
+   */
+  '고등어통조림'
 ])
 
 export function isIngredientOnly(f: Food): boolean {
