@@ -1,4 +1,5 @@
 import { readFileSync, readdirSync } from 'node:fs'
+import { INGREDIENT_DISHES } from '../../src/data/foods/ingredientDishes'
 /**
  * 두 번째 검사 — 날짜 계산, 기록 정규화, 성분 판정, 데이터 무결성.
  * 첫 검사(fuzz.ts)가 추천 엔진을 봤다면 여기는 그 바깥을 본다.
@@ -293,8 +294,21 @@ const bad = (k: string, d: string) => { const s = `${k} :: ${d}`; if (!seenB.has
       if (!ing) bad('손질 전인데 상에 오른다고 봄', f.name)
       continue
     }
-    if (COOKED.test(f.name) && ing && !SEASONING_LIKE.test(f.name))
-      bad('조리한 음식인데 재료로 봄', f.name)
+    /*
+     * 조리 표시가 있어도 재료인 것이 있다.
+     *
+     * 처음에는 '삶은/데친' 이 붙으면 먹는 것으로 보았다. 그런데 삶은 팥과 삶은 콩,
+     * 삶은 면(사리)은 그대로 먹지 않는다 — 콩자반이 되고, 팥죽이 되고, 국수가 된다.
+     * 실제로 "잡곡밥 + 팥(삶은 것)" 이 아침으로 나갔다.
+     *
+     * 그러니 규칙을 바꾼다. 조리 표시가 있는데 재료로 두었다면,
+     * **그것으로 만드는 요리를 등록해 두었는가** 를 본다.
+     * 빼기만 하고 길을 안 알려 주면 담으신 분이 "왜 아무 말이 없지" 로 끝난다.
+     */
+    if (COOKED.test(f.name) && ing && !SEASONING_LIKE.test(f.name)) {
+      if (!INGREDIENT_DISHES[f.name]?.length)
+        bad('재료로 두었는데 만들 요리를 안 알려 줌', f.name)
+    }
   }
 
   /*

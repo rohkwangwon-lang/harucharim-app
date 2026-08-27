@@ -2300,9 +2300,20 @@ function bestFiller(
       const hasStaple = roles.some((r) => r === 'staple' || r === 'onedish')
       const hasDish = roles.some((r) => r === 'soup' || r === 'main' || r === 'side')
 
+      const hasSoup = roles.includes('soup')
+
       let v = 0
       /* 밥만 놓인 상에는 국이나 반찬이 절실하다 */
       if (hasStaple && !hasDish && (role === 'soup' || role === 'main' || role === 'side')) v = 30
+      /*
+       * 밥과 반찬은 있는데 국이 없다.
+       *
+       * 한식의 통상적인 구성은 밥·반찬·국 한 벌이다. 반드시 그래야 하는 것은 아니지만,
+       * 반찬 하나가 붙었다고 상이 다 차려진 것처럼 두면 국이 좀처럼 오르지 않는다 —
+       * 국 27종을 갖춰 두고도 끼니의 12 % 에만 올랐다.
+       * 밥과 반찬이 있을 때 국을 조금 당긴다. 반찬을 부르는 힘보다는 약하게 둔다.
+       */
+      else if (hasStaple && hasDish && !hasSoup && role === 'soup') v = 20
       /* 반찬만 있고 밥이 없으면 밥을 부른다 */
       else if (!hasStaple && hasDish && role === 'staple') v = 22
       /* 이미 갖춰진 상에 후식을 더 얹는 것은 급하지 않다 */
