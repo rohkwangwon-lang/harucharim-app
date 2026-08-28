@@ -24,9 +24,14 @@ import { CURATED_FOODS, isIngredientOnly, mealRole, mealIsComplete } from '../..
 import { CANCER_BY_ID } from '../../src/data/cancers'
 import { SUBTYPE_OPTIONS } from '../../src/data/types'
 import { DEFAULT_PATIENT } from '../../src/lib/store'
+import { MEAL_SLOTS } from '../../src/data/types'
+import type { MealSlot } from '../../src/data/types'
 import type {
   CancerId, CancerSubtype, Cuisine, PatientCondition, PatientContext, Phase, TreatmentHistory
 } from '../../src/data/types'
+
+/** 상을 차리는 세 끼니 — 간식은 뺀다 */
+const MAIN_ONLY = ['아침', '점심', '저녁'] as const
 
 const bugs: string[] = []
 const seenBug = new Set<string>()
@@ -98,7 +103,7 @@ function claim(group: string, what: string, floor: number): Tally {
 /** 하루치 추천에서 이름들을 꺼낸다 */
 const dayFoods = (p: PatientContext, day: string) => {
   const m = buildDayMenu([], p, { day: day })
-  const items = (['아침', '점심', '저녁', '간식'] as const).flatMap((s) =>
+  const items = (MEAL_SLOTS).flatMap((s) =>
     m.meals[s].map((e) => ({ ...e, slot: s }))
   )
   return { m, items }
@@ -248,10 +253,10 @@ for (let i = 0; i < N; i++) {
      * 간식이 몇 %냐가 아니라 한 번에 얼마나 드시게 되느냐다.
      * 한 끼가 지나치게 크지 않은지로 본다.
      */
-    const kc = (s: '아침' | '점심' | '저녁' | '간식') =>
+    const kc = (s: MealSlot) =>
       m.meals[s].reduce((n, e) => n + (foodContribution(e.food, e.servings).kcal ?? 0), 0)
-    const tot = (['아침', '점심', '저녁', '간식'] as const).reduce((n, s) => n + kc(s), 0)
-    const biggest = Math.max(...(['아침', '점심', '저녁'] as const).map(kc))
+    const tot = (MEAL_SLOTS).reduce((n, s) => n + kc(s), 0)
+    const biggest = Math.max(...MAIN_ONLY.map(kc))
     if (tot > 0 && biggest <= tot * 0.4) cDump.hit++
   }
 
@@ -349,12 +354,12 @@ for (let i = 0; i < N; i++) {
   if (i % 6 === 0) {
     cRetry.n++
     const first = buildDayMenu([], p, { day: day, nonce: 0 })
-    const prev = (['아침', '점심', '저녁', '간식'] as const)
+    const prev = (MEAL_SLOTS)
       .flatMap((s) => first.meals[s].map((e) => ({ id: e.food.id, kcal: foodContribution(e.food, e.servings).kcal ?? 0 })))
     const avoid = new Map<string, number>()
     for (const e of [...prev].sort((a, b) => b.kcal - a.kcal).slice(0, 2)) avoid.set(e.id, 0)
     const second = buildDayMenu([], p, { day: day, nonce: 1, recent: avoid })
-    const keep = new Set((['아침', '점심', '저녁', '간식'] as const).flatMap((s) => second.meals[s].map((e) => e.food.id)))
+    const keep = new Set((MEAL_SLOTS).flatMap((s) => second.meals[s].map((e) => e.food.id)))
     const changed = prev.filter((e) => !keep.has(e.id)).length / Math.max(1, prev.length)
     if (changed >= 0.3) cRetry.hit++
   }
@@ -389,7 +394,7 @@ for (let i = 0; i < N; i++) {
       const dk = `2026-08-0${d}`
       week.push(dk)
       const mm = buildDayMenu([], p, { day: dk })
-      diary[dk] = (['아침', '점심', '저녁', '간식'] as const)
+      diary[dk] = (MEAL_SLOTS)
         .flatMap((s) => mm.meals[s].map((e) => ({ foodId: e.food.id, servings: e.servings, meal: '아침' as const })))
     }
     const rows = reportNutrients(week, (d) => (diary[d]?.length ? sumIntake(diary[d], []) : null), p, '주')

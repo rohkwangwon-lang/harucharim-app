@@ -53,7 +53,7 @@ const HISTORY: TreatmentHistory[] = ['수술','방사선치료','항암화학요
 // 생존기·호중구감소증 규칙이 한 번도 검사되지 않고 있었다.
 const PHASES = ['during_rt', 'during_chemo', 'neutropenia', 'post_op', 'survivorship'] as const
 const CUISINES: Cuisine[] = ['한식','양식','중식','일식','동남아']
-const SLOTS: (MealSlot | undefined)[] = ['아침','점심','저녁','간식', undefined]
+const SLOTS: (MealSlot | undefined)[] = [...MEAL_SLOTS, undefined]
 
 function randomPatient(): PatientContext {
   return {
@@ -211,7 +211,7 @@ for (let iter = 0; iter < N; iter++) {
       report('처음부터 구성한 하루가 열량 미달', `${ctx} ${Math.round(m.totals.kcal ?? 0)}/${m.target.kcal[0]}`)
     if ((m.totals.protein ?? 0) < m.target.protein[0])
       report('처음부터 구성한 하루가 단백질 미달', `${ctx} ${Math.round(m.totals.protein ?? 0)}/${m.target.protein[0]}`)
-    if (m.meals['간식'].length === 0)
+    if ([...m.meals['오전간식'], ...m.meals['오후간식']].length === 0)
       report('처음부터 구성했는데 간식이 없음', ctx)
 
     /*

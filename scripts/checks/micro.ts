@@ -21,6 +21,7 @@ import { CURATED_FOODS, mealIsComplete, mealRole } from '../../src/data/foods'
 import { REF_BY_ID } from '../../src/data/references'
 import { DEFAULT_PATIENT } from '../../src/lib/store'
 import type { CancerId, CancerSubtype, PatientCondition, PatientContext, Phase } from '../../src/data/types'
+import { MEAL_SLOTS } from '../../src/data/types'
 
 const bugs: string[] = []
 const seen = new Set<string>()
@@ -191,7 +192,7 @@ for (let i = 0; i < N; i++) {
     for (const m of targets) {
       let sum = 0
       let any = false
-      for (const slot of ['아침', '점심', '저녁', '간식'] as const)
+      for (const slot of MEAL_SLOTS)
         for (const e of day.meals[slot]) {
           const v = foodContribution(e.food, e.servings)[m.key]
           if (v !== undefined) { sum += v; any = true }
@@ -206,7 +207,7 @@ for (let i = 0; i < N; i++) {
      * 값이 없는 음식이 섞였으면 그 사실을 밝혀야 한다.
      * "기준 안에 있습니다" 라고 안심시켜 놓고 사실이 아니면 가장 나쁘다.
      */
-    const chosen = day.meals['아침'].concat(day.meals['점심'], day.meals['저녁'], day.meals['간식'])
+    const chosen = MEAL_SLOTS.flatMap((s) => day.meals[s])
       .map((e) => ({ foodId: e.food.id, servings: e.servings, meal: '아침' as const }))
     const blind = microUnknownNames(chosen, p)
     for (const m of targets) {
@@ -343,7 +344,7 @@ for (let i = 0; i < N; i++) {
   const day = (p: PatientContext) => buildDayMenu([], p, { day: '2026-08-25' })
   const menuOf = (p: PatientContext) => {
     const m = day(p)
-    return (['아침', '점심', '저녁', '간식'] as const)
+    return (MEAL_SLOTS)
       .flatMap((s) => m.meals[s].map((e) => e.food.id)).sort().join(',')
   }
 
@@ -482,7 +483,7 @@ for (let i = 0; i < N; i++) {
     for (let d = 0; d < 20; d++) {
       const m = buildDayMenu([], who, { day: `2026-${String(1 + (d % 12)).padStart(2, '0')}-${String(1 + d).padStart(2, '0')}` })
       days++
-      const names = (['아침', '점심', '저녁', '간식'] as const)
+      const names = (MEAL_SLOTS)
         .flatMap((s) => m.meals[s].map((e) => ({ n: e.food.name, g: e.food.group })))
       if (names.some((x) => match(x.n, x.g))) hit++
     }
@@ -693,7 +694,7 @@ for (let i = 0; i < N; i++) {
       if (nonce > 0)
         for (const e of [...prev].sort((a, b) => b.kcal - a.kcal).slice(0, 2)) avoid.set(e.id, 0)
       const m = buildDayMenu([], p, { day: '2026-08-25', nonce, recent: avoid })
-      const entries = (['아침', '점심', '저녁', '간식'] as const)
+      const entries = (MEAL_SLOTS)
         .flatMap((s) => m.meals[s].map((e) => ({ id: e.food.id, kcal: foodContribution(e.food, e.servings).kcal ?? 0 })))
       prev = entries
       return { list: entries.map((e) => e.id), kcal: m.totals.kcal ?? 0, target: m.target.kcal }

@@ -31,7 +31,7 @@ const CONDITION_LABELS: { id: PatientCondition; name: string }[] = ([
 import { label as dayLabel, today as todayKey } from '../lib/day'
 
 const SLOT_ICON: Record<MealSlot, typeof IconMorning> = {
-  아침: IconMorning, 점심: IconNoon, 저녁: IconEvening, 간식: IconSnack
+  아침: IconMorning, 오전간식: IconSnack, 점심: IconNoon, 오후간식: IconSnack, 저녁: IconEvening
 }
 
 /**

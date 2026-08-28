@@ -31,7 +31,7 @@ function normalizeDay(list: SelectedItem[]): SelectedItem[] {
   return out
 }
 
-const SLOTS: (MealSlot | undefined)[] = ['아침','점심','저녁','간식', undefined, undefined]
+const SLOTS: (MealSlot | undefined)[] = [...MEAL_SLOTS, undefined, undefined]
 
 for (let i = 0; i < 3000; i++) {
   const n = Math.floor(rnd() * 12)

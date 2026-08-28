@@ -13,7 +13,7 @@ import { REF_BY_ID } from '../data/references'
 import { DayNoteList, EvidenceBadge, NutrientPanel, NutrientRow, nutrientState, Section } from './ui'
 
 const SLOT_ICON: Record<MealSlot, typeof IconMorning> = {
-  아침: IconMorning, 점심: IconNoon, 저녁: IconEvening, 간식: IconSnack
+  아침: IconMorning, 오전간식: IconSnack, 점심: IconNoon, 오후간식: IconSnack, 저녁: IconEvening
 }
 
 /**
@@ -160,8 +160,8 @@ export function RecommendedMenu({
    * 정확한 값을 마지막에 한 번 반올림하면 항목을 손으로 더해 본 사람과 숫자가 어긋난다.
    * 영양제 몫은 끼니에 속하지 않으므로 따로 세어 마지막에 더한다.
    */
-  const slotNa: Record<MealSlot, number> = { 아침: 0, 점심: 0, 저녁: 0, 간식: 0 }
-  const slotKcal: Record<MealSlot, number> = { 아침: 0, 점심: 0, 저녁: 0, 간식: 0 }
+  const slotNa: Record<MealSlot, number> = { 아침: 0, 오전간식: 0, 점심: 0, 오후간식: 0, 저녁: 0 }
+  const slotKcal: Record<MealSlot, number> = { 아침: 0, 오전간식: 0, 점심: 0, 오후간식: 0, 저녁: 0 }
   for (const slot of MEAL_SLOTS) {
     for (const e of menu.meals[slot]) {
       const per = foodContribution(e.food, e.servings)

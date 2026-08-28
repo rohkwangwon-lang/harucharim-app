@@ -512,9 +512,36 @@ export type PatientCondition =
   | '와파린복용'
 
 /** 끼니 구분 */
-export type MealSlot = '아침' | '점심' | '저녁' | '간식'
+/**
+ * 끼니 자리.
+ *
+ * 처음에는 세 끼에 간식 한 자리였다. 그런데 암 치료 중에는 한 번에 많이 못 드시는 일이 흔해
+ * 소량씩 자주 나눠 드시는 것이 권장된다(ESPEN). 위를 절제하신 뒤에는 더욱 그렇다 —
+ * 하루 세 끼에 간식 두 번이 표준 권고다.
+ *
+ * 영양 배분은 이미 그렇게 나누고 있었는데(25/26/27/22) 간식 자리가 하나뿐이라
+ * 한 번에 몰아 드시는 것처럼 보였다. 오전과 오후로 나눠 실제 드시는 차례대로 적는다.
+ */
+export type MealSlot = '아침' | '오전간식' | '점심' | '오후간식' | '저녁'
 
-export const MEAL_SLOTS: MealSlot[] = ['아침', '점심', '저녁', '간식']
+export const MEAL_SLOTS: MealSlot[] = ['아침', '오전간식', '점심', '오후간식', '저녁']
+
+/** 간식 자리 — '간식이면 어디든' 을 뜻하는 자리에서 쓴다 */
+export const SNACK_SLOTS: MealSlot[] = ['오전간식', '오후간식']
+export const isSnack = (s: MealSlot): boolean => s === '오전간식' || s === '오후간식'
+
+/**
+ * 예전 기록의 '간식'.
+ *
+ * 자리를 둘로 나누기 전에 담으신 것들이다. 어느 쪽이었는지는 알 수 없으므로
+ * 오후 간식으로 본다 — 하루 중 간식은 오후에 드시는 일이 더 흔하다.
+ */
+export const LEGACY_SNACK = '간식'
+export function normalizeSlot(v: unknown): MealSlot | undefined {
+  if (typeof v !== 'string') return undefined
+  if (v === LEGACY_SNACK) return '오후간식'
+  return (MEAL_SLOTS as string[]).includes(v) ? (v as MealSlot) : undefined
+}
 
 /** 사용자가 고른 식품 1건 (같은 음식을 여러 끼니에 담을 수 있다) */
 export interface SelectedItem {

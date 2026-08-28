@@ -26,6 +26,7 @@ import { western } from './western'
 import { ramyeon } from './ramyeon'
 import { gimbap } from './gimbap'
 import { ASIA_FOODS } from './asia'
+import { CALCIUM_FOODS } from './calcium'
 import { CUISINE_MAP, SEASON_MAP } from './seasonCuisine'
 import { GENERATED_CORE } from './generated'
 
@@ -62,7 +63,7 @@ export const CURATED_FOODS: Food[] = [
   ...soups, ...sidedish, ...riceNoodle, ...eatout,
   ...beverages, ...snacks, ...processed, ...clinical,
   ...vegetables2, ...fruits2, ...dishes2, ...misc2, ...western,
-  ...ramyeon, ...gimbap, ...ASIA_FOODS
+  ...ramyeon, ...gimbap, ...ASIA_FOODS, ...CALCIUM_FOODS
 ].map((f) => ({
   // 제철·요리 계통은 seasonCuisine.ts 한 곳에서 관리하고 여기서 붙인다
   ...f,

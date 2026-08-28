@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
+import { normalizeSlot } from '../data/types'
 import { FOOD_BY_ID } from '../data/foods'
 import { observedWeightLoss } from '../engine/nutrition'
 import { defaultSlotFor } from '../engine/menu'
@@ -78,7 +79,15 @@ const DEFAULT_STATE: AppState = {
 function normalizeDay(list: SelectedItem[]): SelectedItem[] {
   const out: SelectedItem[] = []
   for (const item of list) {
-    const meal: MealSlot = item.meal ?? defaultSlotFor(FOOD_BY_ID[item.foodId])
+    /*
+     * 간식 자리가 하나에서 둘로 나뉘었다.
+     *
+     * 그전에 담으신 것에는 meal 이 '간식' 으로 적혀 있다. 그대로 두면 어느 자리에도
+     * 걸리지 않아 화면에서 사라지고, 합계에는 남아 "담지 않은 것이 들어가 있다" 로 보인다.
+     * 어느 쪽이었는지는 알 수 없으니 오후 간식으로 옮긴다 —
+     * 간식은 점심과 저녁 사이에 드시는 일이 더 흔하다.
+     */
+    const meal: MealSlot = normalizeSlot(item.meal) ?? defaultSlotFor(FOOD_BY_ID[item.foodId])
     const same = out.find((x) => x.foodId === item.foodId && x.meal === meal)
     if (same) {
       same.servings = Math.round((same.servings + item.servings) * 10) / 10

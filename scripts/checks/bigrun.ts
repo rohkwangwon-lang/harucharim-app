@@ -273,8 +273,8 @@ for (let person = 0; person < PEOPLE; person++) {
       const kc = (s: MealSlot) => menu.meals[s].reduce((n, e) => n + (foodContribution(e.food, e.servings).kcal ?? 0), 0)
       const day = MEAL_SLOTS.reduce((n, s) => n + kc(s), 0)
       if (day > 400) {
-        if (kc('간식') > day * 0.35)
-          bad('간식이 하루를 지고 있음', `${ctx} 간식 ${Math.round(kc('간식'))} / 하루 ${Math.round(day)}`)
+        if ((kc('오전간식') + kc('오후간식')) > day * 0.35)
+          bad('간식이 하루를 지고 있음', `${ctx} 간식 ${Math.round((kc('오전간식') + kc('오후간식')))} / 하루 ${Math.round(day)}`)
         for (const s of ['아침', '점심', '저녁'] as MealSlot[]) {
           if (kc(s) < day * 0.08)
             bad('한 끼가 식사라고 하기 어려움', `${ctx} ${s} ${Math.round(kc(s))} / 하루 ${Math.round(day)}`)
@@ -349,7 +349,7 @@ for (let person = 0; person < PEOPLE; person++) {
           kcal: Math.round(c.kcal ?? 0), na: Math.round(c.na ?? 0),
           protein: Math.round((c.protein ?? 0) * 10) / 10, fiber: Math.round((c.fiber ?? 0) * 10) / 10,
           count: 0, seasonal: 0, withEvidence: 0,
-          slots: { 아침: 0, 점심: 0, 저녁: 0, 간식: 0 }, cancers: new Map()
+          slots: { 아침: 0, 오전간식: 0, 점심: 0, 오후간식: 0, 저녁: 0 }, cancers: new Map()
         }
         stats.set(e.food.id, st)
       }

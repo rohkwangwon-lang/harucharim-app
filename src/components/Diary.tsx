@@ -12,6 +12,7 @@ import { GRADE_STYLE, reportNutrients, summarizeDay, summarizePeriod } from '../
 import { sumIntake } from '../engine/nutrition'
 import { DayNoteList, NutrientReportList, Section, ShortfallAdviceList, Stat } from './ui'
 import { adviseForShortfall } from '../engine/supplementAdvice'
+import { MEAL_SLOTS } from '../data/types'
 
 type View = 'day' | 'week' | 'month'
 
@@ -174,7 +175,7 @@ function DayView({
   const st = GRADE_STYLE[s.grade]
   const [w, setW] = useState(weight ? String(weight) : '')
 
-  const byMeal = (['아침', '점심', '저녁', '간식'] as const).map((m) => ({
+  const byMeal = MEAL_SLOTS.map((m) => ({
     meal: m,
     list: items.filter((i) => i.meal === m)
   }))
