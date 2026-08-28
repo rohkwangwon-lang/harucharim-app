@@ -524,6 +524,11 @@ export function buildDayMenu(
   const cached = { rules: activeRules(patient), interactions: activeInteractions(patient) }
   const profile = CANCER_BY_ID[patient.cancer]
   const target = personalTarget(patient, profile.target.kcalPerKg, profile.target.proteinPerKg)
+  /*
+   * 신장이 걸리는 분께 한 품목이 하루 단백질의 3분의 1을 넘지 않게 한다.
+   * 한 번에 몰아 쓰면 나머지 끼니에 남는 몫이 없어, 뒤에서 조금씩 새다 상한을 넘긴다.
+   */
+  const renalItemCap = renalCap ? target.protein[1] / 3 : 0
   const naLimit = profile.target.naLimit ?? 2000
 
   /*
@@ -838,9 +843,9 @@ export function buildDayMenu(
     for (const [id, ago] of recent) if (ago <= 2) looser.set(id, ago)
 
     const best =
-      bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, recent, GROUP_CAP, microRoom, renalCap, retry) ??
-      bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, looser, GROUP_CAP, microRoom, renalCap, retry) ??
-      bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, EMPTY_RECENT, GROUP_CAP, microRoom, renalCap, retry)
+      bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, recent, GROUP_CAP, microRoom, renalCap, renalItemCap, retry) ??
+      bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, looser, GROUP_CAP, microRoom, renalCap, renalItemCap, retry) ??
+      bestFiller(candidates, need, room, used, meals, groupCount, naCap, cap, quota, dayIndex + guard, EMPTY_RECENT, GROUP_CAP, microRoom, renalCap, renalItemCap, retry)
     if (!best) break
 
     /*
@@ -920,6 +925,7 @@ export function buildDayMenu(
       GROUP_CAP + 2,
       microBudget(micros, cur),
       renalCap,
+      renalItemCap,
       retry
     )
     if (!best) break
@@ -2791,6 +2797,8 @@ function bestFiller(
    * 그 맞바꿈은 하지 않는다 — 자세한 사정은 아래 걸러 내는 자리에 적어 두었다.
    */
   renalCap = false,
+  /** 신장이 걸리는 분께 한 품목이 넘지 못할 단백질 (하루 목표의 3분의 1) */
+  proteinCeiling = 0,
   /** '다시 구성' 을 누르셨는가 — 그때는 엇비슷한 후보를 넓게 본다 */
   retry = false
 ): Filler | undefined {
@@ -2833,6 +2841,15 @@ function bestFiller(
      * 그것대로 위험하다. 크게 모자란 동안에는 조금 열어 둔다.
      */
     if (renalCap && c.protein > Math.max(6, room.protein + (need.kcal > 1200 ? 14 : 0))) continue
+    /*
+     * 신장이 걸리는 분께는 한 품목이 하루 몫을 크게 가져가지 못하게 한다.
+     *
+     * 위 걸림돌은 '남은 여유' 만 본다. 그래서 하루가 아직 비어 있을 때는
+     * 닭가슴살 한 접시(31 g)가 그대로 통과했다 — 목표가 68 g 인 분께는 하루의 절반이다.
+     * 그러고 나면 나머지 끼니에 쓸 몫이 얼마 안 남아, 뒤에서 조금씩 새어 90 g 이 되었다.
+     * 한 번에 하루의 3분의 1을 넘지 않게 하면 세 끼에 고르게 나뉜다.
+     */
+    if (renalCap && proteinCeiling > 0 && c.protein > proteinCeiling) continue
     /*
      * 저잔사 기간에는 섬유가 많은 것을 받지 않는다.
      * 남은 여유를 크게 넘기지만 않으면 되므로, 조금씩 여러 가지는 그대로 들어온다.
