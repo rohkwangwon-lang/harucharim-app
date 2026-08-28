@@ -178,7 +178,11 @@ export function Onboarding({
                   className="underline decoration-stone-300"
                 >
                   개인정보처리방침
-                </a>
+                </a>{' · '}<a
+                  href={`${import.meta.env.BASE_URL}terms.html`}
+                  target="_blank" rel="noreferrer"
+                  className="underline underline-offset-2"
+                >이용약관</a>
               </p>
             </div>
           </Step>

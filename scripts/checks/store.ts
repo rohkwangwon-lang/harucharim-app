@@ -88,6 +88,28 @@ no(!/대체하지 않습니다/.test(app), '진료를 대체하지 않는다는 
 const howto = readFileSync('src/components/HowTo.tsx', 'utf-8')
 no(!/근거 등급|근거 A/.test(howto), '근거 등급을 설명하는 자리가 없음')
 
+/* ── 3-2. 이용약관 ────────────────────────────────────
+ *
+ * 소셜 로그인으로 회원을 받는 서비스이므로 약관이 있어야 한다.
+ * 애플은 기본 EULA 로 갈음할 수 있지만, 국내법에서는 회원 서비스에 약관 동의를 요구한다.
+ * 그리고 이 앱은 건강을 다루므로 '진료를 대체하지 않는다' 는 말이 약관에도 있어야 한다.
+ */
+{
+  const terms = existsSync('public/terms.html') ? readFileSync('public/terms.html', 'utf8') : ''
+  no(!terms, 'public/terms.html 이 없음 — 회원 서비스에는 이용약관이 필요하다')
+  if (terms) {
+    no(!/대체하지 않습니다/.test(terms), '약관에 진료를 대체하지 않는다는 고지가 없음')
+    no(!/만 14세 미만/.test(terms), '약관에 만 14세 미만 이용 제한이 없음')
+    no(!/개인정보처리방침/.test(terms), '약관이 개인정보처리방침을 가리키지 않음')
+    no(!/시행일/.test(terms), '약관에 시행일이 없음')
+  }
+  /* 앱 안에서 볼 수 있어야 한다 — 파일만 있고 링크가 없으면 없는 것과 같다 */
+  const appSrc = readFileSync('src/App.tsx', 'utf8')
+  no(!/terms\.html/.test(appSrc), '앱에서 이용약관으로 가는 길이 없음')
+  const onboard = readFileSync('src/components/Onboarding.tsx', 'utf8')
+  no(!/terms\.html/.test(onboard), '가입 전에 약관을 볼 자리가 없음')
+}
+
 /* ── 4. 매니페스트 — TWA·설치 요건 ─────────────────────── */
 for (const [re, what] of [
   [/short_name:/, '홈 화면 이름(short_name)'],

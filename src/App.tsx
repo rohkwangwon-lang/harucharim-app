@@ -558,6 +558,17 @@ function Disclaimer() {
             개인정보처리방침 보기
           </a>
         </li>
+        <li>
+          ·{' '}
+          <a
+            href={`${import.meta.env.BASE_URL}terms.html`}
+            target="_blank"
+            rel="noreferrer"
+            className="font-medium text-brand-700 underline decoration-brand-300 underline-offset-2"
+          >
+            이용약관 보기
+          </a>
+        </li>
       </ul>
     </div>
     </>
