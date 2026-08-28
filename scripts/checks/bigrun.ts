@@ -25,7 +25,7 @@ import { MEDICATIONS } from '../../src/data/interactions'
 import { DEFAULT_PATIENT } from '../../src/lib/store'
 import { MEAL_SLOTS, SUBTYPE_OPTIONS } from '../../src/data/types'
 import { portionLabel } from '../../src/lib/portion'
-import type { Food, MealSlot, PatientCondition, PatientContext, SelectedItem } from '../../src/data/types'
+import type { Food, MealSlot, PatientCondition, PatientContext, SelectedItem, TreatmentHistory } from '../../src/data/types'
 
 const PEOPLE = Number(process.env.PEOPLE ?? 2000)
 const DAYS = Number(process.env.DAYS ?? 90)
@@ -132,6 +132,9 @@ const CONDS: PatientCondition[] = [
   '호중구감소증', '위절제후', '장루보유', '복수', '간성뇌증위험', '신기능저하', '당뇨', '고혈압', '와파린복용'
 ]
 const PHASES = ['during_rt', 'during_chemo', 'neutropenia', 'post_op', 'survivorship'] as const
+const HISTORY: TreatmentHistory[] = [
+  '수술', '방사선치료', '항암화학요법', '항호르몬치료', '표적치료', '면역항암제', '조혈모세포이식'
+]
 const CUISINES = ['양식', '중식', '일식', '동남아'] as const
 
 const RealDate = Date
@@ -186,6 +189,14 @@ for (let person = 0; person < PEOPLE; person++) {
       if (r < 0.93) return uniq(['한식', pick(CUISINES), pick(CUISINES)]) as PatientContext['cuisines']
       return [pick(CUISINES)] as PatientContext['cuisines']
     })(),
+    /*
+     * 치료 이력.
+     *
+     * 여태 한 번도 넣지 않았다. 영양제 권고가 이력에 걸리는데도 그랬다 —
+     * '위 전절제면 B12', '항호르몬치료면 칼슘·비타민 D' 같은 갈래가
+     * 이 검사에서는 한 번도 밟히지 않았던 셈이다.
+     */
+    history: uniq(times(rnd() < 0.4 ? 1 : rnd() < 0.65 ? 2 : rnd() < 0.8 ? 3 : 0, () => pick(HISTORY))),
     /*
      * 세부 변수.
      *
