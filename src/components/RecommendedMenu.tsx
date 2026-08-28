@@ -294,7 +294,7 @@ export function RecommendedMenu({
         </Section>
       )}
 
-      <Section title="끼니별 구성" desc="네 끼니를 모두 합한 것이 하루 목표량입니다.">
+      <Section title="끼니별 구성" desc="다섯 끼니를 모두 합한 것이 하루 목표량입니다.">
         <div className="space-y-2.5">
           {MEAL_SLOTS.map((slot) => {
             const entries = menu.meals[slot]

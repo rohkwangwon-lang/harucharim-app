@@ -975,7 +975,17 @@ export function buildDayMenu(
      * 잦은 소량이 필요한 분은 둘 다 채우고, 그렇지 않으면 오후 한 번만 채운다.
      * 오후를 남기는 것은 점심과 저녁 사이가 가장 길기 때문이다.
      */
-    if (slot === '오전간식' && snackShare(shares) < 0.2) continue
+    if (slot === '오전간식' && snackShare(shares) < GRAZE_SNACK_SHARE) continue
+    /*
+     * 간식은 모자랄 때 채우는 자리다.
+     *
+     * 이 단계는 '빈 끼니에는 뭐라도' 인데, 간식 자리가 둘이 되면서 하루가 이미 찬 날에도
+     * 두 자리를 다 채워 목표를 넘겼다. 잦은 소량으로 드셔야 하는 분께 필요한 것은
+     * '더 드시는 것' 이 아니라 '나눠 드시는 것' 이다 — 나누는 일은 아래 4-2-3 이 한다.
+     * 그렇다고 둘 다 막으면 간식이 없는 하루가 된다 — 실제로 그렇게 만들어 보았다(23종).
+     * 오후 한 번은 늘 두고, 오전은 아직 하루가 모자랄 때만 새로 놓는다.
+     */
+    if (slot === '오전간식' && (running().kcal ?? 0) >= target.kcal[0]) continue
     /*
      * 잦은 소량으로 드셔야 하는 분은 간식이 '비어 있지 않기만' 해서는 부족하다.
      *
@@ -984,7 +994,7 @@ export function buildDayMenu(
      * 간식에 213 kcal 짜리 하나가 놓이면 그것으로 끝났다 — 하루의 12 % 다.
      * 그래서 제 몫의 절반도 못 채운 간식은 한 번 더 본다.
      */
-    const graze = snackShare(shares) >= 0.2
+    const graze = snackShare(shares) >= GRAZE_SNACK_SHARE
     const thin = graze && isSnack(slot) &&
       snackEntries(meals).reduce((n, e) => n + (foodContribution(e.food, e.servings).kcal ?? 0), 0) < snackShare(quota) * 0.55
     if (meals[slot].length > 0 && !thin) continue
@@ -1034,7 +1044,7 @@ export function buildDayMenu(
      * 잦은 소량이 필요한 분은 둘 다 채우고, 그렇지 않으면 오후 한 번만 채운다.
      * 오후를 남기는 것은 점심과 저녁 사이가 가장 길기 때문이다.
      */
-    if (slot === '오전간식' && snackShare(shares) < 0.2) continue
+    if (slot === '오전간식' && snackShare(shares) < GRAZE_SNACK_SHARE) continue
       for (const entry of meals[slot]) {
         if (entry.origin !== 'added' || entry.seasonal) continue
         const cur = foodContribution(entry.food, entry.servings)
@@ -1367,7 +1377,7 @@ export function buildDayMenu(
    * 하루 총량은 그대로이고 나뉘는 모양만 달라진다.
    */
   {
-    const graze = snackShare(shares) >= 0.2
+    const graze = snackShare(shares) >= GRAZE_SNACK_SHARE
     const load = (slot: MealSlot) =>
       meals[slot].reduce((n, e) => n + (foodContribution(e.food, e.servings).kcal ?? 0), 0)
 
@@ -1457,7 +1467,7 @@ export function buildDayMenu(
        * 위를 잘라 내신 분께 저녁 660 kcal 은 한 번에 드시기 어려운 양이다.
        * 그분들께는 '넘침' 의 기준을 낮춰 더 부지런히 나눈다.
        */
-      const graze = snackShare(shares) >= 0.2
+      const graze = snackShare(shares) >= GRAZE_SNACK_SHARE
       const overLine = starving ? 0.95 : graze ? 1.05 : 1.15
       const overs = MEAL_SLOTS.filter((s) => load(s) > quota[s] * overLine)
         .sort((a, b) => load(b) - quota[b] - (load(a) - quota[a]))
@@ -1606,7 +1616,7 @@ export function buildDayMenu(
      * 잦은 소량이 필요한 분은 둘 다 채우고, 그렇지 않으면 오후 한 번만 채운다.
      * 오후를 남기는 것은 점심과 저녁 사이가 가장 길기 때문이다.
      */
-    if (slot === '오전간식' && snackShare(shares) < 0.2) continue
+    if (slot === '오전간식' && snackShare(shares) < GRAZE_SNACK_SHARE) continue
     let t: NutrientTotals = {}
     for (const e of meals[slot]) t = addTotals(t, foodContribution(e.food, e.servings))
     slotTotals[slot] = t
@@ -1902,12 +1912,12 @@ export function planNotes(patient: PatientContext): { label: string; reason: str
   }
 
   const shares = mealShares(patient)
-  if (snackShare(shares) >= 0.2) {
+  if (snackShare(shares) >= GRAZE_SNACK_SHARE) {
     out.push({
       label: '한 끼를 크게 만들지 않고 나눠 담았습니다',
       reason:
         '한 번에 많이 드시기 어려운 상태입니다. 저녁을 크게 잡으면 그 끼니를 통째로 남기시게 되므로, ' +
-        '네 끼니를 고르게 하고 간식 몫을 키웠습니다.'
+        '다섯 번에 나누고 간식 몫을 키웠습니다.'
     })
   }
 
@@ -2240,6 +2250,16 @@ function snackKcal(meals: Record<MealSlot, MenuEntry[]>): number {
 function snackEntries(meals: Record<MealSlot, MenuEntry[]>): MenuEntry[] {
   return SNACK_SLOTS.flatMap((s) => meals[s])
 }
+
+/**
+ * 이 몫을 넘으면 '잦은 소량' 으로 본다.
+ *
+ * 예전에는 0.2 로 못 박혀 있었다. 그런데 자리를 둘로 나누며 간식 몫을 0.22 에서 0.18 로
+ * 줄이자, 위를 절제하신 분이 이 문턱에 걸려 오전 간식을 통째로 잃었다 —
+ * 정작 소량 빈번식이 가장 필요한 분인데.
+ * 숫자를 여기 한 곳에 두고 몫과 함께 움직이게 한다.
+ */
+const GRAZE_SNACK_SHARE = 0.15
 
 function mealShares(patient: PatientContext): Record<MealSlot, number> {
   const grazing = patient.conditions.some(

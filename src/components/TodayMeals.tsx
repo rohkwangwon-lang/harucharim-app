@@ -236,7 +236,7 @@ export function TodayMeals({
           {profile.name} · {currentSeason()}철 · {patient.weightKg} kg 기준
         </p>
         <p className="mt-1 text-xs leading-relaxed text-stone-600">
-          아침·점심·저녁·간식을 <strong>모두 합한 것이 하루치</strong>입니다. 한 끼 분량이 아닙니다.
+          아침·오전간식·점심·오후간식·저녁을 <strong>모두 합한 것이 하루치</strong>입니다. 한 끼 분량이 아닙니다.
         </p>
 
         {/*
@@ -310,7 +310,7 @@ export function TodayMeals({
           <p className="text-xs leading-relaxed text-stone-600">
             {filledSlots.length === 0 ? (
               <>
-                <strong className="text-stone-800">나만의 식단을 구성해 보세요.</strong> 아침·점심·저녁·간식 중
+                <strong className="text-stone-800">나만의 식단을 구성해 보세요.</strong> 아침·오전간식·점심·오후간식·저녁 중
                 드시고 싶은 메뉴를 찾아 채우시면 <strong>검증하고 평가해 드립니다.</strong>
                 <br />
                 전부 채우지 않으셔도 됩니다. 필요한 끼니만 채우시면 나머지는{' '}
