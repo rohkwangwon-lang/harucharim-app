@@ -27,6 +27,7 @@ import { ramyeon } from './ramyeon'
 import { gimbap } from './gimbap'
 import { ASIA_FOODS } from './asia'
 import { CALCIUM_FOODS } from './calcium'
+import { WORLD_FOODS } from './worldMore'
 import { CUISINE_MAP, SEASON_MAP } from './seasonCuisine'
 import { GENERATED_CORE } from './generated'
 
@@ -63,7 +64,7 @@ export const CURATED_FOODS: Food[] = [
   ...soups, ...sidedish, ...riceNoodle, ...eatout,
   ...beverages, ...snacks, ...processed, ...clinical,
   ...vegetables2, ...fruits2, ...dishes2, ...misc2, ...western,
-  ...ramyeon, ...gimbap, ...ASIA_FOODS, ...CALCIUM_FOODS
+  ...ramyeon, ...gimbap, ...ASIA_FOODS, ...CALCIUM_FOODS, ...WORLD_FOODS
 ].map((f) => ({
   // 제철·요리 계통은 seasonCuisine.ts 한 곳에서 관리하고 여기서 붙인다
   ...f,
@@ -262,6 +263,9 @@ export type MealRole = 'staple' | 'onedish' | 'soup' | 'main' | 'side' | 'desser
 
 const ONE_DISH = /죽$|미음|국수|냉면|비빔밥|덮밥|볶음밥|김밥|우동|라면|파스타|리소토|쌈밥|카레|짜장|짬뽕|초밥|백반|정식/
 
+/** 이름이 이렇게 끝나면 국물 요리다 */
+const SOUPY = /(국|탕|찌개|전골|수프|스프)$/
+
 /*
  * 밥 노릇을 하는 빵.
  *
@@ -299,7 +303,17 @@ export function mealRole(f: Food): MealRole {
        * 보쌈을 '주식' 으로 두었더니 밥 자리를 차지하고도 반찬이 없어
        * '보쌈 + 수박' 이 한 끼로 나갔다. 밥이 아니면 주찬으로 본다.
        */
-      return ONE_DISH.test(f.name) ? 'onedish' : /밥$|공기밥/.test(f.name) ? 'staple' : 'main'
+      if (ONE_DISH.test(f.name)) return 'onedish'
+      if (/밥$|공기밥/.test(f.name)) return 'staple'
+      /*
+       * 국물 요리는 갈래가 어디에 적혀 있든 국이다.
+       *
+       * 미소국·단호박 수프·크림 스프가 '외식·프랜차이즈' 로 묶여 있어 주찬으로 잡혔다.
+       * 그래서 양식을 고르신 분께는 국이 한 가지도 없었고, 두 그릇이 한 상에 오르는 것도
+       * 막히지 않았다 — 국이 아닌 것으로 보였으니까.
+       */
+      if (SOUPY.test(f.name)) return 'soup'
+      return 'main'
     case '곡류·전분':
       /*
        * 밥과 빵은 주식, 감자·고구마·옥수수는 곁들이로 본다.

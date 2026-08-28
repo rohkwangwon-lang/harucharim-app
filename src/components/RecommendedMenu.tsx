@@ -3,8 +3,8 @@ import { portionLabel } from '../lib/portion'
 import { menuConditionKey } from '../lib/menuIdentity'
 import { track } from '../lib/stats'
 import { IconEvening, IconMorning, IconNoon, IconShuffle, IconSnack } from './icons'
-import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
-import { MEAL_SLOTS } from '../data/types'
+import type { Cuisine, MealSlot, PatientContext, SelectedItem } from '../data/types'
+import { CUISINE_CHOICES, MEAL_SLOTS } from '../data/types'
 import { buildDayMenu, fiberGoal, recentFoods, type DayMenu } from '../engine/menu'
 import { foodContribution, personalTarget } from '../engine/nutrition'
 import { CANCER_BY_ID } from '../data/cancers'
@@ -33,7 +33,8 @@ export function RecommendedMenu({
   onShown,
   onApply,
   onApplyAll,
-  onGoCompose
+  onGoCompose,
+  onPatch
 }: {
   patient: PatientContext
   selected: SelectedItem[]
@@ -50,6 +51,8 @@ export function RecommendedMenu({
   onApply: (foodId: string, meal: MealSlot) => void
   onApplyAll: (items: { foodId: string; meal: MealSlot }[]) => void
   onGoCompose: () => void
+  /** 요리 계통을 이 화면에서 바로 고치실 수 있게 한다 */
+  onPatch?: (patch: { cuisines: Cuisine[] }) => void
 }) {
   const profile = CANCER_BY_ID[patient.cancer]
   const naLimit = profile.target.naLimit ?? 2000
@@ -292,6 +295,39 @@ export function RecommendedMenu({
             ))}
           </div>
         </Section>
+      )}
+
+      {/*
+        * 요리 계통을 여기서 바로 고르신다.
+        *
+        * 첫 설정에서 한 번 고르고 나면 바꿀 자리가 없었다. 그런데 무엇을 드실지는
+        * 그날그날 다르고, 바꾸신 결과는 바로 이 화면에 나온다 — 고르는 자리도 여기 있어야 한다.
+        */}
+      {onPatch && (
+        <div className="card mb-3 px-3.5 py-3">
+          <p className="mb-1.5 text-[11px] font-semibold text-stone-500">
+            드시고 싶은 요리 계통 <span className="font-normal text-stone-400">· 한식은 늘 나옵니다</span>
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {CUISINE_CHOICES.map((c) => {
+              const on = (patient.cuisines ?? ['한식']).includes(c)
+              return (
+                <button
+                  key={c}
+                  onClick={() => {
+                    const now = patient.cuisines ?? ['한식']
+                    const next = now.includes(c) ? now.filter((x) => x !== c) : [...now, c]
+                    onPatch({ cuisines: next.length > 0 ? next : ['한식'] })
+                  }}
+                  aria-pressed={on}
+                  className={`chip border ${on ? 'border-brand-600 bg-brand-600 text-white' : 'border-stone-300 bg-white text-stone-600'}`}
+                >
+                  {c === '동남아' ? '동남아식' : c}
+                </button>
+              )
+            })}
+          </div>
+        </div>
       )}
 
       <Section title="끼니별 구성" desc="다섯 끼니를 모두 합한 것이 하루 목표량입니다.">

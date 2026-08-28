@@ -296,6 +296,7 @@ export default function App() {
               setTimeout(() => setToast(null), 1600)
               setTab('compose')
             }}
+            onPatch={setPatient}
             onGoCompose={() => setTab('compose')}
           />
         )}

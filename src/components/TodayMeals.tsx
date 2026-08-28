@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { portionLabel } from '../lib/portion'
 import { IconEvening, IconMorning, IconNoon, IconSnack, IconSuggest } from './icons'
 import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
-import { MEAL_SLOTS } from '../data/types'
+import { CUISINE_CHOICES, MEAL_SLOTS } from '../data/types'
 import { FOOD_BY_ID } from '../data/foods'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
 import { CANCER_BY_ID } from '../data/cancers'
@@ -226,6 +226,24 @@ export function TodayMeals({
                 : [...patient.medications, id]
             })
           }
+        />
+        {/*
+          * 요리 계통.
+          *
+          * 여태 첫 설정에서 한 번 고르고 나면 바꿀 자리가 없었다.
+          * 오늘은 일식이 당기실 수도 있고, 양식을 골라 두었는데 물리실 수도 있다 —
+          * 증상이나 약처럼 그 자리에서 고치실 수 있어야 한다.
+          */}
+        <ChipGroup
+          label="드시고 싶은 요리 계통 (한식은 늘 나옵니다)"
+          options={CUISINE_CHOICES.map((c) => ({ id: c, name: c === '동남아' ? '동남아식' : c }))}
+          value={patient.cuisines ?? ['한식']}
+          onToggle={(id) => {
+            const now = patient.cuisines ?? ['한식']
+            const next = now.includes(id) ? now.filter((c) => c !== id) : [...now, id]
+            /* 하나도 안 고르시면 한식으로 되돌린다 — 빈 목록은 '아무것도 안 드신다' 가 아니다 */
+            onPatch({ cuisines: next.length > 0 ? next : ['한식'] })
+          }}
         />
       </TodayStatus>
 
