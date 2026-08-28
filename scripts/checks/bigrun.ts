@@ -277,7 +277,15 @@ for (let person = 0; person < PEOPLE; person++) {
     const grazing = patient.conditions.some((c) => ['식욕부진', '체중감소', '위절제후', '오심·구토'].includes(c))
     if (!grazing) {
       const kc = (s: MealSlot) => menu.meals[s].reduce((n, e) => n + (foodContribution(e.food, e.servings).kcal ?? 0), 0)
-      if (kc('아침') > kc('저녁') * 1.1) bad('아침이 저녁보다 무거움', `${ctx} ${Math.round(kc('아침'))} > ${Math.round(kc('저녁'))}`)
+      if (kc('아침') > kc('저녁') * 1.1) {
+        bad('아침이 저녁보다 무거움', `${ctx} ${Math.round(kc('아침'))} > ${Math.round(kc('저녁'))}`)
+        if (process.env.DBG_BF) {
+          const r = kc('아침') / Math.max(1, kc('저녁'))
+          const band = patient.weightKg < 45 ? 'a 30~44kg' : patient.weightKg < 60 ? 'b 45~59' : patient.weightKg < 80 ? 'c 60~79' : 'd 80+'
+          const supN = supps.length
+          console.log(`[아침] ${r.toFixed(2)} ${band} supp=${supN} sub=${(patient.subtypes ?? []).length} hist=${(patient.history ?? []).length} | ${menu.meals['아침'].map((e) => e.food.name).join('+')}`)
+        }
+      }
     }
 
     /*
