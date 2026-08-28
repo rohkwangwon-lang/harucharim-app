@@ -1115,7 +1115,16 @@ export function buildDayMenu(
              * 곁들임 상한이 걸리지 않는 유일한 통로였다.
              */
             (!sideClash(meals, slot, c.food, entry) ||
-              (renalCap && c.protein < (foodContribution(entry.food, entry.servings).protein ?? 0))) &&
+              /*
+               * 신장을 위해 여는 문을 좁힌다.
+               *
+               * 단백질을 낮추는 갈아 끼우기는 막지 않기로 했는데, 그 예외가 너무 넓었다.
+               * 같은 재료를 한 상에 두 번 놓는 것까지 통과해 '토마토 + 토마토(가열, 기름 조리)' 가
+               * 나왔다 — 36만 일에서 걸린 세 건이 모두 신기능저하인 분이었다.
+               * 같은 것을 두 번 놓는 것이 신장에 이로울 까닭은 없다. 그것만은 막는다.
+               */
+              (renalCap && c.protein < (foodContribution(entry.food, entry.servings).protein ?? 0) &&
+                !sameIngredient(meals, slot, c.food, entry))) &&
               /*
                * 갈아 끼운 뒤에도 상이 서야 한다.
                *
@@ -2075,6 +2084,27 @@ function tidy(t: NutrientTotals): NutrientTotals {
     out[k] = Math.abs(v) < 1e-9 ? 0 : v
   }
   return out as NutrientTotals
+}
+
+/**
+ * 같은 재료를 두 번 놓는가만 따로 본다.
+ *
+ * sideClash 는 곁들임 몰림·국 둘·같은 재료를 한꺼번에 본다. 신장을 위해 그 문을 열 때
+ * 세 가지가 함께 열려 버려서, 같은 재료만 따로 떼어 볼 수 있게 한다.
+ */
+function sameIngredient(
+  meals: Record<MealSlot, MenuEntry[]>, to: MealSlot, food: Food, replacing?: MenuEntry
+): boolean {
+  const here = meals[to].filter((e) => e !== replacing)
+  const core = coreName(food.name)
+  if (core.length >= 2 && here.some((e) => coreName(e.food.name) === core)) return true
+  const bare = (n: string) => n.replace(/\(.*?\)/g, '').replace(/\s+/g, '').trim()
+  const mine = bare(food.name)
+  if (mine.length < 2) return false
+  return here.some((e) => {
+    const other = bare(e.food.name)
+    return other.length >= 2 && (mine.startsWith(other) || other.startsWith(mine))
+  })
 }
 
 function sideClash(meals: Record<MealSlot, MenuEntry[]>, to: MealSlot, food: Food, replacing?: MenuEntry): boolean {
