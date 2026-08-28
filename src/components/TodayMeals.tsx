@@ -310,6 +310,7 @@ export function TodayMeals({
           {day === todayKey() ? '오늘' : dayLabel(day)} 체중
         </span>
         <input
+          aria-label="오늘 체중 (kg)"
           type="number" inputMode="decimal"
           className="input flex-1 text-right"
           placeholder="기록 안 함"

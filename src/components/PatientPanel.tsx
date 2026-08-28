@@ -159,6 +159,7 @@ export function PatientPanel({
           <div className="col-span-2 sm:col-span-4">
             <label className="label">어떻게 불러 드릴까요</label>
             <input
+              aria-label="어떻게 불러 드릴까요"
               className="input"
               placeholder="이름 또는 별칭"
               value={patient.name ?? ''}
@@ -169,6 +170,7 @@ export function PatientPanel({
           <div>
             <label className="label">체중 (kg)</label>
             <input
+              aria-label="체중 (kg)"
               type="number" inputMode="decimal" className="input"
               value={patient.weightKg}
               onChange={(e) => onChange({ weightKg: Number(e.target.value) || 0 })}
@@ -177,6 +179,7 @@ export function PatientPanel({
           <div>
             <label className="label">신장 (cm)</label>
             <input
+              aria-label="신장 (cm)"
               type="number" inputMode="decimal" className="input"
               value={patient.heightCm}
               onChange={(e) => onChange({ heightCm: Number(e.target.value) || 0 })}
@@ -185,6 +188,7 @@ export function PatientPanel({
           <div>
             <label className="label">나이</label>
             <input
+              aria-label="나이"
               type="number" inputMode="numeric" className="input"
               value={patient.age}
               onChange={(e) => onChange({ age: Number(e.target.value) || 0 })}
@@ -211,6 +215,7 @@ export function PatientPanel({
           <div className="col-span-2 sm:col-span-4">
             <label className="label">최근 6개월 체중 감소율 (%)</label>
             <input
+              aria-label="최근 6개월 체중 감소율 (%)"
               type="number" inputMode="decimal" className="input"
               value={patient.weightLossPct ?? 0}
               onChange={(e) => onChange({ weightLossPct: Number(e.target.value) || 0 })}

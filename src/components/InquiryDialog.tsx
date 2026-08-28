@@ -136,6 +136,7 @@ export function InquiryDialog({
                 {kind === 'error' ? '어떤 항목인가요?' : '무엇을 찾으시나요?'}
               </label>
               <input
+                aria-label={kind === 'error' ? '어떤 항목인가요' : '무엇을 찾으시나요'}
                 className="input mb-1"
                 placeholder={kind === 'supplement' ? '예: 임팩타민 프리미엄 파워' : '예: 밀푀유나베'}
                 value={subject}
@@ -146,6 +147,7 @@ export function InquiryDialog({
 
               <label className="label">자세한 내용</label>
               <textarea
+                aria-label="자세한 내용"
                 className="input mb-4 min-h-[110px] resize-y"
                 placeholder="아는 만큼만 적어 주셔도 됩니다."
                 value={body}
@@ -167,6 +169,7 @@ export function InquiryDialog({
                 <>
                   <label className="label">답변받으실 이메일</label>
                   <input
+                    aria-label="답변받으실 이메일"
                     className="input mb-3"
                     type="email"
                     inputMode="email"

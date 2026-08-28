@@ -155,6 +155,7 @@ export function BarcodeScanner({
           }}
         >
           <input
+            aria-label="바코드 번호 직접 입력"
             className="min-w-0 flex-1 rounded-xl border border-white/25 bg-white/10 px-3 py-2.5 text-sm text-white placeholder:text-white/45 focus:border-brand-400 focus:outline-none"
             inputMode="numeric"
             autoComplete="off"

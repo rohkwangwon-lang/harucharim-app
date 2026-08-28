@@ -206,6 +206,7 @@ function DayView({
       <Section title="그날 체중">
         <div className="card flex items-center gap-2 p-3.5">
           <input
+            aria-label="체중 (kg)"
             type="number" inputMode="decimal" className="input flex-1"
             placeholder="예: 58.5"
             value={w}

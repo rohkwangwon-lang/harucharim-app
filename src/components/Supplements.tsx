@@ -218,6 +218,7 @@ export function Supplements({
 
         <div className="mb-3 flex gap-1.5">
           <input
+            aria-label="영양제 검색"
             className="input flex-1"
             placeholder={hasExt ? '제품명으로 검색 — 예: 락토핏, 오메가3, 홍삼' : '먼저 상품 데이터를 받아 주세요'}
             value={q}

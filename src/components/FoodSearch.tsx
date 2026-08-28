@@ -207,6 +207,7 @@ export function FoodSearch({
       <div className={`sticky ${onDone ? 'top-[52px]' : 'top-0'} z-10 -mx-4 mb-3 bg-stone-50/95 px-4 pb-2 pt-1 backdrop-blur`}>
         <div className="flex gap-1.5">
           <input
+            aria-label="음식 이름으로 검색"
             className="input flex-1"
             placeholder="음식 이름으로 검색 — 예: 된장찌개, 두부, 삼겹살"
             value={q}

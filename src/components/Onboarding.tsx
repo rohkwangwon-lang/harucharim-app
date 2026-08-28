@@ -511,6 +511,7 @@ function Field({ label, value, onChange }: { label: string; value: number; onCha
     <div>
       <label className="label">{label}</label>
       <input
+        aria-label={label}
         type="number" inputMode="decimal" className="input"
         value={value}
         onChange={(e) => onChange(Number(e.target.value) || 0)}

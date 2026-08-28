@@ -14,6 +14,7 @@ import { CANCERS } from '../../src/data/cancers'
 import { MEDICATIONS } from '../../src/data/interactions'
 import type { CancerId, MealSlot, PatientCondition, PatientContext, SelectedItem, TreatmentHistory, Cuisine } from '../../src/data/types'
 import type { Food } from '../../src/data/types'
+import { SUBTYPE_OPTIONS } from '../../src/data/types'
 
 /*
  * 무엇을 상에 올려서는 안 되는가 — 검사 쪽 기준.
@@ -56,8 +57,9 @@ const CUISINES: Cuisine[] = ['한식','양식','중식','일식','동남아']
 const SLOTS: (MealSlot | undefined)[] = [...MEAL_SLOTS, undefined]
 
 function randomPatient(): PatientContext {
+  const pickedCancer = pick(CANCERS).id as CancerId
   return {
-    cancer: pick(CANCERS).id as CancerId,
+    cancer: pickedCancer,
     phase: pick([...PHASES]) as any,
     weightKg: [30, 42, 55, 60, 78, 95, 130][Math.floor(rnd()*7)],
     heightCm: [140, 150, 163, 172, 185, 199][Math.floor(rnd()*6)],
@@ -68,6 +70,18 @@ function randomPatient(): PatientContext {
     medications: some(MEDICATIONS.map(m => m.id), 3),
     history: some(HISTORY, 3),
     cuisines: rnd() < 0.2 ? [] : some(CUISINES, 3),
+    /*
+     * 세부 변수.
+     *
+     * bigrun 에는 넣었는데 여기에는 없었다. 그래서 사만 번을 돌리면서도
+     * HER2 양성이신 분도, 위를 모두 떼신 분도, 간경변이 함께 있는 분도
+     * 이 검사에는 존재하지 않았다 — 그분들에게만 걸리는 규칙이 스무 가지 넘는데도.
+     */
+    subtypes: (() => {
+      const opts = SUBTYPE_OPTIONS[pickedCancer] ?? []
+      if (opts.length === 0 || rnd() < 0.35) return []
+      return [...new Set(some(opts.map((o) => o.id), 2))]
+    })(),
     onboarded: true,
     name: rnd() < 0.5 ? '광원' : undefined
   }

@@ -119,6 +119,7 @@ export function AdminInquiries() {
               ) : (
                 <div className="mt-2.5">
                   <textarea
+                    aria-label="답변 내용"
                     className="input min-h-[80px] resize-y text-xs"
                     placeholder="답변을 적어 주세요."
                     value={drafts[q.id] ?? ''}
