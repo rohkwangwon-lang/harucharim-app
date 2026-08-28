@@ -14,7 +14,7 @@
  *
  * 나중에 누가(나를 포함해) 편하려고 원본을 실으면 여기서 걸린다.
  */
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import {
   ageBand, bmiBand, hasConsent, track, setConsent, EVENTS, cleanSource, SOURCES
 } from '../../src/lib/stats'
@@ -190,11 +190,36 @@ const app = readFileSync('src/App.tsx', 'utf-8')
 const howto = readFileSync('src/components/HowTo.tsx', 'utf-8')
 const policy = readFileSync('public/privacy.html', 'utf-8')
 
-/* 통계 기능이 켜져 있는 한, 무엇도 안 나간다고 단언해서는 안 된다 */
-for (const [name, text] of [['앱 고지', app], ['사용법', howto]] as const) {
-  no(/건강 정보는[^.]*어디로도 전송되지 않습니다/.test(text),
-     `${name} 가 아직 "건강 정보는 어디로도 전송되지 않습니다" 라고 단언함 — 통계를 켜면 사실이 아니다`)
+const terms = existsSync('public/terms.html') ? readFileSync('public/terms.html', 'utf-8') : ''
+
+/*
+ * 통계 기능이 켜져 있는 한, 무엇도 안 나간다고 단언해서는 안 된다.
+ *
+ * 처음에는 "건강 정보는 어디로도 전송되지 않습니다" 라는 한 문장만 찾았다.
+ * 그물이 너무 좁았다 — 처리방침에 "암종·체중·증상·식단처럼 건강에 관한 정보는
+ * 서버로 전송되지 않습니다" 라고 적혀 있었는데 그 그물을 그냥 빠져나갔다.
+ * 바로 아래 표에서는 암종을 보낸다고 정확히 적어 두고 있었으니, 문서가 스스로를 뒤집고 있었다.
+ *
+ * 그래서 문장을 외우지 않고 뜻으로 본다 —
+ * '보내지 않는다' 고 말하는 문장 안에 암종이 함께 들어 있으면 걸린다.
+ */
+const DENY = /[^.。]*?(전송되지 않|보내지 않|나가지 않)[^.。]*/g
+for (const [name, text] of [['앱 고지', app], ['사용법', howto],
+                            ['처리방침', policy], ['이용약관', terms]] as const) {
+  if (!text) continue
+  const plain = text.replace(/<[^>]+>/g, '')
+  for (const sent of plain.match(DENY) ?? []) {
+    no(/암종|암 종류/.test(sent),
+       `${name} 이 "${sent.trim().slice(0, 40)}…" 라고 적음 — 통계에 동의하시면 암종은 전송된다`)
+  }
   no(!/통계/.test(text), `${name} 에 통계 이야기가 없음`)
+}
+
+/* 무엇이 나가는지 실제로 적어 두었는가 — 안 보낸다는 말만 지우고 끝내면 안 된다 */
+for (const [name, text] of [['처리방침', policy], ['이용약관', terms]] as const) {
+  if (!text) continue
+  no(!/암종/.test(text), `${name} 에 암종이 전송된다는 사실이 적혀 있지 않음`)
+  no(!/동의/.test(text), `${name} 에 동의를 받는다는 말이 없음`)
 }
 
 no(/이용자 분석에 쓰지 않습니다/.test(policy),
