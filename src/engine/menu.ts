@@ -681,6 +681,14 @@ export function buildDayMenu(
         .filter((c) => mealRole(c.food) === 'staple' || mealRole(c.food) === 'onedish')
         .filter((c) => slotsFor(c.food).includes(slot))
         .filter((c) => !stapleClash(meals, slot, c.food))
+        /*
+         * 겹침도 함께 본다.
+         *
+         * 이 자리는 상을 차리기 전에 먼저 도는 곳이라 겹칠 것이 없다고 여겨 빼 두었다.
+         * 그런데 담아 두신 것이 이미 있으면 겹친다 — '귀리 우유죽' 을 앉혀 놓고
+         * 같은 상에 '귀리(압착귀리)' 가 남아 있는 아침이 나왔다.
+         */
+        .filter((c) => !sideClash(meals, slot, c.food))
         .filter((c) => c.kcal <= room)
         .sort((a, b) =>
           (Number(used.has(a.food.id)) - Number(used.has(b.food.id))) ||

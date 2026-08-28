@@ -61,7 +61,18 @@ const COOKED = /찌개|국$|탕$|전골|나물|무침|볶음|조림|찜|구이|�
 const PLAIN = /\((삶은 것|찐 것|생것|데친 것|구운 것|불린 것)\)$/
 const DISH_GROUPS = ['국·탕·찌개', '반찬·조림·볶음', '육류', '가금류·난류', '어패류', '외식·프랜차이즈']
 const BREAD = /^(식빵|통밀식빵|바게트|모닝빵|베이글|사워도우|토르티야\(밀\)|크루아상)$/
-const DRINK = /두유|우유|요구르트|요거트|주스|스무디|차\(우린/
+/*
+ * 마시는 것인가.
+ *
+ * 이름 어디에든 '우유' 가 있으면 음료로 보았다. 그래서 '귀리 우유죽' 이 후식으로 잡혀,
+ * 죽을 먼저 놓은 상이 모두 '후식이 앞에 끼어 있음' 이 되었다 — 36만 일 중 19 % 였다.
+ * 앱의 잘못이 아니라 재는 자의 잘못이었다.
+ *
+ * compose 검사에서는 같은 것을 이미 고쳤는데 여기만 옛 식이 남아 있었다 —
+ * 고친 자리 옆에 안 고친 자리가 남는 일이 여섯 번째다.
+ * 괄호를 걷고, 그 낱말로 끝나는 것만 마시는 것으로 본다.
+ */
+const DRINK = /(두유|우유|요구르트|요거트|주스|스무디|라떼|차)$/
 
 /** 밥 노릇을 하는가 */
 function myStaple(f: Food): boolean {
@@ -81,7 +92,7 @@ function myAnchor(f: Food): boolean {
 /** 후식인가 — 밥 노릇을 하는 빵은 뺀다 */
 function myDessert(f: Food): boolean {
   if (myStaple(f)) return false
-  if (DRINK.test(f.name)) return true
+  if (DRINK.test(f.name.replace(/\(.*?\)/g, '').replace(/\s+/g, '').trim())) return true
   return ['과일', '간식·디저트', '우유·유제품', '음료', '견과·종실'].includes(f.group)
 }
 /**
