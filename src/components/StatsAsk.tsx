@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { confirmAdult, isAdultConfirmed } from '../lib/ageGate'
 import { setConsent } from '../lib/stats'
 
 /**
@@ -31,6 +33,14 @@ function remember() {
 }
 
 export function StatsAsk({ onClose }: { onClose: () => void }) {
+  /*
+   * 여기서 받는 것은 암종·치료 시기 — 개인정보보호법 제23조의 민감정보다.
+   * 로그인 화면에서 이미 여쭈었으므로 보통은 확인된 상태이지만,
+   * 그 문이 없어지거나 순서가 바뀌어도 민감정보만은 새지 않도록 여기서 한 번 더 본다.
+   * '보내지 않기'는 언제나 누르실 수 있다 — 거절을 막는 것은 동의가 아니다.
+   */
+  const [adult, setAdult] = useState(isAdultConfirmed)
+
   function answer(yes: boolean) {
     setConsent(yes)
     remember()
@@ -86,11 +96,32 @@ export function StatsAsk({ onClose }: { onClose: () => void }) {
           * 두 단추를 같은 크기로 둔다.
           * 거절을 잔글씨로 밀어 두면 형식만 동의이지 실은 동의가 아니다.
           */}
+        {!adult && (
+          <label className="mt-3 flex items-start gap-2.5 rounded-xl border border-stone-200 px-3 py-2.5">
+            <input
+              type="checkbox"
+              className="mt-0.5 h-4 w-4 shrink-0 accent-brand-600"
+              checked={adult}
+              onChange={(e) => { setAdult(e.target.checked); confirmAdult(e.target.checked) }}
+            />
+            <span className="text-[11px] leading-relaxed text-stone-600">
+              <strong className="text-stone-800">만 14세 이상입니다.</strong>{' '}
+              건강에 관한 정보라 만 14세 미만은 보호자 동의 없이 보내실 수 없습니다.
+            </span>
+          </label>
+        )}
+
         <div className="mt-4 flex gap-2">
-          <button className="btn-outline flex-1" onClick={() => answer(false)}>
+          {/* 두 단추의 클래스를 똑같이 둔다 — 거절은 막히는 일이 없으므로 disabled 는 여기서 놀지만,
+              한쪽에만 붙여 두면 크기가 어긋나고 검사도 그것을 잡는다 */}
+          <button className="btn-outline flex-1 disabled:opacity-40" onClick={() => answer(false)}>
             보내지 않기
           </button>
-          <button className="btn-primary flex-1" onClick={() => answer(true)}>
+          <button
+            className="btn-primary flex-1 disabled:opacity-40"
+            disabled={!adult}
+            onClick={() => answer(true)}
+          >
             보내기
           </button>
         </div>

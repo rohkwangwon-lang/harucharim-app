@@ -377,6 +377,37 @@ for (const name of defAt.keys()) {
      `${name} 에 grant 도 revoke 도 없음 — 앱에서 부르면 권한 오류가 난다`)
 }
 
+/*
+ * ── 만 14세 확인 ───────────────────────────────────────
+ *
+ * 약관과 처리방침이 "만 14세 미만은 이용할 수 없다"고 적어 두었는데,
+ * 한동안 적어 두기만 하고 묻지는 않았다. 금지를 문서에만 두면
+ * 지키는 것이 아니라 책임을 이용자에게 미뤄 둔 것에 가깝다.
+ *
+ * 개인정보가 실제로 밖으로 나가는 문은 둘뿐이다 — 로그인과 통계 동의.
+ * 그 두 곳에 확인이 걸려 있는지를 화면 코드에서 직접 본다.
+ */
+const GATE = 'lib/ageGate'
+for (const [file, what] of [
+  ['src/components/Onboarding.tsx', '로그인 화면'],
+  ['src/components/StatsAsk.tsx', '통계 동의 화면']
+] as const) {
+  const src = existsSync(file) ? readFileSync(file, 'utf-8') : ''
+  no(!src.includes(GATE), `${what}(${file})에 만 14세 확인이 없다 — 약관 3항이 금지한 것을 묻지 않고 있다`)
+  no(!/만 14세/.test(src), `${what}에 '만 14세' 라는 말이 화면에 보이지 않는다`)
+}
+
+/* 두 문서가 실제로 그 금지를 적고 있는가 — 한쪽만 고치고 오는 일을 막는다 */
+for (const doc of ['public/terms.html', 'public/privacy.html']) {
+  const html = existsSync(doc) ? readFileSync(doc, 'utf-8') : ''
+  no(!/만 14세 미만/.test(html), `${doc} 에 만 14세 미만 관련 조항이 없다`)
+}
+
+/* 나이를 받아 적지는 않는가 — 확인하자고 새 개인정보를 만들면 앞뒤가 안 맞는다 */
+const gateSrc = existsSync('src/lib/ageGate.ts') ? readFileSync('src/lib/ageGate.ts', 'utf-8') : ''
+no(!gateSrc, 'src/lib/ageGate.ts 가 없다')
+no(/생년|birth|나이를 저장|age\s*:/.test(gateSrc), 'ageGate 가 나이나 생년월일을 저장하려 한다 — 확인만 남겨야 한다')
+
 console.log(bads.length
   ? `개인정보 검사 — 문제 ${bads.length}종\n` + bads.map((b) => '■ ' + b).join('\n')
-  : `개인정보 검사 완료 — 동의·뭉개기·집계 방어 확인, 문제 없음 (세는 항목 ${used.size}종)`)
+  : `개인정보 검사 완료 — 동의·뭉개기·집계·만14세 방어 확인, 문제 없음 (세는 항목 ${used.size}종)`)

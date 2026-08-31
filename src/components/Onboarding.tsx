@@ -3,6 +3,7 @@ import { SOURCES, setSource } from '../lib/stats'
 import { track } from '../lib/stats'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { displayName, lastProvider, PROVIDER_LABEL, signIn, useSession, type Provider } from '../lib/auth'
+import { confirmAdult, isAdultConfirmed } from '../lib/ageGate'
 import type { CancerId, Cuisine, PatientCondition, PatientContext, Phase, TreatmentHistory } from '../data/types'
 import { SUBTYPE_OPTIONS } from '../data/types'
 import { Credentials } from './ui'
@@ -66,6 +67,13 @@ export function Onboarding({
    * 앱을 아예 쓸 수 없게 되므로, 그때는 그대로 통과시킨다.
    */
   const needsLogin = isSupabaseConfigured && !user
+  /*
+   * 만 14세 확인.
+   *
+   * 로그인하는 순간 계정 식별자를 받게 되므로, 그 앞에 한 번 여쭙는다.
+   * 나이를 받아 적지는 않는다 — 확인하자고 새 개인정보를 만들 일이 아니다.
+   */
+  const [adult, setAdult] = useState(isAdultConfirmed)
   const [pickedSource, setPickedSource] = useState<string | null>(null)
   const canNext = step === 0 ? !needsLogin : step === 1 ? !!patient.cancer : true
 
@@ -101,7 +109,7 @@ export function Onboarding({
             title={loginOnly ? '다시 로그인해 주세요' : '하루차림을 시작합니다'}
             desc={loginOnly
               ? '로그아웃하셨습니다. 다시 로그인하시면 적어 두신 기록이 그대로 있습니다.'
-              : '먼저 로그인해 주세요. 기기를 바꾸셔도 설정이 유지되고, 문의하신 내용의 답변을 앱에서 바로 확인하실 수 있습니다.'}
+              : '먼저 로그인해 주세요. 문의하신 내용의 답변을 앱에서 바로 확인하실 수 있습니다.'}
           >
             {user ? (
               <div className="rounded-2xl border border-brand-200 bg-brand-50/60 p-4">
@@ -122,7 +130,20 @@ export function Onboarding({
                   * 사용자 몫으로 둘 것이 아니다 — 다른 쪽으로 들어가면 아예 다른 계정이 되어
                   * 적어 두신 것과 문의 내역이 사라진 것처럼 보인다.
                   */}
-                <div className="flex flex-col gap-2">
+                <label className="mb-3 flex items-start gap-2.5 rounded-xl border border-stone-200 bg-white px-3.5 py-3">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 h-4 w-4 shrink-0 accent-brand-600"
+                    checked={adult}
+                    onChange={(e) => { setAdult(e.target.checked); confirmAdult(e.target.checked) }}
+                  />
+                  <span className="text-[12px] leading-relaxed text-stone-600">
+                    <strong className="text-stone-800">만 14세 이상입니다.</strong>{' '}
+                    만 14세 미만은 보호자의 동의를 받을 방법이 없어 이 앱을 쓰실 수 없습니다.
+                  </span>
+                </label>
+
+                <div className={`flex flex-col gap-2 ${adult ? '' : 'pointer-events-none opacity-40'}`}>
                   {([...(['kakao', 'google'] as Provider[])]
                     .sort((a, b) => (a === last ? -1 : b === last ? 1 : 0))
                   ).map((p) => (
@@ -153,7 +174,7 @@ export function Onboarding({
                   처음이시면 위 버튼으로 바로 가입됩니다. 따로 아이디를 만들지 않으셔도 됩니다.
                 </p>
                 <p className="mt-2 text-center text-[11px] text-stone-400">
-                  로그인하시면 다음 단계로 넘어갑니다.
+                  {adult ? '로그인하시면 다음 단계로 넘어갑니다.' : '위 항목을 확인해 주시면 로그인할 수 있습니다.'}
                 </p>
               </>
             ) : (

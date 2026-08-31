@@ -27,7 +27,9 @@ import { StatsAsk, shouldAsk } from './components/StatsAsk'
 import { checkAdmin } from './lib/inquiry'
 import { displayName, useSession, lastProvider } from './lib/auth'
 import { isSupabaseConfigured } from './lib/supabase'
-import { Credentials } from './components/ui'
+import { Credentials, Section } from './components/ui'
+import { NoticeBanner, NoticeList } from './components/NoticeBanner'
+import { skipBacklog } from './lib/notice'
 
 /**
  * 탭은 5개로 고정한다.
@@ -195,7 +197,7 @@ export default function App() {
       <Onboarding
         patient={state.patient}
         onChange={setPatient}
-        onDone={completeOnboarding}
+        onDone={(patch) => { skipBacklog(); completeOnboarding(patch) }}
         /* 이미 설정을 마치신 분이 로그아웃만 하신 경우에는 로그인 화면만 보여 준다 */
         loginOnly={state.patient.onboarded === true}
       />
@@ -242,6 +244,7 @@ export default function App() {
       </header>
 
       {REVIEW_MODE && <ReviewBanner />}
+      <NoticeBanner />
 
       <main className="flex-1 px-4 py-4 pb-24">
         {tab === 'compose' && (
@@ -474,6 +477,10 @@ export default function App() {
                 <DeleteAccount onDone={() => setTab('compose')} />
               </div>
             )}
+            <Section title="알림" desc="약관·처리방침이 바뀌면 여기에 남겨 둡니다.">
+              <NoticeList />
+            </Section>
+
             <Disclaimer />
               </>
           </>
