@@ -199,6 +199,36 @@ if (setup) {
   no(!/설치 확인|결과/.test(setup), 'setup.sql 에 설치 확인 질의가 없음 — 됐는지 알 길이 없다')
 }
 
+/* ── 로그인을 필수로 두기로 한 결정이 문서와 어긋나지 않는가 ────
+ *
+ * 이 앱은 로그인을 필수로 둔다(2026-08-31 결정). 그런데 한동안
+ * 약관과 처리방침은 "로그인은 선택"이라고 적고 있었다 — 코드만 바꾸고
+ * 문서를 두고 온 것이다.
+ *
+ * 그래서 코드에서 그 문을 직접 읽어, 문서가 같은 말을 하는지 본다.
+ * 어느 쪽으로 바뀌든 나머지 한쪽을 고치라고 알린다.
+ */
+const gated = /const loggedOut\s*=\s*isSupabaseConfigured\s*&&/.test(app)
+  && /!state\.patient\.onboarded \|\| loggedOut/.test(app)
+const terms = readFileSync('public/terms.html', 'utf-8')
+
+if (gated) {
+  no(/로그인은 선택/.test(terms) || /로그인은 선택 사항/.test(policy),
+     '코드는 로그인을 필수로 막는데 문서는 "선택"이라 적고 있다 — 둘 중 하나가 틀렸다')
+  no(!/로그인하셔야 합니다/.test(terms),
+     '약관이 로그인이 필요하다는 것을 적지 않았다 — 필수인데 알리지 않으면 안 된다')
+  no(!/로그인<br>\s*\(필수\)/.test(policy),
+     '처리방침 수집 항목표가 로그인을 필수로 적지 않았다')
+  /*
+   * 필수 로그인은 애플 5.1.1(v) 의 "핵심 기능에 직접 관련될 때만 개인정보를 요구하라" 에 걸린다.
+   * 반려를 피하려면 심사 메모에 이유를 적고 심사용 계정을 주어야 한다 — 코드로는 못 하는 일이다.
+   */
+  todos.push('애플 5.1.1(v): 로그인을 필수로 두었으므로 심사 메모에 그 이유를 적고\n     심사용 계정(리뷰어가 쓸 카카오/구글 계정 또는 우회 경로)을 반드시 함께 낼 것.')
+} else {
+  no(/로그인하셔야 합니다/.test(terms),
+     '코드는 로그인 없이도 들어올 수 있는데 약관은 필수라고 적고 있다')
+}
+
 /* ── 남은 일 — 검사로 대신할 수 없는 것 ─────────────────── */
 if (!existsSync('.well-known/assetlinks.json') && !existsSync('public/.well-known/assetlinks.json')) {
   todos.push('구글 플레이(TWA): .well-known/assetlinks.json 이 도메인 루트에 있어야 한다.\n     지금은 github.io 하위 경로라 넣을 자리가 없다 — 자체 도메인이 필요하다.')
