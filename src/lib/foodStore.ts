@@ -1,4 +1,5 @@
 import type { Food, FoodGroup, FoodTag, NutrientKey, Nutrients } from '../data/types'
+import { withAutoTags } from '../data/foods/autoTag'
 import type { PackedFoods } from '../data/foods/generated'
 
 /**
@@ -257,7 +258,7 @@ function toFood(i: number, row: Row, sc: { cols: string[]; groups: string[]; tag
     form: 'processed',
     serving: { g: servingG, label: `1회 제공량 ${servingG} g` },
     per100,
-    tags: tagIdx.map((t) => sc.tags[t] as FoodTag),
+    tags: withAutoTags(name, tagIdx.map((t) => sc.tags[t] as FoodTag)),
     src: 'kfda',
     auto: true
   }

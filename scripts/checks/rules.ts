@@ -13,6 +13,7 @@ import { CANCERS } from '../../src/data/cancers'
 import { REF_BY_ID } from '../../src/data/references'
 import { BASE_EXERCISE, BONE_METS_NOTE, EXERCISE_BY_CANCER } from '../../src/data/exercise'
 import { CURATED_FOODS, FOOD_BY_ID } from '../../src/data/foods'
+import { GENERATED_CORE } from '../../src/data/foods/generated'
 import { readFileSync } from 'node:fs'
 import { SUPPLEMENTS } from '../../src/data/supplements'
 import { evaluateFood, activeRules, activeInteractions } from '../../src/engine/rules'
@@ -27,7 +28,16 @@ const seenB = new Set<string>()
 const bad = (k: string, d: string) => { const s = `${k} :: ${d}`; if (!seenB.has(s)) { seenB.add(s); bugs.push(s) } }
 
 /* ── 1. 규칙 한 건 한 건이 성한가 ────────────────── */
-const allTags = new Set(CURATED_FOODS.flatMap((f) => f.tags as string[]))
+/*
+ * 태그는 손으로 등록한 음식에만 있는 것이 아니다.
+ * 받아 온 자료에는 이름을 보고 붙이는 것이 있고(data/foods/autoTag.ts),
+ * '생식동물성' 처럼 거기에만 있는 태그도 있다.
+ * 손으로 등록한 것만 세면 그런 태그를 "아무 데도 안 쓰는 태그" 로 잘못 본다.
+ */
+const allTags = new Set([
+  ...CURATED_FOODS.flatMap((f) => f.tags as string[]),
+  ...GENERATED_CORE.flatMap((f) => f.tags as string[])
+])
 const allGroups = new Set(CURATED_FOODS.map((f) => f.group as string))
 const suppCats = new Set(SUPPLEMENTS.map((s) => s.category as string))
 const ids = new Set<string>()

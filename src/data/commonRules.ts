@@ -81,6 +81,31 @@ export const COMMON_RULES: NutritionRule[] = [
     refIds: ['sonbol2015', 'fda-foodsafety']
   },
   {
+    id: 'common-raw-animal-neutropenia',
+    level: 'avoid',
+    /*
+     * 위 규칙과 짝을 이룬다.
+     *
+     * 위 규칙은 손으로 등록한 식품을 식품군으로 걸러 내는데,
+     * 받아 온 자료에는 '회덮밥' 이 밥·면·죽 요리로, '물회' 가 반찬으로 분류되어 있어
+     * 그 걸름망을 그냥 지나갔다. 실제로 호중구감소증 환자에게
+     * 회덮밥·물회는 아무 말 없이 지나갔고 모듬회는 단백질 규칙에 걸려 권장으로 나왔다.
+     *
+     * '생식동물성' 은 이름을 보고 붙이며(data/foods/autoTag.ts),
+     * 붙는 순간 이미 날것 동물성이라는 뜻이므로 식품군을 따지지 않는다.
+     */
+    match: { tags: ['생식동물성'] },
+    phases: ['neutropenia'],
+    title: '호중구가 낮은 동안에는 회·초밥처럼 익히지 않은 것을 피하세요',
+    reason:
+      '회·육회·생굴·초밥처럼 가열하지 않은 동물성 식품은 ' +
+      '살모넬라·리스테리아·비브리오 감염의 경로가 됩니다. ' +
+      '초밥은 위에 올린 재료를 익혔더라도 같은 자리에서 날생선을 다루므로 함께 피하시는 편이 안전합니다. ' +
+      '생과일·생채소는 여기에 해당하지 않습니다 — 깨끗이 씻거나 껍질을 벗겨 드시면 됩니다.',
+    evidence: 'B',
+    refIds: ['sonbol2015', 'fda-foodsafety']
+  },
+  {
     id: 'common-antioxidant-rt',
     level: 'avoid',
     match: {

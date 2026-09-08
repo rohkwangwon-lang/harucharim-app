@@ -473,7 +473,7 @@ export function FoodSearch({
                       {food.auto && (
                         <span
                           className="chip shrink-0 bg-stone-100 text-stone-500"
-                          title="식약처 공공데이터에서 자동으로 들여온 항목입니다. 성분값은 정확하지만 임상 태그는 성분으로 판정 가능한 것만 붙어 있습니다."
+                          title="식약처 공공데이터에서 자동으로 들여온 항목입니다. 성분값은 정확하지만, 임상 판정은 성분과 이름으로 알 수 있는 것까지만 붙어 있습니다."
                         >
                           식약처
                         </span>
