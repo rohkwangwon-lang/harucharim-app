@@ -49,9 +49,22 @@ export interface ExercisePlan {
  * "부족한 상태에서 운동을 늘리면 근육부터 빠집니다" 처럼 근거보다 센 말이 섞였다.
  * 자료로 옮겨 두면 출처가 붙었는지, 근거 수준이 맞는지를 검사가 함께 본다.
  *
- * 열량이 모자란 날의 조언은 근거 수준 'C' 다. 이 상황을 직접 다룬 시험이 없고,
- * 있는 자료는 대상이 다르거나(건강한 젊은 남성) 확실성이 매우 낮다(Cochrane very low).
- * 그래서 늘리라거나 줄이라고 방향을 정해 드리지 않고, 아는 것과 모르는 것을 나누어 적는다.
+ * 처음에는 열량이 모자란 날의 조언을 'C' 로 두었다. 그런데 ESPEN 2021 원문을 확인해 보니
+ * 그것이 지나치게 낮았다 —
+ *
+ *   권고 12 (B4-1) "We recommend maintenance or an increased level of physical activity
+ *   in cancer patients to support muscle mass, physical function, and metabolic pattern."
+ *   → 권고 강도 strong · 근거 수준 **high**
+ *
+ *   권고 35 (C4-1) "During intensive chemotherapy and after stem cell transplantation
+ *   we recommend maintaining physical activity **and** to ensure an adequate nutritional intake."
+ *   → 권고 강도 strong · 근거 수준 very low
+ *
+ * 곧 지침은 둘 중 하나를 고르라고 하지 않는다. **활동은 유지하고 섭취를 채우라**고 한다.
+ * 그래서 'G'(주요 학회 가이드라인의 합의 권고)로 올린다.
+ *
+ * 다만 이미 악액질에 이른 경우의 운동은 여전히 불확실하다(Cochrane 2021, GRADE very low).
+ * 그 구분을 단서에 적어 두고, 어디까지 하실지는 담당 의료진과 정하시게 남긴다.
  */
 export interface IntakeAdvice {
   id: 'under' | 'over' | 'within'
@@ -64,16 +77,17 @@ export interface IntakeAdvice {
 export const INTAKE_EXERCISE_ADVICE: Record<IntakeAdvice['id'], IntakeAdvice> = {
   under: {
     id: 'under',
-    evidence: 'C',
-    refIds: ['acsm2019', 'cochrane-cachexia-exercise', 'asco-cachexia2020', 'longland2016'],
+    evidence: 'G',
+    refIds: ['espen2021', 'acsm2019', 'cochrane-cachexia-exercise', 'asco-cachexia2020', 'longland2016'],
     caveat:
-      '에너지가 모자란 때 근육을 지키는 데는 운동을 줄이는 것보다 단백질을 채우는 쪽이 ' +
-      '크게 작용한다는 시험이 있습니다. 다만 그 시험은 암 환자를 대상으로 한 것이 아니고, ' +
-      '암 악액질에서 운동의 효과와 안전성은 아직 확실하지 않습니다. ' +
-      '그래서 이 앱은 운동을 늘리라거나 줄이라고 말씀드리지 않습니다.'
+      '신체활동을 유지하거나 늘리는 것은 근육량과 신체기능을 지키는 데 권고 강도가 높습니다 ' +
+      '(ESPEN 2021 권고 12 — 강도 strong·근거수준 high). 항암치료 중에도 활동을 유지하면서 ' +
+      '영양 섭취를 충분히 하도록 함께 권합니다(권고 35). ' +
+      '다만 이미 악액질에 이른 경우의 운동은 효과와 안전성이 아직 확실하지 않습니다 ' +
+      '(Cochrane 2021, GRADE very low). 어디까지 하실지는 담당 의료진과 정하십시오.'
   },
-  over: { id: 'over', evidence: 'G', refIds: ['acsm2019', 'asco-exercise2022'] },
-  within: { id: 'within', evidence: 'G', refIds: ['acsm2019', 'asco-exercise2022'] }
+  over: { id: 'over', evidence: 'G', refIds: ['espen2021', 'acsm2019', 'asco-exercise2022'] },
+  within: { id: 'within', evidence: 'G', refIds: ['espen2021', 'acsm2019', 'asco-exercise2022'] }
 }
 
 export const BASE_EXERCISE: ExerciseItem[] = [
