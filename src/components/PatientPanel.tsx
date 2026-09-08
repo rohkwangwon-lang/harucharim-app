@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { PatientContext, PatientCondition, Phase, CancerSubtype } from '../data/types'
 import { SUBTYPE_OPTIONS } from '../data/types'
 import { CANCERS } from '../data/cancers'
@@ -213,16 +214,12 @@ export function PatientPanel({
             </div>
           </div>
           <div className="col-span-2 sm:col-span-4">
-            <label className="label">최근 6개월 체중 감소율 (%)</label>
-            <input
-              aria-label="최근 6개월 체중 감소율 (%)"
-              type="number" inputMode="decimal" className="input"
-              value={patient.weightLossPct ?? 0}
-              onChange={(e) => onChange({ weightLossPct: Number(e.target.value) || 0 })}
+            {/* 여기도 함께 바꾼다 — 한쪽만 고치면 같은 것을 두 가지 방식으로 여쭙게 된다 */}
+            <WeightBefore
+              nowKg={patient.weightKg}
+              pct={patient.weightLossPct ?? 0}
+              onPct={(v) => onChange({ weightLossPct: v })}
             />
-            <p className="mt-1 text-[11px] text-stone-400">
-              5 % 이상이면 영양 개입 기준에 해당합니다. 예: 60 kg → 57 kg 이면 5 %
-            </p>
           </div>
         </div>
 
@@ -315,6 +312,48 @@ export function PatientPanel({
           </span>
         </button>
       </Section>
+    </div>
+  )
+}
+
+/**
+ * 6개월 전 몸무게 — 온보딩과 같은 방식으로 여쭙는다.
+ *
+ * 사람이 아는 것은 비율이 아니라 예전 몸무게다. kg 으로 받고 비율은 앱이 센다.
+ * 저장하는 값은 그대로 비율이라 규칙도 기존 기록도 손댈 것이 없다.
+ */
+function WeightBefore({
+  nowKg, pct, onPct
+}: {
+  nowKg: number
+  pct: number
+  onPct: (v: number) => void
+}) {
+  const derived = pct > 0 && pct < 100 ? nowKg / (1 - pct / 100) : nowKg
+  const [before, setBefore] = useState(() => Math.round(derived * 10) / 10)
+
+  function apply(v: number) {
+    setBefore(v)
+    onPct(v > 0 && v > nowKg ? Math.round(((v - nowKg) / v) * 1000) / 10 : 0)
+  }
+
+  const lost = Math.round((before - nowKg) * 10) / 10
+
+  return (
+    <div>
+      <label className="label" htmlFor="panel-weight-before">6개월 전 몸무게 (kg)</label>
+      <input
+        id="panel-weight-before"
+        type="number" inputMode="decimal" className="input"
+        value={before}
+        onChange={(e) => apply(Number(e.target.value) || 0)}
+      />
+      <p className="mt-1 text-[11px] text-stone-400">
+        {lost > 0
+          ? <><strong className="text-stone-600">{lost} kg 줄어 {pct} %</strong> 입니다.
+            {pct >= 5 ? ' 5 % 이상이라 영양 개입 기준에 해당합니다.' : ''}</>
+          : '모르시면 지금 몸무게를 그대로 두셔도 됩니다.'}
+      </p>
     </div>
   )
 }

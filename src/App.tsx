@@ -89,7 +89,18 @@ export default function App() {
     rememberShown
   } = useAppState()
 
-  const [tab, setTabState] = useState<Tab>('compose')
+  /*
+   * 처음 여실 때 어느 탭을 보여 드릴 것인가.
+   *
+   * 그동안은 늘 '내 식단' 이었다. 그런데 설정을 막 마치신 분에게
+   * 그 화면은 0 kcal · 0 g 짜리 빈 막대 넷이다. 여섯 화면을 성실히 답하신
+   * 첫 보상이 빈 장부인 셈이라, 정작 이 앱이 하는 일은 옆 탭에 있었다.
+   *
+   * 그래서 담아 두신 것이 없을 때만 '추천' 으로 연다.
+   * 이미 담으신 분에게는 그대로 '내 식단' 이 맞다 — 그분은 오늘 드신 것을
+   * 확인하러 오신 것이지 새로 추천받으러 오신 것이 아니다.
+   */
+  const [tab, setTabState] = useState<Tab>(() => (selected.length > 0 ? 'compose' : 'suggest'))
   /** 음식 찾기로 넘어갈 때 어느 끼니에 담을지 미리 정해 둔다 */
   const [pendingMeal, setPendingMeal] = useState<MealSlot>('점심')
   const [care, setCare] = useState<CareView>('howto')

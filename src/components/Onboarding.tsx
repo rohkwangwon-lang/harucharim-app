@@ -350,14 +350,11 @@ export function Onboarding({
                 </div>
               </div>
               <div className="col-span-2">
-                <Field
-                  label="최근 6개월 체중 감소율 (%)"
-                  value={patient.weightLossPct ?? 0}
-                  onChange={(v) => onChange({ weightLossPct: v })}
+                <WeightBefore
+                  nowKg={patient.weightKg}
+                  pct={patient.weightLossPct ?? 0}
+                  onPct={(v) => onChange({ weightLossPct: v })}
                 />
-                <p className="mt-1 text-[11px] text-stone-400">
-                  없으면 0. 예: 60 kg 에서 57 kg 이 되었다면 5 %
-                </p>
               </div>
             </div>
 
@@ -529,6 +526,54 @@ function Step({ title, desc, children }: { title: string; desc: string; children
       <h2 className="text-xl font-bold leading-snug text-stone-900">{title}</h2>
       <p className="mb-5 mt-1.5 text-sm leading-relaxed text-stone-500">{desc}</p>
       {children}
+    </div>
+  )
+}
+
+/**
+ * 6개월 전 몸무게.
+ *
+ * 예전에는 "최근 6개월 체중 감소율 (%)" 을 직접 넣게 했다.
+ * 설명에 "60 kg 에서 57 kg 이 되었다면 5 %" 라고 적어 두긴 했지만,
+ * 그건 환자분께 암산을 시키는 것이다. 사람이 아는 것은 비율이 아니라 **예전 몸무게**다.
+ *
+ * 그래서 kg 으로 여쭙고 비율은 앱이 센다. 저장하는 값은 그대로 비율이라
+ * 규칙도 기존 기록도 손댈 것이 없다 — 되돌려 채울 때는 지금 몸무게에서 역산한다.
+ */
+function WeightBefore({
+  nowKg, pct, onPct
+}: {
+  nowKg: number
+  pct: number
+  onPct: (v: number) => void
+}) {
+  /* 지금 몸무게와 비율로 예전 몸무게를 되돌린다 */
+  const derived = pct > 0 && pct < 100 ? nowKg / (1 - pct / 100) : nowKg
+  const [before, setBefore] = useState(() => Math.round(derived * 10) / 10)
+
+  function apply(v: number) {
+    setBefore(v)
+    /* 늘었거나 그대로면 0. 음수 감소율은 뜻이 없다 */
+    const next = v > 0 && v > nowKg ? Math.round(((v - nowKg) / v) * 1000) / 10 : 0
+    onPct(next)
+  }
+
+  const lost = Math.round((before - nowKg) * 10) / 10
+
+  return (
+    <div>
+      <label className="label" htmlFor="weight-before">6개월 전 몸무게 (kg)</label>
+      <input
+        id="weight-before"
+        type="number" inputMode="decimal" className="input"
+        value={before}
+        onChange={(e) => apply(Number(e.target.value) || 0)}
+      />
+      <p className="mt-1 text-[11px] text-stone-400">
+        {lost > 0
+          ? <><strong className="text-stone-600">{lost} kg 줄어 {pct} %</strong> 입니다. 목표 열량을 여기에 맞춰 잡습니다.</>
+          : '모르시면 지금 몸무게를 그대로 두셔도 됩니다.'}
+      </p>
     </div>
   )
 }

@@ -292,6 +292,10 @@ export function TodayMeals({
         <NutrientRow
           label="단백질" value={protein} unit="g"
           min={target.protein[0]} max={target.protein[1]} state={proteinState}
+          /* 목표를 넘었는데 '적정' 이라고만 적혀 있으면 앱이 틀린 것처럼 보인다 */
+          hint={protein > target.protein[1] && !renalCare
+            ? '치료 중에는 목표를 조금 넘겨 드시는 편이 낫습니다'
+            : undefined}
         />
         <NutrientRow
           label="식이섬유" value={fiber} unit="g"

@@ -1,5 +1,5 @@
 import type { Food, FoodGroup, FoodTag, NutrientKey, Nutrients } from '../data/types'
-import { withAutoTags } from '../data/foods/autoTag'
+import { displayName, withAutoTags } from '../data/foods/autoTag'
 import type { PackedFoods } from '../data/foods/generated'
 
 /**
@@ -253,7 +253,8 @@ function toFood(i: number, row: Row, sc: { cols: string[]; groups: string[]; tag
   if (per100.kcal === undefined) per100.kcal = 0
   const food: Food = {
     id: `kx-${i}`,
-    name,
+    /* 보이는 이름은 다듬고, 태그는 원본 이름으로 판정한다 */
+    name: displayName(name),
     group: sc.groups[gi] as FoodGroup,
     form: 'processed',
     serving: { g: servingG, label: `1회 제공량 ${servingG} g` },

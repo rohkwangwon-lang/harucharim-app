@@ -20,11 +20,34 @@ import { setConsent } from '../lib/stats'
  */
 
 const ASKED_KEY = 'harucharim.stats.asked'
+/** 처음 여신 날짜를 적어 둔다 — 언제 여쭐지 정하는 데만 쓴다 */
+const FIRST_KEY = 'harucharim.stats.firstSeen'
 
-export function shouldAsk(): boolean {
+/**
+ * 언제 여쭐 것인가.
+ *
+ * 설정을 마치신 1.2초 뒤에 여쭙고 있었다. 그런데 그 순간은 이 앱이 하는 일을
+ * 처음 보시는 자리다 — 추천 식단이 뜨자마자 동의 창이 그것을 덮었다.
+ * 무엇에 쓰는 앱인지 아직 모르시는데 "쓰임새를 알려 주시겠어요?" 라고 물은 셈이다.
+ *
+ * 그래서 하루를 둔다. 다음날 다시 여실 때 여쭙는다.
+ * 그때는 이 앱이 무엇을 해 드리는지 보신 뒤라, 답하실 근거가 생긴다.
+ * 한 번 답하시면 다시 묻지 않는 것은 그대로다.
+ */
+const ASK_AFTER_DAYS = 1
+
+export function shouldAsk(now = Date.now()): boolean {
   try {
-    return localStorage.getItem(ASKED_KEY) !== 'yes'
-      && localStorage.getItem('harucharim.stats.consent') === null
+    if (localStorage.getItem(ASKED_KEY) === 'yes') return false
+    if (localStorage.getItem('harucharim.stats.consent') !== null) return false
+
+    const first = localStorage.getItem(FIRST_KEY)
+    if (!first) {
+      localStorage.setItem(FIRST_KEY, String(now))
+      return false
+    }
+    const days = (now - Number(first)) / 86_400_000
+    return Number.isFinite(days) && days >= ASK_AFTER_DAYS
   } catch { return false }
 }
 

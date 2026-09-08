@@ -94,6 +94,27 @@ for (const f of obvious) {
   }
 }
 
+/*
+ * ── 보이는 이름에 밑줄이 새지 않는가 ────────────────────
+ *
+ * 식약처 자료는 '피자_쉬림프 피자 골드' 처럼 분류와 이름을 밑줄로 잇는다.
+ * 그대로 내보이면 '회덮밥_모듬' 처럼 고장 난 화면으로 읽힌다.
+ * 판정에 쓰는 원본은 그대로 두고 보이는 이름만 다듬으므로, 여기서 새는 것만 본다.
+ */
+const underscored = GENERATED_CORE.filter((f) => f.name.includes('_'))
+no(underscored.length > 0,
+   `보이는 이름에 밑줄이 남았다 — ${underscored.length}건 (예: ${underscored.slice(0, 3).map((f) => f.name).join(', ')})`)
+
+/*
+ * 다듬다가 이름이 사라지지 않았는가.
+ *
+ * 처음에는 '두 글자 미만' 을 잣대로 삼았다가 '번·엿·럼·꿀' 을 잡았다 —
+ * 넷 다 실제 한 글자 음식 이름이다. 길이는 잣대가 못 된다.
+ * 비었는지만 본다.
+ */
+const emptied = GENERATED_CORE.filter((f) => !f.name.trim())
+no(emptied.length > 0, `다듬은 뒤 이름이 빈 것 ${emptied.length}건`)
+
 /* 검사가 헛돌지 않는지 — 훑은 것이 0 이면 아무것도 확인하지 않은 것이다 */
 const tagged = { raw: 0, cured: 0, grape: 0 }
 for (const f of GENERATED_CORE) {

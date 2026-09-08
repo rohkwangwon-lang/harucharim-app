@@ -252,18 +252,6 @@ export function RecommendedMenu({
         </p>
       </div>
 
-      <NutrientPanel states={[kcalState, proteinState, fiberState, naState]}>
-        <NutrientRow label="에너지" value={kcal} unit="kcal"
-          min={target.kcal[0]} max={target.kcal[1]} state={kcalState} />
-        <NutrientRow label="단백질" value={protein} unit="g"
-          min={target.protein[0]} max={target.protein[1]} state={proteinState} />
-        <NutrientRow label="식이섬유" value={fiber} unit="g"
-          min={fg.range[0]} max={fg.range[1]} state={fiberState}
-          hint={fg.lowResidue ? '지금은 잔사를 줄이는 시기입니다' : undefined} />
-        <NutrientRow label="나트륨" value={na} unit="mg"
-          min={0} max={naLimit} limit={naLimit} state={naState} />
-      </NutrientPanel>
-
       {added.length > 0 && (
         <button className="btn-primary mb-4 w-full" onClick={() => { track('menu_take'); onApplyAll(added) }}>
           추천 {added.length}가지를 내 식단에 담기
@@ -379,14 +367,12 @@ export function RecommendedMenu({
                           단백질 {(per.protein ?? 0).toFixed(1)} g · 나트륨 {per.na === undefined ? '정보 없음' : `${Math.round(per.na)} mg`}
                         </div>
                         {e.origin === 'added' && e.ruleTitle && (
-                          <div className="mt-1.5 rounded-lg bg-brand-50 px-2.5 py-2">
-                            <div className="mb-1 flex flex-wrap items-center gap-1.5">
-                              {e.contribution && <span className="chip bg-brand-600 text-white">{e.contribution}</span>}
-                              {e.evidence && <EvidenceBadge level={e.evidence} />}
-                            </div>
-                            <p className="text-[11px] leading-relaxed text-brand-900">{e.ruleTitle}</p>
-                            <Refs ids={e.refIds ?? []} />
-                          </div>
+                          <Why
+                            contribution={e.contribution}
+                            evidence={e.evidence}
+                            title={e.ruleTitle}
+                            refIds={e.refIds ?? []}
+                          />
                         )}
                       </li>
                     )
@@ -397,6 +383,33 @@ export function RecommendedMenu({
           })}
         </div>
       </Section>
+
+      {/*
+        * 영양소 합계는 끼니 뒤에 둔다.
+        *
+        * 예전에는 이 넉 줄이 맨 위에 있어서, 첫 음식 이름이 두 화면 반 아래에 있었다.
+        * 여쭙는 것은 "뭘 먹어요?" 인데 답이 열량·단백질·식이섬유·나트륨 막대였다.
+        * 숫자는 드실 것을 보고 나서 확인하는 것이지 먼저 읽는 것이 아니다.
+        */}
+      <NutrientPanel states={[kcalState, proteinState, fiberState, naState]}>
+        <NutrientRow label="에너지" value={kcal} unit="kcal"
+          min={target.kcal[0]} max={target.kcal[1]} state={kcalState} />
+        <NutrientRow label="단백질" value={protein} unit="g"
+          min={target.protein[0]} max={target.protein[1]} state={proteinState}
+          /*
+            * 목표를 넘었는데 '적정' 이라고 적혀 있으면 앱이 틀린 것처럼 보인다.
+            * 실제로는 치료 중 단백질을 넉넉히 드시는 편이 낫다는 뜻인데,
+            * 그 뜻이 화면 어디에도 없었다. 넘었을 때만 한 줄 적는다.
+            */
+          hint={protein > target.protein[1] && !renalCare
+            ? '치료 중에는 목표를 조금 넘겨 드시는 편이 낫습니다'
+            : undefined} />
+        <NutrientRow label="식이섬유" value={fiber} unit="g"
+          min={fg.range[0]} max={fg.range[1]} state={fiberState}
+          hint={fg.lowResidue ? '지금은 잔사를 줄이는 시기입니다' : undefined} />
+        <NutrientRow label="나트륨" value={na} unit="mg"
+          min={0} max={naLimit} limit={naLimit} state={naState} />
+      </NutrientPanel>
 
       <Section title="나트륨 합계 내역" desc="위 끼니별 숫자를 그대로 더한 값입니다. 손으로 더해 보셔도 같습니다.">
         <div className="card divide-y divide-stone-100">
@@ -440,6 +453,65 @@ export function RecommendedMenu({
         추천 항목마다 어떤 권고에 따른 것인지와 근거를 함께 표시했습니다.
         실제 처방·영양 상담을 대체하지 않습니다.
       </p>
+    </div>
+  )
+}
+
+/**
+ * 왜 이것을 올렸는지.
+ *
+ * 예전에는 음식 하나가 이름·담기·분량/열량/단백질/나트륨·보충문구·근거등급·
+ * 근거문장·근거건수로 여섯 줄을 썼다. 열 가지면 예순 줄이다.
+ * 항암 중 피로하신 분께 그것은 읽을거리가 아니라 벽이다.
+ *
+ * 게다가 근거 문장은 되풀이된다 — '채소 중심 식사는…' 이 배·단감·밤에
+ * 나란히 세 번 적혀 있었다. 세 번 읽을 문장은 아니다.
+ *
+ * 그래서 한 줄로 접는다. **근거를 없애는 것이 아니라 원하실 때 펴시게 두는 것이다** —
+ * 무엇을 채우려고 올렸는지(보충 문구)와 근거 등급은 접어도 늘 보인다.
+ */
+function Why({
+  contribution, evidence, title, refIds
+}: {
+  contribution?: string
+  evidence?: Parameters<typeof EvidenceBadge>[0]['level']
+  title: string
+  refIds: string[]
+}) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="mt-1.5 rounded-lg bg-brand-50 px-2.5 py-2">
+      {/*
+        * 줄 전체를 단추로 감싸지 않는다.
+        * 근거 등급 딱지가 이미 단추(눌러서 뜻을 본다)라, 감싸면 단추 안에 단추가 되어
+        * HTML 이 어긋나고 한 번 눌렀을 때 두 가지가 함께 일어난다.
+        */}
+      <div className="flex items-center gap-1.5">
+        <span className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+          {contribution && <span className="chip bg-brand-600 text-white">{contribution}</span>}
+          {evidence && <EvidenceBadge level={evidence} />}
+        </span>
+        <button
+          type="button"
+          /*
+            * 누를 자리를 44 px 로 잡는다. 글씨는 작아도 손가락이 닿는 넓이는 따로다 —
+            * 이 앱을 쓰시는 분 중에는 항암 중 손이 떨리시는 분이 있다.
+            * 바깥 여백을 음수로 당겨 줄 높이는 늘리지 않는다.
+            */
+          className="-my-2 flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center px-1 text-[11px] font-medium text-brand-700/80"
+          aria-expanded={open}
+          aria-label={open ? '이유 접기' : '이 음식을 올린 이유 보기'}
+          onClick={() => setOpen((v) => !v)}
+        >
+          {open ? '접기' : '왜요?'}
+        </button>
+      </div>
+      {open && (
+        <>
+          <p className="mt-1.5 text-[11px] leading-relaxed text-brand-900">{title}</p>
+          <Refs ids={refIds} />
+        </>
+      )}
     </div>
   )
 }

@@ -97,3 +97,26 @@ export function withAutoTags(name: string, tags: FoodTag[]): FoodTag[] {
   const extra = autoTags(name).filter((t) => !tags.includes(t))
   return extra.length ? [...tags, ...extra] : tags
 }
+
+/**
+ * 화면에 보일 이름.
+ *
+ * 식약처 자료는 '피자_쉬림프 피자 골드 (L)' 처럼 분류와 이름을 밑줄로 잇는다.
+ * 17,756건 중 14,427건이 그렇다. 그대로 내보이면 자료가 새는 것처럼 보이고,
+ * 실제로 '회덮밥_모듬' 은 고장 난 화면으로 읽힌다.
+ *
+ * 앞머리가 뒤에 이미 들어 있으면 덜어 낸다 — '피자_… 피자 골드' 는 '피자' 를 두 번 말한다.
+ * 그렇지 않으면 띄어쓰기로 잇는다 — '브로콜리_잎_생것' 은 셋 다 뜻이 있다.
+ *
+ * 판정에 쓰는 이름(food.name 을 만들기 전의 원본)은 건드리지 않는다.
+ * 태그 패턴은 원본 이름으로 검증했으므로, 보이는 이름만 다듬는다.
+ */
+export function displayName(raw: string): string {
+  if (!raw.includes('_')) return raw
+  const parts = raw.split('_').map((x) => x.trim()).filter(Boolean)
+  if (parts.length < 2) return parts.join(' ') || raw
+
+  const [head, ...rest] = parts
+  const redundant = rest.some((r) => r.includes(head))
+  return (redundant ? rest : parts).join(' ')
+}

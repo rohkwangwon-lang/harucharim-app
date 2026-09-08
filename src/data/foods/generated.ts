@@ -1,5 +1,5 @@
 import type { Food, FoodGroup, FoodTag, NutrientKey, Nutrients } from '../types'
-import { withAutoTags } from './autoTag'
+import { displayName, withAutoTags } from './autoTag'
 import packed from './generated-core.json'
 
 /**
@@ -31,7 +31,8 @@ export function unpack(p: PackedFoods, idPrefix: string): Food[] {
 
     const food: Food = {
       id: `${idPrefix}${i}`,
-      name,
+      /* 보이는 이름은 다듬고, 태그는 원본 이름으로 판정한다 */
+      name: displayName(name),
       group: p.groups[gi] as FoodGroup,
       form: 'processed',
       serving: { g: servingG, label: `1회 제공량 ${servingG} g` },
