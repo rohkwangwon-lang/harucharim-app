@@ -127,6 +127,38 @@ for (const prof of CANCERS) {
   }
 }
 
+/* ── 4-b. 근거 등급이 인용한 것과 맞는가 ────────────────
+ *
+ * 원문 대조에서 두 가지가 드러났다.
+ *
+ * 하나, 환자 5명의 교차설계를 인용하면서 등급을 'B'(대규모 전향적 코호트) 로 매겨 두었다.
+ * 둘, 셀레늄 규칙이 SELECT 본 논문에만 출처를 달고, 정작 그 논문에 없는 사후 분석 결과를 말하고 있었다.
+ *
+ * 사람 눈으로 다시 훑는 대신 여기서 붙잡는다. 잣대는 출처에 적어 둔 연구 종류(kind) 다 —
+ * 규칙이 스스로 매긴 등급이 아니라 **인용한 것** 을 본다.
+ */
+const KIND_MAX: Record<string, string[]> = {
+  /* 무작위배정 시험·메타분석이면 A 까지, 코호트면 B 까지 */
+  rct: ['A', 'B', 'C', 'G'],
+  meta: ['A', 'B', 'C', 'G'],
+  cohort: ['B', 'C', 'G'],
+  review: ['C', 'G'],
+  guideline: ['G', 'A', 'B', 'C'],
+  db: ['C', 'G']
+}
+for (const r of [...COMMON_RULES, ...Object.values(CONDITION_RULES).flat(),
+                 ...CANCERS.flatMap((c) => c.rules ?? []), ...INTERACTIONS] as {
+                   id: string; evidence: string; refIds?: string[] }[]) {
+  const kinds = (r.refIds ?? []).map((id) => REF_BY_ID[id]?.kind).filter(Boolean) as string[]
+  if (kinds.length === 0) continue
+  /* 인용한 것 가운데 가장 센 종류가 이 등급을 허용하는가 */
+  const ok = kinds.some((k) => (KIND_MAX[k] ?? ['A', 'B', 'C', 'G']).includes(r.evidence))
+  if (!ok) {
+    bad('근거 등급이 인용한 연구 종류와 맞지 않음',
+        `${r.id} — 등급 ${r.evidence} 인데 인용은 ${kinds.join('/')} 뿐이다`)
+  }
+}
+
 /* ── 5. 출처 ─────────────────────────────────── */
 const used = new Set<string>()
 for (const r of [...COMMON_RULES, ...Object.values(CONDITION_RULES).flat(), ...CANCERS.flatMap((c) => c.rules ?? [])])

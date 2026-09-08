@@ -78,7 +78,16 @@ export const REFERENCES: Reference[] = [
   { id: 'caret1996', kind: 'rct', year: 1996,
     citation: 'Omenn GS, et al. Effects of a combination of beta carotene and vitamin A on lung cancer and cardiovascular disease (CARET). N Engl J Med. 1996;334(18):1150-1155.' },
   { id: 'select2011', kind: 'rct', year: 2011,
-    citation: 'Klein EA, et al. Vitamin E and the risk of prostate cancer: the Selenium and Vitamin E Cancer Prevention Trial (SELECT). JAMA. 2011;306(14):1549-1556.' },
+    citation: 'Klein EA, et al. Vitamin E and the risk of prostate cancer: the Selenium and Vitamin E Cancer Prevention Trial (SELECT). JAMA. 2011;306(14):1549-1556. (n=35,533 · 비타민 E 400 IU HR 1.17, 99% CI 1.004-1.36 · 셀레늄 200 µg HR 1.09, 99% CI 0.93-1.27)',
+    url: 'https://doi.org/10.1001/jama.2011.1437' },
+  /*
+   * 기저 셀레늄 수치에 따라 결과가 갈린다는 것은 위 논문이 아니라 이 사후 분석에 있다.
+   * 한동안 이 주장을 select2011 하나에 붙여 두었는데, 그 논문 초록에는 없는 내용이었다.
+   * "A 를 다룬 논문" 과 "A 가 그렇다는 근거" 는 다르다.
+   */
+  { id: 'kristal2014', kind: 'cohort', year: 2014,
+    citation: 'Kristal AR, et al. Baseline selenium status and effects of selenium and vitamin E supplementation on prostate cancer risk. J Natl Cancer Inst. 2014;106(3):djt456. (SELECT 사후 case-cohort · 기저 셀레늄이 높던 군에서 고위험 전립선암 91% 증가, P=.007)',
+    url: 'https://doi.org/10.1093/jnci/djt456' },
 
   // ── 비타민 D ─────────────────────────────────────────────────
   { id: 'ng2019', kind: 'rct', year: 2019,
@@ -126,9 +135,19 @@ export const REFERENCES: Reference[] = [
     citation: 'Bailey DG, et al. Grapefruit–medication interactions: forbidden fruit or avoidable consequences? CMAJ. 2013;185(4):309-316.' },
   { id: 'golden2009', kind: 'review', year: 2009,
     citation: 'Golden EB, et al. Green tea polyphenols block the anticancer effects of bortezomib and other boronic acid-based proteasome inhibitors. Blood. 2009;113(23):5927-5937.' },
-  { id: 'sjw-interaction', kind: 'review', year: 2002,
-    citation: 'Mathijssen RH, et al. Effects of St. John\'s wort on irinotecan metabolism. J Natl Cancer Inst. 2002;94(16):1247-1249.' },
-  { id: 'warfarin-vitk', kind: 'review', year: 2012,
+  /*
+   * 카페시타빈–와파린은 증례 보고가 근거다. 한동안 ACCP 항응고 지침 하나만 달아 두었는데,
+   * 그 지침은 비타민 K 섭취의 일관성을 다루지 카페시타빈을 다루지 않는다.
+   * 주장을 실제로 뒷받침하는 문헌을 따로 단다.
+   */
+  { id: 'capecitabine-warfarin', kind: 'review', year: 2001,
+    citation: 'Copur MS, et al. An adverse interaction between warfarin and capecitabine: a case report and review of the literature. Clin Colorectal Cancer. 2001;1(3):182-184. (증례 2건 — 병용 6주 뒤 INR 10 초과·위장관 출혈)',
+    url: 'https://doi.org/10.3816/CCC.2001.n.019' },
+  { id: 'sjw-interaction', kind: 'rct', year: 2002,
+    citation: 'Mathijssen RH, et al. Effects of St. John\'s wort on irinotecan metabolism. J Natl Cancer Inst. 2002;94(16):1247-1249. (환자 5명 무작위배정 교차설계 · SN-38 농도 42 % 감소, 95 % CI 14~70 %)',
+    url: 'https://doi.org/10.1093/jnci/94.16.1247' },
+  /* ACCP 항응고 치료 지침이다 — 'review' 가 아니라 'guideline' 이 맞다 */
+  { id: 'warfarin-vitk', kind: 'guideline', year: 2012,
     citation: 'Holbrook A, et al. Evidence-based management of anticoagulant therapy: ACCP Guidelines. Chest. 2012;141(2 Suppl):e152S-e184S. — 비타민 K 섭취의 일관성 유지 권고.' },
 
   // ── 증상 관리 ────────────────────────────────────────────────
