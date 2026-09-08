@@ -11,7 +11,7 @@ import { INTERACTIONS, MEDICATIONS } from '../../src/data/interactions'
 import { INGREDIENT_RULES } from '../../src/data/ingredientRules'
 import { CANCERS } from '../../src/data/cancers'
 import { REF_BY_ID } from '../../src/data/references'
-import { BASE_EXERCISE, BONE_METS_NOTE, EXERCISE_BY_CANCER } from '../../src/data/exercise'
+import { BASE_EXERCISE, BONE_METS_NOTE, EXERCISE_BY_CANCER, INTAKE_EXERCISE_ADVICE } from '../../src/data/exercise'
 import { CURATED_FOODS, FOOD_BY_ID } from '../../src/data/foods'
 import { GENERATED_CORE } from '../../src/data/foods/generated'
 import { readFileSync } from 'node:fs'
@@ -140,6 +140,44 @@ for (const r of INGREDIENT_RULES) for (const ref of r.refIds ?? []) used.add(ref
 for (const list of [BASE_EXERCISE, ...Object.values(EXERCISE_BY_CANCER).map((p) => p.items)])
   for (const e of list) for (const ref of e.refIds ?? []) used.add(ref)
 for (const ref of BONE_METS_NOTE.refIds) used.add(ref)
+/*
+ * 섭취량에 따른 운동 조언도 마찬가지다.
+ * 이 문장들은 한동안 화면에 직접 박혀 있어 이 그물 밖에 있었고,
+ * 그래서 출처 없이 근거보다 센 말이 섞여 있었다. 자료로 옮겨 여기서 함께 센다.
+ */
+/*
+ * 화면에 근거보다 센 말이 다시 들어오지 않는가.
+ *
+ * 예전에는 "부족한 상태에서 운동을 늘리면 근육부터 빠집니다. 가벼운 걷기 정도로 유지하세요"
+ * 라고 단정했다. 찾아보니 이 상황을 직접 다룬 시험이 없고, Cochrane 갱신판은
+ * 악액질에서 운동의 효과도 안전성도 불확실하다고 결론짓는다(GRADE very low).
+ * 근거가 없는데 방향을 정해 말하면, 규칙마다 출처를 붙여 온 이 앱의 원칙이 무너진다.
+ *
+ * 그래서 운동 조언 화면에 '줄이세요/늘리세요' 류의 단정이 있는지 본다.
+ * 문장을 외우지 않고 뜻으로 본다 — 운동을 목적어로 삼은 명령형만 잡는다.
+ */
+const todayScreen = readFileSync('src/components/TodayMeals.tsx', 'utf-8')
+const exerciseBlock = todayScreen.slice(todayScreen.indexOf('function ExerciseAdvice'))
+const PRESCRIPTIVE = /(운동을?|운동량을?|강도를?)\s*(줄이|늘리)(세요|십시오|시기 바랍|셔야)/g
+for (const m of exerciseBlock.match(PRESCRIPTIVE) ?? []) {
+  bad('운동을 늘리라거나 줄이라고 단정함', `"${m}" — 이 상황을 직접 다룬 시험이 없다`)
+}
+/*
+ * 출처가 화면에 실제로 **불리는가**.
+ *
+ * 처음에는 'AdviceRefs' 라는 글자가 있는지만 봤는데, 그러면 함수 정의만 남아 있어도 통과한다.
+ * 호출을 지워 보았더니 검사가 그냥 넘어갔다 — 있는지가 아니라 쓰이는지를 봐야 한다.
+ */
+if (!/<AdviceRefs[\s>]/.test(exerciseBlock)) {
+  bad('운동 조언에 출처를 보여 주지 않음', '<AdviceRefs …/> 를 부르지 않는다')
+}
+
+for (const a of Object.values(INTAKE_EXERCISE_ADVICE)) {
+  for (const ref of a.refIds) used.add(ref)
+  if (a.refIds.length === 0) bad('섭취량 조언에 출처 없음', a.id)
+  if (!['A', 'B', 'C', 'G'].includes(a.evidence)) bad('섭취량 조언의 근거 수준 이상', `${a.id} ${a.evidence}`)
+  for (const ref of a.refIds) if (!REF_BY_ID[ref]) bad('없는 출처를 가리킴', `운동 조언 ${a.id} → ${ref}`)
+}
 /*
  * 미량영양소 기준도 문헌을 인용한다.
  * 규칙 목록에만 없다는 이유로 '안 쓰는 문헌' 이 되어서는 안 된다.

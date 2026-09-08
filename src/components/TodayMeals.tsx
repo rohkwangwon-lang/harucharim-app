@@ -9,11 +9,11 @@ import { CANCER_BY_ID } from '../data/cancers'
 import { buildDayMenu, currentSeason, dayNotes, fiberGoal, ideasFromIngredients, intakeTrend, microUnknownNames, naUnknownNames, planNotes, recentFoods } from '../engine/menu'
 import { evaluateSelection } from '../engine/rules'
 import { foodContribution, observedWeightGain, personalTarget, sumIntake, targetNotes } from '../engine/nutrition'
-import { BASE_EXERCISE, CONDITION_EXERCISE_NOTES, EXERCISE_BY_CANCER } from '../data/exercise'
+import { BASE_EXERCISE, CONDITION_EXERCISE_NOTES, EXERCISE_BY_CANCER, INTAKE_EXERCISE_ADVICE } from '../data/exercise'
 import { REF_BY_ID } from '../data/references'
 import { ChipGroup, DayNoteList, EvidenceBadge, LevelBadge, NutrientPanel, NutrientRow, nutrientState, Section, TodayStatus } from './ui'
 import { MEDICATIONS } from '../data/interactions'
-import type { Phase, PatientCondition } from '../data/types'
+import type { EvidenceLevel, Phase, PatientCondition } from '../data/types'
 
 /* 화면에 보여 줄 이름. 저장은 id 로 한다 — 약을 이름으로 견주면 규칙이 비켜 간다. */
 const PHASE_LABELS: { id: Phase; name: string }[] = [
@@ -645,6 +645,9 @@ function ExerciseAdvice({
   const under = kcal < target[0]
   const over = kcal > target[1] * 1.15
 
+  /* 섭취량에 따른 조언 — 근거와 단서는 자료에 적어 두었다 */
+  const advice = INTAKE_EXERCISE_ADVICE[under ? 'under' : over ? 'over' : 'within']
+
   const conditionNote = patient.conditions
     .map((c) => CONDITION_EXERCISE_NOTES[c])
     .find(Boolean)
@@ -665,11 +668,24 @@ function ExerciseAdvice({
   return (
     <Section title="오늘 운동" desc="식단과 함께 봐야 의미가 있는 부분입니다.">
       <div className="card p-4">
+        {/*
+          * 문구를 근거에 맞춰 낮췄다 (2026-09-08).
+          *
+          * 예전에는 "부족한 상태에서 운동을 늘리면 근육부터 빠집니다. 가벼운 걷기 정도로 유지하세요"
+          * 라고 단정하면서 출처를 하나도 달지 않았다. 규칙 121건에는 모두 출처를 붙여 두고
+          * 운동 조언만 그 그물 밖에 있었다.
+          *
+          * 실제로 찾아보니 이 상황을 직접 다룬 시험이 없다. Cochrane 갱신판은
+          * 악액질에서 운동의 효과도 안전성도 불확실하다고 결론짓는다(GRADE very low).
+          * 반대로 ACSM 합의는 "비활동을 피하라" 이므로, 줄이라고 말할 근거도 없다.
+          * 그래서 방향을 정해 주는 대신 아는 것과 모르는 것을 나누어 적는다.
+          */}
         <p className="text-sm leading-relaxed text-stone-700">
           {under ? (
             <>
-              오늘 열량이 목표보다 적습니다. <strong>운동량을 늘리기보다 먼저 채우시는 편</strong>이 좋습니다.
-              부족한 상태에서 운동을 늘리면 근육부터 빠집니다. 가벼운 걷기 정도로 유지하세요.
+              오늘 열량이 목표보다 적습니다. 이럴 때는 <strong>강도를 올리기보다 먼저 채우시는 편</strong>이 낫습니다.
+              다만 움직임을 멈추실 일은 아닙니다 &mdash; 지침이 권하는 것은 <strong>비활동을 피하는 것</strong>입니다.
+              가벼운 걷기는 그대로 이어 가시고, 부족이 며칠 이어지면 담당 의료진과 상의하십시오.
             </>
           ) : over ? (
             <>
@@ -683,6 +699,15 @@ function ExerciseAdvice({
             </>
           )}
         </p>
+
+        {/* 아는 것과 모르는 것을 나누어 적는다 — 문안과 출처는 data/exercise.ts 에 둔다 */}
+        {advice.caveat && (
+          <p className="mt-2 rounded-lg bg-stone-50 px-3 py-2 text-[11px] leading-relaxed text-stone-600">
+            {advice.caveat}
+          </p>
+        )}
+
+        <AdviceRefs evidence={advice.evidence} ids={advice.refIds} />
 
         {sustained && (
           <div className="mt-3 rounded-lg border border-brand-200 bg-brand-50/60 px-3 py-2.5">
@@ -753,6 +778,41 @@ function ExerciseAdvice({
         )}
       </div>
     </Section>
+  )
+}
+
+/**
+ * 운동 조언에 붙는 근거.
+ *
+ * 이 앱은 식이 규칙 121건에 모두 출처를 달고 검사로 그것을 지키는데,
+ * 운동 조언만 한동안 맨몸이었다. 화면에 직접 박힌 문장이라 규칙 검사의 그물 밖에 있었다.
+ *
+ * 근거 수준을 나누어 붙인다. 열량이 모자란 날의 조언은 'C' 다 —
+ * 이 상황을 직접 다룬 시험이 없고, 있는 자료는 대상이 다르거나(건강한 젊은 남성)
+ * 확실성이 매우 낮기(Cochrane very low) 때문이다.
+ * 부풀려 'G' 를 달면 앞서 고친 잘못을 여기서 되풀이하게 된다.
+ */
+function AdviceRefs({ evidence, ids }: { evidence: EvidenceLevel; ids: string[] }) {
+  const refs = ids.map((id) => REF_BY_ID[id]).filter(Boolean)
+  if (refs.length === 0) return null
+  return (
+    <div className="mt-2.5">
+      <details>
+        <summary className="flex cursor-pointer items-center gap-1.5 text-[11px] font-medium text-stone-400">
+          <EvidenceBadge level={evidence} />
+          <span>근거 {refs.length}건</span>
+        </summary>
+        <ul className="mt-1.5 space-y-1">
+          {refs.map((r) => (
+            <li key={r.id} className="text-[11px] leading-relaxed text-stone-500">
+              {r.url
+                ? <a href={r.url} target="_blank" rel="noreferrer" className="underline decoration-stone-300">{r.citation}</a>
+                : r.citation}
+            </li>
+          ))}
+        </ul>
+      </details>
+    </div>
   )
 }
 

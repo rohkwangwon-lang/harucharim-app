@@ -1,4 +1,4 @@
-import type { CancerId, CancerSubtype, PatientCondition, TreatmentHistory } from './types'
+import type { CancerId, CancerSubtype, EvidenceLevel, PatientCondition, TreatmentHistory } from './types'
 
 /**
  * 암 환자 운동 처방.
@@ -40,6 +40,41 @@ export interface ExercisePlan {
 }
 
 /* ────────────────────── 모든 암종 공통 ────────────────────── */
+
+/**
+ * 오늘 섭취한 열량에 따라 드리는 말.
+ *
+ * 화면에 문장을 직접 박아 두었더니 규칙 검사의 그물 밖에 있었다 —
+ * 식이 규칙 121건에는 모두 출처를 달아 두고 운동 조언만 맨몸이었고,
+ * "부족한 상태에서 운동을 늘리면 근육부터 빠집니다" 처럼 근거보다 센 말이 섞였다.
+ * 자료로 옮겨 두면 출처가 붙었는지, 근거 수준이 맞는지를 검사가 함께 본다.
+ *
+ * 열량이 모자란 날의 조언은 근거 수준 'C' 다. 이 상황을 직접 다룬 시험이 없고,
+ * 있는 자료는 대상이 다르거나(건강한 젊은 남성) 확실성이 매우 낮다(Cochrane very low).
+ * 그래서 늘리라거나 줄이라고 방향을 정해 드리지 않고, 아는 것과 모르는 것을 나누어 적는다.
+ */
+export interface IntakeAdvice {
+  id: 'under' | 'over' | 'within'
+  evidence: EvidenceLevel
+  refIds: string[]
+  /** 모르는 것을 밝히는 단서 — 있으면 본문 아래 작은 글씨로 함께 보인다 */
+  caveat?: string
+}
+
+export const INTAKE_EXERCISE_ADVICE: Record<IntakeAdvice['id'], IntakeAdvice> = {
+  under: {
+    id: 'under',
+    evidence: 'C',
+    refIds: ['acsm2019', 'cochrane-cachexia-exercise', 'asco-cachexia2020', 'longland2016'],
+    caveat:
+      '에너지가 모자란 때 근육을 지키는 데는 운동을 줄이는 것보다 단백질을 채우는 쪽이 ' +
+      '크게 작용한다는 시험이 있습니다. 다만 그 시험은 암 환자를 대상으로 한 것이 아니고, ' +
+      '암 악액질에서 운동의 효과와 안전성은 아직 확실하지 않습니다. ' +
+      '그래서 이 앱은 운동을 늘리라거나 줄이라고 말씀드리지 않습니다.'
+  },
+  over: { id: 'over', evidence: 'G', refIds: ['acsm2019', 'asco-exercise2022'] },
+  within: { id: 'within', evidence: 'G', refIds: ['acsm2019', 'asco-exercise2022'] }
+}
 
 export const BASE_EXERCISE: ExerciseItem[] = [
   {
