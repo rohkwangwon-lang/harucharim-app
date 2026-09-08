@@ -18,6 +18,7 @@ node_modules/.bin/jiti scripts/checks/micro.ts    # 칼륨·인·칼슘·철과 
 node_modules/.bin/jiti scripts/checks/intent.ts   # 하기로 한 일이 실제로 일어나는가 (오류 찾기가 아니라 동작 확인표)
 node_modules/.bin/jiti scripts/checks/notice.ts   # 약관이 약속한 고지 기간(7일·불리한 변경 30일)을 지켰는가
 node_modules/.bin/jiti scripts/checks/autotag.ts  # 받아 온 식품에 날것·가공육·자몽 태그가 붙는가 (양쪽 방향)
+PEOPLE=3000 node_modules/.bin/jiti scripts/checks/patient.ts  # 환자 입장 — 읽을 수 있는가, 이유가 오는가, 앱이 스스로 어긋나지 않는가
 
 # 대규모 실행 — 위 규칙들을 한자리에 모아 훨씬 큰 표본으로 돌린다.
 # 돌면서 무엇이 얼마나 자주 추천되는지 세어 docs/추천-식단-top100.md 에 적는다.

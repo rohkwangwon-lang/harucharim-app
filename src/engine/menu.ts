@@ -14,7 +14,15 @@ export interface MenuEntry {
   servings: number
   /** 사용자가 직접 고른 것인지, 앱이 채운 것인지 */
   origin: 'chosen' | 'added'
-  /** 무엇을 채우려고 넣었는지 (예: '단백질 31 g 보충') */
+  /**
+   * 무엇을 채우려고 넣었는지 (예: '단백질 31 g 보충').
+   *
+   * 화면에서는 작은 딱지 하나로 그려지므로 **짧은 말**이어야 한다.
+   * 한동안 '밥상을 세우려고 곁들임 하나를 반찬으로 바꿨습니다' 같은
+   * 문장이 들어가 있었는데, 딱지가 한 줄을 다 차지했고
+   * 바로 아래 이유와 같은 말을 두 번 하는 셈이었다.
+   * 문장은 ruleTitle 에 두고 여기에는 이름표만 둔다.
+   */
   contribution?: string
   /** 어떤 권고에 따른 것인지 */
   ruleTitle?: string
@@ -47,6 +55,15 @@ export interface DayMenu {
    * 예산이 빠듯해 가볍게 채운 끼니의 사정이다.
    */
   slotNotes: Partial<Record<MealSlot, string>>
+  /**
+   * 오늘 식단을 사실상 정한 권고.
+   *
+   * 삼킴이 어려우신 분께는 '음식의 형태를 먼저 바꾸세요' 가 열여섯 가지 중 아홉에 걸린다.
+   * 그 자체는 옳은 일인데, 앱은 그것을 항목마다 흩어 적을 뿐 한 번도
+   * "오늘은 이래서 이렇게 짰습니다" 라고 말하지 않았다.
+   * 환자분은 같은 문장을 여러 번 펴 보고 나서야 그 사실을 짐작하시게 된다.
+   */
+  leadRule?: { title: string; count: number; total: number }
 }
 
 /** 식품군 → 어느 끼니에 어울리는지 */
@@ -737,7 +754,7 @@ export function buildDayMenu(
       foodTotals = addTotals(foodTotals, foodContribution(put.food, part))
       here.push({
         food: put.food, servings: part, origin: 'added',
-        contribution: '한 상의 바탕이 되는 밥입니다',
+        contribution: '한 상의 바탕',
         ruleTitle: '반찬은 밥에 곁들이는 것이라, 밥이 있어야 한 상이 됩니다.',
         refIds: [], seasonal: put.seasonal
       })
@@ -1376,7 +1393,7 @@ export function buildDayMenu(
           const h2 = swap.prefers[0]
           here.push({
             food: swap.food, servings: 1, origin: 'added',
-            contribution: '밥상을 세우려고 곁들임 하나를 반찬으로 바꿨습니다',
+            contribution: '반찬으로 바꿈',
             ruleTitle: h2?.rule.title ?? '밥만으로는 한 끼가 되지 않아 반찬으로 바꿨습니다.',
             evidence: h2?.rule.evidence, refIds: h2?.rule.refIds ?? [],
             seasonal: swap.seasonal
@@ -1393,7 +1410,7 @@ export function buildDayMenu(
         food: picked.food,
         servings: 1,
         origin: 'added',
-        contribution: '상을 갖추려고 곁들였습니다',
+        contribution: '상 갖춤',
         ruleTitle: hit?.rule.title ?? '밥만으로는 한 끼가 되지 않아 곁들였습니다.',
         evidence: hit?.rule.evidence,
         refIds: hit?.rule.refIds ?? [],
@@ -1735,9 +1752,7 @@ export function buildDayMenu(
     const h = swap.prefers[0]
     here.push({
       food: swap.food, servings: 1, origin: 'added',
-      contribution: drop
-        ? '밥상을 세우려고 곁들임 하나를 반찬으로 바꿨습니다'
-        : '밥만으로는 한 끼가 되지 않아 반찬을 곁들였습니다',
+      contribution: drop ? '반찬으로 바꿈' : '반찬 곁들임',
       ruleTitle: h?.rule.title ?? '밥만으로는 한 끼가 되지 않아 반찬을 놓았습니다.',
       evidence: h?.rule.evidence, refIds: h?.rule.refIds ?? [],
       seasonal: swap.seasonal
@@ -1861,7 +1876,7 @@ export function buildDayMenu(
       const h3 = add.prefers[0]
       here.push({
         food: add.food, servings: part, origin: 'added',
-        contribution: '반찬이 하나뿐이라 한 가지를 더 놓았습니다',
+        contribution: '반찬 한 가지 더',
         ruleTitle: h3?.rule.title ?? '밥에 반찬 두어 가지가 통상적인 한 상입니다.',
         evidence: h3?.rule.evidence, refIds: h3?.rule.refIds ?? [],
         seasonal: add.seasonal
@@ -1906,7 +1921,29 @@ export function buildDayMenu(
 
   notes.push(...dayNotes(totals, suppTotals, patient, naUnknownNames(onPlate), microUnknownNames(onPlate, patient)))
 
-  return { scope: '하루(24시간) 전체', season, meals, totals, suppTotals, slotTotals, target, removed, notes, slotNotes }
+  /*
+   * 오늘을 정한 권고 하나를 골라 둔다.
+   * 절반을 넘게 차지하고 넷 이상일 때만 — 그보다 적으면 '오늘의 까닭' 이라 할 수 없다.
+   */
+  const shown = MEAL_SLOTS.flatMap((s) => meals[s])
+  const ruleCount = new Map<string, number>()
+  for (const e of shown) {
+    if (e.ruleTitle) ruleCount.set(e.ruleTitle, (ruleCount.get(e.ruleTitle) ?? 0) + 1)
+  }
+  let leadRule: DayMenu['leadRule']
+  for (const [title, count] of ruleCount) {
+    /*
+     * 열에 넷이면 말한다.
+     *
+     * 처음에는 '절반을 넘을 때' 로 잡았는데, 삼킴이 어려우신 분의 하루가
+     * 열한 가지 중 다섯이라 아슬아슬하게 빠졌다. 다섯 가지가 같은 까닭이면
+     * 알려 드릴 만하다. 검사는 절반 넘을 때만 요구하니,
+     * 앱이 검사보다 조금 더 말하는 쪽이 된다 — 그 방향이 맞다.
+     */
+    if (count >= 4 && count * 5 >= shown.length * 2) leadRule = { title, count, total: shown.length }
+  }
+
+  return { scope: '하루(24시간) 전체', season, meals, totals, suppTotals, slotTotals, target, removed, notes, slotNotes, leadRule }
 }
 
 /**
@@ -3112,6 +3149,20 @@ function bestFiller(
     { label: `열량 ${Math.round(c.kcal)} kcal 보충`, ratio: need.kcal > 0 ? Math.min(c.kcal, need.kcal) / need.kcal : 0 }
   ]
   parts.sort((a, b) => b.ratio - a.ratio)
+  /*
+   * '보충' 이라 말할 값어치가 있는 양인가.
+   *
+   * 가장 크게 메운 것을 골라 적다 보니 '식이섬유 0.5 g 보충' 같은 문구가 나왔다.
+   * 하루 목표가 25~30 g 인데 0.5 g 을 이유로 내세우면,
+   * 환자분은 "반 그램 때문에 이걸 올렸다고?" 하고 읽으신다.
+   * 열에 하나가 그랬다.
+   *
+   * 미미하면 부풀리지 않고 사실대로 적는다 — 상을 고르게 채우려고 곁들인 것이다.
+   */
+  const worth = /단백질/.test(parts[0].label) ? c.protein >= 3
+    : /식이섬유/.test(parts[0].label) ? c.fiber >= 2
+      : c.kcal >= 50
+  const contributionLabel = worth ? parts[0].label : '곁들임'
   const wantTags =
     parts[0].label.startsWith('단백질') ? ['고단백']
       : parts[0].label.startsWith('식이섬유') ? ['고식이섬유', '십자화과', '저잔사']
@@ -3121,7 +3172,7 @@ function bestFiller(
   return {
     food: c.food,
     servings: 1,
-    contribution: parts[0].label,
+    contribution: contributionLabel,
     /*
      * 권장 근거가 붙은 식품이면 그 문장을 그대로 쓴다.
      * 근거가 없는 식품은 없는 대로 말한다 — 있지도 않은 권고를 지어내지 않는다.
@@ -3280,7 +3331,15 @@ function pickForSlot(
       ruleTitle:
         hit?.rule.title ??
         '하루 목표에 이미 도달해, 열량은 낮고 포만감이 큰 것으로 골랐습니다.',
-      evidence: hit?.rule.evidence ?? 'G',
+      /*
+       * 걸린 규칙이 없으면 근거 수준을 붙이지 않는다.
+       *
+       * 예전에는 'G'(주요 학회 가이드라인의 합의 권고)를 기본값으로 달아 두었는데,
+       * 그 문장은 학회 권고가 아니라 앱이 자리를 고른 사정이다.
+       * 출처는 비어 있는 채로 등급만 붙으니, 눌러도 근거가 나오지 않는 'G' 가 됐다.
+       * 등급을 부풀리면 진짜 근거의 값이 함께 떨어진다.
+       */
+      evidence: hit?.rule.evidence,
       refIds: hit?.rule.refIds ?? []
     },
     note:

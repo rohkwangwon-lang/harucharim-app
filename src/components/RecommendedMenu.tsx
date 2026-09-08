@@ -235,6 +235,20 @@ export function RecommendedMenu({
             </button>
           </div>
         </div>
+        {/*
+          * 오늘을 정한 까닭을 한 번 말한다.
+          *
+          * 삼킴이 어려우신 분께는 같은 권고가 열여섯 가지 중 아홉에 걸리는데,
+          * 그것을 항목마다 흩어 적기만 하면 환자분은 '이유' 를 여러 번 펴 보고 나서야
+          * 오늘 식단이 왜 이런지 짐작하시게 된다. 흩어 적기 전에 한 번 말한다.
+          */}
+        {menu.leadRule && (
+          <p className="mt-2.5 rounded-lg bg-white/70 px-3 py-2 text-[11.5px] leading-relaxed text-brand-900">
+            오늘은 <strong>{menu.leadRule.title}</strong> 를 가장 크게 반영했습니다
+            <span className="text-brand-800/60"> — {menu.leadRule.total}가지 중 {menu.leadRule.count}가지가 이 까닭입니다.</span>
+          </p>
+        )}
+
         <p className="mt-2.5 text-[11px] leading-relaxed text-brand-800/70">
           {seed === 0 ? (
             <>마음에 드는 것이 없으면 <strong>다시 구성</strong>을 눌러 보세요. 같은 영양 목표로 다른 조합을 짜 드립니다.</>
@@ -503,7 +517,12 @@ function Why({
           aria-label={open ? '이유 접기' : '이 음식을 올린 이유 보기'}
           onClick={() => setOpen((v) => !v)}
         >
-          {open ? '접기' : '왜요?'}
+          {/*
+            * '왜요?' 라고 적었더니 앱이 되묻는 것처럼 읽혔다.
+            * 단추에는 물음이 아니라 무엇이 열리는지를 적는다.
+            * '근거' 는 바로 옆의 근거 등급·근거 N건(출처)과 겹치므로 '이유' 로 둔다.
+            */}
+          {open ? '접기' : '이유'}
         </button>
       </div>
       {open && (
