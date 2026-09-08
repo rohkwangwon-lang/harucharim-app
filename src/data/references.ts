@@ -176,8 +176,26 @@ export const REFERENCES: Reference[] = [
     citation: 'Elad S, et al. MASCC/ISOO clinical practice guidelines for the management of mucositis secondary to cancer therapy. Cancer. 2020;126(19):4423-4431.' },
   { id: 'iddsi', kind: 'guideline', year: 2019,
     citation: 'International Dysphagia Diet Standardisation Initiative (IDDSI) Framework. — 연하곤란 식이 점도 표준.' },
+  /*
+   * 악액질 진단 기준의 실제 출처. ESPEN 두 판(2017 전체·2021 축약) 전문을 다 훑어도
+   * '5 % / 6개월' 기준은 나오지 않는다 — 그것은 이 국제 합의문의 정의다.
+   */
+  /*
+   * 췌장 외분비기능부전의 유럽 지침. 췌장암에서의 PEI 관리를 따로 다룬다.
+   * 그동안 이 대목에 ESPEN 암 영양 지침을 달아 두었는데, 그 문서에는 췌장 효소도
+   * 식사 분할도 나오지 않는다(전문 검색으로 확인).
+   */
+  { id: 'eras-colorectal', kind: 'guideline', year: 2019,
+    citation: 'Gustafsson UO, et al. Guidelines for Perioperative Care in Elective Colorectal Surgery: ERAS Society Recommendations 2018. World J Surg. 2019;43(3):659-695.',
+    url: 'https://doi.org/10.1007/s00268-018-4844-y' },
+  { id: 'ueg-pei2025', kind: 'guideline', year: 2025,
+    citation: 'Vujasinovic M, et al. Recommendations from the European guidelines for the diagnosis and therapy of pancreatic exocrine insufficiency. Pancreatology. 2025;25(3):293-300.',
+    url: 'https://doi.org/10.1016/j.pan.2025.02.015' },
+  { id: 'fearon2011', kind: 'guideline', year: 2011,
+    citation: 'Fearon K, et al. Definition and classification of cancer cachexia: an international consensus. Lancet Oncol. 2011;12(5):489-495. (체중 감소 5 % 초과, 또는 BMI 20 미만이거나 근감소가 있으면 2 % 초과)',
+    url: 'https://doi.org/10.1016/S1470-2045(10)70218-7' },
   { id: 'espen-cachexia', kind: 'guideline', year: 2017,
-    citation: 'Arends J, et al. ESPEN guidelines on nutrition in cancer patients. Clin Nutr. 2017;36(1):11-48. — 악액질에서 단백질 1.0~1.5 g/kg, 오메가-3 고려.' }
+    citation: 'Arends J, et al. ESPEN guidelines on nutrition in cancer patients. Clin Nutr. 2017;36(1):11-48. — ESPEN 암 영양 지침 전체판(2021 은 축약본).' }
 ]
 
 /** 식이 문헌과 운동 문헌을 함께 조회할 수 있게 합친다 */

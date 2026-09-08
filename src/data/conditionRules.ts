@@ -132,7 +132,7 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
         '식욕이 없을 때 "많이 드세요"는 실행 불가능한 조언입니다. ' +
         '죽에 참기름·달걀·단백질분말을 섞고, 우유에 미숫가루를 타고, 간식으로 견과·치즈를 두는 식으로 ' +
         '같은 부피에서 얻는 열량을 올리는 편이 실제로 작동합니다.',
-      evidence: 'G', refIds: ['espen2021', 'espen-cachexia']
+      evidence: 'G', refIds: ['espen2021', 'fearon2011', 'espen-cachexia']
     },
     {
       id: 'cond-anor-soup', level: 'caution', match: { groups: ['국·탕·찌개'] },
@@ -149,8 +149,18 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
       id: 'cond-wl-ons', level: 'prefer', match: { supplementCategories: ['경장영양(균형영양식)', '단백질보충'] },
       title: '식사만으로 부족하면 경구영양보충을 더하세요',
       reason:
-        'ESPEN 은 경구 섭취가 필요량의 60 % 미만인 상태가 이어지면 경구영양보충(ONS)을 권고합니다. ' +
-        '6개월간 5 % 이상 체중이 줄었다면 이미 개입 기준을 넘은 상태입니다.',
+        /*
+       * '60 %' 는 ESPEN 두 판(2017 전체·2021 축약) 어디에도 없는 숫자였다.
+       * 원문 기준은 "less than 50% of the requirement for more than one week or
+       * only 50-75% of the requirement for more than two weeks" 이고,
+       * 그것도 ONS 가 아니라 **의학적 영양요법**(경관·정맥 포함) 개시 기준이다.
+       * ONS 는 '강화한 식사로 목표에 못 미칠 때' 더하는 단계다. 두 단계를 나누어 적는다.
+       */
+        '먼저 평소 식사를 열량·단백질이 높게 바꾸고, 그것으로 목표에 못 미치면 경구영양보충(ONS)을 더합니다. '
+        + '섭취가 필요량의 절반에 못 미치는 상태가 1주를 넘거나, 절반~4분의 3 수준이 2주를 넘으면 '
+        + 'ESPEN 은 의학적 영양요법을 시작하도록 권고합니다. ' +
+        '체중이 5 % 넘게 줄었다면 이미 개입 기준을 넘은 상태입니다 — '
+        + '마르신 분(BMI 20 미만)이나 근감소가 있는 분은 2 % 만 줄어도 같은 기준에 해당합니다.',
       evidence: 'G', refIds: ['espen2021', 'espen-cachexia']
     }
   ],
@@ -243,7 +253,12 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
       reason:
         '버섯 밑동, 옥수수, 견과, 나물 줄기가 대표적입니다. 잘게 썰고 충분히 씹으면 대부분 드실 수 있으며, ' +
         '수술 후 6~8주가 지나면 하나씩 다시 시도해 보셔도 됩니다.',
-      evidence: 'G', refIds: ['espen2021']
+      /*
+       * ESPEN 암 영양 지침(2017 전체·2021 축약) 전문을 검색해도 이 내용은 없다 —
+       * '섬유' 는 두 판 통틀어 0건, '소량 다회' 도 0건, 'B12' 도 0건이다.
+       * 인용은 실제로 그 말을 하는 문헌에만 단다.
+       */
+      evidence: 'C', refIds: ['eras-colorectal']
     },
     {
       id: 'cond-stoma-fluid', level: 'prefer', match: { tags: ['수분보충'] },

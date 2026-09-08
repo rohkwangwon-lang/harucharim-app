@@ -159,6 +159,49 @@ for (const r of [...COMMON_RULES, ...Object.values(CONDITION_RULES).flat(),
   }
 }
 
+/* ── 4-c. 인용이 주장을 뒷받침하는가 (손으로 확인한 것만) ──
+ *
+ * 원문 대조에서 같은 실수가 세 번 나왔다 — 셀레늄, 비브리오, 칼슘, 식도염 시점,
+ * 그리고 ESPEN 인용 다섯 건. 모두 "그 문헌이 그 말을 하지 않는" 경우였다.
+ *
+ * 이것은 자동으로 잡을 수 없다. 문헌을 읽어야 알 수 있기 때문이다.
+ * 대신 **이미 읽고 확인한 것** 을 여기에 못 박아, 나중에 누가 되돌리면 걸리게 한다.
+ * 아래 짝은 사람이 원문을 읽고 손으로 적은 것이다.
+ */
+const MUST_NOT_CITE: [string, string, string][] = [
+  ['crc-lowresidue', 'espen2021', "ESPEN 두 판 전문에 '섬유' 가 0건이다"],
+  ['cond-stoma-fiber', 'espen2021', "ESPEN 두 판 전문에 '섬유' 가 0건이다"],
+  ['stomach-small-meals', 'espen2021', 'ESPEN 에 소량 다회 권고가 없다'],
+  ['stomach-b12', 'espen2021', "ESPEN 두 판 전문에 'B12' 가 0건이다"],
+  ['panc-fat-symptom', 'espen2021', 'ESPEN 에 췌장 효소·지방 분할 권고가 없다'],
+  ['liver-raw-seafood', 'easl-nutrition', 'EASL 영양 지침에 비브리오·생식 언급이 0건이다'],
+  ['prostate-selenium', 'select2011-only', '기저 셀레늄 사후분석은 Kristal 2014 다']
+]
+const ALL_RULES = [...COMMON_RULES, ...Object.values(CONDITION_RULES).flat(),
+                   ...CANCERS.flatMap((c) => c.rules ?? []), ...INTERACTIONS] as {
+                     id: string; refIds?: string[] }[]
+for (const [rid, refId, why] of MUST_NOT_CITE) {
+  if (refId.endsWith('-only')) continue
+  const r = ALL_RULES.find((x) => x.id === rid)
+  if (!r) { bad('확인해 둔 규칙이 사라짐', rid); continue }
+  if ((r.refIds ?? []).includes(refId)) {
+    bad('원문이 그 말을 하지 않는 문헌을 다시 인용함', `${rid} → ${refId} (${why})`)
+  }
+}
+/* 반대로, 원문을 읽고 붙인 출처가 빠지지 않았는가 */
+const MUST_CITE: [string, string][] = [
+  ['prostate-selenium', 'kristal2014'],
+  ['liver-raw-seafood', 'vibrio-meta2019'],
+  ['lung-cachexia', 'fearon2011'],
+  ['panc-fat-symptom', 'ueg-pei2025']
+]
+for (const [rid, refId] of MUST_CITE) {
+  const r = ALL_RULES.find((x) => x.id === rid)
+  if (r && !(r.refIds ?? []).includes(refId)) {
+    bad('원문 대조로 붙여 둔 출처가 빠짐', `${rid} 에 ${refId} 가 없다`)
+  }
+}
+
 /* ── 5. 출처 ─────────────────────────────────── */
 const used = new Set<string>()
 for (const r of [...COMMON_RULES, ...Object.values(CONDITION_RULES).flat(), ...CANCERS.flatMap((c) => c.rules ?? [])])

@@ -72,7 +72,12 @@ export const colorectal: CancerProfile = {
         '흰밥·흰죽·껍질 벗긴 부드러운 채소 위주로 시작해 4~6주에 걸쳐 서서히 섬유를 늘립니다. ' +
         '이 시기의 고섬유식은 이득이 아니라 부담입니다.',
       evidence: 'G',
-      refIds: ['espen2021']
+      /*
+       * ESPEN 암 영양 지침(2017 전체·2021 축약) 전문을 검색해도 이 내용은 없다 —
+       * '섬유' 는 두 판 통틀어 0건, '소량 다회' 도 0건, 'B12' 도 0건이다.
+       * 인용은 실제로 그 말을 하는 문헌에만 단다.
+       */
+      refIds: ['eras-colorectal']
     },
     {
       id: 'crc-highfiber-stricture',
