@@ -190,8 +190,10 @@ export function Onboarding({
 
             <div className="mt-3 rounded-xl bg-stone-50 px-4 py-3">
               <p className="text-[11px] leading-relaxed text-stone-500">
-                암종·체중·식단 같은 <strong className="text-stone-700">건강 정보는 이 기기 안에만</strong> 저장되며
-                서버로 전송되지 않습니다. 로그인은 문의 답변을 확인하기 위한 것입니다.{' '}
+                적어 두신 <strong className="text-stone-700">체중과 식단은 이 기기 안에만</strong> 저장되며
+                서버로 나가지 않습니다. 로그인은 문의 답변을 확인하기 위한 것입니다.
+                이용 통계에 따로 동의하시면 암종·치료 시기가 뭉갠 값으로 전송됩니다 &mdash;
+                동의하지 않으셔도 모든 기능을 그대로 쓰실 수 있습니다.{' '}
                 <a
                   href={`${import.meta.env.BASE_URL}privacy.html`}
                   target="_blank"

@@ -188,6 +188,15 @@ no(/of_users['"]\)|select\(\s*['"]\*/.test(admin), '관리자 화면이 개인 �
  */
 const app = readFileSync('src/App.tsx', 'utf-8')
 const howto = readFileSync('src/components/HowTo.tsx', 'utf-8')
+/*
+ * 온보딩은 모든 분이 가장 먼저 읽는 화면인데 이 그물 밖에 있었다.
+ * 거기서 "암종·체중·식단 같은 건강 정보는 서버로 전송되지 않습니다" 라고 적고 있었다 —
+ * 문서 넷을 고치는 동안 화면 하나를 두고 온 것이다. 고치는 자리마다 그 옆을 함께 본다.
+ */
+const onboard = readFileSync('src/components/Onboarding.tsx', 'utf-8')
+const statsAsk = readFileSync('src/components/StatsAsk.tsx', 'utf-8')
+const statsConsent = existsSync('src/components/StatsConsent.tsx')
+  ? readFileSync('src/components/StatsConsent.tsx', 'utf-8') : ''
 const policy = readFileSync('public/privacy.html', 'utf-8')
 
 const terms = existsSync('public/terms.html') ? readFileSync('public/terms.html', 'utf-8') : ''
@@ -204,14 +213,45 @@ const terms = existsSync('public/terms.html') ? readFileSync('public/terms.html'
  * '보내지 않는다' 고 말하는 문장 안에 암종이 함께 들어 있으면 걸린다.
  */
 const DENY = /[^.。]*?(전송되지 않|보내지 않|나가지 않)[^.。]*/g
-for (const [name, text] of [['앱 고지', app], ['사용법', howto],
-                            ['처리방침', policy], ['이용약관', terms]] as const) {
+/**
+ * 화면에 실제로 보이는 글자만 뽑는다.
+ *
+ * JSX 를 태그만 지우고 보면 코드가 문장처럼 붙어 버려, 서로 상관없는 두 곳이
+ * 한 문장으로 읽힌다. 주석과 중괄호 식을 먼저 걷어내야 사람이 읽는 것과 같아진다.
+ */
+function visible(src: string): string {
+  return src
+    .replace(/\{\/\*[\s\S]*?\*\/\}/g, ' ')   // JSX 주석
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')         // 블록 주석
+    .replace(/^\s*(import|const|function|export|return|if|for)\b.*$/gm, ' ')
+    .replace(/\{[^{}]*\}/g, ' ')                // 중괄호 식
+    .replace(/<[^>]+>/g, ' ')                   // 태그
+    .replace(/\s+/g, ' ')
+}
+
+/*
+ * 동의 창(StatsAsk·StatsConsent)은 이 그물에서 뺀다.
+ * 그 화면은 '보내는 것'과 '보내지 않는 것'을 나란히 적는 것이 본래 목적이라
+ * 두 목록이 한자리에 있는 것이 옳다. 여기서 잡아야 할 것은
+ * "아무것도 안 나갑니다" 라고 **뭉뚱그려 단언하는** 화면이다.
+ */
+const SURFACES = [
+  ['앱 고지', visible(app)], ['사용법', visible(howto)],
+  ['처리방침', policy], ['이용약관', terms],
+  ['첫 화면', visible(onboard)]
+] as const
+no(!statsAsk || !statsConsent, '통계 동의 화면을 찾지 못했다 — 그물에서 뺀 것이 사라지면 알아야 한다')
+for (const [name, text] of SURFACES) {
   if (!text) continue
   const plain = text.replace(/<[^>]+>/g, '')
   for (const sent of plain.match(DENY) ?? []) {
     no(/암종|암 종류/.test(sent),
        `${name} 이 "${sent.trim().slice(0, 40)}…" 라고 적음 — 통계에 동의하시면 암종은 전송된다`)
   }
+}
+/* 통계 이야기는 안내를 맡은 화면에만 요구한다 — 동의 창은 그 자체가 통계 이야기다 */
+for (const [name, text] of [['앱 고지', app], ['사용법', howto],
+                            ['처리방침', policy], ['이용약관', terms]] as const) {
   no(!/통계/.test(text), `${name} 에 통계 이야기가 없음`)
 }
 
