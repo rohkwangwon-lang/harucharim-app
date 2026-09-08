@@ -85,9 +85,10 @@ export const gyn: CancerProfile = {
       title: '수술적 폐경 이후에는 골밀도가 빠르게 떨어집니다',
       reason:
         '난소를 절제하면 에스트로겐이 급격히 사라져, 자연 폐경보다 골 소실 속도가 빠릅니다. ' +
-        '칼슘 하루 1,000~1,200 mg 과 비타민 D 를 확보하고 체중 부하 운동을 병행하는 것이 기본 관리입니다.',
+        '칼슘 하루 1,000~1,200 mg 과 비타민 D 를 확보하고 체중 부하 운동을 병행하는 것이 기본 관리입니다. ' +
+        '이 값은 골 소실을 관리할 때의 기준으로, 일반 성인 기준(칼슘 700~800 mg)보다 높습니다.',
       evidence: 'G',
-      refIds: ['kdri2020', 'nccn-survivorship']
+      refIds: ['kdca-bone', 'kdri2020', 'nccn-survivorship']
     },
     {
       id: 'gyn-iron',

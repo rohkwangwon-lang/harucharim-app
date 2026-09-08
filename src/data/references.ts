@@ -41,6 +41,15 @@ export const REFERENCES: Reference[] = [
   { id: 'kdoqi2020', kind: 'guideline', year: 2020,
     citation: 'Ikizler TA, et al. KDOQI Clinical Practice Guideline for Nutrition in CKD: 2020 Update. Am J Kidney Dis. 2020;76(3 Suppl 1):S1-S107.',
     url: 'https://doi.org/10.1053/j.ajkd.2020.05.006' },
+  /*
+   * 골 소실 관리에 쓰는 1,000~1,200 mg·800 IU 는 KDRI 의 숫자가 아니다.
+   * KDRI 성인 기준은 칼슘 700~800 mg, 비타민 D 10~15 µg(400~600 IU) 이고,
+   * 질병관리청도 "골다공증 치료를 위해서는 더 많은 양을" 이라고 따로 적는다.
+   * 두 숫자를 섞어 쓰면 어느 쪽도 못 믿게 되므로 출처를 나눈다.
+   */
+  { id: 'kdca-bone', kind: 'guideline', year: 2023,
+    citation: '질병관리청. 골다공증 예방관리 보도자료 — 우리나라 성인의 1일 칼슘 권장섭취량은 700~800 mg, 비타민 D 는 10~15 µg 이며, 골다공증 치료를 위해서는 더 많은 양을 섭취하도록 할 수 있다.',
+    url: 'https://www.kdca.go.kr/board/board.es?mid=a20501010000&bid=0015&act=view&list_no=723657' },
   { id: 'kdri2020', kind: 'guideline', year: 2020,
     citation: '보건복지부·한국영양학회. 2020 한국인 영양소 섭취기준(KDRIs).' },
   { id: 'knhanes', kind: 'db', year: 2023,
@@ -127,6 +136,16 @@ export const REFERENCES: Reference[] = [
   // ── 호중구감소증 식이 ────────────────────────────────────────
   { id: 'sonbol2015', kind: 'meta', year: 2015,
     citation: 'Sonbol MB, et al. Neutropenic diets to prevent cancer infections: updated systematic review and meta-analysis. BMJ Support Palliat Care. 2019;9(4):425-433.' },
+  /*
+   * 비브리오 치사율의 실제 출처. EASL 영양 지침에는 비브리오도 생식도 한 번도 나오지 않는다 —
+   * 그 지침을 근거로 달아 두었던 것은 인용과 주장이 어긋난 경우였다.
+   */
+  { id: 'vibrio-meta2019', kind: 'meta', year: 2019,
+    citation: 'Chuang PY, et al. Hepatic disease and the risk of mortality of Vibrio vulnificus necrotizing skin and soft tissue infections: a systematic review and meta-analysis. PLoS One. 2019;14(10):e0223513. (12편·1,157명 · 간질환군 53.9 % 대 비간질환군 16.1 %, RR 2.61, 95 % CI 2.14~3.19)',
+    url: 'https://doi.org/10.1371/journal.pone.0223513' },
+  { id: 'cdc-vibrio', kind: 'guideline', year: 2024,
+    citation: 'U.S. CDC. Clinical Overview of Vibriosis. — 비브리오 불니피쿠스 감염자의 약 5명 중 1명이 사망하며, 간질환이 있으면 특히 위험하다.',
+    url: 'https://www.cdc.gov/vibrio/hcp/clinical-overview/index.html' },
   { id: 'fda-foodsafety', kind: 'guideline', year: 2023,
     citation: 'U.S. FDA. Food Safety for People with Cancer. — 조리·보관 위생 중심의 식품안전 권고.' },
 

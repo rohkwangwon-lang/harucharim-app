@@ -261,6 +261,8 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
       title: '복수 조절의 핵심은 나트륨 제한입니다',
       reason:
         '하루 2,000 mg(소금 5 g) 이하가 표준이며, 국물·젓갈·장아찌·면류 국물이 실제 제한을 깨뜨립니다. ' +
+        '다만 유럽간학회 지침은 하루 60 mmol(나트륨 약 1,400 mg) 아래로는 줄이지 말라고 못 박습니다 — ' +
+        '음식이 너무 맛없어져 열량과 단백질 섭취가 함께 무너지기 때문입니다. ' +
         '수분 제한은 저나트륨혈증이 있을 때만 필요합니다.',
       evidence: 'G', refIds: ['easl-nutrition']
     }
