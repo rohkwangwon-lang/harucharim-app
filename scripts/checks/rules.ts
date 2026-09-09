@@ -197,11 +197,14 @@ const MUST_CITE: [string, string][] = [
   /* 알코올 수치의 실제 출처 — IARC·WCRF 는 분류와 권고를 말하지 이 숫자를 말하지 않는다 */
   ['breast-alcohol', 'hamajima2002'],
   ['eso-alcohol', 'brooks2009aldh2'],
-  ['prostate-adt-bone', 'smith2001adt']
+  ['prostate-adt-bone', 'smith2001adt'],
+  ['common-antioxidant-rt', 'meyer2008smoking'],
+  ['hn-antioxidant', 'meyer2008smoking']
 ]
 for (const [rid, refId] of MUST_CITE) {
   const r = ALL_RULES.find((x) => x.id === rid)
-  if (r && !(r.refIds ?? []).includes(refId)) {
+  if (!r) { bad('못 박아 둔 규칙이 사라졌거나 이름이 바뀜', `${rid} → ${refId}`); continue }
+  if (!(r.refIds ?? []).includes(refId)) {
     bad('원문 대조로 붙여 둔 출처가 빠짐', `${rid} 에 ${refId} 가 없다`)
   }
 }
@@ -222,11 +225,24 @@ const MUST_SAY: [string, RegExp, string][] = [
    * 이 예외가 없어서 호중구가 낮은 분께 브로콜리 새싹이 권장으로 나가고 있었다.
    */
   ['cond-neut-raw', /새싹채소/, '생 새싹은 씻어서 해결되지 않는다는 FDA 예외를 적는다'],
-  ['cond-neut-raw', /2시간/, 'FDA 의 시간 기준이다. "오래" 로는 실행할 수 없다']
+  ['cond-neut-raw', /2시간/, 'FDA 의 시간 기준이다. "오래" 로는 실행할 수 없다'],
+  /*
+   * 항산화제 규칙의 핵심은 '흡연자에서만' 이다. 비흡연자의 위험비는 1에 가까웠다.
+   * 뭉뚱그리면 끊으신 분께는 겁만 주고 피우시는 분께는 경고가 약해진다.
+   */
+  ['common-antioxidant-rt', /담배를 피우신 분/, 'Meyer 2008 의 핵심은 흡연자에 몰렸다는 것이다'],
+  ['common-antioxidant-rt', /2\.9배/, '이차암 HR 2.88(95 % CI 1.56~5.31)이다'],
+  /* 호중구감소증 식단은 '이득 없음' 을 넘어 이식군에서 감염이 더 많았다 */
+  ['common-neutropenic-diet-myth', /1\.25/, '조혈모세포이식군에서 제한식이 쪽 감염이 더 많았다(RR 1.25, 1.02~1.54)']
 ]
 for (const [rid, pat, why] of MUST_SAY) {
   const r = ALL_RULES.find((x) => x.id === rid) as { id: string; reason?: string } | undefined
-  if (r && !pat.test(r.reason ?? '')) {
+  /*
+   * 없는 id 를 적어 두면 조용히 지나간다 — 훑지 않는 길은 지켜지지 않는다.
+   * 규칙 이름이 바뀌거나 사라지면 여기서 먼저 걸리게 한다.
+   */
+  if (!r) { bad('못 박아 둔 규칙이 사라졌거나 이름이 바뀜', `${rid} (${why})`); continue }
+  if (!pat.test(r.reason ?? '')) {
     bad('원문 대조로 고친 수치가 사라짐', `${rid} — ${why}`)
   }
 }

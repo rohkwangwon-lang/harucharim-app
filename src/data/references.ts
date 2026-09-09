@@ -81,8 +81,16 @@ export const REFERENCES: Reference[] = [
   // ── 항산화 보충제의 위해 ──────────────────────────────────────
   { id: 'bairati2005', kind: 'rct', year: 2005,
     citation: 'Bairati I, et al. Randomized trial of antioxidant vitamins to prevent acute adverse effects of radiation therapy in head and neck cancer patients. J Clin Oncol. 2005;23(24):5805-5813.' },
+  /*
+   * '국소 재발·사망 증가(특히 흡연자)' 의 실제 출처. 같은 540명 시험의 후속 분석이다.
+   * 두 Bairati 2005 논문은 각각 급성 부작용과 이차암을 다루지 이 결과를 다루지 않는다.
+   * 그리고 이 논문의 핵심은 '흡연자에서만' 이라는 것이다 — 비흡연자의 위험비는 1에 가까웠다.
+   */
+  { id: 'meyer2008smoking', kind: 'rct', year: 2008,
+    citation: 'Meyer F, et al. Interaction between antioxidant vitamin supplementation and cigarette smoking during radiation therapy in relation to long-term effects on recurrence and mortality: a randomized trial among head and neck cancer patients. Int J Cancer. 2008;122(7):1679-1683. (방사선치료 중 흡연자에서 재발 HR 2.41, 전체 사망 2.26, 두경부암 사망 3.38 · 비흡연자는 모두 1에 가까움)',
+    url: 'https://doi.org/10.1002/ijc.23200' },
   { id: 'bairati2005b', kind: 'rct', year: 2005,
-    citation: 'Bairati I, et al. A randomized trial of antioxidant vitamins to prevent second primary cancers in head and neck cancer patients. J Natl Cancer Inst. 2005;97(7):481-488.' },
+    citation: 'Bairati I, et al. A randomized trial of antioxidant vitamins to prevent second primary cancers in head and neck cancer patients. J Natl Cancer Inst. 2005;97(7):481-488. (비타민 E 400 IU·베타카로틴 30 mg, 방사선치료 첫날부터 · 보충 기간 중 이차암 HR 2.88, 95 % CI 1.56~5.31)' },
   { id: 'atbc1994', kind: 'rct', year: 1994,
     citation: 'The Alpha-Tocopherol, Beta Carotene Cancer Prevention Study Group. The effect of vitamin E and beta carotene on the incidence of lung cancer in male smokers. N Engl J Med. 1994;330(15):1029-1035.' },
   { id: 'caret1996', kind: 'rct', year: 1996,
@@ -143,8 +151,13 @@ export const REFERENCES: Reference[] = [
     citation: 'Armenian SH, et al. Prevention and Monitoring of Cardiac Dysfunction in Survivors of Adult Cancers: ASCO Clinical Practice Guideline. J Clin Oncol. 2017;35(8):893-911. — 심장독성 약제 사용 중 혈압·체중·지질 등 심혈관 위험 요인 관리 권고.' },
 
   // ── 호중구감소증 식이 ────────────────────────────────────────
-  { id: 'sonbol2015', kind: 'meta', year: 2015,
-    citation: 'Sonbol MB, et al. Neutropenic diets to prevent cancer infections: updated systematic review and meta-analysis. BMJ Support Palliat Care. 2019;9(4):425-433.' },
+  /*
+   * id 는 'sonbol2015' 이지만 실제로 인용하는 것은 2019년 갱신판이다(초판이 2015년).
+   * id 는 읽음 표시처럼 여기저기 걸려 있어 그대로 두고, 연도와 내용을 사실에 맞춘다.
+   */
+  { id: 'sonbol2015', kind: 'meta', year: 2019,
+    citation: 'Sonbol MB, et al. Neutropenic diets to prevent cancer infections: updated systematic review and meta-analysis. BMJ Support Palliat Care. 2019;9(4):425-433. (6편·1,116명 · 주요 감염 RR 1.16, 95 % CI 0.94~1.42 · 조혈모세포이식군에서는 제한식이가 오히려 감염 증가 RR 1.25, 95 % CI 1.02~1.54 · 제한식이 대신 미국 FDA 식품취급 지침을 따르라고 권고)',
+    url: 'https://doi.org/10.1136/bmjspcare-2018-001742' },
   /*
    * 비브리오 치사율의 실제 출처. EASL 영양 지침에는 비브리오도 생식도 한 번도 나오지 않는다 —
    * 그 지침을 근거로 달아 두었던 것은 인용과 주장이 어긋난 경우였다.
