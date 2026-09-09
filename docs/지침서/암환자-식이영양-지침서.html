@@ -128,13 +128,56 @@ main{padding-top:32px;min-width:0}
 .gradekey b{font-family:"IBM Plex Mono",monospace;font-size:14px;color:var(--celadon);font-weight:600}
 .gradekey span{font-size:14px}
 .gradekey i{font-style:normal;color:var(--mute);font-size:13px;display:block;margin-top:2px}
+/* 산문 각주 */
+.cite{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.03em;
+  vertical-align:super;line-height:0;margin-left:2px}
+.cite a{color:var(--celadon-2);text-decoration:none;padding:0 1px}
+.cite a:hover{color:var(--celadon);text-decoration:underline}
+/* 흔한 오해 */
+.myth{margin:18px 0 0;display:grid;gap:0;border-top:1px solid var(--line)}
+.myth>div{padding:16px 0;border-bottom:1px solid var(--line)}
+.myth b{display:block;font-family:Hahmlet,serif;font-size:16px;font-weight:600;
+  color:var(--seal);margin:0 0 6px;line-height:1.5}
+.myth span{display:block;font-size:14.5px;max-width:62ch}
+/* 성분 카드 */
+.ings{display:grid;gap:0;margin:18px 0 0;border-top:1px solid var(--line)}
+.ing{padding:16px 0;border-bottom:1px solid var(--line)}
+.ing-h{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 7px}
+.ing-h b{font-family:Hahmlet,serif;font-size:16.5px;font-weight:600}
+.ing-h .lv{font-size:10.5px;border:1px solid currentColor;padding:1px 7px}
+.grade.sm{width:20px;height:20px;font-size:11px;margin-left:auto}
+.ing p{margin:0 0 5px;font-size:14.5px;max-width:64ch}
+.ing .dt{color:var(--seal)}
+.ing .src{margin-top:5px}
 footer{grid-column:1/-1;border-top:1px solid var(--line);margin-top:40px;padding-top:22px;
   font-size:12.5px;color:var(--mute);display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between}
 a:focus-visible,.toc a:focus-visible{outline:2px solid var(--celadon);outline-offset:3px}
 @media print{
-  .toc{display:none} .wrap{grid-template-columns:1fr;max-width:none}
-  .entry,.sub,.part{break-inside:avoid} body{background:#fff}
+  /*
+   * 인쇄·PDF. 화면용 2단을 1단으로 펴고, 색을 종이에 맞게 낮춘다.
+   * 각주는 종이에서 눌러 갈 수 없으므로 번호만 남긴다.
+   */
+  :root{--paper:#fff;--card:#fff;--ink:#111;--mute:#555;--line:#CFCFCF;
+    --celadon:#20463D;--celadon-2:#4C6F65;--wash:#F0F3F1;--shadow:none}
+  .toc{display:none}
+  .wrap{grid-template-columns:1fr;max-width:none;padding:0;gap:0}
+  body{background:#fff;font-size:10.5pt;line-height:1.65}
+  .cover{padding:0 0 18pt;border-bottom:1.5pt solid var(--celadon)}
+  h1{font-size:26pt}
+  .part{margin:0 0 24pt;break-before:page}
+  #p0.part{break-before:auto}
+  .part>h2{font-size:17pt}
+  .sub>h3{font-size:13pt}
+  .say>h4{font-size:11.5pt}
+  .entry,.sub,.ing,.myth>div,.target,.phase,.gradekey>div,.refs li{break-inside:avoid}
+  .part>h2,.sub>h3{break-after:avoid}
+  a{color:var(--ink);text-decoration:none}
+  .src a,.cite a{color:var(--celadon-2)}
+  .ru{display:none}
+  .refs li{grid-template-columns:26px 84px minmax(0,1fr)}
+  footer{margin-top:20pt}
 }
+@page{size:A4;margin:16mm 15mm}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -160,6 +203,26 @@ a:focus-visible,.toc a:focus-visible{outline:2px solid var(--celadon);outline-of
   <p class="toc-h">차례</p>
   <ol>
     <li><a href="#p0">읽기 전에</a></li>
+    <li><a href="#pA">총론 — 암 환자에게 영양이란</a>
+      <ol>
+        <li><a href="#a1">왜 영양이 치료의 일부인가</a></li>
+        <li><a href="#a2">체중 감소와 악액질</a></li>
+        <li><a href="#a3">내 하루 목표 계산하기</a></li>
+        <li><a href="#a4">모자랄 때 무엇부터 하는가</a></li>
+        <li><a href="#a5">언제 의료진에게 알려야 하는가</a></li>
+        <li><a href="#a6">흔한 오해 여섯 가지</a></li>
+      </ol>
+    </li>
+    <li><a href="#pB">영양소별 권고</a>
+      <ol>
+        <li><a href="#n-macro">열량 · 단백질 · 지방 · 탄수화물</a></li>
+        <li><a href="#n-fiber">식이섬유와 수분</a></li>
+        <li><a href="#n-min">나트륨 · 칼륨 · 인 · 칼슘</a></li>
+        <li><a href="#n-vit">비타민 D · K · B12 · 철 · 아연</a></li>
+        <li><a href="#n-anti">항산화제 — 치료 중이 문제다</a></li>
+        <li><a href="#n-supp">보충제 성분 한눈에 보기</a></li>
+      </ol>
+    </li>
     <li><a href="#p1">공통 원칙</a></li>
     <li><a href="#p2">증상과 상태</a>
       <ol><li><a href="#c-%EC%97%B0%ED%95%98%EA%B3%A4%EB%9E%80">연하곤란</a></li><li><a href="#c-%EA%B5%AC%EA%B0%95%EC%A0%90%EB%A7%89%EC%97%BC">구강점막염</a></li><li><a href="#c-%EC%84%A4%EC%82%AC">설사</a></li><li><a href="#c-%EB%B3%80%EB%B9%84">변비</a></li><li><a href="#c-%EC%98%A4%EC%8B%AC%C2%B7%EA%B5%AC%ED%86%A0">오심·구토</a></li><li><a href="#c-%EC%8B%9D%EC%9A%95%EB%B6%80%EC%A7%84">식욕부진</a></li><li><a href="#c-%EC%B2%B4%EC%A4%91%EA%B0%90%EC%86%8C">체중감소</a></li><li><a href="#c-%EC%B2%B4%EC%A4%91%EC%A6%9D%EA%B0%80">체중증가</a></li><li><a href="#c-%ED%98%B8%EC%A4%91%EA%B5%AC%EA%B0%90%EC%86%8C%EC%A6%9D">호중구감소증</a></li><li><a href="#c-%EC%9C%84%EC%A0%88%EC%A0%9C%ED%9B%84">위절제후</a></li><li><a href="#c-%EC%9E%A5%EB%A3%A8%EB%B3%B4%EC%9C%A0">장루보유</a></li><li><a href="#c-%EB%B3%B5%EC%88%98">복수</a></li><li><a href="#c-%EA%B0%84%EC%84%B1%EB%87%8C%EC%A6%9D%EC%9C%84%ED%97%98">간성뇌증위험</a></li><li><a href="#c-%EC%8B%A0%EA%B8%B0%EB%8A%A5%EC%A0%80%ED%95%98">신기능저하</a></li><li><a href="#c-%EB%8B%B9%EB%87%A8">당뇨</a></li><li><a href="#c-%EA%B3%A0%ED%98%88%EC%95%95">고혈압</a></li><li><a href="#c-%EC%99%80%ED%8C%8C%EB%A6%B0%EB%B3%B5%EC%9A%A9">와파린복용</a></li></ol>
@@ -205,6 +268,549 @@ a:focus-visible,.toc a:focus-visible{outline:2px solid var(--celadon);outline-of
       특히 놓치기 쉬운 지점입니다.</p>
     </section>
 
+    <section id="pA" class="part">
+  <p class="pn">총론</p><h2>암 환자에게 영양이란</h2>
+  <p class="lead">개별 음식으로 들어가기 전에, 왜 이것을 챙겨야 하는지와
+    내 몫이 얼마인지를 먼저 정리합니다. 이 장만 읽으셔도 큰 틀은 잡히실 것입니다.</p>
+
+  <div class="sub" id="a1">
+    <h3>1. 왜 영양이 치료의 일부인가</h3>
+    <p>영양은 치료를 돕는 곁가지가 아니라 치료를 <em>완주하게 하는 조건</em>입니다.
+      먹지 못해 몸이 축나면 항암제 용량을 줄이거나 미루게 되고, 수술 뒤 회복이 늦어지며,
+      감염이 늘고, 결국 치료 결과 자체가 나빠집니다.
+      유럽임상영양대사학회는 그래서 암 환자에게 영양 상태를 <em>일찍, 반복해서</em>
+      확인하도록 권고합니다.<sup class="cite"><a href="#ref-2">2</a>,<a href="#ref-68">68</a></sup></p>
+    <p>반대 방향도 중요합니다. 음식으로 암을 낫게 할 수는 없습니다.
+      확인된 바 없는 이야기에 시간과 돈을 쓰다가 정작 필요한 열량과 단백질을 놓치는 일이
+      진료실에서 드물지 않습니다. 이 문서가 하려는 일은 그 사이를 갈라 놓는 것입니다.</p>
+    <p>치료를 마치신 뒤에도 영양은 남습니다. 다만 목표가 바뀝니다 —
+      치료 중에는 <em>지키는 것</em>이, 그 뒤에는 <em>두 번째 암과 다른 병을 막는 것</em>이
+      목표가 됩니다. 조기 유방암이나 전립선암처럼 예후가 좋은 암에서는
+      암보다 심혈관질환이 더 흔한 사망 원인이 되기도 합니다.<sup class="cite"><a href="#ref-1">1</a>,<a href="#ref-4">4</a></sup></p>
+  </div>
+
+  <div class="sub" id="a2">
+    <h3>2. 체중 감소와 악액질 — 숫자로 알아 두십시오</h3>
+    <p>“조금 빠졌다”는 말은 사람마다 뜻이 다릅니다. 국제 합의 기준은 이렇습니다.<sup class="cite"><a href="#ref-67">67</a></sup></p>
+    <div class="target">
+      <p class="tl">악액질에 해당하는 체중 감소 <span>둘 중 하나만 맞아도</span></p>
+      <dl>
+        <div><dt>보통 체격</dt><dd>6개월 안에 5 % 초과</dd></div>
+        <div><dt>마르신 분 (체질량지수 20 미만)</dt><dd>2 % 초과</dd></div>
+        <div><dt>근감소가 있는 분</dt><dd>2 % 초과</dd></div>
+      </dl>
+      <p class="tn">60 kg 인 분이 6개월에 3 kg 이면 5 % 입니다.
+        마르신 분은 1.2 kg 만 빠져도 같은 기준에 해당합니다 — 이것이 잘 알려지지 않은 부분입니다.</p>
+    </div>
+    <p>여기서 빠지는 것은 지방이 아니라 <em>근육</em>이라는 점이 중요합니다.
+      근육량은 항암제 용량 유지와 치료 완주율에 직접 연결됩니다.
+      그래서 치료 중에는 체중을 줄이는 것이 목표가 아니며,
+      체중계 숫자가 그대로여도 근육이 줄고 지방이 느는 일이 흔합니다.<sup class="cite"><a href="#ref-2">2</a>,<a href="#ref-3">3</a></sup></p>
+    <p>주 1회, 같은 시간·같은 옷차림으로 재시는 것으로 충분합니다.
+      매일 재면 물빠짐에 따른 흔들림에 마음만 쓰이게 됩니다.</p>
+  </div>
+
+  <div class="sub" id="a3">
+    <h3>3. 내 하루 목표 계산하기</h3>
+    <p>암종별 세부 목표는 3부에 있지만, 계산법은 공통입니다.
+      유럽임상영양대사학회의 권고를 체중에 곱해 씁니다.<sup class="cite"><a href="#ref-2">2</a>,<a href="#ref-68">68</a></sup></p>
+    <div class="target">
+      <p class="tl">계산 <span>체중 1 kg 당</span></p>
+      <dl>
+        <div><dt>열량</dt><dd>25~30 kcal</dd></div>
+        <div><dt>단백질</dt><dd>1 g 초과 · 가능하면 1.5 g 까지</dd></div>
+        <div><dt>수분</dt><dd>30~35 mL</dd></div>
+      </dl>
+      <p class="tn">60 kg 이면 하루 1,500~1,800 kcal, 단백질 60 g 을 넘겨 90 g 쪽,
+        물 1.8~2.1 L 입니다. 단백질 권고는 <em>“1.0~1.5”가 아니라 “1 g 을 넘겨 1.5 까지”</em>입니다 —
+        원문이 그렇게 적혀 있고, 하한이 다릅니다.
+        체중이 줄고 있거나 마르신 분은 열량을 30~35 kcal 쪽 상단으로 잡습니다.</p>
+    </div>
+    <p>단백질 90 g 은 막연합니다. 손으로 가늠하시는 편이 낫습니다 —
+      달걀 1개 6 g, 두부 반 모 15 g, 생선 한 토막 20 g, 닭가슴살 100 g 에 30 g,
+      우유 한 잔 6 g, 밥 한 공기 6 g. 매 끼니에 손바닥만 한 단백질 반찬이 하나씩 있으면 대개 채워집니다.</p>
+  </div>
+
+  <div class="sub" id="a4">
+    <h3>4. 모자랄 때 무엇부터 하는가 — 순서가 있습니다</h3>
+    <p>모자란다고 곧바로 영양제를 사는 것이 아닙니다. 단계가 정해져 있습니다.<sup class="cite"><a href="#ref-2">2</a></sup></p>
+    <div class="phase">
+      <p class="tl">순서</p>
+      <div><dt>① 먼저 식사</dt><dd>같은 부피에서 열량·단백질을 올립니다. 죽에 참기름·달걀·단백질분말을 섞고,
+        우유에 미숫가루를 타고, 간식으로 견과·치즈를 둡니다. 양을 늘리는 것보다 <em>한 입의 밀도</em>를 올리는 쪽이 실행됩니다.</dd></div>
+      <div><dt>② 그래도 모자라면 경구영양보충</dt><dd>이른바 영양음료입니다. 식사를 대신하는 것이 아니라 더하는 것입니다.</dd></div>
+      <div><dt>③ 그래도 안 되면 관을 통한 영양</dt><dd>코를 통하거나 위루관을 통해 넣습니다.
+        식도암·두경부암에서는 치료 시작 전에 미리 논의하는 편이 낫습니다.</dd></div>
+      <div><dt>④ 장을 쓸 수 없을 때만 정맥영양</dt><dd>순서상 마지막입니다.</dd></div>
+    </div>
+    <p>어느 시점에 ②로 넘어가야 하는지도 기준이 있습니다 —
+      섭취가 <em>필요량의 절반에 못 미치는 상태가 1주를 넘거나</em>,
+      <em>절반에서 4분의 3 수준이 2주를 넘으면</em> 의학적 영양요법을 시작하도록 권고합니다.<sup class="cite"><a href="#ref-2">2</a></sup></p>
+    <p>인슐린 저항성이 있으면서 체중이 줄고 있는 분께는 탄수화물보다 지방 쪽 열량 비중을 올리도록 권합니다 —
+      부피당 열량을 높이면서 혈당 부담은 낮추려는 것입니다. 참기름·견과·치즈를 먼저 드는 이유가 여기 있습니다.<sup class="cite"><a href="#ref-68">68</a></sup></p>
+  </div>
+
+  <div class="sub" id="a5">
+    <h3>5. 언제 의료진에게 알려야 하는가</h3>
+    <p>아래는 다음 진료를 기다리지 마시고 알리셔야 하는 것들입니다.</p>
+    <div class="phase">
+      <p class="tl">알리십시오</p>
+      <div><dt>체중</dt><dd>한 달에 2 % 넘게 빠질 때. 60 kg 이면 1.2 kg 입니다.</dd></div>
+      <div><dt>먹는 양</dt><dd>평소의 절반도 못 드시는 날이 사나흘 이어질 때.</dd></div>
+      <div><dt>삼킴</dt><dd>삼킬 때 기침이 나거나 목소리가 젖은 소리로 변할 때 — 연하 평가가 필요합니다.</dd></div>
+      <div><dt>구토·설사</dt><dd>하루를 넘겨 이어지거나 소변이 줄 때(탈수).</dd></div>
+      <div><dt>발열</dt><dd>호중구가 낮은 시기의 38 ℃ 이상은 응급입니다.</dd></div>
+      <div><dt>새 영양제</dt><dd>드시기 <em>전에</em> 말씀하십시오. 항암제와 부딪히는 것이 실제로 있습니다.</dd></div>
+    </div>
+  </div>
+
+  <div class="sub" id="a6">
+    <h3>6. 흔한 오해 여섯 가지</h3>
+    <p>진료실에서 반복해 바로잡게 되는 것들입니다. 근거는 각 항목의 번호를 따라가시면 됩니다.</p>
+    <div class="myth">
+      <div><b>“암세포가 굶어 죽게 설탕을 끊어야 한다”</b>
+        <span>당을 끊는다고 암세포만 굶지 않습니다. 굶는 것은 환자분이고, 먼저 빠지는 것은 근육입니다.
+          단 음료·과자를 줄이는 것은 다른 이유(영양 밀도)로 맞는 말입니다.<sup class="cite"><a href="#ref-2">2</a>,<a href="#ref-1">1</a></sup></span></div>
+      <div><b>“유방암이면 콩·두부를 끊어야 한다”</b>
+        <span>반대입니다. 진단 후 대두 섭취가 많은 군에서 재발이 낮았고, 이 경향은 수용체 양성에서도
+          타목시펜 복용자에서도 같았습니다. 다만 이소플라본을 수십 배 농축한 <em>보충제</em>는 별개입니다.<sup class="cite"><a href="#ref-24">24</a>,<a href="#ref-25">25</a>,<a href="#ref-4">4</a></sup></span></div>
+      <div><b>“가공육이 담배와 같은 1군이라니 큰일이다”</b>
+        <span>국제암연구소가 직접 밝혀 두었습니다 — 이 등급은 <em>근거가 얼마나 확실한가</em>를 말하는 것이지
+          <em>얼마나 위험한가</em>를 재는 것이 아닙니다.<sup class="cite"><a href="#ref-20">20</a></sup></span></div>
+      <div><b>“면역력에 좋다니 이것저것 챙겨 먹자”</b>
+        <span>치료 중 고용량 항산화 보충제는 오히려 해가 될 수 있습니다.
+          두경부암 무작위배정 시험에서 보충 기간 중 이차암이 2.9배 많았습니다.<sup class="cite"><a href="#ref-27">27</a>,<a href="#ref-29">29</a>,<a href="#ref-28">28</a></sup></span></div>
+      <div><b>“호중구가 낮으니 생과일·생채소를 다 끊어야 한다”</b>
+        <span>이른바 호중구감소증 식단이 감염을 줄인다는 근거는 메타분석에서 확인되지 않았고,
+          조혈모세포이식군에서는 오히려 감염이 더 많았습니다. 익히고 씻어 안전하게 다루는 쪽이 맞습니다.
+          다만 생 새싹채소만은 예외라 익혀 드셔야 합니다.<sup class="cite"><a href="#ref-50">50</a>,<a href="#ref-53">53</a></sup></span></div>
+      <div><b>“수술했으니 죽만 몇 주 먹어야 한다”</b>
+        <span>수술 후 회복 지침은 반대로 말합니다 — 정상 식사 재개가 늦어질수록 감염이 늘고 회복이 느려지므로,
+          대부분의 환자는 수술 당일부터 음식을 시작해야 한다고 강하게 권고합니다.<sup class="cite"><a href="#ref-65">65</a></sup></span></div>
+    </div>
+  </div>
+</section>
+    <section id="pB" class="part">
+  <p class="pn">각론</p><h2>영양소별 권고</h2>
+  <p class="lead">“이 성분은 어떻습니까”라는 질문에 답하는 장입니다.
+    음식으로 먹는 것과 보충제로 농축한 것은 답이 다른 경우가 많아, 그 둘을 나누어 적었습니다.</p>
+
+  <div class="sub" id="n-macro">
+    <h3>열량 · 단백질 · 지방 · 탄수화물</h3>
+    <div class="target">
+      <p class="tl">기본 목표 <span>체중 1 kg 당 · 자세한 것은 총론 3장</span></p>
+      <dl>
+        <div><dt>열량</dt><dd>25~30 kcal</dd></div>
+        <div><dt>단백질</dt><dd>1 g 초과 ~ 1.5 g</dd></div>
+        <div><dt>수분</dt><dd>30~35 mL</dd></div>
+      </dl>
+      <p class="tn">체중이 줄고 있거나 마르신 분은 열량을 상단(30~35)으로 잡습니다.
+        신장 기능이 떨어져 있으면 단백질은 검사 수치를 보고 담당 의료진이 정합니다 — 임의로 늘리지 마십시오.<sup class="cite"><a href="#ref-2">2</a></sup></p>
+    </div>
+    <p><strong>단백질.</strong> 암 환자에게는 모자란 것보다 조금 넘치는 쪽이 낫고,
+      체중 1 kg 당 2.0 g 까지는 대체로 안전하다고 봅니다. 신장 기능이 떨어진 경우만 예외입니다.<sup class="cite"><a href="#ref-2">2</a></sup>
+      식사량을 늘리기 어려울 때는 단백질 보충제로 부피를 키우지 않고 단백질만 올릴 수 있습니다.</p>
+    <p><strong>지방.</strong> 체중이 줄고 인슐린 저항성이 있는 분께는 탄수화물보다 지방 쪽 열량 비중을 올리도록 권고합니다.
+      부피당 열량이 높으면서 혈당 부담이 낮기 때문입니다.<sup class="cite"><a href="#ref-68">68</a></sup>
+      오메가-3 는 아래 보충제 표를 보십시오.</p>
+    <p><strong>탄수화물·당.</strong> 단 음료와 과자는 포만감만 만들고 영양은 남기지 않습니다.
+      다만 “당을 끊으면 암세포가 굶는다”는 말은 사실이 아닙니다(총론 6장).
+      과일에 든 당은 식이섬유·미량영양소와 함께 들어오므로 여기서 말하는 대상이 아닙니다.<sup class="cite"><a href="#ref-1">1</a>,<a href="#ref-4">4</a></sup></p>
+  </div>
+
+  <div class="sub" id="n-fiber">
+    <h3>식이섬유와 수분</h3>
+    <p><strong>식이섬유.</strong> 세계암연구기금은 식품으로 하루 30 g 이상을 권고합니다.<sup class="cite"><a href="#ref-1">1</a></sup>
+      다만 <em>시기에 따라 정반대</em>가 됩니다 — 수술 직후, 장이 좁아진 상태, 장루를 만든 초기,
+      골반 방사선치료로 설사가 심한 시기에는 오히려 줄여야 합니다. 해당 항목은 2부와 3부에 있습니다.</p>
+    <p>대장암에서는 어디서 온 섬유인지가 갈립니다. 1~3기 환자 1,575명을 8년 추적한 코호트에서
+      진단 후 섬유를 하루 5 g 더 드실 때마다 대장암 사망이 22 % 낮았는데,
+      <em>곡물 섬유가 가장 뚜렷했고 과일 섬유는 연관이 확인되지 않았습니다.</em><sup class="cite"><a href="#ref-42">42</a></sup></p>
+    <p><strong>채소·과일.</strong> 세계암연구기금의 목표는 “채소 400 g”이 아니라
+      <em>비전분 채소와 과일을 합쳐 하루 400 g 이상(1회 약 80 g × 5회 이상)</em>입니다.
+      감자·고구마·마 같은 전분질 뿌리채소는 여기에 들어가지 않습니다.<sup class="cite"><a href="#ref-1">1</a></sup></p>
+    <p><strong>수분.</strong> 체중 1 kg 당 30~35 mL 가 기준입니다. 다만 복수가 있거나 심부전이 있으면 다릅니다.
+      회장루가 있는 분은 수분과 나트륨 손실이 커 따로 챙기셔야 합니다(2부 장루보유).</p>
+  </div>
+
+  <div class="sub" id="n-min">
+    <h3>나트륨 · 칼륨 · 인 · 칼슘</h3>
+    <div class="target">
+      <p class="tl">한국인 기준 <span>2020 한국인 영양소 섭취기준</span></p>
+      <dl>
+        <div><dt>나트륨 충분섭취량</dt><dd>1,500 mg</dd></div>
+        <div><dt>나트륨 만성질환위험감소섭취량</dt><dd>2,300 mg</dd></div>
+        <div><dt>칼륨 충분섭취량</dt><dd>3,500 mg</dd></div>
+        <div><dt>인 권장섭취량</dt><dd>700 mg (상한 3,500)</dd></div>
+        <div><dt>칼슘 권장섭취량</dt><dd>700~800 mg</dd></div>
+      </dl>
+      <p class="tn">65~74세는 나트륨 기준이 2,100 mg, 75세 이상은 1,700 mg 으로 더 낮습니다.
+        칼슘 상한은 19~49세 2,500 mg, 50세 이상 2,000 mg 입니다.<sup class="cite"><a href="#ref-16">16</a></sup></p>
+    </div>
+    <p><strong>나트륨.</strong> 한국인 평균 섭취량은 하루 3,255 mg 으로 기준의 1.4배입니다.<sup class="cite"><a href="#ref-17">17</a></sup>
+      대부분이 국·찌개·김치·젓갈에서 옵니다 — <em>국물을 남기는 것만으로 한 끼의 절반 가까이가 줄어듭니다.</em>
+      만성질환위험감소섭취량은 “그 아래로 반드시 내려가라”는 뜻이 아니라,
+      그보다 많이 드시고 계시면 줄이는 만큼 위험이 낮아진다는 뜻입니다.<sup class="cite"><a href="#ref-16">16</a></sup></p>
+    <p>위암에서는 별도의 의미가 있습니다. 207만 명을 모은 메타분석에서 고염군의 위암 위험이
+      저염군의 2.05배였고, <em>아시아만 따로 보면 1.27배</em>였습니다.
+      한국 코호트를 포함한 분석에서는 절임채소를 하루 40 g 더 드실 때마다 위험이 15 % 씩 올라갔습니다.<sup class="cite"><a href="#ref-36">36</a>,<a href="#ref-38">38</a></sup></p>
+    <p><strong>칼륨·인.</strong> 신장 기능이 떨어지면 배설이 줄어 문제가 됩니다.
+      칼륨은 바나나·감자·토마토·건과일·저염소금(염화칼륨)이 대표적 급원이고,
+      채소는 잘게 썰어 데쳐 물을 버리면 상당히 줄어듭니다.
+      인은 <em>가공식품에 첨가된 무기 인산염이 자연 식품의 인보다 훨씬 잘 흡수된다</em>는 것이 요점입니다 —
+      콜라·가공치즈·햄류가 대표적입니다.<sup class="cite"><a href="#ref-16">16</a></sup></p>
+    <p><strong>칼슘.</strong> 평소 기준은 700~800 mg 이지만,
+      아로마타제 억제제나 안드로겐 차단요법으로 골 소실이 진행 중일 때는 더 높게 잡습니다.
+      국제골다공증재단이 폐경 후 여성에게 권하는 양은 칼슘 1,200 mg, 비타민 D 800~1,000 IU 입니다.
+      골밀도 T값이 −2.0 아래이거나 −1.5 아래이면서 위험 인자가 있으면
+      식사가 아니라 약물치료로 넘어갑니다.<sup class="cite"><a href="#ref-5">5</a>,<a href="#ref-16">16</a></sup></p>
+  </div>
+
+  <div class="sub" id="n-vit">
+    <h3>비타민 D · K · B12 · 철 · 아연</h3>
+    <p><strong>비타민 D.</strong> 한국인 충분섭취량은 성인 10 µg, 65세 이상 15 µg 이고 상한은 100 µg(4,000 IU)입니다.<sup class="cite"><a href="#ref-16">16</a></sup>
+      암 환자에서 결핍이 매우 흔하고 결핍을 교정하는 것은 근거가 분명합니다.
+      다만 <em>항암 효과나 예방을 기대한 초고용량은 다릅니다</em> —
+      건강한 성인 25,871명에게 2,000 IU 를 5.3년간 드리게 한 시험에서 암 발생이 줄지 않았고(위험비 0.96),
+      전이성 대장암 환자에게 고용량을 더한 2상 시험에서도 전체 생존은 양군 모두 24.3개월로 같았습니다.<sup class="cite"><a href="#ref-35">35</a>,<a href="#ref-34">34</a></sup></p>
+    <p><strong>비타민 K.</strong> 와파린을 드시는 분께만 해당합니다.
+      한국인 충분섭취량은 남 75 µg, 여 65 µg 인데 <em>시금치 한 접시로도 이 값을 훌쩍 넘습니다.</em>
+      끊으라는 뜻이 아니라 날마다 비슷한 양을 유지하시라는 뜻입니다 — 들쭉날쭉한 것이 문제입니다.<sup class="cite"><a href="#ref-58">58</a>,<a href="#ref-16">16</a></sup></p>
+    <p><strong>비타민 B12.</strong> 위절제를 받으신 분께 특히 중요합니다.
+      B12 흡수에 필요한 내인자가 위 벽세포에서 만들어지기 때문입니다.
+      위암으로 위절제를 받은 2,627명을 모은 메타분석에서 B12 결핍은 48.8 % 에서 확인되었습니다.
+      증상은 빈혈·쉽게 지침·손발 시림·저림·어지럼이었고,
+      <em>결핍은 되돌리기 어려운 신경 손상으로 이어질 수 있습니다.</em><sup class="cite"><a href="#ref-41">41</a></sup></p>
+    <p><strong>철.</strong> 결핍이 확인되었을 때 교정하는 것이 원칙입니다. 결핍이 아닌데 넣을 이유는 없습니다.
+      위절제 후에는 위산이 줄어 흡수가 떨어지므로 수년에 걸쳐 서서히 나타나는 경우가 많습니다.<sup class="cite"><a href="#ref-16">16</a></sup></p>
+    <p><strong>아연.</strong> 미각 변화에 흔히 쓰이지만 무작위배정 연구 결과가 일관되지 않습니다.
+      장기 고용량은 구리 결핍을 부르므로, 몇 주 써 보고 변화가 없으면 중단하시는 편이 낫습니다.<sup class="cite"><a href="#ref-2">2</a></sup></p>
+  </div>
+
+  <div class="sub" id="n-anti">
+    <h3>항산화제 — 치료 중이 문제입니다</h3>
+    <div class="note">
+      <p><strong>이 장이 이 문서에서 가장 자주 오해되는 부분입니다.</strong>
+        “항산화”라는 말이 좋게 들리지만, 방사선치료와 상당수 항암제는 <em>활성산소를 통해 암세포를 죽입니다.</em>
+        식품 수준을 넘는 고용량 항산화제가 그 기전을 방해할 수 있습니다.</p>
+      <p>두경부암 환자 540명 무작위배정 시험에서, 비타민 E 400 IU 와 베타카로틴 30 mg 을
+        방사선치료 첫날부터 드신 군은 보충 기간 중 이차암이 2.9배 많았습니다(95 % 신뢰구간 1.56~5.31).
+        재발과 사망은 <em>치료 중에도 담배를 피우신 분에게 몰렸고</em>, 피우지 않으신 분에서는 거의 차이가 없었습니다.<sup class="cite"><a href="#ref-27">27</a>,<a href="#ref-29">29</a>,<a href="#ref-28">28</a></sup></p>
+      <p>흡연력이 있으시면 베타카로틴 보충제는 더 분명합니다.
+        핀란드 시험에서 폐암 발생이 18 % 많았고 전체 사망도 8 % 많았으며,
+        미국 시험에서는 폐암이 28 % 많고 폐암 사망이 46 % 많아 예정보다 21개월 일찍 중단되었습니다.
+        <em>“효과가 없었다”가 아니라 “더 나빴다”는 결과입니다.</em><sup class="cite"><a href="#ref-30">30</a>,<a href="#ref-31">31</a></sup></p>
+      <p>채소·과일에 든 항산화 성분은 해당되지 않습니다. 문제가 되는 것은 분리·농축한 보충제입니다.</p>
+    </div>
+  </div>
+
+  <div class="sub" id="n-supp">
+    <h3>보충제 성분 한눈에 보기</h3>
+    <p>제품 이름이 아니라 <em>성분</em>으로 보십시오. 같은 성분이 여러 이름으로 팔립니다.
+      “평소”와 “치료 중”의 판단이 다른 것이 여럿 있습니다.</p>
+    <div class="ings">
+      <div class="ing">
+    <div class="ing-h"><b>비타민 E</b>
+      <span class="lv lv-info">평소 참고</span>
+      <span class="lv lv-avoid">치료 중 피하세요</span>
+      <span class="grade sm">G</span></div>
+    <p>결핍이 드물어 따로 챙길 이유가 크지 않은 성분입니다. 식품으로 충분히 섭취됩니다.</p>
+    <p class="dt">치료 중 — 방사선치료와 상당수 항암제는 활성산소로 암세포를 죽입니다. 고용량 항산화제가 이 기전을 방해할 수 있다는 우려가 있고, 두경부암 환자 무작위배정 연구에서 고용량 비타민 E 군은 국소 재발과 사망이 오히려 늘었습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-16">16</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>베타카로틴</b>
+      <span class="lv lv-caution">평소 주의</span>
+      
+      <span class="grade sm">A</span></div>
+    <p>채소·과일에 든 것과 달리, 분리·농축한 보충제는 이야기가 다릅니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-30">30</a> · <a href="#ref-31">31</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>셀레늄</b>
+      <span class="lv lv-caution">평소 주의</span>
+      
+      <span class="grade sm">A</span></div>
+    <p>결핍이 아닌 상태에서 보충할 이유가 확인되지 않았습니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-32">32</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>고용량 비타민 C</b>
+      <span class="lv lv-info">평소 참고</span>
+      <span class="lv lv-caution">치료 중 주의</span>
+      <span class="grade sm">G</span></div>
+    <p>식품 수준이나 하루 500 mg 안팎은 문제가 되지 않습니다. 1,000 mg 이상 고용량이 논의 대상입니다.</p>
+    <p class="dt">치료 중 — 치료 중 고용량 항산화제는 방사선·항암제의 작용을 방해할 수 있다는 우려가 있습니다. 음식으로 먹는 비타민 C 는 해당되지 않으며, 문제는 보충제 수준의 고용량입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-16">16</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>코엔자임 Q10</b>
+      <span class="lv lv-caution">평소 주의</span>
+      
+      <span class="grade sm">C</span></div>
+    <p>항암 효과를 뒷받침하는 임상 근거가 없습니다. 구조가 비타민 K 와 비슷해 와파린 효과를 줄일 수 있습니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-58">58</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>은행잎추출물</b>
+      <span class="lv lv-caution">평소 주의</span>
+      
+      <span class="grade sm">C</span></div>
+    <p>혈소판 응집을 억제해 출혈 경향을 높입니다. 항암 치료로 혈소판이 낮아지는 시기에는 특히 주의가 필요합니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-58">58</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>오메가-3 (EPA·DHA)</b>
+      <span class="lv lv-prefer">평소 권장</span>
+      
+      <span class="grade sm">C</span></div>
+    <p>체중이 줄고 있는 진행암 환자에서 근육 소실을 늦출 가능성이 논의됩니다. ESPEN 은 강한 권고 대신 &quot;고려할 수 있다&quot; 수준으로 정리하고 있습니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-68">68</a> · <a href="#ref-2">2</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>감마리놀렌산</b>
+      <span class="lv lv-caution">평소 주의</span>
+      
+      <span class="grade sm">C</span></div>
+    <p>혈소판 기능에 영향을 줄 수 있고, 암 환자에서 이득을 보인 임상 근거는 없습니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>홍삼·인삼</b>
+      <span class="lv lv-caution">평소 주의</span>
+      
+      <span class="grade sm">C</span></div>
+    <p>항암 중 피로 개선에 대한 소규모 연구가 있으나 결과가 일정하지 않습니다. 혈소판 응집을 억제하고 혈당·혈압에도 영향을 주어, 여러 약과 부딪힐 여지가 있습니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-2">2</a> · <a href="#ref-58">58</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>마늘추출물</b>
+      <span class="lv lv-info">평소 참고</span>
+      
+      <span class="grade sm">C</span></div>
+    <p>음식으로 먹는 마늘은 권장 대상입니다. 농축 보충제는 혈소판 억제 작용이 강해질 수 있습니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-1">1</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>대두 이소플라본(농축)</b>
+      <span class="lv lv-caution">평소 주의</span>
+      
+      <span class="grade sm">C</span></div>
+    <p>두부·두유처럼 식품으로 먹는 대두는 유방암에서도 제한할 이유가 없고 오히려 이득 쪽입니다. 다만 이소플라본을 수십 배 농축한 보충제는 그 근거의 대상이 아니며, 안전성 자료가 없습니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-24">24</a> · <a href="#ref-25">25</a> · <a href="#ref-4">4</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>백수오·승마 등 갱년기 원료</b>
+      <span class="lv lv-caution">평소 주의</span>
+      
+      <span class="grade sm">C</span></div>
+    <p>여성호르몬 유사 작용을 표방하는 원료입니다. 간독성 보고가 있고, 호르몬 감수성 종양에서의 안전성 자료가 없습니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-4">4</a> · <a href="#ref-45">45</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>석류추출물</b>
+      <span class="lv lv-info">평소 참고</span>
+      
+      <span class="grade sm">C</span></div>
+    <p>식물성 에스트로겐 유사 성분이 있으나, 식품 수준 섭취가 문제된다는 근거는 없습니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-4">4</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>가르시니아캄보지아</b>
+      <span class="lv lv-avoid">평소 피하세요</span>
+      <span class="lv lv-avoid">치료 중 피하세요</span>
+      <span class="grade sm">C</span></div>
+    <p>체지방 감소를 표방하는 원료인데, 간독성 사례가 반복 보고되어 식약처도 주의를 안내한 바 있습니다. 체중 관리가 필요하시더라도 식사와 운동으로 하시는 편이 낫습니다.</p>
+    <p class="dt">치료 중 — 간독성 사례가 반복 보고된 원료입니다. 게다가 치료 중 체중 감량은 목표가 아니며, 이 시기에 빠지는 것은 지방이 아니라 근육입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a> · <a href="#ref-45">45</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>녹차추출물(카테킨·EGCG)</b>
+      <span class="lv lv-caution">평소 주의</span>
+      
+      <span class="grade sm">C</span></div>
+    <p>마시는 녹차와 달리 농축 추출물은 간독성 사례가 보고되어 있습니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-55">55</a> · <a href="#ref-45">45</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>밀크씨슬(실리마린)</b>
+      <span class="lv lv-info">평소 참고</span>
+      
+      <span class="grade sm">C</span></div>
+    <p>간수치 개선에 대한 근거는 제한적입니다. 다만 주요 대사효소에 큰 영향을 주지 않아 병용 위험은 낮은 편입니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-45">45</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>헛개나무추출물</b>
+      <span class="lv lv-caution">평소 주의</span>
+      
+      <span class="grade sm">C</span></div>
+    <p>간 건강을 표방하지만 임상 근거가 약하고, 간독성 사례 보고가 있습니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-45">45</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>칼슘</b>
+      <span class="lv lv-info">평소 참고</span>
+      
+      <span class="grade sm">G</span></div>
+    <p>하루 1,000~1,200 mg 을 식품과 합쳐 맞추는 것이 기준입니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-16">16</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>비타민 D</b>
+      <span class="lv lv-prefer">평소 권장</span>
+      
+      <span class="grade sm">G</span></div>
+    <p>암 환자에서 결핍이 매우 흔하고, 결핍을 교정하는 것은 근거가 분명합니다. 다만 항암 효과를 기대한 초고용량 복용은 임상시험에서 확인되지 않았습니다. 상한은 하루 100 µg(4,000 IU)입니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-16">16</a> · <a href="#ref-34">34</a> · <a href="#ref-35">35</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>철분</b>
+      <span class="lv lv-info">평소 참고</span>
+      
+      <span class="grade sm">G</span></div>
+    <p>결핍이 확인되었을 때 교정하는 것이 원칙입니다. 결핍이 아닌데 넣을 이유는 없습니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-16">16</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>아연</b>
+      <span class="lv lv-info">평소 참고</span>
+      
+      <span class="grade sm">C</span></div>
+    <p>미각 변화에 흔히 쓰이지만 무작위배정 연구 결과가 일관되지 않습니다. 장기 고용량은 구리 결핍을 부르므로 몇 주 써 보고 변화가 없으면 중단하는 편이 낫습니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>마그네슘</b>
+      <span class="lv lv-info">평소 참고</span>
+      
+      <span class="grade sm">G</span></div>
+    <p>결핍이 있으면 교정합니다. 과량은 설사를 일으킵니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-16">16</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>프로바이오틱스(유산균)</b>
+      <span class="lv lv-info">평소 참고</span>
+      
+      <span class="grade sm">C</span></div>
+    <p>골반 방사선치료 설사에 대한 소규모 연구들이 있으나 결과가 엇갈립니다. 일반적으로는 안전합니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-53">53</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>단백질 보충</b>
+      <span class="lv lv-prefer">평소 권장</span>
+      
+      <span class="grade sm">G</span></div>
+    <p>ESPEN 은 암 환자에게 체중 1 kg 당 1.0~1.5 g 의 단백질을 권고합니다. 식사량을 늘리기 어려울 때 부피를 키우지 않고 단백질만 올릴 수 있습니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-2">2</a> · <a href="#ref-68">68</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>루테인·지아잔틴</b>
+      <span class="lv lv-info">평소 참고</span>
+      
+      <span class="grade sm">G</span></div>
+    <p>황반 건강을 위한 원료로, 암 치료와 직접적인 상호작용은 알려져 있지 않습니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-16">16</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>글루코사민·MSM</b>
+      <span class="lv lv-info">평소 참고</span>
+      
+      <span class="grade sm">C</span></div>
+    <p>관절 증상에 쓰이며 암 치료와의 상호작용은 알려져 있지 않습니다. 혈당을 약간 올릴 수 있다는 보고가 있습니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-16">16</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>콜라겐</b>
+      <span class="lv lv-info">평소 참고</span>
+      
+      <span class="grade sm">C</span></div>
+    <p>먹은 콜라겐이 그대로 피부나 관절로 가지 않습니다. 소화되면 아미노산으로 분해됩니다. 해롭지는 않지만, 같은 값이면 단백질 보충이 목적에 더 맞습니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>프로폴리스</b>
+      <span class="lv lv-info">평소 참고</span>
+      
+      <span class="grade sm">C</span></div>
+    <p>구내염에 쓰이기도 하나 근거는 제한적입니다. 벌 산물 알레르기가 있으면 피해야 합니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-60">60</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>클로렐라·스피루리나</b>
+      <span class="lv lv-caution">평소 주의</span>
+      
+      <span class="grade sm">C</span></div>
+    <p>비타민 K 와 요오드가 많아 와파린 복용자와 갑상선 검사·치료를 앞둔 분에게 문제가 됩니다. 중금속 오염 가능성도 제품에 따라 다릅니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-58">58</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>쏘팔메토</b>
+      <span class="lv lv-caution">평소 주의</span>
+      
+      <span class="grade sm">C</span></div>
+    <p>전립선비대 증상에 쓰이는 원료입니다. PSA 수치에 영향을 줄 수 있어, 전립선암 추적 중에는 판단을 흐릴 수 있습니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-46">46</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>커큐민(강황)</b>
+      <span class="lv lv-info">평소 참고</span>
+      
+      <span class="grade sm">C</span></div>
+    <p>전임상 근거는 풍부하나 사람에서 항암 효과는 확립되지 않았습니다. 고용량은 철 흡수를 방해할 수 있습니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>알로에</b>
+      <span class="lv lv-caution">평소 주의</span>
+      
+      <span class="grade sm">C</span></div>
+    <p>설사를 유발할 수 있어, 항암·방사선치료로 장이 예민한 시기에는 증상을 키웁니다.</p>
+    
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+<div class="ing">
+    <div class="ing-h"><b>체지방 감소 표방 원료</b>
+      <span class="lv lv-caution">평소 주의</span>
+      <span class="lv lv-avoid">치료 중 피하세요</span>
+      <span class="grade sm">G</span></div>
+    <p>체중 관리가 필요하시더라도 이런 원료로 하실 일은 아닙니다. 효과는 대개 미미하고, 가르시니아·녹차추출물처럼 간독성이 보고된 것도 있습니다. 치료를 마친 뒤의 체중 관리는 식사와 운동으로 하는 것이 근거가 분명합니다.</p>
+    <p class="dt">치료 중 — 치료 중에는 체중 감량 자체가 목표가 아닙니다. 이 시기에 빠지는 것은 지방이 아니라 근육이고, 근육량은 항암제 용량 유지와 치료 완주율에 직접 연결됩니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a> · <a href="#ref-3">3</a></p>
+  </div>
+    </div>
+    <p class="tn" style="margin-top:20px">새 보충제를 시작하시기 <em>전에</em> 담당 의료진께 말씀하십시오.
+      특히 항암치료·방사선치료 중, 수술 전후, 와파린이나 경구 표적치료제를 드시는 동안에는 반드시 확인이 필요합니다.</p>
+  </div>
+</section>
     <section id="p1" class="part">
   <p class="pn">1부</p><h2>공통 원칙</h2>
   <p class="lead">암종과 무관하게, 치료를 받는 거의 모든 분께 해당하는 것들입니다. 여기부터 읽으십시오.</p>
@@ -1580,7 +2186,7 @@ a:focus-visible,.toc a:focus-visible{outline:2px solid var(--celadon);outline-of
   <p class="pn">4부</p><h2>약과 음식</h2>
   <p class="lead">약을 드시는 동안에만 해당하는 것들입니다. 아래 약제 가운데 드시는 것이 있으면 그 항목을 보십시오.</p>
   <div class="meds"><p class="tl">이 문서가 다루는 약제 18가지</p>
-    <p><span class="med">타목시펜</span><span class="med">아로마타제 억제제</span><span class="med">안드로겐 차단요법(ADT)</span><span class="med">카페시타빈</span><span class="med">EGFR 표적치료제</span><span class="med">ALK 표적치료제</span><span class="med">CDK4/6 억제제</span><span class="med">소라페닙 / 렌바티닙</span><span class="med">와파린</span><span class="med">DOAC (아픽사반·리바록사반 등)</span><span class="med">보르테조밉</span><span class="med">시스플라틴</span><span class="med">옥살리플라틴</span><span class="med">이리노테칸</span><span class="med">메토트렉세이트</span><span class="med">스테로이드(덱사메타손 등)</span><span class="med">위산분비억제제(PPI)</span><span class="med">갑상선호르몬제</span></p>
+    <p><span class="med">타목시펜 <i>놀바덱스, tamoxifen</i></span><span class="med">아로마타제 억제제 <i>아나스트로졸, 레트로졸, 엑스메스탄, 페마라, 아리미덱스</i></span><span class="med">안드로겐 차단요법(ADT) <i>졸라덱스, 루프린, 엘리가드, 비칼루타미드</i></span><span class="med">카페시타빈 <i>젤로다, xeloda</i></span><span class="med">EGFR 표적치료제 <i>이레사, 타쎄바, 지오트립, 타그리소, 오시머티닙, 게피티닙</i></span><span class="med">ALK 표적치료제 <i>잴코리, 알레센자, 로비큐아</i></span><span class="med">CDK4/6 억제제 <i>입랜스, 키스칼리, 버제니오, 팔보시클립</i></span><span class="med">소라페닙 / 렌바티닙 <i>넥사바, 렌비마</i></span><span class="med">와파린 <i>쿠마딘, warfarin</i></span><span class="med">DOAC (아픽사반·리바록사반 등) <i>엘리퀴스, 자렐토, 릭시아나</i></span><span class="med">보르테조밉 <i>벨케이드</i></span><span class="med">시스플라틴 <i>백금계</i></span><span class="med">옥살리플라틴 <i>엘록사틴, FOLFOX</i></span><span class="med">이리노테칸 <i>캠푸토, FOLFIRI</i></span><span class="med">메토트렉세이트 <i>MTX</i></span><span class="med">스테로이드(덱사메타손 등) <i>덱사, 프레드니솔론</i></span><span class="med">위산분비억제제(PPI) <i>넥시움, 판토록, 란스톤</i></span><span class="med">갑상선호르몬제 <i>씬지로이드, 신지록신</i></span></p>
   </div>
   <article class="entry" id="r-int-grapefruit-tki">
   <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
