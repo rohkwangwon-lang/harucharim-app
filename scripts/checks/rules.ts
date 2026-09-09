@@ -243,6 +243,10 @@ const MUST_CITE: [string, string][] = [
   ['int-capecitabine-warfarin', 'capecitabine-warfarin'],
   ['int-warfarin-ginger', 'warfarin-vitk'],
   ['cond-nau-ginger', 'warfarin-vitk'],
+  /* 확인되지 않는 출처를 뺀 자리에 실제 한국 자료를 넣었다 */
+  ['stomach-salted', 'yoo2020pickled'],
+  ['stomach-kimchi', 'kimhj2010veg'],
+  ['stomach-kimchi', 'kim2010saltpref'],
   /* 위절제 후 B12 결핍의 빈도를 실제로 말하는 것은 이 메타분석뿐이다 */
   ['stomach-b12', 'b12-gastrectomy-meta'],
   ['stomach-b12-partial', 'b12-gastrectomy-meta'],
@@ -373,7 +377,24 @@ const MUST_SAY: [string, RegExp, string][] = [
   /* ESPEN 2017 원문 — 오메가-3 는 '약한 권고' 이고 대상이 정해져 있다 */
   ['lung-omega3', /약하고/, 'ESPEN 권고 강도는 WEAK·근거 수준 Low 다'],
   ['lung-omega3', /1\.8 g/, 'EFSA 의 EPA 단독 안전 상한이다'],
-  ['int-warfarin-omega3', /5 g/, 'EFSA 는 EPA·DHA 합쳐 하루 5 g 까지 자발 출혈이 늘지 않는다고 정리했다']
+  ['int-warfarin-omega3', /5 g/, 'EFSA 는 EPA·DHA 합쳐 하루 5 g 까지 자발 출혈이 늘지 않는다고 정리했다'],
+  /*
+   * KDRI 2020 공식 개정본 대조. 2015 판의 '목표섭취량 2,000 mg' 은 2020 판에 없는 용어·값이고,
+   * 2020 판은 만성질환위험감소섭취량 2,300 mg 을 새로 두었다(65세 이상은 더 낮다).
+   */
+  ['common-sodium', /2,300 mg/, 'KDRI 2020 의 나트륨 만성질환위험감소섭취량이다'],
+  ['common-sodium', /1,500 mg/, '충분섭취량도 함께 보여야 3,255 mg 의 무게를 안다'],
+  ['common-sodium', /65세를 넘으면/, '65세 이상은 기준이 더 낮다 — 환자군이 여기에 몰려 있다'],
+  ['cond-htn-na', /2,300 mg/, 'KDRI 2020 의 기준값이다'],
+  ['cond-htn-na', /그 아래로 반드시 내려가라/, 'CDRR 의 뜻을 원문대로 적는다'],
+  ['cond-ckd-k', /3,500 mg/, '건강한 성인의 칼륨 충분섭취량이다'],
+  ['cond-ckd-p', /700 mg/, '인 권장섭취량이다'],
+  ['int-warfarin-vitk', /75 µg/, '비타민 K 충분섭취량(남)이다 — 가늠자가 없으면 실행할 수 없다'],
+  /* 위암 염장 규칙 — 아시아 하위군 값과 한국 코호트의 용량-반응 */
+  ['stomach-salted', /1\.27배/, '메타분석의 아시아 하위군 값이다. 전체 2.05배만 적으면 과장이 된다'],
+  ['stomach-salted', /40 g/, '한국 코호트 메타분석의 용량 단위다'],
+  ['stomach-kimchi', /0\.62/, '신선 채소의 오즈비다 — 절임과 갈라야 뜻이 산다'],
+  ['stomach-kimchi', /1\.28/, '절임 채소의 오즈비다']
 ]
 /*
  * 반대 방향의 못. 원문이 하지 않는 말을 우리가 하지 않았는지 본다.
@@ -394,6 +415,9 @@ const MUST_NOT_SAY: [string, RegExp, string][] = [
   ['prostate-adt-protein', /1\.0~1\.5 g/, 'ESPEN 원문 표현이 아니다'],
   /* 이론만 적고 관찰 자료를 빼면 방향이 거꾸로 전달된다 */
   ['int-warfarin-coq10', /와파린 효과를 줄일 수 있고/, 'ACCP 가 인용한 자료는 출혈 증가 쪽이다'],
+  /* 2015 판 용어가 되살아나면 기준이 300 mg 어긋난다 */
+  ['common-sodium', /목표섭취량 2,000 mg/, 'KDRI 2020 에 없는 용어·값이다'],
+  ['cond-htn-na', /하루 2,000 mg 이하로/, 'KDRI 2020 의 기준은 2,300 mg 이다'],
   /* 뭉뚱그린 표현이 되살아나면 해당하지 않는 분이 따라 하신다 */
   ['cond-muc-cold', /5-FU 계열 항암제 투여 중/, 'MASCC 권고는 bolus 주입 중으로 한정된다']
 ]

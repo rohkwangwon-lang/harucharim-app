@@ -52,7 +52,17 @@ export const REFERENCES: Reference[] = [
   { id: 'kdca-bone', kind: 'guideline', year: 2023,
     citation: '질병관리청. 골다공증 예방관리 보도자료 — 우리나라 성인의 1일 칼슘 권장섭취량은 700~800 mg, 비타민 D 는 10~15 µg 이며, 골다공증 치료를 위해서는 더 많은 양을 섭취하도록 할 수 있다.',
     url: 'https://www.kdca.go.kr/board/board.es?mid=a20501010000&bid=0015&act=view&list_no=723657' },
+  /*
+   * 공식 개정본(보건복지부 발간·한국영양학회 공개)을 내려받아 요약표를 직접 대조했다.
+   * 2020 판에서 나트륨에 '만성질환위험감소섭취량(CDRR)' 이 새로 생겼고,
+   * 2015 판의 '목표섭취량 2,000 mg' 이라는 용어·값은 더 이상 쓰지 않는다.
+   *   나트륨 19-64세 충분섭취량 1,500 · CDRR 2,300 (65-74세 1,300/2,100 · 75세 이상 1,100/1,700)
+   *   칼슘 권장 남 800→750→700 · 여 700→800 (상한 19-49세 2,500 · 50세 이상 2,000)
+   *   인 권장 700 · 상한 3,500 / 칼륨 충분 3,500 / 비타민 D 충분 10 µg(65세 이상 15) · 상한 100 µg
+   *   비타민 K 충분 남 75 µg · 여 65 µg
+   */
   { id: 'kdri2020', kind: 'guideline', year: 2020,
+    url: 'https://www.kns.or.kr/FileRoom/FileRoom_view.asp?idx=108&BoardID=Kdr',
     citation: '보건복지부·한국영양학회. 2020 한국인 영양소 섭취기준(KDRIs).' },
   { id: 'knhanes', kind: 'db', year: 2023,
     citation: '질병관리청. 국민건강영양조사 — 한국인 1일 나트륨 섭취량 3,255 mg(2018년 기준)으로 목표섭취량 2,000 mg 의 약 1.6배.' },
@@ -122,9 +132,31 @@ export const REFERENCES: Reference[] = [
 
   // ── 위암·염장식품 ─────────────────────────────────────────────
   { id: 'ge2012salt', kind: 'meta', year: 2012,
-    citation: 'Ge S, et al. Association between habitual dietary salt intake and risk of gastric cancer: a systematic review of observational studies. Gastroenterol Res Pract. 2012;2012:808120.' },
-  { id: 'dagostino-kim2013', kind: 'cohort', year: 2013,
-    citation: 'Kim J, et al. Dietary factors and gastric cancer in Korea: a case-control study. Int J Cancer / Korean cohort evidence on salted foods and kimchi intake.' },
+    url: 'https://doi.org/10.1155/2012/808120',
+    citation:
+      'Ge S, et al. Association between habitual dietary salt intake and risk of gastric cancer: a systematic review of observational studies. ' +
+      'Gastroenterol Res Pract. 2012;2012:808120. (11편·207만 명 · 고염 대 저염 OR 2.05 [1.60~2.62] · 아시아 하위군 OR 1.27 [1.22~1.32])' },
+  /*
+   * 'dagostino-kim2013' 을 여기서 뺐다.
+   * 인용문 자체가 서지 형태가 아니었고("Int J Cancer / Korean cohort evidence on ..."),
+   * PubMed 에서 해당 논문을 찾을 수 없었다. 확인되지 않는 출처를 근거로 둘 수는 없다.
+   * 대신 실제로 존재하고 확인한 한국 자료 세 편으로 바꾼다.
+   */
+  { id: 'kim2010saltpref', kind: 'cohort', year: 2010,
+    url: 'https://doi.org/10.3945/ajcn.2009.28732',
+    citation:
+      'Kim J, Park S, Nam BH. Gastric cancer and salt preference: a population-based cohort study in Korea. Am J Clin Nutr. 2010;91(5):1289-1293. ' +
+      '(224만 명 · 짜게 먹는 기호 위험비 1.10 [1.04~1.16] — 저자 표현은 "marginal")' },
+  { id: 'yoo2020pickled', kind: 'meta', year: 2020,
+    url: 'https://doi.org/10.3390/cancers12040996',
+    citation:
+      'Yoo JY, et al. Pickled vegetable and salted fish intake and the risk of gastric cancer: two prospective cohort studies and a meta-analysis. Cancers. 2020;12(4):996. ' +
+      '(한국인유전체역학조사·다기관암코호트 · 절임채소 하루 40 g 당 상대위험 1.15 [1.07~1.23] · 젓갈 1.17 [0.99~1.38])' },
+  { id: 'kimhj2010veg', kind: 'meta', year: 2010,
+    url: 'https://doi.org/10.1111/j.1349-7006.2009.01374.x',
+    citation:
+      'Kim HJ, et al. Fresh and pickled vegetable consumption and gastric cancer in Japanese and Korean populations: a meta-analysis of observational studies. Cancer Sci. 2010;101(2):508-516. ' +
+      '(신선 채소 오즈비 0.62 [0.46~0.85] · 절임 채소 1.28 [1.06~1.53])' },
   /*
    * 연도가 2020 으로 적혀 있었으나 실제는 2011 이다(PubMed 21447764).
    * 단독저자 초청 종설이며 학회 합의문이 아니다 — 그래서 이 출처만으로는 'G' 를 달 수 없다.
