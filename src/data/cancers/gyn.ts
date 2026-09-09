@@ -87,11 +87,13 @@ export const gyn: CancerProfile = {
       title: '수술적 폐경 이후에는 골밀도가 빠르게 떨어집니다',
       reason:
         '난소를 절제하면 에스트로겐이 급격히 사라져, 자연 폐경보다 골 소실 속도가 빠릅니다. ' +
-        '칼슘 하루 1,000~1,200 mg 과 비타민 D 를 확보하고 체중 부하 운동을 병행하는 것이 기본 관리입니다. ' +
+        '국제골다공증재단이 폐경 후 여성에게 권하는 양은 하루 칼슘 1,200 mg, 비타민 D 800~1,000 IU 입니다. ' +
+        '체중 부하 운동도 함께 하시되 기대는 정확히 하시는 편이 낫습니다 — 골밀도를 올린다는 것은 확립되어 있지만 ' +
+        '골절을 줄인다는 것까지는 아직 입증되지 않았습니다. ' +
         '이 값은 골 소실을 관리할 때의 기준으로, 일반 성인 기준(칼슘 700~800 mg)보다 높습니다. ' +
         '보충제를 더하실 때는 상한도 보십시오 — 칼슘은 50세 이상에서 하루 2,000 mg 이 상한입니다.',
       evidence: 'G',
-      refIds: ['kdca-bone', 'kdri2020', 'nccn-survivorship']
+      refIds: ['hadji2017aibl', 'kdca-bone', 'kdri2020']
     },
     {
       id: 'gyn-iron',
@@ -124,5 +126,5 @@ export const gyn: CancerProfile = {
     survivorship:
       '체중 관리와 골 건강이 장기 과제입니다. 자궁내막암은 특히 체중이 재발·전체 사망과 연결됩니다.'
   },
-  refIds: ['wcrf2018', 'asco2022', 'espen2021', 'nccn-survivorship']
+  refIds: ['wcrf2018', 'asco2022', 'espen2021', 'hadji2017aibl']
 }

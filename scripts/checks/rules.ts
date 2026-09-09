@@ -14,7 +14,7 @@ import { REF_BY_ID } from '../../src/data/references'
 import { BASE_EXERCISE, BONE_METS_NOTE, EXERCISE_BY_CANCER, INTAKE_EXERCISE_ADVICE } from '../../src/data/exercise'
 import { CURATED_FOODS, FOOD_BY_ID } from '../../src/data/foods'
 import { GENERATED_CORE } from '../../src/data/foods/generated'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { SUPPLEMENTS } from '../../src/data/supplements'
 import { evaluateFood, activeRules, activeInteractions } from '../../src/engine/rules'
 import { DEFAULT_PATIENT } from '../../src/lib/store'
@@ -213,6 +213,26 @@ const MUST_NOT_CITE: [string, string, string][] = [
   ['hn-soft-moist', 'mascc-mucositis', 'MASCC 전문에 soft·texture·temperature 가 0건이다'],
   ['hn-dry-mouth', 'mascc-mucositis', 'MASCC 전문에 caffeine·alcohol·xerostomia 가 0건이다']
 ]
+/*
+ * 읽지 못한 문헌은 근거가 아니다.
+ * NCCN Survivorship 은 구독자용 문서라 이 작업에서 원문을 열어 대조할 수 없었다.
+ * 여덟 자리를 공개 문헌으로 갈아 끼웠으니, 다시 들어오지 못하게 막아 둔다.
+ */
+{
+  const src = [
+    'src/data/commonRules.ts', 'src/data/conditionRules.ts', 'src/data/interactions.ts',
+    'src/data/references.ts', 'src/engine/supplementAdvice.ts', 'src/engine/nutrition.ts'
+  ]
+  const dir = 'src/data/cancers'
+  const files = [...src, ...readdirSync(dir).filter((f) => f.endsWith('.ts')).map((f) => `${dir}/${f}`)]
+  for (const f of files) {
+    const text = readFileSync(f, 'utf8')
+    if (/'nccn-survivorship'/.test(text)) {
+      bad('원문을 읽을 수 없는 문헌이 다시 인용됨', `${f} — NCCN Survivorship 은 구독자용이라 대조할 수 없다`)
+    }
+  }
+}
+
 const ALL_RULES = [...COMMON_RULES, ...Object.values(CONDITION_RULES).flat(),
                    ...CANCERS.flatMap((c) => c.rules ?? []), ...INTERACTIONS] as {
                      id: string; refIds?: string[] }[]
@@ -441,7 +461,18 @@ const MUST_SAY: [string, RegExp, string][] = [
   ['prostate-adt-bone', /골밀도 검사를 받아/, 'CCO·ASCO 지침의 권고는 ADT 시작 전 골밀도 검사다'],
   ['prostate-adt-bone', /500 mg 이상/, '지침에 나오는 칼슘 값은 500 mg 이상이고 맥락이 다르다'],
   /* 장루 식이는 근거가 얇다는 사실을 함께 전한다 */
-  ['cond-stoma-fiber', /서로 엇갈리고 불충분/, '장루 식이 종설의 결론이다']
+  ['cond-stoma-fiber', /서로 엇갈리고 불충분/, '장루 식이 종설의 결론이다'],
+  /*
+   * NCCN Survivorship 을 걷어 낸 자리에 넣은 공개 문헌들.
+   * 읽지 못한 문헌을 근거로 두지 않는다는 원칙이 지켜지는지 여기서 지킨다.
+   */
+  ['breast-calcium-vitd', /1,200 mg/, '국제골다공증재단 권고값이다'],
+  ['breast-calcium-vitd', /T값이 −2\.0/, '골표적 약물치료로 넘어가는 기준이다'],
+  ['gyn-bone', /골절을 줄인다는 것까지는 아직 입증되지 않았/, '체중부하 운동의 근거 한계를 원문대로 적는다'],
+  ['int-ai-calcium', /25-OH/, '골절 고위험군에서는 혈중 농도 측정이 권장된다'],
+  ['cond-const-opioid', /완하제를 계속 유지/, '합의문은 오피오이드를 쓰는 동안 완하제 유지를 권한다'],
+  ['hn-caries', /3개월/, '방사선 우식증은 치료 후 3개월 안에 시작될 수 있다'],
+  ['hn-caries', /턱뼈 괴사/, '치료 후 발치를 따로 판단하는 이유다']
 ]
 /*
  * 반대 방향의 못. 원문이 하지 않는 말을 우리가 하지 않았는지 본다.

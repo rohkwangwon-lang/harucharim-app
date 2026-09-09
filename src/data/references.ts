@@ -20,8 +20,28 @@ export const REFERENCES: Reference[] = [
   { id: 'acs2022', kind: 'guideline', year: 2022,
     citation: 'Rock CL, et al. American Cancer Society nutrition and physical activity guideline for cancer survivors. CA Cancer J Clin. 2022;72(3):230-262.',
     url: 'https://doi.org/10.3322/caac.21719' },
-  { id: 'nccn-survivorship', kind: 'guideline', year: 2024,
-    citation: 'NCCN Clinical Practice Guidelines in Oncology: Survivorship. National Comprehensive Cancer Network.' },
+  /*
+   * NCCN Survivorship 을 여기서 뺐다.
+   * 구독자용 문서라 이용약관상 이 작업에서 원문을 열어 대조할 수 없었고,
+   * 읽지 못한 문헌을 근거로 남겨 둘 수는 없다.
+   * 여덟 규칙이 이 출처에 걸려 있었는데, 모두 공개된 문헌으로 갈아 끼웠다.
+   */
+  { id: 'hadji2017aibl', kind: 'guideline', year: 2017,
+    url: 'https://doi.org/10.1016/j.jbo.2017.03.001',
+    citation:
+      'Hadji P, et al. Management of aromatase inhibitor-associated bone loss (AIBL) in postmenopausal women with hormone sensitive breast cancer: ' +
+      'joint position statement of the IOF, CABS, ECTS, IEG, ESCEO, IMS, and SIOG. J Bone Oncol. 2017;7:1-12. ' +
+      '(국제골다공증재단 권고 칼슘 1,200 mg·비타민 D 800~1,000 IU · 골표적치료 기준 T-score < −2.0 등)' },
+  { id: 'oic-consensus2021', kind: 'guideline', year: 2021,
+    url: 'https://doi.org/10.1186/s12904-020-00693-z',
+    citation:
+      'Gironés Sarrió R, et al. Delphi consensus on strategies in the management of opioid-induced constipation in cancer patients. ' +
+      'BMC Palliat Care. 2021;20(1):1. (전문가 46인 · 항목 91 % 합의)' },
+  { id: 'radiation-caries-review', kind: 'review', year: 2015,
+    url: 'https://doi.org/10.4103/0975-5950.183870',
+    citation:
+      'Gupta N, et al. Radiation-induced dental caries, prevention and treatment — a systematic review. Natl J Maxillofac Surg. 2015;6(2):160-166. ' +
+      '(방사선치료 후 3개월 이내 발생 가능 · 빠르게 진행 · 불소 자가도포 · 치료 후 발치는 예외로 둠)' },
   { id: 'acr-giop', kind: 'guideline', year: 2023,
     citation: 'Humphrey MB, et al. 2022 ACR Guideline for the Prevention and Treatment of Glucocorticoid-Induced Osteoporosis. Arthritis Rheumatol. 2023;75(12):2088-2102.',
     url: 'https://doi.org/10.1002/art.42646' },

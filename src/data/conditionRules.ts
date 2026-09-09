@@ -98,8 +98,10 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
       title: '마약성 진통제로 인한 변비는 섬유만으로 해결되지 않습니다',
       reason:
         '오피오이드는 장운동 자체를 억제하기 때문에 식이 조절만으로는 부족합니다. ' +
-        '이 경우 진통제를 시작할 때부터 완하제를 함께 쓰는 것이 표준입니다.',
-      evidence: 'G', refIds: ['nccn-survivorship']
+        '전문가 46인이 참여한 합의문은 진통제를 쓰는 동안 완하제를 계속 유지하고, ' +
+        '사람마다 맞게 조정하며 정기적으로 다시 살피도록 권합니다. ' +
+        '섬유를 늘리는 것으로 대신하려 하시면 오히려 배가 더 불편해질 수 있으니 담당 의료진과 약을 먼저 상의하십시오.',
+      evidence: 'G', refIds: ['oic-consensus2021']
     }
   ],
 

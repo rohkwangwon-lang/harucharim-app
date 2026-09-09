@@ -118,7 +118,7 @@ export function adviseSupplements(patient: PatientContext): SupplementAdvice[] {
         '아로마타제 억제제와 안드로겐 차단요법은 골밀도를 빠르게 떨어뜨립니다. ' +
         '하루 1,000~1,200 mg 을 식품과 보충제로 합쳐 맞추는 것이 표준 관리이고, 여기에 체중 부하 운동을 더합니다. ' +
         '식품에서 이미 충분하다면 보충제를 추가할 필요는 없습니다.',
-      evidence: 'G', refIds: ['adt-bone', 'nccn-survivorship'],
+      evidence: 'G', refIds: ['adt-bone', 'hadji2017aibl'],
       trigger: '항호르몬 치료 중'
     })
     push({
@@ -127,7 +127,7 @@ export function adviseSupplements(patient: PatientContext): SupplementAdvice[] {
       reason:
         '비타민 D 가 없으면 칼슘을 먹어도 흡수되지 않습니다. 하루 800~1,000 IU 수준이 표준이며, ' +
         '아로마타제 억제제 관절통이 심한 경우 결핍 교정이 증상 완화에 도움이 된다는 보고가 있습니다.',
-      evidence: 'G', refIds: ['adt-bone', 'nccn-survivorship', 'kdri2020'],
+      evidence: 'G', refIds: ['adt-bone', 'hadji2017aibl', 'kdri2020'],
       trigger: '항호르몬 치료 중'
     })
   }
@@ -543,7 +543,7 @@ export function adviseSupplements(patient: PatientContext): SupplementAdvice[] {
         '실내 생활이 길어지면 모자라기 쉬워, 혈중 농도를 한 번 확인해 보시는 정도는 해 볼 만합니다. ' +
         '기록을 며칠 쌓으시면 기록 탭의 주간 보고에서 실제로 모자란 것을 짚어 드립니다.',
       evidence: 'G',
-      refIds: ['kdri2020', 'nccn-survivorship'],
+      refIds: ['kdri2020'],
       products: productsIn('비타민D', patient)
     })
   }
@@ -633,7 +633,7 @@ const FILLS: Record<string, {
       '비타민 D 가 없으면 칼슘을 먹어도 흡수되지 않으므로 함께 보십시오.',
     byFood: '우유 한 잔 220 mg, 두부 반 모 150 mg, 뱅어포·멸치·요거트도 좋은 급원입니다.',
     evidence: 'G',
-    refIds: ['nccn-survivorship', 'kdri2020']
+    refIds: ['hadji2017aibl', 'kdri2020']
   },
   식이섬유: {
     category: '식이섬유',

@@ -635,7 +635,7 @@ export function microTargets(patient: PatientContext): MicroTarget[] {
           '하루 1,000~1,200 mg 을 식품과 보충제로 맞추는 것이 표준적 관리입니다. ' +
           '우유 1잔에 약 220 mg, 두부 반 모에 약 150 mg 들어 있습니다.',
       evidence: 'G',
-      refIds: ceiling ? ['nccn-survivorship', 'wcrf-prostate'] : ['nccn-survivorship', 'kdri2020']
+      refIds: ceiling ? ['adt-bone', 'wcrf-prostate'] : ['hadji2017aibl', 'kdri2020']
     })
   }
 
