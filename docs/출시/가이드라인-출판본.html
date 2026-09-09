@@ -1,0 +1,2183 @@
+<title>암 환자 식이·영양 지침서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@400;600;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --paper:#F6F8F6; --card:#FFFFFF; --ink:#141C1A; --mute:#5E6B66; --line:#DCE3DF;
+  --celadon:#2F5D52; --celadon-2:#5E8C80; --wash:#EAF0EC;
+  --seal:#A2382B; --amber:#7E6216; --sky:#2C5A73;
+  --shadow:0 1px 2px rgba(20,28,26,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F1413; --card:#161D1B; --ink:#E4EAE6; --mute:#93A29C; --line:#26302D;
+    --celadon:#8FBDB0; --celadon-2:#6E9A8D; --wash:#182220;
+    --seal:#E08A7C; --amber:#D6B45E; --sky:#8FBBD4; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F1413; --card:#161D1B; --ink:#E4EAE6; --mute:#93A29C; --line:#26302D;
+  --celadon:#8FBDB0; --celadon-2:#6E9A8D; --wash:#182220;
+  --seal:#E08A7C; --amber:#D6B45E; --sky:#8FBBD4; --shadow:none;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);
+  font-family:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  font-weight:400;line-height:1.75;letter-spacing:-.005em;margin:0;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px 96px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:56px}
+@media (max-width:900px){.wrap{grid-template-columns:1fr;gap:0;padding:0 18px 72px}}
+h1,h2,h3,h4{font-family:Hahmlet,"Nanum Myeongjo",serif;text-wrap:balance;margin:0}
+.cover{grid-column:1/-1;padding:72px 0 40px;border-bottom:2px solid var(--celadon)}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--celadon);margin:0 0 18px}
+h1{font-size:clamp(34px,6vw,58px);font-weight:700;line-height:1.18;letter-spacing:-.02em;max-width:16ch}
+.sub{}
+.cover .deck{font-size:17px;color:var(--mute);max-width:60ch;margin:18px 0 0;line-height:1.8}
+.facts{display:flex;flex-wrap:wrap;gap:0;margin:34px 0 0;border-top:1px solid var(--line)}
+.facts div{padding:16px 28px 14px 0;margin-right:28px;border-right:1px solid var(--line)}
+.facts div:last-child{border-right:0}
+.facts b{display:block;font-family:"IBM Plex Mono",monospace;font-size:24px;font-weight:600;
+  color:var(--celadon);font-variant-numeric:tabular-nums;line-height:1.2}
+.facts span{font-size:12px;color:var(--mute)}
+.toc{position:sticky;top:24px;align-self:start;max-height:calc(100vh - 48px);overflow-y:auto;
+  padding:32px 0;font-size:13.5px}
+@media (max-width:900px){.toc{position:static;max-height:none;border-bottom:1px solid var(--line);margin-bottom:8px}}
+.toc-h{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--mute);margin:0 0 14px}
+.toc ol{list-style:none;margin:0;padding:0;counter-reset:t}
+.toc>ol>li{counter-increment:t;margin:0 0 10px}
+.toc>ol>li>a::before{content:counter(t) ". ";font-family:"IBM Plex Mono",monospace;color:var(--celadon-2)}
+.toc ol ol{margin:6px 0 14px 14px;border-left:1px solid var(--line);padding-left:12px}
+.toc ol ol li{margin:0 0 4px}
+.toc a{color:var(--ink);text-decoration:none;display:block;padding:2px 0}
+.toc ol ol a{color:var(--mute);font-size:12.5px}
+.toc a:hover{color:var(--celadon);text-decoration:underline;text-underline-offset:3px}
+main{padding-top:32px;min-width:0}
+.part{margin:0 0 88px;scroll-margin-top:24px}
+.pn{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.2em;color:var(--celadon);margin:0 0 6px}
+.part>h2{font-size:clamp(26px,4vw,36px);font-weight:700;letter-spacing:-.015em;
+  padding-bottom:14px;border-bottom:1px solid var(--line)}
+.lead{color:var(--mute);max-width:62ch;margin:16px 0 34px;font-size:15px}
+.sub{margin:0 0 52px;scroll-margin-top:24px}
+.sub>h3{font-size:22px;font-weight:600;color:var(--celadon);margin:0 0 6px;
+  padding-left:12px;border-left:3px solid var(--celadon)}
+.summary{max-width:62ch;margin:14px 0 8px}
+.issues{font-size:13px;color:var(--mute);margin:0 0 20px}
+.entry{display:grid;grid-template-columns:44px minmax(0,1fr);gap:16px;padding:20px 0;
+  border-top:1px solid var(--line)}
+.entry:first-of-type{border-top:0}
+.mark{padding-top:4px}
+.grade{display:grid;place-items:center;width:30px;height:30px;border:1px solid var(--line);
+  font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:600;color:var(--celadon);
+  background:var(--wash)}
+.say>h4{font-size:17.5px;font-weight:600;line-height:1.5;margin:2px 0 8px}
+.say>p{margin:0 0 8px;max-width:64ch}
+.say em{font-style:normal;font-weight:600;box-shadow:inset 0 -.42em 0 var(--wash)}
+.lv{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;margin:0}
+.lv-avoid{color:var(--seal)} .lv-caution{color:var(--amber)}
+.lv-prefer{color:var(--celadon)} .lv-info{color:var(--sky)}
+.when{color:var(--mute);letter-spacing:0;font-family:inherit;margin-left:10px;
+  font-size:11.5px;font-family:"IBM Plex Sans KR",sans-serif}
+.src{font-size:12px;color:var(--mute);margin:6px 0 0}
+.src a{color:var(--celadon);text-decoration:none;font-family:"IBM Plex Mono",monospace;
+  border-bottom:1px solid var(--line)}
+.src a:hover{border-color:var(--celadon)}
+.target,.phase,.meds{background:var(--card);border:1px solid var(--line);padding:18px 20px;
+  margin:0 0 24px;box-shadow:var(--shadow)}
+.tl{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--mute);margin:0 0 12px}
+.tl span{text-transform:none;letter-spacing:0;font-family:"IBM Plex Sans KR",sans-serif;color:var(--celadon-2)}
+.target dl{display:flex;flex-wrap:wrap;gap:0;margin:0}
+.target dl>div{padding-right:26px;margin-right:26px;border-right:1px solid var(--line)}
+.target dl>div:last-child{border-right:0;margin-right:0;padding-right:0}
+.target dt{font-size:11.5px;color:var(--mute)}
+.target dd{margin:2px 0 0;font-family:"IBM Plex Mono",monospace;font-size:15px;font-weight:600;
+  color:var(--ink);font-variant-numeric:tabular-nums}
+.tn{font-size:13px;color:var(--mute);margin:14px 0 0;padding-top:12px;border-top:1px solid var(--line)}
+.phase>div{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;padding:9px 0;
+  border-top:1px solid var(--line)}
+.phase>div:first-of-type{border-top:0}
+.phase dt{font-size:12.5px;color:var(--celadon);font-weight:500}
+.phase dd{margin:0;font-size:14px}
+.med{display:inline-block;background:var(--wash);padding:3px 10px;margin:0 6px 6px 0;font-size:13px}
+.med i{font-style:normal;color:var(--mute);font-size:11.5px}
+.refs{list-style:none;counter-reset:r;margin:0;padding:0;font-size:13.5px}
+.refs li{counter-increment:r;display:grid;grid-template-columns:34px 96px minmax(0,1fr);gap:12px;
+  padding:12px 0;border-top:1px solid var(--line);scroll-margin-top:24px}
+.refs li::before{content:counter(r);font-family:"IBM Plex Mono",monospace;color:var(--celadon-2);
+  font-variant-numeric:tabular-nums}
+.refs li:target{background:var(--wash)}
+.rk{font-size:11.5px;color:var(--mute)}
+.rc{line-height:1.65}
+.ru{grid-column:3;font-size:12px;color:var(--celadon);text-decoration:none;
+  border-bottom:1px solid var(--line);justify-self:start;margin-top:2px}
+@media (max-width:640px){.refs li{grid-template-columns:28px minmax(0,1fr)}.rk{grid-column:2}.ru{grid-column:2}
+  .entry{grid-template-columns:36px minmax(0,1fr);gap:12px}
+  .phase>div{grid-template-columns:1fr;gap:2px}
+  .target dl>div{border-right:0;margin-right:0;padding-right:20px}}
+.note{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--seal);
+  padding:18px 20px;margin:0 0 28px}
+.note p{margin:0 0 8px;font-size:14.5px}
+.note p:last-child{margin:0}
+.gradekey{display:grid;gap:0;margin:20px 0 30px;border:1px solid var(--line);background:var(--card)}
+.gradekey>div{display:grid;grid-template-columns:52px minmax(0,1fr);gap:14px;padding:13px 18px;
+  border-top:1px solid var(--line);align-items:baseline}
+.gradekey>div:first-child{border-top:0}
+.gradekey b{font-family:"IBM Plex Mono",monospace;font-size:14px;color:var(--celadon);font-weight:600}
+.gradekey span{font-size:14px}
+.gradekey i{font-style:normal;color:var(--mute);font-size:13px;display:block;margin-top:2px}
+footer{grid-column:1/-1;border-top:1px solid var(--line);margin-top:40px;padding-top:22px;
+  font-size:12.5px;color:var(--mute);display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between}
+a:focus-visible,.toc a:focus-visible{outline:2px solid var(--celadon);outline-offset:3px}
+@media print{
+  .toc{display:none} .wrap{grid-template-columns:1fr;max-width:none}
+  .entry,.sub,.part{break-inside:avoid} body{background:#fff}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="cover">
+    <p class="eyebrow">하루차림 · 근거 대조판 2026-09-09</p>
+    <h1>암 환자 식이·영양 지침서</h1>
+    <p class="deck">암 치료를 받는 동안, 그리고 마친 뒤에 무엇을 어떻게 드실지에 대한 안내입니다.
+      규칙 144개와 참고 문헌 79종으로 이루어져 있으며,
+      각 항목마다 그 말이 어느 문헌에서 나왔는지와 근거가 얼마나 단단한지를 함께 적었습니다.
+      방사선종양학과 전문의가 감수했습니다.</p>
+    <div class="facts">
+      <div><b>144</b><span>임상 규칙</span></div>
+      <div><b>79</b><span>참고 문헌 (전부 원문 대조)</span></div>
+      <div><b>10</b><span>암종</span></div>
+      <div><b>17</b><span>증상·상태</span></div>
+      <div><b>18</b><span>약제</span></div>
+    </div>
+  </header>
+
+  
+<nav class="toc" aria-label="목차">
+  <p class="toc-h">차례</p>
+  <ol>
+    <li><a href="#p0">읽기 전에</a></li>
+    <li><a href="#p1">공통 원칙</a></li>
+    <li><a href="#p2">증상과 상태</a>
+      <ol><li><a href="#c-%EC%97%B0%ED%95%98%EA%B3%A4%EB%9E%80">연하곤란</a></li><li><a href="#c-%EA%B5%AC%EA%B0%95%EC%A0%90%EB%A7%89%EC%97%BC">구강점막염</a></li><li><a href="#c-%EC%84%A4%EC%82%AC">설사</a></li><li><a href="#c-%EB%B3%80%EB%B9%84">변비</a></li><li><a href="#c-%EC%98%A4%EC%8B%AC%C2%B7%EA%B5%AC%ED%86%A0">오심·구토</a></li><li><a href="#c-%EC%8B%9D%EC%9A%95%EB%B6%80%EC%A7%84">식욕부진</a></li><li><a href="#c-%EC%B2%B4%EC%A4%91%EA%B0%90%EC%86%8C">체중감소</a></li><li><a href="#c-%EC%B2%B4%EC%A4%91%EC%A6%9D%EA%B0%80">체중증가</a></li><li><a href="#c-%ED%98%B8%EC%A4%91%EA%B5%AC%EA%B0%90%EC%86%8C%EC%A6%9D">호중구감소증</a></li><li><a href="#c-%EC%9C%84%EC%A0%88%EC%A0%9C%ED%9B%84">위절제후</a></li><li><a href="#c-%EC%9E%A5%EB%A3%A8%EB%B3%B4%EC%9C%A0">장루보유</a></li><li><a href="#c-%EB%B3%B5%EC%88%98">복수</a></li><li><a href="#c-%EA%B0%84%EC%84%B1%EB%87%8C%EC%A6%9D%EC%9C%84%ED%97%98">간성뇌증위험</a></li><li><a href="#c-%EC%8B%A0%EA%B8%B0%EB%8A%A5%EC%A0%80%ED%95%98">신기능저하</a></li><li><a href="#c-%EB%8B%B9%EB%87%A8">당뇨</a></li><li><a href="#c-%EA%B3%A0%ED%98%88%EC%95%95">고혈압</a></li><li><a href="#c-%EC%99%80%ED%8C%8C%EB%A6%B0%EB%B3%B5%EC%9A%A9">와파린복용</a></li></ol>
+    </li>
+    <li><a href="#p3">암종별</a>
+      <ol><li><a href="#k-breast">유방암</a></li><li><a href="#k-stomach">위암</a></li><li><a href="#k-colorectal">대장암</a></li><li><a href="#k-lung">폐암</a></li><li><a href="#k-liver">간암</a></li><li><a href="#k-prostate">전립선암</a></li><li><a href="#k-pancreas">췌장암</a></li><li><a href="#k-esophagus">식도암</a></li><li><a href="#k-headneck">두경부암</a></li><li><a href="#k-gyn">부인암 (자궁·난소)</a></li></ol>
+    </li>
+    <li><a href="#p4">약과 음식</a></li>
+    <li><a href="#p5">참고 문헌</a></li>
+  </ol>
+</nav>
+
+  <main>
+    <section id="p0" class="part">
+      <p class="pn">0부</p><h2>읽기 전에</h2>
+      <div class="note">
+        <p><strong>이 문서는 담당 의료진의 지시를 대신하지 않습니다.</strong>
+        여기 적힌 것은 일반적인 안내이고, 여러분의 검사 수치와 치료 계획을 아는 것은 담당 의료진입니다.
+        두 이야기가 다르면 담당 의료진의 지시를 따르십시오.</p>
+        <p>치료 자체(약, 방사선, 수술)에 대한 판단은 이 문서의 범위가 아닙니다.
+        음식과 영양보충제에 한정된 안내입니다.</p>
+      </div>
+      <h3 style="font-size:20px;margin:34px 0 4px">왜 이런 문서를 만들었는가</h3>
+      <p style="max-width:62ch;margin:10px 0 0">진료실에서 가장 많이 나오는 질문이 “무엇을 먹으면 되느냐”인데,
+      정작 그 답을 정리해 드릴 시간은 가장 적습니다. 그래서 환자분들은 검색과 주변의 말에 기대게 되고,
+      거기에는 근거가 없는 것과 있는 것이 섞여 있습니다.
+      이 문서는 그 사이를 갈라 놓으려는 것입니다.</p>
+      <p style="max-width:62ch">한 가지 원칙을 지켰습니다 —
+      <em style="font-style:normal;font-weight:600;box-shadow:inset 0 -.42em 0 var(--wash)">근거를 부풀리지도 낮추지도 않는다.</em>
+      어떤 항목은 “하지 마십시오”라고 단정하고, 어떤 항목은 “아직 모릅니다”라고 적혀 있습니다.
+      후자를 지운 문서가 읽기에는 편하지만, 그것은 도움이 되지 않습니다.</p>
+
+      <h3 style="font-size:20px;margin:38px 0 4px">근거 등급 읽는 법</h3>
+      <p style="max-width:62ch;margin:10px 0 0">각 항목 왼쪽의 글자는 그 말이 어떤 종류의 연구에서 나왔는지를 뜻합니다.
+      <strong>등급이 높다고 위험이 크다는 뜻이 아닙니다</strong> — 얼마나 확실히 아는가를 나타냅니다.</p>
+      <div class="gradekey">
+        <div><b>A</b><span>무작위배정 시험 또는 메타분석<i>사람을 나누어 비교해 본 결과. 가장 단단한 종류입니다.</i></span></div>
+        <div><b>B</b><span>대규모 전향적 코호트<i>많은 사람을 오래 따라가며 관찰한 결과. 연관은 보이지만 원인이라 단정하긴 어렵습니다.</i></span></div>
+        <div><b>C</b><span>소규모·후향적 연구 또는 기전<i>이론과 경험에 근거한 조정. 방향은 그럴듯하나 증명된 것은 아닙니다.</i></span></div>
+        <div><b>G</b><span>주요 학회 지침의 합의<i>전문가들이 모여 정리한 권고. 근거의 강도는 지침마다 다르므로 본문에 함께 적었습니다.</i></span></div>
+      </div>
+      <p style="max-width:62ch;font-size:14px;color:var(--mute)">본문에서 <em style="font-style:normal;font-weight:600;box-shadow:inset 0 -.42em 0 var(--wash)">굵게 표시된 부분</em>은
+      특히 놓치기 쉬운 지점입니다.</p>
+    </section>
+
+    <section id="p1" class="part">
+  <p class="pn">1부</p><h2>공통 원칙</h2>
+  <p class="lead">암종과 무관하게, 치료를 받는 거의 모든 분께 해당하는 것들입니다. 여기부터 읽으십시오.</p>
+  <article class="entry" id="r-common-alcohol">
+  <div class="mark"><span class="grade" title="근거 등급 A">A</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>술은 치료 기간과 그 이후 모두 피하는 것이 원칙입니다</h4>
+    <p>알코올은 IARC Group 1 발암물질이며, 구강·인두·후두·식도·간·대장·유방암의 위험을 높이는 것으로 확립되어 있습니다. 치료 중에는 여기에 더해 점막 손상 악화, 간독성 약물과의 부담 중첩, 탈수 문제가 겹칩니다. 다만 이유는 정확히 알고 계시는 편이 낫습니다 — 미국암학회 2022년 생존자 지침은 &quot;암 전체를 놓고 보면 음주와 사망을 잇는 근거가 생존자만을 위한 별도 권고를 낼 만큼 충분하지 않다&quot;고 밝히면서도, 술이 여러 암의 확립된 원인이므로 새로운 암을 막기 위해 끊기를 권했습니다. 재발보다 두 번째 암이 이유입니다(두경부·간암처럼 음주가 예후와 직접 연결된 암은 따로 있습니다). 같은 지침은 그래도 드신다면 여성 하루 1잔, 남성 2잔을 넘기지 말라고 적습니다. &quot;레드와인은 몸에 좋다&quot;는 폴리페놀 논리는 알코올 자체의 위험을 상쇄하지 못합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-21">21</a> · <a href="#ref-1">1</a> · <a href="#ref-4">4</a></p>
+  </div>
+</article>
+<article class="entry" id="r-common-processed-meat">
+  <div class="mark"><span class="grade" title="근거 등급 A">A</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>햄·소시지·베이컨 같은 가공육은 되도록 줄이세요</h4>
+    <p>IARC 는 가공육을 Group 1(사람에게 발암성이 있음)으로 분류했습니다. 정확히는 &quot;가공육 섭취가 대장암을 일으킨다&quot;는 충분한 근거가 있다는 뜻이고, 위암과의 연관도 관찰되었으나 결론을 내릴 만큼은 아니라고 적었습니다. 아질산염과 단백질이 만나 생기는 N-니트로소 화합물이 주된 기전으로 지목됩니다. 다만 놀라지 마십시오 — IARC 는 담배·석면과 같은 Group 1 이라고 해서 위험의 크기가 같다는 뜻은 아니라고 분명히 밝히고 있습니다. 이 등급은 &quot;근거가 얼마나 확실한가&quot;를 말하는 것이지 &quot;얼마나 위험한가&quot;를 재는 것이 아닙니다. WCRF/AICR 는 &quot;매우 적게 먹을 것&quot;을 권고합니다. 완전히 끊기 어렵다면 주 1회 이하, 한 번에 소량으로 제한하는 것이 현실적인 목표입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-20">20</a> · <a href="#ref-1">1</a></p>
+  </div>
+</article>
+<article class="entry" id="r-common-ultraprocessed">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>초가공식품이 식사의 중심이 되지 않게 하세요</h4>
+    <p>나트륨·당·포화지방이 높고 단백질·미량영양소는 낮아, 같은 열량에서 얻는 영양의 질이 떨어집니다. 치료 중처럼 먹을 수 있는 총량이 줄어든 시기에는 이 &quot;영양 밀도&quot; 차이가 특히 크게 작용합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-1">1</a> · <a href="#ref-4">4</a></p>
+  </div>
+</article>
+<article class="entry" id="r-common-sugary-drink">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>당이 많은 음료·간식은 배만 부르게 하고 영양은 남기지 않습니다</h4>
+    <p>단 음료와 과자는 포만감을 만들어 실제 식사량을 줄이면서 열량만 채웁니다. 체중 유지가 필요한 환자에게는 차라리 단백질이 든 음료가 낫고, 체중 관리가 목표인 생존자에게는 비만을 통해 여러 암의 재발 위험과 연결됩니다. 과일에 든 당은 식이섬유·미량영양소와 함께 들어오므로 여기서 말하는 대상이 아닙니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-1">1</a> · <a href="#ref-4">4</a></p>
+  </div>
+</article>
+<article class="entry" id="r-common-raw-neutropenia">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요<span class="when">호중구감소 시기</span></p>
+    <h4>호중구가 낮은 동안에는 익히지 않은 음식을 피하세요</h4>
+    <p>회·육회·생굴·반숙 달걀·살균되지 않은 유제품처럼 가열하지 않은 동물성 식품은 살모넬라·리스테리아·비브리오 감염의 경로가 됩니다. 반면 생과일·생채소까지 전면 금지하는 이른바 &quot;호중구감소증 식단&quot;이 감염을 줄인다는 근거는 메타분석에서 확인되지 않았습니다. 그래서 이 규칙은 동물성 식품에만 적용합니다. 과일·채소는 깨끗이 씻거나 껍질을 벗겨 드시면 됩니다. 다만 새싹채소(숙주·알팔파·브로콜리 새싹)만은 예외라 익혀 드셔야 합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-50">50</a> · <a href="#ref-53">53</a></p>
+  </div>
+</article>
+<article class="entry" id="r-common-raw-sprouts-neutropenia">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요<span class="when">호중구감소 시기</span></p>
+    <h4>호중구가 낮은 동안에는 생 새싹채소만은 익혀서 드세요</h4>
+    <p>숙주·알팔파·브로콜리 새싹·무순 같은 새싹채소는 다른 생채소와 다릅니다. 싹을 틔우는 따뜻하고 습한 환경 자체가 균이 자라기 좋아서, 씻는 것으로는 해결되지 않습니다. 미국 FDA 도 생 새싹채소를 위험이 높은 쪽에 두고, 낮은 쪽으로 익힌 새싹을 듭니다. 데치거나 볶아 드시면 됩니다 — 숙주나물(데친 것), 콩나물무침처럼요.</p>
+    <p class="src">근거 문헌 <a href="#ref-53">53</a></p>
+  </div>
+</article>
+<article class="entry" id="r-common-raw-animal-neutropenia">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요<span class="when">호중구감소 시기</span></p>
+    <h4>호중구가 낮은 동안에는 회·초밥처럼 익히지 않은 것을 피하세요</h4>
+    <p>회·육회·생굴·초밥처럼 가열하지 않은 동물성 식품은 살모넬라·리스테리아·비브리오 감염의 경로가 됩니다. 초밥은 위에 올린 재료를 익혔더라도 같은 자리에서 날생선을 다루므로 함께 피하시는 편이 안전합니다. 생과일·생채소는 여기에 해당하지 않습니다 — 깨끗이 씻거나 껍질을 벗겨 드시면 됩니다. 새싹채소만은 씻어도 안 되니 익혀 드세요.</p>
+    <p class="src">근거 문헌 <a href="#ref-50">50</a> · <a href="#ref-53">53</a></p>
+  </div>
+</article>
+<article class="entry" id="r-common-antioxidant-rt">
+  <div class="mark"><span class="grade" title="근거 등급 A">A</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요<span class="when">방사선치료 중 · 항암치료 중</span></p>
+    <h4>치료 중 고용량 항산화 보충제는 권하지 않습니다</h4>
+    <p>방사선치료와 상당수 항암제는 활성산소를 통해 암세포를 죽입니다. 식품 수준을 넘는 고용량 항산화제는 이 기전을 방해할 수 있습니다. 두경부암 환자 540명 무작위배정 시험에서, 비타민 E 400 IU·베타카로틴 30 mg 을 방사선치료 첫날부터 드신 군은 보충 기간 중 이차암이 2.9배 많았습니다(95 % 신뢰구간 1.56~5.31). 재발과 사망은 <em>치료 중에도 담배를 피우신 분에게 몰렸습니다</em> — 재발 2.4배, 전체 사망 2.3배였고, 피우지 않으신 분에서는 거의 차이가 없었습니다. 항산화 성분을 음식으로 드시는 것은 제한 대상이 아니며, 문제가 되는 것은 보충제 수준의 고용량입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-29">29</a> · <a href="#ref-28">28</a> · <a href="#ref-27">27</a></p>
+  </div>
+</article>
+<article class="entry" id="r-common-grapefruit">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>자몽·자몽주스는 항암제 농도를 예측할 수 없게 바꿉니다</h4>
+    <p>자몽의 푸라노쿠마린이 소장의 CYP3A4 를 비가역적으로 억제해, 이 효소로 대사되는 약물의 혈중 농도를 크게 올립니다. 자몽 한 개나 주스 200 mL 만으로도 임상적으로 의미 있는 농도 상승이 일어납니다. 먹고 24시간이 지나도 최대 효과의 4분의 1이 남기 때문에, 하루 한 번 드시는 약이라면 자몽을 언제 드시든 겹칩니다 — &quot;복용 시간을 피해서 먹는&quot; 방식으로는 해결되지 않습니다. 매일 반복해서 드시면 영향이 더 커집니다. 자몽만이 아닙니다. 라임·포멜로, 그리고 마멀레이드에 흔히 쓰이는 세비야 오렌지도 같은 작용을 합니다. 반대로 네이블·발렌시아 같은 보통 단맛 오렌지에는 이 성분이 없어 해당되지 않으니 굳이 피하지 않으셔도 됩니다. 문제가 되는 것은 먹는 약이고, 정맥으로 맞는 항암제는 이 영향을 받지 않습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-54">54</a></p>
+  </div>
+</article>
+<article class="entry" id="r-common-sodium">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>1회 제공량 나트륨이 800 mg 을 넘습니다</h4>
+    <p>국민건강영양조사에서 한국인의 하루 나트륨 섭취량은 3,255 mg 이었습니다(2018년). 2020 한국인 영양소 섭취기준의 나트륨 만성질환위험감소섭취량이 하루 2,300 mg 이니 그 1.4배이고, 몸에 필요한 양인 충분섭취량 1,500 mg 과 견주면 두 배가 넘습니다. 65세를 넘으면 기준 자체가 더 낮아집니다 — 65~74세 2,100 mg, 75세 이상 1,700 mg. 그 대부분이 국·찌개·김치·젓갈에서 옵니다. 국물을 남기는 것만으로 한 끼 나트륨을 절반 가까이 줄일 수 있습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-16">16</a> · <a href="#ref-17">17</a></p>
+  </div>
+</article>
+<article class="entry" id="r-common-vegetables">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>채소와 과일을 합쳐 하루 400 g — 한 번에 80 g씩 다섯 번입니다</h4>
+    <p>WCRF/AICR 의 목표는 비전분 채소와 과일을 합쳐 하루 400 g 이상, 곧 한 번에 80 g 정도씩 하루 다섯 번 이상입니다. 80 g 은 우리 밥상으로 나물 한 접시, 방울토마토 열 개쯤 되는 양이라 다섯 번이면 채울 수 있습니다. 여기서 말하는 채소에 감자·고구마·마 같은 전분질 뿌리채소는 들어가지 않습니다(그쪽은 밥과 같은 자리입니다). 같은 보고서는 식이섬유를 식품으로 하루 30 g 이상 드시도록 함께 권고합니다. 단일 성분이 아니라 식이섬유·카로티노이드·폴리페놀이 함께 들어 있는 &quot;식품 형태&quot;에서 이득이 관찰되었습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-1">1</a> · <a href="#ref-4">4</a></p>
+  </div>
+</article>
+<article class="entry" id="r-common-protein">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>단백질은 평소보다 넉넉히 잡으셔야 합니다</h4>
+    <p>ESPEN 은 암 환자의 단백질을 체중 1 kg 당 1 g 을 넘기고, 가능하면 1.5 g 까지 올리도록 권고합니다. 60 kg 성인이라면 하루 60 g 을 넘겨 90 g 쪽으로 잡는 것이며, 일반 성인 권장량보다 뚜렷하게 많습니다. 치료 중에는 근육량이 치료 완주율과 부작용 회복 속도에 직접 연결되고, 치료를 마친 뒤에도 근육은 저절로 돌아오지 않아 계속 챙기셔야 하는 부분입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a> · <a href="#ref-68">68</a></p>
+  </div>
+</article>
+<article class="entry" id="r-common-neutropenic-diet-myth">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-info">참고<span class="when">호중구감소 시기</span></p>
+    <h4>생과일·생채소를 전면 금지할 필요는 없습니다</h4>
+    <p>&quot;호중구감소증 식단&quot;이 감염을 줄인다는 근거는 무작위배정 연구들의 메타분석(6편·1,116명)에서 확인되지 않았습니다 (주요 감염 상대위험 1.16, 95 % 신뢰구간 0.94~1.42). 조혈모세포이식을 받은 분들에서는 오히려 제한식이 쪽의 감염이 조금 더 많았습니다(1.25, 1.02~1.54). 섭취량이 줄어 영양 상태가 나빠지는 것도 문제입니다. 그래서 저자들이 권하는 것은 음식을 넓게 금지하는 것이 아니라 <em>식품을 안전하게 다루는 것</em>입니다 — 익혀서 드시고, 씻어 드시고, 만든 뒤 2시간 안에 냉장하는 것. 이 앱도 그 방식을 따릅니다. 미국임상종양학회도 2022년 지침에서 &quot;생과일·생채소를 빼는 호중구감소증 식단은 치료 중 감염 예방 목적으로 권고하지 않는다(이득보다 해가 클 가능성)&quot; 고 못 박았습니다. 다만 담당 의료진이 따로 정해 주신 기준이 있으면 그것을 우선하십시오.</p>
+    <p class="src">근거 문헌 <a href="#ref-50">50</a> · <a href="#ref-3">3</a></p>
+  </div>
+</article>
+</section>
+    <section id="p2" class="part">
+  <p class="pn">2부</p><h2>증상과 상태</h2>
+  <p class="lead">실제 진료에서 “무엇을 드실까”를 좌우하는 것은 암종보다 이쪽인 경우가 많습니다.
+  해당하는 항목만 찾아 보셔도 됩니다.</p>
+  <div class="sub" id="c-%EC%97%B0%ED%95%98%EA%B3%A4%EB%9E%80">
+    <h3>연하곤란</h3>
+    <article class="entry" id="r-cond-dys-soft">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>삼키기 쉬운 형태로 바꾸는 것이 먼저입니다</h4>
+    <p>먹는 양을 줄이는 대신 음식의 형태를 바꾸는 것이 원칙입니다. 국제 표준(IDDSI)의 기준으로는 어른은 한 조각 1.5 cm 이하(포크 폭), 잘게 다진 단계는 4 mm 이하(포크 살 사이 간격)이고, 포크로 눌러 엄지손톱이 하얘질 정도의 힘에 뭉개지면 부드러운 것입니다. 촉촉하게 만들 때는 걸쭉한 소스를 쓰고, 국물처럼 묽은 것이 따로 흐르지 않도록 남는 물기는 따라 내십시오.</p>
+    <p class="src">근거 문헌 <a href="#ref-61">61</a></p>
+  </div>
+</article>
+<article class="entry" id="r-cond-dys-rough">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>거칠거나 잘 뭉치는 음식은 사레와 막힘의 원인입니다</h4>
+    <p>견과·튀김옷·질긴 나물처럼 거친 것, 떡처럼 끈적하게 뭉치는 것은 특히 위험합니다. 마른 빵·토스트·샌드위치는 국제 표준에서 아예 빼도록 되어 있고, 과일의 질긴 속껍질과 씨·껍질도 마찬가지입니다. 한 입에 여러 질감이 섞인 음식(국물에 밥을 만 것 등)도 삼키기 어렵습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-61">61</a></p>
+  </div>
+</article>
+<article class="entry" id="r-cond-dys-thin">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>물처럼 묽은 액체는 너무 빨리 흘러 조절하기 어렵습니다</h4>
+    <p>묽은 액체는 흐르는 속도가 빨라 안전하게 조절하기 어려운 경우가 있습니다. 걸쭉하게 하면 흐름이 느려집니다. 다만 어느 정도로 걸쭉하게 할지는 사람마다 달라, 연하 평가를 받고 담당 의료진이 정해 주는 단계를 따르셔야 합니다. 임의로 되게 만들면 오히려 목에 남고 물을 적게 드시게 됩니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-61">61</a></p>
+  </div>
+</article>
+  </div>
+<div class="sub" id="c-%EA%B5%AC%EA%B0%95%EC%A0%90%EB%A7%89%EC%97%BC">
+    <h3>구강점막염</h3>
+    <article class="entry" id="r-cond-muc-avoid">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>맵고 시고 짜고 거친 것 — 네 가지를 모두 빼세요</h4>
+    <p>벗겨진 점막에는 캡사이신·산·염분이 직접적인 통증 자극이 됩니다. 토마토, 감귤, 파인애플, 식초, 김치, 과자류가 실제로 가장 자주 문제가 되는 항목입니다. 다만 근거의 무게는 정확히 알고 계시는 편이 낫습니다 — 국제 지침(MASCC/ISOO)은 &quot;통증 조절과 식이 지원이 관리의 핵심&quot;이라고 적으면서도, 어떤 음식을 빼야 하는지에 대해서는 근거가 불충분하고 서로 엇갈려 권고를 내지 못했습니다. 위 목록은 통증이 생기는 기전과 진료 경험에 따른 조정이지 임상시험으로 증명된 목록이 아닙니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-60">60</a></p>
+  </div>
+</article>
+<article class="entry" id="r-cond-muc-cold">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>미지근하거나 차가운 부드러운 음식이 견디기 쉽습니다</h4>
+    <p>아이스크림·요거트·푸딩·계란찜처럼 부드럽고 온도가 낮은 음식은 통증을 덜 자극하면서 열량을 줍니다. 여기에 더해 &quot;구강 냉각&quot;은 국제 지침이 실제로 권고하는 방법인데, 조건이 정해져 있습니다 — 5-FU 를 짧게 밀어 넣는(볼루스) 방식으로 맞는 동안 30분간 얼음을 물고 있는 것, 그리고 고용량 멜팔란으로 전처치하는 자가조혈모세포이식을 받는 경우입니다. 이미 생긴 점막염을 낫게 하는 것이 아니라 생기는 것을 줄이는 예방법이고, 지속 주입이나 먹는 항암제에는 해당되지 않습니다. 담당 의료진께 내 항암제가 여기에 해당하는지 확인하십시오.</p>
+    <p class="src">근거 문헌 <a href="#ref-60">60</a></p>
+  </div>
+</article>
+  </div>
+<div class="sub" id="c-%EC%84%A4%EC%82%AC">
+    <h3>설사</h3>
+    <article class="entry" id="r-cond-diar-lowres">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>잔사가 적은 음식으로 옮기고 수분을 채우세요</h4>
+    <p>흰죽·흰밥·바나나·감자·닭가슴살처럼 잔사가 적은 음식이 기본입니다. 설사로 잃는 것은 물뿐 아니라 나트륨·칼륨이므로 경구수액이나 이온음료를 함께 드시는 편이 좋습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-cond-diar-avoid">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>유당·기름진 음식·거친 섬유·카페인은 설사를 악화시킵니다</h4>
+    <p>장 점막이 손상되면 유당분해효소가 일시적으로 줄어 우유가 설사를 키웁니다. 지방은 담즙산 흡수 장애로, 카페인은 장운동 촉진으로 각각 증상을 악화시킵니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+  </div>
+<div class="sub" id="c-%EB%B3%80%EB%B9%84">
+    <h3>변비</h3>
+    <article class="entry" id="r-cond-const-fiber">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>섬유와 수분은 반드시 함께 늘려야 합니다</h4>
+    <p>물 없이 섬유만 늘리면 변이 오히려 더 단단해집니다. 하루 1.5~2 L 의 수분과 함께 늘리는 것이 원칙이며, 푸룬·키위·차전자피가 실용적인 선택입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-cond-const-opioid">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-info">참고</p>
+    <h4>마약성 진통제로 인한 변비는 섬유만으로 해결되지 않습니다</h4>
+    <p>오피오이드는 장운동 자체를 억제하기 때문에 식이 조절만으로는 부족합니다. 전문가 46인이 참여한 합의문은 진통제를 쓰는 동안 완하제를 계속 유지하고, 사람마다 맞게 조정하며 정기적으로 다시 살피도록 권합니다. 섬유를 늘리는 것으로 대신하려 하시면 오히려 배가 더 불편해질 수 있으니 담당 의료진과 약을 먼저 상의하십시오.</p>
+    <p class="src">근거 문헌 <a href="#ref-6">6</a></p>
+  </div>
+</article>
+  </div>
+<div class="sub" id="c-%EC%98%A4%EC%8B%AC%C2%B7%EA%B5%AC%ED%86%A0">
+    <h3>오심·구토</h3>
+    <article class="entry" id="r-cond-nau-ginger">
+  <div class="mark"><span class="grade" title="근거 등급 A">A</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>생강은 항암 유발 오심에 근거가 있는 몇 안 되는 식품입니다</h4>
+    <p>항암 환자 576명을 대상으로 한 무작위배정 연구에서, 항암 시작 3일 전부터 생강을 복용한 군은 급성 오심이 유의하게 감소했습니다(P=0.003). 효과는 하루 0.5~1.0 g 에서 가장 컸고, 1.5 g 으로 늘려도 더 낫지 않았습니다. 항구토제를 대체하는 것이 아니라 더하는 개념입니다. 다만 와파린 같은 항응고제를 드시는 분은 예외입니다 — 출혈 위험이 높아진다는 관찰이 있어 따로 상의하셔야 합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-59">59</a> · <a href="#ref-58">58</a></p>
+  </div>
+</article>
+<article class="entry" id="r-cond-nau-avoid">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>기름지고 냄새가 강한 음식은 오심을 키웁니다</h4>
+    <p>지방은 위 배출을 늦춰 더부룩함을 오래 끌고, 강한 냄새는 그 자체로 구토 유발 자극이 됩니다. 상온이나 찬 음식은 냄새가 덜 나서 견디기 쉽습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-cond-nau-dry">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>아침 공복에 마른 음식을 조금 드시는 것이 도움이 됩니다</h4>
+    <p>빈속일 때 오심이 가장 심한 경우가 많습니다. 일어나기 전에 마른 크래커를 몇 개 드시고 천천히 일어나는 방법이 오래전부터 쓰입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+  </div>
+<div class="sub" id="c-%EC%8B%9D%EC%9A%95%EB%B6%80%EC%A7%84">
+    <h3>식욕부진</h3>
+    <article class="entry" id="r-cond-anor-dense">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>양을 늘리지 말고 한 입의 밀도를 올리세요</h4>
+    <p>식욕이 없을 때 &quot;많이 드세요&quot;는 실행 불가능한 조언입니다. 죽에 참기름·달걀·단백질분말을 섞고, 우유에 미숫가루를 타고, 간식으로 견과·치즈를 두는 식으로 같은 부피에서 얻는 열량을 올리는 편이 실제로 작동합니다. ESPEN 도 체중이 줄고 인슐린 저항성이 있는 분에게는 탄수화물보다 지방 쪽 열량 비중을 올리도록 권고합니다 — 부피당 열량을 높이면서 혈당 부담은 낮추려는 것이라, 참기름·견과·치즈를 먼저 드는 이유가 여기 있습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a> · <a href="#ref-67">67</a> · <a href="#ref-68">68</a></p>
+  </div>
+</article>
+<article class="entry" id="r-cond-anor-soup">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>국물로 배를 채우면 정작 먹어야 할 것이 안 들어갑니다</h4>
+    <p>국물은 부피에 비해 열량과 단백질이 거의 없습니다. 식욕이 없는 시기에는 국물 대신 건더기와 단백질 반찬을 먼저 드시는 순서가 좋습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+  </div>
+<div class="sub" id="c-%EC%B2%B4%EC%A4%91%EA%B0%90%EC%86%8C">
+    <h3>체중감소</h3>
+    <article class="entry" id="r-cond-wl-ons">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>식사만으로 부족하면 경구영양보충을 더하세요</h4>
+    <p>먼저 평소 식사를 열량·단백질이 높게 바꾸고, 그것으로 목표에 못 미치면 경구영양보충(ONS)을 더합니다. 섭취가 필요량의 절반에 못 미치는 상태가 1주를 넘거나, 절반~4분의 3 수준이 2주를 넘으면 ESPEN 은 의학적 영양요법을 시작하도록 권고합니다. 체중이 5 % 넘게 줄었다면 이미 개입 기준을 넘은 상태입니다 — 마르신 분(BMI 20 미만)이나 근감소가 있는 분은 2 % 만 줄어도 같은 기준에 해당합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a> · <a href="#ref-68">68</a></p>
+  </div>
+</article>
+  </div>
+<div class="sub" id="c-%EC%B2%B4%EC%A4%91%EC%A6%9D%EA%B0%80">
+    <h3>체중증가</h3>
+    <article class="entry" id="r-cond-gain-dense">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>이때 늘어난 체중은 나중에 잘 빠지지 않습니다</h4>
+    <p>암 치료를 받는 동안에도, 마친 뒤에도 체중이 느는 일은 흔합니다. 치료 중에는 오심을 달래려 탄수화물 위주로 먹게 되고 스테로이드가 식욕을 올리며, 치료를 마친 뒤에는 항호르몬 치료와 줄어든 활동량이 겹칩니다. 문제는 이때 늘어난 것이 근육이 아니라 지방이고, 한번 붙으면 잘 빠지지 않는다는 점입니다. 다만 치료를 받는 동안 살을 빼거나 체중 증가를 막는 개입이 도움이 되는지는 아직 근거가 부족해, 미국임상종양학회는 2022년 지침에서 권고를 내지 않았습니다 — 하지 말라는 뜻이 아니라 아직 모른다는 뜻입니다. 그래서 치료 중에는 감량을 목표로 삼지 마시고, 열량을 줄이기보다 같은 열량에서 단백질과 채소의 비중을 올리는 편이 실천하기도 쉽고 안전합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-3">3</a> · <a href="#ref-4">4</a></p>
+  </div>
+</article>
+<article class="entry" id="r-cond-gain-veg">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>먼저 채소로 배를 채우면 총량이 자연스럽게 줄어듭니다</h4>
+    <p>식사 순서를 채소 → 단백질 → 밥으로 바꾸는 것만으로 총섭취량이 줄어듭니다. 먹는 양을 참는 방식은 어느 시기에나 오래 가지 못합니다 — 치료 중에는 더 그렇습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-4">4</a> · <a href="#ref-16">16</a></p>
+  </div>
+</article>
+<article class="entry" id="r-cond-gain-move">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-info">참고</p>
+    <h4>체중보다 근육량이 중요합니다</h4>
+    <p>체중계 숫자가 그대로여도 근육이 줄고 지방이 느는 경우가 많습니다. 단백질을 유지하면서 저항운동을 더해야 몸의 구성이 나빠지지 않습니다. 치료 중이라면 감량 자체가 목표가 아니고, 치료를 마치셨더라도 한 달에 체중의 2 % 를 넘겨 빼면 근육부터 빠집니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-69">69</a> · <a href="#ref-3">3</a></p>
+  </div>
+</article>
+  </div>
+<div class="sub" id="c-%ED%98%B8%EC%A4%91%EA%B5%AC%EA%B0%90%EC%86%8C%EC%A6%9D">
+    <h3>호중구감소증</h3>
+    <article class="entry" id="r-cond-neut-raw">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>익히지 않은 음식은 이 기간 동안 피하세요</h4>
+    <p>회·육회·생굴·반숙 달걀·살균되지 않은 유제품이 대상입니다. 생 새싹채소(숙주·알팔파·브로콜리 새싹)도 씻는 것으로 해결되지 않아 익혀 드셔야 합니다. 조리하시거나 사 오신 뒤 2시간 안에 냉장하시고(더운 날 32 ℃ 를 넘으면 1시간), 상온에 오래 둔 김밥·샐러드는 드시지 마십시오.</p>
+    <p class="src">근거 문헌 <a href="#ref-53">53</a> · <a href="#ref-50">50</a></p>
+  </div>
+</article>
+<article class="entry" id="r-cond-neut-probiotic">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>유산균 보충제는 이 시기에 신중하게 판단합니다</h4>
+    <p>중증 호중구감소증이나 중심정맥관을 가진 환자에서 프로바이오틱스 균에 의한 균혈증·패혈증 사례가 보고되었습니다. 김치·요거트 같은 일반 식품 수준과, 고농도 균을 넣은 보충제는 구분해서 보아야 합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-53">53</a></p>
+  </div>
+</article>
+  </div>
+<div class="sub" id="c-%EC%9C%84%EC%A0%88%EC%A0%9C%ED%9B%84">
+    <h3>위절제후</h3>
+    <article class="entry" id="r-cond-gx-dumping">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>농축된 단 음식은 덤핑증후군을 일으킵니다</h4>
+    <p>주스·사이다·꿀물처럼 당이 농축된 액체가 가장 흔한 원인입니다. 식사 중에는 물을 적게 드시고, 식후 20~30분 비스듬히 누워 계시면 증상이 줄어듭니다. 위절제 후에 지켜야 할 &quot;정해진 식단&quot;이 따로 있는 것은 아니고, 증상을 보아 가며 맞추는 것이 원칙입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-40">40</a></p>
+  </div>
+</article>
+<article class="entry" id="r-cond-gx-b12">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>비타민 B12 는 정기적으로 확인하고 보충해야 합니다</h4>
+    <p>위 전절제 후에는 경구 흡수가 불가능해 주사 보충이 필요합니다. 아절제 후에도 수년에 걸쳐 결핍이 나타나는 경우가 많습니다. 위암으로 위절제를 받은 2,627명을 모은 메타분석에서 B12 결핍은 48.8 % 에서 확인되었습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-40">40</a> · <a href="#ref-41">41</a></p>
+  </div>
+</article>
+  </div>
+<div class="sub" id="c-%EC%9E%A5%EB%A3%A8%EB%B3%B4%EC%9C%A0">
+    <h3>장루보유</h3>
+    <article class="entry" id="r-cond-stoma-fiber">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>장루를 만든 초기에는 질긴 섬유가 막힘의 원인이 됩니다</h4>
+    <p>버섯 밑동, 옥수수, 견과, 나물 줄기가 대표적입니다. 잘게 썰고 충분히 씹으면 대부분 드실 수 있으며, 수술 후 6~8주가 지나면 하나씩 다시 시도해 보셔도 됩니다. 다만 이 조언의 무게는 알고 계시는 편이 낫습니다 — 장루 식이 문헌을 훑은 종설은 &quot;조언이 흔히 주어지지만 서로 엇갈리고 불충분하며 질 높은 연구가 부족하다&quot;고 정리했습니다. 못 드시는 목록이 아니라 처음에 조심할 목록으로 보시고, 괜찮으면 늘려 가시면 됩니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-64">64</a></p>
+  </div>
+</article>
+<article class="entry" id="r-cond-stoma-fluid">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>회장루가 있으면 수분과 나트륨 손실이 큽니다</h4>
+    <p>대장을 거치지 않아 수분·전해질 재흡수가 일어나지 않습니다. 배출량이 하루 1 L 를 넘으면 탈수와 신기능 저하로 이어질 수 있어, 경구수액 형태로 보충하는 편이 물만 마시는 것보다 효과적입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+  </div>
+<div class="sub" id="c-%EB%B3%B5%EC%88%98">
+    <h3>복수</h3>
+    <article class="entry" id="r-cond-asc-na">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>복수 조절의 핵심은 나트륨 제한입니다</h4>
+    <p>하루 2,000 mg(소금 5 g) 이하가 표준이며, 국물·젓갈·장아찌·면류 국물이 실제 제한을 깨뜨립니다. 다만 유럽간학회 지침은 하루 60 mmol(나트륨 약 1,400 mg) 아래로는 줄이지 말라고 못 박습니다 — 음식이 너무 맛없어져 열량과 단백질 섭취가 함께 무너지기 때문입니다. 수분 제한은 저나트륨혈증이 있을 때만 필요합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-45">45</a></p>
+  </div>
+</article>
+  </div>
+<div class="sub" id="c-%EA%B0%84%EC%84%B1%EB%87%8C%EC%A6%9D%EC%9C%84%ED%97%98">
+    <h3>간성뇌증위험</h3>
+    <article class="entry" id="r-cond-he-protein">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-info">참고</p>
+    <h4>단백질을 끊는 것이 아니라 종류를 바꾸는 것입니다</h4>
+    <p>과거에는 단백질을 제한했지만, 현재 지침은 총량 유지를 권고합니다. 동물성 단백질 대신 식물성·유제품 단백질의 비중을 늘리면 암모니아 부담이 줄면서 근육은 지킬 수 있습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-45">45</a></p>
+  </div>
+</article>
+  </div>
+<div class="sub" id="c-%EC%8B%A0%EA%B8%B0%EB%8A%A5%EC%A0%80%ED%95%98">
+    <h3>신기능저하</h3>
+    <article class="entry" id="r-cond-ckd-k">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>칼륨이 높은 식품은 확인이 필요합니다</h4>
+    <p>사구체여과율이 떨어지면 칼륨 배설이 줄어 고칼륨혈증이 생길 수 있습니다. 건강한 성인의 칼륨 충분섭취량은 하루 3,500 mg 이지만, 신기능이 떨어진 분께는 이 값이 그대로 적용되지 않습니다 — 얼마까지 드실지는 검사 수치를 보고 담당 의료진이 정합니다. 바나나·감자·토마토·건과일·저염소금(염화칼륨)이 대표적인 급원입니다. 채소는 잘게 썰어 데쳐서 물을 버리면 칼륨을 상당히 줄일 수 있습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-16">16</a></p>
+  </div>
+</article>
+<article class="entry" id="r-cond-ckd-p">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>인이 높은 식품과 가공식품의 인산염 첨가물에 주의하세요</h4>
+    <p>가공식품에 첨가된 무기 인산염은 자연 식품의 인보다 흡수율이 훨씬 높습니다. 콜라·가공치즈·햄류가 대표적입니다. 건강한 성인의 인 권장섭취량은 하루 700 mg, 상한은 3,500 mg 입니다 — 같은 700 mg 이라도 첨가물로 들어온 쪽이 몸에 더 많이 남는다는 것이 요점입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-16">16</a></p>
+  </div>
+</article>
+  </div>
+<div class="sub" id="c-%EB%8B%B9%EB%87%A8">
+    <h3>당뇨</h3>
+    <article class="entry" id="r-cond-dm-sugar">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>단순당이 몰린 음식은 혈당을 급격히 올립니다</h4>
+    <p>항암 전후 스테로이드를 쓰는 날에는 평소보다 혈당이 크게 오르므로 특히 주의가 필요합니다. 탄수화물을 매 끼 비슷하게 나누고 단백질·섬유와 함께 드시면 상승 폭이 완만해집니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-16">16</a> · <a href="#ref-2">2</a></p>
+  </div>
+</article>
+  </div>
+<div class="sub" id="c-%EA%B3%A0%ED%98%88%EC%95%95">
+    <h3>고혈압</h3>
+    <article class="entry" id="r-cond-htn-na">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>나트륨은 지금보다 줄이는 것이 목표입니다 — 기준은 하루 2,300 mg</h4>
+    <p>2020 한국인 영양소 섭취기준은 나트륨 만성질환위험감소섭취량을 하루 2,300 mg 으로 정했습니다. 65~74세는 2,100 mg, 75세 이상은 1,700 mg 으로 더 낮습니다. 이 값은 그 아래로 반드시 내려가라는 뜻이 아니라, 그보다 많이 드시고 계시면 줄이는 만큼 만성질환 위험이 낮아진다는 뜻입니다. 한국인 평균이 3,255 mg 이니 대부분 줄일 여지가 있습니다. 국·찌개 국물을 남기고, 김치·젓갈·장아찌를 줄이며, 라면 국물을 마시지 않는 세 가지만으로도 기준 가까이 내려갈 수 있습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-16">16</a> · <a href="#ref-17">17</a></p>
+  </div>
+</article>
+  </div>
+<div class="sub" id="c-%EC%99%80%ED%8C%8C%EB%A6%B0%EB%B3%B5%EC%9A%A9">
+    <h3>와파린복용</h3>
+    <article class="entry" id="r-cond-warf-vitk">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>비타민 K 는 끊는 것이 아니라 &quot;일정하게&quot; 드시는 것이 핵심입니다</h4>
+    <p>와파린은 비타민 K 의 작용을 막아 효과를 냅니다. 시금치·케일·청국장·낫토를 갑자기 많이 드시거나 갑자기 끊으면 INR 이 흔들립니다. 매일 비슷한 양을 유지하는 것이 가장 안전합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-58">58</a></p>
+  </div>
+</article>
+  </div>
+</section>
+    <section id="p3" class="part">
+  <p class="pn">3부</p><h2>암종별</h2>
+  <p class="lead">암종마다 문제가 되는 자리가 다릅니다. 해당하는 암종만 보시면 됩니다.</p>
+  <div class="sub" id="k-breast">
+    <h3>유방암</h3>
+    <p class="summary">유방암 환자에게 식이가 실제로 영향을 미치는 지점은 체중과 알코올입니다. 진단 후 체중 증가는 재발 위험과 관련이 있고, 알코올은 유방암의 확립된 위험 요인입니다. 반대로 콩·두부는 오랫동안 오해를 받아 왔지만, 진단 후 대두 식품 섭취는 재발과 사망을 낮추는 방향으로 관찰되었습니다. 항호르몬 치료 중 관절통·골밀도 감소에 대해서는 칼슘·비타민 D 관리가 핵심입니다.</p>
+    <p class="issues">자주 문제가 되는 것 — 진단 후 체중 증가 — 특히 항암 치료 중과 폐경기 이행 시기 · 아로마타제 억제제 사용 중 골밀도 감소 · 대두 식품에 대한 과도한 회피 · 알코올 — 소량이라도 위험이 선형으로 증가</p>
+    <div class="target">
+    <p class="tl">하루 영양 목표 <span>체중 1 kg 당</span></p>
+    <dl>
+      <div><dt>열량</dt><dd>25~30 kcal</dd></div>
+      <div><dt>단백질</dt><dd>1~1.5 g</dd></div>
+      <div><dt>수분</dt><dd>30 mL</dd></div>
+      <div><dt>나트륨</dt><dd>하루 2,000 mg 이하</dd></div>
+      <div><dt>식이섬유</dt><dd>하루 25~30 g</dd></div>
+    </dl>
+    <p class="tn">치료 종료 후에는 체중 유지·감량이 목표가 되므로 열량 목표를 하단으로 잡습니다. 항암 치료 중 체중이 줄고 있다면 목표를 상단으로 올려 잡습니다.</p>
+  </div>
+    <article class="entry" id="r-breast-soy">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>두부·두유·된장은 피하지 않아도 됩니다 — 오히려 이득 쪽입니다</h4>
+    <p>대두 이소플라본이 에스트로겐과 구조가 비슷하다는 이유로 오랫동안 금기로 여겨졌지만, 사람 대상 연구는 반대 방향을 가리킵니다. 중국·미국 코호트 9,514명을 통합 분석한 연구에서, 이소플라본을 하루 10 mg 이상 드신 군은 재발이 25 % 낮았습니다 (위험비 0.75, 95 % 신뢰구간 0.61~0.92). 다만 같은 연구에서 사망률 감소는 통계적으로 유의하지 않았습니다. 수용체 상태와 타목시펜에 대한 답은 상하이 코호트 5,042명 연구에서 나왔습니다 — 이득은 에스트로겐 수용체 양성에서도 음성에서도, 타목시펜을 드시는 분에서도 안 드시는 분에서도 똑같이 나타났습니다. 이 연구의 4년 재발률은 대두를 적게 드신 군 11.2 %, 많이 드신 군 8.0 % 였습니다. 미국암학회 2022년 지침도 진단 후 이소플라본 섭취가 재발 위험을 낮추는 쪽으로 관찰된다고 정리하면서, 사망률까지 낮춘다는 근거는 아니라고 덧붙였습니다. 식품 형태의 대두는 제한할 이유가 없습니다. 다만 이소플라본을 농축한 고용량 보충제는 이 근거의 대상이 아니므로 별개로 판단합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-24">24</a> · <a href="#ref-25">25</a> · <a href="#ref-26">26</a> · <a href="#ref-4">4</a></p>
+  </div>
+</article>
+<article class="entry" id="r-breast-isoflavone-supp">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의<span class="when">호르몬수용체양성</span></p>
+    <h4>이소플라본·에스트로겐 유사 성분을 농축한 보충제는 별개 문제입니다</h4>
+    <p>대두가 괜찮다는 근거는 모두 &quot;식품으로 먹은 양&quot;을 본 연구에서 나왔고, 농축 보충제를 먹여 본 연구가 아닙니다. 이소플라본을 수십 배 농축한 보충제나 여성호르몬 유사 작용을 표방하는 건강기능식품은 안전성을 뒷받침할 임상 자료가 없습니다. 특히 항호르몬 치료를 받는 동안에는 권하지 않습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-4">4</a></p>
+  </div>
+</article>
+<article class="entry" id="r-breast-alcohol">
+  <div class="mark"><span class="grade" title="근거 등급 A">A</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>유방암에서 알코올은 특히 분명한 위험 요인입니다</h4>
+    <p>알코올은 에스트로겐 농도를 올리고 아세트알데하이드를 통해 직접 DNA 손상을 일으킵니다. 53편·15만 명을 모은 집단 재분석에서 하루 10 g 을 더 드실 때마다 위험이 7.1 % 씩 올랐습니다(95 % 신뢰구간 5.5~8.7 %). 10 g 은 소주 한 잔 반, 맥주 300 mL 정도입니다. 이 증가는 흡연 여부와 무관하게 같았고, 용량이 늘수록 계속 올라가 &quot;적당량은 괜찮다&quot;는 안전 구간이 보이지 않습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-62">62</a> · <a href="#ref-21">21</a> · <a href="#ref-1">1</a></p>
+  </div>
+</article>
+<article class="entry" id="r-breast-weight">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의<span class="when">치료 종료 후</span></p>
+    <h4>체중이 늘지 않게 지키는 것이 치료 후 가장 근거가 두터운 부분입니다</h4>
+    <p>폐경 후 지방조직은 아로마타제를 통해 에스트로겐을 만드는 주된 장소가 됩니다. 진단 후 비만(체질량지수 30 이상)이 재발·사망 위험과 연결된다는 것은 여러 코호트에서 일관되게 관찰되었습니다. 다만 미국암학회 2022년 지침은 &quot;이미 늘어난 체중을 진단 후에 빼면 생존이 좋아지는지는 아직 분명하지 않다&quot;고 적었습니다. 근거가 두터운 쪽은 빼는 것보다 늘지 않게 지키는 쪽이고, 운동은 유방암 사망·전체 사망 모두와 연결되어 더 뚜렷합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-4">4</a> · <a href="#ref-1">1</a></p>
+  </div>
+</article>
+<article class="entry" id="r-breast-calcium-vitd">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장<span class="when">호르몬수용체양성</span></p>
+    <h4>아로마타제 억제제를 쓰는 동안 칼슘과 비타민 D를 챙기세요</h4>
+    <p>아로마타제 억제제는 에스트로겐을 거의 없애기 때문에 골밀도가 빠르게 떨어집니다. 7개 국제학회가 함께 낸 입장문은 아로마타제 억제제를 시작할 때 골절 위험을 평가하고 운동과 칼슘·비타민 D 보충을 안내하도록 권합니다. 그 문서가 인용하는 국제골다공증재단 권고는 폐경 후 여성에게 하루 칼슘 1,200 mg, 비타민 D 800~1,000 IU 입니다. 골밀도 T값이 −2.0 아래이거나, −1.5 아래이면서 위험 인자가 하나 더 있거나, 위험 인자가 둘 이상이면 식사만으로 되지 않고 골표적 약물치료가 필요합니다. 이 값은 골 소실을 관리할 때의 기준이라, 일반 성인 기준(한국인 영양소 섭취기준 칼슘 700~800 mg, 비타민 D 10~15 µg)보다 높습니다 — 다른 곳에서 700 mg 이라 적힌 것을 보셨다면 그 때문입니다. 보충제를 더하실 때는 상한도 함께 보십시오 — 칼슘은 50세 이상에서 하루 2,000 mg, 비타민 D 는 100 µg 이 상한입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-5">5</a> · <a href="#ref-15">15</a> · <a href="#ref-16">16</a></p>
+  </div>
+</article>
+<article class="entry" id="r-breast-her2-cardiac">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의<span class="when">HER2양성</span></p>
+    <h4>HER2 표적치료를 받으셨다면 심장 쪽 위험 요인을 같이 관리하세요</h4>
+    <p>트라스투주맙은 심장 기능(좌심실 구혈률)을 떨어뜨릴 수 있고, 안트라사이클린 계열 항암제를 함께 또는 앞서 쓴 경우 그 위험이 더 큽니다. 치료 중에도, 치료를 마친 뒤에도 나타날 수 있어 심장 기능은 한동안 추적합니다. 이 손상을 막아 준다고 입증된 보충제는 없습니다. 미국임상종양학회는 심장독성 약제를 쓰는 동안 &quot;고칠 수 있는 심혈관 위험 요인 — 흡연·고혈압·당뇨·이상지질혈증·비만 — 을 찾아내고 적극적으로 관리하라&quot;고 권고합니다(다만 이 권고의 근거 수준은 충분하지 않다고 지침 스스로 밝히고 있습니다). 다섯 가지 중 첫째가 금연이고, 식사에서 손댈 수 있는 부분은 나트륨과 체중입니다. 심장이 방사선 조사야에 들어가 30 Gy 이상을 받은 경우도 같은 지침이 고위험으로 분류합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-49">49</a></p>
+  </div>
+</article>
+<article class="entry" id="r-breast-tnbc-focus">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-info">참고<span class="when">삼중음성</span></p>
+    <h4>삼중음성이라면 항호르몬 치료 관련 주의는 해당되지 않습니다</h4>
+    <p>삼중음성 유방암은 타목시펜이나 아로마타제 억제제를 쓰지 않습니다. 그래서 아로마타제 억제제로 인한 골밀도 감소, 대두·이소플라본과 항호르몬제의 관계 같은 이야기는 해당되지 않습니다. 반대로 운동은 근거가 뚜렷합니다 — 치료 중에는 미국임상종양학회가 유산소와 저항운동을 함께 하도록 강하게 권고했고(피로·체력·근력에 대한 이득), 치료를 마친 뒤로는 규칙적인 운동이 유방암 사망·전체 사망 모두와 연결되어 있습니다. 체중은 늘지 않게 지키는 쪽이 근거가 두텁고, 이미 늘어난 것을 진단 후에 빼면 생존이 좋아지는지는 아직 분명하지 않습니다. 단백질과 채소를 채우는 평범한 식사가 그 바탕입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-3">3</a> · <a href="#ref-4">4</a></p>
+  </div>
+</article>
+<article class="entry" id="r-breast-fiber-veg">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>채소 중심 식사는 체중과 대사 양쪽에서 도움이 됩니다</h4>
+    <p>식이섬유가 풍부한 식사는 포만감을 통해 체중 관리에 유리하고, 인슐린 저항성과 만성 염증을 낮추는 방향으로 작용합니다. 이득이 어디에 있는지는 나누어 보셔야 합니다 — 미국암학회 2022년 지침에서 식물성 위주의 건강한 식사는 전체 사망과 유방암 이외의 원인에 의한 사망을 낮추는 쪽으로 관찰되었고, 유방암 재발이나 유방암 자체의 사망까지 낮춘다는 근거는 아직 충분하지 않습니다. 유방암을 겨냥한 치료법이 아니라 오래 건강하게 지내기 위한 바탕이라고 보시는 편이 정확합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-1">1</a> · <a href="#ref-4">4</a></p>
+  </div>
+</article>
+    <div class="phase">
+      <p class="tl">시기별 실무 지침</p>
+      <div><dt>항암치료 중</dt><dd>항암 중에는 미각 변화와 오심으로 단 음식·탄수화물 위주로 쏠리기 쉽습니다. 이때 늘어난 체중은 치료 후에도 잘 빠지지 않으므로, 열량보다 단백질을 먼저 채우는 순서를 유지하는 것이 좋습니다.</dd></div><div><dt>방사선치료 중</dt><dd>방사선치료 부위 피부 관리가 중심이며 식이 제한은 거의 없습니다. 다만 치료 중 고용량 항산화 보충제는 권하지 않습니다.</dd></div><div><dt>치료 종료 후</dt><dd>체중 유지, 주당 150분 이상의 중강도 운동, 금주가 근거가 가장 확실한 세 가지입니다. 대두 식품은 자유롭게 드셔도 됩니다.</dd></div>
+    </div>
+  </div>
+<div class="sub" id="k-stomach">
+    <h3>위암</h3>
+    <p class="summary">위암은 한국인의 식습관과 가장 직접적으로 연결된 암입니다. 염장식품과 고나트륨 식사는 위점막을 손상시키고 H. pylori 감염의 발암 과정을 촉진하는 것으로 알려져 있습니다. 수술을 받은 환자에게는 여기에 더해 덤핑증후군, 철·비타민 B12·칼슘 흡수장애라는 전혀 다른 축의 문제가 생깁니다.</p>
+    <p class="issues">자주 문제가 되는 것 — 염장식품·젓갈·고나트륨 국물 — 발생과 재발 양쪽에 관련 · 위절제 후 덤핑증후군과 조기 포만감 · 비타민 B12 흡수 불능(내인자 소실) — 평생 보충 필요 · 철·칼슘 흡수 감소로 인한 빈혈과 골감소 · 급격한 체중 감소</p>
+    <div class="target">
+    <p class="tl">하루 영양 목표 <span>체중 1 kg 당</span></p>
+    <dl>
+      <div><dt>열량</dt><dd>30~35 kcal</dd></div>
+      <div><dt>단백질</dt><dd>1.2~1.5 g</dd></div>
+      <div><dt>수분</dt><dd>30 mL</dd></div>
+      <div><dt>나트륨</dt><dd>하루 1,500 mg 이하</dd></div>
+      <div><dt>식이섬유</dt><dd>하루 15~25 g</dd></div>
+    </dl>
+    <p class="tn">위절제 후에는 한 번에 먹을 수 있는 양이 줄어드는 만큼 하루 5~6회로 나눠 먹는 것이 핵심입니다. 나트륨 목표를 일반 권고(2,000 mg)보다 낮게 잡았습니다.</p>
+  </div>
+    <article class="entry" id="r-stomach-salted">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>젓갈·자반·장아찌 같은 염장식품은 줄여야 합니다</h4>
+    <p>고농도 소금은 위점막의 방어층을 직접 손상시켜 염증과 위축성 위염을 촉진하고, H. pylori 의 집락 형성과 DNA 손상을 함께 증폭시킵니다. 크기도 알고 계시는 편이 낫습니다 — 207만 명을 모은 메타분석에서 고염군의 위암 위험은 저염군의 2.05배였지만, 아시아만 따로 보면 1.27배였습니다. 한국인유전체역학조사와 다기관암코호트를 포함한 메타분석에서는 절임채소를 하루 40 g 더 드실 때마다 위험이 15 % 씩 올라갔습니다. 반면 젓갈은 위험이 높은 쪽이었으나 통계적으로 확정되지는 않았습니다 (1.17, 95 % 신뢰구간 0.99~1.38). 겁을 드리려는 숫자가 아니라 무엇부터 줄일지 정하실 때 쓰시라는 숫자입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-36">36</a> · <a href="#ref-1">1</a> · <a href="#ref-38">38</a></p>
+  </div>
+</article>
+<article class="entry" id="r-stomach-sodium">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>국물·찌개의 나트륨이 위암 환자에게는 특히 중요합니다</h4>
+    <p>한국인 나트륨 섭취의 절반 이상이 국·찌개·김치에서 옵니다. 재료를 바꾸지 않고 국물만 남겨도 한 끼 나트륨을 절반 가까이 줄일 수 있어, 실천 가능성이 가장 높은 개입입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-36">36</a> · <a href="#ref-17">17</a></p>
+  </div>
+</article>
+<article class="entry" id="r-stomach-kimchi">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>김치는 완전히 끊기보다 &quot;덜 짜게, 덜 자주&quot;가 현실적입니다</h4>
+    <p>김치에는 유산균과 식이섬유라는 이점과 높은 나트륨이라는 위험이 같이 들어 있습니다. 한국·일본 자료를 모은 메타분석이 이 둘을 갈라 보여 줍니다 — 신선한 채소를 많이 드신 군은 위암 위험이 38 % 낮았고 (오즈비 0.62), 절인 채소를 많이 드신 군은 28 % 높았습니다(1.28). 채소를 적게 드셔서가 아니라 &quot;절여서&quot; 드시는 것이 문제라는 뜻입니다. 224만 명 코호트에서 짜게 먹는 기호도 위험을 올렸지만 그 정도는 1.10배였고 저자들도 &quot;약한 연관&quot; 이라고 적었습니다. 그러니 김치를 끊는 것보다, 생채소·나물을 함께 늘리고 백김치나 덜 짜게 담근 김치로 바꾸는 편이 실제로 맞습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-39">39</a> · <a href="#ref-37">37</a> · <a href="#ref-36">36</a></p>
+  </div>
+</article>
+<article class="entry" id="r-stomach-grilled">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>태운 부분과 훈제식품은 피하세요</h4>
+    <p>고온 직화에서 생기는 다환방향족탄화수소(PAH)와 헤테로사이클릭아민(HCA)은 위·대장 점막에 대한 유전독성 물질로 분류됩니다. 불과 거리를 두고 굽고, 탄 부분은 잘라내는 것만으로 노출을 크게 줄일 수 있습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-1">1</a> · <a href="#ref-20">20</a></p>
+  </div>
+</article>
+<article class="entry" id="r-stomach-b12">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장<span class="when">수술 후 회복기 · 치료 종료 후 / 위전절제</span></p>
+    <h4>위 전절제 후에는 비타민 B12 를 평생 보충해야 합니다</h4>
+    <p>B12 흡수에 필요한 내인자는 위 벽세포에서 만들어집니다. 전절제 후에는 경구 섭취만으로 흡수되지 않아 보통 주사(월 1회 등)로 보충합니다. 아절제 후에도 시간이 지나며 결핍이 오는 경우가 많아 정기적인 확인이 필요합니다. 위암으로 위절제를 받은 2,627명을 모은 메타분석에서 B12 결핍은 48.8 % 에서 확인되었습니다 (95 % 신뢰구간 32.4~65.2 % — 연구마다 편차가 매우 커 범위가 넓습니다). 가장 흔한 증상은 빈혈·쉽게 지침·손발이 시림·저림·어지럼이었습니다. 결핍은 빈혈뿐 아니라 되돌리기 어려운 신경 손상으로 이어질 수 있습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-40">40</a> · <a href="#ref-41">41</a></p>
+  </div>
+</article>
+<article class="entry" id="r-stomach-b12-partial">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장<span class="when">수술 후 회복기 · 치료 종료 후 / 위부분절제</span></p>
+    <h4>위 부분절제 후에도 비타민 B12 는 정기적으로 확인하세요</h4>
+    <p>위를 일부 남겼다면 내인자가 어느 정도 만들어지므로 전절제처럼 곧바로 결핍되지는 않습니다. 다만 남은 위 점막이 위축되면서 수술 몇 해 뒤에 서서히 부족해지는 경우가 드물지 않아, 증상이 없더라도 정기적으로 혈중 농도를 확인하는 것이 권고됩니다. 부족이 확인되면 그때 보충을 시작하면 되고, 미리 고용량을 드실 이유는 없습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-40">40</a> · <a href="#ref-41">41</a></p>
+  </div>
+</article>
+<article class="entry" id="r-stomach-dumping">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의<span class="when">수술 후 회복기</span></p>
+    <h4>위 수술 후 단 음식은 덤핑증후군을 부릅니다</h4>
+    <p>농축된 당이 소장으로 급히 내려가면 삼투압으로 수분이 몰려 식은땀·어지럼·복통·설사가 나타납니다(조기 덤핑). 2~3시간 뒤 반응성 저혈당이 오는 후기 덤핑도 흔합니다. 단 음료·주스·과자를 피하고, 식사 중 물을 많이 마시지 않으며, 먹은 뒤 20~30분 정도 비스듬히 누워 있는 것이 도움이 됩니다. 다만 이런 방법들은 증상에 맞춰 조정하는 것이지 지켜야 할 표준 식단이 아닙니다 — 위절제 후의 &quot;정해진 식단&quot;을 뒷받침할 문헌은 충분하지 않다는 것이 이 분야 종설의 결론입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-40">40</a></p>
+  </div>
+</article>
+<article class="entry" id="r-stomach-small-meals">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장<span class="when">수술 후 회복기</span></p>
+    <h4>적은 양으로 열량과 단백질을 채우는 식품이 유리합니다</h4>
+    <p>위 용적이 줄어든 상태에서는 부피가 큰 음식으로 필요량을 채우기 어렵습니다. 계란찜·두부·생선살·경구영양보충 음료처럼 부피 대비 영양이 높은 것을 하루 5~6회로 나눠 드시는 편이 좋습니다. 횟수와 양은 사람마다 다르니 증상을 보아 가며 조정하시면 됩니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-40">40</a></p>
+  </div>
+</article>
+<article class="entry" id="r-stomach-bezoar">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의<span class="when">수술 후 회복기 · 치료 종료 후</span></p>
+    <h4>위 수술을 받았다면 감·곶감은 조심하세요</h4>
+    <p>감의 탄닌은 위산과 만나 굳어 위석(bezoar)을 만들 수 있습니다. 위 배출 기능이 떨어진 수술 후 상태에서는 위석으로 인한 폐색으로 내시경 제거나 수술이 필요했던 사례가 드물지 않게 보고됩니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-40">40</a></p>
+  </div>
+</article>
+<article class="entry" id="r-stomach-iron-ca">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장<span class="when">수술 후 회복기 · 치료 종료 후</span></p>
+    <h4>철분과 칼슘 흡수가 떨어지므로 의식적으로 챙겨야 합니다</h4>
+    <p>철과 칼슘은 위산이 있어야 잘 흡수되는데, 위절제 후에는 위산이 크게 줄어듭니다. 철결핍빈혈은 수술 후 수년에 걸쳐 서서히 나타나는 경우가 많고, 칼슘 흡수 감소는 골감소로 이어집니다. 칼슘 보충이 필요하면 위산 의존도가 낮은 구연산칼슘 형태가 유리합니다. 미리 드시기보다 정기 검사에서 부족이 확인되면 그때 보충하시는 편이 낫습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-40">40</a></p>
+  </div>
+</article>
+    <div class="phase">
+      <p class="tl">시기별 실무 지침</p>
+      <div><dt>수술 후 회복기</dt><dd>수술 직후에는 미음에서 시작해 죽·연식·일반식으로 단계적으로 올립니다. 하루 5~6회 소량 분할이 원칙이고, 식사와 물은 30분 정도 간격을 둡니다. 체중이 수술 전보다 10 % 이상 빠졌다면 경구영양보충을 적극적으로 고려합니다.</dd></div><div><dt>항암치료 중</dt><dd>오심이 심한 시기에는 냄새가 강한 국·찌개보다 상온의 담백한 음식이 견디기 쉽습니다.</dd></div><div><dt>치료 종료 후</dt><dd>나트륨을 낮게 유지하고, B12·철·칼슘·비타민 D 를 정기적으로 확인합니다. H. pylori 제균 여부도 함께 점검합니다.</dd></div>
+    </div>
+  </div>
+<div class="sub" id="k-colorectal">
+    <h3>대장암</h3>
+    <p class="summary">대장암은 식이 근거가 가장 두껍게 쌓인 암입니다. 가공육과 적색육은 위험을 높이고, 식이섬유·통곡물·유제품은 낮추는 쪽으로 WCRF 가 &quot;convincing/probable&quot; 등급을 부여했습니다. 진단 후 식이섬유 섭취가 많은 환자에서 사망률이 낮았다는 코호트 결과도 있습니다. 다만 수술 직후나 장 협착·장루 보유 상태에서는 오히려 섬유를 줄여야 하므로, 시기 구분이 중요합니다.</p>
+    <p class="issues">자주 문제가 되는 것 — 가공육·적색육 섭취 · 수술 직후·장 협착 시의 저잔사식과, 회복 후의 고섬유식이 정반대 방향이라는 점 · 장루 보유 시 가스·냄새·수분 손실 관리 · 골반 방사선치료로 인한 설사 · 비만과 신체활동 부족</p>
+    <div class="target">
+    <p class="tl">하루 영양 목표 <span>체중 1 kg 당</span></p>
+    <dl>
+      <div><dt>열량</dt><dd>25~30 kcal</dd></div>
+      <div><dt>단백질</dt><dd>1~1.5 g</dd></div>
+      <div><dt>수분</dt><dd>30 mL</dd></div>
+      <div><dt>나트륨</dt><dd>하루 2,000 mg 이하</dd></div>
+      <div><dt>식이섬유</dt><dd>하루 25~35 g</dd></div>
+    </dl>
+    <p class="tn">섬유 목표는 회복기 이후 기준입니다. 수술 직후·협착·급성 설사 시에는 하루 10 g 이하의 저잔사식으로 낮춥니다.</p>
+  </div>
+    <article class="entry" id="r-crc-processed-meat">
+  <div class="mark"><span class="grade" title="근거 등급 A">A</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>가공육은 대장암에서 가장 명확한 회피 대상입니다</h4>
+    <p>IARC 는 가공육을 Group 1 로 분류하면서, 10편의 연구를 모아 하루 50 g 섭취마다 대장암 위험이 약 18 % 증가한다고 정리했습니다. 햄 2~3장, 소시지 1개 정도가 그 50 g 에 해당합니다. 부대찌개처럼 가공육이 주재료인 메뉴가 우선 조정 대상입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-20">20</a> · <a href="#ref-1">1</a></p>
+  </div>
+</article>
+<article class="entry" id="r-crc-red-meat">
+  <div class="mark"><span class="grade" title="근거 등급 A">A</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>적색육은 주당 조리 후 500 g 이내로 제한하세요</h4>
+    <p>WCRF/AICR 는 적색육(소·돼지·양)을 주당 조리 후 350~500 g 이내로 권고합니다. 하루 한 끼 고기반찬 정도의 양입니다. 적색육은 가공육과 등급이 다릅니다 — IARC 분류는 Group 2A(아마도 발암성)이고 근거도 &quot;제한적&quot;이라고 적혀 있습니다. 인과관계가 맞다고 가정했을 때의 추정치가 하루 100 g 당 대장암 위험 17 % 증가입니다. 헴철이 장내에서 N-니트로소 화합물 생성을 촉진하는 것이 주요 기전으로 지목됩니다. 조리 후 500 g 은 생고기로 700~750 g 쯤 되니, 장 보실 때 이 무게로 가늠하시면 됩니다. 완전히 끊을 필요는 없으며, 가금류·생선·콩으로 일부를 대체하는 방식이 현실적입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-1">1</a> · <a href="#ref-20">20</a></p>
+  </div>
+</article>
+<article class="entry" id="r-crc-fiber">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장<span class="when">치료 종료 후 · 모든 시기</span></p>
+    <h4>회복 후에는 식이섬유를 하루 30 g 이상으로 올리세요</h4>
+    <p>WCRF/AICR 는 식이섬유를 식품으로 하루 30 g 이상 드시도록 권고합니다. 1~3기 대장암 환자 1,575명을 8년 추적한 전향적 코호트에서, 진단 후 섬유를 하루 5 g 더 드실 때마다 대장암 사망이 22 % 낮았습니다(위험비 0.78). 진단 전보다 섬유를 늘리신 분들에서는 5 g 마다 18 % 씩 낮아졌습니다. 어디서 온 섬유인지가 갈립니다 — 곡물 섬유가 가장 뚜렷했고(5 g 마다 33 % 낮음), 채소 섬유는 전체 사망에서만, 과일 섬유는 연관이 확인되지 않았습니다. 잡곡밥과 통곡물 쪽을 먼저 늘리시는 편이 낫습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-42">42</a> · <a href="#ref-1">1</a></p>
+  </div>
+</article>
+<article class="entry" id="r-crc-lowresidue">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장<span class="when">수술 후 회복기</span></p>
+    <h4>수술 직후에는 저잔사식으로 시작하되, 오래 끌지 않는 것이 중요합니다</h4>
+    <p>문합부가 아무는 동안 대변량과 장운동 부담을 줄이려고 흰밥·흰죽·껍질 벗긴 부드러운 채소로 시작합니다. 맑은 유동식보다 이런 저잔사식이 오심이 적고 장 기능이 빨리 돌아오며 재원 기간도 짧았다는 보고가 있습니다. 다만 여기서 중요한 것은 &quot;얼마나 오래 제한하느냐&quot; 입니다 — 수술 후 회복 지침(ERAS)은 정상 식사 재개가 늦어질수록 감염 합병증이 늘고 회복이 느려진다는 점을 근거로, 대부분의 환자는 수술 당일부터 음식과 영양보충 음료를 시작해야 한다고 강하게 권고합니다. 저잔사식은 며칠 동안의 출발점이지 몇 주씩 이어 갈 식단이 아닙니다. 언제 무엇을 올릴지는 회복 속도에 따라 다르니 담당 의료진의 지시를 따르십시오.</p>
+    <p class="src">근거 문헌 <a href="#ref-65">65</a></p>
+  </div>
+</article>
+<article class="entry" id="r-crc-highfiber-stricture">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의<span class="when">수술 후 회복기</span></p>
+    <h4>수술 직후 질긴 섬유는 조심하세요 — 협착·장루가 있다면 특히</h4>
+    <p>버섯 밑동, 팽이버섯, 나물 줄기, 견과류처럼 질긴 섬유는 좁아진 부위나 장루 입구를 막을 수 있습니다. 충분히 잘게 썰고 오래 씹는 것이 기본이며, 증상이 있으면 해당 식품을 잠시 제외합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-crc-calcium-dairy">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>유제품과 칼슘은 대장암 위험을 낮추는 쪽입니다</h4>
+    <p>WCRF/AICR 는 유제품과 칼슘 섭취가 대장암 위험을 낮춘다는 근거에 &quot;probable&quot; 등급을 부여했습니다. 칼슘이 장내 담즙산과 유리지방산을 결합해 점막 자극을 줄이는 것이 기전으로 제시됩니다. 단, 이 방향은 전립선암에서는 정반대이므로 암종을 구분해서 보아야 합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-1">1</a></p>
+  </div>
+</article>
+<article class="entry" id="r-crc-vitd">
+  <div class="mark"><span class="grade" title="근거 등급 A">A</span></div>
+  <div class="say">
+    <p class="lv lv-info">참고</p>
+    <h4>비타민 D 는 결핍 교정 수준까지가 근거가 있는 범위입니다</h4>
+    <p>전이성 대장암 환자 139명을 대상으로 고용량 비타민 D3 를 항암제에 추가한 SUNSHINE 2상 연구에서 무진행생존은 13.0개월 대 11.0개월로 통계적 차이가 없었고(다변량 분석에서만 신호), 전체 생존은 양쪽 모두 24.3개월로 똑같았습니다. 예방 쪽 근거는 더 분명합니다 — 건강한 성인 25,871명에게 비타민 D 2,000 IU 를 5.3년간 드리게 한 VITAL 연구에서 암 발생은 줄지 않았고(위험비 0.96), 대장암도 마찬가지였습니다(1.09). 결핍이 있으면 교정하되, 항암 효과나 예방을 기대한 초고용량 복용을 뒷받침할 근거는 아직 없습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-34">34</a> · <a href="#ref-35">35</a></p>
+  </div>
+</article>
+<article class="entry" id="r-crc-diarrhea-rt">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장<span class="when">방사선치료 중</span></p>
+    <h4>골반 방사선치료 중 설사가 있으면 잔사와 유당을 줄이세요</h4>
+    <p>골반 조사 중 급성 장염으로 설사가 흔합니다. 이 시기에는 고섬유·고지방·유당·카페인·매운 음식이 증상을 악화시킵니다. 흰죽·바나나·감자·닭가슴살처럼 잔사가 적고 부드러운 음식으로 옮기고, 수분과 전해질을 함께 보충합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-crc-lifestyle">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장<span class="when">치료 종료 후</span></p>
+    <h4>가이드라인을 잘 지킨 환자군에서 실제로 생존이 좋았습니다</h4>
+    <p>CALGB 89803 임상시험에 참여한 3기 대장암 환자 992명을 7년 추적했더니, 미국암학회의 식사·운동·체중 권고를 가장 잘 따른 군(6점 만점에 5~6점)은 가장 못 따른 군(0~1점)보다 사망 위험이 42 % 낮았습니다(위험비 0.58). 여기에 절주까지 넣어 8점으로 매기면 차이가 더 벌어졌습니다(위험비 0.49). 단일 식품이 아니라 전체 생활 패턴의 문제라는 것을 보여준 결과입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-43">43</a> · <a href="#ref-4">4</a></p>
+  </div>
+</article>
+    <div class="phase">
+      <p class="tl">시기별 실무 지침</p>
+      <div><dt>수술 후 회복기</dt><dd>저잔사식으로 시작해 4~6주에 걸쳐 섬유를 늘립니다. 장루가 있다면 가스를 만드는 콩류·양파·탄산음료를 처음에는 줄이고, 수분·나트륨 손실이 크므로 물을 충분히 마십니다.</dd></div><div><dt>방사선치료 중</dt><dd>골반 조사 중에는 설사 대응이 중심입니다. 증상이 심하면 유당·고지방·고섬유를 한꺼번에 줄여 보고 하나씩 다시 넣습니다.</dd></div><div><dt>항암치료 중</dt><dd>옥살리플라틴 사용 중에는 찬 음식·찬 음료가 인후 경련과 손발 저림을 유발할 수 있어 미지근하게 드시는 편이 좋습니다.</dd></div><div><dt>치료 종료 후</dt><dd>섬유·통곡물·유제품을 늘리고, 가공육을 줄이며, 체중과 활동량을 관리합니다.</dd></div>
+    </div>
+  </div>
+<div class="sub" id="k-lung">
+    <h3>폐암</h3>
+    <p class="summary">폐암에서 식이의 역할은 예방보다 &quot;치료를 버텨내는 몸&quot;을 만드는 데 있습니다. 진단 시점에 이미 체중이 줄어 있는 경우가 많고, 악액질은 치료 중단과 생존 악화에 직결됩니다. 한편 베타카로틴 보충제는 흡연자에서 폐암 발생을 오히려 늘린 것으로 확인되어, &quot;항산화제를 챙겨 먹겠다&quot;는 선의가 해가 되는 대표적인 사례이기도 합니다.</p>
+    <p class="issues">자주 문제가 되는 것 — 진단 시부터 흔한 체중 감소와 악액질 · 베타카로틴·비타민 A 보충제 — 흡연력이 있으면 위험 · 방사선 식도염으로 인한 연하통 · 숨참으로 인한 식사 지속 곤란 · 스테로이드 병용 시 혈당 상승</p>
+    <div class="target">
+    <p class="tl">하루 영양 목표 <span>체중 1 kg 당</span></p>
+    <dl>
+      <div><dt>열량</dt><dd>30~35 kcal</dd></div>
+      <div><dt>단백질</dt><dd>1.2~1.5 g</dd></div>
+      <div><dt>수분</dt><dd>30 mL</dd></div>
+      <div><dt>나트륨</dt><dd>하루 2,000 mg 이하</dd></div>
+      <div><dt>식이섬유</dt><dd>하루 20~25 g</dd></div>
+    </dl>
+    <p class="tn">체중 감소가 진행 중이라면 열량·단백질 목표를 상단으로 잡고, 부피가 작으면서 열량이 높은 식품을 우선합니다.</p>
+  </div>
+    <article class="entry" id="r-lung-betacarotene">
+  <div class="mark"><span class="grade" title="근거 등급 A">A</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>흡연력이 있다면 베타카로틴 보충제는 피해야 합니다</h4>
+    <p>핀란드 ATBC 연구(남성 흡연자 29,133명)에서 베타카로틴 20 mg 을 매일 드신 군은 폐암 발생이 18 % 많았고 (95 % 신뢰구간 3~36 %), 전체 사망도 8 % 많았습니다(1~16 %). 흡연자·석면 노출 노동자 18,314명을 대상으로 한 미국 CARET 연구에서는 베타카로틴 30 mg 에 비타민 A 를 더한 군의 폐암이 28 % 많았고(1.04~1.57) 폐암 사망은 46 % 많아, 예정보다 21개월 일찍 시험이 중단되었습니다. 두 연구 모두 &quot;효과가 없었다&quot;가 아니라 &quot;더 나빴다&quot;는 결과입니다. 채소·과일에 든 베타카로틴은 해당되지 않으며, 문제는 분리·농축된 고용량 보충제입니다. 종합비타민을 드신다면 베타카로틴 함량을 확인하실 필요가 있습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-30">30</a> · <a href="#ref-31">31</a> · <a href="#ref-4">4</a></p>
+  </div>
+</article>
+<article class="entry" id="r-lung-cachexia">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>체중을 지키는 것이 폐암 치료에서 가장 중요한 영양 목표입니다</h4>
+    <p>진행성 폐암 환자의 상당수가 진단 시 이미 체중이 줄어 있습니다. 국제 합의 기준으로는 체중이 5 % 넘게 줄면 악액질에 해당하고, 마르신 분(BMI 20 미만)이나 근감소가 있는 분은 2 % 만 줄어도 같습니다. 이 상태는 치료 완주율 저하와 생존 악화로 이어집니다. 식사량 자체를 늘리기 어려우므로, 같은 부피에서 열량과 단백질이 높은 식품(계란, 두부, 치즈, 견과, 경구영양보충 음료)을 우선 배치합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-67">67</a> · <a href="#ref-2">2</a> · <a href="#ref-68">68</a></p>
+  </div>
+</article>
+<article class="entry" id="r-lung-ons">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>식사만으로 부족하면 경구영양보충을 미루지 마세요</h4>
+    <p>ESPEN 은 경구 섭취가 필요량의 60 % 에 못 미치는 상태가 1~2주 이상 이어지면 경구영양보충(ONS)을 시작하도록 권고합니다. &quot;밥부터 어떻게든 먹어보자&quot;며 시간을 보내는 사이 근육이 빠지는 편이 더 흔한 문제입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-lung-omega3">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-info">참고</p>
+    <h4>오메가-3 는 체중이 줄고 있는 분에게 약한 권고로 올라 있습니다</h4>
+    <p>ESPEN 은 &quot;진행성 암으로 항암치료를 받으면서 체중이 줄고 있거나 영양불량인 분&quot; 에게 긴사슬 오메가-3(생선기름) 보충을 제안합니다 — 식욕·섭취량·제지방량·체중을 지키려는 목적입니다. 다만 권고의 강도는 약하고 근거 수준도 낮습니다. 체중이 안정된 분께 일반적으로 권하는 것이 아닙니다. 양은 유럽식품안전청 정리 기준으로 EPA·DHA 합쳐 하루 5 g, EPA 단독으로는 1.8 g 까지가 안전 범위입니다. 항응고제를 함께 쓰는 경우에는 출혈 경향을 살펴야 합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-68">68</a> · <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-lung-esophagitis">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장<span class="when">방사선치료 중</span></p>
+    <h4>방사선 식도염이 생기면 부드럽고 자극 없는 음식으로 바꾸세요</h4>
+    <p>흉부 방사선치료가 2주를 넘어서면 식도 점막염으로 삼킬 때 통증이 생기는 경우가 많습니다. 뜨겁고 맵고 신 음식, 거친 음식이 통증을 키우므로 미지근한 죽·계란찜·부드러운 두부·영양음료 위주로 옮깁니다. 통증 때문에 먹는 양이 줄어드는 것이 이 시기 체중 감소로 이어지므로, 점막염 지침도 통증 조절과 식이 지원을 관리의 핵심 요소로 꼽습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-60">60</a> · <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-lung-spicy-acid-rt">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요<span class="when">방사선치료 중</span></p>
+    <h4>흉부 방사선치료 중에는 맵고 신 음식, 거친 음식을 피하세요</h4>
+    <p>식도 점막이 벗겨진 상태에서 캡사이신과 산은 직접적인 통증 자극이 되고, 튀김이나 견과류 같은 거친 음식은 물리적 손상을 더합니다. 어떤 음식을 뺄지는 국제 지침이 근거 부족으로 권고를 내지 못한 영역이라, 통증 기전에 따른 조정으로 보시면 됩니다. 치료가 끝나고 2~4주면 대개 회복되므로 한시적입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-60">60</a></p>
+  </div>
+</article>
+<article class="entry" id="r-lung-steroid-sugar">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의<span class="when">항암치료 중</span></p>
+    <h4>항암 전후 스테로이드를 쓰는 동안 혈당이 오릅니다</h4>
+    <p>오심 예방을 위해 쓰는 덱사메타손은 투여 후 며칠간 혈당을 뚜렷하게 올립니다. 이 시기에 단 음식이 겹치면 고혈당 증상이 나타날 수 있어, 당뇨가 있거나 경계 수치인 분은 특히 조심해야 합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+    <div class="phase">
+      <p class="tl">시기별 실무 지침</p>
+      <div><dt>방사선치료 중</dt><dd>식도염이 생기기 전부터 미리 부드러운 식사로 옮겨두면 체중 감소 폭이 작습니다. 통증이 심하면 진통제를 식전에 쓰는 것도 방법입니다.</dd></div><div><dt>항암치료 중</dt><dd>오심·미각 변화가 겹치는 시기입니다. 냄새가 적은 상온 음식, 신맛이 약한 음료가 견디기 쉽습니다.</dd></div><div><dt>치료 종료 후</dt><dd>금연이 가장 중요합니다. 베타카로틴 보충제는 흡연력이 있다면 치료 종료 후에도 권하지 않습니다.</dd></div>
+    </div>
+  </div>
+<div class="sub" id="k-liver">
+    <h3>간암</h3>
+    <p class="summary">간암 환자의 영양 관리는 암 자체보다 배경 간경변에 좌우되는 경우가 많습니다. 간경변에서는 근감소가 매우 흔하고 예후와 직접 연결되므로, 오래 굶지 않는 것과 충분한 단백질이 핵심입니다. 예전처럼 단백질을 무조건 제한하는 방식은 현재 권고와 맞지 않습니다. 반대로 알코올과 아플라톡신은 분명한 회피 대상입니다.</p>
+    <p class="issues">자주 문제가 되는 것 — 간경변에 동반된 근감소증 — 예후 인자 · 복수·부종 시 나트륨 제한 · 간성뇌증 — 단백질 제한이 아니라 식물성·유제품 단백질로의 전환 · 알코올과 아플라톡신 · 야간 공복 시간이 길면 근육이 빠진다는 점</p>
+    <div class="target">
+    <p class="tl">하루 영양 목표 <span>체중 1 kg 당</span></p>
+    <dl>
+      <div><dt>열량</dt><dd>30~35 kcal</dd></div>
+      <div><dt>단백질</dt><dd>1.2~1.5 g</dd></div>
+      <div><dt>수분</dt><dd>30 mL</dd></div>
+      <div><dt>나트륨</dt><dd>하루 2,000 mg 이하</dd></div>
+      <div><dt>식이섬유</dt><dd>하루 25~30 g</dd></div>
+    </dl>
+    <p class="tn">복수가 있으면 나트륨을 하루 2,000 mg 이하(중증에서는 1,500 mg 이하)로 제한합니다. 자기 전 탄수화물 위주의 야식(late evening snack)이 근육 분해를 줄인다는 근거가 있습니다.</p>
+  </div>
+    <article class="entry" id="r-liver-alcohol">
+  <div class="mark"><span class="grade" title="근거 등급 A">A</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>간암에서 금주는 예외 없는 원칙입니다</h4>
+    <p>알코올은 간세포암의 직접적 원인이자 간경변 진행의 최대 가속 요인입니다. B형·C형 간염이 원인인 경우에도 음주는 발암 위험을 배가시킵니다. 치료 중이든 아니든 완전한 금주가 필요합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-21">21</a> · <a href="#ref-1">1</a> · <a href="#ref-45">45</a></p>
+  </div>
+</article>
+<article class="entry" id="r-liver-aflatoxin">
+  <div class="mark"><span class="grade" title="근거 등급 A">A</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>곰팡이가 핀 견과·곡물은 절대 드시지 마세요</h4>
+    <p>아스페르길루스가 만드는 아플라톡신 B1 은 IARC Group 1 발암물질로, 간세포암의 강력한 원인입니다. B형 간염 보유자에게는 특히 그렇습니다 — 국제암연구소는 두 위험이 &quot;곱셈보다 더 크게&quot; 겹친다고 적었고, 한 연구에서는 아플라톡신 노출과 B형 간염 표면항원 양성을 합쳐 간세포암의 약 80 % 를 설명했습니다. 아플라톡신이 TP53 유전자의 코돈 249 에 특정 변이를 만든다는 것도 확인되어 있습니다. 땅콩·옥수수·곡물을 습한 곳에 오래 두지 말고, 쓴맛이 나거나 색이 변한 것은 버리셔야 합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-23">23</a> · <a href="#ref-1">1</a></p>
+  </div>
+</article>
+<article class="entry" id="r-liver-protein">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>간이 나쁘다고 단백질을 줄이는 것은 오래된 오해입니다</h4>
+    <p>유럽간학회 지침은 간경변 환자에게 체중 1 kg 당 1.2~1.5 g 의 단백질을 권고합니다. 단백질 제한은 근감소를 악화시켜 오히려 예후를 나쁘게 만듭니다. 간성뇌증이 있는 경우에도 총량을 줄이기보다 식물성 단백질과 유제품 단백질의 비중을 늘리는 방향으로 조정합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-45">45</a> · <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-liver-lens">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장<span class="when">간경변동반</span></p>
+    <h4>자기 전 간단한 야식이 근육 손실을 줄입니다</h4>
+    <p>간경변에서는 간의 글리코겐 저장 능력이 떨어져, 하룻밤 공복이 건강한 사람의 사흘 굶은 것과 비슷한 대사 상태를 만듭니다. 자기 전 탄수화물 50 g 정도(빵·미숫가루·영양음료 등)를 섭취하면 밤사이 근육 분해를 줄일 수 있습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-45">45</a></p>
+  </div>
+</article>
+<article class="entry" id="r-liver-bcaa">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>간성뇌증이 반복되면 BCAA 제제를 고려합니다</h4>
+    <p>분지사슬아미노산은 간경변 환자에서 근거가 축적된 몇 안 되는 보충제로, 간성뇌증 재발 감소와 삶의 질 개선이 보고되었습니다. 다만 처방 맥락에서 판단할 사항이며 자가 판단으로 시작할 일은 아닙니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-45">45</a></p>
+  </div>
+</article>
+<article class="entry" id="r-liver-sodium-ascites">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>나트륨을 낮게 유지하세요 — 복수가 있다면 더 엄격하게</h4>
+    <p>간경변에서는 나트륨이 곧 체액 저류로 이어집니다. 복수가 아직 없더라도 하루 2,000 mg 이하를 목표로 하고, 복수가 생기면 나트륨 조절이 치료의 한 축이 됩니다(다만 유럽간학회는 이 제한의 근거가 아직 제한적이고 연구마다 엇갈린다고 적고 있습니다). 국물·젓갈·장아찌·라면 국물이 실제로 제한을 깨뜨리는 주범입니다. 반대로 하루 60 mmol(나트륨 약 1,400 mg) 아래로 줄이는 것은 권하지 않습니다 — 음식이 맛없어져 드시는 양 자체가 줄면 영양이 먼저 무너집니다. 위에서 복수를 동반 상태로 선택하시면 판정이 금기 수준으로 올라갑니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-45">45</a></p>
+  </div>
+</article>
+<article class="entry" id="r-liver-raw-seafood">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요<span class="when">간경변동반</span></p>
+    <h4>간경변이 있으면 생굴·생선회는 특히 위험합니다</h4>
+    <p>비브리오 불니피쿠스는 간질환이 있는 분에게 특히 위험합니다. 감염자 전체로 보면 약 5명 중 1명이 사망하지만(미국 CDC), 간질환이 있는 분에서는 크게 올라갑니다 — 12편·1,157명을 모은 메타분석에서 간질환군의 사망률은 53.9 %, 간질환이 없는 군은 16.1 % 였습니다(위험비 2.61, 95 % 신뢰구간 2.14~3.19). 여름철 생굴·조개·생선회는 호중구 수치와 무관하게 피하셔야 합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-51">51</a> · <a href="#ref-52">52</a> · <a href="#ref-53">53</a></p>
+  </div>
+</article>
+<article class="entry" id="r-liver-coffee">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>커피는 간에 관해서는 방향이 일관된 기호식품입니다</h4>
+    <p>국제암연구소도 2016년 평가에서 커피 섭취가 간암 위험을 낮추는 쪽으로 관찰된다고 적었습니다. 코호트 18편(참여자 227만 명)을 모은 메타분석에서 커피 섭취량이 늘수록 간세포암 위험이 낮아지는 용량-반응 관계가 관찰되었고, 하루 2잔 증가마다 위험이 약 35 % 낮았습니다(상대위험 0.65, 95 % 신뢰구간 0.59~0.72). 디카페인에서도 방향은 같았지만 크기가 달랐습니다 — 카페인 커피는 27 % 감소, 디카페인은 14 % 감소였고 디카페인 쪽은 신뢰구간 상한이 1.00 에 걸쳐 있었습니다. 카페인만의 효과는 아니되, 같지도 않다는 뜻입니다. 간질환이 이미 있는 분에서도, B형·C형 간염이 있는 분에서도 연관은 유지되었습니다. 다만 무작위배정 시험이 없어 저자들은 이 근거의 확실성을 GRADE 기준 '매우 낮음' 으로 평가했습니다. 치료 목적으로 억지로 늘릴 일은 아니지만, 드시던 분이 끊을 이유도 없습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-44">44</a> · <a href="#ref-22">22</a></p>
+  </div>
+</article>
+<article class="entry" id="r-liver-herbal">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>출처가 불분명한 건강원 달인 물·한약재는 피하세요</h4>
+    <p>국내 약인성 간손상의 상당 부분이 건강기능식품과 민간 생약에서 발생합니다. 간 기능이 이미 떨어진 상태에서는 같은 노출에도 손상이 크게 나타나므로, 성분과 용량이 확인되지 않은 제품은 드시지 않는 편이 안전합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-45">45</a></p>
+  </div>
+</article>
+    <div class="phase">
+      <p class="tl">시기별 실무 지침</p>
+      <div><dt>항암치료 중</dt><dd>전신치료 중에는 간 기능 수치를 자주 확인하게 됩니다. 이 시기에 새 건강기능식품을 시작하면 원인 감별이 어려워집니다.</dd></div><div><dt>치료 종료 후</dt><dd>금주, 체중 관리, 곰팡이 노출 회피가 축입니다. 지방간이 동반된 경우 체중 감량이 그 자체로 치료가 됩니다.</dd></div>
+    </div>
+  </div>
+<div class="sub" id="k-prostate">
+    <h3>전립선암</h3>
+    <p class="summary">전립선암은 경과가 길어 &quot;치료 중 영양&quot;보다 &quot;장기 관리&quot;가 중심이 됩니다. 안드로겐 차단요법(ADT)을 받는 동안 근육이 빠지고 지방이 늘며 골밀도가 떨어지므로, 단백질·칼슘·비타민 D와 근력운동이 실질적인 개입 지점입니다. 반면 셀레늄·비타민 E 보충제는 대규모 임상시험에서 이득이 없었고 오히려 위험을 높였습니다.</p>
+    <p class="issues">자주 문제가 되는 것 — ADT 로 인한 근감소·체중 증가·골밀도 감소 · 고용량 비타민 E·셀레늄 보충제의 위해 · 유제품·칼슘 고섭취와 위험 증가의 연관(대장암과 방향이 반대) · 골반 방사선치료 중 배뇨·배변 자극 증상</p>
+    <div class="target">
+    <p class="tl">하루 영양 목표 <span>체중 1 kg 당</span></p>
+    <dl>
+      <div><dt>열량</dt><dd>25~30 kcal</dd></div>
+      <div><dt>단백질</dt><dd>1~1.5 g</dd></div>
+      <div><dt>수분</dt><dd>30 mL</dd></div>
+      <div><dt>나트륨</dt><dd>하루 2,000 mg 이하</dd></div>
+      <div><dt>식이섬유</dt><dd>하루 25~30 g</dd></div>
+    </dl>
+    <p class="tn">ADT 중에는 열량은 늘리지 않으면서 단백질만 올리는 방향이 맞습니다. 칼슘은 하루 1,000~1,200 mg 을 넘기지 않도록 식품과 보충제를 합산해서 봅니다.</p>
+  </div>
+    <article class="entry" id="r-prostate-vite">
+  <div class="mark"><span class="grade" title="근거 등급 A">A</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>고용량 비타민 E 보충제는 전립선암 위험을 높였습니다</h4>
+    <p>35,000명 이상을 대상으로 한 SELECT 무작위배정 임상시험에서, 비타민 E 400 IU 를 복용한 군은 위약군보다 전립선암 발생이 17 % 더 높았습니다. 셀레늄도 예방 효과가 없었습니다. &quot;항산화제가 전립선에 좋다&quot;는 통념과 정반대 결과였고, 현재 어떤 가이드라인도 이 목적의 보충을 권하지 않습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-32">32</a></p>
+  </div>
+</article>
+<article class="entry" id="r-prostate-selenium">
+  <div class="mark"><span class="grade" title="근거 등급 A">A</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>셀레늄 보충제도 권하지 않습니다</h4>
+    <p>SELECT 연구에서 셀레늄 200 µg 단독군은 전립선암을 줄이지 못했습니다(위험비 1.09, 99 % 신뢰구간 0.93~1.27). 이어진 사후 분석에서는 더 뚜렷한 결과가 나왔습니다 — 원래 셀레늄 수치가 높던 분이 보충제를 드신 경우 고위험(글리슨 7~10) 전립선암이 91 % 늘었습니다(P=0.007). 결핍이 아닌 상태에서의 보충은 이득이 없고, 오히려 해가 될 수 있습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-32">32</a> · <a href="#ref-33">33</a></p>
+  </div>
+</article>
+<article class="entry" id="r-prostate-dairy">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>유제품과 칼슘은 &quot;충분히&quot;까지가 좋고 그 이상은 이득이 없습니다</h4>
+    <p>WCRF/AICR 는 유제품·칼슘 고섭취와 전립선암 위험 증가 사이의 연관에 &quot;limited-suggestive&quot; 등급을 부여했습니다. 다만 그 연관은 전립선암이 <em>생기는 것</em> 에 관한 것이고, 고등급·진행성·사망과는 뚜렷한 연관이 관찰되지 않았습니다 — 이미 진단을 받으신 분께 그대로 옮기기는 어려운 근거라는 뜻입니다. 보고서 자신도 이 등급에 대해 &quot;권고를 만들 근거가 되기에는 좀처럼 충분하지 않다&quot; 고 적어 두었습니다. 칼슘 보충제만 따로 본 판정은 아예 &quot;결론 없음&quot; 이었습니다 — 유제품을 끊으실 일은 아니라는 뜻입니다. 다만 보충제로 밀어 올릴 이유도 없으니, 한국 기준의 상한(50세 이상 하루 2,000 mg)을 넘지 않게만 보십시오. ADT 중 골 건강을 위해 챙기는 양은 그와 다른 이야기입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-46">46</a> · <a href="#ref-1">1</a></p>
+  </div>
+</article>
+<article class="entry" id="r-prostate-adt-protein">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장<span class="when">안드로겐차단요법중</span></p>
+    <h4>ADT 중에는 단백질과 근력운동으로 근육을 지켜야 합니다</h4>
+    <p>안드로겐이 차단되면 근육량이 줄고 내장지방이 늘어 인슐린 저항성과 심혈관 위험이 함께 올라갑니다. 체중계 숫자는 그대로여도 몸의 구성이 나빠지는 것이 문제입니다. 단백질은 ESPEN 권고대로 체중 1 kg 당 1 g 을 넘겨 1.5 g 쪽으로 잡으시고, 저항운동을 함께 하십시오 — 미국임상종양학회는 치료를 받는 동안 유산소와 저항운동을 함께 하도록 강하게 권고했고, 안드로겐 차단요법을 받는 남성 57명을 12주간 무작위배정한 시험에서 저항+유산소 병행군은 제지방량과 근력이 실제로 늘었고 피로와 삶의 질도 좋아졌습니다. 다만 이 시험은 뼈 전이가 없는 분들만 대상으로 했습니다 — 뼈 전이가 있으시면 운동 처방이 달라지므로 담당 의료진과 먼저 상의하십시오.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a> · <a href="#ref-3">3</a> · <a href="#ref-73">73</a></p>
+  </div>
+</article>
+<article class="entry" id="r-prostate-adt-bone">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장<span class="when">안드로겐차단요법중</span></p>
+    <h4>ADT 중 칼슘·비타민 D 는 골절 예방의 기본입니다</h4>
+    <p>ADT 를 시작하면 골밀도가 빠르게 떨어집니다. 무작위 시험에서 48주 동안 요추 3.3 %, 고관절 1.8 % 가 줄었고, 요추 해면골만 보면 8.5 % 였습니다(측정 부위에 따라 폭이 다릅니다). 그만큼 골절 위험이 올라갑니다. 미국임상종양학회가 승인한 지침이 실제로 권하는 것은 두 가지입니다 — ADT 를 시작하기 전에 골밀도 검사를 받아 골절 위험을 가늠할 것, 그리고 위험이 높으면 약물치료를 고려할 것. 칼슘·비타민 D 수치가 그 지침에 나오는 자리는 골전이 표적치료제(졸레드론산·데노수맙)를 함께 쓸 때이고, 그때의 기준은 칼슘 하루 500 mg 이상, 비타민 D 400 IU 이상입니다. 평소 식사의 기준은 한국인 영양소 섭취기준의 성인 권장량(칼슘 700~800 mg, 비타민 D 10~15 µg)이고, 골 소실을 관리할 때는 그보다 높게 잡습니다 — 얼마로 할지는 골밀도 결과를 보고 담당 의료진이 정합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-48">48</a> · <a href="#ref-47">47</a> · <a href="#ref-16">16</a></p>
+  </div>
+</article>
+<article class="entry" id="r-prostate-lycopene">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-info">참고</p>
+    <h4>토마토·리코펜은 기대만큼 강한 근거는 아닙니다</h4>
+    <p>&quot;토마토가 전립선에 좋다&quot; 는 말은 2007년 WCRF 평가에서 나왔습니다. 그때 리코펜은 &quot;아마도 위험을 낮춘다&quot; 였습니다. 그런데 2014년 재평가에서 자료가 늘자 등급이 &quot;결론을 내릴 수 없음&quot; 으로 내려갔습니다. 셀레늄 보충제도 같은 길을 걸었습니다. 방향이 나쁘다는 뜻이 아니라 좋다고 말할 근거가 부족하다는 뜻이니, 토마토를 즐겨 드시는 것은 좋지만 &quot;치료 효과&quot;로 기대하실 만한 수준은 아닙니다. 리코펜은 기름과 함께 가열할 때 흡수가 훨씬 좋아집니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-46">46</a></p>
+  </div>
+</article>
+<article class="entry" id="r-prostate-veg-fat">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>전립선암에서는 체중보다 식사 패턴 쪽 근거가 더 뚜렷합니다</h4>
+    <p>미국암학회 2022년 지침은 서구식 식사가 전립선암 사망·전체 사망과, 지중해식 식사가 낮은 전체 사망과 연결된다고 정리했습니다. 반면 비만이 전립선암의 사망이나 진행과 연관되는지는 아직 결론이 나지 않았다고 적었습니다 — 체중이 진행성 전립선암의 &quot;발생&quot; 위험과 연관된다는 것과는 다른 이야기입니다. 그러니 살을 빼는 것보다 채소·통곡물·콩 중심으로 옮기면서 포화지방을 낮추는 쪽이 근거가 분명한 접근입니다. 운동은 전립선암 사망·전체 사망 모두와 연결되어 따로 챙기실 만합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-1">1</a> · <a href="#ref-4">4</a></p>
+  </div>
+</article>
+<article class="entry" id="r-prostate-rt-bowel">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의<span class="when">방사선치료 중</span></p>
+    <h4>골반 방사선치료 중에는 장·방광을 자극하는 음식을 줄이세요</h4>
+    <p>치료 계획에 맞추려면 매일 직장 내 가스와 대변량이 일정해야 합니다. 가스를 많이 만드는 콩류·탄산음료는 치료 위치의 재현성을 떨어뜨립니다. 또한 카페인·매운 음식·알코올은 배뇨 자극 증상을 악화시킵니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+    <div class="phase">
+      <p class="tl">시기별 실무 지침</p>
+      <div><dt>방사선치료 중</dt><dd>치료 직전 배변을 규칙적으로 하고 가스를 줄이는 것이 자세 재현성에 도움이 됩니다. 배뇨 증상이 심하면 카페인을 줄여 보세요.</dd></div><div><dt>치료 종료 후</dt><dd>ADT 를 계속 받는 동안에는 단백질·칼슘·비타민 D와 저항운동이 관리의 축입니다. 비타민 E·셀레늄 보충제는 권하지 않습니다.</dd></div>
+    </div>
+  </div>
+<div class="sub" id="k-pancreas">
+    <h3>췌장암</h3>
+    <p class="summary">췌장암은 소화효소를 만드는 장기가 망가지는 병이라, 잘 먹어도 흡수가 안 되는 상황이 자주 생깁니다. 지방변·복부 팽만·체중 감소가 있으면 식사량이 아니라 췌장효소보충요법(PERT)이 먼저 필요한 경우가 많습니다. 또한 췌장 절제나 종양 자체로 당뇨가 새로 생기거나 악화되는 일이 흔합니다.</p>
+    <p class="issues">자주 문제가 되는 것 — 외분비 기능부전으로 인한 지방 흡수장애(지방변) · 췌장효소보충요법의 시점과 복용법 · 췌장성 당뇨(3c형) · 악액질 — 암 중 가장 심한 축 · 십이지장 폐색·조기 포만감</p>
+    <div class="target">
+    <p class="tl">하루 영양 목표 <span>체중 1 kg 당</span></p>
+    <dl>
+      <div><dt>열량</dt><dd>30~35 kcal</dd></div>
+      <div><dt>단백질</dt><dd>1.2~1.5 g</dd></div>
+      <div><dt>수분</dt><dd>30 mL</dd></div>
+      <div><dt>나트륨</dt><dd>하루 2,000 mg 이하</dd></div>
+      <div><dt>식이섬유</dt><dd>하루 15~25 g</dd></div>
+    </dl>
+    <p class="tn">지방을 무조건 줄이기보다, 효소를 제대로 쓰면서 지방을 유지하는 쪽이 열량 확보에 유리합니다. 섬유가 지나치게 많으면 효소 작용을 방해할 수 있어 목표를 다소 낮게 잡았습니다.</p>
+  </div>
+    <article class="entry" id="r-panc-pert">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>지방을 줄이기 전에 췌장효소 복용부터 확인하세요</h4>
+    <p>지방변과 체중 감소의 원인이 외분비 기능부전이라면, 지방을 제한하는 것은 열량만 잃고 문제는 그대로 두는 선택입니다. 췌장효소제를 식사 시작과 함께(식사 중간에 나눠서) 충분한 용량으로 복용하면 지방 흡수가 회복되어 체중이 유지됩니다. 효소는 식전에 미리 먹거나 식후에 먹으면 효과가 떨어집니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-panc-fat-symptom">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>효소를 써도 증상이 심하면 한 끼 지방량을 나누세요</h4>
+    <p>효소 용량이 충분한데도 지방변·복통이 계속되면, 한 번에 들어가는 지방량이 과한 경우가 많습니다. 튀김처럼 지방이 몰린 음식을 줄이고 하루 5~6회로 나눠 드시면 같은 총량이라도 훨씬 잘 견딥니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-66">66</a></p>
+  </div>
+</article>
+<article class="entry" id="r-panc-diabetes">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>췌장성 당뇨는 혈당이 위아래로 크게 흔들립니다</h4>
+    <p>췌장 절제나 종양 침범으로 생기는 3c형 당뇨는 인슐린뿐 아니라 글루카곤도 함께 부족해져 저혈당에도 취약합니다. 단순당을 몰아서 먹는 패턴이 특히 불리하며, 탄수화물을 매 끼 비슷하게 나누는 것이 안전합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-panc-cachexia">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>췌장암에서 악액질 대응은 이르면 이를수록 좋습니다</h4>
+    <p>진단 시점에 이미 절반 이상이 의미 있는 체중 감소를 겪고 있습니다. 근육량은 항암제 용량 감량·중단과 직접 연결되므로, 식사만으로 부족하다고 판단되면 곧바로 경구영양보충을 더하는 것이 권고됩니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a> · <a href="#ref-68">68</a></p>
+  </div>
+</article>
+<article class="entry" id="r-panc-fatsoluble">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>지용성 비타민(A·D·E·K) 결핍을 확인하세요</h4>
+    <p>지방 흡수가 안 되면 지용성 비타민도 함께 빠져나갑니다. 특히 비타민 D 결핍은 흔하고, 비타민 K 부족은 출혈 경향으로 나타날 수 있습니다. 효소 보충과 함께 혈중 농도를 확인하는 것이 원칙입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-panc-alcohol">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>음주는 남은 췌장 기능을 더 빠르게 무너뜨립니다</h4>
+    <p>알코올은 만성 췌장염의 주된 원인이며, 이미 손상된 췌장에서는 잔여 외분비·내분비 기능의 소실을 가속합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-1">1</a> · <a href="#ref-21">21</a></p>
+  </div>
+</article>
+    <div class="phase">
+      <p class="tl">시기별 실무 지침</p>
+      <div><dt>수술 후 회복기</dt><dd>휘플 수술 후에는 위 배출 지연과 덤핑이 함께 올 수 있습니다. 소량 분할식으로 시작하고 효소 용량을 증상에 맞춰 조정합니다.</dd></div><div><dt>항암치료 중</dt><dd>FOLFIRINOX 처럼 강한 요법을 견디려면 근육량 유지가 필수입니다. 체중을 매주 같은 조건에서 기록해 두면 판단이 쉬워집니다.</dd></div><div><dt>치료 종료 후</dt><dd>효소 보충과 혈당 관리가 장기 과제로 남습니다. 지용성 비타민과 골밀도를 주기적으로 확인합니다.</dd></div>
+    </div>
+  </div>
+<div class="sub" id="k-esophagus">
+    <h3>식도암</h3>
+    <p class="summary">식도암은 &quot;먹는 통로&quot; 자체에 생긴 암이라, 영양 문제가 진단 시점부터 시작됩니다. 한국에서 많은 편평상피암은 음주와 흡연이 주된 원인이며, 특히 술을 마시면 얼굴이 붉어지는 ALDH2 유전형에서는 같은 양을 마셔도 위험이 훨씬 높습니다. 치료 중에는 방사선 식도염으로 삼키는 것 자체가 어려워지므로, 식이 형태의 단계적 조정이 관리의 중심입니다.</p>
+    <p class="issues">자주 문제가 되는 것 — 알코올 — 특히 안면홍조(ALDH2 결핍) 체질에서 위험이 크게 증가 · 65 ℃ 이상의 매우 뜨거운 음료 · 연하곤란과 진행성 협착 · 방사선·항암 병용 중 식도염 · 수술 후 위-식도 문합부 역류</p>
+    <div class="target">
+    <p class="tl">하루 영양 목표 <span>체중 1 kg 당</span></p>
+    <dl>
+      <div><dt>열량</dt><dd>30~35 kcal</dd></div>
+      <div><dt>단백질</dt><dd>1.2~1.5 g</dd></div>
+      <div><dt>수분</dt><dd>30 mL</dd></div>
+      <div><dt>나트륨</dt><dd>하루 2,000 mg 이하</dd></div>
+      <div><dt>식이섬유</dt><dd>하루 15~25 g</dd></div>
+    </dl>
+    <p class="tn">삼키기 어려운 정도에 따라 일반식 → 연식 → 갈아만든 식사 → 유동식으로 단계를 낮춥니다. 경구 섭취가 계속 어려우면 위루관(PEG)·공장루 등 경관영양을 미루지 않는 것이 원칙입니다.</p>
+  </div>
+    <article class="entry" id="r-eso-alcohol">
+  <div class="mark"><span class="grade" title="근거 등급 A">A</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>식도암에서 술은 가장 강력한 단일 위험 요인입니다</h4>
+    <p>알코올과 그 대사산물인 아세트알데하이드는 식도 편평상피에 직접 작용합니다. 동아시아인(한국·중국·일본) 약 36 % 는 ALDH2 효소가 부족해 아세트알데하이드가 잘 분해되지 않습니다 — 술을 마시면 얼굴이 붉어지는 그 반응입니다. 위험이 가장 큰 쪽은 아예 못 마시는 분이 아니라, 붉어지면서도 마시다 보니 견디게 된 분입니다(오즈비 3.7~18.1, 많이 드시는 경우 대개 10을 넘습니다). 홍조를 약으로 가리고 계속 드시는 것은 그래서 특히 나쁩니다. 흡연이 겹치면 위험은 더해지는 것이 아니라 곱해집니다. 다만 뒤집으면 이런 뜻이기도 합니다 — 이 체질이면서 많이 드시던 분이 가볍게 줄이기만 해도 식도편평세포암의 절반가량을 막을 수 있다고 추정됩니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-63">63</a> · <a href="#ref-21">21</a> · <a href="#ref-1">1</a></p>
+  </div>
+</article>
+<article class="entry" id="r-eso-hot">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-info">참고</p>
+    <h4>음료는 식혀서 드세요 — 65 ℃ 이상이면 그 자체가 위험 요인입니다</h4>
+    <p>IARC 는 65 ℃ 이상의 음료를 Group 2A(사람에게 발암 가능성이 있음)로 분류했습니다. 반복되는 열손상이 점막의 재생과 이형성을 촉진하는 것으로 설명됩니다. 음료를 끊으라는 뜻이 아니라 온도를 낮추라는 뜻입니다. 끓인 차나 커피를 몇 분 식혀 드시는 것만으로 충분하고, 물·보리차처럼 마셔야 하는 음료는 오히려 충분히 드셔야 합니다. 커피 자체를 걱정하실 필요는 없습니다 — 같은 평가에서 커피는 오히려 &quot;분류 불가(Group 3)&quot;로 내려갔고 (1991년의 2B 에서 하향), 간암과 자궁내막암은 위험이 낮아지는 쪽으로 관찰되었습니다. 다만 뜨거운 음료 쪽 근거는 &quot;제한적&quot; 수준이고, 식도암 가운데 얼마나가 이것 탓인지는 아직 알려져 있지 않습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-22">22</a> · <a href="#ref-1">1</a></p>
+  </div>
+</article>
+<article class="entry" id="r-eso-texture">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>삼키기 어려워지면 음식의 형태를 먼저 바꾸세요</h4>
+    <p>연하곤란은 대개 고형식 → 연식 → 액체 순서로 진행합니다. 국제 표준(IDDSI)은 음료의 묽기와 음식의 질감·조각 크기를 0~7의 8단계로 나눕니다. 집에서 확인하실 수 있는 기준은 두 가지입니다 — 어른은 한 조각 1.5 cm 이하(포크 폭), 잘게 다진 단계는 4 mm 이하(포크 살 사이 간격). 먹는 양을 줄이는 대신 형태를 바꾸는 것이 원칙입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-61">61</a> · <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-eso-rough">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>견과·튀김·질긴 고기는 걸리거나 상처를 냅니다</h4>
+    <p>협착이 있는 식도에서 단단하고 거친 음식은 막힘의 직접적 원인이 되고, 점막염이 있는 상태에서는 출혈을 유발할 수 있습니다. 떡처럼 끈적하게 뭉치는 음식도 위험합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-61">61</a></p>
+  </div>
+</article>
+<article class="entry" id="r-eso-mucositis">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요<span class="when">방사선치료 중 · 항암치료 중</span></p>
+    <h4>치료 중 식도염이 오면 맵고 신 음식은 통증을 크게 키웁니다</h4>
+    <p>동시항암방사선요법이 2주를 넘어서면 식도 점막염이 흔합니다. 캡사이신·구연산·탄산은 벗겨진 점막에 직접적인 자극이 되며, 점막염은 삼킴 통증과 함께 치료 중단으로도 이어집니다. 다만 어떤 음식을 뺄지는 국제 지침이 근거 부족으로 권고를 내지 못한 영역이라, 통증 기전에 따른 조정으로 보시면 됩니다. 지침이 실제로 핵심으로 꼽는 것은 통증 조절과 식이 지원이니, 진통제를 식전에 쓰는 것을 적극적으로 상의하십시오.</p>
+    <p class="src">근거 문헌 <a href="#ref-60">60</a> · <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-eso-ons">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>삼킴이 어려울수록 액상 영양보충의 비중을 올리세요</h4>
+    <p>액상은 통과가 쉬우면서 부피당 열량과 단백질을 확보할 수 있습니다. 치료 시작 전부터 체중이 빠르게 줄고 있다면 예방적 위루관 설치를 논의하는 것이 늦지 않습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-eso-reflux">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의<span class="when">수술 후 회복기</span></p>
+    <h4>수술 후에는 역류 관리가 식사의 큰 축이 됩니다</h4>
+    <p>식도를 절제하고 위를 끌어올린 뒤에는 하부식도괄약근이 없어 역류가 쉽게 일어납니다. 소량씩 자주 먹고, 식후 2~3시간은 눕지 않으며, 잘 때 상체를 높이는 것이 기본입니다. 고지방식·카페인·초콜릿·산성 음식은 역류를 악화시킵니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+    <div class="phase">
+      <p class="tl">시기별 실무 지침</p>
+      <div><dt>방사선치료 중</dt><dd>식도염이 시작되기 전부터 연식으로 옮겨 두면 체중을 훨씬 잘 지킵니다. 미지근한 온도, 부드러운 질감, 자극 없는 맛이 세 가지 기준입니다.</dd></div><div><dt>수술 후 회복기</dt><dd>소량 분할식과 역류 예방 자세가 핵심입니다. 덤핑 증상이 있으면 단 음식과 식사 중 물 섭취를 줄입니다.</dd></div><div><dt>치료 종료 후</dt><dd>금주·금연이 이차암 예방의 핵심입니다. 뜨거운 음료 습관도 함께 교정합니다.</dd></div>
+    </div>
+  </div>
+<div class="sub" id="k-headneck">
+    <h3>두경부암</h3>
+    <p class="summary">두경부암은 치료 중 영양 문제가 가장 심한 암입니다. 구강점막염·구강건조·미각소실·연하곤란이 겹쳐, 방사선치료 7주 동안 체중이 10 % 이상 빠지는 일이 드물지 않습니다. 이 암종에서는 &quot;무엇을 먹으면 좋은가&quot;보다 &quot;어떻게 하면 삼킬 수 있게 만들 것인가&quot;가 핵심 질문입니다. 고용량 항산화 보충제가 재발을 늘린 임상시험도 이 암종에서 나왔습니다.</p>
+    <p class="issues">자주 문제가 되는 것 — 구강·인두 점막염으로 인한 통증과 섭취 저하 · 침샘 손상으로 인한 구강건조증 — 치료 후에도 오래 남는다 · 미각 변화·소실 · 연하곤란과 흡인 위험 · 알코올·흡연 — 원인이자 이차암 위험 요인 · 치료 중 고용량 항산화 보충제의 위해</p>
+    <div class="target">
+    <p class="tl">하루 영양 목표 <span>체중 1 kg 당</span></p>
+    <dl>
+      <div><dt>열량</dt><dd>30~35 kcal</dd></div>
+      <div><dt>단백질</dt><dd>1.2~1.5 g</dd></div>
+      <div><dt>수분</dt><dd>35 mL</dd></div>
+      <div><dt>나트륨</dt><dd>하루 2,000 mg 이하</dd></div>
+      <div><dt>식이섬유</dt><dd>하루 15~25 g</dd></div>
+    </dl>
+    <p class="tn">구강건조가 심하면 수분 목표를 높게 잡습니다. 치료 전 체중이 이미 빠지고 있다면 예방적 위루관 설치를 미리 논의합니다.</p>
+  </div>
+    <article class="entry" id="r-hn-antioxidant">
+  <div class="mark"><span class="grade" title="근거 등급 A">A</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요<span class="when">방사선치료 중 · 항암치료 중</span></p>
+    <h4>치료 중 고용량 항산화 보충제는 재발을 늘렸다는 연구가 있습니다</h4>
+    <p>이 규칙은 방사선치료 중이든 항암치료 중이든 어느 시기에나 같습니다. 두경부암 환자 540명을 대상으로 방사선치료 첫날부터 비타민 E 400 IU·베타카로틴 30 mg 을 드리는 무작위배정 시험이 있었습니다. 급성 부작용은 줄었지만, 보충 기간 중 이차암이 2.9배 많았습니다 (95 % 신뢰구간 1.56~5.31). 재발과 사망은 치료 중에도 담배를 피우신 분에게 몰렸습니다 — 재발 2.4배, 전체 사망 2.3배, 두경부암 사망 3.4배였고, 피우지 않으신 분에서는 거의 차이가 없었습니다. 저자들은 두 가지가 겹쳐 방사선치료의 효과 자체를 떨어뜨린 것으로 봅니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-29">29</a> · <a href="#ref-28">28</a> · <a href="#ref-27">27</a></p>
+  </div>
+</article>
+<article class="entry" id="r-hn-mucositis-avoid">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요<span class="when">방사선치료 중 · 항암치료 중</span></p>
+    <h4>점막염 기간에는 맵고 신 음식, 거친 음식을 완전히 빼세요</h4>
+    <p>벗겨진 구강 점막에 캡사이신·산·소금은 직접적인 통증 자극이 됩니다. 토마토·감귤·파인애플·식초·김치·과자류가 흔한 원인입니다. 통증으로 못 먹는 것이 이 시기 체중 감소의 큰 부분이므로, 자극을 없애는 것 자체가 영양 개입입니다. 다만 근거의 무게는 알고 계시는 편이 낫습니다 — 국제 지침(MASCC/ISOO)은 &quot;통증 조절과 식이 지원이 관리의 핵심&quot;이라고 적으면서도, 어떤 음식을 빼야 하는지에 대해서는 근거가 불충분하고 서로 엇갈려 권고를 내지 못했습니다. 위 목록은 통증 기전과 진료 경험에 따른 조정입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-60">60</a></p>
+  </div>
+</article>
+<article class="entry" id="r-hn-soft-moist">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>부드럽고 촉촉하고 미지근한 것 — 이 세 가지가 기준입니다</h4>
+    <p>침이 줄면 마른 음식은 입안에서 뭉쳐 삼킬 수 없게 됩니다. 걸쭉한 소스·요거트·계란찜처럼 수분을 머금은 형태로 바꾸되, 국물처럼 묽은 것이 음식과 따로 흐르면 오히려 사레가 들기 쉬우니 남는 물기는 따라 내십시오. 뜨겁거나 차가운 극단적 온도를 피하면 같은 음식도 훨씬 편하게 드실 수 있습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-61">61</a></p>
+  </div>
+</article>
+<article class="entry" id="r-hn-dense-calorie">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>먹을 수 있는 양이 적으니 한 입의 밀도를 올려야 합니다</h4>
+    <p>삼킬 수 있는 총량이 제한된 상태에서 죽만 드시면 하루 필요 열량의 절반도 채우기 어렵습니다. 같은 부피에 열량과 단백질을 더하는 방법(죽에 참기름·달걀·단백질분말 섞기, 우유에 미숫가루 타기, 영양음료 추가)이 실질적입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-hn-alcohol">
+  <div class="mark"><span class="grade" title="근거 등급 A">A</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>두경부암에서 음주는 원인이자 이차암의 위험 요인입니다</h4>
+    <p>알코올과 흡연은 두경부 편평상피암의 주된 원인이며, 두 가지가 겹치면 위험이 곱해집니다. 치료 후에도 계속 마시면 이차 원발암 발생이 뚜렷하게 늘어납니다. 점막염 시기에는 통증 자극이라는 문제까지 더해집니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-21">21</a> · <a href="#ref-29">29</a> · <a href="#ref-1">1</a></p>
+  </div>
+</article>
+<article class="entry" id="r-hn-dry-mouth">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의<span class="when">치료 종료 후</span></p>
+    <h4>구강건조증이 남았다면 카페인과 알코올은 증상을 악화시킵니다</h4>
+    <p>침샘 손상은 치료 후 수개월에서 수년까지 이어지는 경우가 많습니다. 이뇨 작용이 있는 카페인·알코올은 구강건조를 더 심하게 만들고, 침의 완충 작용이 없어진 상태에서 당까지 겹치면 방사선 우식증이 빠르게 진행합니다. 방사선치료로 침 분비가 줄면 충치 위험이 크게 올라간다는 것은 확립되어 있습니다. 다만 카페인·알코올을 줄이라는 조언 자체는 큰 임상시험으로 증명된 것이 아니라 이뇨·점막 자극이라는 기전에 근거한 조정입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-7">7</a></p>
+  </div>
+</article>
+<article class="entry" id="r-hn-caries">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의<span class="when">치료 종료 후</span></p>
+    <h4>침이 줄어든 입에서 단 음식은 충치로 직행합니다</h4>
+    <p>방사선 우식증은 치아 목 부위에서 빠르게 진행하는, 파괴력이 큰 형태의 충치입니다. 치료가 끝나고 3개월 안에 시작될 수 있으니 그 전에 대비하셔야 합니다. 단 음료를 자주 조금씩 마시는 습관이 특히 나쁩니다 — 총량보다 입안이 산성이 되는 횟수가 문제이기 때문입니다. 치료 전에 치과 진료를 마쳐 두고, 치료 후에는 정기 검진과 불소 자가도포를 이어 가는 것이 표준입니다. 다만 방사선치료를 받은 턱은 발치가 턱뼈 괴사로 이어질 수 있어, 치료 후 발치는 따로 판단합니다 — 그래서 이가 상하기 전에 막는 것이 그만큼 중요합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-7">7</a></p>
+  </div>
+</article>
+<article class="entry" id="r-hn-aspiration">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>물처럼 묽은 액체가 오히려 사레의 원인이 됩니다</h4>
+    <p>묽은 액체는 흐르는 속도가 빨라 조절하기 어려울 수 있고, 걸쭉하게 하면 흐름이 느려집니다. 다만 어느 단계까지 되게 할지는 연하 평가를 받고 담당 의료진이 정합니다. 삼킬 때 기침이 나거나 목소리가 젖은 소리로 변하면 먼저 연하 평가를 받으셔야 합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-61">61</a></p>
+  </div>
+</article>
+    <div class="phase">
+      <p class="tl">시기별 실무 지침</p>
+      <div><dt>방사선치료 중</dt><dd>3주째부터 점막염이 본격화됩니다. 그 전에 미리 연식·액상으로 옮기고 체중을 주 1회 기록하세요. 치료 중 흡연은 결과를 뚜렷하게 나쁘게 만듭니다.</dd></div><div><dt>치료 종료 후</dt><dd>구강건조와 연하 기능은 서서히 회복되지만 완전히 돌아오지 않는 경우도 많습니다. 수분 섭취, 불소 관리, 삼킴 재활 운동을 꾸준히 이어가는 것이 중요합니다.</dd></div>
+    </div>
+  </div>
+<div class="sub" id="k-gyn">
+    <h3>부인암 (자궁·난소)</h3>
+    <p class="summary">부인암은 자궁내막암·자궁경부암·난소암을 함께 다룹니다. 자궁내막암은 비만과의 연관이 모든 암 중 가장 강한 편이라 체중 관리가 곧 재발 관리에 해당합니다. 치료 측면에서는 골반 방사선치료로 인한 장염·설사와, 난소암에서 흔한 복막 파종·장폐색 대응이 실질적인 과제입니다.</p>
+    <p class="issues">자주 문제가 되는 것 — 자궁내막암 — 비만이 강력한 위험 인자이자 재발 인자 · 골반 방사선치료로 인한 급성·만성 장염 · 난소암의 복수와 아급성 장폐색 · 수술적 폐경 이후 골밀도 감소 · 항암 중 빈혈</p>
+    <div class="target">
+    <p class="tl">하루 영양 목표 <span>체중 1 kg 당</span></p>
+    <dl>
+      <div><dt>열량</dt><dd>25~30 kcal</dd></div>
+      <div><dt>단백질</dt><dd>1~1.5 g</dd></div>
+      <div><dt>수분</dt><dd>30 mL</dd></div>
+      <div><dt>나트륨</dt><dd>하루 2,000 mg 이하</dd></div>
+      <div><dt>식이섬유</dt><dd>하루 25~30 g</dd></div>
+    </dl>
+    <p class="tn">자궁내막암이면서 과체중이라면 열량 목표를 하단으로 잡고 단백질은 유지합니다. 장폐색 위험이 있으면 섬유 목표를 하루 10 g 이하의 저잔사식으로 낮춥니다.</p>
+  </div>
+    <article class="entry" id="r-gyn-obesity">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>자궁내막암과 체중은 강하게 연결됩니다 — 다만 &quot;생기는 것&quot; 쪽입니다</h4>
+    <p>WCRF/AICR 는 비만과 자궁내막암 사이의 연관에 최고 등급(convincing)을 부여했습니다. 지방조직에서 만들어지는 에스트로겐이 자궁내막을 계속 자극하는 것이 기전입니다. 다만 이것은 &quot;생기는 것&quot;에 대한 이야기입니다. 미국암학회 2022년 지침에 따르면 진단 시점의 비만은 전체 사망과는 연관되지만 자궁내막암 자체의 사망·무진행 생존·재발과는 연관이 확인되지 않았고, 진단 후 감량이 재발을 줄이는지에 대한 무작위배정 근거도 아직 없습니다. 그래도 전체 사망과 동반질환(당뇨·심혈관) 측면에서 이득은 분명합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-1">1</a> · <a href="#ref-4">4</a></p>
+  </div>
+</article>
+<article class="entry" id="r-gyn-rt-diarrhea">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장<span class="when">방사선치료 중</span></p>
+    <h4>골반 방사선치료 중 설사가 시작되면 잔사와 유당부터 줄이세요</h4>
+    <p>골반 조사 중 급성 방사선 장염은 매우 흔합니다. 일시적으로 유당분해효소가 줄어 우유가 설사를 악화시키는 경우가 많고, 고섬유·고지방 식사도 마찬가지입니다. 흰죽·바나나·감자·닭가슴살 위주로 옮기고, 수분과 전해질을 함께 채우는 것이 기본입니다. 치료가 끝나면 대개 회복되므로 한시적 조정입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-gyn-rt-gas">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의<span class="when">방사선치료 중</span></p>
+    <h4>가스를 많이 만드는 음식은 치료 위치의 재현성을 떨어뜨립니다</h4>
+    <p>골반 방사선치료는 방광 충만과 직장 가스량에 따라 실제 조사 부위가 달라집니다. 콩류·탄산음료·양배추류를 치료 시간 전후로 줄이면 셋업이 안정됩니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-gyn-obstruction">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의<span class="when">수술 후 회복기</span></p>
+    <h4>수술 후 질긴 섬유는 조심하세요 — 복막 파종·유착이 있다면 특히</h4>
+    <p>난소암에서는 복막 파종과 수술 후 유착으로 아급성 장폐색이 반복되는 경우가 있습니다. 이 상태에서 질긴 섬유(버섯 밑동, 나물 줄기, 견과, 말린 과일)는 폐색을 유발할 수 있습니다. 복통·구토·배변 중단이 있으면 즉시 금식하고 진료를 받으셔야 합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-gyn-bone">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>수술적 폐경 이후에는 골밀도가 빠르게 떨어집니다</h4>
+    <p>난소를 절제하면 에스트로겐이 급격히 사라져, 자연 폐경보다 골 소실 속도가 빠릅니다. 국제골다공증재단이 폐경 후 여성에게 권하는 양은 하루 칼슘 1,200 mg, 비타민 D 800~1,000 IU 입니다. 체중 부하 운동도 함께 하시되 기대는 정확히 하시는 편이 낫습니다 — 골밀도를 올린다는 것은 확립되어 있지만 골절을 줄인다는 것까지는 아직 입증되지 않았습니다. 이 값은 골 소실을 관리할 때의 기준으로, 일반 성인 기준(칼슘 700~800 mg)보다 높습니다. 보충제를 더하실 때는 상한도 보십시오 — 칼슘은 50세 이상에서 하루 2,000 mg 이 상한입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-5">5</a> · <a href="#ref-15">15</a> · <a href="#ref-16">16</a></p>
+  </div>
+</article>
+<article class="entry" id="r-gyn-iron">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>출혈과 항암이 겹치면 철결핍이 오기 쉽습니다</h4>
+    <p>부인암에서는 종양 출혈과 항암제로 인한 골수억제가 함께 작용해 빈혈이 흔합니다. 식품 철만으로 교정이 어려우면 경구·정맥 철분 보충이 필요하며, 빈혈 자체가 피로와 치료 지연의 원인이 됩니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-gyn-phytoestrogen">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-info">참고</p>
+    <h4>자궁내막암에서 콩 식품은 제한 대상이 아닙니다</h4>
+    <p>유방암에서와 마찬가지로, 식품 형태의 대두 섭취가 자궁내막암 예후를 나쁘게 한다는 근거는 없습니다. 다만 이소플라본을 농축한 고용량 보충제는 자료가 부족해 권하지 않습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-4">4</a> · <a href="#ref-25">25</a></p>
+  </div>
+</article>
+    <div class="phase">
+      <p class="tl">시기별 실무 지침</p>
+      <div><dt>방사선치료 중</dt><dd>설사 대응과 가스 조절이 두 축입니다. 증상이 심하면 유당·고섬유·고지방을 한꺼번에 줄였다가 하나씩 되돌려 봅니다.</dd></div><div><dt>수술 후 회복기</dt><dd>광범위 수술 후에는 유착으로 인한 폐색 증상에 주의합니다. 소량 분할식과 충분한 저작이 도움이 됩니다.</dd></div><div><dt>치료 종료 후</dt><dd>체중 관리와 골 건강이 장기 과제입니다. 자궁내막암은 특히 체중이 재발·전체 사망과 연결됩니다.</dd></div>
+    </div>
+  </div>
+</section>
+    <section id="p4" class="part">
+  <p class="pn">4부</p><h2>약과 음식</h2>
+  <p class="lead">약을 드시는 동안에만 해당하는 것들입니다. 아래 약제 가운데 드시는 것이 있으면 그 항목을 보십시오.</p>
+  <div class="meds"><p class="tl">이 문서가 다루는 약제 18가지</p>
+    <p><span class="med">타목시펜</span><span class="med">아로마타제 억제제</span><span class="med">안드로겐 차단요법(ADT)</span><span class="med">카페시타빈</span><span class="med">EGFR 표적치료제</span><span class="med">ALK 표적치료제</span><span class="med">CDK4/6 억제제</span><span class="med">소라페닙 / 렌바티닙</span><span class="med">와파린</span><span class="med">DOAC (아픽사반·리바록사반 등)</span><span class="med">보르테조밉</span><span class="med">시스플라틴</span><span class="med">옥살리플라틴</span><span class="med">이리노테칸</span><span class="med">메토트렉세이트</span><span class="med">스테로이드(덱사메타손 등)</span><span class="med">위산분비억제제(PPI)</span><span class="med">갑상선호르몬제</span></p>
+  </div>
+  <article class="entry" id="r-int-grapefruit-tki">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>자몽은 표적치료제의 혈중 농도를 예측 불가능하게 올립니다</h4>
+    <p>대부분의 경구 표적치료제는 CYP3A4 로 대사됩니다. 자몽의 푸라노쿠마린은 이 효소를 비가역적으로 억제해 약물 농도를 수 배까지 올릴 수 있고, 그만큼 부작용 위험도 커집니다. 주스 200 mL 한 잔으로도 충분하고 24시간이 지나도 최대 효과의 4분의 1이 남아, 복용 시간을 조절하는 방식으로는 피할 수 없습니다. 라임·포멜로도 같으며, 보통 단맛 오렌지(네이블·발렌시아)는 해당되지 않습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-54">54</a></p>
+  </div>
+</article>
+<article class="entry" id="r-int-grapefruit-cdk">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>CDK4/6 억제제 복용 중 자몽은 금기입니다</h4>
+    <p>팔보시클립·리보시클립·아베마시클립 모두 CYP3A4 기질입니다. 농도 상승은 호중구감소증 악화로 직결되므로 제품 설명서에서도 자몽과 자몽주스를 명시적으로 금하고 있습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-54">54</a></p>
+  </div>
+</article>
+<article class="entry" id="r-int-grapefruit-alk">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>ALK 표적치료제도 자몽과 함께 드시면 안 됩니다</h4>
+    <p>크리조티닙·알렉티닙 등은 CYP3A4 기질로, 자몽에 의한 농도 상승 시 간독성과 QT 연장 위험이 커집니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-54">54</a></p>
+  </div>
+</article>
+<article class="entry" id="r-int-grapefruit-sorafenib">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>소라페닙·렌바티닙 복용 중 자몽을 피하세요</h4>
+    <p>CYP3A4 억제로 농도가 올라가면 수족피부반응과 고혈압 등 부작용이 심해집니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-54">54</a></p>
+  </div>
+</article>
+<article class="entry" id="r-int-warfarin-vitk">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>비타민 K 섭취량을 갑자기 바꾸지 마세요</h4>
+    <p>시금치·케일·브로콜리·청국장·낫토는 비타민 K 가 많습니다. 끊을 필요는 없지만 &quot;어제는 많이, 오늘은 전혀&quot;처럼 들쭉날쭉하면 INR 이 흔들립니다. 매일 비슷한 양을 유지하는 것이 목표입니다. 가늠이 필요하시면 한국인 하루 기준치가 남자 75 µg·여자 65 µg 입니다 — 시금치 한 접시로도 이 값을 훌쩍 넘습니다. 많고 적음이 문제가 아니라 날마다 달라지는 것이 문제라는 뜻입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-58">58</a> · <a href="#ref-16">16</a></p>
+  </div>
+</article>
+<article class="entry" id="r-int-warfarin-omega3">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>오메가-3 고용량은 출혈 경향을 더할 수 있습니다</h4>
+    <p>오메가-3 는 혈소판 응집을 억제합니다. 와파린과 함께 쓰면 출혈 위험이 더해질 수 있어, 시작하거나 끊을 때 INR 을 확인하는 것이 좋습니다. 다만 무게는 알고 계시는 편이 낫습니다 — 유럽식품안전청은 EPA·DHA 를 합쳐 하루 5 g 까지 드셔도 자발 출혈이 늘지 않는다고 정리했습니다. 항응고제와 함께 쓸 때를 따로 본 자료가 없어서 드리는 주의입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-68">68</a></p>
+  </div>
+</article>
+<article class="entry" id="r-int-warfarin-coq10">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>코엔자임Q10·홍삼은 와파린 효과에 영향을 줄 수 있습니다</h4>
+    <p>코엔자임Q10 은 구조가 비타민 K 와 비슷해 이론상 와파린 효과를 줄일 것으로 예상되었지만, 실제 관찰 자료는 반대쪽이었습니다 — 항응고 지침이 인용한 연구에서 코엔자임Q10 을 함께 드신 분들의 출혈 위험이 3.7배 높았습니다(95 % 신뢰구간 1.88~7.24). 같은 표에 생강도 3.2배로 올라 있습니다. 지침 자신은 &quot;더 확인이 필요하다&quot;고 단서를 답니다. 인삼류는 INR 을 올린 사례와 내린 사례가 모두 보고되어 있습니다. 이론과 실제가 반대로 나온다는 것 자체가 이 조합을 피해야 할 이유입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-58">58</a></p>
+  </div>
+</article>
+<article class="entry" id="r-int-warfarin-ginger">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>와파린을 드시는 동안에는 생강을 늘리지 마세요</h4>
+    <p>생강은 항암 오심에 근거가 있어 이 앱도 권해 드리지만, 와파린을 함께 드시는 경우에는 이야기가 다릅니다. 항응고 지침이 인용한 연구에서 생강을 함께 드신 분들의 출혈 위험이 3.2배 높았습니다(95 % 신뢰구간 2.42~4.24). 지침 자신은 &quot;더 확인이 필요하다&quot;는 단서를 달고 있으니 생강차 한 잔에 놀라실 일은 아닙니다. 다만 오심 때문에 생강을 새로 시작하거나 양을 늘리실 생각이라면 담당 의료진과 먼저 상의하시고 INR 을 확인하십시오.</p>
+    <p class="src">근거 문헌 <a href="#ref-58">58</a></p>
+  </div>
+</article>
+<article class="entry" id="r-int-doac-omega3">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>DOAC 과 오메가-3 를 함께 쓰면 출혈에 유의하세요</h4>
+    <p>항응고 작용이 더해질 수 있습니다. 멍이 잘 들거나 코피가 잦아지면 알려 주셔야 합니다. 일반 성인에서는 EPA·DHA 를 합쳐 하루 5 g 까지 자발 출혈이 늘지 않는 것으로 정리되어 있으니, 항응고제와 함께 쓸 때를 따로 본 자료가 없어서 드리는 주의로 보시면 됩니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-68">68</a></p>
+  </div>
+</article>
+<article class="entry" id="r-int-bortezomib-greentea">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>보르테조밉 치료 중 녹차·녹차추출물은 약효를 떨어뜨릴 수 있습니다</h4>
+    <p>녹차의 EGCG 가 보르테조밉의 보론산기와 직접 결합해 프로테아좀 억제 작용을 무력화시키는 것이 세포와 동물 실험에서 확인되었습니다(사람 대상 시험은 아직 없습니다). 같은 현상은 보론산 계열 약제에서만 나타났고 다른 계열 프로테아좀 억제제에서는 나타나지 않았습니다. 저자들은 이 약을 쓰는 동안 녹차 제품 섭취가 금기일 수 있다고 적었습니다. 특히 농축된 녹차추출물 보충제는 피해야 합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-55">55</a></p>
+  </div>
+</article>
+<article class="entry" id="r-int-capecitabine-warfarin">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>카페시타빈은 와파린 효과를 크게 증폭시킵니다</h4>
+    <p>카페시타빈은 CYP2C9 를 억제해 와파린 농도를 올리며, 심각한 출혈 사례가 보고되어 경고문이 붙어 있습니다. 보고된 증례에서는 병용 6주 뒤 INR 이 10을 넘고 위장관 출혈이 생겼습니다. 두 약을 함께 쓰는 동안에는 INR 을 자주 확인해야 하고, 여기에 비타민 K 섭취량 변동까지 겹치면 조절이 매우 어려워집니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-56">56</a></p>
+  </div>
+</article>
+<article class="entry" id="r-int-oxaliplatin-cold">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>옥살리플라틴 투여 후 며칠간은 찬 음식·찬 음료를 피하세요</h4>
+    <p>옥살리플라틴은 한랭 유발 말초신경병증을 일으켜, 찬 것을 만지거나 마실 때 손발이 저리고 목이 조이는 느낌(인후 감각이상)이 생깁니다. 미지근하게 드시는 것만으로 상당히 줄일 수 있습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-int-cisplatin-mg">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-info">참고</p>
+    <h4>시스플라틴은 마그네슘·칼륨을 소변으로 빼앗아 갑니다</h4>
+    <p>신세뇨관 손상으로 저마그네슘혈증·저칼륨혈증이 흔합니다. 보충이 필요한 경우가 많고, 동시에 신독성이 있으므로 수분을 충분히 드시는 것이 중요합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-int-irinotecan-sjw">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-avoid">피하세요</p>
+    <h4>세인트존스워트(성요한초)는 항암제 농도를 떨어뜨립니다</h4>
+    <p>세인트존스워트는 CYP3A4 를 강력하게 유도합니다. 암 환자 5명을 대상으로 한 교차설계 연구에서 이리노테칸의 활성대사체(SN-38) 혈중 농도가 42 % 낮아졌습니다(95 % 신뢰구간 14~70 %). 작은 연구이지만 약효가 줄어드는 방향이라 위험 쪽으로 봅니다. 우울·불면 목적의 수입 건강기능식품에 흔히 들어 있습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-57">57</a></p>
+  </div>
+</article>
+<article class="entry" id="r-int-mtx-folate">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>메토트렉세이트 사용 중 엽산 보충은 임의로 하지 마세요</h4>
+    <p>메토트렉세이트는 엽산 대사를 차단해 작용합니다. 엽산 보충 시점과 용량은 치료 목적에 따라 정해지므로, 엽산이 든 종합비타민을 자가로 추가하면 계획이 흐트러질 수 있습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-int-ppi-calcium">
+  <div class="mark"><span class="grade" title="근거 등급 C">C</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>위산억제제를 드시면 탄산칼슘 흡수가 떨어집니다</h4>
+    <p>탄산칼슘은 위산이 있어야 녹습니다. PPI 복용 중이거나 위절제를 받은 경우에는 위산에 덜 의존하는 구연산칼슘 형태가 유리합니다. 장기 PPI 사용 시 B12·마그네슘도 함께 확인합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-40">40</a></p>
+  </div>
+</article>
+<article class="entry" id="r-int-levothyroxine-ca-fe">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>갑상선호르몬제는 칼슘·철분과 4시간 이상 띄워 드세요</h4>
+    <p>칼슘과 철은 갑상선호르몬제와 결합해 흡수를 크게 방해합니다. 두유·우유도 마찬가지입니다. 아침 공복에 물과 함께 복용하고, 칼슘·철분제는 점심 이후로 옮기는 것이 표준적인 방법입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-16">16</a></p>
+  </div>
+</article>
+<article class="entry" id="r-int-steroid-sugar-na">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-caution">주의</p>
+    <h4>스테로이드를 쓰는 날에는 혈당과 부종이 함께 올라갑니다</h4>
+    <p>덱사메타손은 혈당을 올리고 나트륨·수분을 저류시킵니다. 항암 전후 며칠간 단 음식과 짠 음식이 겹치면 고혈당과 부종이 뚜렷해집니다. 이 시기만 한시적으로 조절해도 충분합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-2">2</a></p>
+  </div>
+</article>
+<article class="entry" id="r-int-tamoxifen-soy">
+  <div class="mark"><span class="grade" title="근거 등급 B">B</span></div>
+  <div class="say">
+    <p class="lv lv-info">참고</p>
+    <h4>타목시펜을 드시는 중에도 콩 음식은 괜찮습니다</h4>
+    <p>가장 흔한 질문입니다. 상하이 유방암 생존자 5,042명을 추적한 연구에서 대두를 많이 드신 군은 전체 사망이 29 %, 재발이 32 % 낮았고(위험비 0.71·0.68), 이 이득은 타목시펜을 드시는 분에서도 안 드시는 분에서도 똑같았습니다. 두부·두유·된장을 제한할 근거는 없습니다. 다만 이소플라본 농축 보충제는 별개로 판단합니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-24">24</a> · <a href="#ref-25">25</a> · <a href="#ref-26">26</a></p>
+  </div>
+</article>
+<article class="entry" id="r-int-adt-calcium">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>ADT 중에는 칼슘·비타민 D 보충이 권고됩니다</h4>
+    <p>안드로겐 차단은 골밀도를 빠르게 떨어뜨립니다. 미국임상종양학회가 승인한 지침은 ADT 를 시작하기 전 골밀도 검사를 받도록 권합니다. 칼슘과 비타민 D 는 먼저 식품으로 채우시고(한국 성인 권장량은 칼슘 700~800 mg, 비타민 D 10~15 µg), 보충이 필요한지와 얼마나 할지는 골밀도 결과를 보고 정하는 것이 순서입니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-47">47</a> · <a href="#ref-16">16</a></p>
+  </div>
+</article>
+<article class="entry" id="r-int-ai-calcium">
+  <div class="mark"><span class="grade" title="근거 등급 G">G</span></div>
+  <div class="say">
+    <p class="lv lv-prefer">권장</p>
+    <h4>아로마타제 억제제 사용 중 칼슘·비타민 D 를 챙기세요</h4>
+    <p>에스트로겐이 거의 없어지면서 골 소실이 빨라집니다. 국제학회 공동 입장문은 아로마타제 억제제를 시작할 때 골절 위험을 평가하고 칼슘·비타민 D 를 안내하도록 권하며, 그 기준은 하루 칼슘 1,200 mg·비타민 D 800~1,000 IU 입니다. 골절 위험이 높은 분은 혈중 25-OH 비타민 D 를 재 보는 것이 권장됩니다. 관절통도 흔한데, 비타민 D 결핍이 있으면 증상이 더 심하다는 보고가 있어 결핍 교정이 도움이 될 수 있습니다.</p>
+    <p class="src">근거 문헌 <a href="#ref-5">5</a></p>
+  </div>
+</article>
+</section>
+    <section id="p5" class="part">
+  <p class="pn">5부</p><h2>참고 문헌</h2>
+  <p class="lead">79종입니다. 모두 원문을 받아 이 문서의 문장과 맞춰 본 것들입니다.
+  링크가 있는 것은 눌러 원문으로 가실 수 있습니다.</p>
+  <ol class="refs">
+    <li id="ref-1">
+      <span class="rk">학회 지침</span>
+      <span class="rc">World Cancer Research Fund / American Institute for Cancer Research. Diet, Nutrition, Physical Activity and Cancer: a Global Perspective. Continuous Update Project Expert Report 2018.</span>
+      <a class="ru" href="https://www.wcrf.org/diet-activity-and-cancer/" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-2">
+      <span class="rk">학회 지침</span>
+      <span class="rc">Muscaritoli M, et al. ESPEN practical guideline: Clinical Nutrition in cancer. Clin Nutr. 2021;40(5):2898-2913.</span>
+      <a class="ru" href="https://doi.org/10.1016/j.clnu.2021.02.005" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-3">
+      <span class="rk">학회 지침</span>
+      <span class="rc">Ligibel JA, et al. Exercise, Diet, and Weight Management During Cancer Treatment: ASCO Guideline. J Clin Oncol. 2022;40(22):2491-2507.</span>
+      <a class="ru" href="https://doi.org/10.1200/JCO.22.00687" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-4">
+      <span class="rk">학회 지침</span>
+      <span class="rc">Rock CL, et al. American Cancer Society nutrition and physical activity guideline for cancer survivors. CA Cancer J Clin. 2022;72(3):230-262.</span>
+      <a class="ru" href="https://doi.org/10.3322/caac.21719" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-5">
+      <span class="rk">학회 지침</span>
+      <span class="rc">Hadji P, et al. Management of aromatase inhibitor-associated bone loss (AIBL) in postmenopausal women with hormone sensitive breast cancer: joint position statement of the IOF, CABS, ECTS, IEG, ESCEO, IMS, and SIOG. J Bone Oncol. 2017;7:1-12. (국제골다공증재단 권고 칼슘 1,200 mg·비타민 D 800~1,000 IU · 골표적치료 기준 T-score &lt; −2.0 등)</span>
+      <a class="ru" href="https://doi.org/10.1016/j.jbo.2017.03.001" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-6">
+      <span class="rk">학회 지침</span>
+      <span class="rc">Gironés Sarrió R, et al. Delphi consensus on strategies in the management of opioid-induced constipation in cancer patients. BMC Palliat Care. 2021;20(1):1. (전문가 46인 · 항목 91 % 합의)</span>
+      <a class="ru" href="https://doi.org/10.1186/s12904-020-00693-z" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-7">
+      <span class="rk">종설</span>
+      <span class="rc">Gupta N, et al. Radiation-induced dental caries, prevention and treatment — a systematic review. Natl J Maxillofac Surg. 2015;6(2):160-166. (방사선치료 후 3개월 이내 발생 가능 · 빠르게 진행 · 불소 자가도포 · 치료 후 발치는 예외로 둠)</span>
+      <a class="ru" href="https://doi.org/10.4103/0975-5950.183870" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-8">
+      <span class="rk">학회 지침</span>
+      <span class="rc">Humphrey MB, et al. 2022 ACR Guideline for the Prevention and Treatment of Glucocorticoid-Induced Osteoporosis. Arthritis Rheumatol. 2023;75(12):2088-2102.</span>
+      <a class="ru" href="https://doi.org/10.1002/art.42646" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-9">
+      <span class="rk">학회 지침</span>
+      <span class="rc">U.S. Food and Drug Administration. Drug Safety Communication: Low magnesium levels can be associated with long-term use of proton pump inhibitor drugs (PPIs). 2011.</span>
+      <a class="ru" href="https://www.fda.gov/drugs/drug-safety-and-availability/fda-drug-safety-communication-low-magnesium-levels-can-be-associated-long-term-use-proton-pump" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-10">
+      <span class="rk">코호트 연구</span>
+      <span class="rc">Lam JR, et al. Proton pump inhibitor and histamine 2 receptor antagonist use and vitamin B12 deficiency. JAMA. 2013;310(22):2435-2442.</span>
+      <a class="ru" href="https://doi.org/10.1001/jama.2013.280490" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-11">
+      <span class="rk">학회 지침</span>
+      <span class="rc">National Institute for Health and Care Excellence. Nutrition support for adults (CG32) — refeeding problems. 2006, updated 2017.</span>
+      <a class="ru" href="https://www.nice.org.uk/guidance/cg32" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-12">
+      <span class="rk">종설</span>
+      <span class="rc">Nightingale JMD. How to manage a high-output stoma. Frontline Gastroenterol. 2022;13(2):140-151.</span>
+      <a class="ru" href="https://doi.org/10.1136/flgastro-2018-101108" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-13">
+      <span class="rk">무작위배정 시험</span>
+      <span class="rc">Lyckholm L, et al. A randomized, placebo controlled trial of oral zinc for chemotherapy-related taste and smell disorders. J Pain Palliat Care Pharmacother. 2012;26(2):111-114.</span>
+      <a class="ru" href="https://doi.org/10.3109/15360288.2012.676618" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-14">
+      <span class="rk">학회 지침</span>
+      <span class="rc">Ikizler TA, et al. KDOQI Clinical Practice Guideline for Nutrition in CKD: 2020 Update. Am J Kidney Dis. 2020;76(3 Suppl 1):S1-S107.</span>
+      <a class="ru" href="https://doi.org/10.1053/j.ajkd.2020.05.006" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-15">
+      <span class="rk">학회 지침</span>
+      <span class="rc">질병관리청. 골다공증 예방관리 보도자료 — 우리나라 성인의 1일 칼슘 권장섭취량은 700~800 mg, 비타민 D 는 10~15 µg 이며, 골다공증 치료를 위해서는 더 많은 양을 섭취하도록 할 수 있다.</span>
+      <a class="ru" href="https://www.kdca.go.kr/board/board.es?mid=a20501010000&amp;bid=0015&amp;act=view&amp;list_no=723657" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-16">
+      <span class="rk">학회 지침</span>
+      <span class="rc">보건복지부·한국영양학회. 2020 한국인 영양소 섭취기준(KDRIs).</span>
+      <a class="ru" href="https://www.kns.or.kr/FileRoom/FileRoom_view.asp?idx=108&amp;BoardID=Kdr" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-17">
+      <span class="rk">자료원</span>
+      <span class="rc">질병관리청. 국민건강영양조사 — 한국인 1일 나트륨 섭취량 3,255 mg(2018년 기준). 2020 한국인 영양소 섭취기준의 만성질환위험감소섭취량 2,300 mg 의 약 1.4배, 충분섭취량 1,500 mg 의 약 2.2배.</span>
+      
+    </li>
+<li id="ref-18">
+      <span class="rk">자료원</span>
+      <span class="rc">식품의약품안전처. 식품영양성분 데이터베이스.</span>
+      
+    </li>
+<li id="ref-19">
+      <span class="rk">자료원</span>
+      <span class="rc">농촌진흥청 국립농업과학원. 국가표준식품성분표 제9개정판.</span>
+      
+    </li>
+<li id="ref-20">
+      <span class="rk">종설</span>
+      <span class="rc">IARC Monographs Volume 114: Red Meat and Processed Meat. International Agency for Research on Cancer. (공개 Q&amp;A 포함)</span>
+      <a class="ru" href="https://www.iarc.who.int/wp-content/uploads/2018/07/Monographs-QA_Vol114.pdf" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-21">
+      <span class="rk">종설</span>
+      <span class="rc">IARC Monographs Volume 100E: Personal Habits and Indoor Combustions — Alcohol Consumption. (주류 = Group 1 · 구강·인두·후두·식도·간·대장·여성 유방)</span>
+      <a class="ru" href="https://publications.iarc.who.int/122" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-22">
+      <span class="rk">종설</span>
+      <span class="rc">IARC Monographs Volume 116: Drinking Coffee, Mate, and Very Hot Beverages (2016). 65 ℃ 초과 음료 = Group 2A(제한적 근거) · 커피 자체 = Group 3(1991년 2B 에서 하향)</span>
+      <a class="ru" href="https://www.iarc.who.int/wp-content/uploads/2018/07/pr244_E.pdf" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-23">
+      <span class="rk">종설</span>
+      <span class="rc">IARC Monographs Volume 100F: Aflatoxins. — Group 1 · B형 간염과 곱셈보다 더 크게 겹침 · TP53 코돈 249 변이</span>
+      <a class="ru" href="https://www.ncbi.nlm.nih.gov/books/NBK304413/" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-24">
+      <span class="rk">코호트 연구</span>
+      <span class="rc">Shu XO, et al. Soy food intake and breast cancer survival. JAMA. 2009;302(22):2437-2443.</span>
+      <a class="ru" href="https://doi.org/10.1001/jama.2009.1783" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-25">
+      <span class="rk">메타분석</span>
+      <span class="rc">Nechuta SJ, et al. Soy food intake after diagnosis of breast cancer and survival: an in-depth analysis of combined evidence from cohort studies. Am J Clin Nutr. 2012;96(1):123-132.</span>
+      <a class="ru" href="https://doi.org/10.3945/ajcn.112.035972" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-26">
+      <span class="rk">메타분석</span>
+      <span class="rc">Chi F, et al. Post-diagnosis soy food intake and breast cancer survival: a meta-analysis of cohort studies. Asian Pac J Cancer Prev. 2013;14(4):2407-2412.</span>
+      <a class="ru" href="https://doi.org/10.7314/apjcp.2013.14.4.2407" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-27">
+      <span class="rk">무작위배정 시험</span>
+      <span class="rc">Bairati I, et al. Randomized trial of antioxidant vitamins to prevent acute adverse effects of radiation therapy in head and neck cancer patients. J Clin Oncol. 2005;23(24):5805-5813.</span>
+      
+    </li>
+<li id="ref-28">
+      <span class="rk">무작위배정 시험</span>
+      <span class="rc">Meyer F, et al. Interaction between antioxidant vitamin supplementation and cigarette smoking during radiation therapy in relation to long-term effects on recurrence and mortality: a randomized trial among head and neck cancer patients. Int J Cancer. 2008;122(7):1679-1683. (방사선치료 중 흡연자에서 재발 HR 2.41, 전체 사망 2.26, 두경부암 사망 3.38 · 비흡연자는 모두 1에 가까움)</span>
+      <a class="ru" href="https://doi.org/10.1002/ijc.23200" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-29">
+      <span class="rk">무작위배정 시험</span>
+      <span class="rc">Bairati I, et al. A randomized trial of antioxidant vitamins to prevent second primary cancers in head and neck cancer patients. J Natl Cancer Inst. 2005;97(7):481-488. (비타민 E 400 IU·베타카로틴 30 mg, 방사선치료 첫날부터 · 보충 기간 중 이차암 HR 2.88, 95 % CI 1.56~5.31)</span>
+      
+    </li>
+<li id="ref-30">
+      <span class="rk">무작위배정 시험</span>
+      <span class="rc">The Alpha-Tocopherol, Beta Carotene Cancer Prevention Study Group. The effect of vitamin E and beta carotene on the incidence of lung cancer in male smokers. N Engl J Med. 1994;330(15):1029-1035.</span>
+      <a class="ru" href="https://doi.org/10.1056/NEJM199404143301501" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-31">
+      <span class="rk">무작위배정 시험</span>
+      <span class="rc">Omenn GS, et al. Effects of a combination of beta carotene and vitamin A on lung cancer and cardiovascular disease (CARET). N Engl J Med. 1996;334(18):1150-1155.</span>
+      <a class="ru" href="https://doi.org/10.1056/NEJM199605023341802" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-32">
+      <span class="rk">무작위배정 시험</span>
+      <span class="rc">Klein EA, et al. Vitamin E and the risk of prostate cancer: the Selenium and Vitamin E Cancer Prevention Trial (SELECT). JAMA. 2011;306(14):1549-1556. (n=35,533 · 비타민 E 400 IU HR 1.17, 99% CI 1.004-1.36 · 셀레늄 200 µg HR 1.09, 99% CI 0.93-1.27)</span>
+      <a class="ru" href="https://doi.org/10.1001/jama.2011.1437" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-33">
+      <span class="rk">코호트 연구</span>
+      <span class="rc">Kristal AR, et al. Baseline selenium status and effects of selenium and vitamin E supplementation on prostate cancer risk. J Natl Cancer Inst. 2014;106(3):djt456. (SELECT 사후 case-cohort · 기저 셀레늄이 높던 군에서 고위험 전립선암 91% 증가, P=.007)</span>
+      <a class="ru" href="https://doi.org/10.1093/jnci/djt456" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-34">
+      <span class="rk">무작위배정 시험</span>
+      <span class="rc">Ng K, et al. Effect of High-Dose vs Standard-Dose Vitamin D3 Supplementation on Progression-Free Survival Among Patients With Advanced or Metastatic Colorectal Cancer (SUNSHINE). JAMA. 2019;321(14):1370-1379.</span>
+      <a class="ru" href="https://doi.org/10.1001/jama.2019.2402" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-35">
+      <span class="rk">무작위배정 시험</span>
+      <span class="rc">Manson JE, et al. Vitamin D Supplements and Prevention of Cancer and Cardiovascular Disease (VITAL). N Engl J Med. 2019;380(1):33-44.</span>
+      <a class="ru" href="https://doi.org/10.1056/NEJMoa1809944" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-36">
+      <span class="rk">메타분석</span>
+      <span class="rc">Ge S, et al. Association between habitual dietary salt intake and risk of gastric cancer: a systematic review of observational studies. Gastroenterol Res Pract. 2012;2012:808120. (11편·207만 명 · 고염 대 저염 OR 2.05 [1.60~2.62] · 아시아 하위군 OR 1.27 [1.22~1.32])</span>
+      <a class="ru" href="https://doi.org/10.1155/2012/808120" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-37">
+      <span class="rk">코호트 연구</span>
+      <span class="rc">Kim J, Park S, Nam BH. Gastric cancer and salt preference: a population-based cohort study in Korea. Am J Clin Nutr. 2010;91(5):1289-1293. (224만 명 · 짜게 먹는 기호 위험비 1.10 [1.04~1.16] — 저자 표현은 &quot;marginal&quot;)</span>
+      <a class="ru" href="https://doi.org/10.3945/ajcn.2009.28732" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-38">
+      <span class="rk">메타분석</span>
+      <span class="rc">Yoo JY, et al. Pickled vegetable and salted fish intake and the risk of gastric cancer: two prospective cohort studies and a meta-analysis. Cancers. 2020;12(4):996. (한국인유전체역학조사·다기관암코호트 · 절임채소 하루 40 g 당 상대위험 1.15 [1.07~1.23] · 젓갈 1.17 [0.99~1.38])</span>
+      <a class="ru" href="https://doi.org/10.3390/cancers12040996" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-39">
+      <span class="rk">메타분석</span>
+      <span class="rc">Kim HJ, et al. Fresh and pickled vegetable consumption and gastric cancer in Japanese and Korean populations: a meta-analysis of observational studies. Cancer Sci. 2010;101(2):508-516. (신선 채소 오즈비 0.62 [0.46~0.85] · 절임 채소 1.28 [1.06~1.53])</span>
+      <a class="ru" href="https://doi.org/10.1111/j.1349-7006.2009.01374.x" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-40">
+      <span class="rk">종설</span>
+      <span class="rc">Rogers C. Postgastrectomy nutrition. Nutr Clin Pract. 2011;26(2):126-136. (초청 종설) — 위절제 후 덤핑증후군·B12·철·칼슘 흡수장애 관리. 표준 식단을 뒷받침할 문헌은 충분하지 않으며 증상별 개별 조정을 권한다.</span>
+      <a class="ru" href="https://doi.org/10.1177/0884533611400070" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-41">
+      <span class="rk">메타분석</span>
+      <span class="rc">Bahardoust M, et al. Vitamin B12 deficiency after total gastrectomy for gastric cancer, prevalence, and symptoms: a systematic review and meta-analysis. Eur J Cancer Prev. 2024;33(3):208-216. (14편·2,627명)</span>
+      <a class="ru" href="https://doi.org/10.1097/CEJ.0000000000000838" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-42">
+      <span class="rk">코호트 연구</span>
+      <span class="rc">Song M, et al. Fiber Intake and Survival After Colorectal Cancer Diagnosis. JAMA Oncol. 2018;4(1):71-79.</span>
+      <a class="ru" href="https://doi.org/10.1001/jamaoncol.2017.3684" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-43">
+      <span class="rk">코호트 연구</span>
+      <span class="rc">Van Blarigan EL, et al. Association of Survival With Adherence to the ACS Nutrition and Physical Activity Guidelines Among Patients With Colon Cancer (CALGB 89803). JAMA Oncol. 2018;4(6):783-790.</span>
+      <a class="ru" href="https://doi.org/10.1001/jamaoncol.2018.0126" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-44">
+      <span class="rk">메타분석</span>
+      <span class="rc">Kennedy OJ, et al. Coffee, including caffeinated and decaffeinated coffee, and the risk of hepatocellular carcinoma: a systematic review and dose-response meta-analysis. BMJ Open. 2017;7(5):e013739.</span>
+      <a class="ru" href="https://doi.org/10.1136/bmjopen-2016-013739" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-45">
+      <span class="rk">학회 지침</span>
+      <span class="rc">European Association for the Study of the Liver. EASL Clinical Practice Guidelines on nutrition in chronic liver disease. J Hepatol. 2019;70(1):172-193.</span>
+      
+    </li>
+<li id="ref-46">
+      <span class="rk">종설</span>
+      <span class="rc">WCRF/AICR Continuous Update Project: Diet, nutrition, physical activity and prostate cancer. (유제품·칼슘 고섭취 — limited-suggestive 위험 증가)</span>
+      
+    </li>
+<li id="ref-47">
+      <span class="rk">학회 지침</span>
+      <span class="rc">Saylor PJ, et al. Bone Health and Bone-Targeted Therapies for Prostate Cancer: ASCO Endorsement of a Cancer Care Ontario Guideline. J Clin Oncol. 2020;38(15):1736-1743. — ADT 시작 전 골밀도 검사 권장 · 골전이 표적치료제 병용 시 칼슘 500 mg 이상·비타민 D 400 IU 이상</span>
+      <a class="ru" href="https://doi.org/10.1200/JCO.19.03148" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-48">
+      <span class="rk">무작위배정 시험</span>
+      <span class="rc">Smith MR, et al. Pamidronate to prevent bone loss during androgen-deprivation therapy for prostate cancer. N Engl J Med. 2001;345(13):948-955. (48주 · 대조군 골밀도 요추 3.3 %, 대전자 2.1 %, 고관절 1.8 % 감소 · 요추 해면골은 8.5 %)</span>
+      <a class="ru" href="https://doi.org/10.1056/NEJMoa010845" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-49">
+      <span class="rk">학회 지침</span>
+      <span class="rc">Armenian SH, et al. Prevention and Monitoring of Cardiac Dysfunction in Survivors of Adult Cancers: ASCO Clinical Practice Guideline. J Clin Oncol. 2017;35(8):893-911. — 심장독성 약제 사용 중 혈압·체중·지질 등 심혈관 위험 요인 관리 권고.</span>
+      <a class="ru" href="https://doi.org/10.1200/JCO.2016.70.5400" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-50">
+      <span class="rk">메타분석</span>
+      <span class="rc">Sonbol MB, et al. Neutropenic diets to prevent cancer infections: updated systematic review and meta-analysis. BMJ Support Palliat Care. 2019;9(4):425-433. (6편·1,116명 · 주요 감염 RR 1.16, 95 % CI 0.94~1.42 · 조혈모세포이식군에서는 제한식이가 오히려 감염 증가 RR 1.25, 95 % CI 1.02~1.54 · 제한식이 대신 미국 FDA 식품취급 지침을 따르라고 권고)</span>
+      <a class="ru" href="https://doi.org/10.1136/bmjspcare-2018-001742" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-51">
+      <span class="rk">메타분석</span>
+      <span class="rc">Chuang PY, et al. Hepatic disease and the risk of mortality of Vibrio vulnificus necrotizing skin and soft tissue infections: a systematic review and meta-analysis. PLoS One. 2019;14(10):e0223513. (12편·1,157명 · 간질환군 53.9 % 대 비간질환군 16.1 %, RR 2.61, 95 % CI 2.14~3.19)</span>
+      <a class="ru" href="https://doi.org/10.1371/journal.pone.0223513" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-52">
+      <span class="rk">학회 지침</span>
+      <span class="rc">U.S. CDC. Clinical Overview of Vibriosis. — 비브리오 불니피쿠스 감염자의 약 5명 중 1명이 사망하며, 간질환이 있으면 특히 위험하다.</span>
+      <a class="ru" href="https://www.cdc.gov/vibrio/hcp/clinical-overview/index.html" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-53">
+      <span class="rk">학회 지침</span>
+      <span class="rc">U.S. FDA. Food Safety for Older Adults and People with Cancer, Diabetes, HIV/AIDS, Organ Transplants, and Autoimmune Diseases. — 위험이 높은 것과 낮은 것을 짝지어 제시한다. 생 새싹채소는 높은 쪽, 익힌 새싹이 낮은 쪽이다. 조리 후 2시간 안에 냉장(32 ℃ 넘으면 1시간).</span>
+      <a class="ru" href="https://www.fda.gov/media/83744/download" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-54">
+      <span class="rk">종설</span>
+      <span class="rc">Bailey DG, et al. Grapefruit–medication interactions: forbidden fruit or avoidable consequences? CMAJ. 2013;185(4):309-316.</span>
+      <a class="ru" href="https://doi.org/10.1503/cmaj.120951" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-55">
+      <span class="rk">종설</span>
+      <span class="rc">Golden EB, et al. Green tea polyphenols block the anticancer effects of bortezomib and other boronic acid-based proteasome inhibitors. Blood. 2009;113(23):5927-5937.</span>
+      <a class="ru" href="https://doi.org/10.1182/blood-2008-07-171389" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-56">
+      <span class="rk">종설</span>
+      <span class="rc">Copur MS, et al. An adverse interaction between warfarin and capecitabine: a case report and review of the literature. Clin Colorectal Cancer. 2001;1(3):182-184. (증례 2건 — 병용 6주 뒤 INR 10 초과·위장관 출혈)</span>
+      <a class="ru" href="https://doi.org/10.3816/CCC.2001.n.019" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-57">
+      <span class="rk">무작위배정 시험</span>
+      <span class="rc">Mathijssen RH, et al. Effects of St. John's wort on irinotecan metabolism. J Natl Cancer Inst. 2002;94(16):1247-1249. (환자 5명 무작위배정 교차설계 · SN-38 농도 42 % 감소, 95 % CI 14~70 %)</span>
+      <a class="ru" href="https://doi.org/10.1093/jnci/94.16.1247" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-58">
+      <span class="rk">학회 지침</span>
+      <span class="rc">Holbrook A, et al. Evidence-based management of anticoagulant therapy: Antithrombotic Therapy and Prevention of Thrombosis, 9th ed: ACCP Evidence-Based Clinical Practice Guidelines. Chest. 2012;141(2 Suppl):e152S-e184S. — 비타민 K 섭취 일관성·병용 주의.</span>
+      <a class="ru" href="https://doi.org/10.1378/chest.11-2295" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-59">
+      <span class="rk">무작위배정 시험</span>
+      <span class="rc">Ryan JL, et al. Ginger (Zingiber officinale) reduces acute chemotherapy-induced nausea: a URCC CCOP study of 576 patients. Support Care Cancer. 2012;20(7):1479-1489.</span>
+      <a class="ru" href="https://doi.org/10.1007/s00520-011-1236-3" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-60">
+      <span class="rk">학회 지침</span>
+      <span class="rc">Elad S, et al. MASCC/ISOO clinical practice guidelines for the management of mucositis secondary to cancer therapy. Cancer. 2020;126(19):4423-4431.</span>
+      <a class="ru" href="https://doi.org/10.1002/cncr.33100" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-61">
+      <span class="rk">학회 지침</span>
+      <span class="rc">International Dysphagia Diet Standardisation Initiative. Complete IDDSI Framework: Detailed Definitions 2.2 (2026) · Testing Methods 2.0 (2019). 원 논문 Cichero JAY, et al. Dysphagia. 2017;32:293-314. — 연하곤란 식이의 점도·질감 국제 표준(0~7의 8단계).</span>
+      <a class="ru" href="https://iddsi.org/framework/" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-62">
+      <span class="rk">메타분석</span>
+      <span class="rc">Collaborative Group on Hormonal Factors in Breast Cancer (Hamajima N, et al). Alcohol, tobacco and breast cancer — collaborative reanalysis of individual data from 53 epidemiological studies. Br J Cancer. 2002;87(11):1234-1245. (하루 10 g 당 상대위험 7.1 % 증가, 95 % CI 5.5~8.7)</span>
+      <a class="ru" href="https://doi.org/10.1038/sj.bjc.6600596" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-63">
+      <span class="rk">종설</span>
+      <span class="rc">Brooks PJ, et al. The alcohol flushing response: an unrecognized risk factor for esophageal cancer from alcohol consumption. PLoS Med. 2009;6(3):e50. (동아시아인 약 36 % · 이형접합자 오즈비 3.7~18.1 · 음주를 줄이면 일본 남성 식도편평세포암의 53 % 예방 가능 추정)</span>
+      <a class="ru" href="https://doi.org/10.1371/journal.pmed.1000050" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-64">
+      <span class="rk">종설</span>
+      <span class="rc">Mitchell A, et al. Dietary management for people with an ileostomy: a scoping review. JBI Evid Synth. 2021;19(9):2188-2306. — &quot;장루 식이 조언은 흔히 제공되지만 서로 엇갈리고 불충분하며, 질 높은 연구가 부족하다&quot;</span>
+      <a class="ru" href="https://doi.org/10.11124/JBIES-20-00377" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-65">
+      <span class="rk">학회 지침</span>
+      <span class="rc">Gustafsson UO, et al. Guidelines for Perioperative Care in Elective Colorectal Surgery: ERAS Society Recommendations 2018. World J Surg. 2019;43(3):659-695. — &quot;대부분의 환자는 수술 당일부터 음식과 경구영양보충을 시작해야 한다&quot;(강한 권고)</span>
+      <a class="ru" href="https://doi.org/10.1007/s00268-018-4844-y" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-66">
+      <span class="rk">학회 지침</span>
+      <span class="rc">Vujasinovic M, et al. Recommendations from the European guidelines for the diagnosis and therapy of pancreatic exocrine insufficiency. Pancreatology. 2025;25(3):293-300.</span>
+      <a class="ru" href="https://doi.org/10.1016/j.pan.2025.02.015" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-67">
+      <span class="rk">학회 지침</span>
+      <span class="rc">Fearon K, et al. Definition and classification of cancer cachexia: an international consensus. Lancet Oncol. 2011;12(5):489-495. (체중 감소 5 % 초과, 또는 BMI 20 미만이거나 근감소가 있으면 2 % 초과)</span>
+      <a class="ru" href="https://doi.org/10.1016/S1470-2045(10)70218-7" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-68">
+      <span class="rk">학회 지침</span>
+      <span class="rc">Arends J, et al. ESPEN guidelines on nutrition in cancer patients. Clin Nutr. 2017;36(1):11-48. — ESPEN 암 영양 지침 전체판(2021 은 축약본).</span>
+      <a class="ru" href="https://doi.org/10.1016/j.clnu.2016.07.015" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-69">
+      <span class="rk">학회 지침</span>
+      <span class="rc">Campbell KL, et al. Exercise Guidelines for Cancer Survivors: Consensus Statement from International Multidisciplinary Roundtable. Med Sci Sports Exerc. 2019;51(11):2375-2390.</span>
+      <a class="ru" href="https://doi.org/10.1249/MSS.0000000000002116" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-70">
+      <span class="rk">학회 지침</span>
+      <span class="rc">Ligibel JA, et al. Exercise, Diet, and Weight Management During Cancer Treatment: ASCO Guideline. J Clin Oncol. 2022;40(22):2491-2507.</span>
+      
+    </li>
+<li id="ref-71">
+      <span class="rk">무작위배정 시험</span>
+      <span class="rc">Courneya KS, et al. Structured Exercise after Adjuvant Chemotherapy in Colon Cancer (CHALLENGE). N Engl J Med. 2025;393(1):13-25.</span>
+      <a class="ru" href="https://doi.org/10.1056/NEJMoa2502760" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-72">
+      <span class="rk">무작위배정 시험</span>
+      <span class="rc">Schmitz KH, et al. Weight lifting in women with breast-cancer-related lymphedema (PAL trial). N Engl J Med. 2009;361(7):664-673.</span>
+      
+    </li>
+<li id="ref-73">
+      <span class="rk">무작위배정 시험</span>
+      <span class="rc">Galvão DA, et al. Combined resistance and aerobic exercise program reverses muscle loss in men undergoing androgen suppression therapy for prostate cancer without bone metastases: a randomized controlled trial. J Clin Oncol. 2010;28(2):340-347. (57명·12주 · 뼈 전이가 없는 남성만 대상)</span>
+      <a class="ru" href="https://doi.org/10.1200/JCO.2009.23.2488" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-74">
+      <span class="rk">메타분석</span>
+      <span class="rc">Rosero ID, et al. Systematic Review and Meta-Analysis of Randomized Controlled Trials on Preoperative Physical Exercise Interventions in Patients with Non-Small-Cell Lung Cancer. Cancers. 2019;11(7):944.</span>
+      
+    </li>
+<li id="ref-75">
+      <span class="rk">종설</span>
+      <span class="rc">McGarvey AC, et al. Physiotherapy for accessory nerve shoulder dysfunction following neck dissection surgery: a literature review. Head Neck. 2011;33(2):274-280.</span>
+      
+    </li>
+<li id="ref-76">
+      <span class="rk">메타분석</span>
+      <span class="rc">Grande AJ, et al. Exercise for cancer cachexia in adults. Cochrane Database Syst Rev. 2021;3(3):CD010804. (RCT 4편·178명, GRADE very low — 효과·수용성·안전성 모두 불확실)</span>
+      <a class="ru" href="https://doi.org/10.1002/14651858.CD010804.pub3" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-77">
+      <span class="rk">학회 지침</span>
+      <span class="rc">Roeland EJ, et al. Management of Cancer Cachexia: ASCO Guideline. J Clin Oncol. 2020;38(21):2438-2453. (체계적 문헌고찰 20편·RCT 13편 검토, 운동을 포함한 그 밖의 중재는 이득 없음 또는 근거 불충분)</span>
+      <a class="ru" href="https://doi.org/10.1200/JCO.20.00611" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-78">
+      <span class="rk">무작위배정 시험</span>
+      <span class="rc">Longland TM, et al. Higher compared with lower dietary protein during an energy deficit combined with intense exercise promotes greater lean mass gain and fat mass loss. Am J Clin Nutr. 2016;103(3):738-746. (건강한 젊은 남성 40명·4주 — 암 환자 대상 아님)</span>
+      <a class="ru" href="https://doi.org/10.3945/ajcn.115.119339" target="_blank" rel="noopener">원문 보기</a>
+    </li>
+<li id="ref-79">
+      <span class="rk">종설</span>
+      <span class="rc">Campbell KL, et al. Exercise recommendation for people with bone metastases: expert consensus. J Cancer Surviv / Sheill G, et al. Considerations for exercise prescription in patients with bone metastases. 2018.</span>
+      
+    </li>
+  </ol>
+</section>
+  </main>
+
+  <footer>
+    <span>하루차림 — 암 환자 식이·영양 도우미 · 감수 방사선종양학과 전문의</span>
+    <span>본문 생성일 2026-09-09 · 앱 데이터에서 자동 생성</span>
+  </footer>
+</div>
