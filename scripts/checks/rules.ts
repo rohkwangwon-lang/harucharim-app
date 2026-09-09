@@ -191,8 +191,17 @@ const MUST_NOT_CITE: [string, string, string][] = [
   ['common-protein', 'asco2022', 'ASCO 2022 는 단백질 목표를 제시하지 않는다'],
   ['breast-weight', 'asco2022', "ASCO 2022 는 '치료 중' 지침이고 내분비요법 중 유방암을 대상에서 뺐다"],
   ['gyn-obesity', 'asco2022', "ASCO 2022 는 '치료 중' 지침이라 생존기 체중 권고의 출처가 아니다"],
+  ['crc-fiber', 'vanblarigan2018', 'CALGB 89803 은 섬유의 용량-반응을 보고하지 않는다'],
   /* ESPEN 두 판에 'B12' 는 0건이다 — 전절제 쪽에서 뗐는데 부분절제 쪽에 남아 있었다 */
-  ['stomach-b12-partial', 'espen2021', "ESPEN 두 판 전문에 'B12' 가 0건이다"]
+  ['stomach-b12-partial', 'espen2021', "ESPEN 두 판 전문에 'B12' 가 0건이다"],
+  /*
+   * MASCC/ISOO 2020 전문 대조. 이 지침은 중재만 다룬다 —
+   * spicy·acidic·citrus·food·texture·soft·temperature·caffeine·alcohol 이 모두 0건이다.
+   * 식이 중재는 검토했으나 "근거 불충분·상충으로 권고를 낼 수 없었다"고 적는다.
+   */
+  ['eso-rough', 'mascc-mucositis', 'MASCC 전문에 음식 질감 언급이 0건이다'],
+  ['hn-soft-moist', 'mascc-mucositis', 'MASCC 전문에 soft·texture·temperature 가 0건이다'],
+  ['hn-dry-mouth', 'mascc-mucositis', 'MASCC 전문에 caffeine·alcohol·xerostomia 가 0건이다']
 ]
 const ALL_RULES = [...COMMON_RULES, ...Object.values(CONDITION_RULES).flat(),
                    ...CANCERS.flatMap((c) => c.rules ?? []), ...INTERACTIONS] as {
@@ -298,7 +307,48 @@ const MUST_SAY: [string, RegExp, string][] = [
   ['stomach-dumping', /표준 식단이 아닙니다/, 'Rogers 2011 은 표준 위절제 후 식단의 근거 부족을 결론으로 적는다'],
   ['cond-gx-dumping', /증상을 보아 가며 맞추는 것이 원칙/, '같은 결론을 증상 규칙 쪽에도 남긴다'],
   ['stomach-b12', /48\.8 %/, '메타분석(14편·2,627명)의 값이다'],
-  ['cond-gx-b12', /48\.8 %/, '메타분석(14편·2,627명)의 값이다']
+  ['cond-gx-b12', /48\.8 %/, '메타분석(14편·2,627명)의 값이다'],
+  /*
+   * MASCC 가 실제로 권고하는 것은 구강 냉각 하나뿐이고, 조건이 붙어 있다.
+   * '5-FU 계열' 로 뭉뚱그리면 지속주입·경구 약을 드시는 분이 헛되이 얼음을 무신다.
+   */
+  ['cond-muc-cold', /볼루스/, 'MASCC 권고는 bolus 5-FU 주입 중에 한정된다'],
+  ['cond-muc-cold', /30분/, 'MASCC 권고의 시간이다'],
+  ['cond-muc-cold', /멜팔란/, '두 번째 권고 상황(고용량 멜팔란 자가이식)이 빠지면 절반만 전한 것이다'],
+  /* 지침이 식이에 대해 권고를 내지 못했다는 사실은 환자가 알아야 할 근거의 무게다 */
+  ['cond-muc-avoid', /권고를 내지 못했습니다/, 'MASCC 는 식이 중재에 권고를 내지 못했다'],
+  ['hn-mucositis-avoid', /권고를 내지 못했습니다/, 'MASCC 는 식이 중재에 권고를 내지 못했다'],
+  /*
+   * IARC 114 공개 Q&A 대조. 등급을 위험의 크기로 읽는 오해가 이 항목의 가장 큰 문제라
+   * IARC 자신의 해명을 그대로 싣는다.
+   */
+  ['common-processed-meat', /근거가 얼마나 확실한가/, 'IARC 는 분류가 위험의 크기가 아니라 근거의 확실성이라고 못 박는다'],
+  ['crc-processed-meat', /10편/, '50 g·18 % 는 10편을 모은 추정이다'],
+  ['crc-red-meat', /Group 2A/, '적색육은 가공육과 등급이 다르다 — 근거도 "제한적" 이다'],
+  ['crc-red-meat', /17 %/, 'IARC 의 적색육 추정치는 하루 100 g 당 17 % 다'],
+  /*
+   * Bailey 2013 대조. 라임·포멜로·세비야 오렌지가 같고, 단맛 오렌지는 아니며,
+   * 정맥주사는 영향을 받지 않는다 — 셋 다 환자가 실제로 헷갈리는 지점이다.
+   */
+  ['common-grapefruit', /200 mL/, '임상적으로 의미 있는 최소량이다'],
+  ['common-grapefruit', /라임/, '원문은 라임·포멜로·세비야 오렌지를 함께 든다'],
+  ['common-grapefruit', /정맥으로 맞는/, '정맥 투여 약물은 이 상호작용을 받지 않는다'],
+  /* Song 2018 은 이 규칙을 뒷받침하지만 Van Blarigan 은 섬유의 용량-반응을 보고하지 않는다 */
+  ['common-grapefruit', /네이블|발렌시아/, '단맛 오렌지는 해당되지 않는다는 안심도 함께 전한다'],
+  /*
+   * WCRF 제3차 보고서 원문. 400 g 은 '채소만' 이 아니라 '비전분 채소와 과일을 합쳐서' 다.
+   * 채소만으로 읽으면 목표가 두 배가 되어 아무도 지킬 수 없다.
+   */
+  ['common-vegetables', /합쳐/, 'WCRF 의 400 g 은 비전분 채소와 과일의 합계다'],
+  ['common-vegetables', /80 g/, '1회분 약 80 g × 5회 이상이 원문의 표현이다'],
+  ['crc-fiber', /30 g 이상/, 'WCRF 목표는 하루 30 g 이상이다 — 25~35 g 은 원문에 없다'],
+  ['crc-fiber', /과일 섬유는 연관이 확인되지 않았/, 'Song 2018 은 과일 섬유에서 연관을 찾지 못했다'],
+  ['crc-red-meat', /700~750 g/, '조리 후 500 g 의 생고기 환산값이 원문에 있다'],
+  /* 대두 세 편 — 어느 연구가 무엇을 말했는지 갈라 둔다 */
+  ['breast-soy', /0\.75/, 'Nechuta 2012 의 재발 위험비다'],
+  ['breast-soy', /상하이 코호트 5,042명/, '수용체·타목시펜 소집단 결과는 Shu 2009 의 것이다'],
+  ['crc-lifestyle', /992명/, 'CALGB 89803 의 분석 대상 수다'],
+  ['crc-lifestyle', /42 %/, '가장 잘 따른 군의 사망 위험 감소(위험비 0.58)다']
 ]
 /*
  * 반대 방향의 못. 원문이 하지 않는 말을 우리가 하지 않았는지 본다.
@@ -312,26 +362,31 @@ const MUST_NOT_SAY: [string, RegExp, string][] = [
   /* ACS 는 진단 후 감량의 이득을 확인하지 못했다 — '가장 확실한' 이 되살아나면 근거를 넘는다 */
   ['breast-weight', /가장 확실한/, 'ACS 는 진단 후 감량과 생존의 관계를 불확실로 두었다'],
   ['prostate-veg-fat', /재발 위험 모두와 연관/, 'ACS 는 비만과 전립선암 진행·사망을 결론 없음으로 두었다'],
+  /* 채소만 400 g 은 원문이 아니다 — 되살아나면 지킬 수 없는 목표가 된다 */
+  ['common-vegetables', /채소는 하루 400 g/, 'WCRF 의 400 g 은 채소와 과일의 합계다'],
   /* ASCO 2022 는 이 말을 하지 않는다 — 생존자 체중 권고를 낸 적이 없다 */
   ['breast-weight', /미국임상종양학회는 생존자에게 체중 관리/, "ASCO 2022 는 체중 개입에 '근거 불충분' 을 냈다"],
-  ['prostate-adt-protein', /1\.0~1\.5 g/, 'ESPEN 원문 표현이 아니다']
+  ['prostate-adt-protein', /1\.0~1\.5 g/, 'ESPEN 원문 표현이 아니다'],
+  /* 뭉뚱그린 표현이 되살아나면 해당하지 않는 분이 따라 하신다 */
+  ['cond-muc-cold', /5-FU 계열 항암제 투여 중/, 'MASCC 권고는 bolus 주입 중으로 한정된다']
 ]
 for (const [rid, pat, why] of MUST_NOT_SAY) {
-  const r = ALL_RULES.find((x) => x.id === rid) as { id: string; reason?: string } | undefined
+  const r = ALL_RULES.find((x) => x.id === rid) as { id: string; title?: string; reason?: string } | undefined
   if (!r) { bad('못 박아 둔 규칙이 사라졌거나 이름이 바뀜', `${rid} (${why})`); continue }
-  if (pat.test(r.reason ?? '')) {
+  /* 제목에 적힌 주장도 화면에 보이는 주장이다 — reason 만 보면 제목으로 되돌아가도 지나간다 */
+  if (pat.test(`${r.title ?? ''} ${r.reason ?? ''}`)) {
     bad('원문이 하지 않는 말이 되살아남', `${rid} — ${why}`)
   }
 }
 
 for (const [rid, pat, why] of MUST_SAY) {
-  const r = ALL_RULES.find((x) => x.id === rid) as { id: string; reason?: string } | undefined
+  const r = ALL_RULES.find((x) => x.id === rid) as { id: string; title?: string; reason?: string } | undefined
   /*
    * 없는 id 를 적어 두면 조용히 지나간다 — 훑지 않는 길은 지켜지지 않는다.
    * 규칙 이름이 바뀌거나 사라지면 여기서 먼저 걸리게 한다.
    */
   if (!r) { bad('못 박아 둔 규칙이 사라졌거나 이름이 바뀜', `${rid} (${why})`); continue }
-  if (!pat.test(r.reason ?? '')) {
+  if (!pat.test(`${r.title ?? ''} ${r.reason ?? ''}`)) {
     bad('원문 대조로 고친 수치가 사라짐', `${rid} — ${why}`)
   }
 }

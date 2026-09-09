@@ -62,8 +62,10 @@ export const REFERENCES: Reference[] = [
     citation: '농촌진흥청 국립농업과학원. 국가표준식품성분표 제9개정판.' },
 
   // ── 발암성 분류 ───────────────────────────────────────────────
+  /* 공개 Q&A 문서를 받아 대조했다 — 분류 근거·50 g/18 %·100 g/17 % 가 모두 여기에 있다 */
   { id: 'iarc114', kind: 'review', year: 2018,
-    citation: 'IARC Monographs Volume 114: Red Meat and Processed Meat. International Agency for Research on Cancer.' },
+    url: 'https://www.iarc.who.int/wp-content/uploads/2018/07/Monographs-QA_Vol114.pdf',
+    citation: 'IARC Monographs Volume 114: Red Meat and Processed Meat. International Agency for Research on Cancer. (공개 Q&A 포함)' },
   { id: 'iarc100e', kind: 'review', year: 2012,
     citation: 'IARC Monographs Volume 100E: Personal Habits and Indoor Combustions — Alcohol Consumption. (주류 = Group 1 · 구강·인두·후두·식도·간·대장·여성 유방)',
     url: 'https://publications.iarc.who.int/122' },
@@ -74,11 +76,14 @@ export const REFERENCES: Reference[] = [
 
   // ── 대두·유방암 ───────────────────────────────────────────────
   { id: 'shu2009', kind: 'cohort', year: 2009,
-    citation: 'Shu XO, et al. Soy food intake and breast cancer survival. JAMA. 2009;302(22):2437-2443.' },
+    citation: 'Shu XO, et al. Soy food intake and breast cancer survival. JAMA. 2009;302(22):2437-2443.',
+    url: 'https://doi.org/10.1001/jama.2009.1783' },
   { id: 'nechuta2012', kind: 'meta', year: 2012,
-    citation: 'Nechuta SJ, et al. Soy food intake after diagnosis of breast cancer and survival: an in-depth analysis of combined evidence from cohort studies. Am J Clin Nutr. 2012;96(1):123-132.' },
+    citation: 'Nechuta SJ, et al. Soy food intake after diagnosis of breast cancer and survival: an in-depth analysis of combined evidence from cohort studies. Am J Clin Nutr. 2012;96(1):123-132.',
+    url: 'https://doi.org/10.3945/ajcn.112.035972' },
   { id: 'chi2013', kind: 'meta', year: 2013,
-    citation: 'Chi F, et al. Post-diagnosis soy food intake and breast cancer survival: a meta-analysis of cohort studies. Asian Pac J Cancer Prev. 2013;14(4):2407-2412.' },
+    citation: 'Chi F, et al. Post-diagnosis soy food intake and breast cancer survival: a meta-analysis of cohort studies. Asian Pac J Cancer Prev. 2013;14(4):2407-2412.',
+    url: 'https://doi.org/10.7314/apjcp.2013.14.4.2407' },
 
   // ── 항산화 보충제의 위해 ──────────────────────────────────────
   { id: 'bairati2005', kind: 'rct', year: 2005,
@@ -140,9 +145,11 @@ export const REFERENCES: Reference[] = [
 
   // ── 대장암 ───────────────────────────────────────────────────
   { id: 'song2018fiber', kind: 'cohort', year: 2018,
-    citation: 'Song M, et al. Fiber Intake and Survival After Colorectal Cancer Diagnosis. JAMA Oncol. 2018;4(1):71-79.' },
+    citation: 'Song M, et al. Fiber Intake and Survival After Colorectal Cancer Diagnosis. JAMA Oncol. 2018;4(1):71-79.',
+    url: 'https://doi.org/10.1001/jamaoncol.2017.3684' },
   { id: 'vanblarigan2018', kind: 'cohort', year: 2018,
-    citation: 'Van Blarigan EL, et al. Association of Survival With Adherence to the ACS Nutrition and Physical Activity Guidelines Among Patients With Colon Cancer (CALGB 89803). JAMA Oncol. 2018;4(6):783-790.' },
+    citation: 'Van Blarigan EL, et al. Association of Survival With Adherence to the ACS Nutrition and Physical Activity Guidelines Among Patients With Colon Cancer (CALGB 89803). JAMA Oncol. 2018;4(6):783-790.',
+    url: 'https://doi.org/10.1001/jamaoncol.2018.0126' },
 
   // ── 간암 ─────────────────────────────────────────────────────
   { id: 'kennedy2017coffee', kind: 'meta', year: 2017,
@@ -190,7 +197,9 @@ export const REFERENCES: Reference[] = [
     url: 'https://www.fda.gov/media/83744/download' },
 
   // ── 상호작용 ─────────────────────────────────────────────────
+  /* 전문 공개. 200 mL·24시간 25 %·라임/포멜로/세비야오렌지·단맛오렌지 제외·정맥주사 무영향이 모두 여기에 있다 */
   { id: 'bailey2013grapefruit', kind: 'review', year: 2013,
+    url: 'https://doi.org/10.1503/cmaj.120951',
     citation: 'Bailey DG, et al. Grapefruit–medication interactions: forbidden fruit or avoidable consequences? CMAJ. 2013;185(4):309-316.' },
   { id: 'golden2009', kind: 'review', year: 2009,
     citation: 'Golden EB, et al. Green tea polyphenols block the anticancer effects of bortezomib and other boronic acid-based proteasome inhibitors. Blood. 2009;113(23):5927-5937.' },
@@ -212,7 +221,15 @@ export const REFERENCES: Reference[] = [
   // ── 증상 관리 ────────────────────────────────────────────────
   { id: 'ryan2012ginger', kind: 'rct', year: 2012,
     citation: 'Ryan JL, et al. Ginger (Zingiber officinale) reduces acute chemotherapy-induced nausea: a URCC CCOP study of 576 patients. Support Care Cancer. 2012;20(7):1479-1489.' },
+  /*
+   * 전문을 받아 대조했다. 이 지침은 '무엇을 쓸 것인가'(구강 냉각·광생체조절·벤지다민 등)를 다루지
+   * '무엇을 먹을 것인가'를 다루지 않는다 — 전문에 spicy·acidic·citrus·food·texture·soft·
+   * temperature·caffeine·alcohol 이 모두 0건이다. 식이 중재(지방조절식·섬유)는 검토했으나
+   * "근거가 불충분하거나 상충되어 권고를 낼 수 없었다"고 적는다.
+   * 그러므로 이 출처는 '통증 조절과 식이 지원이 핵심' 이라는 틀과 구강 냉각에만 붙일 수 있다.
+   */
   { id: 'mascc-mucositis', kind: 'guideline', year: 2020,
+    url: 'https://doi.org/10.1002/cncr.33100',
     citation: 'Elad S, et al. MASCC/ISOO clinical practice guidelines for the management of mucositis secondary to cancer therapy. Cancer. 2020;126(19):4423-4431.' },
   /*
    * IDDSI 는 두 문서로 되어 있다 — 단계 정의(Detailed Definitions)와 확인법(Testing Methods).

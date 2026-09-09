@@ -53,9 +53,12 @@ export const headneck: CancerProfile = {
       title: '점막염 기간에는 맵고 신 음식, 거친 음식을 완전히 빼세요',
       reason:
         '벗겨진 구강 점막에 캡사이신·산·소금은 직접적인 통증 자극이 됩니다. ' +
-        '토마토·감귤·파인애플·식초·김치·과자류가 흔한 원인입니다. 통증으로 못 먹는 것이 이 시기 체중 감소의 거의 전부이므로, ' +
-        '자극을 없애는 것 자체가 영양 개입입니다.',
-      evidence: 'G',
+        '토마토·감귤·파인애플·식초·김치·과자류가 흔한 원인입니다. 통증으로 못 먹는 것이 이 시기 체중 감소의 큰 부분이므로, ' +
+        '자극을 없애는 것 자체가 영양 개입입니다. ' +
+        '다만 근거의 무게는 알고 계시는 편이 낫습니다 — 국제 지침(MASCC/ISOO)은 "통증 조절과 식이 지원이 관리의 핵심"이라고 적으면서도, ' +
+        '어떤 음식을 빼야 하는지에 대해서는 근거가 불충분하고 서로 엇갈려 권고를 내지 못했습니다. ' +
+        '위 목록은 통증 기전과 진료 경험에 따른 조정입니다.',
+      evidence: 'C',
       refIds: ['mascc-mucositis']
     },
     {
@@ -68,7 +71,8 @@ export const headneck: CancerProfile = {
         '국물처럼 묽은 것이 음식과 따로 흐르면 오히려 사레가 들기 쉬우니 남는 물기는 따라 내십시오. ' +
         '뜨겁거나 차가운 극단적 온도를 피하면 같은 음식도 훨씬 편하게 드실 수 있습니다.',
       evidence: 'G',
-      refIds: ['mascc-mucositis', 'iddsi']
+      /* 부드러움·촉촉함의 근거는 IDDSI 다. MASCC 전문에 soft·texture·temperature 는 0건이다 */
+      refIds: ['iddsi']
     },
     {
       id: 'hn-dense-calorie',
@@ -100,9 +104,14 @@ export const headneck: CancerProfile = {
       title: '구강건조증이 남았다면 카페인과 알코올은 증상을 악화시킵니다',
       reason:
         '침샘 손상은 치료 후 수개월에서 수년까지 이어지는 경우가 많습니다. 이뇨 작용이 있는 카페인·알코올은 구강건조를 더 심하게 만들고, ' +
-        '침의 완충 작용이 없어진 상태에서 당까지 겹치면 방사선 우식증이 빠르게 진행합니다.',
-      evidence: 'G',
-      refIds: ['nccn-survivorship', 'mascc-mucositis']
+        '침의 완충 작용이 없어진 상태에서 당까지 겹치면 방사선 우식증이 빠르게 진행합니다. ' +
+        '카페인·알코올을 줄이라는 조언은 큰 임상시험으로 증명된 것이 아니라 이뇨·점막 자극이라는 기전에 근거한 조정입니다.',
+      evidence: 'C',
+      /*
+       * MASCC/ISOO 전문에 caffeine·alcohol·xerostomia·dry mouth 가 모두 0건이다 —
+       * 그 지침은 점막염 중재를 다루지 구강건조 관리를 다루지 않는다.
+       */
+      refIds: ['nccn-survivorship']
     },
     {
       id: 'hn-caries',
