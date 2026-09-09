@@ -142,7 +142,12 @@ const KIND_MAX: Record<string, string[]> = {
   rct: ['A', 'B', 'C', 'G'],
   meta: ['A', 'B', 'C', 'G'],
   cohort: ['B', 'C', 'G'],
-  review: ['C', 'G'],
+  /*
+   * 종설은 'G' 를 달 수 없다. G 는 '주요 학회 지침 합의' 를 뜻하는데,
+   * 단독저자 초청 종설을 그 자리에 놓으면 없는 권위를 만들어 낸다 —
+   * 실제로 위절제 규칙 여섯 건이 그렇게 올라가 있었다.
+   */
+  review: ['C'],
   guideline: ['G', 'A', 'B', 'C'],
   db: ['C', 'G']
 }
@@ -175,7 +180,19 @@ const MUST_NOT_CITE: [string, string, string][] = [
   ['stomach-b12', 'espen2021', "ESPEN 두 판 전문에 'B12' 가 0건이다"],
   ['panc-fat-symptom', 'espen2021', 'ESPEN 에 췌장 효소·지방 분할 권고가 없다'],
   ['liver-raw-seafood', 'easl-nutrition', 'EASL 영양 지침에 비브리오·생식 언급이 0건이다'],
-  ['prostate-selenium', 'select2011-only', '기저 셀레늄 사후분석은 Kristal 2014 다']
+  ['prostate-selenium', 'select2011-only', '기저 셀레늄 사후분석은 Kristal 2014 다'],
+  /*
+   * ASCO 2022(Ligibel) 전문 대조. 제목 그대로 '치료 중' 지침이고,
+   * 보충제·악액질·영양실조는 범위에서 명시적으로 뺐으며, 내분비요법 중 유방암 환자도 대상이 아니다.
+   * 식이 중재와 체중 개입에는 둘 다 '근거 불충분' 을 냈다.
+   */
+  ['common-antioxidant-rt', 'asco2022', 'ASCO 2022 는 보충제를 범위에서 뺐다'],
+  ['common-vegetables', 'asco2022', "ASCO 2022 는 치료 중 식이 중재에 '근거 불충분' 을 냈다"],
+  ['common-protein', 'asco2022', 'ASCO 2022 는 단백질 목표를 제시하지 않는다'],
+  ['breast-weight', 'asco2022', "ASCO 2022 는 '치료 중' 지침이고 내분비요법 중 유방암을 대상에서 뺐다"],
+  ['gyn-obesity', 'asco2022', "ASCO 2022 는 '치료 중' 지침이라 생존기 체중 권고의 출처가 아니다"],
+  /* ESPEN 두 판에 'B12' 는 0건이다 — 전절제 쪽에서 뗐는데 부분절제 쪽에 남아 있었다 */
+  ['stomach-b12-partial', 'espen2021', "ESPEN 두 판 전문에 'B12' 가 0건이다"]
 ]
 const ALL_RULES = [...COMMON_RULES, ...Object.values(CONDITION_RULES).flat(),
                    ...CANCERS.flatMap((c) => c.rules ?? []), ...INTERACTIONS] as {
@@ -199,7 +216,16 @@ const MUST_CITE: [string, string][] = [
   ['eso-alcohol', 'brooks2009aldh2'],
   ['prostate-adt-bone', 'smith2001adt'],
   ['common-antioxidant-rt', 'meyer2008smoking'],
-  ['hn-antioxidant', 'meyer2008smoking']
+  ['hn-antioxidant', 'meyer2008smoking'],
+  /* ASCO 2022 권고 2.2 는 호중구감소증 식단을 정면으로 권고하지 않는다 — 지침급 뒷받침이라 붙여 둔다 */
+  ['common-neutropenic-diet-myth', 'asco2022'],
+  /* ADT 중 단백질 목표는 ESPEN 몫, 저항운동 회복 근거는 Galvão 무작위배정 시험이다 */
+  ['prostate-adt-protein', 'espen2021'],
+  ['prostate-adt-protein', 'galvao2010'],
+  /* 위절제 후 B12 결핍의 빈도를 실제로 말하는 것은 이 메타분석뿐이다 */
+  ['stomach-b12', 'b12-gastrectomy-meta'],
+  ['stomach-b12-partial', 'b12-gastrectomy-meta'],
+  ['cond-gx-b12', 'b12-gastrectomy-meta']
 ]
 for (const [rid, refId] of MUST_CITE) {
   const r = ALL_RULES.find((x) => x.id === rid)
@@ -260,7 +286,19 @@ const MUST_SAY: [string, RegExp, string][] = [
   ['breast-fiber-veg', /유방암 이외의 원인/, 'ACS 에서 식물성 식사의 이득은 전체 사망·비유방암 사망 쪽이었다'],
   ['breast-soy', /사망률까지 낮춘다는 근거는 아니/, 'ACS 는 대두의 이득을 재발에 한정했다'],
   ['prostate-veg-fat', /결론이 나지 않/, 'ACS 는 비만과 전립선암 사망·진행의 관계를 결론 없음으로 두었다'],
-  ['gyn-obesity', /무진행 생존/, 'ACS 는 비만이 자궁내막암 자체의 사망·재발과는 연관되지 않았다고 적었다']
+  ['gyn-obesity', /무진행 생존/, 'ACS 는 비만이 자궁내막암 자체의 사망·재발과는 연관되지 않았다고 적었다'],
+  /* ASCO 2022 원문 대조로 넣은 문장들 */
+  ['common-neutropenic-diet-myth', /이득보다 해가 클/, 'ASCO 권고 2.2 의 판정(harms likely to outweigh benefits)이다'],
+  ['cond-gain-dense', /권고를 내지 않았습니다/, "ASCO 권고 3 은 치료 중 체중 개입에 '근거 불충분' 을 냈다"],
+  ['prostate-adt-protein', /1 g 을 넘겨/, 'ESPEN 원문은 1.0~1.5 가 아니라 1 g 초과·1.5 까지다'],
+  /*
+   * Rogers 2011 의 결론은 '표준 위절제 후 식단을 뒷받침할 문헌이 충분하지 않다' 이다.
+   * 환자들이 받아 드는 빡빡한 식단표가 근거에서 나온 것이 아니라는 뜻이라, 그 말을 화면에 남긴다.
+   */
+  ['stomach-dumping', /표준 식단이 아닙니다/, 'Rogers 2011 은 표준 위절제 후 식단의 근거 부족을 결론으로 적는다'],
+  ['cond-gx-dumping', /증상을 보아 가며 맞추는 것이 원칙/, '같은 결론을 증상 규칙 쪽에도 남긴다'],
+  ['stomach-b12', /48\.8 %/, '메타분석(14편·2,627명)의 값이다'],
+  ['cond-gx-b12', /48\.8 %/, '메타분석(14편·2,627명)의 값이다']
 ]
 /*
  * 반대 방향의 못. 원문이 하지 않는 말을 우리가 하지 않았는지 본다.
@@ -273,7 +311,10 @@ const MUST_NOT_SAY: [string, RegExp, string][] = [
   ['hn-aspiration', /가장 빠르게/, 'IDDSI 는 단계를 나눌 뿐 위험 순위를 매기지 않는다'],
   /* ACS 는 진단 후 감량의 이득을 확인하지 못했다 — '가장 확실한' 이 되살아나면 근거를 넘는다 */
   ['breast-weight', /가장 확실한/, 'ACS 는 진단 후 감량과 생존의 관계를 불확실로 두었다'],
-  ['prostate-veg-fat', /재발 위험 모두와 연관/, 'ACS 는 비만과 전립선암 진행·사망을 결론 없음으로 두었다']
+  ['prostate-veg-fat', /재발 위험 모두와 연관/, 'ACS 는 비만과 전립선암 진행·사망을 결론 없음으로 두었다'],
+  /* ASCO 2022 는 이 말을 하지 않는다 — 생존자 체중 권고를 낸 적이 없다 */
+  ['breast-weight', /미국임상종양학회는 생존자에게 체중 관리/, "ASCO 2022 는 체중 개입에 '근거 불충분' 을 냈다"],
+  ['prostate-adt-protein', /1\.0~1\.5 g/, 'ESPEN 원문 표현이 아니다']
 ]
 for (const [rid, pat, why] of MUST_NOT_SAY) {
   const r = ALL_RULES.find((x) => x.id === rid) as { id: string; reason?: string } | undefined

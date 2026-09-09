@@ -158,7 +158,8 @@ export const COMMON_RULES: NutritionRule[] = [
       '피우지 않으신 분에서는 거의 차이가 없었습니다. ' +
       '항산화 성분을 음식으로 드시는 것은 제한 대상이 아니며, 문제가 되는 것은 보충제 수준의 고용량입니다.',
     evidence: 'A',
-    refIds: ['bairati2005b', 'meyer2008smoking', 'bairati2005', 'asco2022']
+    /* ASCO 2022 는 보충제를 범위에서 명시적으로 제외한다 — 이 규칙을 뒷받침하지 않는다 */
+    refIds: ['bairati2005b', 'meyer2008smoking', 'bairati2005']
   },
   {
     id: 'common-grapefruit',
@@ -199,7 +200,8 @@ export const COMMON_RULES: NutritionRule[] = [
       'WCRF/AICR 와 미국암학회는 생존자에게 채소·과일이 풍부한 식사를 권고합니다. ' +
       '단일 성분이 아니라 식이섬유·카로티노이드·폴리페놀이 함께 들어 있는 "식품 형태"에서 이득이 관찰되었습니다.',
     evidence: 'G',
-    refIds: ['wcrf2018', 'acs2022', 'asco2022']
+    /* ASCO 2022 는 치료 중 식이 중재에 '근거 불충분' 을 냈다 — 채소 권고의 출처가 아니다 */
+    refIds: ['wcrf2018', 'acs2022']
   },
   {
     id: 'common-protein',
@@ -224,7 +226,8 @@ export const COMMON_RULES: NutritionRule[] = [
       '치료 중에는 근육량이 치료 완주율과 부작용 회복 속도에 직접 연결되고, ' +
       '치료를 마친 뒤에도 근육은 저절로 돌아오지 않아 계속 챙기셔야 하는 부분입니다.',
     evidence: 'G',
-    refIds: ['espen2021', 'espen-cachexia', 'asco2022']
+    /* ASCO 2022 는 영양실조·악액질을 범위에서 제외했고 단백질 목표를 제시하지 않는다 */
+    refIds: ['espen2021', 'espen-cachexia']
   },
   {
     id: 'common-neutropenic-diet-myth',
@@ -245,8 +248,10 @@ export const COMMON_RULES: NutritionRule[] = [
       '섭취량이 줄어 영양 상태가 나빠지는 것도 문제입니다. ' +
       '그래서 저자들이 권하는 것은 음식을 넓게 금지하는 것이 아니라 ' +
       '**식품을 안전하게 다루는 것**입니다 — 익혀서 드시고, 씻어 드시고, 만든 뒤 2시간 안에 냉장하는 것. ' +
-      '이 앱도 그 방식을 따릅니다. 다만 담당 의료진이 따로 정해 주신 기준이 있으면 그것을 우선하십시오.',
+      '이 앱도 그 방식을 따릅니다. 미국임상종양학회도 2022년 지침에서 ' +
+      '"생과일·생채소를 빼는 호중구감소증 식단은 치료 중 감염 예방 목적으로 권고하지 않는다(이득보다 해가 클 가능성)" 고 못 박았습니다. ' +
+      '다만 담당 의료진이 따로 정해 주신 기준이 있으면 그것을 우선하십시오.',
     evidence: 'B',
-    refIds: ['sonbol2015']
+    refIds: ['sonbol2015', 'asco2022']
   }
 ]

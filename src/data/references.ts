@@ -120,8 +120,23 @@ export const REFERENCES: Reference[] = [
     citation: 'Ge S, et al. Association between habitual dietary salt intake and risk of gastric cancer: a systematic review of observational studies. Gastroenterol Res Pract. 2012;2012:808120.' },
   { id: 'dagostino-kim2013', kind: 'cohort', year: 2013,
     citation: 'Kim J, et al. Dietary factors and gastric cancer in Korea: a case-control study. Int J Cancer / Korean cohort evidence on salted foods and kimchi intake.' },
-  { id: 'gastrectomy-nutr', kind: 'review', year: 2020,
-    citation: 'Rogers C. Postgastrectomy Nutrition. Nutr Clin Pract — 위절제 후 덤핑증후군·B12·철·칼슘 흡수장애 관리.' },
+  /*
+   * 연도가 2020 으로 적혀 있었으나 실제는 2011 이다(PubMed 21447764).
+   * 단독저자 초청 종설이며 학회 합의문이 아니다 — 그래서 이 출처만으로는 'G' 를 달 수 없다.
+   * 그리고 이 종설 자신이 결론에서 "표준 위절제 후 식단을 뒷받침할 문헌이 충분하지 않고,
+   * 증상에 맞춘 개별 조정이 권고된다" 고 적는다. 앱도 그 말을 그대로 옮긴다.
+   */
+  { id: 'gastrectomy-nutr', kind: 'review', year: 2011,
+    url: 'https://doi.org/10.1177/0884533611400070',
+    citation:
+      'Rogers C. Postgastrectomy nutrition. Nutr Clin Pract. 2011;26(2):126-136. (초청 종설) ' +
+      '— 위절제 후 덤핑증후군·B12·철·칼슘 흡수장애 관리. 표준 식단을 뒷받침할 문헌은 충분하지 않으며 증상별 개별 조정을 권한다.' },
+  /* 위절제 후 B12 결핍의 빈도를 실제 숫자로 말하는 유일한 상위 근거 */
+  { id: 'b12-gastrectomy-meta', kind: 'meta', year: 2024,
+    url: 'https://doi.org/10.1097/CEJ.0000000000000838',
+    citation:
+      'Bahardoust M, et al. Vitamin B12 deficiency after total gastrectomy for gastric cancer, prevalence, and symptoms: ' +
+      'a systematic review and meta-analysis. Eur J Cancer Prev. 2024;33(3):208-216. (14편·2,627명)' },
 
   // ── 대장암 ───────────────────────────────────────────────────
   { id: 'song2018fiber', kind: 'cohort', year: 2018,
