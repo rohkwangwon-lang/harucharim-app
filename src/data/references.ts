@@ -156,7 +156,8 @@ export const REFERENCES: Reference[] = [
     citation: 'U.S. CDC. Clinical Overview of Vibriosis. — 비브리오 불니피쿠스 감염자의 약 5명 중 1명이 사망하며, 간질환이 있으면 특히 위험하다.',
     url: 'https://www.cdc.gov/vibrio/hcp/clinical-overview/index.html' },
   { id: 'fda-foodsafety', kind: 'guideline', year: 2023,
-    citation: 'U.S. FDA. Food Safety for People with Cancer. — 조리·보관 위생 중심의 식품안전 권고.' },
+    citation: 'U.S. FDA. Food Safety for Older Adults and People with Cancer, Diabetes, HIV/AIDS, Organ Transplants, and Autoimmune Diseases. — 위험이 높은 것과 낮은 것을 짝지어 제시한다. 생 새싹채소는 높은 쪽, 익힌 새싹이 낮은 쪽이다. 조리 후 2시간 안에 냉장(32 ℃ 넘으면 1시간).',
+    url: 'https://www.fda.gov/media/83744/download' },
 
   // ── 상호작용 ─────────────────────────────────────────────────
   { id: 'bailey2013grapefruit', kind: 'review', year: 2013,

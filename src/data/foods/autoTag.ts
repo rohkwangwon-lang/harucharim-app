@@ -55,6 +55,16 @@ const RAW = new RegExp(
   '|생굴|굴회|산낙지|낙지탕탕이|생연어'
 )
 
+/* ── 생 새싹채소 ──────────────────────────────────
+ *
+ * '생채소는 씻어 드시면 된다' 의 예외다. FDA 는 'Raw sprouts (alfalfa, bean, or any
+ * other sprout)' 를 위험 높은 쪽에, 'Cooked sprouts' 를 낮은 쪽에 짝지어 둔다 —
+ * 싹을 틔우는 따뜻하고 습한 환경 자체가 균에 유리해서 씻는 것으로 해결되지 않는다.
+ * 데친·볶은·무친 것은 익힌 것이므로 뺀다.
+ */
+const SPROUT = /숙주|콩나물|새싹|무순|알팔파|스프라우트/
+const SPROUT_COOKED = /데친|삶은|볶음|무침|국|탕|찌개|찜|전|밥|죽|구이|조림|튀김/
+
 /* ── 가공육 ────────────────────────────────────────── */
 /* 햄버거의 패티는 가공육이 아니고, 비엔나커피는 고기가 아니다 */
 const CURED = /햄(?!버거)|소시지|쏘시지|베이컨|살라미|프랑크|비엔나(?!커피)|스팸|런천미트|초리조|파스트라미|육포|핫도그/
@@ -86,6 +96,7 @@ export function autoTags(name: string): FoodTag[] {
   if (!COOKED.test(s) && !NOT_FOOD.test(s) && !SUSHI_COOKED.test(s) && RAW.test(s)) {
     out.push('생식동물성' as FoodTag)
   }
+  if (SPROUT.test(s) && !SPROUT_COOKED.test(s)) out.push('생새싹' as FoodTag)
   if (CURED.test(s) && !CURED_NOT.test(s)) out.push('가공육' as FoodTag)
   if (GRAPEFRUIT.test(s) && !GRAPEFRUIT_NOT.test(s)) out.push('자몽계' as FoodTag)
 

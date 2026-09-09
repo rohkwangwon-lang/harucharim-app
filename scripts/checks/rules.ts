@@ -216,7 +216,13 @@ const MUST_SAY: [string, RegExp, string][] = [
   ['prostate-selenium', /91 %/, '사후 분석의 값은 91 % 증가·P=0.007 이다'],
   ['liver-raw-seafood', /53\.9 %/, '간질환군의 값과 전체 값을 나누어 적는다'],
   ['prostate-adt-bone', /3\.3 %/, '무작위 시험의 값은 요추 3.3 %·고관절 1.8 % 다. 연 2~5 % 는 상한이 근거를 넘었다'],
-  ['common-sodium', /3,255 mg/, '국민건강영양조사 2018년 값이다. 1.5배는 어림이었다']
+  ['common-sodium', /3,255 mg/, '국민건강영양조사 2018년 값이다. 1.5배는 어림이었다'],
+  /*
+   * FDA 는 생 새싹채소를 '생채소는 씻으면 된다' 의 예외로 못 박는다.
+   * 이 예외가 없어서 호중구가 낮은 분께 브로콜리 새싹이 권장으로 나가고 있었다.
+   */
+  ['cond-neut-raw', /새싹채소/, '생 새싹은 씻어서 해결되지 않는다는 FDA 예외를 적는다'],
+  ['cond-neut-raw', /2시간/, 'FDA 의 시간 기준이다. "오래" 로는 실행할 수 없다']
 ]
 for (const [rid, pat, why] of MUST_SAY) {
   const r = ALL_RULES.find((x) => x.id === rid) as { id: string; reason?: string } | undefined

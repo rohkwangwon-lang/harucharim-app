@@ -213,8 +213,11 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
       id: 'cond-neut-raw', level: 'avoid', match: { tags: ['생식'] },
       title: '익히지 않은 음식은 이 기간 동안 피하세요',
       reason:
+        /* FDA 원문의 시간 기준을 그대로 적는다 — '오래' 로는 실행할 수가 없다 */
         '회·육회·생굴·반숙 달걀·살균되지 않은 유제품이 대상입니다. ' +
-        '조리한 지 오래된 음식, 상온에 오래 둔 김밥·샐러드도 마찬가지입니다.',
+        '생 새싹채소(숙주·알팔파·브로콜리 새싹)도 씻는 것으로 해결되지 않아 익혀 드셔야 합니다. ' +
+        '조리하시거나 사 오신 뒤 2시간 안에 냉장하시고(더운 날 32 ℃ 를 넘으면 1시간), ' +
+        '상온에 오래 둔 김밥·샐러드는 드시지 마십시오.',
       evidence: 'B', refIds: ['fda-foodsafety', 'sonbol2015']
     },
     {
