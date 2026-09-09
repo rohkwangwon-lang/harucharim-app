@@ -25,9 +25,12 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Build
-        # GitHub Pages 는 https://<user>.github.io/<repo>/ 하위 경로로 서빙되므로
-        # base 를 저장소 이름으로 맞춰 준다
-        run: HARUCHARIM_BASE=/${{ github.event.repository.name }}/ npm run build
+        # 자체 도메인(harucharim.com)을 쓰므로 뿌리 경로에서 서빙된다.
+        # 예전에는 github.io/<repo>/ 하위였기에 base 를 저장소 이름으로 맞춰 주었는데,
+        # 지금 그대로 두면 시작주소와 서비스워커 경로가 한 칸씩 어긋난다.
+        # public/CNAME 이 사용자 지정 도메인 설정을 배포마다 다시 심어 준다 —
+        # 이 파일이 없으면 GitHub Pages 화면에서 넣은 도메인이 배포할 때마다 지워진다.
+        run: npm run build
         env:
           # 문의·로그인용 Supabase 연결값.
           # 저장소 Settings → Secrets and variables → Actions 에 등록하면 주입된다.
