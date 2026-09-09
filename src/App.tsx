@@ -4,6 +4,7 @@ import { REVIEW_MODE } from './config'
 import { useAppState } from './lib/store'
 import { CANCER_BY_ID } from './data/cancers'
 import type { MealSlot } from './data/types'
+import { NewPassword } from './components/NewPassword'
 import { Onboarding } from './components/Onboarding'
 import { PatientPanel } from './components/PatientPanel'
 import { FoodSearch } from './components/FoodSearch'
@@ -106,7 +107,7 @@ export default function App() {
   const [care, setCare] = useState<CareView>('howto')
   const [toast, setToast] = useState<string | null>(null)
   const [asking, setAsking] = useState(false)
-  const { user, loading: sessionLoading } = useSession()
+  const { user, loading: sessionLoading, recovering, doneRecovering } = useSession()
 
   /*
    * 고르신 글자 크기를 문서에 적용한다.
@@ -201,6 +202,13 @@ export default function App() {
    * 로그인 서버가 설정되지 않은 환경에서는 이 문이 아예 없다.
    */
   const loggedOut = isSupabaseConfigured && !sessionLoading && !user
+
+  /*
+   * 비밀번호를 다시 정하러 오신 길이면 그것부터 끝낸다.
+   * 로그인 문보다 앞에 세워야 한다 — 메일 주소로 들어오시면 세션이 이미 있어서,
+   * 뒤에 두면 문을 그냥 지나쳐 앱이 열리고 비밀번호는 잊으신 그대로 남는다.
+   */
+  if (recovering) return <NewPassword onDone={doneRecovering} />
 
   // 첫 실행이거나 로그아웃 상태면 다른 화면을 보여주기 전에 로그인부터 받는다
   if (!state.patient.onboarded || loggedOut) {

@@ -2,7 +2,10 @@ import { useState } from 'react'
 import { SOURCES, setSource } from '../lib/stats'
 import { track } from '../lib/stats'
 import { isSupabaseConfigured } from '../lib/supabase'
-import { displayName, lastProvider, PROVIDER_LABEL, signIn, useSession, type Provider } from '../lib/auth'
+import {
+  checkSignUp, displayName, lastProvider, MIN_PASSWORD, PROVIDER_LABEL,
+  sendPasswordReset, signIn, signInWithEmail, signUpWithEmail, useSession, type Provider
+} from '../lib/auth'
 import { confirmAdult, isAdultConfirmed } from '../lib/ageGate'
 import type { CancerId, Cuisine, PatientCondition, PatientContext, Phase, TreatmentHistory } from '../data/types'
 import { SUBTYPE_OPTIONS } from '../data/types'
@@ -170,8 +173,12 @@ export function Onboarding({
                     같은 방법으로 들어오셔야 적어 두신 기록과 문의 내역이 그대로 이어집니다.
                   </p>
                 )}
+
+                <div className={adult ? '' : 'pointer-events-none opacity-40'}>
+                  <EmailWay enabled={adult} seenBefore={last !== null} />
+                </div>
                 <p className="mt-4 text-center text-xs text-stone-400">
-                  처음이시면 위 버튼으로 바로 가입됩니다. 따로 아이디를 만들지 않으셔도 됩니다.
+                  처음이시면 카카오·구글 단추로 바로 가입됩니다. 두 가지가 없으시면 이메일로 하실 수 있습니다.
                 </p>
                 <p className="mt-2 text-center text-[11px] text-stone-400">
                   {adult ? '로그인하시면 다음 단계로 넘어갑니다.' : '위 항목을 확인해 주시면 로그인할 수 있습니다.'}
@@ -516,6 +523,148 @@ export function Onboarding({
           </button>
         )}
       </div>
+    </div>
+  )
+}
+
+/*
+ * 이메일로 들어오는 길.
+ *
+ * 카카오·구글이 둘 다 없는 분을 위한 자리다. 그 둘이 있으면 굳이 여기까지
+ * 오실 일이 없으므로, 접어 두었다가 "이메일로 가입/로그인" 을 누르셨을 때만 편다.
+ * 소셜 단추를 밀어내지 않으면서, 없는 분에게는 분명히 보이는 정도로 둔다.
+ *
+ * 가입과 로그인을 한 화면에서 오간다. 두 화면으로 나누면
+ * "가입한 적이 있던가" 를 떠올려 고르셔야 하는데, 그건 사용자 몫이 아니다 —
+ * 틀리게 고르셔도 오류 문구가 맞은편으로 안내한다.
+ */
+function EmailWay({ enabled, seenBefore }: { enabled: boolean; seenBefore: boolean }) {
+  const [open, setOpen] = useState(false)
+  /*
+   * 처음이신지 아닌지를 기기가 알고 있다.
+   *
+   * 로그인을 기본으로 두었더니, 처음 오신 분이 그대로 이메일과 비밀번호를 적고
+   * "맞지 않습니다" 를 만나게 되어 있었다. 가입한 적이 없으니 당연한데,
+   * 그 순간에는 자기가 뭘 잘못 적었나부터 살피게 된다.
+   * 이 기기에서 들어온 적이 없으면 가입 쪽을 펴 둔다.
+   */
+  const [mode, setMode] = useState<'in' | 'up'>(seenBefore ? 'in' : 'up')
+  const [email, setEmail] = useState('')
+  const [pw, setPw] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [msg, setMsg] = useState<string | null>(null)
+  const [note, setNote] = useState<string | null>(null)
+
+  const say = (m: string) => { setMsg(m); setNote(null) }
+  const good = (m: string) => { setNote(m); setMsg(null) }
+
+  async function go() {
+    setBusy(true); setMsg(null); setNote(null)
+    try {
+      if (mode === 'up') {
+        const bad = checkSignUp(email, pw)
+        if (bad) { say(bad); return }
+        const { needsConfirm } = await signUpWithEmail(email, pw)
+        if (needsConfirm) {
+          good('확인 편지를 보냈습니다. 메일함에서 주소를 눌러 주시면 가입이 끝납니다. 스팸함도 함께 보십시오.')
+        }
+      } else {
+        await signInWithEmail(email, pw)
+      }
+    } catch (e) {
+      say(e instanceof Error ? e.message : '잠시 뒤에 다시 해 주세요.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function forgot() {
+    if (!email.trim()) { say('비밀번호를 다시 정하시려면 위에 이메일 주소를 먼저 적어 주세요.'); return }
+    setBusy(true); setMsg(null); setNote(null)
+    try {
+      await sendPasswordReset(email)
+      good('비밀번호를 다시 정하실 주소를 메일로 보냈습니다. 스팸함도 함께 보십시오.')
+    } catch (e) {
+      say(e instanceof Error ? e.message : '잠시 뒤에 다시 해 주세요.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (!open) {
+    return (
+      <button
+        className="mt-3 w-full rounded-xl border border-dashed border-stone-300 py-2.5 text-xs text-stone-500 hover:bg-stone-50"
+        disabled={!enabled}
+        onClick={() => setOpen(true)}
+      >
+        카카오·구글 계정이 없으신가요? <strong className="text-stone-700">이메일로 하기</strong>
+      </button>
+    )
+  }
+
+  return (
+    <div className="mt-3 rounded-xl border border-stone-200 bg-white p-3.5">
+      <div className="mb-2.5 flex gap-1 rounded-lg bg-stone-100 p-1">
+        {(['in', 'up'] as const).map((m) => (
+          <button
+            key={m}
+            className={`flex-1 rounded-md py-1.5 text-xs font-semibold ${
+              mode === m ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-500'
+            }`}
+            onClick={() => { setMode(m); setMsg(null); setNote(null) }}
+          >
+            {m === 'in' ? '로그인' : '처음이에요 (가입)'}
+          </button>
+        ))}
+      </div>
+
+      <label className="block text-[11px] font-medium text-stone-500" htmlFor="of-email">이메일</label>
+      <input
+        id="of-email"
+        type="email"
+        inputMode="email"
+        autoComplete="email"
+        className="mb-2 mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm"
+        placeholder="hong@example.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+
+      <label className="block text-[11px] font-medium text-stone-500" htmlFor="of-pw">비밀번호</label>
+      <input
+        id="of-pw"
+        type="password"
+        autoComplete={mode === 'up' ? 'new-password' : 'current-password'}
+        className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm"
+        placeholder={`${MIN_PASSWORD}자 이상`}
+        value={pw}
+        onChange={(e) => setPw(e.target.value)}
+        onKeyDown={(e) => { if (e.key === 'Enter' && !busy) void go() }}
+      />
+
+      {msg && <p className="mt-2 rounded-lg bg-warn-50 px-2.5 py-2 text-[11px] leading-relaxed text-warn-700">{msg}</p>}
+      {note && <p className="mt-2 rounded-lg bg-brand-50 px-2.5 py-2 text-[11px] leading-relaxed text-brand-800">{note}</p>}
+
+      <button className="btn-primary mt-2.5 w-full py-2.5 text-sm" disabled={busy || !enabled} onClick={() => void go()}>
+        {busy ? '잠시만요…' : mode === 'up' ? '가입하고 시작하기' : '로그인'}
+      </button>
+
+      <div className="mt-2 flex items-center justify-between">
+        <button className="text-[11px] text-stone-400 hover:text-stone-600" onClick={() => setOpen(false)}>
+          접기
+        </button>
+        {mode === 'in' && (
+          <button className="text-[11px] text-stone-400 underline hover:text-stone-600" onClick={() => void forgot()}>
+            비밀번호를 잊으셨나요?
+          </button>
+        )}
+      </div>
+
+      <p className="mt-2.5 text-[11px] leading-relaxed text-stone-400">
+        비밀번호는 이 앱을 거치기만 하고 기기나 저희 쪽에 남지 않습니다.
+        적어 두신 암종·체중·식단은 어느 길로 들어오셔도 이 기기 안에만 저장됩니다.
+      </p>
     </div>
   )
 }
