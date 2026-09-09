@@ -152,6 +152,33 @@ for (const [re, what] of [
 ] as [RegExp, string][]) {
   no(!re.test(vite), `매니페스트에 ${what} 이 없음`)
 }
+/*
+ * 심사용 계정을 관리자 주소로 만들면 안 된다.
+ *
+ * 관리자 판정(of_is_admin)은 로그인 방법을 가리지 않고 이메일 주소만 본다.
+ * 그래서 명단에 오른 주소로 이메일 가입을 하면 그 계정도 관리자가 되고,
+ * 애플·구글 심사자가 로그인하는 순간 문의 관리 화면이 열린다 —
+ * 다른 환자분들이 남긴 문의와 연락처 이메일까지 함께.
+ *
+ * 나중에 관리자를 한 분 더하실 때 이 경고가 따라가지 않으면 뜻이 없으므로,
+ * 명단에 있는 주소가 모두 절차 문서에 적혀 있는지 여기서 견준다.
+ */
+{
+  const sql = existsSync('supabase/setup.sql') ? readFileSync('supabase/setup.sql', 'utf-8') : ''
+  const admins = [...sql.matchAll(/insert into public\.of_admins \(email\) values \('([^']+)'\)/g)]
+    .map((m) => m[1])
+  no(Boolean(sql) && admins.length === 0,
+     '설치 SQL 에서 관리자 명단을 읽지 못함 — 이 검사가 헛돌고 있다')
+
+  const guide = 'docs/출시/플레이-콘솔-등록-절차.md'
+  const text = existsSync(guide) ? readFileSync(guide, 'utf-8') : ''
+  no(!text, `${guide} 이 없음 — 심사용 계정을 어떻게 만드는지 적힌 곳이 사라졌다`)
+  for (const a of admins) {
+    no(Boolean(text) && !text.includes(a),
+       `관리자 주소 ${a} 가 심사용 계정 경고에 빠져 있음 — 그 주소로 만들면 심사자가 문의 관리 화면을 보게 된다`)
+  }
+}
+
 /* 구글 플레이는 512px 아이콘과 maskable 을 요구한다 */
 no(!/sizes:\s*'512x512'/.test(vite), '512px 아이콘이 없음 — 플레이 스토어 요건')
 no(!/purpose:\s*'maskable'/.test(vite), 'maskable 아이콘이 없음 — 안드로이드에서 아이콘이 잘린다')

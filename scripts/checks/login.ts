@@ -106,6 +106,11 @@ const CASES: [string, string, boolean][] = [
   ['hong@example', '12345678', false],          // 점 뒤가 없음
   ['hong example.com', '12345678', false],      // @ 가 없음
   ['  hong@example.com  ', '12345678', true],   // 앞뒤 공백은 우리가 턴다
+  /*
+   * 지메일의 '+' 주소. 심사용 계정을 이 꼴로 만들도록 안내해 두었으므로
+   * (관리자 주소와 겹치지 않게) 여기서 막히면 그 안내가 통째로 무너진다.
+   */
+  ['rohkwangwon+review@gmail.com', '12345678', true],
   ['hong@ex ample.com', '12345678', false],     // 가운데 공백
   ['', '12345678', false]
 ]
