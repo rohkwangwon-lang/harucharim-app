@@ -192,6 +192,8 @@ const MUST_NOT_CITE: [string, string, string][] = [
   ['breast-weight', 'asco2022', "ASCO 2022 는 '치료 중' 지침이고 내분비요법 중 유방암을 대상에서 뺐다"],
   ['gyn-obesity', 'asco2022', "ASCO 2022 는 '치료 중' 지침이라 생존기 체중 권고의 출처가 아니다"],
   ['crc-fiber', 'vanblarigan2018', 'CALGB 89803 은 섬유의 용량-반응을 보고하지 않는다'],
+  /* ERAS 지침에 장루 식이·섬유 이야기는 없다 — 그 지침이 다루는 것은 수술 전후 관리 항목이다 */
+  ['cond-stoma-fiber', 'eras-colorectal', 'ERAS 대장수술 지침에 장루 식이 내용이 없다'],
   /*
    * ACCP 2012 전문 대조. 이 지침은 비타민 K 길항제 관리 지침이다 —
    * omega·fish oil·ginseng 이 0건이고 DOAC 은 다루지 않는다.
@@ -250,6 +252,7 @@ const MUST_CITE: [string, string][] = [
   /* VITAL 을 인용해 두고 본문에서 말하지 않고 있었다 */
   ['crc-vitd', 'manson2019'],
   ['liver-coffee', 'iarc116'],
+  ['cond-stoma-fiber', 'ileostomy-diet-review'],
   /* 위절제 후 B12 결핍의 빈도를 실제로 말하는 것은 이 메타분석뿐이다 */
   ['stomach-b12', 'b12-gastrectomy-meta'],
   ['stomach-b12-partial', 'b12-gastrectomy-meta'],
@@ -422,7 +425,23 @@ const MUST_SAY: [string, RegExp, string][] = [
   /* 운동 시험의 대상 제한 — 뼈 전이가 있으면 처방이 달라진다 */
   ['prostate-adt-protein', /뼈 전이가 없는 분들만/, 'Galvão 시험은 뼈 전이가 없는 남성만 대상으로 했다'],
   /* 녹차-보르테조밉은 사람 대상 시험이 아니다 */
-  ['int-bortezomib-greentea', /세포와 동물 실험/, 'Golden 2009 는 in vitro·in vivo 연구다']
+  ['int-bortezomib-greentea', /세포와 동물 실험/, 'Golden 2009 는 in vitro·in vivo 연구다'],
+  /*
+   * ERAS 대장수술 지침은 오히려 반대쪽을 말한다 —
+   * 정상 식사 재개가 늦어지면 감염이 늘고 회복이 느려지므로 수술 당일부터 시작하라(강한 권고).
+   * '4~6주에 걸쳐' 라고 적어 두면 지침이 막으려는 바로 그 일을 권하게 된다.
+   */
+  ['crc-lowresidue', /수술 당일부터/, 'ERAS 의 권고는 당일 시작이다'],
+  ['crc-lowresidue', /며칠 동안의 출발점/, '저잔사식은 몇 주씩 이어 갈 식단이 아니다'],
+  /* WCRF 전립선 보고서는 자기 등급의 한계를 스스로 적어 두었다 */
+  ['prostate-dairy', /권고를 만들 근거가 되기에는/, 'WCRF 는 제한적-시사적 등급의 한계를 명시한다'],
+  ['prostate-dairy', /칼슘 보충제만 따로 본 판정은 아예 "결론 없음"/, '보충제는 별도 판정이며 결론 없음이다'],
+  ['prostate-lycopene', /2014년 재평가/, '리코펜은 2007년 판정에서 하향되었다 — 그 사실이 요점이다'],
+  /* ADT 골 지침이 실제로 말하는 것은 골밀도 검사이고, 칼슘 수치는 다른 맥락이다 */
+  ['prostate-adt-bone', /골밀도 검사를 받아/, 'CCO·ASCO 지침의 권고는 ADT 시작 전 골밀도 검사다'],
+  ['prostate-adt-bone', /500 mg 이상/, '지침에 나오는 칼슘 값은 500 mg 이상이고 맥락이 다르다'],
+  /* 장루 식이는 근거가 얇다는 사실을 함께 전한다 */
+  ['cond-stoma-fiber', /서로 엇갈리고 불충분/, '장루 식이 종설의 결론이다']
 ]
 /*
  * 반대 방향의 못. 원문이 하지 않는 말을 우리가 하지 않았는지 본다.
@@ -441,6 +460,9 @@ const MUST_NOT_SAY: [string, RegExp, string][] = [
   /* IARC 원문에 없는 배수 표현이 되살아나면 근거를 넘는다 */
   ['liver-aflatoxin', /수십 배/, 'IARC 는 배수를 말하지 않는다'],
   ['liver-coffee', /카페인만의 효과는 아닌 것으로 보입니다/, '디카페인은 크기가 절반이고 신뢰구간이 1에 걸친다'],
+  /* ERAS 가 막으려는 바로 그 지시가 되살아나면 안 된다 */
+  ['crc-lowresidue', /4~6주에 걸쳐 서서히 섬유를 늘립니다/, 'ERAS 는 정상 식사 재개를 늦추지 말라고 한다'],
+  ['prostate-adt-bone', /칼슘 하루 1,000~1,200 mg, 비타민 D 400~1,000 IU 보충과 정기적인 골밀도 검사입니다/, '그 수치는 이 지침에 없다'],
   /* ASCO 2022 는 이 말을 하지 않는다 — 생존자 체중 권고를 낸 적이 없다 */
   ['breast-weight', /미국임상종양학회는 생존자에게 체중 관리/, "ASCO 2022 는 체중 개입에 '근거 불충분' 을 냈다"],
   ['prostate-adt-protein', /1\.0~1\.5 g/, 'ESPEN 원문 표현이 아니다'],

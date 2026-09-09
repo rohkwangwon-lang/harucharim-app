@@ -207,7 +207,9 @@ export const REFERENCES: Reference[] = [
   { id: 'wcrf-prostate', kind: 'review', year: 2018,
     citation: 'WCRF/AICR Continuous Update Project: Diet, nutrition, physical activity and prostate cancer. (유제품·칼슘 고섭취 — limited-suggestive 위험 증가)' },
   { id: 'adt-bone', kind: 'guideline', year: 2020,
-    citation: 'Saylor PJ, et al. Bone Health and Bone-Targeted Therapies for Prostate Cancer: ASCO Endorsement of a Cancer Care Ontario Guideline. J Clin Oncol. 2020;38(15):1736-1743.',
+    citation:
+      'Saylor PJ, et al. Bone Health and Bone-Targeted Therapies for Prostate Cancer: ASCO Endorsement of a Cancer Care Ontario Guideline. ' +
+      'J Clin Oncol. 2020;38(15):1736-1743. — ADT 시작 전 골밀도 검사 권장 · 골전이 표적치료제 병용 시 칼슘 500 mg 이상·비타민 D 400 IU 이상',
     url: 'https://doi.org/10.1200/JCO.19.03148' },
   /*
    * '연 2~5 %' 의 실제 값은 이 무작위 시험에 있다.
@@ -318,8 +320,19 @@ export const REFERENCES: Reference[] = [
   { id: 'brooks2009aldh2', kind: 'review', year: 2009,
     citation: 'Brooks PJ, et al. The alcohol flushing response: an unrecognized risk factor for esophageal cancer from alcohol consumption. PLoS Med. 2009;6(3):e50. (동아시아인 약 36 % · 이형접합자 오즈비 3.7~18.1 · 음주를 줄이면 일본 남성 식도편평세포암의 53 % 예방 가능 추정)',
     url: 'https://doi.org/10.1371/journal.pmed.1000050' },
+  /*
+   * 장루 식이 조언은 임상에서 널리 쓰이지만 근거가 얇다.
+   * 그 사실 자체를 정리한 문헌이 있어, 조언과 함께 그 한계도 같이 인용한다.
+   */
+  { id: 'ileostomy-diet-review', kind: 'review', year: 2021,
+    url: 'https://doi.org/10.11124/JBIES-20-00377',
+    citation:
+      'Mitchell A, et al. Dietary management for people with an ileostomy: a scoping review. JBI Evid Synth. 2021;19(9):2188-2306. ' +
+      '— "장루 식이 조언은 흔히 제공되지만 서로 엇갈리고 불충분하며, 질 높은 연구가 부족하다"' },
   { id: 'eras-colorectal', kind: 'guideline', year: 2019,
-    citation: 'Gustafsson UO, et al. Guidelines for Perioperative Care in Elective Colorectal Surgery: ERAS Society Recommendations 2018. World J Surg. 2019;43(3):659-695.',
+    citation:
+      'Gustafsson UO, et al. Guidelines for Perioperative Care in Elective Colorectal Surgery: ERAS Society Recommendations 2018. World J Surg. 2019;43(3):659-695. ' +
+      '— "대부분의 환자는 수술 당일부터 음식과 경구영양보충을 시작해야 한다"(강한 권고)',
     url: 'https://doi.org/10.1007/s00268-018-4844-y' },
   { id: 'ueg-pei2025', kind: 'guideline', year: 2025,
     citation: 'Vujasinovic M, et al. Recommendations from the European guidelines for the diagnosis and therapy of pancreatic exocrine insufficiency. Pancreatology. 2025;25(3):293-300.',
