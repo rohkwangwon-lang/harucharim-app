@@ -53,7 +53,7 @@ export const REFERENCES: Reference[] = [
   { id: 'kdri2020', kind: 'guideline', year: 2020,
     citation: '보건복지부·한국영양학회. 2020 한국인 영양소 섭취기준(KDRIs).' },
   { id: 'knhanes', kind: 'db', year: 2023,
-    citation: '질병관리청. 국민건강영양조사 — 한국인 나트륨 섭취 실태.' },
+    citation: '질병관리청. 국민건강영양조사 — 한국인 1일 나트륨 섭취량 3,255 mg(2018년 기준)으로 목표섭취량 2,000 mg 의 약 1.6배.' },
   { id: 'kfda-db', kind: 'db', year: 2024,
     citation: '식품의약품안전처. 식품영양성분 데이터베이스.' },
   { id: 'rda-table', kind: 'db', year: 2021,
@@ -63,7 +63,8 @@ export const REFERENCES: Reference[] = [
   { id: 'iarc114', kind: 'review', year: 2018,
     citation: 'IARC Monographs Volume 114: Red Meat and Processed Meat. International Agency for Research on Cancer.' },
   { id: 'iarc100e', kind: 'review', year: 2012,
-    citation: 'IARC Monographs Volume 100E: Personal Habits and Indoor Combustions — Alcohol Consumption.' },
+    citation: 'IARC Monographs Volume 100E: Personal Habits and Indoor Combustions — Alcohol Consumption. (주류 = Group 1 · 구강·인두·후두·식도·간·대장·여성 유방)',
+    url: 'https://publications.iarc.who.int/122' },
   { id: 'iarc116', kind: 'review', year: 2018,
     citation: 'IARC Monographs Volume 116: Drinking Coffee, Mate, and Very Hot Beverages. (65 °C 이상 음료 = Group 2A)' },
   { id: 'iarc-aflatoxin', kind: 'review', year: 2012,
@@ -128,7 +129,15 @@ export const REFERENCES: Reference[] = [
   { id: 'wcrf-prostate', kind: 'review', year: 2018,
     citation: 'WCRF/AICR Continuous Update Project: Diet, nutrition, physical activity and prostate cancer. (유제품·칼슘 고섭취 — limited-suggestive 위험 증가)' },
   { id: 'adt-bone', kind: 'guideline', year: 2020,
-    citation: 'Saylor PJ, et al. Bone Health and Bone-Targeted Therapies for Prostate Cancer: ASCO Endorsement. — ADT 중 칼슘·비타민 D 보충 권고.' },
+    citation: 'Saylor PJ, et al. Bone Health and Bone-Targeted Therapies for Prostate Cancer: ASCO Endorsement of a Cancer Care Ontario Guideline. J Clin Oncol. 2020;38(15):1736-1743.',
+    url: 'https://doi.org/10.1200/JCO.19.03148' },
+  /*
+   * '연 2~5 %' 의 실제 값은 이 무작위 시험에 있다.
+   * 부위와 측정법에 따라 다르다 — 그래서 문헌마다 숫자가 달라 보인다.
+   */
+  { id: 'smith2001adt', kind: 'rct', year: 2001,
+    citation: 'Smith MR, et al. Pamidronate to prevent bone loss during androgen-deprivation therapy for prostate cancer. N Engl J Med. 2001;345(13):948-955. (48주 · 대조군 골밀도 요추 3.3 %, 대전자 2.1 %, 고관절 1.8 % 감소 · 요추 해면골은 8.5 %)',
+    url: 'https://doi.org/10.1056/NEJMoa010845' },
 
   { id: 'asco-cardio', kind: 'guideline', year: 2017,
     citation: 'Armenian SH, et al. Prevention and Monitoring of Cardiac Dysfunction in Survivors of Adult Cancers: ASCO Clinical Practice Guideline. J Clin Oncol. 2017;35(8):893-911. — 심장독성 약제 사용 중 혈압·체중·지질 등 심혈관 위험 요인 관리 권고.' },

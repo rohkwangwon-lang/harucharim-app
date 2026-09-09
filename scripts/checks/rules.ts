@@ -196,7 +196,8 @@ const MUST_CITE: [string, string][] = [
   ['panc-fat-symptom', 'ueg-pei2025'],
   /* 알코올 수치의 실제 출처 — IARC·WCRF 는 분류와 권고를 말하지 이 숫자를 말하지 않는다 */
   ['breast-alcohol', 'hamajima2002'],
-  ['eso-alcohol', 'brooks2009aldh2']
+  ['eso-alcohol', 'brooks2009aldh2'],
+  ['prostate-adt-bone', 'smith2001adt']
 ]
 for (const [rid, refId] of MUST_CITE) {
   const r = ALL_RULES.find((x) => x.id === rid)
@@ -213,7 +214,9 @@ const MUST_SAY: [string, RegExp, string][] = [
   ['breast-alcohol', /7\.1 %/, '집단 재분석의 값은 7.1 %(95 % CI 5.5~8.7)다. 7~10 % 는 상한이 신뢰구간을 넘었다'],
   ['eso-alcohol', /3\.7~18\.1/, '오즈비 범위를 밝힌다. 수 배~수십 배는 뭉뚱그린 말이었다'],
   ['prostate-selenium', /91 %/, '사후 분석의 값은 91 % 증가·P=0.007 이다'],
-  ['liver-raw-seafood', /53\.9 %/, '간질환군의 값과 전체 값을 나누어 적는다']
+  ['liver-raw-seafood', /53\.9 %/, '간질환군의 값과 전체 값을 나누어 적는다'],
+  ['prostate-adt-bone', /3\.3 %/, '무작위 시험의 값은 요추 3.3 %·고관절 1.8 % 다. 연 2~5 % 는 상한이 근거를 넘었다'],
+  ['common-sodium', /3,255 mg/, '국민건강영양조사 2018년 값이다. 1.5배는 어림이었다']
 ]
 for (const [rid, pat, why] of MUST_SAY) {
   const r = ALL_RULES.find((x) => x.id === rid) as { id: string; reason?: string } | undefined
