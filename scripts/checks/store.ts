@@ -43,6 +43,27 @@ if (hasLogin) {
      '설치 SQL 에 계정 삭제(of_delete_me)가 없음 — 화면만 있고 실제로 지워지지 않는다')
   no(Boolean(sql) && !/delete from auth\.users/.test(sql),
      '계정을 실제로 지우지 않음 — 비활성 처리는 애플이 반려 사유로 명시했다')
+
+  /*
+   * 구글 플레이는 애플과 요구가 다르다.
+   * 앱 안의 삭제만으로는 부족하고, **앱을 설치하지 않고도 닿을 수 있는 웹 주소**를 하나 내야 한다.
+   * 스토어 등록 원고에 그 주소를 적어 두었으므로, 그 페이지가 실제로 있는지 여기서 붙든다 —
+   * 없는 주소를 심사 자료에 적으면 그 자체가 반려 사유가 된다.
+   */
+  const webDel = 'public/delete-account.html'
+  no(!existsSync(webDel),
+     '설치 없이 닿을 수 있는 계정 삭제 안내 페이지가 없음 — 구글 플레이가 요구한다')
+  if (existsSync(webDel)) {
+    const w = readFileSync(webDel, 'utf-8')
+    no(!/rohkwangwon@gmail\.com/.test(w), '계정 삭제 페이지에 요청을 보낼 곳이 없음')
+    no(/noindex/.test(w),
+       '계정 삭제 페이지가 검색에서 빠져 있음 — 심사자가 설치 없이 찾아올 수 있어야 한다')
+    /* 스토어 원고가 가리키는 주소와 실제 파일 이름이 어긋나면 안 된다 */
+    const listing = existsSync('docs/출시/스토어-등록-자료.md')
+      ? readFileSync('docs/출시/스토어-등록-자료.md', 'utf-8') : ''
+    no(Boolean(listing) && !/delete-account/.test(listing),
+       '스토어 원고가 계정 삭제 웹 주소를 가리키지 않음')
+  }
   no(Boolean(sql) && !/delete from public\.of_inquiries/.test(sql),
      '계정만 지우고 남기신 문의는 남겨 둠')
   /* 되돌릴 수 없다는 것을 누르기 전에 알리는가 */

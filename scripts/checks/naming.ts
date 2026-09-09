@@ -16,7 +16,7 @@
  * 이미 쓰시던 분의 설정·식단·체중이 조용히 사라진다.
  * 옮기는 장치(migrate.ts)가 제대로 붙어 있는지 함께 본다.
  */
-import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
 const NAME = '하루차림'
@@ -113,13 +113,31 @@ for (const [file, marker, what] of SPOTS) {
 }
 
 /* ── 5. 배포 설정이 짝이 맞는가 ─────────────────────────── */
+/*
+ * 예전에는 'base 환경변수를 워크플로가 넘기는가' 만 보았다.
+ * github.io/<repo>/ 하위에 올릴 때는 그것이 맞았지만, 자체 도메인으로 옮기면 정반대가 된다 —
+ * 뿌리에서 서빙되는데 base 를 넘기면 모든 경로가 한 칸씩 밀린다.
+ *
+ * 그래서 한쪽을 못 박는 대신 **두 사실이 서로 맞는지** 를 본다.
+ * 어디에 올리는지를 말해 주는 것은 public/CNAME 이다.
+ */
 const vite = readFileSync('vite.config.ts', 'utf-8')
 const wf = readFileSync('.github/workflows/deploy.yml', 'utf-8')
 const envName = vite.match(/process\.env\.(\w+)/)?.[1]
 no(!envName, 'vite.config.ts 에서 base 환경변수 이름을 못 찾음')
+const custom = existsSync('public/CNAME')
 if (envName) {
-  no(!wf.includes(envName),
-     `배포 워크플로가 ${envName} 을 넘기지 않음 — base 가 '/' 로 잡혀 배포된 앱의 모든 경로가 깨진다`)
+  if (custom) {
+    const host = readFileSync('public/CNAME', 'utf-8').trim()
+    no(!host, 'public/CNAME 이 비어 있음 — 사용자 지정 도메인 설정이 배포마다 지워진다')
+    no(/^https?:|\/$/.test(host),
+       `public/CNAME 에는 도메인 이름만 적는다 — 지금은 "${host}"`)
+    no(wf.includes(envName),
+       `자체 도메인(${host})은 뿌리에서 서빙되는데 배포 워크플로가 ${envName} 을 넘긴다 — 모든 경로가 한 칸씩 밀린다`)
+  } else {
+    no(!wf.includes(envName),
+       `배포 워크플로가 ${envName} 을 넘기지 않음 — base 가 '/' 로 잡혀 github.io 하위 경로에서 모든 경로가 깨진다`)
+  }
 }
 
 /* ── 6. 이름 뒤 조사가 맞는가 ───────────────────────────
