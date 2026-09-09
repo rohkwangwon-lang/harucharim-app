@@ -115,8 +115,9 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
       reason:
         '항암 환자 576명을 대상으로 한 무작위배정 연구에서, 항암 시작 3일 전부터 생강을 복용한 군은 ' +
         '급성 오심이 유의하게 감소했습니다(P=0.003). 효과는 하루 0.5~1.0 g 에서 가장 컸고, ' +
-        '1.5 g 으로 늘려도 더 낫지 않았습니다. 항구토제를 대체하는 것이 아니라 더하는 개념입니다.',
-      evidence: 'A', refIds: ['ryan2012ginger']
+        '1.5 g 으로 늘려도 더 낫지 않았습니다. 항구토제를 대체하는 것이 아니라 더하는 개념입니다. ' +
+        '다만 와파린 같은 항응고제를 드시는 분은 예외입니다 — 출혈 위험이 높아진다는 관찰이 있어 따로 상의하셔야 합니다.',
+      evidence: 'A', refIds: ['ryan2012ginger', 'warfarin-vitk']
     },
     {
       id: 'cond-nau-avoid', level: 'avoid', match: { tags: ['고지방', '튀김', '매운맛'] },
@@ -143,7 +144,9 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
       reason:
         '식욕이 없을 때 "많이 드세요"는 실행 불가능한 조언입니다. ' +
         '죽에 참기름·달걀·단백질분말을 섞고, 우유에 미숫가루를 타고, 간식으로 견과·치즈를 두는 식으로 ' +
-        '같은 부피에서 얻는 열량을 올리는 편이 실제로 작동합니다.',
+        '같은 부피에서 얻는 열량을 올리는 편이 실제로 작동합니다. ' +
+        'ESPEN 도 체중이 줄고 인슐린 저항성이 있는 분에게는 탄수화물보다 지방 쪽 열량 비중을 올리도록 권고합니다 — ' +
+        '부피당 열량을 높이면서 혈당 부담은 낮추려는 것이라, 참기름·견과·치즈를 먼저 드는 이유가 여기 있습니다.',
       evidence: 'G', refIds: ['espen2021', 'fearon2011', 'espen-cachexia']
     },
     {

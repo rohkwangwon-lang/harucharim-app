@@ -62,12 +62,21 @@ const GRAPE_NO = [
   '오렌지', '오렌지 주스', '발렌시아 오렌지'
 ]
 
+/*
+ * 생강은 오심에 권장으로 나가면서 와파린과는 주의로 만나는 식품이라 태그가 필요했다.
+ * 진저에일·생강과자처럼 생강이 주가 아닌 것까지 잡으면 경고가 무뎌진다.
+ */
+const GINGER_YES = ['생강차', '생강 라떼', '기타차_레몬진저 캐모마일 핫(HOT)', '편강']
+const GINGER_NO = ['진저에일', '생강나무 잎차', '생강향 쿠키', '진저브레드 쿠키']
+
 const has = (name: string, tag: string) => autoTags(name).includes(tag as never)
 
 for (const n of RAW_YES) no(!has(n, '생식동물성'), `"${n}" 에 생식동물성이 안 붙는다 — 날것인데 조용히 지나간다`)
 for (const n of RAW_NO) no(has(n, '생식동물성'), `"${n}" 에 생식동물성이 붙었다 — 날것이 아니다. 헛경보는 진짜 경고를 죽인다`)
 for (const n of CURED_YES) no(!has(n, '가공육'), `"${n}" 에 가공육이 안 붙는다`)
 for (const n of CURED_NO) no(has(n, '가공육'), `"${n}" 에 가공육이 붙었다 — 패티는 가공육이 아니다`)
+for (const n of GINGER_YES) no(!has(n, '생강'), `"${n}" 에 생강이 안 붙는다 — 와파린 주의를 놓친다`)
+for (const n of GINGER_NO) no(has(n, '생강'), `"${n}" 에 생강이 붙었다 — 생강이 주가 아닌 것까지 막으면 경고가 무뎌진다`)
 for (const n of GRAPE_YES) no(!has(n, '자몽계'), `"${n}" 에 자몽계가 안 붙는다 — 약물 상호작용을 놓친다`)
 for (const n of GRAPE_NO) no(has(n, '자몽계'), `"${n}" 에 자몽계가 붙었다 — 향만 낸 것까지 막으면 진짜 경고를 안 믿게 된다`)
 

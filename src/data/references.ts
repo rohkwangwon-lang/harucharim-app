@@ -215,12 +215,21 @@ export const REFERENCES: Reference[] = [
     citation: 'Mathijssen RH, et al. Effects of St. John\'s wort on irinotecan metabolism. J Natl Cancer Inst. 2002;94(16):1247-1249. (환자 5명 무작위배정 교차설계 · SN-38 농도 42 % 감소, 95 % CI 14~70 %)',
     url: 'https://doi.org/10.1093/jnci/94.16.1247' },
   /* ACCP 항응고 치료 지침이다 — 'review' 가 아니라 'guideline' 이 맞다 */
+  /*
+   * 전문 대조. 이 지침은 비타민 K 길항제(와파린) 관리 지침이다 —
+   * omega·fish oil·ginseng 은 전문에 0건이고, DOAC 은 다루지 않는다.
+   * 반면 보완요법 표에는 코엔자임Q10(오즈비 3.69)과 생강(3.20)이 출혈 위험 증가로 올라 있다.
+   */
   { id: 'warfarin-vitk', kind: 'guideline', year: 2012,
-    citation: 'Holbrook A, et al. Evidence-based management of anticoagulant therapy: ACCP Guidelines. Chest. 2012;141(2 Suppl):e152S-e184S. — 비타민 K 섭취의 일관성 유지 권고.' },
+    url: 'https://doi.org/10.1378/chest.11-2295',
+    citation:
+      'Holbrook A, et al. Evidence-based management of anticoagulant therapy: Antithrombotic Therapy and Prevention of Thrombosis, 9th ed: ACCP Evidence-Based Clinical Practice Guidelines. ' +
+      'Chest. 2012;141(2 Suppl):e152S-e184S. — 비타민 K 섭취 일관성·병용 주의.' },
 
   // ── 증상 관리 ────────────────────────────────────────────────
   { id: 'ryan2012ginger', kind: 'rct', year: 2012,
-    citation: 'Ryan JL, et al. Ginger (Zingiber officinale) reduces acute chemotherapy-induced nausea: a URCC CCOP study of 576 patients. Support Care Cancer. 2012;20(7):1479-1489.' },
+    citation: 'Ryan JL, et al. Ginger (Zingiber officinale) reduces acute chemotherapy-induced nausea: a URCC CCOP study of 576 patients. Support Care Cancer. 2012;20(7):1479-1489.',
+    url: 'https://doi.org/10.1007/s00520-011-1236-3' },
   /*
    * 전문을 받아 대조했다. 이 지침은 '무엇을 쓸 것인가'(구강 냉각·광생체조절·벤지다민 등)를 다루지
    * '무엇을 먹을 것인가'를 다루지 않는다 — 전문에 spicy·acidic·citrus·food·texture·soft·
@@ -270,7 +279,12 @@ export const REFERENCES: Reference[] = [
   { id: 'fearon2011', kind: 'guideline', year: 2011,
     citation: 'Fearon K, et al. Definition and classification of cancer cachexia: an international consensus. Lancet Oncol. 2011;12(5):489-495. (체중 감소 5 % 초과, 또는 BMI 20 미만이거나 근감소가 있으면 2 % 초과)',
     url: 'https://doi.org/10.1016/S1470-2045(10)70218-7' },
+  /*
+   * 전문 대조. 단백질(1 g 초과·1.5 까지·STRONG), 오메가-3(WEAK·근거 낮음),
+   * EFSA 안전 용량(EPA+DHA 5 g/일, EPA 단독 1.8 g/일)이 모두 여기에 있다.
+   */
   { id: 'espen-cachexia', kind: 'guideline', year: 2017,
+    url: 'https://doi.org/10.1016/j.clnu.2016.07.015',
     citation: 'Arends J, et al. ESPEN guidelines on nutrition in cancer patients. Clin Nutr. 2017;36(1):11-48. — ESPEN 암 영양 지침 전체판(2021 은 축약본).' }
 ]
 

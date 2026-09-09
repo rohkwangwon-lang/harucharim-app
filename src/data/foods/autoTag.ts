@@ -70,6 +70,17 @@ const SPROUT_COOKED = /데친|삶은|볶음|무침|국|탕|찌개|찜|전|밥|�
 const CURED = /햄(?!버거)|소시지|쏘시지|베이컨|살라미|프랑크|비엔나(?!커피)|스팸|런천미트|초리조|파스트라미|육포|핫도그/
 const CURED_NOT = /햄버거|비엔나커피|햄스터/
 
+/* ── 생강 ──────────────────────────────────────────── */
+/*
+ * 생강은 오심에 권장으로 나가는 항목인데, ACCP 2012 항응고 지침의 표에는
+ * 와파린 병용 시 출혈 위험 증가(오즈비 3.20, 95 % CI 2.42~4.24)로 올라 있다.
+ * 권장과 주의가 같은 식품에 붙는 자리라 태그로 만들어 둔다.
+ * '생강나무·생강과자' 처럼 생강이 주가 아닌 것까지 잡으면 경고가 무뎌진다.
+ */
+/* '편강' 은 생강을 저며 절인 것이라 이름에 '생강' 이 없다 — 실제 자료에 들어 있어 따로 적는다 */
+const GINGER = /생강|편강|진저(?!에일)/
+const GINGER_NOT = /생강나무|생강향|생강맛|과자|쿠키|케이크|사탕|캔디|젤리|비누|샴푸/
+
 /* ── 자몽 ──────────────────────────────────────────── */
 /*
  * 푸라노쿠마린은 과육과 즙에 있다. 향만 낸 과자까지 막으면
@@ -107,6 +118,7 @@ export function autoTags(name: string): FoodTag[] {
   if (SPROUT.test(s) && !SPROUT_COOKED.test(s)) out.push('생새싹' as FoodTag)
   if (CURED.test(s) && !CURED_NOT.test(s)) out.push('가공육' as FoodTag)
   if (GRAPEFRUIT.test(s) && !GRAPEFRUIT_NOT.test(s)) out.push('자몽계' as FoodTag)
+  if (GINGER.test(s) && !GINGER_NOT.test(s)) out.push('생강' as FoodTag)
 
   return out
 }

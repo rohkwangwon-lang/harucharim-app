@@ -192,6 +192,14 @@ const MUST_NOT_CITE: [string, string, string][] = [
   ['breast-weight', 'asco2022', "ASCO 2022 는 '치료 중' 지침이고 내분비요법 중 유방암을 대상에서 뺐다"],
   ['gyn-obesity', 'asco2022', "ASCO 2022 는 '치료 중' 지침이라 생존기 체중 권고의 출처가 아니다"],
   ['crc-fiber', 'vanblarigan2018', 'CALGB 89803 은 섬유의 용량-반응을 보고하지 않는다'],
+  /*
+   * ACCP 2012 전문 대조. 이 지침은 비타민 K 길항제 관리 지침이다 —
+   * omega·fish oil·ginseng 이 0건이고 DOAC 은 다루지 않는다.
+   * 그리고 카페시타빈 증례 보고와 서로 뒤바뀌어 달려 있었다.
+   */
+  ['int-warfarin-vitk', 'capecitabine-warfarin', '비타민 K 규칙에 카페시타빈 증례가 달려 있었다'],
+  ['int-warfarin-omega3', 'warfarin-vitk', 'ACCP 2012 전문에 omega·fish oil 이 0건이다'],
+  ['int-doac-omega3', 'warfarin-vitk', 'ACCP 2012 는 DOAC 을 다루지 않는다'],
   /* ESPEN 두 판에 'B12' 는 0건이다 — 전절제 쪽에서 뗐는데 부분절제 쪽에 남아 있었다 */
   ['stomach-b12-partial', 'espen2021', "ESPEN 두 판 전문에 'B12' 가 0건이다"],
   /*
@@ -231,6 +239,10 @@ const MUST_CITE: [string, string][] = [
   /* ADT 중 단백질 목표는 ESPEN 몫, 저항운동 회복 근거는 Galvão 무작위배정 시험이다 */
   ['prostate-adt-protein', 'espen2021'],
   ['prostate-adt-protein', 'galvao2010'],
+  /* 카페시타빈 증례를 실제로 보고한 문헌이 그 규칙에 없었다 */
+  ['int-capecitabine-warfarin', 'capecitabine-warfarin'],
+  ['int-warfarin-ginger', 'warfarin-vitk'],
+  ['cond-nau-ginger', 'warfarin-vitk'],
   /* 위절제 후 B12 결핍의 빈도를 실제로 말하는 것은 이 메타분석뿐이다 */
   ['stomach-b12', 'b12-gastrectomy-meta'],
   ['stomach-b12-partial', 'b12-gastrectomy-meta'],
@@ -348,7 +360,20 @@ const MUST_SAY: [string, RegExp, string][] = [
   ['breast-soy', /0\.75/, 'Nechuta 2012 의 재발 위험비다'],
   ['breast-soy', /상하이 코호트 5,042명/, '수용체·타목시펜 소집단 결과는 Shu 2009 의 것이다'],
   ['crc-lifestyle', /992명/, 'CALGB 89803 의 분석 대상 수다'],
-  ['crc-lifestyle', /42 %/, '가장 잘 따른 군의 사망 위험 감소(위험비 0.58)다']
+  ['crc-lifestyle', /42 %/, '가장 잘 따른 군의 사망 위험 감소(위험비 0.58)다'],
+  /*
+   * 생강은 오심 규칙이 '권장' 으로 내보내는데 항응고 지침 표에는 출혈 위험 증가로 올라 있었다.
+   * 권장과 주의가 만나는 자리라 양쪽에 못을 박는다.
+   */
+  ['int-warfarin-ginger', /3\.2배/, 'ACCP 표의 생강 오즈비 3.20(2.42~4.24)이다'],
+  ['cond-nau-ginger', /항응고제/, '오심에 생강을 권하면서 항응고제 예외를 빠뜨리면 안 된다'],
+  ['int-warfarin-coq10', /3\.7배/, 'ACCP 표의 코엔자임Q10 오즈비 3.69(1.88~7.24)다'],
+  ['int-warfarin-coq10', /반대쪽/, '이론(비타민 K 유사)과 관찰(출혈 증가)이 반대라는 것이 핵심이다'],
+  ['int-capecitabine-warfarin', /INR 이 10을 넘/, '증례 보고의 실제 경과다'],
+  /* ESPEN 2017 원문 — 오메가-3 는 '약한 권고' 이고 대상이 정해져 있다 */
+  ['lung-omega3', /약하고/, 'ESPEN 권고 강도는 WEAK·근거 수준 Low 다'],
+  ['lung-omega3', /1\.8 g/, 'EFSA 의 EPA 단독 안전 상한이다'],
+  ['int-warfarin-omega3', /5 g/, 'EFSA 는 EPA·DHA 합쳐 하루 5 g 까지 자발 출혈이 늘지 않는다고 정리했다']
 ]
 /*
  * 반대 방향의 못. 원문이 하지 않는 말을 우리가 하지 않았는지 본다.
@@ -367,6 +392,8 @@ const MUST_NOT_SAY: [string, RegExp, string][] = [
   /* ASCO 2022 는 이 말을 하지 않는다 — 생존자 체중 권고를 낸 적이 없다 */
   ['breast-weight', /미국임상종양학회는 생존자에게 체중 관리/, "ASCO 2022 는 체중 개입에 '근거 불충분' 을 냈다"],
   ['prostate-adt-protein', /1\.0~1\.5 g/, 'ESPEN 원문 표현이 아니다'],
+  /* 이론만 적고 관찰 자료를 빼면 방향이 거꾸로 전달된다 */
+  ['int-warfarin-coq10', /와파린 효과를 줄일 수 있고/, 'ACCP 가 인용한 자료는 출혈 증가 쪽이다'],
   /* 뭉뚱그린 표현이 되살아나면 해당하지 않는 분이 따라 하신다 */
   ['cond-muc-cold', /5-FU 계열 항암제 투여 중/, 'MASCC 권고는 bolus 주입 중으로 한정된다']
 ]
