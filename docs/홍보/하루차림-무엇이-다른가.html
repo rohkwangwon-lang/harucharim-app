@@ -1,0 +1,417 @@
+<title>하루차림은 무엇이 다른가</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@400;500;600;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#F6F8F6; --card:#FFFFFF; --ink:#141C1A; --mute:#5E6B66; --line:#DCE3DF;
+  --celadon:#2F5D52; --celadon-2:#5E8C80; --wash:#EAF0EC;
+  --seal:#A2382B; --amber:#7E6216; --sky:#2C5A73;
+  --shadow:0 1px 2px rgba(20,28,26,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F1413; --card:#161D1B; --ink:#E4EAE6; --mute:#93A29C; --line:#26302D;
+    --celadon:#8FBDB0; --celadon-2:#6E9A8D; --wash:#182220;
+    --seal:#E08A7C; --amber:#D6B45E; --sky:#8FBBD4; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F1413; --card:#161D1B; --ink:#E4EAE6; --mute:#93A29C; --line:#26302D;
+  --celadon:#8FBDB0; --celadon-2:#6E9A8D; --wash:#182220;
+  --seal:#E08A7C; --amber:#D6B45E; --sky:#8FBBD4; --shadow:none;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);margin:0;
+  font-family:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  line-height:1.78;letter-spacing:-.005em;-webkit-font-smoothing:antialiased}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 100px}
+h1,h2,h3{font-family:Hahmlet,"Nanum Myeongjo",serif;text-wrap:balance;margin:0}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--celadon);margin:0 0 20px}
+header{padding:76px 0 44px}
+h1{font-size:clamp(32px,6.2vw,54px);font-weight:700;line-height:1.2;letter-spacing:-.022em;max-width:16ch}
+.deck{font-size:18px;color:var(--mute);max-width:56ch;margin:22px 0 0;line-height:1.85}
+.byline{font-size:13px;color:var(--mute);margin:28px 0 0;padding-top:18px;border-top:1px solid var(--line)}
+section{padding:56px 0;border-top:1px solid var(--line)}
+section>h2{font-size:clamp(24px,3.6vw,32px);font-weight:600;letter-spacing:-.015em;max-width:20ch}
+.sd{color:var(--mute);max-width:60ch;margin:14px 0 0;font-size:15.5px}
+p{max-width:62ch}
+em{font-style:normal;font-weight:600;box-shadow:inset 0 -.42em 0 var(--wash)}
+
+/* 지금 있는 선택지 */
+.field{display:grid;gap:0;margin:34px 0 0;border-top:1px solid var(--line)}
+.field>div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:22px;
+  padding:18px 0;border-bottom:1px solid var(--line)}
+.field b{font-family:Hahmlet,serif;font-size:15.5px;font-weight:600}
+.field span{font-size:14.5px;color:var(--mute);display:block}
+.field i{font-style:normal;display:block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;
+  letter-spacing:.1em;color:var(--seal);margin-top:6px}
+@media (max-width:640px){.field>div{grid-template-columns:1fr;gap:4px}}
+
+/* 우월성 다섯 */
+.diffs{display:grid;gap:0;margin:36px 0 0}
+.diffs>div{display:grid;grid-template-columns:34px minmax(0,1fr);gap:18px;
+  padding:26px 0;border-top:1px solid var(--line)}
+.diffs>div:first-child{border-top:0}
+.dn{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--celadon-2);padding-top:5px}
+.diffs h3{font-size:19.5px;font-weight:600;margin:0 0 9px;line-height:1.5}
+.diffs p{margin:0;font-size:15px}
+.diffs p+p{margin-top:9px}
+.only{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.12em;
+  padding:2px 8px;background:var(--celadon);color:var(--paper);margin-bottom:9px}
+:root[data-theme="dark"] .only,
+:root:not([data-theme="light"]) .only{color:#0F1413}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .only{color:#F6F8F6}}
+
+/* 알고리즘 */
+.steps{counter-reset:s;margin:32px 0 0;display:grid;gap:0;padding:0}
+.steps>li{counter-increment:s;list-style:none;display:grid;
+  grid-template-columns:56px minmax(0,1fr);gap:18px;padding:20px 0;border-top:1px solid var(--line)}
+.steps>li::before{content:"단계 " counter(s);font-family:"IBM Plex Mono",monospace;font-size:10.5px;
+  letter-spacing:.1em;color:var(--celadon);padding-top:5px}
+.steps b{display:block;font-size:16px;font-weight:600;margin:0 0 5px;font-family:Hahmlet,serif}
+.steps span{font-size:14.5px;color:var(--mute);display:block;max-width:56ch}
+.demo{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);
+  margin:34px 0 0;overflow:hidden}
+.demo-h{padding:15px 20px;border-bottom:1px solid var(--line);background:var(--wash)}
+.demo-h b{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--celadon);font-weight:500}
+.demo-h span{display:block;font-size:14px;margin-top:5px}
+.demo-b{padding:6px 20px 18px}
+.trace{display:grid;grid-template-columns:118px minmax(0,1fr);gap:16px;padding:11px 0;
+  border-bottom:1px solid var(--line);font-size:14px}
+.trace:last-child{border-bottom:0}
+.trace dt{color:var(--mute);font-size:12.5px}
+.trace dd{margin:0}
+.verdict{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;
+  padding:2px 9px;border:1px solid currentColor}
+.v-avoid{color:var(--seal)} .v-prefer{color:var(--celadon)} .v-caution{color:var(--amber)}
+@media (max-width:640px){.trace{grid-template-columns:1fr;gap:3px}}
+
+/* 흔한 정보 vs 하루차림 */
+.vs{margin:34px 0 0;display:grid;gap:0}
+.vs>div{padding:22px 0;border-top:1px solid var(--line)}
+.vs>div:first-child{border-top:0}
+.vsq{font-family:Hahmlet,serif;font-size:17.5px;font-weight:600;margin:0 0 14px;line-height:1.5}
+.ba{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:0;
+  border:1px solid var(--line);background:var(--card)}
+@media (max-width:640px){.ba{grid-template-columns:1fr}}
+.ba>div{padding:15px 17px}
+.ba>div:first-child{border-right:1px solid var(--line);background:var(--wash)}
+@media (max-width:640px){.ba>div:first-child{border-right:0;border-bottom:1px solid var(--line)}}
+.ba p{margin:0;font-size:14px;max-width:none}
+.ba .lbl{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;margin:0 0 7px}
+.lbl-out{color:var(--seal)} .lbl-us{color:var(--celadon)}
+
+/* 숫자 */
+.grades{display:flex;flex-wrap:wrap;gap:0;margin:30px 0 0;border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line)}
+.grades div{padding:18px 30px 16px 0;margin-right:30px;border-right:1px solid var(--line)}
+.grades div:last-child{border-right:0;margin-right:0}
+.grades b{display:block;font-family:"IBM Plex Mono",monospace;font-size:26px;font-weight:600;
+  color:var(--celadon);font-variant-numeric:tabular-nums;line-height:1.15}
+.grades span{font-size:12.5px;color:var(--mute)}
+
+/* 검사 */
+.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:0;
+  margin:30px 0 0;border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.checks div{padding:13px 15px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.checks b{display:block;font-size:14px;font-weight:600;margin-bottom:2px}
+.checks span{font-size:12px;color:var(--mute);line-height:1.6;display:block}
+
+/* 비교표 */
+.cmp{margin:30px 0 0;overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:14px}
+th,td{text-align:left;padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--mute);font-weight:500;border-bottom:1px solid var(--celadon)}
+thead th.us{color:var(--celadon);font-weight:600}
+tbody th{font-weight:500;color:var(--ink);width:24%}
+td.us{background:var(--wash);font-weight:500}
+tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
+
+/* 안 하는 것 */
+.nots{margin:30px 0 0;display:grid;gap:0}
+.nots>div{display:grid;grid-template-columns:16px minmax(0,1fr);gap:14px;padding:14px 0;
+  border-top:1px solid var(--line);font-size:15px}
+.nots>div:first-child{border-top:0}
+.nots i{font-style:normal;color:var(--seal);font-family:"IBM Plex Mono",monospace;font-size:13px;padding-top:2px}
+.nots b{font-weight:600}
+.nots span{color:var(--mute);display:block;font-size:14px;margin-top:3px}
+.cta{margin:44px 0 0;padding:26px;background:var(--card);border:1px solid var(--line);
+  border-left:3px solid var(--celadon);box-shadow:var(--shadow)}
+.cta p{margin:0 0 10px;font-size:15px}
+.cta p:last-child{margin:0}
+.cta a{color:var(--celadon);font-weight:500}
+footer{padding:34px 0 0;border-top:1px solid var(--line);margin-top:56px;
+  font-size:12.5px;color:var(--mute);display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between}
+a:focus-visible{outline:2px solid var(--celadon);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">하루차림 · 무엇이 다른가</p>
+  <h1>암 환자 식이 앱 가운데, 근거를 끝까지 밝히는 유일한 앱</h1>
+  <p class="deck">“뭘 먹어야 하나요”는 진료실에서 가장 자주 나오지만 답할 시간은 가장 적은 질문입니다.
+    그 틈을 검색과 주변의 말이 채웁니다. 하루차림은 그 자리에
+    <em>출처를 하나하나 원문으로 확인한 판단</em>을 놓습니다.</p>
+  <p class="byline">암 환자를 25년간 치료해 온 방사선종양학과 전문의가 내용을 감수했습니다.</p>
+</header>
+
+<section>
+  <h2>지금 환자분들이 쓰실 수 있는 것들</h2>
+  <p class="sd">각각 자기 자리에서 쓸모가 있습니다. 다만 공통적으로 비어 있는 칸이 있습니다.</p>
+  <div class="field">
+    <div><b>병원 안내문·정보 페이지</b><div>
+      <span>신뢰할 만하지만 <em>일반론</em>입니다. 유방암 환자용 안내문 한 장이
+        호르몬 수용체 양성인 분과 삼중음성인 분, 항암 중인 분과 5년 지난 분께 똑같이 주어집니다.</span>
+      <i>내 상황에 맞춘 판정이 없음</i></div></div>
+    <div><b>검색·블로그·영상</b><div>
+      <span>가장 많이 보시는 곳이자, 가장 많이 틀리는 곳입니다.
+        출처가 없거나, 있어도 그 문헌이 실제로 그 말을 하는지 아무도 확인하지 않습니다.</span>
+      <i>출처 없음 · 검증 없음</i></div></div>
+    <div><b>식단 배송·메디푸드</b><div>
+      <span>먹을 것을 실제로 가져다준다는 큰 장점이 있습니다.
+        다만 판매가 목적이라 “무엇을 사지 말아야 하는가”는 말하기 어려운 구조입니다.</span>
+      <i>상업적 이해가 개입</i></div></div>
+    <div><b>일반 식단·칼로리 앱</b><div>
+      <span>기록은 잘 됩니다. 그러나 암종도, 치료 시기도, 항암제도 모릅니다.
+        호중구가 낮은 날 회를 먹어도 아무 말도 하지 않습니다.</span>
+      <i>암 치료 맥락 없음</i></div></div>
+  </div>
+</section>
+
+<section>
+  <h2>하루차림만 하는 다섯 가지</h2>
+  <div class="diffs">
+    <div><span class="dn">01</span><div>
+      <p class="only">국내 유일</p>
+      <h3>참고 문헌 79종을 전부 원문으로 대조했습니다</h3>
+      <p>“ESPEN 권고에 따르면”이라고 적힌 앱은 있을 수 있습니다.
+        그 지침을 <em>실제로 내려받아 앱의 문장과 한 줄씩 맞춰 본</em> 앱은 저희가 아는 한 없습니다.</p>
+      <p>ESPEN·WCRF·미국암학회·미국임상종양학회·IARC·FDA·EASL·IDDSI·MASCC,
+        그리고 질병관리청의 한국인 영양소 섭취기준까지 79종을 모두 받아 확인했습니다.
+        원문을 열어 볼 수 없는 구독자용 지침 하나는 <em>인용에서 아예 걷어 냈습니다</em> —
+        읽지 못한 문헌은 근거가 아니기 때문입니다.</p>
+    </div></div>
+
+    <div><span class="dn">02</span><div>
+      <p class="only">국내 유일</p>
+      <h3>문장마다 근거 등급이 붙고, “아직 모릅니다”를 적습니다</h3>
+      <p>A(무작위배정 시험)부터 C(기전·경험)까지, 각 항목이 어느 종류의 연구에서 나왔는지를 밝힙니다.
+        그래서 <em>확신할 수 있는 것과 그렇지 않은 것을 구분해서</em> 읽으실 수 있습니다.</p>
+      <p>“토마토가 전립선에 좋다”는 2007년 평가였고 2014년 재평가에서 ‘결론 없음’으로 내려갔습니다.
+        비타민 D를 5년 넘게 드시게 한 25,871명 시험에서 암 발생은 줄지 않았습니다.
+        <em>이런 것을 지운 앱이 읽기에는 편하지만, 도움이 되지는 않습니다.</em></p>
+    </div></div>
+
+    <div><span class="dn">03</span><div>
+      <p class="only">국내 유일</p>
+      <h3>약과 음식의 상호작용을 약제 18종에 대해 봅니다</h3>
+      <p>와파린과 비타민 K, 자몽·라임과 경구 표적치료제, 보르테조밉과 녹차,
+        갑상선호르몬제와 칼슘, 아로마타제 억제제와 칼슘·비타민 D —
+        <em>실제로 문제가 되는 조합</em>을 21개 규칙으로 확인해 드립니다.</p>
+      <p>이 영역은 검색으로 가장 위험하게 틀리는 곳입니다.
+        생강이 항암 오심에 좋다는 정보는 흔하지만, 와파린과 함께면 출혈 위험이 3.2배라는 이야기는
+        어디에도 붙어 있지 않습니다. 하루차림은 그 두 가지를 <em>같은 화면에서</em> 말합니다.</p>
+    </div></div>
+
+    <div><span class="dn">04</span><div>
+      <h3>한국 밥상 위에서 판단합니다</h3>
+      <p>식품 18,000여 종. 국·찌개·김치·젓갈처럼 <em>한국인 나트륨 섭취의 대부분이 오는 자리</em>를
+        1회 제공량 기준으로 봅니다. 추천도 밥 + 반찬 두셋 + 국이라는 한 상의 꼴을 지킵니다 —
+        반찬만 세 가지 늘어놓지 않습니다.</p>
+      <p>수치도 한국 것을 우선합니다. 위암의 절임채소는 한국인유전체역학조사를 포함한
+        한국 코호트 값을, 나트륨·칼슘·비타민 D는 2020 한국인 영양소 섭취기준을 씁니다.
+        서구 평균을 그대로 옮기면 우리 밥상에서는 맞지 않습니다.</p>
+    </div></div>
+
+    <div><span class="dn">05</span><div>
+      <h3>팔지 않고, 기록을 가져가지 않습니다</h3>
+      <p>식품도 보충제도 판매하거나 중개하지 않습니다.
+        영양제 항목은 성분 33종에 대해 <em>“이건 근거가 있고, 이건 없습니다”</em>를 말할 뿐입니다.
+        판매를 겸하는 서비스가 하기 어려운 말입니다.</p>
+      <p>적어 두신 암종·체중·식단은 <em>이 기기 안에만</em> 저장되고 서버로 보내지 않습니다.
+        전액 무료이며, 로그인은 문의 답변을 위한 것입니다.</p>
+    </div></div>
+  </div>
+</section>
+
+<section>
+  <h2>흔히 도는 정보와 하루차림의 답</h2>
+  <p class="sd">아래는 검색과 주변에서 실제로 자주 듣게 되는 말들입니다.
+    오른쪽이 원문을 확인한 뒤의 답입니다. 이 차이가 곧 이 앱의 값어치입니다.</p>
+  <div class="vs">
+    <div>
+      <p class="vsq">“항암 중에는 생과일·생채소를 다 끊어야 한다”</p>
+      <div class="ba">
+        <div><p class="lbl lbl-out">흔히 도는 말</p><p>호중구가 낮으면 감염 위험이 있으니 익힌 것만 드세요.</p></div>
+        <div><p class="lbl lbl-us">하루차림</p><p>이른바 호중구감소증 식단이 감염을 줄인다는 근거는 메타분석에서 확인되지 않았고,
+          조혈모세포이식군에서는 <em>오히려 감염이 더 많았습니다</em>(상대위험 1.25).
+          씻어 드시면 됩니다. 다만 <em>생 새싹채소만은 예외</em>라 익혀 드셔야 합니다 —
+          싹 틔우는 환경 자체가 균이 자라기 좋아 씻는 것으로 해결되지 않습니다.</p></div>
+      </div>
+    </div>
+    <div>
+      <p class="vsq">“유방암이니 콩·두부·된장을 끊어야 한다”</p>
+      <div class="ba">
+        <div><p class="lbl lbl-out">흔히 도는 말</p><p>이소플라본이 여성호르몬처럼 작용하니 위험합니다.</p></div>
+        <div><p class="lbl lbl-us">하루차림</p><p>사람 대상 연구는 반대 방향입니다. 상하이 코호트 5,042명에서
+          대두를 많이 드신 군의 재발이 32 % 낮았고, 이 이득은 <em>타목시펜을 드시는 분에서도 같았습니다.</em>
+          다만 이소플라본을 수십 배 농축한 <em>보충제는 별개</em>입니다 — 그 근거는 식품을 본 것이지
+          보충제를 먹여 본 것이 아닙니다.</p></div>
+      </div>
+    </div>
+    <div>
+      <p class="vsq">“채소를 하루 400 g 먹으라던데요”</p>
+      <div class="ba">
+        <div><p class="lbl lbl-out">흔히 도는 말</p><p>세계암연구기금이 채소 400 g을 권합니다.</p></div>
+        <div><p class="lbl lbl-us">하루차림</p><p>원문은 <em>비전분 채소와 과일을 합쳐</em> 400 g 이상,
+          곧 한 번에 80 g씩 다섯 번입니다. 채소만으로 읽으면 요구량이 두 배가 되어 아무도 지킬 수 없습니다.
+          감자·고구마는 여기 들어가지 않습니다.</p></div>
+      </div>
+    </div>
+    <div>
+      <p class="vsq">“가공육이 담배와 같은 1군 발암물질이라니”</p>
+      <div class="ba">
+        <div><p class="lbl lbl-out">흔히 도는 말</p><p>담배와 같은 등급이니 절대 먹으면 안 됩니다.</p></div>
+        <div><p class="lbl lbl-us">하루차림</p><p>국제암연구소가 직접 밝혀 두었습니다 — 이 등급은
+          <em>근거가 얼마나 확실한가</em>를 말하는 것이지 <em>얼마나 위험한가</em>를 재는 것이 아닙니다.
+          하루 50 g마다 대장암 위험이 약 18 % 오릅니다. 겁이 아니라 그 숫자로 정하시면 됩니다.</p></div>
+      </div>
+    </div>
+    <div>
+      <p class="vsq">“수술했으니 죽만 몇 주 드세요”</p>
+      <div class="ba">
+        <div><p class="lbl lbl-out">흔히 도는 말</p><p>문합부가 아물 때까지 4~6주는 부드러운 것만.</p></div>
+        <div><p class="lbl lbl-us">하루차림</p><p>수술 후 회복 지침은 반대로 말합니다 —
+          정상 식사 재개가 늦어질수록 감염 합병증이 늘고 회복이 느려지므로,
+          <em>대부분의 환자는 수술 당일부터</em> 음식과 영양보충을 시작해야 한다고 강하게 권고합니다.
+          저잔사식은 며칠의 출발점이지 몇 주 이어 갈 식단이 아닙니다.</p></div>
+      </div>
+    </div>
+    <div>
+      <p class="vsq">“면역력에 좋다니 항산화제를 챙겨 먹자”</p>
+      <div class="ba">
+        <div><p class="lbl lbl-out">흔히 도는 말</p><p>치료 중일수록 항산화제로 몸을 지켜야 합니다.</p></div>
+        <div><p class="lbl lbl-us">하루차림</p><p>방사선과 상당수 항암제는 <em>활성산소로 암세포를 죽입니다.</em>
+          두경부암 환자 540명 무작위배정 시험에서 고용량 항산화제를 드신 군은 보충 기간 중
+          이차암이 2.9배 많았습니다. 재발·사망은 <em>치료 중에도 담배를 피우신 분에게 몰렸습니다.</em>
+          음식으로 드시는 것은 해당되지 않습니다.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>어떻게 판정하는가</h2>
+  <p class="sd">음식 하나가 화면에 뜨기까지 여섯 단계를 지납니다.
+    각 단계는 사람이 손으로 적은 규칙이고, 규칙마다 출처와 근거 등급이 달려 있습니다.
+    통계 모델이 추정하는 것이 아니라 <em>근거를 따라가는 구조</em>입니다.</p>
+  <ol class="steps">
+    <li><b>맥락을 세운다</b><span>암종 · 세부 유형(수용체·ADT 여부 등) · 치료 시기 · 동반 증상 17종 · 복용 약 18종 · 체중 변화율.</span></li>
+    <li><b>해당하는 규칙만 고른다</b><span>규칙 144개 가운데 이 맥락에 해당하는 것만 남깁니다. 시기나 세부 유형이 다르면 애초에 적용되지 않습니다.</span></li>
+    <li><b>음식을 규칙에 건다</b><span>태그(염장·생식·가공육·자몽계·생강·고비타민K)와 성분 수치(1회 제공량 나트륨·칼륨·인·비타민 K) 양쪽으로 겁니다. 이름에 태그가 빠져 있어도 성분표의 숫자로 걸립니다.</span></li>
+    <li><b>가장 강한 판정을 대표로 삼는다</b><span>‘피하세요’가 하나라도 걸리면 그것이 결론입니다. 이때 권장 사유는 화면에서 뺍니다 — 상반된 두 이유가 나란히 보이면 무엇을 믿을지 알 수 없기 때문입니다.</span></li>
+    <li><b>한 상으로 짠다</b><span>하루 열량·단백질 목표를 체중에서 계산하고, 밥 + 반찬 + 국의 꼴을 지키면서 다섯 끼니로 나눕니다.</span></li>
+    <li><b>이유를 함께 보여 준다</b><span>‘이유’를 펼치면 어떤 규칙이 걸렸는지, 근거 등급이 무엇인지, 어느 문헌에서 왔는지가 나옵니다.</span></li>
+  </ol>
+
+  <div class="demo">
+    <div class="demo-h">
+      <b>실제 판정 예시</b>
+      <span>위암 · 수술 후 회복기 · 와파린 복용 중 — 이 분께 <strong>시금치나물</strong>을 보여 줄 때</span>
+    </div>
+    <div class="demo-b">
+      <div class="trace"><dt>걸린 규칙 ①</dt><dd><span class="verdict v-caution">주의</span> 비타민 K 섭취량을 갑자기 바꾸지 마세요<br>
+        <small style="color:var(--mute)">1회 제공량 비타민 K가 100 µg을 넘어 성분 수치로 걸렸습니다. 한국인 하루 기준치는 남 75·여 65 µg입니다.</small></dd></div>
+      <div class="trace"><dt>걸린 규칙 ②</dt><dd><span class="verdict v-prefer">권장</span> 적은 양으로 열량과 단백질을 채우는 식품이 유리합니다<br>
+        <small style="color:var(--mute)">위 용적이 줄어든 상태라 부피 대비 영양이 높은 쪽을 우선합니다.</small></dd></div>
+      <div class="trace"><dt>결론</dt><dd><span class="verdict v-caution">주의</span> — 끊으라는 뜻이 아니라 <em>매일 비슷한 양으로</em> 드시라는 뜻입니다.</dd></div>
+      <div class="trace"><dt>붙는 출처</dt><dd>미국흉부의사학회 항응고 관리 지침(2012) · 2020 한국인 영양소 섭취기준</dd></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>규모와 검증</h2>
+  <p class="sd">근거의 양뿐 아니라, 그것이 실제로 지켜지는지를 기계가 매번 확인합니다.</p>
+  <div class="grades">
+    <div><b>144</b><span>임상 규칙</span></div>
+    <div><b>79</b><span>참고 문헌 (전부 원문 대조)</span></div>
+    <div><b>18,000+</b><span>판정 가능한 식품</span></div>
+    <div><b>10 · 17 · 18</b><span>암종 · 증상 · 약제</span></div>
+  </div>
+
+  <h3 style="font-size:20px;font-weight:600;margin:44px 0 0">확인한 것을 기계가 지킵니다</h3>
+  <p class="sd" style="margin-top:12px">문헌에서 확인한 수치가 사라지거나 원문이 하지 않는 말이 되살아나면
+    <em>빌드가 실패합니다.</em> 되돌려 넣어 실제로 걸리는지까지 매번 확인합니다.</p>
+  <div class="checks">
+    <div><b>규칙·출처</b><span>등급이 인용한 연구 종류와 맞는가</span></div>
+    <div><b>추천 엔진</b><span>피해야 할 것이 추천으로 나가지 않는가</span></div>
+    <div><b>자동 태그</b><span>날것·가공육·자몽계·생강이 양방향으로 맞는가</span></div>
+    <div><b>화면</b><span>판단이 실제 화면에 그대로 나오는가</span></div>
+    <div><b>환자 입장</b><span>읽을 수 있는가, 하루에 너무 많지 않은가</span></div>
+    <div><b>영양 목표</b><span>체중·시기에 따라 목표가 따라오는가</span></div>
+    <div><b>미량영양소</b><span>칼륨·인·칼슘 권고가 서로 부딪치지 않는가</span></div>
+    <div><b>개인정보</b><span>동의·뭉개기·만 14세 방어가 살아 있는가</span></div>
+  </div>
+  <p style="margin-top:26px">검사는 <em>21종</em>입니다. 여기에 더해 출시 전
+    가상의 환자 3,000명에게 90일치 식단을 실제로 만들어 보았습니다 —
+    <em>270,000일 · 추천 3,531,402건 가운데 피해야 할 것을 추천한 경우는 0건</em>이었습니다.</p>
+</section>
+
+<section>
+  <h2>한눈에 비교</h2>
+  <div class="cmp">
+    <table>
+      <thead><tr><th></th><th>병원 안내문</th><th>검색·블로그</th><th>식단 배송</th><th>일반 식단 앱</th><th class="us">하루차림</th></tr></thead>
+      <tbody>
+        <tr><th>내 암종·시기에 맞춘 판정</th><td>일반 안내</td><td>없음</td><td>상품 단위</td><td>없음</td><td class="us">암종 10 · 시기 · 증상 17</td></tr>
+        <tr><th>문장마다 출처</th><td>일부</td><td>대부분 없음</td><td>없음</td><td>없음</td><td class="us">전부 (79종)</td></tr>
+        <tr><th>출처 원문 대조</th><td>—</td><td>—</td><td>—</td><td>—</td><td class="us">79종 전부</td></tr>
+        <tr><th>근거 등급 표시</th><td>없음</td><td>없음</td><td>없음</td><td>없음</td><td class="us">A·B·C·G</td></tr>
+        <tr><th>“아직 모른다”를 밝힘</th><td>드묾</td><td>거의 없음</td><td>없음</td><td>없음</td><td class="us">그대로 표시</td></tr>
+        <tr><th>약–음식 상호작용</th><td>일부</td><td>부정확한 경우 많음</td><td>없음</td><td>없음</td><td class="us">약제 18 · 규칙 21</td></tr>
+        <tr><th>한국 식품·한국 기준</th><td>있음</td><td>혼재</td><td>있음</td><td>있음</td><td class="us">식품 18,000+ · KDRI</td></tr>
+        <tr><th>비용</th><td>무료</td><td>무료</td><td>유료</td><td>일부 유료</td><td class="us">전액 무료</td></tr>
+        <tr><th>내 건강 기록의 위치</th><td>—</td><td>—</td><td>업체 서버</td><td>업체 서버</td><td class="us">내 기기 안</td></tr>
+        <tr><th>상업적 이해</th><td>없음</td><td>광고</td><td>판매</td><td>광고·구독</td><td class="us">없음</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>하지 않는 것</h2>
+  <p class="sd">할 수 있는 것보다 하지 않는 것을 먼저 말씀드리는 편이 정직합니다.</p>
+  <div class="nots">
+    <div><i>×</i><div><b>치료 방침을 대신하지 않습니다</b>
+      <span>약·방사선·수술에 대한 판단은 이 앱의 범위가 아닙니다. 담당 의료진의 지시가 언제나 우선합니다.</span></div></div>
+    <div><i>×</i><div><b>암을 낫게 하는 음식을 말하지 않습니다</b>
+      <span>그런 음식은 확인된 바 없습니다. 이 앱이 다루는 것은 치료를 견디고 회복하는 데 필요한 영양입니다.</span></div></div>
+    <div><i>×</i><div><b>진단하거나 처방하지 않습니다</b>
+      <span>의료기기가 아니며, 증상은 여러분이 선택하시는 것입니다.</span></div></div>
+    <div><i>×</i><div><b>식품이나 보충제를 팔지 않습니다</b>
+      <span>추천에 상업적 이해가 개입하지 않습니다.</span></div></div>
+    <div><i>×</i><div><b>건강 정보를 서버에 모으지 않습니다</b>
+      <span>암종·체중·식단은 기기 안에만 저장됩니다.</span></div></div>
+  </div>
+  <div class="cta">
+    <p><strong>같이 보실 것</strong></p>
+    <p>이 앱의 근거 전체를 한 권으로 정리한
+      <a href="https://claude.ai/code/artifact/1c76d951-840d-4f4d-9e4f-db8601a4a5bd">암 환자 식이·영양 지침서</a>가 있습니다.
+      총론과 영양소별 각론, 규칙 144개와 참고 문헌 79종이 모두 들어 있고, 앱을 쓰지 않으셔도 읽으실 수 있습니다.</p>
+  </div>
+</section>
+
+<footer>
+  <span>하루차림 — 암 환자 식이·영양 도우미</span>
+  <span>감수 · 방사선종양학과 전문의 (임상 25년)</span>
+</footer>
+
+</div>
