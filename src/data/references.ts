@@ -16,8 +16,10 @@ export const REFERENCES: Reference[] = [
   { id: 'asco2022', kind: 'guideline', year: 2022,
     citation: 'Ligibel JA, et al. Exercise, Diet, and Weight Management During Cancer Treatment: ASCO Guideline. J Clin Oncol. 2022;40(22):2491-2507.',
     url: 'https://doi.org/10.1200/JCO.22.00687' },
+  /* 전문 공개(Open Access). 표3 '무엇이 연결되고 무엇이 아직 아닌가' 를 규칙마다 대조했다. */
   { id: 'acs2022', kind: 'guideline', year: 2022,
-    citation: 'Rock CL, et al. American Cancer Society nutrition and physical activity guideline for cancer survivors. CA Cancer J Clin. 2022;72(3):230-262.' },
+    citation: 'Rock CL, et al. American Cancer Society nutrition and physical activity guideline for cancer survivors. CA Cancer J Clin. 2022;72(3):230-262.',
+    url: 'https://doi.org/10.3322/caac.21719' },
   { id: 'nccn-survivorship', kind: 'guideline', year: 2024,
     citation: 'NCCN Clinical Practice Guidelines in Oncology: Survivorship. National Comprehensive Cancer Network.' },
   { id: 'acr-giop', kind: 'guideline', year: 2023,
@@ -197,8 +199,16 @@ export const REFERENCES: Reference[] = [
     citation: 'Ryan JL, et al. Ginger (Zingiber officinale) reduces acute chemotherapy-induced nausea: a URCC CCOP study of 576 patients. Support Care Cancer. 2012;20(7):1479-1489.' },
   { id: 'mascc-mucositis', kind: 'guideline', year: 2020,
     citation: 'Elad S, et al. MASCC/ISOO clinical practice guidelines for the management of mucositis secondary to cancer therapy. Cancer. 2020;126(19):4423-4431.' },
-  { id: 'iddsi', kind: 'guideline', year: 2019,
-    citation: 'International Dysphagia Diet Standardisation Initiative (IDDSI) Framework. — 연하곤란 식이 점도 표준.' },
+  /*
+   * IDDSI 는 두 문서로 되어 있다 — 단계 정의(Detailed Definitions)와 확인법(Testing Methods).
+   * 앱이 적은 수치(0~7의 8단계, 어른 1.5 cm·4 mm, 10 mL 주사기 10초)는 두 문서를 내려받아 대조했다.
+   * CC BY-SA 4.0 문서라 표를 그대로 옮기지 않고 사실만 우리 문장으로 적는다.
+   */
+  { id: 'iddsi', kind: 'guideline', year: 2026,
+    url: 'https://iddsi.org/framework/',
+    citation:
+      'International Dysphagia Diet Standardisation Initiative. Complete IDDSI Framework: Detailed Definitions 2.2 (2026) · Testing Methods 2.0 (2019). ' +
+      '원 논문 Cichero JAY, et al. Dysphagia. 2017;32:293-314. — 연하곤란 식이의 점도·질감 국제 표준(0~7의 8단계).' },
   /*
    * 악액질 진단 기준의 실제 출처. ESPEN 두 판(2017 전체·2021 축약) 전문을 다 훑어도
    * '5 % / 6개월' 기준은 나오지 않는다 — 그것은 이 국제 합의문의 정의다.

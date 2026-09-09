@@ -233,8 +233,56 @@ const MUST_SAY: [string, RegExp, string][] = [
   ['common-antioxidant-rt', /담배를 피우신 분/, 'Meyer 2008 의 핵심은 흡연자에 몰렸다는 것이다'],
   ['common-antioxidant-rt', /2\.9배/, '이차암 HR 2.88(95 % CI 1.56~5.31)이다'],
   /* 호중구감소증 식단은 '이득 없음' 을 넘어 이식군에서 감염이 더 많았다 */
-  ['common-neutropenic-diet-myth', /1\.25/, '조혈모세포이식군에서 제한식이 쪽 감염이 더 많았다(RR 1.25, 1.02~1.54)']
+  ['common-neutropenic-diet-myth', /1\.25/, '조혈모세포이식군에서 제한식이 쪽 감염이 더 많았다(RR 1.25, 1.02~1.54)'],
+  /*
+   * IDDSI 는 두 문서를 받아 대조했다. 환자가 집에서 확인할 수 있는 숫자는 이 둘뿐이다 —
+   * 어른 한 조각 1.5 cm(포크 폭), 다진 단계 4 mm(포크 살 사이). 말로만 '작게' 는 실행할 수 없다.
+   */
+  ['eso-texture', /1\.5 cm/, 'IDDSI Level 6 의 어른 기준이다(15 mm = 1.5 cm)'],
+  ['eso-texture', /4 mm/, 'IDDSI Level 5 의 어른 기준이다(폭 4 mm 이하)'],
+  ['eso-texture', /0~7/, 'IDDSI 는 0~7 의 8단계다. 단계 수를 적어야 "단계로 나눈다" 가 확인된다'],
+  ['cond-dys-soft', /4 mm/, 'IDDSI Level 5 의 어른 기준이다'],
+  ['cond-dys-soft', /따라 내/, "IDDSI 는 '묽은 액체가 음식과 분리되면 안 된다·남는 물기는 따라 낸다' 를 못 박는다"],
+  ['hn-soft-moist', /따라 내/, "'국물로 촉촉하게' 는 IDDSI 가 금하는 분리 액체를 부른다"],
+  ['cond-dys-rough', /마른 빵/, "IDDSI 는 Level 5·6 에서 마른 빵·토스트·샌드위치를 모두 뺀다"],
+  /*
+   * 되기 단계는 IDDSI 가 정하지 않는다 — 원문은 임상가가 종합 평가로 정한다고 못 박는다.
+   * 앱이 '걸쭉하게 드세요' 를 권고로 적으면 근거를 넘는다.
+   */
+  ['cond-dys-thin', /연하 평가/, 'IDDSI 는 단계 결정을 임상가에게 맡긴다'],
+  ['hn-aspiration', /연하 평가/, 'IDDSI 는 단계 결정을 임상가에게 맡긴다'],
+  /*
+   * ACS 2022 생존자 지침 전문 대조. 이 지침의 핵심은 '무엇이 연결되고 무엇이 아직 아닌가' 를 갈라 둔 것이다.
+   * 뭉뚱그리면 환자는 하지 않아도 될 일을 하고, 해야 할 일을 놓친다.
+   */
+  ['common-alcohol', /새로운 암/, "ACS 는 생존자 금주의 이유를 재발이 아니라 이차암 예방으로 못 박는다"],
+  ['breast-weight', /분명하지 않/, "ACS 는 '진단 후 감량과 생존의 관계는 불확실' 이라고 적었다"],
+  ['breast-fiber-veg', /유방암 이외의 원인/, 'ACS 에서 식물성 식사의 이득은 전체 사망·비유방암 사망 쪽이었다'],
+  ['breast-soy', /사망률까지 낮춘다는 근거는 아니/, 'ACS 는 대두의 이득을 재발에 한정했다'],
+  ['prostate-veg-fat', /결론이 나지 않/, 'ACS 는 비만과 전립선암 사망·진행의 관계를 결론 없음으로 두었다'],
+  ['gyn-obesity', /무진행 생존/, 'ACS 는 비만이 자궁내막암 자체의 사망·재발과는 연관되지 않았다고 적었다']
 ]
+/*
+ * 반대 방향의 못. 원문이 하지 않는 말을 우리가 하지 않았는지 본다.
+ * MUST_SAY 는 지워진 것을 잡고, 이쪽은 되살아난 것을 잡는다.
+ */
+const MUST_NOT_SAY: [string, RegExp, string][] = [
+  ['cond-dys-thin', /흡인이 줄어듭니다|걸쭉하게 만들어 드시는 것을 권/, 'IDDSI 는 되기를 권고하지 않고 임상가 판단에 맡긴다'],
+  ['hn-aspiration', /흡인이 줄어듭니다/, 'IDDSI 에 걸쭉하게 하면 흡인이 준다는 효과 문장이 없다'],
+  ['cond-dys-thin', /가장 사레들기 쉽|가장 빠르게/, 'IDDSI 는 단계를 나눌 뿐 위험 순위를 매기지 않는다'],
+  ['hn-aspiration', /가장 빠르게/, 'IDDSI 는 단계를 나눌 뿐 위험 순위를 매기지 않는다'],
+  /* ACS 는 진단 후 감량의 이득을 확인하지 못했다 — '가장 확실한' 이 되살아나면 근거를 넘는다 */
+  ['breast-weight', /가장 확실한/, 'ACS 는 진단 후 감량과 생존의 관계를 불확실로 두었다'],
+  ['prostate-veg-fat', /재발 위험 모두와 연관/, 'ACS 는 비만과 전립선암 진행·사망을 결론 없음으로 두었다']
+]
+for (const [rid, pat, why] of MUST_NOT_SAY) {
+  const r = ALL_RULES.find((x) => x.id === rid) as { id: string; reason?: string } | undefined
+  if (!r) { bad('못 박아 둔 규칙이 사라졌거나 이름이 바뀜', `${rid} (${why})`); continue }
+  if (pat.test(r.reason ?? '')) {
+    bad('원문이 하지 않는 말이 되살아남', `${rid} — ${why}`)
+  }
+}
+
 for (const [rid, pat, why] of MUST_SAY) {
   const r = ALL_RULES.find((x) => x.id === rid) as { id: string; reason?: string } | undefined
   /*
