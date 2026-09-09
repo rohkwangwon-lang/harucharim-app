@@ -65,7 +65,9 @@ export const REFERENCES: Reference[] = [
     url: 'https://www.kns.or.kr/FileRoom/FileRoom_view.asp?idx=108&BoardID=Kdr',
     citation: '보건복지부·한국영양학회. 2020 한국인 영양소 섭취기준(KDRIs).' },
   { id: 'knhanes', kind: 'db', year: 2023,
-    citation: '질병관리청. 국민건강영양조사 — 한국인 1일 나트륨 섭취량 3,255 mg(2018년 기준)으로 목표섭취량 2,000 mg 의 약 1.6배.' },
+    citation:
+      '질병관리청. 국민건강영양조사 — 한국인 1일 나트륨 섭취량 3,255 mg(2018년 기준). ' +
+      '2020 한국인 영양소 섭취기준의 만성질환위험감소섭취량 2,300 mg 의 약 1.4배, 충분섭취량 1,500 mg 의 약 2.2배.' },
   { id: 'kfda-db', kind: 'db', year: 2024,
     citation: '식품의약품안전처. 식품영양성분 데이터베이스.' },
   { id: 'rda-table', kind: 'db', year: 2021,
