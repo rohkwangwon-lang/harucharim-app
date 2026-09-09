@@ -16,6 +16,7 @@
  * 이미 쓰시던 분의 설정·식단·체중이 조용히 사라진다.
  * 옮기는 장치(migrate.ts)가 제대로 붙어 있는지 함께 본다.
  */
+import { inflateSync } from 'node:zlib'
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
@@ -207,6 +208,63 @@ if (brand600 && stone50) {
   }
 }
 
+/*
+ * 7-2. 아이콘과 바깥 페이지도 같은 색인가.
+ *
+ * 위의 7번은 매니페스트와 index.html 만 보았다. 그래서 아이콘 넉 장과
+ * 약관·처리방침·계정삭제 페이지는 예전 청록(#0d9482)으로 반년을 남아 있었다.
+ * 브라우저로 앱만 열어 보면 드러나지 않는다 — 스토어에서 아이콘과 스크린샷이
+ * 나란히 놓이고 나서야, 심사자 눈에 서로 다른 앱처럼 보인다.
+ *
+ * 색을 고칠 자리는 언제나 한 곳이 아니다. 그래서 여기서 나머지를 함께 붙든다.
+ */
+if (brand600 && stone50) {
+  const brand300 = twColor('brand', '300')
+
+  /* 파비콘 — 아이콘 넉 장과 같은 정의(scripts/icons/build-icons.py)에서 나온다 */
+  const fav = readFileSync('public/favicon.svg', 'utf-8')
+  const favBg = fav.match(/<rect[^>]*fill="(#[0-9a-f]{6})"/i)?.[1]
+  no(!favBg, 'favicon.svg 에서 바탕색을 못 찾음')
+  no(Boolean(favBg) && favBg!.toLowerCase() !== brand600.toLowerCase(),
+     `파비콘 바탕색이 지금 디자인과 다름 — ${favBg} (tailwind 는 ${brand600})`)
+
+  /*
+   * 설치용 아이콘 — 그림 파일이라 눈으로만 보고 지나치기 쉽다.
+   * 가운데 점 하나를 실제로 뽑아 본다. 잣대는 tailwind 에서만 가져온다.
+   */
+  for (const f of ['public/icon-192.png', 'public/icon-512.png',
+                   'public/icon-maskable-512.png', 'public/apple-touch-icon.png']) {
+    const got = sampleBackground(f)
+    if (!got) { no(true, `${f} 에서 색을 읽지 못함`); continue }
+    no(got.toLowerCase() !== brand600.toLowerCase(),
+       `${f} 바탕색이 지금 디자인과 다름 — ${got} (tailwind 는 ${brand600})`)
+  }
+
+  /*
+   * maskable 은 안드로이드가 제 모양으로 오려 내고, iOS 는 투명한 자리를 검게 깐다.
+   * 둘 다 네 귀퉁이가 비어 있으면 안 된다.
+   */
+  for (const f of ['public/icon-maskable-512.png', 'public/apple-touch-icon.png']) {
+    no(cornerIsClear(f) === true,
+       `${f} 의 귀퉁이가 비어 있음 — ${f.includes('maskable')
+         ? '네모난 틀을 쓰는 런처에서 귀퉁이가 뚫려 보인다'
+         : 'iOS 홈 화면에서 그 자리가 검게 깔린다'}`)
+  }
+
+  /* 설치 없이 열리는 세 페이지 — 심사자가 제일 먼저 여는 자리다 */
+  for (const f of ['public/privacy.html', 'public/terms.html', 'public/delete-account.html']) {
+    const t = readFileSync(f, 'utf-8')
+    const accents = [...t.matchAll(/--accent:\s*(#[0-9a-f]{6})/gi)].map((m2) => m2[1].toLowerCase())
+    no(accents.length < 2, `${f} 에서 강조색을 ${accents.length}개밖에 못 찾음 — 밝은 쪽과 어두운 쪽 둘이어야 한다`)
+    if (accents.length >= 2) {
+      no(accents[0] !== brand600.toLowerCase(),
+         `${f} 의 강조색이 지금 디자인과 다름 — ${accents[0]} (tailwind 는 ${brand600})`)
+      no(Boolean(brand300) && accents[1] !== brand300!.toLowerCase(),
+         `${f} 의 어두운 화면 강조색이 지금 디자인과 다름 — ${accents[1]} (tailwind 는 ${brand300})`)
+    }
+  }
+}
+
 /* ── 8. 기기 저장소를 갈아탈 때 예전 것을 치우는가 ────────
  *
  * 이름을 바꾸면 IndexedDB 이름도 함께 바뀐다.
@@ -271,3 +329,83 @@ no(!app.includes(NAME), `App.tsx 에 앱 이름(${NAME})이 없음`)
 console.log(bads.length
   ? `이름 검사 — 문제 ${bads.length}종\n` + bads.map((b) => '■ ' + b).join('\n')
   : `이름 검사 완료 — ${files.length}개 파일·저장소 열쇠 ${keys.size}개 대조, 문제 없음`)
+
+/*
+ * PNG 에서 한 점의 색을 뽑는다.
+ *
+ * 그림 파일은 검사에서 늘 빠지는 자리다 — 열어 보지 않으면 색이 틀린 줄 모른다.
+ * 라이브러리를 더하지 않으려고 8비트 RGB/RGBA 만 읽는 최소한만 적었다.
+ * 이 앱의 아이콘은 전부 그 꼴이고, 아니면 null 을 돌려 검사가 스스로 소리를 낸다.
+ */
+function decodePng(file: string): { w: number; h: number; ch: number; px: Buffer } | null {
+  let buf: Buffer
+  try { buf = readFileSync(file) } catch { return null }
+  if (buf.readUInt32BE(0) !== 0x89504e47) return null
+
+  let at = 8
+  let w = 0, h = 0, ch = 0
+  const idat: Buffer[] = []
+  while (at + 8 <= buf.length) {
+    const len = buf.readUInt32BE(at)
+    const kind = buf.toString('ascii', at + 4, at + 8)
+    const body = buf.subarray(at + 8, at + 8 + len)
+    if (kind === 'IHDR') {
+      w = body.readUInt32BE(0); h = body.readUInt32BE(4)
+      if (body[8] !== 8) return null                 // 8비트만
+      if (body[9] === 2) ch = 3
+      else if (body[9] === 6) ch = 4
+      else return null                               // 팔레트·회색조는 안 읽는다
+      if (body[12] !== 0) return null                // 인터레이스는 안 읽는다
+    } else if (kind === 'IDAT') idat.push(body)
+    else if (kind === 'IEND') break
+    at += 12 + len
+  }
+  if (!w || !ch || idat.length === 0) return null
+
+  const raw = inflateSync(Buffer.concat(idat))
+  const stride = w * ch
+  const px = Buffer.alloc(h * stride)
+  let src = 0
+  for (let y = 0; y < h; y++) {
+    const filter = raw[src++]
+    const row = src; src += stride
+    for (let x = 0; x < stride; x++) {
+      const a = x >= ch ? px[y * stride + x - ch] : 0
+      const b = y > 0 ? px[(y - 1) * stride + x] : 0
+      const c = y > 0 && x >= ch ? px[(y - 1) * stride + x - ch] : 0
+      let v = raw[row + x]
+      if (filter === 1) v += a
+      else if (filter === 2) v += b
+      else if (filter === 3) v += (a + b) >> 1
+      else if (filter === 4) {
+        const p = a + b - c
+        const pa = Math.abs(p - a), pb = Math.abs(p - b), pc = Math.abs(p - c)
+        v += pa <= pb && pa <= pc ? a : pb <= pc ? b : c
+      }
+      px[y * stride + x] = v & 0xff
+    }
+  }
+  return { w, h, ch, px }
+}
+
+/**
+ * 바탕색을 #rrggbb 로.
+ *
+ * 처음에는 한가운데를 짚었는데, 그 자리가 그릇 막대와 가까워
+ * 작은 아이콘에서는 줄이는 과정의 번짐이 섞여 두 단계씩 어긋났다.
+ * 위쪽 가운데(12 %)는 잎보다 위이면서 둥근 모서리 밖이 아니라 늘 바탕이다.
+ */
+function sampleBackground(file: string): string | null {
+  const img = decodePng(file)
+  if (!img) return null
+  const i = (Math.round(img.h * 0.12) * img.w + Math.floor(img.w / 2)) * img.ch
+  return '#' + [0, 1, 2].map((k) => img.px[i + k].toString(16).padStart(2, '0')).join('')
+}
+
+/** 네 귀퉁이가 비어 있는가(투명한가). 알파가 없는 그림이면 false */
+function cornerIsClear(file: string): boolean | null {
+  const img = decodePng(file)
+  if (!img) return null
+  if (img.ch !== 4) return false
+  return img.px[3] < 128
+}

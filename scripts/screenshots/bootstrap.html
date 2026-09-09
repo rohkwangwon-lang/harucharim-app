@@ -1,0 +1,112 @@
+<script>
+/* 스토어 스크린샷 촬영용. 배포본이 아니라 /tmp 사본에만 주입된다. */
+(function () {
+  var q = new URLSearchParams(location.search);
+  if (!q.has('shot')) return;
+  var patient = {
+    name: '', cancer: 'breast', subtypes: ['호르몬수용체양성'], phase: 'during_chemo',
+    weightKg: 54, heightCm: 160, age: 52, sex: 'F', weightLossPct: 4,
+    conditions: ['오심·구토'], medications: ['tamoxifen'], history: [],
+    cuisines: ['한식'], onboarded: true
+  };
+  var today = new Date();
+  var iso = function (d) { return d.toISOString().slice(0, 10) };
+  var diary = {};
+  /* 오늘과 최근 6일치를 심는다. 오늘을 비워 두면 '내 식단' 이 빈 막대만 보인다 */
+  var picks = [
+    ['rice-white', 1, '아침'], ['egg-steamed', 1, '아침'], ['seaweed-soup', 1, '아침'],
+    ['rice-white', 1, '점심'], ['tofu-stew', 1, '점심'], ['spinach-namul', 1, '점심'],
+    ['banana', 1, '오후간식'], ['rice-white', 1, '저녁'], ['grilled-fish', 1, '저녁']
+  ];
+  for (var i = 0; i <= 6; i++) {
+    var d = new Date(today); d.setDate(d.getDate() - i);
+    diary[iso(d)] = picks.map(function (x) { return { foodId: x[0], servings: x[1], meal: x[2] } });
+  }
+  /* 체중은 배열이 아니라 날짜→kg 의 표다(store.ts: Record<DayKey, number>) */
+  var weights = {};
+  for (var j = 30; j >= 0; j -= 5) {
+    var wd = new Date(today); wd.setDate(wd.getDate() - j);
+    weights[iso(wd)] = +(56.4 - (30 - j) * 0.08).toFixed(1);
+  }
+  try {
+    localStorage.setItem('harucharim.state.v1', JSON.stringify({
+      patient: patient, diary: diary, shown: {}, weights: weights, supplements: []
+    }));
+    localStorage.setItem('harucharim.migrated', '1');
+    localStorage.setItem('harucharim.stats.firstSeen', iso(today));
+    localStorage.setItem('harucharim.stats.consent', 'no');
+    localStorage.setItem('harucharim.notice.read', '["terms-2026-09"]');
+  } catch (e) {}
+
+  /* 리액트가 쥐고 있는 입력칸은 값을 직접 넣어도 모른다. 네이티브 세터로 넣고 알린다 */
+  var typeInto = function (el, text) {
+    var set = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+    set.call(el, text);
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  };
+
+  var hit = function (label) {
+    var t = [].slice.call(document.querySelectorAll('button, a'))
+      .filter(function (b) { return b.textContent.trim() === label });
+    if (t.length) { t[t.length - 1].click(); return true }
+    return false;
+  };
+
+  /* 화면이 뜬 뒤 원하는 탭으로 옮기고, 촬영 준비가 끝나면 표시를 남긴다 */
+  var want = q.get('shot');
+  var sub = q.get('sub');
+  var openWhy = q.has('why');
+  var scrollTo = q.get('to');
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      hit(want);
+      setTimeout(function () {
+        if (sub) hit(sub);
+        /* 검수 배너와 공지 띠는 출시 화면에 없을 것들이라 촬영에서 뺀다 */
+        [].slice.call(document.querySelectorAll('button, a')).forEach(function (b) {
+          if (b.textContent.trim() === '닫기') b.click();
+        });
+        [].slice.call(document.querySelectorAll('*')).forEach(function (el) {
+          if (el.children.length === 0 && /검수용 시험 버전입니다/.test(el.textContent || '')) {
+            var box = el.closest('div');
+            if (box) box.style.display = 'none';
+          }
+        });
+        setTimeout(function () {
+          var q2 = q.get('q');
+          if (q2) {
+            var box = document.querySelector('input[placeholder*="음식 이름으로 검색"]');
+            if (box) typeInto(box, q2);
+          }
+          if (openWhy) {
+            var ys = [].slice.call(document.querySelectorAll('button'))
+              .filter(function (b) { return b.textContent.trim() === '이유' });
+            ys.slice(0, 2).forEach(function (b) { b.click() });
+            if (ys.length) {
+              var card = ys[0].closest('li') || ys[0].closest('div');
+              if (card) card.scrollIntoView({ block: 'start' });
+              window.scrollBy(0, -140);
+            }
+          } else if (scrollTo) {
+            var m = [].slice.call(document.querySelectorAll('*')).filter(function (e) {
+              return e.childElementCount === 0 && e.textContent.trim().indexOf(scrollTo) === 0
+            });
+            if (m.length) { m[0].scrollIntoView({ block: 'start' }); window.scrollBy(0, -110) }
+          }
+          var pick = q.get('pick');
+          if (pick) {
+            var row = [].slice.call(document.querySelectorAll('li > button')).filter(function (b) {
+              /* textContent 는 줄이 붙어 나오므로 innerText 로 첫 줄만 본다 */
+              return (b.innerText || '').trim().split('\n')[0].trim() === pick
+            });
+            if (row.length) row[0].click();
+          }
+          setTimeout(function () {
+            document.documentElement.setAttribute('data-shot-ready', '1');
+          }, 400);
+        }, 500);
+      }, 900);
+    }, 1200);
+  });
+})();
+</script>
