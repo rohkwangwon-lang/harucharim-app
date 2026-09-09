@@ -185,6 +185,17 @@ export const REFERENCES: Reference[] = [
    * 그동안 이 대목에 ESPEN 암 영양 지침을 달아 두었는데, 그 문서에는 췌장 효소도
    * 식사 분할도 나오지 않는다(전문 검색으로 확인).
    */
+  /*
+   * 유방암 알코올의 '10 g 당 몇 %' 는 IARC·WCRF 가 아니라 이 집단 재분석의 숫자다.
+   * 53편·유방암 58,515명·대조 95,067명을 한자리에 모아 다시 분석한 것으로,
+   * 이 분야에서 그 수치의 출처다.
+   */
+  { id: 'hamajima2002', kind: 'meta', year: 2002,
+    citation: 'Collaborative Group on Hormonal Factors in Breast Cancer (Hamajima N, et al). Alcohol, tobacco and breast cancer — collaborative reanalysis of individual data from 53 epidemiological studies. Br J Cancer. 2002;87(11):1234-1245. (하루 10 g 당 상대위험 7.1 % 증가, 95 % CI 5.5~8.7)',
+    url: 'https://doi.org/10.1038/sj.bjc.6600596' },
+  { id: 'brooks2009aldh2', kind: 'review', year: 2009,
+    citation: 'Brooks PJ, et al. The alcohol flushing response: an unrecognized risk factor for esophageal cancer from alcohol consumption. PLoS Med. 2009;6(3):e50. (동아시아인 약 36 % · 이형접합자 오즈비 3.7~18.1 · 음주를 줄이면 일본 남성 식도편평세포암의 53 % 예방 가능 추정)',
+    url: 'https://doi.org/10.1371/journal.pmed.1000050' },
   { id: 'eras-colorectal', kind: 'guideline', year: 2019,
     citation: 'Gustafsson UO, et al. Guidelines for Perioperative Care in Elective Colorectal Surgery: ERAS Society Recommendations 2018. World J Surg. 2019;43(3):659-695.',
     url: 'https://doi.org/10.1007/s00268-018-4844-y' },

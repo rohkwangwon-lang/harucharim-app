@@ -193,7 +193,10 @@ const MUST_CITE: [string, string][] = [
   ['prostate-selenium', 'kristal2014'],
   ['liver-raw-seafood', 'vibrio-meta2019'],
   ['lung-cachexia', 'fearon2011'],
-  ['panc-fat-symptom', 'ueg-pei2025']
+  ['panc-fat-symptom', 'ueg-pei2025'],
+  /* 알코올 수치의 실제 출처 — IARC·WCRF 는 분류와 권고를 말하지 이 숫자를 말하지 않는다 */
+  ['breast-alcohol', 'hamajima2002'],
+  ['eso-alcohol', 'brooks2009aldh2']
 ]
 for (const [rid, refId] of MUST_CITE) {
   const r = ALL_RULES.find((x) => x.id === rid)
@@ -201,6 +204,24 @@ for (const [rid, refId] of MUST_CITE) {
     bad('원문 대조로 붙여 둔 출처가 빠짐', `${rid} 에 ${refId} 가 없다`)
   }
 }
+
+/*
+ * 원문을 읽고 고친 수치는 되돌아가지 못하게 문장으로도 못 박는다.
+ * 숫자 하나가 바뀌면 임상 판단이 바뀐다.
+ */
+const MUST_SAY: [string, RegExp, string][] = [
+  ['breast-alcohol', /7\.1 %/, '집단 재분석의 값은 7.1 %(95 % CI 5.5~8.7)다. 7~10 % 는 상한이 신뢰구간을 넘었다'],
+  ['eso-alcohol', /3\.7~18\.1/, '오즈비 범위를 밝힌다. 수 배~수십 배는 뭉뚱그린 말이었다'],
+  ['prostate-selenium', /91 %/, '사후 분석의 값은 91 % 증가·P=0.007 이다'],
+  ['liver-raw-seafood', /53\.9 %/, '간질환군의 값과 전체 값을 나누어 적는다']
+]
+for (const [rid, pat, why] of MUST_SAY) {
+  const r = ALL_RULES.find((x) => x.id === rid) as { id: string; reason?: string } | undefined
+  if (r && !pat.test(r.reason ?? '')) {
+    bad('원문 대조로 고친 수치가 사라짐', `${rid} — ${why}`)
+  }
+}
+
 
 /* ── 5. 출처 ─────────────────────────────────── */
 const used = new Set<string>()
