@@ -43,7 +43,12 @@ function rng(seed: number) {
   }
 }
 
-const PHASES: Phase[] = ['pre_op', 'post_op', 'during_rt', 'during_chemo', 'neutropenia', 'survivorship']
+/*
+ * 실제로 쓰이는 값만 쓴다. 'pre_op' 는 존재하지 않는 값인데 여기에 적혀 있었다 —
+ * README 가 경고해 둔 실수가 새 검사에서 되살아난 것이다.
+ * 그 탓에 여섯 중 하나는 시기 규칙이 하나도 걸리지 않는 상태로 돌고 있었다.
+ */
+const PHASES: Phase[] = ['post_op', 'during_rt', 'during_chemo', 'neutropenia', 'survivorship']
 const CONDITIONS: PatientCondition[] = [
   '식욕부진', '체중감소', '오심·구토', '구강점막염', '설사', '변비',
   '연하곤란', '신기능저하', '당뇨', '고혈압'
@@ -313,13 +318,28 @@ for (let i = 0; i < N; i++) {
 
   /* "아까랑 말이 다른데요?" — 한 화면 안에서 앱이 스스로 어긋나지 않는가 */
   const protein = menu.totals.protein ?? 0
-  const overNote = menu.notes.some((n) => /단백질/.test(n.label ?? '') && /많|넘/.test(n.text ?? ''))
-  const lowNote = menu.notes.some((n) => /단백질/.test(n.label ?? '') && /부족|모자/.test(n.text ?? ''))
-  if (overNote && protein < menu.target.protein[1]) {
-    bad('앱이 스스로 어긋남', `${ctx} 단백질 ${Math.round(protein)}g 은 목표 안인데 "많다" 고 적음`)
+  /*
+   * 이 검사는 두 번 틀렸다. 남겨 둘 값어치가 있어 둘 다 적는다.
+   *
+   * 하나. n.label 을 읽고 있었다 — DayNote 에 그런 속성은 없다(topic 이다).
+   * 그래서 늘 undefined 였고, 아래 두 검사는 한 번도 돈 적이 없었다.
+   * 타입 검사가 scripts 를 보지 않아 아무도 몰랐다.
+   *
+   * 둘. 고쳐서 돌렸더니 714종이 걸렸는데, 틀린 것은 앱이 아니라 잣대였다.
+   * 앱이 "단백질이 많습니다" 라고 할 때 덧붙이는 말이
+   * "암 환자에게는 **모자란** 것보다 나은 쪽" 이다. 정규식이 그 '모자란' 을 물었다.
+   * 산문을 정규식으로 읽지 말고 구조화된 값(tone)을 볼 것.
+   *
+   * 방향도 하나만 확실하다. 앱의 판단은 식품+영양제 합계로 하고 여기 protein 은 식품만이라,
+   * 영양제는 더하기만 한다 — 그러므로 '부족하다는데 식품만으로 이미 상단 초과' 는 반드시 모순이다.
+   * 반대 방향은 영양제가 채웠을 수 있으므로, 설명이 안 되는 폭(하단의 70 %)일 때만 짖는다.
+   */
+  const pNote = menu.notes.find((n) => n.topic === '단백질')
+  if (pNote?.tone === 'low' && protein >= menu.target.protein[1]) {
+    bad('앱이 스스로 어긋남', `${ctx} 단백질 ${Math.round(protein)}g 은 목표 상단을 넘는데 "부족" 하다고 적음`)
   }
-  if (lowNote && protein > menu.target.protein[1]) {
-    bad('앱이 스스로 어긋남', `${ctx} 단백질 ${Math.round(protein)}g 은 목표를 넘는데 "부족" 하다고 적음`)
+  if (pNote && pNote.tone !== 'low' && /많습니다/.test(pNote.text) && protein < menu.target.protein[0] * 0.7) {
+    bad('앱이 스스로 어긋남', `${ctx} 단백질 ${Math.round(protein)}g 은 목표 하단에 크게 못 미치는데 "많다" 고 적음`)
   }
 
   /* "이거 먹어도 되나요?" — 무작위 음식을 여쭤 본다 */
