@@ -81,10 +81,17 @@ export const REFERENCES: Reference[] = [
   { id: 'iarc100e', kind: 'review', year: 2012,
     citation: 'IARC Monographs Volume 100E: Personal Habits and Indoor Combustions — Alcohol Consumption. (주류 = Group 1 · 구강·인두·후두·식도·간·대장·여성 유방)',
     url: 'https://publications.iarc.who.int/122' },
-  { id: 'iarc116', kind: 'review', year: 2018,
-    citation: 'IARC Monographs Volume 116: Drinking Coffee, Mate, and Very Hot Beverages. (65 °C 이상 음료 = Group 2A)' },
+  /* 공개 보도자료(PR 244) 대조. '매우 뜨거움' 의 정의가 65 ℃ 초과이고, 커피 자체는 Group 3 으로 내려갔다 */
+  { id: 'iarc116', kind: 'review', year: 2016,
+    url: 'https://www.iarc.who.int/wp-content/uploads/2018/07/pr244_E.pdf',
+    citation:
+      'IARC Monographs Volume 116: Drinking Coffee, Mate, and Very Hot Beverages (2016). ' +
+      '65 ℃ 초과 음료 = Group 2A(제한적 근거) · 커피 자체 = Group 3(1991년 2B 에서 하향)' },
+  /* 공개 전문(NCBI Bookshelf) 대조. 'greater than multiplicative interaction' 이 원문 표현이다 */
   { id: 'iarc-aflatoxin', kind: 'review', year: 2012,
-    citation: 'IARC Monographs Volume 100F: Aflatoxins.' },
+    url: 'https://www.ncbi.nlm.nih.gov/books/NBK304413/',
+    citation:
+      'IARC Monographs Volume 100F: Aflatoxins. — Group 1 · B형 간염과 곱셈보다 더 크게 겹침 · TP53 코돈 249 변이' },
 
   // ── 대두·유방암 ───────────────────────────────────────────────
   { id: 'shu2009', kind: 'cohort', year: 2009,
@@ -111,9 +118,11 @@ export const REFERENCES: Reference[] = [
   { id: 'bairati2005b', kind: 'rct', year: 2005,
     citation: 'Bairati I, et al. A randomized trial of antioxidant vitamins to prevent second primary cancers in head and neck cancer patients. J Natl Cancer Inst. 2005;97(7):481-488. (비타민 E 400 IU·베타카로틴 30 mg, 방사선치료 첫날부터 · 보충 기간 중 이차암 HR 2.88, 95 % CI 1.56~5.31)' },
   { id: 'atbc1994', kind: 'rct', year: 1994,
-    citation: 'The Alpha-Tocopherol, Beta Carotene Cancer Prevention Study Group. The effect of vitamin E and beta carotene on the incidence of lung cancer in male smokers. N Engl J Med. 1994;330(15):1029-1035.' },
+    citation: 'The Alpha-Tocopherol, Beta Carotene Cancer Prevention Study Group. The effect of vitamin E and beta carotene on the incidence of lung cancer in male smokers. N Engl J Med. 1994;330(15):1029-1035.',
+    url: 'https://doi.org/10.1056/NEJM199404143301501' },
   { id: 'caret1996', kind: 'rct', year: 1996,
-    citation: 'Omenn GS, et al. Effects of a combination of beta carotene and vitamin A on lung cancer and cardiovascular disease (CARET). N Engl J Med. 1996;334(18):1150-1155.' },
+    citation: 'Omenn GS, et al. Effects of a combination of beta carotene and vitamin A on lung cancer and cardiovascular disease (CARET). N Engl J Med. 1996;334(18):1150-1155.',
+    url: 'https://doi.org/10.1056/NEJM199605023341802' },
   { id: 'select2011', kind: 'rct', year: 2011,
     citation: 'Klein EA, et al. Vitamin E and the risk of prostate cancer: the Selenium and Vitamin E Cancer Prevention Trial (SELECT). JAMA. 2011;306(14):1549-1556. (n=35,533 · 비타민 E 400 IU HR 1.17, 99% CI 1.004-1.36 · 셀레늄 200 µg HR 1.09, 99% CI 0.93-1.27)',
     url: 'https://doi.org/10.1001/jama.2011.1437' },
@@ -128,9 +137,11 @@ export const REFERENCES: Reference[] = [
 
   // ── 비타민 D ─────────────────────────────────────────────────
   { id: 'ng2019', kind: 'rct', year: 2019,
-    citation: 'Ng K, et al. Effect of High-Dose vs Standard-Dose Vitamin D3 Supplementation on Progression-Free Survival Among Patients With Advanced or Metastatic Colorectal Cancer (SUNSHINE). JAMA. 2019;321(14):1370-1379.' },
+    citation: 'Ng K, et al. Effect of High-Dose vs Standard-Dose Vitamin D3 Supplementation on Progression-Free Survival Among Patients With Advanced or Metastatic Colorectal Cancer (SUNSHINE). JAMA. 2019;321(14):1370-1379.',
+    url: 'https://doi.org/10.1001/jama.2019.2402' },
   { id: 'manson2019', kind: 'rct', year: 2019,
-    citation: 'Manson JE, et al. Vitamin D Supplements and Prevention of Cancer and Cardiovascular Disease (VITAL). N Engl J Med. 2019;380(1):33-44.' },
+    citation: 'Manson JE, et al. Vitamin D Supplements and Prevention of Cancer and Cardiovascular Disease (VITAL). N Engl J Med. 2019;380(1):33-44.',
+    url: 'https://doi.org/10.1056/NEJMoa1809944' },
 
   // ── 위암·염장식품 ─────────────────────────────────────────────
   { id: 'ge2012salt', kind: 'meta', year: 2012,
@@ -187,7 +198,8 @@ export const REFERENCES: Reference[] = [
 
   // ── 간암 ─────────────────────────────────────────────────────
   { id: 'kennedy2017coffee', kind: 'meta', year: 2017,
-    citation: 'Kennedy OJ, et al. Coffee, including caffeinated and decaffeinated coffee, and the risk of hepatocellular carcinoma: a systematic review and dose-response meta-analysis. BMJ Open. 2017;7(5):e013739.' },
+    citation: 'Kennedy OJ, et al. Coffee, including caffeinated and decaffeinated coffee, and the risk of hepatocellular carcinoma: a systematic review and dose-response meta-analysis. BMJ Open. 2017;7(5):e013739.',
+    url: 'https://doi.org/10.1136/bmjopen-2016-013739' },
   { id: 'easl-nutrition', kind: 'guideline', year: 2019,
     citation: 'European Association for the Study of the Liver. EASL Clinical Practice Guidelines on nutrition in chronic liver disease. J Hepatol. 2019;70(1):172-193.' },
 
@@ -206,7 +218,8 @@ export const REFERENCES: Reference[] = [
     url: 'https://doi.org/10.1056/NEJMoa010845' },
 
   { id: 'asco-cardio', kind: 'guideline', year: 2017,
-    citation: 'Armenian SH, et al. Prevention and Monitoring of Cardiac Dysfunction in Survivors of Adult Cancers: ASCO Clinical Practice Guideline. J Clin Oncol. 2017;35(8):893-911. — 심장독성 약제 사용 중 혈압·체중·지질 등 심혈관 위험 요인 관리 권고.' },
+    citation: 'Armenian SH, et al. Prevention and Monitoring of Cardiac Dysfunction in Survivors of Adult Cancers: ASCO Clinical Practice Guideline. J Clin Oncol. 2017;35(8):893-911. — 심장독성 약제 사용 중 혈압·체중·지질 등 심혈관 위험 요인 관리 권고.',
+    url: 'https://doi.org/10.1200/JCO.2016.70.5400' },
 
   // ── 호중구감소증 식이 ────────────────────────────────────────
   /*
@@ -236,7 +249,8 @@ export const REFERENCES: Reference[] = [
     url: 'https://doi.org/10.1503/cmaj.120951',
     citation: 'Bailey DG, et al. Grapefruit–medication interactions: forbidden fruit or avoidable consequences? CMAJ. 2013;185(4):309-316.' },
   { id: 'golden2009', kind: 'review', year: 2009,
-    citation: 'Golden EB, et al. Green tea polyphenols block the anticancer effects of bortezomib and other boronic acid-based proteasome inhibitors. Blood. 2009;113(23):5927-5937.' },
+    citation: 'Golden EB, et al. Green tea polyphenols block the anticancer effects of bortezomib and other boronic acid-based proteasome inhibitors. Blood. 2009;113(23):5927-5937.',
+    url: 'https://doi.org/10.1182/blood-2008-07-171389' },
   /*
    * 카페시타빈–와파린은 증례 보고가 근거다. 한동안 ACCP 항응고 지침 하나만 달아 두었는데,
    * 그 지침은 비타민 K 섭취의 일관성을 다루지 카페시타빈을 다루지 않는다.

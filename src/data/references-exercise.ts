@@ -13,7 +13,10 @@ export const EXERCISE_REFERENCES: Reference[] = [
   { id: 'pal2009', kind: 'rct', year: 2009,
     citation: 'Schmitz KH, et al. Weight lifting in women with breast-cancer-related lymphedema (PAL trial). N Engl J Med. 2009;361(7):664-673.' },
   { id: 'galvao2010', kind: 'rct', year: 2010,
-    citation: 'Galvão DA, et al. Combined resistance and aerobic exercise program reverses muscle loss in men undergoing androgen suppression therapy for prostate cancer. J Clin Oncol. 2010;28(2):340-347.' },
+    url: 'https://doi.org/10.1200/JCO.2009.23.2488',
+    citation:
+      'Galvão DA, et al. Combined resistance and aerobic exercise program reverses muscle loss in men undergoing androgen suppression therapy for prostate cancer ' +
+      'without bone metastases: a randomized controlled trial. J Clin Oncol. 2010;28(2):340-347. (57명·12주 · 뼈 전이가 없는 남성만 대상)' },
   { id: 'prehab-lung', kind: 'meta', year: 2019,
     citation: 'Rosero ID, et al. Systematic Review and Meta-Analysis of Randomized Controlled Trials on Preoperative Physical Exercise Interventions in Patients with Non-Small-Cell Lung Cancer. Cancers. 2019;11(7):944.' },
   { id: 'mckenzie-shoulder', kind: 'review', year: 2020,

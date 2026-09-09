@@ -247,6 +247,9 @@ const MUST_CITE: [string, string][] = [
   ['stomach-salted', 'yoo2020pickled'],
   ['stomach-kimchi', 'kimhj2010veg'],
   ['stomach-kimchi', 'kim2010saltpref'],
+  /* VITAL 을 인용해 두고 본문에서 말하지 않고 있었다 */
+  ['crc-vitd', 'manson2019'],
+  ['liver-coffee', 'iarc116'],
   /* 위절제 후 B12 결핍의 빈도를 실제로 말하는 것은 이 메타분석뿐이다 */
   ['stomach-b12', 'b12-gastrectomy-meta'],
   ['stomach-b12-partial', 'b12-gastrectomy-meta'],
@@ -394,7 +397,32 @@ const MUST_SAY: [string, RegExp, string][] = [
   ['stomach-salted', /1\.27배/, '메타분석의 아시아 하위군 값이다. 전체 2.05배만 적으면 과장이 된다'],
   ['stomach-salted', /40 g/, '한국 코호트 메타분석의 용량 단위다'],
   ['stomach-kimchi', /0\.62/, '신선 채소의 오즈비다 — 절임과 갈라야 뜻이 산다'],
-  ['stomach-kimchi', /1\.28/, '절임 채소의 오즈비다']
+  ['stomach-kimchi', /1\.28/, '절임 채소의 오즈비다'],
+  /*
+   * 단건 출처 대조. 베타카로틴 두 시험은 '효과 없음' 이 아니라 '더 나빴다' 이고,
+   * 사망까지 늘었다는 것이 핵심이라 그 숫자를 남긴다.
+   */
+  ['lung-betacarotene', /전체 사망도 8 %/, 'ATBC 는 총사망도 8 % 높았다(1~16 %)'],
+  ['lung-betacarotene', /폐암 사망은 46 %/, 'CARET 의 폐암 사망 위험비 1.46 이다'],
+  ['lung-betacarotene', /21개월 일찍/, 'CARET 은 예정보다 21개월 일찍 중단되었다'],
+  /* 비타민 D — 전체 생존이 똑같았다는 것이 환자에게 가장 결정적인 사실이다 */
+  ['crc-vitd', /24\.3개월로 똑같/, 'SUNSHINE 의 전체 생존은 양군 모두 24.3개월이었다'],
+  ['crc-vitd', /25,871명/, 'VITAL 의 규모다 — 예방 근거는 이쪽이 결정적이다'],
+  /* 커피 — 디카페인은 방향만 같고 크기가 다르며 신뢰구간이 1에 걸친다 */
+  ['liver-coffee', /1\.00 에 걸쳐/, '디카페인은 신뢰구간 상한이 1.00 이었다'],
+  ['liver-coffee', /간질환이 이미 있는 분/, '간질환이 있어도 연관이 유지된 것이 이 규칙의 요점이다'],
+  /* 뜨거운 음료 — 커피 자체는 Group 3 이라는 안심을 함께 전한다 */
+  ['eso-hot', /Group 3/, '커피는 1991년 2B 에서 분류 불가로 내려갔다'],
+  /* 아플라톡신 — '수십 배' 는 원문에 없다. IARC 의 표현과 기여위험을 쓴다 */
+  ['liver-aflatoxin', /곱셈보다 더 크게/, "IARC 원문은 'greater than multiplicative interaction' 이다"],
+  ['liver-aflatoxin', /80 %/, '아플라톡신+HBsAg 양성의 기여위험도다'],
+  /* 심장독성 — 다섯 요인 중 첫째가 금연이고, 지침 스스로 근거가 부족하다고 적었다 */
+  ['breast-her2-cardiac', /흡연·고혈압·당뇨·이상지질혈증·비만/, 'ASCO 권고 3.1 이 든 다섯 가지다'],
+  ['breast-her2-cardiac', /30 Gy/, '심장이 조사야에 들어간 고위험 기준이다'],
+  /* 운동 시험의 대상 제한 — 뼈 전이가 있으면 처방이 달라진다 */
+  ['prostate-adt-protein', /뼈 전이가 없는 분들만/, 'Galvão 시험은 뼈 전이가 없는 남성만 대상으로 했다'],
+  /* 녹차-보르테조밉은 사람 대상 시험이 아니다 */
+  ['int-bortezomib-greentea', /세포와 동물 실험/, 'Golden 2009 는 in vitro·in vivo 연구다']
 ]
 /*
  * 반대 방향의 못. 원문이 하지 않는 말을 우리가 하지 않았는지 본다.
@@ -410,6 +438,9 @@ const MUST_NOT_SAY: [string, RegExp, string][] = [
   ['prostate-veg-fat', /재발 위험 모두와 연관/, 'ACS 는 비만과 전립선암 진행·사망을 결론 없음으로 두었다'],
   /* 채소만 400 g 은 원문이 아니다 — 되살아나면 지킬 수 없는 목표가 된다 */
   ['common-vegetables', /채소는 하루 400 g/, 'WCRF 의 400 g 은 채소와 과일의 합계다'],
+  /* IARC 원문에 없는 배수 표현이 되살아나면 근거를 넘는다 */
+  ['liver-aflatoxin', /수십 배/, 'IARC 는 배수를 말하지 않는다'],
+  ['liver-coffee', /카페인만의 효과는 아닌 것으로 보입니다/, '디카페인은 크기가 절반이고 신뢰구간이 1에 걸친다'],
   /* ASCO 2022 는 이 말을 하지 않는다 — 생존자 체중 권고를 낸 적이 없다 */
   ['breast-weight', /미국임상종양학회는 생존자에게 체중 관리/, "ASCO 2022 는 체중 개입에 '근거 불충분' 을 냈다"],
   ['prostate-adt-protein', /1\.0~1\.5 g/, 'ESPEN 원문 표현이 아니다'],
