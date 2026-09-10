@@ -1,0 +1,39 @@
+name: 만료·휴면 지킴이
+
+# 사흘마다 한국 시각 오전 9시.
+# 사흘인 까닭 — Supabase 무료 요금제는 7일 동안 요청이 없으면 멈추므로
+# 그보다 넉넉히 짧아야 하고, 예약 작업이 가끔 한 번 빠져도 7일을 넘지 않게 한다.
+on:
+  schedule:
+    - cron: '0 0 */3 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write   # 달마다 점검 기록을 남긴다 — 공개 저장소는 60일 활동이 없으면 예약 작업이 멈춘다
+  issues: write     # 알릴 것이 있으면 이슈를 열어 메일로 알린다
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: 점검하고 알리기
+        run: node scripts/expiry-watch.mjs --issues
+        env:
+          # 배포에 쓰는 것과 같은 공개 연결값. service_role 키는 쓰지 않는다.
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 달이 바뀌었으면 기록 남기기
+        # GITHUB_TOKEN 으로 올린 커밋은 다른 워크플로(배포)를 깨우지 않는다.
+        run: |
+          if ! git diff --quiet -- ops/expiry-status.md; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add ops/expiry-status.md
+            git commit -m "만료·휴면 점검 기록 [skip ci]"
+            git push
+          fi

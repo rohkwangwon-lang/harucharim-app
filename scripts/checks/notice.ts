@@ -60,6 +60,12 @@ for (const n of NOTICES as Notice[]) {
     }
   }
 
+  /* 함께 알리는 문서는 약관·방침이어야 하고, 자기 자신을 다시 적지 않는다 */
+  for (const k of n.alsoCovers ?? []) {
+    if (k !== 'terms' && k !== 'privacy') say(`${where} — 함께 알리는 문서(${k})가 약관·방침이 아니다`)
+    if (k === n.kind) say(`${where} — 함께 알리는 문서에 자기 종류(${k})를 다시 적었다`)
+  }
+
   if (n.link) {
     if (!existsSync(`public/${n.link}`)) say(`${where} — 걸어 둔 문서 public/${n.link} 가 없다`)
   }
@@ -72,7 +78,7 @@ for (const n of NOTICES as Notice[]) {
 const DOC: Record<string, string> = { terms: 'public/terms.html', privacy: 'public/privacy.html' }
 for (const kind of ['terms', 'privacy'] as const) {
   const latest = NOTICES
-    .filter((n) => n.kind === kind && n.effectiveAt)
+    .filter((n) => (n.kind === kind || n.alsoCovers?.includes(kind)) && n.effectiveAt)
     .sort((a, b) => (a.effectiveAt! < b.effectiveAt! ? 1 : -1))[0]
   if (!latest) continue
 

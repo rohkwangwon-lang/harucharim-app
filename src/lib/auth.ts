@@ -4,7 +4,7 @@ import { supabase } from './supabase'
 import { friendlyAuth } from './authMessages'
 
 /* 화면이 쓰는 문구는 서버를 붙들지 않는 자리에 따로 둔다 — 검사가 불러 볼 수 있게 */
-export { MIN_PASSWORD, checkSignUp, friendlyAuth } from './authMessages'
+export { EMAIL_OPENS, MIN_PASSWORD, checkSignUp, emailOpen, friendlyAuth } from './authMessages'
 
 /**
  * 로그인.

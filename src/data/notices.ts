@@ -27,6 +27,14 @@ export interface Notice {
   effectiveAt?: string
   /** 이용자에게 불리한 변경인가. 참이면 30일 간격이 필요하고, 배너 대신 한 번 가리고 보여 준다 */
   adverse?: boolean
+  /**
+   * 이 공지가 함께 알리는 다른 문서.
+   *
+   * 약관과 처리방침을 한날 함께 고치면 공지도 하나가 맞다 — 둘로 나누면
+   * 환자분이 띠를 두 번 닫으셔야 하는데, 알리는 내용은 한 가지다.
+   * 공지 검사는 여기 적힌 문서의 시행일도 이 공지와 맞는지 본다.
+   */
+  alsoCovers?: NoticeKind[]
   /** 함께 열어 볼 문서 — public/ 아래 파일 이름 */
   link?: string
   linkLabel?: string
@@ -42,6 +50,22 @@ export const NOTICE_LEAD_DAYS = { normal: 7, adverse: 30 } as const
  * 나중에 "알린 적 없다"는 다툼이 생기지 않는다.
  */
 export const NOTICES: Notice[] = [
+  {
+    id: 'privacy-2026-09-18',
+    kind: 'privacy',
+    alsoCovers: ['terms'],
+    title: '이메일로도 가입하실 수 있게 되어 문서를 고쳤습니다',
+    body: [
+      '카카오·구글 계정이 없으신 분도 쓰실 수 있도록, 이메일과 비밀번호로 가입하는 길을 냅니다. 9월 18일부터 열립니다.',
+      '그래서 처리방침과 약관에 두 가지를 더했습니다. 이메일로 가입하시면 이메일 주소와 비밀번호를 받는다는 것 — 비밀번호는 되돌릴 수 없는 형태로만 보관해 저희도 알 수 없습니다. ' +
+      '그리고 가입 확인 편지를 보내는 미국의 Resend 에 이메일 주소가 넘어간다는 것입니다.',
+      '카카오·구글로 쓰시는 분께는 달라지는 것이 없습니다. 드신 것과 체중은 여전히 기기 안에만 둡니다.'
+    ],
+    postAt: '2026-09-11',
+    effectiveAt: '2026-09-18',
+    link: 'privacy.html',
+    linkLabel: '개인정보처리방침 보기'
+  },
   {
     id: 'terms-2026-09-08',
     kind: 'terms',

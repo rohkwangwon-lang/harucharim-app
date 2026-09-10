@@ -14,8 +14,9 @@
  *   2. 잊으신 비밀번호를 실제로 다시 정할 수 있는가 (메일만 보내고 끝나지 않는가)
  *   3. 막혔을 때 우리 말로, 무엇을 하면 되는지 알려 주는가
  */
-import { readFileSync } from 'node:fs'
-import { checkSignUp, friendlyAuth, MIN_PASSWORD } from '../../src/lib/authMessages'
+import { existsSync, readFileSync } from 'node:fs'
+import { checkSignUp, EMAIL_OPENS, emailOpen, friendlyAuth, MIN_PASSWORD } from '../../src/lib/authMessages'
+import { NOTICES } from '../../src/data/notices'
 
 const bads: string[] = []
 function no(cond: boolean, msg: string) { if (cond) bads.push(msg) }
@@ -133,6 +134,45 @@ for (const [name, text] of [['auth.ts', auth], ['Onboarding.tsx', onboard], ['Ne
      `${name} 이 비밀번호를 기기에 적어 둠`)
   no(/console\.(log|warn|error)\([^)]*(password|\bpw\b)/i.test(text),
      `${name} 이 비밀번호를 기록으로 남김`)
+}
+
+/* ── 6. 문서가 허락하기 전에 비밀번호를 받지 않는가 ─────────── */
+
+/*
+ * 처리방침이 이메일 가입을 적은 판의 시행일보다 먼저 이 길이 열리면,
+ * 문서가 아직 밝히지 않은 것을 받는 셈이 된다. 두 날짜를 여기서 견준다 —
+ * 하나는 코드에, 하나는 공지 자료에 있어서 한쪽만 옮기기 쉽다.
+ */
+const privacyAt = NOTICES
+  .filter((n) => n.kind === 'privacy' && n.effectiveAt)
+  .map((n) => n.effectiveAt!)
+  .sort()
+  .pop()
+no(!privacyAt, '이메일 가입을 적은 처리방침 개정 공지가 없음 — 무엇을 근거로 비밀번호를 받는가')
+no(Boolean(privacyAt) && EMAIL_OPENS < privacyAt!,
+   `이메일 가입이 처리방침 시행(${privacyAt})보다 먼저 열림 (${EMAIL_OPENS})`)
+no(emailOpen('2026-01-01'), '날짜 문이 과거에도 열려 있음 — 막는 구실을 못 한다')
+no(!emailOpen(EMAIL_OPENS), '날짜 문이 그날이 되어도 열리지 않음')
+no(!/emailOpen\(today\(\)\)/.test(onboard), '첫 화면이 날짜 문을 쓰지 않음 — 문을 만들어 놓고 걸지 않았다')
+
+/* ── 7. 확인 편지가 우리 말인가 ─────────────────────────── */
+
+/*
+ * Supabase 기본 편지는 영어이고 보낸 이도 'Supabase Auth' 다.
+ * 항암 중이신 분께 영어로 "Confirm your signup" 이 오면 사기 편지로 보고 지우신다.
+ * 서식은 대시보드에 붙여 넣는 것이라 코드가 쓰지 않는다 — 그래서 여기서라도 본다.
+ */
+for (const [f, what] of [
+  ['supabase/email-templates/confirm-signup.html', '가입 확인'],
+  ['supabase/email-templates/reset-password.html', '비밀번호 재설정']
+] as const) {
+  const t = existsSync(f) ? readFileSync(f, 'utf-8') : ''
+  no(!t, `${what} 편지 서식(${f})이 없음`)
+  if (!t) continue
+  no(!/\{\{\s*\.ConfirmationURL\s*\}\}/.test(t), `${what} 편지에 단추 주소 자리({{ .ConfirmationURL }})가 없음 — 눌러도 아무 데도 안 간다`)
+  no(/Confirm your|Reset Password for|Follow this link/i.test(t), `${what} 편지에 영어 기본 문구가 남아 있음`)
+  no(!/[가-힣]{20,}|[가-힣]+\s[가-힣]+\s[가-힣]+/.test(t), `${what} 편지가 우리 말이 아님`)
+  no(!/의료기기가 아니며/.test(t), `${what} 편지에 의료 고지가 없음`)
 }
 
 console.log(bads.length

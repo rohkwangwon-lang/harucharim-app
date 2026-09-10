@@ -448,6 +448,34 @@ const gateSrc = existsSync('src/lib/ageGate.ts') ? readFileSync('src/lib/ageGate
 no(!gateSrc, 'src/lib/ageGate.ts 가 없다')
 no(/생년|birth|나이를 저장|age\s*:/.test(gateSrc), 'ageGate 가 나이나 생년월일을 저장하려 한다 — 확인만 남겨야 한다')
 
+/*
+ * ── 들어오는 길과 문서가 같은 말을 하는가 ─────────────────
+ *
+ * 이메일 가입을 붙이던 날(9월 9일), 약관 3항과 처리방침 1항은 여전히
+ * "카카오 또는 구글 계정으로 로그인하셔야 합니다 … 비밀번호는 받지 않습니다" 였다.
+ * 코드는 비밀번호를 받는데 문서는 안 받는다고 적은 채로 이틀이 갔고, 이 검사는 조용했다.
+ * 로그인 방법은 auth.ts 에 있고 문서는 public/ 에 있어서, 한쪽만 고치고 오기 쉽다.
+ */
+{
+  const authSrc = readFileSync('src/lib/auth.ts', 'utf-8')
+  const takesPassword = /signInWithPassword|auth\.signUp\(/.test(authSrc)
+  const flat = (h: string) => h.replace(/<[^>]+>/g, ' ').replace(/&mdash;/g, '—').replace(/&middot;/g, '·').replace(/\s+/g, ' ')
+  for (const [name, html] of [['public/terms.html', terms], ['public/privacy.html', policy]] as const) {
+    const text = flat(html)
+    if (!takesPassword) continue
+    no(!/이메일로 가입/.test(text), `${name} 에 이메일 가입이 없다 — 앱은 이메일과 비밀번호로 가입을 받는다`)
+    no(/(카카오|Google|구글)\s*(또는|이나)\s*(카카오|Google|구글)\s*계정으로\s*로그인하셔야/.test(text),
+       `${name} 이 로그인 방법을 카카오·구글 둘로만 적는다 — 이메일 가입이 빠졌다`)
+    /* "비밀번호는 받지 않습니다" 처럼 누구의 것인지 한정 없이 단언하면 틀린 말이 된다 */
+    no(/(^|[.。]\s)비밀번호는\s*(받지|전달받지)\s*않습니다/.test(text),
+       `${name} 이 비밀번호를 받지 않는다고 단언한다 — 이메일 가입은 비밀번호를 받는다(누구의 비밀번호인지 한정할 것)`)
+  }
+  if (takesPassword) {
+    /* 확인 편지를 누가 보내는지 — 이메일 가입이 있으면 반드시 누군가 보낸다 */
+    no(!/메일 발송/.test(flat(policy)), 'public/privacy.html 에 확인 메일을 보내는 수탁자가 없다 — 이메일 가입이 있으면 누군가 편지를 보낸다')
+  }
+}
+
 console.log(bads.length
   ? `개인정보 검사 — 문제 ${bads.length}종\n` + bads.map((b) => '■ ' + b).join('\n')
   : `개인정보 검사 완료 — 동의·뭉개기·집계·만14세 방어 확인, 문제 없음 (세는 항목 ${used.size}종)`)

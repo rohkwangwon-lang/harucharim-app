@@ -3,9 +3,10 @@ import { SOURCES, setSource } from '../lib/stats'
 import { track } from '../lib/stats'
 import { isSupabaseConfigured } from '../lib/supabase'
 import {
-  checkSignUp, displayName, lastProvider, MIN_PASSWORD, PROVIDER_LABEL,
+  checkSignUp, displayName, EMAIL_OPENS, emailOpen, lastProvider, MIN_PASSWORD, PROVIDER_LABEL,
   sendPasswordReset, signIn, signInWithEmail, signUpWithEmail, useSession, type Provider
 } from '../lib/auth'
+import { today } from '../lib/day'
 import { confirmAdult, isAdultConfirmed } from '../lib/ageGate'
 import type { CancerId, Cuisine, PatientCondition, PatientContext, Phase, TreatmentHistory } from '../data/types'
 import { SUBTYPE_OPTIONS } from '../data/types'
@@ -555,6 +556,12 @@ function EmailWay({ enabled, seenBefore }: { enabled: boolean; seenBefore: boole
   const [msg, setMsg] = useState<string | null>(null)
   const [note, setNote] = useState<string | null>(null)
 
+  /*
+   * 처리방침이 이메일 가입을 적은 판이 시행되는 날부터 연다(authMessages.ts 의 EMAIL_OPENS).
+   * 그 전에는 비밀번호를 받지 않는다 — 문서가 아직 허락하지 않은 것을 받게 되기 때문이다.
+   */
+  const openNow = emailOpen(today())
+
   const say = (m: string) => { setMsg(m); setNote(null) }
   const good = (m: string) => { setNote(m); setMsg(null) }
 
@@ -589,6 +596,16 @@ function EmailWay({ enabled, seenBefore }: { enabled: boolean; seenBefore: boole
     } finally {
       setBusy(false)
     }
+  }
+
+  if (!openNow) {
+    const [, mm, dd] = EMAIL_OPENS.split('-').map(Number)
+    return (
+      <p className="mt-3 rounded-xl border border-dashed border-stone-300 px-3 py-2.5 text-center text-xs leading-relaxed text-stone-500 [text-wrap:balance]">
+        카카오·구글 계정이 없으신가요?{' '}
+        <strong className="text-stone-700">{mm}월 {dd}일부터</strong> 이메일로도 가입하실 수 있습니다.
+      </p>
+    )
   }
 
   if (!open) {

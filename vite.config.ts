@@ -32,6 +32,22 @@ export default defineConfig({
         scope: base,
         display: 'standalone',
         /*
+         * PWABuilder 가 '권장' 으로 짚은 것들. 없어도 포장은 되지만, 있으면 설치 화면과 스토어가 앱을 덜 헷갈린다.
+         *   id           시작 주소가 바뀌어도 같은 앱으로 알아보게 한다
+         *   orientation  세로로 쓰도록 만든 화면이다
+         *   screenshots  안드로이드 크롬이 설치 창에 넓은 미리보기를 띄운다
+         */
+        id: base,
+        orientation: 'portrait',
+        dir: 'ltr',
+        categories: ['health', 'medical', 'food'],
+        screenshots: [
+          { src: 'screenshots/1-suggest.png', sizes: '720x1560', type: 'image/png', form_factor: 'narrow', label: '오늘 무엇을 드실지 — 암종·치료 시기·증상에 맞춘 한 상' },
+          { src: 'screenshots/2-search.png', sizes: '720x1560', type: 'image/png', form_factor: 'narrow', label: '이거 먹어도 되나요 — 근거와 함께 권장·주의·피하세요' },
+          { src: 'screenshots/3-supp.png', sizes: '720x1560', type: 'image/png', form_factor: 'narrow', label: '영양제 — 근거가 있는 것과 없는 것' },
+          { src: 'screenshots/4-diary.png', sizes: '720x1560', type: 'image/png', form_factor: 'narrow', label: '한 주를 모아 모자란 것과 넘치는 것' }
+        ],
+        /*
          * 안드로이드 상태바와 실행 화면 색.
          *
          * 디자인을 쑥·솔잎빛으로 바꾼 뒤에도 여기가 예전 청록색으로 남아 있었다.
@@ -49,6 +65,8 @@ export default defineConfig({
       workbox: {
         // 데이터가 전부 번들에 들어 있으므로 앱 셸 전체를 캐시해 완전한 오프라인 사용을 지원한다
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        // 설치 창에만 쓰는 미리보기 사진 — 오프라인 캐시에 넣으면 설치할 때마다 1 MB 가 더 내려간다
+        globIgnores: ['**/screenshots/**'],
         // 식품 데이터가 들어간 번들이 3 MB 를 넘으므로 넉넉히 잡는다
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
         // 새 서비스워커가 대기하지 않고 바로 넘겨받게 한다.

@@ -1,0 +1,50 @@
+{
+  "_설명": "하루차림이 기대고 있는 것 가운데 기한이 있거나 잠드는 것. scripts/expiry-watch.mjs 가 사흘마다 읽는다. 날짜를 고치면 알림도 따라간다.",
+  "owner": "rohkwangwon-lang",
+  "leadDays": [90, 30, 7],
+  "items": [
+    {
+      "id": "domain",
+      "name": "도메인 harucharim.com",
+      "kind": "domain",
+      "host": "harucharim.com",
+      "expires": "2029-09-09",
+      "confirmed": true,
+      "source": "등록소 원장(RDAP) 2026-09-11 조회 · 가비아 3년 등록",
+      "impact": "만료되면 앱 주소가 끊기고, 플레이 스토어 앱(TWA)도 열리지 않습니다.",
+      "renew": "가비아 → My가비아 → 서비스 관리 → 도메인 → 기간 연장. 자동연장을 켜 두시면 가장 안전합니다."
+    },
+    {
+      "id": "data-go-kr",
+      "name": "공공데이터포털 인증키 (식약처 식품영양성분DB · 건강기능식품정보)",
+      "kind": "apikey",
+      "env": ["DATA_GO_KR_KEY"],
+      "hosts": ["apis.data.go.kr"],
+      "expires": "2027-08-19",
+      "confirmed": false,
+      "source": "추정 — 처음 쓴 날(2026-08-19)에서 1년. 실제 활용기간은 data.go.kr 마이페이지에서 확인해 고칠 것",
+      "impact": "앱 안의 자료는 그대로 남습니다(이미 받아 둔 것을 싣고 있음). 멈추는 것은 자료를 새로 받아 오는 일뿐입니다.",
+      "renew": "data.go.kr → 마이페이지 → 오픈API → 개발계정 → 해당 API → 활용기간 연장 신청. 연장 뒤 자료를 한 번 새로 받아 두면 좋습니다."
+    },
+    {
+      "id": "foodsafety",
+      "name": "식품안전나라 인증키 (바코드 · 품목제조보고)",
+      "kind": "apikey",
+      "env": ["FOODSAFETY_KEY", "FOODSAFETY_KEY_BARCODE", "FOODSAFETY_KEY_PRODUCT", "FOODSAFETY_KEY_MANUFACTURE"],
+      "hosts": ["openapi.foodsafetykorea.go.kr"],
+      "expires": "2027-08-20",
+      "confirmed": false,
+      "source": "추정 — 처음 쓴 날(2026-08-20)에서 1년. 실제 기한은 foodsafetykorea.go.kr 마이페이지에서 확인해 고칠 것",
+      "impact": "앱 안의 바코드 자료는 그대로 남습니다. 새 제품을 받아 오는 일만 멈춥니다.",
+      "renew": "foodsafetykorea.go.kr → 마이페이지 → 인증키 발급·현황에서 기한 확인·재신청."
+    },
+    {
+      "id": "supabase",
+      "name": "Supabase 무료 요금제 휴면 (프로젝트 oncofood)",
+      "kind": "dormancy",
+      "maxIdleDays": 7,
+      "impact": "무료 요금제는 7일 동안 요청이 없으면 멈춥니다. 로그인이 필수라 멈추면 앱을 쓸 수 없습니다.",
+      "renew": "Supabase 대시보드 → 프로젝트 oncofood → Restore project. 사흘마다 요청을 보내 깨워 두지만, Supabase 가 무엇을 '활동'으로 치는지는 공개 규칙이 아니라 보장하지 못합니다."
+    }
+  ]
+}
