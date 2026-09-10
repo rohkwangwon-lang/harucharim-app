@@ -668,3 +668,22 @@ function Cites({ ids }: { ids: string[] }) {
     </details>
   )
 }
+
+/**
+ * 시험 중인 기능 표시.
+ *
+ * 바코드는 23만 건 가운데 영양성분까지 이어지는 것이 약 30 % 뿐이다(살아 있는 등록 기준, 2026-09-11 점검).
+ * 나머지는 제품명만 알려 드린다. "찍으면 바로 판정" 이라고 말할 수 없는 기능에 이 표시를 붙인다.
+ * 비율이 80 % 를 넘기 전까지 떼지 않도록 barcode 검사가 본다.
+ */
+export function BetaChip({ className = '' }: { className?: string }) {
+  return (
+    <span
+      className={`inline-flex items-center rounded-full bg-accent-100 px-1.5 py-0.5 text-[10px] font-bold leading-none text-accent-700 ${className}`}
+      title="시험 중인 기능입니다 — 영양성분까지 나오는 제품은 약 30 % 입니다"
+    >
+      베타
+    </span>
+  )
+}
+

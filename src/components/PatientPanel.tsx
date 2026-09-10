@@ -281,7 +281,7 @@ export function PatientPanel({
       </Section>
 
       <Section
-        title="바코드 스캔"
+        title="바코드 스캔 (베타)"
         desc="공공 바코드 자료는 국내 제품을 다 담지 못합니다. 자주 빗나가 성가시면 꺼 두셔도 됩니다."
       >
         <button

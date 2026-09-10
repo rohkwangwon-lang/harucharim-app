@@ -69,6 +69,7 @@ body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);
 .ledger b{font:700 3cqw/1 var(--display);color:var(--pine-deep);text-align:right;font-variant-numeric:tabular-nums}
 .ledger span{font:500 1.25cqw var(--body);color:var(--ink2)}
 .ledger em{font:400 1.3cqw/1.5 var(--body);font-style:normal;color:var(--ink2)}
+.beta{display:inline-block;font:700 .85cqw/1 var(--body);color:var(--soy);background:var(--soy-soft);border-radius:999px;padding:.3cqw .65cqw;vertical-align:.25cqw;margin-left:.2cqw}
 .ledger em small{display:block;font-size:1.02cqw;color:var(--muted);text-wrap:balance}
 
 /* 4. 엔진 */
@@ -259,8 +260,8 @@ body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);
       </div>
       <ul class="ledger">
         <li class="rise" style="--d:1"><b data-to="18298">18,298</b><span>종</span><em>기본 식품<small>식약처 식품영양성분 DB · 손으로 다듬은 한식 542종 포함</small></em></li>
-        <li class="rise" style="--d:2"><b data-to="273080">273,080</b><span>종</span><em>가공식품<small>제조사와 바코드가 붙은 시판 제품</small></em></li>
-        <li class="rise" style="--d:3"><b data-to="230027">230,027</b><span>개</span><em>바코드<small>제품 봉지를 찍으면 바로 찾습니다</small></em></li>
+        <li class="rise" style="--d:2"><b data-to="273080">273,080</b><span>종</span><em>가공식품<small>제조사·품목보고번호가 있는 시판 제품</small></em></li>
+        <li class="rise" style="--d:3"><b data-to="230027">230,027</b><span>개</span><em>바코드 <span class="beta">베타</span><small>제품명은 대부분 확인되지만, 영양성분까지 나오는 것은 약 30%</small></em></li>
         <li class="rise" style="--d:4"><b data-to="45618">45,618</b><span>종</span><em>시판 영양제<small>식품과 따로 셉니다</small></em></li>
       </ul>
     </div>

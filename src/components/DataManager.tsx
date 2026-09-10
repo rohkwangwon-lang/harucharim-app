@@ -38,7 +38,7 @@ export function DataManager() {
   return (
     <Section
       title="편의점·마트 상품 데이터"
-      desc="받아 두면 시중 가공식품 27만 종을 검색하고 바코드로 찾을 수 있습니다."
+      desc="받아 두면 시중 가공식품 27만 종을 검색하고, 바코드로도 찾을 수 있습니다(베타)."
     >
       <div className="card p-4">
         {status?.installed ? (
@@ -81,7 +81,7 @@ export function DataManager() {
             <p className="text-sm leading-relaxed text-stone-700">
               지금은 자주 먹는 식품 <strong>1만 8천 종</strong>이 앱에 들어 있습니다.
               여기에 시중 가공식품 <strong>27만 종</strong>, 식약처 신고 영양제 <strong>4만 5천 종</strong>,
-              바코드 <strong>23만 건</strong>을 더하면 편의점·마트 상품과 시판 영양제를 모두 찾을 수 있습니다.
+              바코드 <strong>23만 건</strong>(베타)을 더하면 편의점·마트 상품과 시판 영양제를 찾을 수 있습니다.
             </p>
             <p className="mt-2 rounded-lg bg-stone-50 px-3 py-2 text-[11px] leading-relaxed text-stone-500">
               바코드를 찍으면 제품은 대부분 확인되지만, <strong>영양성분까지 나오는 것은 약 30 %</strong> 입니다.

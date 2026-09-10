@@ -107,6 +107,39 @@ for (let i = 0; i < 500; i++) {
   if (hit) bad('없는 바코드가 찾아짐', `${fake} → ${hit.p}`)
 }
 
+/* ── 6. 영양까지 이어지는 비율이 낮으면 '베타' 로 적어야 한다 ─────
+ *
+ * 23만 건이라는 숫자만 보면 무엇이든 찍으면 나올 것 같다. 2026-09-11 에 한 건씩 세어 보니
+ * 영양성분까지 이어지는 것은 28 %(살아 있는 등록 기준 31 %)였고, 나머지는 제품명만 나왔다.
+ * 그 상태로 "바코드 검색" 이라고만 적으면 과장이다. 비율은 자료에서 세고, 표시는 화면에서 본다.
+ */
+{
+  const rn = new Set(ext.items.map((r: unknown[]) => String(r[6] ?? '')))
+  const live = bar.filter((r) => r.old !== 1)
+  const linked = live.filter((r) => rn.has(String(r.n))).length
+  const rate = live.length ? linked / live.length : 0
+  console.log(`  살아 있는 등록 중 영양성분까지 이어지는 것 ${(rate * 100).toFixed(1)}% (${linked.toLocaleString()} / ${live.length.toLocaleString()})`)
+  const BETA_BELOW = 0.8
+  if (rate < BETA_BELOW) {
+    for (const [f, what] of [
+      ['src/components/FoodSearch.tsx', '찾기 화면의 바코드 단추'],
+      ['src/components/Supplements.tsx', '영양제 화면의 바코드 단추'],
+      ['src/components/BarcodeScanner.tsx', '스캐너 화면']
+    ] as const) {
+      const src = fs.readFileSync(path.join(ROOT, f), 'utf8')
+      if (!/<BetaChip\b/.test(src)) bad('베타 표시 없음', `${what} — 영양까지 이어지는 것이 ${(rate * 100).toFixed(0)}% 인데 다 되는 것처럼 보인다`)
+    }
+    for (const f of ['src/components/PatientPanel.tsx', 'src/components/HowTo.tsx', 'docs/출시/스토어-등록-자료.md']) {
+      const src = fs.readFileSync(path.join(ROOT, f), 'utf8')
+      if (!/바코드[^\n]{0,12}베타/.test(src)) bad('베타 표시 없음', f)
+    }
+    const dm = fs.readFileSync(path.join(ROOT, 'src/components/DataManager.tsx'), 'utf8')
+    if (/모두 찾을 수 있습니다/.test(dm)) bad('과장', 'DataManager — 바코드로 "모두 찾을 수 있습니다"')
+  } else {
+    console.log(`  영양까지 이어지는 비율이 ${BETA_BELOW * 100}% 를 넘었다 — 베타 표시를 떼도 된다`)
+  }
+}
+
 console.log(`\n바코드 검사 완료 — 문제 ${bugs.length}종`)
 const g = new Map<string, string[]>()
 for (const b of bugs) { const k = b.split(' :: ')[0]; if (!g.has(k)) g.set(k, []); g.get(k)!.push(b.split(' :: ')[1]) }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { BetaChip } from './ui'
 
 /**
  * 바코드 스캐너.
@@ -106,7 +107,7 @@ export function BarcodeScanner({
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-stone-900">
       <div className="safe-top flex items-center justify-between px-4 py-3">
-        <span className="text-sm font-semibold text-white">바코드 스캔</span>
+        <span className="flex items-center gap-1.5 text-sm font-semibold text-white">바코드 스캔 <BetaChip /></span>
         <button className="rounded-lg px-3 py-1.5 text-sm text-white/80 hover:bg-white/10" onClick={onClose}>
           닫기
         </button>
@@ -144,6 +145,13 @@ export function BarcodeScanner({
             : status === '오류'
               ? '카메라를 사용할 수 없습니다. 아래에 번호를 넣어 주세요'
               : '카메라를 준비하고 있습니다…'}
+        </p>
+        {/*
+          * 시험 중이라는 것을 찍기 전에 말해 둔다.
+          * 찍고 나서 "영양성분이 없습니다" 를 만나면 앱이 고장 난 줄 아신다.
+          */}
+        <p className="mb-2.5 text-center text-[11px] leading-relaxed text-white/55 [text-wrap:balance]">
+          시험 중인 기능입니다. 제품명은 대부분 확인되지만, 영양성분까지 나오는 제품은 약 30 % 입니다.
         </p>
 
         <form

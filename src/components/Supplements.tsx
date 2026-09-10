@@ -6,7 +6,7 @@ import { SUPPLEMENTS } from '../data/supplements'
 import { activeInteractions, activeRules, evaluateSupplement } from '../engine/rules'
 import { NUTRIENT_META_BY_KEY, fmt } from '../engine/nutrition'
 import { REF_BY_ID } from '../data/references'
-import { EvidenceBadge, LevelBadge, LevelDot, Section } from './ui'
+import { EvidenceBadge, LevelBadge, LevelDot, Section, BetaChip } from './ui'
 import { adviseSupplements, type AdviceLevel } from '../engine/supplementAdvice'
 import { nutritionRisk } from '../engine/nutrition'
 import { getStatus, lookupSupplementByBarcode, scanSupplements, searchSupplements, type ExtSupplement } from '../lib/foodStore'
@@ -234,6 +234,7 @@ export function Supplements({
           >
             <IconBarcode className="h-4 w-4" />
             <span className="ml-1">바코드</span>
+            <BetaChip className="ml-1" />
           </button>
           )}
         </div>

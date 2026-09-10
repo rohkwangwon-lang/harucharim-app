@@ -6,7 +6,7 @@ import { FOODS } from '../data/foods'
 import { activeInteractions, activeRules, evaluateFood } from '../engine/rules'
 import { foodContribution } from '../engine/nutrition'
 import { FoodDetail } from './FoodDetail'
-import { LevelDot } from './ui'
+import { LevelDot, BetaChip } from './ui'
 import { BarcodeScanner } from './BarcodeScanner'
 import { getStatus, linkBarcode, lookupBarcode, searchExtended } from '../lib/foodStore'
 import { InquiryDialog } from './InquiryDialog'
@@ -221,6 +221,7 @@ export function FoodSearch({
           >
             <IconBarcode className="h-4 w-4" />
             <span className="ml-1">바코드</span>
+            <BetaChip className="ml-1" />
           </button>
           )}
         </div>
