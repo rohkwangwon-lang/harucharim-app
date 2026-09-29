@@ -75,8 +75,10 @@ const wfCode = wf.split('\n').filter((l) => !l.trim().startsWith('#')).map((l) =
 no(!wf, `${WF} 이 없음 — 목록은 있는데 아무도 세지 않는다`)
 if (wf) {
   const cron = wfCode.match(/cron:\s*'([^']+)'/)?.[1] ?? ''
-  const every = Number(cron.split(/\s+/)[2]?.match(/^\*\/(\d+)$/)?.[1] ?? NaN)
-  no(!Number.isFinite(every), `예약 간격을 읽지 못함 (${cron}) — 날(日) 칸을 */N 으로 적을 것`)
+  const day = cron.split(/\s+/)[2] ?? ''
+  // '*' 는 매일, '*/N' 은 N일마다
+  const every = day === '*' ? 1 : Number(day.match(/^\*\/(\d+)$/)?.[1] ?? NaN)
+  no(!Number.isFinite(every), `예약 간격을 읽지 못함 (${cron}) — 날(日) 칸을 * 또는 */N 으로 적을 것`)
   for (const it of items.filter((x) => x.kind === 'dormancy')) {
     // 날(日) 칸의 'N일마다' 는 달이 바뀌면 1일로 되돌아가며 간격이 벌어진다(29일 → 다음 달 1일).
     // 가장 벌어질 때는 N+2일쯤이므로 그만큼 여유를 두고 견준다.
@@ -102,6 +104,23 @@ for (const [left, want] of STAGES) {
 }
 no(daysBetween('2029-06-11', '2029-09-09') !== 90, '날짜 셈이 틀림 — 2029-06-11 에서 09-09 까지는 90일')
 no(daysBetween('2028-02-28', '2028-03-01') !== 2, '윤년 셈이 틀림 — 2028-02-28 에서 03-01 까지는 2일')
+
+/*
+ * 깨우기와 되살림.
+ *
+ * 사흘마다 성공하는 요청을 보내고도 프로젝트가 멈췄다(2026-09-22, 되살린 뒤 확인).
+ * 그러니 두드림을 믿지 말고, 매일 보고 곧바로 알아채는 쪽을 지킨다.
+ */
+{
+  const w = readFileSync('scripts/expiry-watch.mjs', 'utf-8')
+  no(!/rpc\/of_ping/.test(w), '깨우기가 of_ping 을 부르지 않음')
+  no(!/closeDormancyIssues/.test(w), '되살아나도 휴면 이슈를 닫지 않음 — 다음에 멈춰도 알림이 가지 않는다')
+  no(/of_inquiries\?select/.test(w), '깨우기가 권한 없는 조회를 쓰고 있음')
+  const sql = existsSync('supabase/setup.sql') ? readFileSync('supabase/setup.sql', 'utf-8') : ''
+  no(!/function public\.of_ping/.test(sql), '설치 SQL 에 of_ping 이 없음 — 깨우기가 404 를 받는다')
+  no(!/grant execute on function public\.of_ping\(\) to anon/.test(sql), 'of_ping 을 anon 이 부를 수 없음')
+  no(!/process\.exitCode = 1/.test(w), '멈춰 있어도 실행이 성공으로 끝남 — 실패 메일이 가지 않는다')
+}
 
 /* ── 6. 연결값을 찍지 않는가 ───────────────────────────── */
 const watch = readFileSync('scripts/expiry-watch.mjs', 'utf-8')

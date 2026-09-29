@@ -65,11 +65,26 @@ async function pingSupabase() {
   if (!url || !key) return { state: 'skip', note: '연결값이 없어 건너뜀 (로컬에서 돌린 경우)' }
   try {
     const h = await fetch(`${url}/auth/v1/health`, { headers: { apikey: key } })
-    const db = await fetch(`${url}/rest/v1/of_inquiries?select=id&limit=1`, {
-      headers: { apikey: key, Authorization: `Bearer ${key}` }
+    /*
+     * 깨우기.
+     *
+     * 사흘마다 두드렸는데도 2026-09-22 에 프로젝트가 멈췄다. 그때는 요청이 거절당해서라고
+     * 짐작했지만, 되살린 뒤 같은 요청을 다시 보내 보니 200 이었다 — 짐작이 틀렸다.
+     * 성공하는 요청을 보내고도 멈췄으므로, 이 두드림이 휴면을 막아 준다고 믿어서는 안 된다.
+     * of_ping() 은 조건을 하나 줄여 둘 뿐이고, 진짜 방패는 매일 확인하고 곧 되살리는 것이다.
+     */
+    const db = await fetch(`${url}/rest/v1/rpc/of_ping`, {
+      method: 'POST',
+      headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+      body: '{}'
     })
-    const ok = h.ok && db.status < 500
-    return { state: ok ? 'ok' : 'down', note: `인증 ${h.status} · 데이터베이스 ${db.status}` }
+    const ok = h.ok && db.ok
+    return {
+      state: ok ? 'ok' : 'down',
+      note: db.status === 404
+        ? `of_ping 함수가 없다 — supabase/setup.sql 을 다시 실행할 것 (인증 ${h.status})`
+        : `인증 ${h.status} · 깨우기 ${db.status}`
+    }
   } catch (e) {
     return { state: 'down', note: `닿지 않음 (${e?.cause?.code ?? e?.name ?? '연결 실패'})` }
   }
@@ -77,6 +92,27 @@ async function pingSupabase() {
 
 function gh(args) {
   return execFileSync('gh', args, { encoding: 'utf-8' })
+}
+
+/**
+ * 되살아났으면 열려 있던 휴면 이슈를 닫는다.
+ *
+ * 같은 제목의 이슈가 열려 있으면 새로 열지 않게 해 두었는데(도배 방지),
+ * 닫히지 않은 채 남으면 다음에 또 멈춰도 알림이 가지 않는다. 회복도 기계가 적는다.
+ */
+function closeDormancyIssues(today) {
+  let open = []
+  try {
+    open = JSON.parse(gh(['issue', 'list', '--label', LABEL, '--state', 'open', '--limit', '50', '--json', 'number,title']))
+  } catch { return 0 }
+  let n = 0
+  for (const i of open.filter((x) => x.title.startsWith('[휴면 알림]'))) {
+    try {
+      gh(['issue', 'close', String(i.number), '--comment', `${today} 점검에서 다시 응답합니다. 자동으로 닫습니다.`])
+      n++
+    } catch { /* 권한이 없으면 그냥 둔다 */ }
+  }
+  return n
 }
 
 /** 같은 제목의 열린 이슈가 있으면 새로 열지 않는다 */
@@ -166,6 +202,18 @@ async function main() {
 
   if (process.argv.includes('--issues')) {
     for (const a of alerts) console.log(`  이슈 ${openIssue(list.owner, a.title, a.body)}: ${a.title}`)
+    if (!alerts.some((a) => a.title.startsWith('[휴면 알림]'))) {
+      const closed = closeDormancyIssues(today)
+      if (closed) console.log(`  되살아나 휴면 이슈 ${closed}건을 닫음`)
+    }
+    /*
+     * 멈춘 것을 알리는 이슈만으로는 묻힌다 — 2026-09-22 에 이슈가 열렸는데도
+     * 일주일을 모르고 지나갔다. 실행 자체를 실패로 끝내면 GitHub 가 '작업 실패' 메일을 따로 보낸다.
+     */
+    if (alerts.some((a) => a.title.startsWith('[휴면 알림]'))) {
+      console.error('멈춰 있습니다 — 실행을 실패로 끝내 메일이 가게 합니다')
+      process.exitCode = 1
+    }
   } else if (alerts.length) {
     console.log(`  알릴 것 ${alerts.length}건 (--issues 로 돌리면 이슈를 엽니다)`)
   }
