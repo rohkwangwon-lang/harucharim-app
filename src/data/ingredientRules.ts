@@ -460,7 +460,49 @@ export const INGREDIENT_RULES: IngredientRule[] = [
     reason:
       '전임상 근거는 풍부하나 사람에서 항암 효과는 확립되지 않았습니다. 고용량은 철 흡수를 방해할 수 있습니다.',
     evidence: 'C',
-    refIds: ['espen2021']
+    refIds: ['espen2021', 'hussaarts2019'],
+    byMedication: {
+      /*
+       * 16명의 약동학 연구(Hussaarts 2019)다. 커큐민 하루 3.6 g 에 엔독시펜 AUC −7.7 %(유의하지 않음),
+       * 피페린(후추 추출물)을 더한 제제에서는 −12.4 %(95 % CI −21.9~−1.9). 음식에 넣는 강황 양의 이야기가 아니다.
+       */
+      tamoxifen: {
+        level: 'caution',
+        reason:
+          '유방암 환자 16명을 본 약동학 연구에서, 커큐민 보충제(하루 3.6 g)를 타목시펜과 함께 드시면 활성 대사물(엔독시펜) 농도가 ' +
+          '7.7 % 낮아졌고, 흡수를 높이려 후추 추출물(피페린)을 더한 제제에서는 12.4 % 낮아졌습니다. ' +
+          '작은 연구이지만 약효가 줄어드는 방향이라 보충제는 삼가시는 편이 낫습니다. 카레처럼 음식에 든 강황은 그 양이 아닙니다.'
+      }
+    }
+  },
+  {
+    /*
+     * 2026-10-13 에 넣었다. 국내에서는 건강기능식품 원료가 아니지만(일반의약품·수입 보충제에 들어 있다)
+     * 항암·항호르몬 약의 설명서와 상호작용 자료가 한결같이 이름을 드는 것이라 빠져 있으면 안 된다.
+     * 약마다 수준이 다른 것은 인용한 자료의 분류를 그대로 옮긴 것이다(references.ts 의 cdi-liverpool · fda-label-*).
+     */
+    name: '세인트존스워트(성요한초)',
+    match: ['세인트존스', '세인트 존스', '성요한', '서양고추나물', '히페리쿰', 'hypericum', "St. John", "St John"],
+    base: 'caution',
+    reason:
+      '간의 약물 대사 효소(CYP3A4)와 약을 내보내는 단백질(P-gp)을 늘려, 함께 드시는 여러 약의 농도를 떨어뜨립니다. ' +
+      '우울·불면 목적의 수입 보충제와 일반의약품에 들어 있습니다. 드시는 약이 있으면 먼저 약사·의사에게 확인하십시오.',
+    evidence: 'C',
+    refIds: ['sjw-interaction', 'cdi-liverpool', 'fda-label-tamoxifen', 'fda-label-ai', 'fda-label-arpi'],
+    byMedication: {
+      irinotecan: { level: 'avoid', reason: '암 환자 5명의 교차설계 연구에서 이리노테칸의 활성 대사물(SN-38) 농도가 42 % 낮아졌습니다.' },
+      tamoxifen: {
+        level: 'avoid',
+        reason: '타목시펜 허가사항은 강한 CYP3A4 유도제와 함께 쓰지 말라고 적습니다(리팜핀이 타목시펜 농도를 86 % 낮춤). ' +
+          '세인트존스워트와 직접 본 연구는 없으나, 암 약물 상호작용 자료는 함께 쓰지 말 것으로 분류합니다.'
+      },
+      'ai-letrozole': { level: 'avoid', reason: '레트로졸 농도를 낮출 수 있어 권장하지 않습니다(암 약물 상호작용 자료 — 함께 써 본 연구는 없음, 근거의 질 매우 낮음).' },
+      'ai-exemestane': { level: 'avoid', reason: '엑스메스탄 허가사항이 세인트존스워트를 이름으로 들어, 약 농도를 크게 낮출 수 있다고 적습니다.' },
+      'adt-abiraterone': { level: 'avoid', reason: '자이티가 허가사항은 강한 CYP3A4 유도제를 피하라고 적고, 암 약물 상호작용 자료는 세인트존스워트를 함께 쓰지 말 것으로 분류합니다.' },
+      'adt-enzalutamide': { level: 'avoid', reason: '엑스탄디 허가사항은 강한 CYP3A4 유도제를 피하라고 적고, 암 약물 상호작용 자료는 세인트존스워트를 함께 쓰지 말 것으로 분류합니다.' },
+      'adt-apalutamide': { level: 'caution', reason: '얼리다의 농도를 낮출 수 있어 주의가 필요합니다(암 약물 상호작용 자료 — 함께 써 본 연구는 없음, 근거의 질 매우 낮음).' },
+      'adt-darolutamide': { level: 'avoid', reason: '뉴베카 허가사항은 P-gp 와 CYP3A4 를 함께 유도하는 약을 피하라고 적습니다. 세인트존스워트가 그런 작용을 합니다.' }
+    }
   },
   {
     name: '알로에',

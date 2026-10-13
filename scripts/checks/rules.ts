@@ -7,7 +7,7 @@
  */
 import { COMMON_RULES } from '../../src/data/commonRules'
 import { CONDITION_RULES } from '../../src/data/conditionRules'
-import { INTERACTIONS, MEDICATIONS } from '../../src/data/interactions'
+import { INTERACTIONS, MEAL_TIMING, MEDICATIONS, mealTimingFor, normalizeMedications, toggleMedication, visibleMedications } from '../../src/data/interactions'
 import { INGREDIENT_RULES } from '../../src/data/ingredientRules'
 import { CANCERS } from '../../src/data/cancers'
 import { REF_BY_ID } from '../../src/data/references'
@@ -16,7 +16,8 @@ import { CURATED_FOODS, FOOD_BY_ID } from '../../src/data/foods'
 import { GENERATED_CORE } from '../../src/data/foods/generated'
 import { readFileSync, readdirSync } from 'node:fs'
 import { SUPPLEMENTS } from '../../src/data/supplements'
-import { evaluateFood, activeRules, activeInteractions } from '../../src/engine/rules'
+import { evaluateFood, activeRules, activeInteractions, howToLines } from '../../src/engine/rules'
+import { buildDayMenu, dayNotes } from '../../src/engine/menu'
 import { DEFAULT_PATIENT } from '../../src/lib/store'
 import { microTargets } from '../../src/engine/nutrition'
 import { adviseSupplements } from '../../src/engine/supplementAdvice'
@@ -89,8 +90,15 @@ for (const it of INTERACTIONS) {
 }
 for (const m of MEDICATIONS) {
   if (!m.name?.trim()) bad('약제 이름 없음', m.id)
-  if (!INTERACTIONS.some((i) => i.agent === m.id))
-    bad('상호작용이 하나도 없는 약제', `${m.id} ${m.name} — 골라도 아무 일이 없다`)
+  /*
+   * 골랐을 때 달라지는 것이 하나는 있어야 한다. 음식 상호작용만 세면 엑스탄디·자이티가·뉴베카가 걸린다 —
+   * 이 약들은 자몽이 아니라 복용 시점(빈속·음식과 함께)과 세인트존스워트가 문제인 약이다.
+   */
+  const does = INTERACTIONS.some((i) => i.agent === m.id) ||
+    MEAL_TIMING.some((t) => t.med === m.id) ||
+    INGREDIENT_RULES.some((r) => r.byMedication && m.id in r.byMedication)
+  if (!does) bad('상호작용이 하나도 없는 약제', `${m.id} ${m.name} — 골라도 아무 일이 없다`)
+  if (m.parent && !MEDICATIONS.some((x) => x.id === m.parent && !x.parent)) bad('윗칸이 없는 아랫칸 약', `${m.id} → ${m.parent}`)
 }
 
 /* ── 3. 성분 규칙(영양제) ────────────────────── */
@@ -917,6 +925,9 @@ for (const id of orphan) bad('아무 데서도 인용하지 않는 문헌', `${i
   const IS_ANTICANCER: Record<string, boolean> = {
     /* 항호르몬제 — 수년씩 드시는 약이라 넣지 않았다. 넣을지는 임상 판단이다 */
     tamoxifen: false, ai: false, adt: false,
+    /* 2026-10-13 에 생긴 아랫칸 — 모두 항호르몬제다. 자몽은 약마다 따로 정했다(아래 '항호르몬제와 자몽') */
+    'ai-letrozole': false, 'ai-anastrozole': false, 'ai-exemestane': false,
+    'adt-abiraterone': false, 'adt-enzalutamide': false, 'adt-apalutamide': false, 'adt-darolutamide': false,
     capecitabine: true,
     'tki-egfr': true, 'tki-alk': true, cdk46: true, sorafenib: true,
     warfarin: false, doac: false,
@@ -956,6 +967,153 @@ for (const id of orphan) bad('아무 데서도 인용하지 않는 문헌', `${i
   }
   /* 판정까지 — 경고가 뜨는 분께는 실제로 '피하세요' 여야 한다 */
   if (evaluateFood(sample[0], who('during_chemo', []), 1).level !== 'avoid') bad('자몽 경고의 등급이 피하세요가 아님', sample[0].name)
+}
+
+/* ── 항호르몬제와 자몽 — 2026-10-13 전문의 결정 ─────────────────
+ *
+ * 타목시펜·레트로졸은 '피하세요', 아나스트로졸·엑스메스탄·ADT 는 '주의'. 근거가 약하다는 것을 숨기지 않기로 했다 —
+ * 그래서 등급은 'C' 이고 이유 글에 "함께 써 본 연구는 없다" 는 말이 있어야 한다. 그 문장이 빠지면 근거를 부풀린 것이 된다.
+ */
+{
+  const grapes = [...CURATED_FOODS, ...GENERATED_CORE].filter((f) => (f.tags as string[]).includes('자몽계'))
+  const orange = [...CURATED_FOODS].filter((f) => /^(귤|오렌지|한라봉)$/.test(f.name))
+  const who = (meds: string[], over: Partial<PatientContext> = {}): PatientContext =>
+    ({ ...DEFAULT_PATIENT, cancer: 'breast', phase: 'survivorship', medications: meds, conditions: [], subtypes: [], onboarded: true, ...over })
+  const WANT: [string, string[], string][] = [
+    ['타목시펜', ['tamoxifen'], 'avoid'],
+    ['레트로졸', ['ai', 'ai-letrozole'], 'avoid'],
+    ['아나스트로졸', ['ai', 'ai-anastrozole'], 'caution'],
+    ['엑스메스탄', ['ai', 'ai-exemestane'], 'caution'],
+    ['아로마타제 억제제(종류 모름)', ['ai'], 'caution'],
+    ['ADT', ['adt'], 'caution'],
+    ['ADT + 자이티가', ['adt', 'adt-abiraterone'], 'caution'],
+    ['ADT + 엑스탄디', ['adt', 'adt-enzalutamide'], 'caution'],
+    ['ADT + 얼리다', ['adt', 'adt-apalutamide'], 'caution'],
+    ['ADT + 뉴베카', ['adt', 'adt-darolutamide'], 'caution']
+  ]
+  if (grapes.length < 20 || orange.length < 2) bad('항호르몬제 자몽 검사가 헛돎', `자몽계 ${grapes.length} · 오렌지류 ${orange.length}`)
+  for (const [label, meds, want] of WANT) {
+    const p = who(meds)
+    for (const f of [grapes[0], grapes[Math.floor(grapes.length / 2)], grapes[grapes.length - 1]]) {
+      const v = evaluateFood(f, p, 1)
+      const lv = v.interactions.length ? (v.interactions.some((h) => h.interaction.level === 'avoid') ? 'avoid' : 'caution') : 'none'
+      if (lv !== want) bad('항호르몬제의 자몽 표기가 정해진 것과 다름', `${label} · ${f.name} → ${lv} (정해진 것: ${want})`)
+    }
+    /* 귤과 단맛 오렌지는 푸라노쿠마린이 없다 — 자몽 경고가 번지면 안 된다 */
+    for (const f of orange) if (evaluateFood(f, p, 1).interactions.some((h) => /자몽/.test(h.interaction.title))) bad('자몽 경고가 귤·오렌지에 붙음', `${label} · ${f.name}`)
+  }
+  /* 종류를 고르셨으면 "어느 약인지에 따라 다릅니다" 는 나오지 않는다 */
+  for (const child of ['ai-letrozole', 'ai-anastrozole', 'ai-exemestane']) {
+    if (evaluateFood(grapes[0], who(['ai', child]), 1).interactions.some((h) => h.interaction.id === 'int-grapefruit-ai')) bad('약 이름을 골랐는데 "어느 약인지에 따라" 가 함께 나옴', child)
+  }
+  /* 근거를 부풀리지 않는다 */
+  for (const it of INTERACTIONS.filter((i) => /^int-grapefruit-(tamoxifen|letrozole|anastrozole|exemestane|ai|adt|apalutamide)$/.test(i.id))) {
+    if (it.evidence !== 'C') bad('항호르몬제 자몽 규칙의 등급이 C 가 아님', `${it.id} — ${it.evidence}. 함께 써 본 임상 연구가 없다`)
+    if (!/연구는 없|연구도 없/.test(it.reason)) bad('항호르몬제 자몽 규칙이 "함께 써 본 연구는 없다" 를 밝히지 않음', it.id)
+    if (!it.refIds.some((r) => r === 'cdi-liverpool' || r.startsWith('fda-label-'))) bad('항호르몬제 자몽 규칙에 허가사항·상호작용 자료 인용이 없음', it.id)
+  }
+  if (INTERACTIONS.filter((i) => /^int-grapefruit-(tamoxifen|letrozole|anastrozole|exemestane|ai|adt|apalutamide)$/.test(i.id)).length !== 7) bad('항호르몬제 자몽 규칙 수가 다름', '일곱 건이어야 한다')
+}
+
+/* ── 약 고르기 — 윗칸과 아랫칸 ───────────────────────────────
+ *
+ * 아랫칸(레트로졸·자이티가…)은 윗칸을 고르셨을 때만 보이고, 윗칸을 끄면 함께 꺼져야 한다.
+ * 아무렇게나 눌러 본다. 어떤 순서로 눌러도 "윗칸 없는 아랫칸", "한 윗칸에 아랫칸 둘" 이 생기면 안 된다.
+ */
+{
+  let seed = 20261013
+  const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff }
+  const all = MEDICATIONS.map((m) => m.id)
+  const parentOf = Object.fromEntries(MEDICATIONS.map((m) => [m.id, m.parent]))
+  let sel: string[] = []
+  for (let i = 0; i < 20000; i++) {
+    const id = all[Math.floor(rnd() * all.length)]
+    const before = sel
+    sel = toggleMedication(sel, id)
+    const orphan = sel.find((m) => parentOf[m] && !sel.includes(parentOf[m]!))
+    if (orphan) { bad('윗칸 없이 아랫칸만 남음', `${before.join(',')} + ${id} → ${sel.join(',')}`); break }
+    const perParent = new Map<string, number>()
+    for (const m of sel) if (parentOf[m]) perParent.set(parentOf[m]!, (perParent.get(parentOf[m]!) ?? 0) + 1)
+    if ([...perParent.values()].some((n) => n > 1)) { bad('한 윗칸 아래에서 약이 둘 골라짐', sel.join(',')); break }
+    if (new Set(sel).size !== sel.length) { bad('같은 약이 두 번 들어감', sel.join(',')); break }
+    /* 고른 것은 모두 화면에 보여야 끌 수 있다 */
+    const vis = new Set(visibleMedications(sel).map((m) => m.id))
+    const hidden = sel.find((m) => !vis.has(m))
+    if (hidden) { bad('골라 둔 약이 화면에서 사라짐 — 끌 길이 없다', `${hidden} · ${sel.join(',')}`); break }
+    /* 저장했다가 다시 읽어도 같아야 한다 */
+    const back = normalizeMedications(sel)
+    if (back.slice().sort().join() !== sel.slice().sort().join()) { bad('약 목록이 저장·복원에서 달라짐', `${sel.join(',')} → ${back.join(',')}`); break }
+  }
+  if (normalizeMedications(['ai-letrozole']).join() !== 'ai,ai-letrozole') bad('아랫칸만 저장된 자료에 윗칸을 채우지 않음', normalizeMedications(['ai-letrozole']).join())
+  if (normalizeMedications(['없는약', 3, null, 'warfarin']).join() !== 'warfarin') bad('모르는 약을 버리지 않음', normalizeMedications(['없는약', 3, null, 'warfarin']).join())
+  /* 식사와 얽힌 복용법 — 자이티가를 고르시면 식단 화면에 '빈속' 이 떠야 한다 */
+  for (const t of MEAL_TIMING) {
+    if (!MEDICATIONS.some((m) => m.id === t.med)) bad('복용법이 없는 약을 가리킴', t.med)
+    for (const r of t.refIds) if (!REF_BY_ID[r]) bad('복용법이 없는 출처를 가리킴', `${t.med} → ${r}`)
+    if (!/허가사항/.test(t.text)) bad('복용법에 출처(허가사항)를 밝히지 않음', t.med)
+  }
+  if (!mealTimingFor(['adt', 'adt-abiraterone']).some((t) => /빈속/.test(t.text))) bad('자이티가에 빈속 복용 안내가 없음', '')
+  if (mealTimingFor(['adt']).length) bad('고르지 않은 약의 복용법이 나옴', 'adt')
+}
+
+/* ── 섭취 방법 — 2026-10-13 전문의 지시 ────────────────────────
+ *
+ * "생과일·생채소가 포함될 경우 섭취 방법을 반드시 함께 표기." 호중구가 낮은 분께(시기로 고르든 증상으로 고르든)
+ * 날로 먹는 과일·채소가 나오면 '씻어서' 가 그 음식 옆에 붙어야 한다. 잣대는 태그가 아니라 이름과 군이다 —
+ * 태그가 빠진 음식을 잡으려는 것이다.
+ */
+{
+  const byPhase: PatientContext = { ...DEFAULT_PATIENT, cancer: 'colorectal', phase: 'neutropenia', conditions: [], medications: [], onboarded: true }
+  const byCond: PatientContext = { ...byPhase, phase: 'during_rt', conditions: ['호중구감소증'] }
+  const well: PatientContext = { ...byPhase, phase: 'survivorship' }
+  /* 손으로 등록한 과일 가운데 말리거나 통조림·청이 아닌 것, 그리고 이름으로 보아 날로 먹는 채소 */
+  const DRIED = /곶감|건자두|건포도|건망고|건조|통조림|\(청\)|말린/
+  const RAW_VEG = /^(상추|깻잎|오이|토마토|방울토마토|셀러리|치커리|파프리카\(.+\)|풋고추|적양배추|물냉이|무생채|쌈밥)$/
+  const fresh = CURATED_FOODS.filter((f) => (f.group === '과일' && !DRIED.test(f.name)) || RAW_VEG.test(f.name))
+  if (fresh.length < 40) bad('섭취 방법 검사가 헛돎', `날로 먹는 과일·채소 ${fresh.length}종`)
+  for (const f of fresh) {
+    for (const [label, p] of [['시기', byPhase], ['증상', byCond]] as const) {
+      const v = evaluateFood(f, p, 1)
+      if (v.level === 'avoid') continue
+      if (!howToLines(v).some((t) => /씻/.test(t))) bad('호중구가 낮은 분께 생과일·생채소의 섭취 방법이 안 붙음', `${f.name} (${label}으로 고름)`)
+    }
+    if (howToLines(evaluateFood(f, well, 1)).some((t) => /씻/.test(t))) bad('호중구가 낮지 않은 분께 씻는 방법이 붙음', f.name)
+  }
+  /* 익힌 것·말린 것에는 붙지 않는다 */
+  for (const f of CURATED_FOODS.filter((x) => /데친|삶은|나물$|곶감|건포도|통조림/.test(x.name) && (x.group === '채소' || x.group === '과일'))) {
+    if (howToLines(evaluateFood(f, byPhase, 1)).some((t) => /씻/.test(t))) bad('익히거나 말린 것에 "씻어서 드세요" 가 붙음', f.name)
+  }
+  /* 차려 드린 식단 — 날로 먹는 과일·채소가 오르면 그 줄에 방법이 있어야 한다 */
+  let shown = 0
+  for (let i = 0; i < 120; i++) {
+    const p = i % 2 ? byPhase : byCond
+    const menu = buildDayMenu([], { ...p, cancer: CANCERS[i % CANCERS.length].id, sex: CANCERS[i % CANCERS.length].id === 'prostate' ? 'M' : 'F' }, { nonce: i })
+    for (const slot of Object.keys(menu.meals) as (keyof typeof menu.meals)[]) for (const e of menu.meals[slot]) {
+      const isFresh = (e.food.group === '과일' && !DRIED.test(e.food.name)) || RAW_VEG.test(e.food.name)
+      if (!isFresh) continue
+      shown++
+      if (!howToLines(evaluateFood(e.food, p, e.servings)).some((t) => /씻/.test(t))) bad('식단에 오른 생과일·생채소에 섭취 방법이 없음', `${e.food.name} · ${p.phase}`)
+    }
+  }
+  if (shown < 30) bad('식단의 섭취 방법 검사가 헛돎', `식단에 오른 생과일·생채소 ${shown}건`)
+  /* 방법은 FDA 문장 그대로 — "껍질을 벗겨 드시면 된다" 는 원문에 없다(원문은 벗길 것도 씻으라고 한다) */
+  for (const r of [...COMMON_RULES, ...Object.values(CONDITION_RULES).flat(), ...CANCERS.flatMap((c) => c.rules)]) {
+    if (/씻거나 껍질을 벗겨/.test(r.reason + (r.howTo ?? ''))) bad('"씻거나 껍질을 벗겨" — FDA 원문에 없는 말', r.id)
+    if (r.howTo && r.howTo.length > 60) bad('한 줄 안내가 너무 김', `${r.id} — ${r.howTo.length}자`)
+  }
+  /* 햄·소시지·살라미·훈제오리 — 호중구가 낮은 동안 '주의' 와 "데워서" */
+  const deli = [...CURATED_FOODS, ...GENERATED_CORE].filter((f) => /살라미|훈제\s*오리|소시지|비엔나|^햄$|런천미트/.test(f.name) && !/향|맛$|비건|식물성|스낵|과자|칩/.test(f.name))
+  if (deli.length < 60) bad('데워 먹기 검사가 헛돎', `${deli.length}종`)
+  let warm = 0
+  /* 대장암에서는 가공육이 아예 '피하세요' 라 "데워서" 가 나올 자리가 없다 — 폐암으로 본다 */
+  const lungNeut: PatientContext = { ...byPhase, cancer: 'lung' }
+  for (const f of deli) {
+    const v = evaluateFood(f, lungNeut, 1)
+    if (v.level !== 'caution' && v.level !== 'avoid') { bad('호중구가 낮은데 햄·소시지·훈제오리에 주의가 없음', `${f.name} → ${v.level}`); continue }
+    if (v.level === 'caution' && howToLines(v).some((t) => /데워/.test(t))) warm++
+    if (howToLines(evaluateFood(f, well, 1)).some((t) => /데워/.test(t))) bad('호중구가 낮지 않은 분께 "데워서" 가 붙음', f.name)
+  }
+  if (warm / deli.length < 0.9) bad('햄·소시지·훈제오리에 "데워서 드세요" 가 안 붙은 것이 많음', `${warm}/${deli.length}`)
 }
 
 /* ── 호중구감소 — 고르는 자리가 둘이어도 답은 하나 ─────────────
@@ -1045,6 +1203,32 @@ for (const id of orphan) bad('아무 데서도 인용하지 않는 문헌', `${i
     const w = want[o.key]
     if (!w || Math.abs(o.value - w[0]) > 1e-9 || Math.abs(o.liquidPer100 - w[1]) > 1e-9) bad('문턱이 고시의 셈과 다름', `${o.key} ${o.value}/${o.liquidPer100} — 기준 ${w?.join('/')}`)
   }
+}
+
+/* ── "범위 안에 있습니다" 라고 했으면 정말 안에 있어야 한다 ─────────
+ *
+ * 2026-10-13 에 화면을 눈으로 보다 찾았다 — 1,701 kcal 을 두고 "목표 범위(1,416~1,616 kcal)에 들어옵니다".
+ * 15 % 까지는 맞춘 것으로 치는 것이 문구에까지 번진 것이다. 식이섬유도 같았다.
+ * 무작위 합계를 넣어, 문구가 댄 범위와 문구가 댄 숫자를 다시 견준다.
+ */
+{
+  let seed = 4242
+  const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff }
+  let seen = 0
+  for (let i = 0; i < 4000; i++) {
+    const c = CANCERS[i % CANCERS.length]
+    const p: PatientContext = { ...DEFAULT_PATIENT, cancer: c.id, sex: c.id === 'prostate' ? 'M' : 'F', phase: (['during_rt', 'during_chemo', 'neutropenia', 'post_op', 'survivorship'] as Phase[])[i % 5],
+      weightKg: 40 + Math.floor(rnd() * 60), heightCm: 150 + Math.floor(rnd() * 30), conditions: rnd() < 0.2 ? ['설사'] : [], medications: [], onboarded: true }
+    const totals = { kcal: 700 + rnd() * 2600, protein: 20 + rnd() * 140, na: 500 + rnd() * 4000, fiber: rnd() * 60, carb: 200, fat: 50 }
+    for (const n of dayNotes(totals as never, {} as never, p)) {
+      const m = n.text.match(/^([\d,]+) (kcal|g|mg) — [^(]*\(([\d,]+)~([\d,]+) [^)]*\)\s*(안에 있습니다|에 들어옵니다)/)
+      if (!m) continue
+      seen++
+      const [v, lo, hi] = [m[1], m[3], m[4]].map((x) => Number(x.replace(/,/g, '')))
+      if (v < lo || v > hi) bad('"범위 안" 이라고 했는데 범위 밖', `${n.topic}: ${n.text.slice(0, 70)}`)
+    }
+  }
+  if (seen < 1000) bad('"범위 안" 검사가 헛돎', `견준 문구 ${seen}건`)
 }
 
 /* ── 화면에 '금기' 라는 말을 쓰지 않는다 ───────────────────────

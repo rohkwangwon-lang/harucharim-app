@@ -71,7 +71,12 @@ export function summarizeDay(
     note = `단백질이 ${target.protein[0] - protein} g 모자랍니다`
   } else {
     grade = 'good'
-    note = na > naLimit ? '열량·단백질은 충분하나 나트륨이 많습니다' : '목표 범위에 들어옵니다'
+    /*
+     * '좋음' 은 목표에서 20 % 모자라거나 15 % 넘는 데까지 봐주는 등급이다. 그 날들까지 "목표 범위에 들어옵니다" 라고 하면
+     * 틀린 말이 된다 — 정말 범위 안일 때만 그렇게 적고, 봐준 날은 "가깝습니다" 라고 적는다(2026-10-13).
+     */
+    const inside = kcal >= target.kcal[0] && kcal <= target.kcal[1] && protein >= target.protein[0]
+    note = na > naLimit ? '열량·단백질은 충분하나 나트륨이 많습니다' : inside ? '목표 범위에 들어옵니다' : '목표에 가깝습니다'
   }
 
   return { grade, kcal, protein, na, target, empty: false, note }

@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import type { Food, MealSlot, PatientContext } from '../data/types'
 import { MEAL_SLOTS } from '../data/types'
-import { evaluateFood } from '../engine/rules'
+import { evaluateFood, howToLines } from '../engine/rules'
 import { foodContribution, missingMacros, NUTRIENT_META, fmt } from '../engine/nutrition'
 import { REF_BY_ID } from '../data/references'
-import { EvidenceBadge, LevelBadge } from './ui'
+import { EvidenceBadge, HowTo, LevelBadge } from './ui'
 
 /** 식품 상세 — 하단 시트 형태 */
 export function FoodDetail({
@@ -56,6 +56,13 @@ export function FoodDetail({
             </div>
             {verdict.level && <LevelBadge level={verdict.level} />}
           </div>
+          {/* 어떻게 드시면 되는가 — 판정 바로 아래, 이유 글을 펴 보지 않아도 보이는 자리 */}
+          {howToLines(verdict).length > 0 && (
+            <div className="mt-2.5 rounded-lg bg-brand-50 px-3 py-2">
+              <p className="text-[11px] font-bold text-brand-800">드시는 방법</p>
+              <HowTo lines={howToLines(verdict)} />
+            </div>
+          )}
           {food.auto && (
             <p className="mt-2.5 rounded-lg bg-stone-50 px-3 py-2 text-[11px] leading-relaxed text-stone-500">
               식품의약품안전처 공공데이터에서 자동으로 들여온 항목입니다.

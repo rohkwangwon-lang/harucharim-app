@@ -14,3 +14,7 @@ data/raw/
 data/raw-barcode/
 data/raw-barcode-i2570/
 data/raw-supplement/
+
+# 스크린샷 중간 산출물 — 결과는 docs/출시/스크린샷 에 둔다
+scripts/screenshots/raw/
+scripts/screenshots/store/

@@ -250,6 +250,12 @@ const servers = Array.from({ length: WORKERS }, (_x, w) =>
   spawn('python3', ['-m', 'http.server', String(PORT + w), '--directory', SITE], { stdio: 'ignore' }))
 rmSync('/tmp/harucharim-monkey-profile', { recursive: true, force: true })
 const chrome = spawn(CHROME, ['--headless=new', '--disable-gpu', '--no-sandbox', '--hide-scrollbars',
+  /*
+   * 뒤에 있는 탭의 타이머를 늦추지 않게 한다. 크롬은 앞에 보이지 않는 탭의 setTimeout 을 1초에 한 번으로 묶는데,
+   * 일꾼 넷 가운데 셋이 늘 뒤에 있다 — 0.1초 쉬려던 것이 1초가 되어 한 상태에 20초씩 걸렸고,
+   * "응답 없음" 의 대부분이 그것이었다(앱이 느린 것이 아니었다).
+   */
+  '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows',
   `--remote-debugging-port=${CDP}`, '--user-data-dir=/tmp/harucharim-monkey-profile', '--window-size=900,1000', 'about:blank'], { stdio: 'ignore' })
 const stop = () => { try { chrome.kill() } catch {} for (const sv of servers) { try { sv.kill() } catch {} } }
 process.on('exit', stop)

@@ -10,7 +10,8 @@ import { foodContribution, personalTarget } from '../engine/nutrition'
 import { CANCER_BY_ID } from '../data/cancers'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
 import { REF_BY_ID } from '../data/references'
-import { DayNoteList, EvidenceBadge, NutrientPanel, NutrientRow, nutrientState, Section } from './ui'
+import { DayNoteList, EvidenceBadge, HowTo, NutrientPanel, NutrientRow, nutrientState, Section } from './ui'
+import { activeInteractions, activeRules, evaluateFood, howToLines } from '../engine/rules'
 
 const SLOT_ICON: Record<MealSlot, typeof IconMorning> = {
   아침: IconMorning, 오전간식: IconSnack, 점심: IconNoon, 오후간식: IconSnack, 저녁: IconEvening
@@ -81,6 +82,11 @@ export function RecommendedMenu({
    * 그래서 껍데기가 아니라 내용으로 견준다.
    */
   const recent = useMemo(() => recentFoods(diary, day, undefined, shown), [diary, day, shown])
+  /* 음식마다 "어떻게 드시면 되는가" 를 붙이려면 그 음식을 다시 판정해야 한다 — 규칙 목록은 한 번만 모은다 */
+  const ruleCache = useMemo(
+    () => ({ rules: activeRules(patient), interactions: activeInteractions(patient) }),
+    [patient]
+  )
 
   /*
    * 지금까지 보여 드린 안을 모두 들고 있는다.
@@ -380,6 +386,7 @@ export function RecommendedMenu({
                           {portionLabel(e.food.serving.label, e.servings)} · {Math.round(per.kcal ?? 0)} kcal ·
                           단백질 {(per.protein ?? 0).toFixed(1)} g · 나트륨 {per.na === undefined ? '정보 없음' : `${Math.round(per.na)} mg`}
                         </div>
+                        <HowTo lines={howToLines(evaluateFood(e.food, patient, e.servings, ruleCache))} />
                         {e.origin === 'added' && e.ruleTitle && (
                           <Why
                             contribution={e.contribution}

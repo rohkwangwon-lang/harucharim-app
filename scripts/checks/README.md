@@ -22,6 +22,7 @@ node_modules/.bin/jiti scripts/checks/login.ts    # 로그인 문 — 소셜이 
 node_modules/.bin/jiti scripts/checks/expiry.ts   # 기한 목록이 키·바깥 주소·도메인을 다 덮는가, 휴면 점검 간격
 node_modules/.bin/jiti scripts/checks/sense.ts    # 상식 — 권장의 이유가 그 음식에 맞는가, 날것·젓갈·술이 이름으로 봐도 걸리는가 (약 29만 종)
 node_modules/.bin/jiti scripts/checks/restore.ts  # 저장된 자료가 낡았거나 깨졌어도 앱이 열리는가
+node_modules/.bin/jiti scripts/checks/docs.ts     # 문서(질의서·스토어 원고·발표 자료)에 적은 숫자가 앱과 같은가
 PEOPLE=3000 node_modules/.bin/jiti scripts/checks/patient.ts  # 환자 입장 — 읽을 수 있는가, 이유가 오는가, 앱이 스스로 어긋나지 않는가
 
 # 대규모 실행 — 위 규칙들을 한자리에 모아 훨씬 큰 표본으로 돌린다.
@@ -42,6 +43,12 @@ PEOPLE=2000 DAYS=90 node_modules/.bin/jiti scripts/checks/bigrun.ts
 | 화면에 '금기' 라는 말을 쓰지 않음 | `rules.ts` — 문자열과 JSX 글자를 TypeScript 로 읽음 |
 | 권장의 문턱은 식약처 '급원' 기준, 한 자리에서만 정함 | `rules.ts` — `SOURCE_PER_SERVING` 이 아니면 실패 |
 | 호중구감소는 시기로 고르든 증상으로 고르든 같은 답 | `rules.ts` · `sense.ts` |
+| 항호르몬제와 자몽 — 타목시펜·레트로졸 '피하세요', 아나스트로졸·엑스메스탄·ADT '주의'. 등급은 C, 이유 글에 "함께 써 본 연구는 없다" | `rules.ts` |
+| 생과일·생채소가 나오면 "씻어서" 를 그 음식 옆에 | `rules.ts`(식단 120일) · `sense.ts`(받아 온 생과일·생채소 456종) · 화면 시험 |
+| 살라미·건조 소시지·훈제오리는 호중구가 낮은 동안 '주의' 와 "데워서" | `rules.ts` · `sense.ts`(804종) · `autotag.ts` |
+| 몸 수치 칸은 범위 안의 값만 저장 — 읽는 문과 쓰는 문의 잣대가 같다 | `restore.ts` · 화면 무작위 입력 시험 |
+| "범위 안에 있습니다" 라고 적은 숫자는 정말 범위 안 | `rules.ts`(무작위 합계 4,000가지) · `diary.ts` |
+| 문서에 적은 숫자(규칙·문헌·약의 수)가 앱과 같다 | `docs.ts` — 숫자는 `scripts/doc-numbers.ts` 가 센다 |
 
 ## 다른 씨앗으로 돌리기
 
@@ -70,7 +77,23 @@ node_modules/.bin/jiti scripts/selftest/dump-ids.ts > /tmp/harucharim-ids.json
 node scripts/selftest/ui-monkey.mjs /tmp/hc-nologin /tmp/harucharim-ids.json /tmp/hc-monkey 200 <씨앗>
 ```
 
-10분쯤 걸려 평소 검사 묶음에는 넣지 않았다. 저장 형식(`AppState`)이나 화면 틀을 바꾼 뒤에 돌린다.
+저장 형식(`AppState`)이나 화면 틀을 바꾼 뒤에 돌린다. 2분쯤 걸린다.
+
+### 무작위 입력 — `ui-fuzz.mjs`
+
+`ui-monkey.mjs` 가 "이런 상태에서 열리는가" 를 본다면 이것은 **사람 손이 하는 일** 을 한다.
+보이는 칸과 단추를 아무렇게나 고르고, 숫자 칸에 엉뚱한 값(빈칸·음수·글자·아주 큰 수·전각 숫자)을 넣고,
+칩을 켜고 끄고, 중간중간 새로 고쳐 저장된 것이 그대로 돌아오는지 본다. 걸리면 씨앗과 직전에 한 일 열두 가지를 적는다.
+
+```bash
+node scripts/selftest/ui-fuzz.mjs /tmp/hc-nologin /tmp/harucharim-ids.json /tmp/hc-fuzz 40 240 <씨앗>
+ONLY=3,7 node scripts/selftest/ui-fuzz.mjs … (같은 판 수·횟수·씨앗)   # 걸린 판만 다시
+```
+
+처음 돌린 날(2026-10-13) 찾은 것 — 체중·키·나이 칸이 친 값을 그대로 저장해 키 0 에 BMI 가 Infinity 로 떴다.
+
+**두 시험 모두 크롬을 `--disable-background-timer-throttling` 으로 띄운다.** 안 그러면 뒤에 있는 탭의 타이머가
+1초에 한 번으로 묶여, 0.1초 쉬려던 것이 1초가 되고 "응답 없음" 이 쏟아진다(앱이 느린 것이 아니었다).
 
 검사가 헛돌지 않는지 보려면 engine.ts 가 찍는 커버리지 숫자를 본다.
 제외 건수나 추천 건수가 0 이면 그 검사는 아무것도 확인하지 않은 것이다.

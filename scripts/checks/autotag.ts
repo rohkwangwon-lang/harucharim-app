@@ -16,7 +16,7 @@
 import { evaluateFood } from '../../src/engine/rules'
 import { GENERATED_CORE } from '../../src/data/foods/generated'
 import { CURATED_FOODS } from '../../src/data/foods/index'
-import { autoTags } from '../../src/data/foods/autoTag'
+import { autoTags, withAutoTags } from '../../src/data/foods/autoTag'
 import type { Food, PatientContext } from '../../src/data/types'
 
 const bads: string[] = []
@@ -123,6 +123,25 @@ for (const n of UNDER_NO) no(has(n, '덜익힘'), `"${n}" 에 덜익힘이 붙�
 for (const n of ['그라브락스 연어', '훈제 그라브락스 연어', '연어그라브락스']) no(!has(n, '생식동물성'), `"${n}" 에 생식동물성이 안 붙는다`)
 /* 반숙란·하몽은 '날 해산물' 이 아니다 — 비브리오 같은 규칙에 끌려가면 안 된다 */
 for (const n of ['반숙란', '하몽 세라노', '훈제연어']) no(has(n, '생식동물성'), `"${n}" 에 생식동물성이 붙었다 — 덜익힘과 섞이면 안 된다`)
+
+/*
+ * 훈제오리 — 2026-10-13. IARC 의 가공육 정의(염장·경화·발효·훈연)에 들고, 호중구가 낮은 분께는 "데워서" 가 붙어야 한다.
+ * 훈제 닭가슴살까지 넓히지는 않았다(정해 주신 범위가 아니다).
+ */
+for (const n of ['훈제오리', '훈제오리고기', '유자 훈제오리 저당 포케 샐러드', '오리훈제 슬라이스', '살라미에멘탈 샌드위치']) no(!has(n, '가공육'), `"${n}" 에 가공육이 안 붙는다`)
+for (const n of ['훈제 닭가슴살', '오리백숙', '오리주물럭']) no(has(n, '가공육'), `"${n}" 에 가공육이 붙었다 — 훈제오리가 아니다`)
+
+/*
+ * 날로 먹는 과일·채소 — 호중구가 낮은 분께 "씻어서 드세요" 를 붙이려는 태그. 군을 함께 보아야 해서 withAutoTags 로 본다.
+ */
+const produceTagged = (n: string, g: string) => withAutoTags(n, [], g).includes('생채소과일' as never)
+const PRODUCE_YES: [string, string][] = [['사과_후지_생것', '과일'], ['상추_적상추_생것', '채소'], ['닭가슴살 리코타 샐러드', '가공식품'],
+  ['양배추겉절이', '반찬·조림·볶음'], ['컵과일 (사과·포도)', '가공식품'], ['연어샐러드', '어패류']]
+const PRODUCE_NO: [string, string][] = [['시금치_데친것', '채소'], ['감_말린것', '과일'], ['샐러드 드레싱 오리엔탈', '가공식품'],
+  ['감자샐러드', '반찬·조림·볶음'], ['에그샐러드 샌드위치', '가공식품'], ['샐러드유', '유지·당류'], ['마카로니 샐러드', '반찬·조림·볶음'],
+  ['겉절이김치', '반찬·조림·볶음'], ['프로틴 샐러드바 플레인', '가공식품'], ['사과주스', '음료'], ['시저 샐러드', '외식·프랜차이즈']]
+for (const [n, g] of PRODUCE_YES) no(!produceTagged(n, g), `"${n}"(${g}) 에 생채소과일이 안 붙는다 — 씻는 방법이 안 뜬다`)
+for (const [n, g] of PRODUCE_NO) no(produceTagged(n, g), `"${n}"(${g}) 에 생채소과일이 붙었다 — 익히거나 말린 것, 양념, 과자이거나 밖에서 사 드시는 것이다`)
 
 /* 비타민 K — 와파린 규칙이 이름을 든 다섯 가지. 수치가 없는 자료에도 붙어야 한다 */
 const VITK_YES = ['청국장찌개', '낫토', '시금치나물', '케일주스', '브로콜리 데침']

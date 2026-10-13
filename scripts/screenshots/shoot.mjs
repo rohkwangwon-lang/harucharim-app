@@ -3,13 +3,18 @@
  * headless 크롬의 --window-size 는 폭 500 px 아래로 내려가지 않는다(그래서 430 으로 주면
  * 화면은 500 으로 짜이고 사진만 잘려 오른쪽이 날아갔다). CDP 의 기기 메트릭 재정의로 잡는다.
  */
+import { fileURLToPath } from 'node:url'
 import { spawn } from 'node:child_process'
 import { writeFileSync, mkdirSync, rmSync } from 'node:fs'
 import { setTimeout as sleep } from 'node:timers/promises'
 
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 const PORT = 9333
-const OUT = new URL('./raw/', import.meta.url).pathname
+/*
+ * fileURLToPath 로 푼다. URL 의 pathname 을 그대로 쓰면 한글 폴더 이름이 %ED%81%B4… 로 남아,
+ * 사진이 홈 폴더 아래의 엉뚱한 '%E1%84%8F…' 폴더에 찍혔다(2026-10-13 에 발견).
+ */
+const OUT = fileURLToPath(new URL('./raw/', import.meta.url))
 const W = 430, H = 932, DSF = 3
 
 const SHOTS = [

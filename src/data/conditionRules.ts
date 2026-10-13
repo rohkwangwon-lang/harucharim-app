@@ -246,14 +246,16 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
       match: { restrictGroups: ['어패류', '가금류·난류', '우유·유제품', '육류', '외식·프랜차이즈'], tags: ['생식'] },
       supersedes: ['common-raw-neutropenia'],
       title: '익히지 않은 음식은 이 기간 동안 피하세요',
+      howTo: '이 시기에는 속까지 익힌 것으로 바꿔 드세요',
       reason:
         /* FDA 원문의 시간 기준을 그대로 적는다 — '오래' 로는 실행할 수가 없다 */
         '회·육회·생굴·반숙 달걀·살균되지 않은 유제품이 대상입니다. ' +
-        '생과일·생채소는 깨끗이 씻거나 껍질을 벗겨 드시면 됩니다. ' +
+        '생과일·생채소는 흐르는 물에 씻어서 드시면 됩니다(껍질을 벗겨 드실 것도 벗기기 전에 씻습니다). ' +
         '생 새싹채소(숙주·알팔파·브로콜리 새싹)도 씻는 것으로 해결되지 않아 익혀 드셔야 합니다. ' +
         '조리하시거나 사 오신 뒤 2시간 안에 냉장하시고(더운 날 32 ℃ 를 넘으면 1시간), ' +
         '상온에 오래 둔 김밥·샐러드는 드시지 마십시오.',
-      evidence: 'B', refIds: ['fda-foodsafety', 'sonbol2015']
+      /* 'B' → 'G' (2026-10-13) — 날것을 피하라는 말의 출처는 FDA 지침이다. commonRules 의 같은 규칙에 적었다 */
+      evidence: 'G', refIds: ['fda-foodsafety', 'sonbol2015']
     },
     {
       id: 'cond-neut-probiotic', level: 'caution', match: { supplementCategories: ['유산균'], tags: ['프로바이오틱스'] },

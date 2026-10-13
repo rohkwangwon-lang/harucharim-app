@@ -13,7 +13,8 @@
  * 화면 자가시험(scripts/selftest/ui-monkey.mjs)이 실제 브라우저에서 같은 것을 보지만
  * 그것은 몇 분이 걸린다. 이 검사는 순수 함수를 불러 1초 안에 본다.
  */
-import { restoreState, restoreWeights, DEFAULT_PATIENT } from '../../src/lib/store'
+import { cleanPatch, restoreState, restoreWeights, DEFAULT_PATIENT } from '../../src/lib/store'
+import { BODY_LIMITS, parseInRange } from '../../src/lib/bodyInput'
 import { CANCERS } from '../../src/data/cancers'
 import { CONDITION_RULES } from '../../src/data/conditionRules'
 import { MEDICATIONS } from '../../src/data/interactions'
@@ -134,6 +135,41 @@ for (const junk of [null, undefined, 42, 'x', [], [1, 2], {}, { patient: 7 }, { 
   catch (e) { no(true, `엉뚱한 값 ${JSON.stringify(junk)} — 무너짐: ${(e as Error).message}`) }
 }
 no(Object.keys(restoreWeights([{ date: 'x', kg: 60 }, { date: D1 }, 7, null])).length !== 0, '날짜가 아닌 체중이 살아남음')
+
+/* ── 4. 쓰는 길에도 같은 문 — 손으로 친 값 ──────────────────────
+ *
+ * 2026-10-13 의 무작위 입력 시험이 찾았다. 읽는 문(restoreState)만 있고 쓰는 문이 없어서,
+ * 키에 0 을 치면 그대로 저장되고 BMI 가 Infinity 로 떴다. 읽는 문과 쓰는 문의 잣대가 같아야 한다 —
+ * 쓰는 문이 받은 값은 읽는 문도 받아야 하고(안 그러면 다음에 열 때 사라진다), 읽는 문이 버릴 값은 쓰는 문도 받지 않아야 한다.
+ */
+{
+  const POOL = ['60', '54.5', '170', '45', '', '0', '-5', '999', '1000000', '0.1', '3', '250', 'abc', '６０', '60kg', ' 72 ', '1e3', '.', '--', '007', '12.345678', '19.9', '20', '300', '300.1', '100', '230', '1', '120', '121', '5５', 'NaN', 'Infinity', '1,000', '60.', '.5']
+  for (const [field, lim] of Object.entries(BODY_LIMITS) as [keyof typeof BODY_LIMITS, { min: number; max: number }][]) {
+    for (const t of POOL) {
+      const v = parseInRange(t, lim, field === 'age')
+      if (v === null) continue
+      no(!(v >= lim.min && v <= lim.max), `칸이 범위 밖 값을 받음: ${field} ← "${t}" → ${v}`)
+      /* 받은 값은 저장했다 다시 읽어도 그대로여야 한다 */
+      const back = restoreState({ patient: { ...DEFAULT_PATIENT, onboarded: true, [field]: v } }, TODAY as never).patient[field]
+      no(back !== v, `칸이 받은 값을 읽는 문이 버림: ${field} "${t}" → ${v} → 다시 읽으니 ${back}`)
+    }
+    no(parseInRange(String(lim.min), lim, field === 'age') !== lim.min, `${field} 의 아래 끝(${lim.min})을 받지 않음`)
+    no(parseInRange(String(lim.max), lim, field === 'age') !== lim.max, `${field} 의 위 끝(${lim.max})을 받지 않음`)
+    for (const junk of ['0', '-5', 'abc', '', '60kg', '1e3', '1000000', 'NaN', 'Infinity', String(lim.max + 1), String(lim.min - 1)]) {
+      no(parseInRange(junk, lim) !== null, `칸이 엉뚱한 값을 받음: ${field} ← "${junk}"`)
+    }
+  }
+  no(parseInRange('６０', BODY_LIMITS.weightKg) !== 60, '전각 숫자(６０)를 읽지 못함')
+  no(parseInRange(' 72 ', BODY_LIMITS.weightKg) !== 72, '앞뒤 빈칸이 붙은 숫자를 읽지 못함')
+  no(parseInRange('54.5', BODY_LIMITS.age, true) !== null, '나이에 소수를 받음')
+  /* 쓰는 문 — 범위 밖은 그 칸만 버리고 나머지는 받는다 */
+  const p1 = cleanPatch({ weightKg: 0, heightCm: 170, age: 1000 })
+  no('weightKg' in p1 || 'age' in p1 || p1.heightCm !== 170, `쓰는 문이 범위 밖 값을 받거나 멀쩡한 값을 버림: ${JSON.stringify(p1)}`)
+  no('weightLossPct' in cleanPatch({ weightLossPct: 93 }), '쓰는 문이 60 % 를 넘는 감소율을 받음')
+  no(cleanPatch({ weightLossPct: 12 }).weightLossPct !== 12, '쓰는 문이 멀쩡한 감소율을 버림')
+  no(cleanPatch({ medications: ['ai-letrozole', '없는약'] }).medications?.join() !== 'ai,ai-letrozole', '쓰는 문이 약 목록을 성하게 만들지 않음')
+  for (const bad of [NaN, Infinity, -1, 0, 19.9, 300.1, 1e6]) no('weightKg' in cleanPatch({ weightKg: bad }), `쓰는 문이 체중 ${bad} 을 받음`)
+}
 
 console.log(bads.length
   ? `불러오기 검사 — 문제 ${bads.length}종\n` + bads.map((b) => '■ ' + b).join('\n')

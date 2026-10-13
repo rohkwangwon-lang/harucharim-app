@@ -6,7 +6,8 @@ import { observedWeightLoss } from '../engine/nutrition'
 import { defaultSlotFor } from '../engine/menu'
 import { CANCER_BY_ID } from '../data/cancers'
 import { CONDITION_RULES } from '../data/conditionRules'
-import { MEDICATIONS } from '../data/interactions'
+import { normalizeMedications } from '../data/interactions'
+import { BODY_LIMITS } from './bodyInput'
 import { SUBTYPE_OPTIONS } from '../data/types'
 import { today as todayKey, type DayKey } from './day'
 
@@ -128,7 +129,6 @@ const asList = (v: unknown): unknown[] => (Array.isArray(v) ? v : [])
 const DAY_KEY = /^\d{4}-\d{2}-\d{2}$/
 const KNOWN_PHASES: readonly string[] = ['during_rt', 'during_chemo', 'neutropenia', 'post_op', 'survivorship']
 const KNOWN_CONDITIONS = new Set(Object.keys(CONDITION_RULES))
-const KNOWN_MEDS = new Set(MEDICATIONS.map((m) => m.id))
 const TEXT_SIZES: readonly string[] = ['normal', 'large', 'xlarge']
 
 /** 환자 설정. 바탕이 되는 값이 어긋났으면 onboarded 를 내려 다시 여쭙게 한다 */
@@ -153,13 +153,14 @@ export function restorePatient(raw: unknown): PatientContext {
     ...DEFAULT_PATIENT,
     ...(p as Partial<PatientContext>),
     cancer, phase, sex,
-    weightKg: within(p.weightKg, 20, 300, DEFAULT_PATIENT.weightKg),
-    heightCm: within(p.heightCm, 100, 230, DEFAULT_PATIENT.heightCm),
-    age: within(p.age, 1, 120, DEFAULT_PATIENT.age),
+    weightKg: within(p.weightKg, BODY_LIMITS.weightKg.min, BODY_LIMITS.weightKg.max, DEFAULT_PATIENT.weightKg),
+    heightCm: within(p.heightCm, BODY_LIMITS.heightCm.min, BODY_LIMITS.heightCm.max, DEFAULT_PATIENT.heightCm),
+    age: within(p.age, BODY_LIMITS.age.min, BODY_LIMITS.age.max, DEFAULT_PATIENT.age),
     weightLossPct: loss !== undefined && loss >= 0 && loss <= 60 ? loss : 0,
     /* 없어진 증상·약·세부 유형은 덜어 낸다 — 남은 것은 그대로 쓴다 */
     conditions: asList(p.conditions).filter((c): c is PatientContext['conditions'][number] => typeof c === 'string' && KNOWN_CONDITIONS.has(c)),
-    medications: asList(p.medications).filter((m): m is string => typeof m === 'string' && KNOWN_MEDS.has(m)),
+    /* 모르는 약은 버리고, 윗칸 없이 남은 아랫칸(레트로졸만 있고 '아로마타제 억제제' 가 없는 경우)에는 윗칸을 채운다 */
+    medications: normalizeMedications(asList(p.medications)),
     subtypes: asList(p.subtypes).filter((t): t is NonNullable<PatientContext['subtypes']>[number] => typeof t === 'string' && validSubs.has(t)),
     history: asList(p.history).filter((x): x is NonNullable<PatientContext['history']>[number] => typeof x === 'string'),
     cuisines: (() => {
@@ -246,6 +247,28 @@ export function restoreState(parsed: unknown, today: DayKey = todayKey()): AppSt
   }
 }
 
+/**
+ * 화면에서 올라온 바뀐 값을 저장하기 전에 한 번 거른다.
+ *
+ * 저장 자료를 읽을 때는 걸러 읽는데(restorePatient) 쓰는 길에는 문이 없었다. 그래서 화면 어느 한 군데가
+ * 범위 밖 값을 올리면 그대로 저장됐다가, 다음에 열 때 "잘못된 값" 으로 버려졌다 — 쓰시는 분은 고친 것이 사라진 줄 안다.
+ * 읽는 문과 같은 잣대를 쓰는 문을 쓰는 길에도 둔다. 범위 밖 값은 그 칸만 버리고 나머지는 받는다.
+ */
+export function cleanPatch(patch: Partial<PatientContext>): Partial<PatientContext> {
+  const out: Partial<PatientContext> = { ...patch }
+  const inRange = (v: unknown, lim: { min: number; max: number }) => typeof v === 'number' && Number.isFinite(v) && v >= lim.min && v <= lim.max
+  if ('weightKg' in out && !inRange(out.weightKg, BODY_LIMITS.weightKg)) delete out.weightKg
+  if ('heightCm' in out && !inRange(out.heightCm, BODY_LIMITS.heightCm)) delete out.heightCm
+  if ('age' in out && !inRange(out.age, BODY_LIMITS.age)) delete out.age
+  if ('weightLossPct' in out) {
+    const v = out.weightLossPct
+    /* 60 % 를 넘는 감소율은 잘못 친 것이다(6개월 전 체중에 300 을 넣은 경우) — 읽는 문이 0 으로 되돌리는 값이라 여기서도 받지 않는다 */
+    if (typeof v !== 'number' || !Number.isFinite(v) || v < 0 || v > 60) delete out.weightLossPct
+  }
+  if ('medications' in out) out.medications = normalizeMedications(Array.isArray(out.medications) ? out.medications : [])
+  return out
+}
+
 function load(): AppState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -320,7 +343,7 @@ export function useAppState() {
   }, [])
 
   const setPatient = useCallback((patch: Partial<PatientContext>) => {
-    setState((s) => ({ ...s, patient: { ...s.patient, ...patch } }))
+    setState((s) => ({ ...s, patient: { ...s.patient, ...cleanPatch(patch) } }))
   }, [])
 
   /**
@@ -398,8 +421,14 @@ export function useAppState() {
   const setWeight = useCallback((kg: number, forDay: DayKey = day) => {
     setState((s) => {
       const next = { ...s.weights }
-      if (kg > 0) next[forDay] = kg
-      else delete next[forDay]
+      /*
+       * 범위 안의 값만 적는다. 0 은 "그날 기록을 지운다" 는 뜻이고, 그 밖의 범위 밖 값은 없던 일로 한다 —
+       * 1000 kg 이 한 번 들어가면 그것이 '예전 체중' 이 되어 감소율이 90 % 로 계산된다.
+       * 화면에서도 막지만 여기서 한 번 더 막는다. 화면은 여러 군데고 이 문은 하나다.
+       */
+      if (kg === 0) delete next[forDay]
+      else if (Number.isFinite(kg) && kg >= BODY_LIMITS.weightKg.min && kg <= BODY_LIMITS.weightKg.max) next[forDay] = kg
+      else return s
 
       /*
        * 체중을 적으실 때마다 감소율을 다시 읽는다.

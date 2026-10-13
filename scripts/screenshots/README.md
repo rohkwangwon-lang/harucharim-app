@@ -23,8 +23,9 @@ PY
 python3 -m http.server 8791 --directory /tmp/shot-site &
 
 # 4. 찍고, 문구를 얹는다
-node scripts/screenshots/shoot.mjs      # → raw/*.png
-python3 scripts/screenshots/frame.py    # → store/*.png
+node scripts/screenshots/shoot.mjs      # → scripts/screenshots/raw/*.png
+(cd scripts/screenshots && mkdir -p store && python3 frame.py && python3 feature.py)   # → store/*.png
+cp scripts/screenshots/store/*.png docs/출시/스크린샷/
 ```
 
 ## 걸렸던 자리 — 다시 밟지 말 것
@@ -52,6 +53,6 @@ python3 scripts/screenshots/frame.py    # → store/*.png
 | `to=<문구>` | 그 문구가 화면 위쪽에 오도록 굴린다 |
 
 환자 설정은 유방암·호르몬수용체양성·항암치료 중·54 kg·오심·구토·타목시펜으로 고정한다.
-3 번 사진의 자몽 '피하세요' 는 **항암제를 쓰는 동안에만** 뜬다 (2026-10-13 부터). 이 환자는
-치료 시기가 '항암치료 중' 이라 뜨는 것이고, 타목시펜 때문이 아니다 — 항호르몬제만으로는 뜨지 않는다.
+3 번 사진의 자몽에는 '피하세요' 가 두 개 뜬다(2026-10-13 부터) — 치료 시기가 '항암치료 중' 이라 뜨는 공통 규칙과,
+타목시펜을 고르셨기 때문에 뜨는 약물 상호작용. 둘 다 근거 C 이고, 타목시펜 쪽 이유 글에는 "함께 써 본 임상 연구는 없다" 가 적혀 있다.
 환자 설정에서 치료 시기를 바꾸면 3 번 사진이 비게 되니, 바꿀 때는 이 사진부터 다시 볼 것.

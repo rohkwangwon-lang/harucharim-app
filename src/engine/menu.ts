@@ -4,6 +4,7 @@ import { CURATED_FOODS, FOOD_BY_ID, isAnchorDish, isIngredientOnly, mealIsComple
 import { INGREDIENT_DISHES } from '../data/foods/ingredientDishes'
 import { CANCER_BY_ID } from '../data/cancers'
 import { activeInteractions, activeRules, evaluateFood, type RuleHit, type InteractionHit } from './rules'
+import { mealTimingFor } from '../data/interactions'
 import { addTotals, dosingWeight, effectiveLossPct, foodContribution, microTargets, personalTarget, type MicroTarget, type NutrientTotals } from './nutrition'
 
 export type { MealSlot }
@@ -3400,6 +3401,9 @@ export function dayNotes(
   const naLimit = profile.target.naLimit ?? 2000
   const notes: DayNote[] = []
 
+  /* 식사와 얽힌 복용법 — 식단을 보는 자리에서 함께 보여 드린다(자이티가는 빈속, 뉴베카는 음식과 함께) */
+  for (const t of mealTimingFor(patient.medications)) notes.push({ tone: 'info', topic: '약 드시는 때', text: t.text })
+
   const kcal = totals.kcal ?? 0
   const protein = totals.protein ?? 0
   const na = totals.na ?? 0
@@ -3434,6 +3438,13 @@ export function dayNotes(
   } else if (kcal > target.kcal[1] * 1.15) {
     notes.push({ tone: 'over', topic: '에너지',
       text: `목표 상단(${target.kcal[1]} kcal)을 넘습니다. 치료 중이라면 문제가 아닐 수 있으나, 체중 관리기라면 조정이 필요합니다.` })
+  } else if (Math.round(kcal) > target.kcal[1]) {
+    /*
+     * 목표를 넘었으면 넘었다고 적는다. 15 % 까지는 맞춘 것으로 보지만, 그렇다고 "범위에 들어옵니다" 라고 하면 틀린 말이다 —
+     * 1,701 kcal 을 두고 "목표 범위(1,416~1,616 kcal)에 들어옵니다" 라고 적고 있었다(2026-10-13, 화면을 눈으로 보다 찾음).
+     */
+    notes.push({ tone: 'good', topic: '에너지',
+      text: `${Math.round(kcal)} kcal — 목표(${target.kcal[0]}~${target.kcal[1]} kcal)를 ${Math.round(kcal) - target.kcal[1]} kcal 넘습니다. 이 정도 차이는 맞추신 것으로 봅니다.` })
   } else {
     notes.push({ tone: 'good', topic: '에너지',
       text: `${Math.round(kcal)} kcal — 목표 범위(${target.kcal[0]}~${target.kcal[1]} kcal)에 들어옵니다.` })
@@ -3494,6 +3505,11 @@ export function dayNotes(
       notes.push({ tone: 'over', topic: '식이섬유',
         text: `${Math.round(fiber)} g 입니다. 지금은 잔사를 줄여야 하는 시기라 ` +
           `${goal.range[0]}~${goal.range[1]} g 정도가 적당합니다. 거친 나물·통곡·생채소를 줄여 보세요.` })
+    } else if (Math.round(fiber) < goal.range[0]) {
+      /* 아래로 벗어난 것을 "안에 있습니다" 라고 적고 있었다 — 5 g 을 두고 "목표(8~15 g) 안". 이 시기에는 적은 것이 문제가 아니므로 그렇게 적는다 */
+      notes.push({ tone: 'good', topic: '식이섬유',
+        text: `${Math.round(fiber)} g — 설사·장루가 있는 동안에는 ${goal.range[1]} g 을 넘기지 않는 것이 목표이고, 지금은 그보다 적습니다. ` +
+          '이 시기에는 섬유를 늘리는 것이 목표가 아닙니다.' })
     } else {
       notes.push({ tone: 'good', topic: '식이섬유',
         text: `${Math.round(fiber)} g — 설사·장루가 있는 동안의 목표(${goal.range[0]}~${goal.range[1]} g) 안에 있습니다. ` +
@@ -3502,6 +3518,9 @@ export function dayNotes(
   } else if (fiber < goal.range[0]) {
     notes.push({ tone: 'low', topic: '식이섬유',
       text: `${Math.round(fiber)} g 으로 목표(${goal.range[0]}~${goal.range[1]} g)에 못 미칩니다.` })
+  } else if (Math.round(fiber) > goal.range[1]) {
+    /* 넘었으면 "안에 있습니다" 가 아니다. 에너지와 같은 종류의 틀린 말이었다 */
+    notes.push({ tone: 'good', topic: '식이섬유', text: `${Math.round(fiber)} g — 목표(${goal.range[0]}~${goal.range[1]} g)를 채우고 넘었습니다.` })
   } else {
     notes.push({ tone: 'good', topic: '식이섬유', text: `${Math.round(fiber)} g — 목표(${goal.range[0]}~${goal.range[1]} g) 안에 있습니다.` })
   }

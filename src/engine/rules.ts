@@ -173,7 +173,10 @@ export function activeInteractions(patient: PatientContext): InteractionHit[] {
     const meds = i.alsoTaking.medications ?? [], conds = i.alsoTaking.conditions ?? []
     return meds.some((m) => patient.medications.includes(m)) || conds.some((c) => patient.conditions.includes(c))
   }
-  return INTERACTIONS.filter((i) => patient.medications.includes(i.agent) && also(i)).map((i) => ({
+  /* 더 자세한 약을 고르셨으면, 윗칸에 붙여 둔 "어느 약인지에 따라 다릅니다" 는 내지 않는다 */
+  const unless = (i: (typeof INTERACTIONS)[number]) =>
+    !i.unlessTaking || !i.unlessTaking.some((m) => patient.medications.includes(m))
+  return INTERACTIONS.filter((i) => patient.medications.includes(i.agent) && also(i) && unless(i)).map((i) => ({
     interaction: i,
     medicationName: i.agent
   }))
@@ -235,6 +238,22 @@ export function evaluateFood(
   const hits = covered.size ? shown.filter((h) => !covered.has(h.rule.id)) : shown
 
   return { food, level, hits, interactions }
+}
+
+/**
+ * 이 음식 옆에 바로 보여 줄 "어떻게 드시면 되는가" — 걸린 규칙이 적어 둔 한 줄들.
+ *
+ * 이유 글은 눌러야 펴진다. "씻어서 드세요", "데워서 드세요" 는 그 음식을 보는 자리에서 바로 보여야 한다.
+ * 화면 세 군데(추천 식단·내 식단·음식 상세)가 이 함수 하나를 쓴다 — 한 군데만 빠지는 일이 없게.
+ * '피하세요' 인 음식에는 피하라는 규칙의 안내만 남긴다("씻어서 드세요" 와 "피하세요" 가 나란히 붙지 않게).
+ */
+export function howToLines(verdict: FoodVerdict): string[] {
+  const from = [
+    ...verdict.hits.map((h) => ({ level: h.rule.level, text: h.rule.howTo })),
+    ...verdict.interactions.map((h) => ({ level: h.interaction.level, text: h.interaction.howTo }))
+  ].filter((x): x is { level: RuleLevel; text: string } => !!x.text)
+  const kept = verdict.level === 'avoid' ? from.filter((x) => x.level === 'avoid') : from
+  return [...new Set(kept.map((x) => x.text))]
 }
 
 export interface SupplementVerdict {

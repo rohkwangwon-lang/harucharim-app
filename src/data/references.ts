@@ -288,6 +288,36 @@ export const REFERENCES: Reference[] = [
   { id: 'capecitabine-warfarin', kind: 'review', year: 2001,
     citation: 'Copur MS, et al. An adverse interaction between warfarin and capecitabine: a case report and review of the literature. Clin Colorectal Cancer. 2001;1(3):182-184. (증례 2건 — 병용 6주 뒤 INR 10 초과·위장관 출혈)',
     url: 'https://doi.org/10.3816/CCC.2001.n.019' },
+  /*
+   * 항호르몬제와 음식 — 2026-10-13 에 원문을 받아 확인한 것들.
+   * 약품 설명서는 DailyMed 의 SPL 을 받아 낱말을 세었다('grapefruit' 0건).
+   * 암 약물 상호작용 자료는 2022-06 에 갱신이 멈춘 보관본이다 — 그 사실을 인용에 적는다.
+   */
+  { id: 'cdi-liverpool', kind: 'db', year: 2022,
+    citation: 'Radboud UMC · University of Liverpool. Cancer Drug Interactions (2022년 6월 보관본). — 자몽주스: 타목시펜 "Do Not Coadminister", 레트로졸 "Potential Interaction(권장하지 않음)", 아팔루타미드·엔잘루타미드 "Potential Weak Interaction", 아비라테론 "No Interaction Expected". 세인트존스워트: 타목시펜·아비라테론·엔잘루타미드 "Do Not Coadminister", 레트로졸·아팔루타미드 "Potential Interaction". 근거의 질은 모두 Very Low~Low 이며 요약은 "함께 쓴 연구는 없다" 로 시작한다. 아나스트로졸·엑스메스탄·비칼루타미드·고세렐린·류프로렐린·다롤루타미드는 항목이 없다.',
+    url: 'https://cancer-druginteractions.org/checker' },
+  { id: 'bccancer-tamoxifen', kind: 'db', year: 2024,
+    citation: 'BC Cancer Drug Manual. Tamoxifen monograph (2024년 5월 1일 개정). — "자몽주스는 장에서 타목시펜의 CYP3A4 대사를 억제해 혈중 농도를 올릴 수 있다. 활성 대사물로 덜 바뀌는 것의 임상적 의미는 알려져 있지 않다."',
+    url: 'https://www.bccancer.bc.ca/drug-database-site/Drug%20Index/Tamoxifen_monograph.pdf' },
+  { id: 'fda-label-tamoxifen', kind: 'guideline', year: 2021,
+    citation: 'SOLTAMOX (tamoxifen citrate) 미국 허가사항. DailyMed. — 강한 CYP3A4 유도제와 함께 쓰지 말 것(리팜핀이 타목시펜 AUC 를 86 % 낮춤). 음식은 흡수에 영향을 주지 않는다. 자몽에 관한 언급은 없다.',
+    url: 'https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=1e6ff055-590c-41e6-9530-1fdf04cdbd02' },
+  { id: 'fda-label-ai', kind: 'guideline', year: 2026,
+    citation: 'FEMARA (letrozole) · ARIMIDEX (anastrozole) · AROMASIN (exemestane) 미국 허가사항. DailyMed. — 엑스메스탄: 식후 복용. CYP3A4 유도제(리팜피신·페니토인·세인트존스워트 등)가 노출을 크게 낮출 수 있다. 케토코나졸(강한 CYP3A4 억제제)은 엑스메스탄 약동학에 의미 있는 영향이 없었다. 아나스트로졸: 에스트로겐이 든 제제·타목시펜과 함께 쓰지 말 것, 음식과 무관하게 복용. 세 약 모두 자몽에 관한 언급은 없다.',
+    url: 'https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=cf066b7a-032a-416c-8d40-15ba581423e3' },
+  { id: 'fda-label-adt', kind: 'guideline', year: 2026,
+    citation: 'CASODEX (bicalutamide) · ZOLADEX (goserelin) · LUPRON DEPOT (leuprolide) 미국 허가사항. DailyMed. — 비칼루타미드: 음식은 흡수에 의미 있는 영향이 없다. 졸라덱스: 다른 약과의 상호작용이 확인된 바 없다. 세 약 모두 자몽에 관한 언급은 없다.',
+    url: 'https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=dfee4fe7-8478-4a3e-925d-00be3cd0ab67' },
+  { id: 'fda-label-arpi', kind: 'guideline', year: 2026,
+    citation: 'ZYTIGA (abiraterone) · XTANDI (enzalutamide) · ERLEADA (apalutamide) · NUBEQA (darolutamide) 미국 허가사항. DailyMed. — 자이티가: 빈속에 복용(복용 전 2시간·후 1시간 금식), 음식과 함께 먹으면 AUC 가 저지방식에서 약 5배, 고지방식에서 약 10배. 뉴베카: 음식과 함께 복용. 엑스탄디·얼리다: 음식과 무관. 자이티가·엑스탄디는 강한 CYP3A4 유도제를, 뉴베카는 P-gp·CYP3A4 유도제를 피할 것. 네 약 모두 자몽에 관한 언급은 없다.',
+    url: 'https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4e338e89-3cf2-48eb-b6e2-a06c608c6513' },
+  /* 16명의 약동학 연구다(무작위배정 아님) — 'C' 까지만 달 수 있도록 cohort 로 둔다 */
+  { id: 'hussaarts2019', kind: 'cohort', year: 2019,
+    citation: 'Hussaarts KGAM, et al. Impact of curcumin (with or without piperine) on the pharmacokinetics of tamoxifen. Cancers. 2019;11(3):403. (16명 · 커큐민 하루 3.6 g: 엔독시펜 AUC −7.7 %, 95 % CI −15.4~0.7 · 피페린을 더하면 −12.4 %, −21.9~−1.9)',
+    url: 'https://doi.org/10.3390/cancers11030403' },
+  { id: 'cdc-listeria', kind: 'guideline', year: 2025,
+    citation: 'U.S. CDC. Preventing Listeria Infection (2025년 1월 31일). — 면역이 약한 사람은 "데우지 않은 델리 미트·콜드컷·핫도그·발효 또는 건조 소시지" 를 피하고, 74 ℃(165 °F) 또는 김이 날 때까지 다시 데운 것을 고를 것. 냉장 훈제 생선도 같다.',
+    url: 'https://www.cdc.gov/listeria/prevention/index.html' },
   { id: 'sjw-interaction', kind: 'rct', year: 2002,
     citation: 'Mathijssen RH, et al. Effects of St. John\'s wort on irinotecan metabolism. J Natl Cancer Inst. 2002;94(16):1247-1249. (환자 5명 무작위배정 교차설계 · SN-38 농도 42 % 감소, 95 % CI 14~70 %)',
     url: 'https://doi.org/10.1093/jnci/94.16.1247' },

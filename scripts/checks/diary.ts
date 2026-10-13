@@ -82,6 +82,9 @@ for (let i = 0; i < 3000; i++) {
   if (!Number.isFinite(s.kcal) || s.kcal < 0) bad('요약 열량 이상', String(s.kcal))
   if (!Number.isFinite(s.na) || s.na < 0) bad('요약 나트륨 이상', String(s.na))
   if (!s.note?.trim()) bad('요약 한 줄 평 없음', s.grade)
+  /* "목표 범위에 들어옵니다" 라고 했으면 정말 범위 안이어야 한다 — 15 % 넘은 날까지 그렇게 적고 있었다(2026-10-13) */
+  if (s.note === '목표 범위에 들어옵니다' && s.target && (s.kcal < s.target.kcal[0] || s.kcal > s.target.kcal[1] || s.protein < s.target.protein[0]))
+    bad('"목표 범위에 들어옵니다" 인데 범위 밖', `${s.kcal} kcal (${s.target.kcal.join('~')}) · 단백질 ${s.protein} g (${s.target.protein[0]} 이상)`)
   // 등급과 숫자가 어긋나면 안 된다
   if (s.grade === 'none' && s.kcal > 0) bad('기록없음인데 열량 있음', String(s.kcal))
 }

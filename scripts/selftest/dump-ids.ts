@@ -19,6 +19,8 @@ process.stdout.write(JSON.stringify({
   foodNames: every(FOODS, 40).map((f) => f.name.slice(0, 6)),
   supplements: SUPPLEMENTS.map((s) => s.id),
   medications: MEDICATIONS.map((m) => m.id),
+  /* 아랫칸 약과 그 윗칸 — 화면 시험이 "윗칸 없이 남은 약" 을 볼 때 쓴다 */
+  medParents: MEDICATIONS.filter((m) => m.parent).map((m) => [m.id, m.parent]),
   conditions: Object.keys(CONDITION_RULES),
   cancers: CANCERS.map((c) => c.id),
   subtypes: Object.fromEntries(Object.entries(SUBTYPE_OPTIONS as Record<string, { id: string }[]>).map(([k, v]) => [k, v.map((x) => x.id)])),

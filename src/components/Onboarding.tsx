@@ -10,7 +10,8 @@ import { today } from '../lib/day'
 import { confirmAdult, isAdultConfirmed } from '../lib/ageGate'
 import type { CancerId, Cuisine, PatientCondition, PatientContext, Phase, TreatmentHistory } from '../data/types'
 import { SUBTYPE_OPTIONS } from '../data/types'
-import { Credentials } from './ui'
+import { Credentials, NumberField } from './ui'
+import { BODY_LIMITS } from '../lib/bodyInput'
 import { CANCERS, CANCER_BY_ID } from '../data/cancers'
 import { nutritionRisk, personalTarget } from '../engine/nutrition'
 
@@ -338,9 +339,12 @@ export function Onboarding({
             desc="열량과 단백질 목표는 체중을 기준으로 계산합니다. 정확하지 않아도 대략 넣으시면 됩니다."
           >
             <div className="card grid grid-cols-2 gap-3 p-4">
-              <Field label="체중 (kg)" value={patient.weightKg} onChange={(v) => onChange({ weightKg: v })} />
-              <Field label="신장 (cm)" value={patient.heightCm} onChange={(v) => onChange({ heightCm: v })} />
-              <Field label="나이" value={patient.age} onChange={(v) => onChange({ age: v })} />
+              <NumberField label="체중 (kg)" value={patient.weightKg} limit={BODY_LIMITS.weightKg} unit="kg"
+                onCommit={(v) => onChange({ weightKg: v })} />
+              <NumberField label="신장 (cm)" value={patient.heightCm} limit={BODY_LIMITS.heightCm} unit="cm"
+                onCommit={(v) => onChange({ heightCm: v })} />
+              <NumberField label="나이" value={patient.age} limit={BODY_LIMITS.age} unit="세" integer
+                onCommit={(v) => onChange({ age: v })} />
               <div>
                 <label className="label">성별</label>
                 <div className="flex gap-1.5">
@@ -728,13 +732,8 @@ function WeightBefore({
 
   return (
     <div>
-      <label className="label" htmlFor="weight-before">6개월 전 몸무게 (kg)</label>
-      <input
-        id="weight-before"
-        type="number" inputMode="decimal" className="input"
-        value={before}
-        onChange={(e) => apply(Number(e.target.value) || 0)}
-      />
+      <NumberField id="weight-before" label="6개월 전 몸무게 (kg)" value={before}
+        limit={BODY_LIMITS.weightKg} unit="kg" onCommit={apply} />
       <p className="mt-1 text-[11px] text-stone-400">
         {lost > 0
           ? <><strong className="text-stone-600">{lost} kg 줄어 {pct} %</strong> 입니다. 목표 열량을 여기에 맞춰 잡습니다.</>
@@ -744,19 +743,6 @@ function WeightBefore({
   )
 }
 
-function Field({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
-  return (
-    <div>
-      <label className="label">{label}</label>
-      <input
-        aria-label={label}
-        type="number" inputMode="decimal" className="input"
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value) || 0)}
-      />
-    </div>
-  )
-}
 
 /** 마지막 단계에서 "그래서 뭐가 달라지는데?"에 답한다 */
 function Preview({ patient }: { patient: PatientContext }) {

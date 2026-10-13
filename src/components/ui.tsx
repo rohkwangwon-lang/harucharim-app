@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { parseInRange, rangeHint } from '../lib/bodyInput'
 import type { ReactNode } from 'react'
 import type { EvidenceLevel, RuleLevel } from '../data/types'
 import { REF_BY_ID } from '../data/references'
@@ -352,6 +353,80 @@ export function NutrientPanel({
  * 나란히 같은 무게로 보였다. 여러 줄이 늘어서면 무엇이 문제인지 다 읽어야 알 수 있었다.
  * 왼쪽 색띠와 제목으로 성격을 먼저 드러내고, 문제부터 위로 올린다.
  */
+/**
+ * 숫자를 받는 칸 — 범위 안의 값만 저장한다.
+ *
+ * 치는 동안의 글자(draft)와 저장된 값(value)을 따로 둔다. "170" 을 치는 도중의 "1"·"17" 은 범위 밖이라
+ * 저장하지 않고, 범위 안에 들어온 순간에만 onCommit 을 부른다. 범위 밖 글자가 남은 채 칸을 떠나면 저장된 값으로 돌려 놓는다.
+ * 잣대는 lib/bodyInput.ts 한 곳에 있다.
+ */
+export function NumberField({
+  label, value, limit, unit, integer = false, onCommit, id
+}: {
+  label: string
+  value: number
+  limit: { min: number; max: number }
+  unit: string
+  integer?: boolean
+  onCommit: (v: number) => void
+  id?: string
+}) {
+  const [draft, setDraft] = useState(() => String(value))
+  /*
+   * 바깥에서 값이 바뀌면(다른 화면에서 고쳤거나 불러왔을 때) 칸도 따라간다 — 치고 있는 글자가 같은 숫자면 건드리지 않는다.
+   * 효과(useEffect)로 하지 않고 그리는 도중에 맞춘다. 효과로 하면 낡은 글자가 한 번 그려졌다가 바뀐다.
+   */
+  const [seen, setSeen] = useState(value)
+  if (seen !== value) {
+    setSeen(value)
+    if (parseInRange(draft, limit, integer) !== value) setDraft(String(value))
+  }
+  const parsed = parseInRange(draft, limit, integer)
+  const invalid = draft.trim() !== '' && parsed === null
+  return (
+    <div>
+      <label className="label" htmlFor={id}>{label}</label>
+      <input
+        id={id}
+        aria-label={label}
+        aria-invalid={invalid || undefined}
+        type="text" inputMode={integer ? 'numeric' : 'decimal'}
+        className={`input ${invalid ? 'border-warn-500' : ''}`}
+        value={draft}
+        onChange={(e) => {
+          const t = e.target.value
+          setDraft(t)
+          const n = parseInRange(t, limit, integer)
+          if (n !== null && n !== value) onCommit(n)
+        }}
+        onBlur={() => { if (parseInRange(draft, limit, integer) === null) setDraft(String(value)) }}
+      />
+      {invalid && <p className="mt-1 text-[11px] text-warn-700">{rangeHint(limit, unit)}</p>}
+    </div>
+  )
+}
+
+/**
+ * 어떻게 드시면 되는가 — 음식 이름 바로 아래에 붙는 한 줄.
+ *
+ * 호중구가 낮은 분의 식단에 사과가 오르면 "흐르는 물에 씻어서 드세요" 가 그 자리에서 보여야 한다
+ * (2026-10-13 전문의 지시). 이유 글 안에만 있으면 눌러 보지 않는 한 읽지 못한다.
+ * 문장은 규칙이 적어 둔 것을 그대로 받는다(engine/rules.ts 의 howToLines) — 여기서 지어내지 않는다.
+ */
+export function HowTo({ lines }: { lines: string[] }) {
+  if (lines.length === 0) return null
+  return (
+    <ul className="mt-1 space-y-0.5" data-howto>
+      {lines.map((t) => (
+        <li key={t} className="flex gap-1 text-[11px] leading-snug text-brand-800">
+          <span aria-hidden className="shrink-0">→</span>
+          <span className="min-w-0">{t}</span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 export function DayNoteList({
   notes
 }: {

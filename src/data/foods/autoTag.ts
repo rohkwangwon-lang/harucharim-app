@@ -164,7 +164,12 @@ const VITK_NOT = /과자|쿠키|칩|스낵|캔디|사탕|젤리|빵|케이크|�
  * '소세지'(철자), 페퍼로니, 하몽·프로슈토·잠봉(생햄)이 빠져 있었다 — 페퍼로니 샌드위치와
  * 소세지빵이 아무 표시 없이 지나갔다. 생햄은 날것이기도 하지만 그 판단은 여기서 하지 않는다.
  */
-const CURED = /햄(?!버거)|소시지|소세지|쏘시지|쏘세지|베이컨|살라미|페퍼로니|프랑크|비엔나(?!커피)|스팸|런천미트|초리조|파스트라미|프로슈토|하몽|잠봉|판체타|육포|핫도그/
+/*
+ * 훈제오리를 2026-10-13 에 넣었다. IARC 는 가공육을 "염장·경화·발효·훈연 등으로 가공한 고기" 로 정의하고
+ * 가금류도 포함된다고 적는다. 받아 온 자료의 훈제오리 160여 종에는 아무 태그가 없어 표시 없이 지나갔다.
+ * 훈제 닭가슴살까지 넓히지는 않았다 — 정해 주신 범위(살라미·건조 소시지·훈제오리)가 아니다.
+ */
+const CURED = /햄(?!버거)|소시지|소세지|쏘시지|쏘세지|베이컨|살라미|페퍼로니|프랑크|비엔나(?!커피)|스팸|런천미트|초리조|파스트라미|프로슈토|하몽|잠봉|판체타|육포|핫도그|훈제\s*오리|오리\s*훈제/
 /* 과자·향·시즈닝과 식물성 대체품은 가공육이 아니다 — 하몽 크래커, 페퍼로니맛 감자칩, 비건 소세지 */
 const CURED_NOT = /햄버거|비엔나커피|햄스터|크래커|비스킷|감자칩|포테토칩|스낵|생강청|시즈닝|비건|식물성|베지|향$/
 
@@ -239,12 +244,32 @@ export function autoTags(name: string): FoodTag[] {
  */
 const NO_FIBER_PRAISE = new Set<string>(['육류', '가금류·난류'])
 
+/* ── 날로 먹는 과일·채소 ─────────────────────────────────────
+ *
+ * 막으려는 것이 아니라 "씻어서 드세요" 를 함께 보여 주려는 태그다(types.ts 의 '생채소과일').
+ * 받아 온 과일·채소는 이름 끝에 상태가 적혀 있다 — '생것' 456종, '데친것' 118종, '말린것' 66종.
+ * 샐러드·겉절이는 군이 제각각이라(가공식품 2,400여 종) 이름으로 본다.
+ * 감자·달걀·마카로니 샐러드처럼 익혀 으깬 것, 드레싱·토핑, 샐러드 맛 과자와 빵은 날채소가 아니다.
+ */
+const PRODUCE_GROUPS = new Set<string>(['과일', '채소'])
+const RAW_STATE = /생것|숙과/
+const RAW_DISH = /샐러드|겉절이|쌈\s*채소|모[둠듬]\s*쌈|컵\s*과일|과일\s*컵|생과일|조각\s*과일/
+const RAW_DISH_NOT = /드레싱|소스|시즈닝|토핑|크루통|과자|칩|스낵|쿠키|빵|번$|샌드|버거|피자|김밥|파스타|김치|샐러드\s*바|밥바|한\s*알|마카로니|감자|고구마|단호박|에그|계란|달걀|참치|맛살|크래미|음료|주스|쥬스|젤리|맛$|향$|가루|분말|건조|말린|동결|유$|오일|마요|스프레드|통조림|병조림|볶음|구이|튀김/
+const NOT_PRODUCE_GROUPS = new Set<string>(['유지·당류', '음료', '간식·디저트', '우유·유제품', '외식·프랜차이즈'])
+
+function rawProduce(name: string, group?: string): boolean {
+  if (!group || NOT_PRODUCE_GROUPS.has(group)) return false
+  if (PRODUCE_GROUPS.has(group) && RAW_STATE.test(name)) return true
+  return RAW_DISH.test(name) && !RAW_DISH_NOT.test(name)
+}
+
 /** 이미 있는 태그에 자동 태그를 합친다. 군을 주면 그 군에 맞지 않는 태그를 덜어 낸다 */
 export function withAutoTags(name: string, tags: FoodTag[], group?: string): FoodTag[] {
   const kept = group && NO_FIBER_PRAISE.has(group)
     ? tags.filter((t) => t !== ('고식이섬유' as FoodTag))
     : tags
   const extra = autoTags(name).filter((t) => !kept.includes(t))
+  if (rawProduce(name, group) && !kept.includes('생채소과일' as FoodTag)) extra.push('생채소과일' as FoodTag)
   return extra.length ? [...kept, ...extra] : kept
 }
 

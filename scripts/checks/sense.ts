@@ -26,7 +26,7 @@ import { COMMON_RULES } from '../../src/data/commonRules'
 import { CONDITION_RULES } from '../../src/data/conditionRules'
 import { CANCERS } from '../../src/data/cancers'
 import { MEDICATIONS } from '../../src/data/interactions'
-import { evaluateFood, activeRules, activeInteractions } from '../../src/engine/rules'
+import { evaluateFood, activeRules, activeInteractions, howToLines } from '../../src/engine/rules'
 import { foodContribution, personalTarget } from '../../src/engine/nutrition'
 import { buildDayMenu } from '../../src/engine/menu'
 import { DEFAULT_PATIENT } from '../../src/lib/store'
@@ -177,7 +177,7 @@ const CONTEXT: { word: RegExp; name: string; ok: (p: PatientContext) => boolean 
   { name: '당뇨', word: /당뇨/, ok: (p) => has(p, '당뇨') },
   { name: '삼킴', word: /삼키|연하/, ok: (p) => has(p, '연하곤란') || p.cancer === 'esophagus' || p.cancer === 'headneck' },
   { name: '스테로이드', word: /스테로이드/, ok: (p) => p.medications.includes('steroid') },
-  { name: '항호르몬제', word: /타목시펜|아로마타제|안드로겐 차단|ADT/, ok: (p) => p.medications.some((m) => ['tamoxifen', 'ai', 'adt'].includes(m)) || hist(p, '항호르몬치료') }
+  { name: '항호르몬제', word: /타목시펜|아로마타제|안드로겐 차단|ADT/, ok: (p) => p.medications.some((m) => ['tamoxifen', 'ai', 'adt'].includes(m) || m.startsWith('ai-') || m.startsWith('adt-')) || hist(p, '항호르몬치료') }
 ]
 {
   const fired = new Map<string, { title: string; level: string; ctx: string; total: number; off: number; ex: string }>()
@@ -433,6 +433,38 @@ const CURED_NOT = /(향|과자|스낵|칩|크래커|비스킷|시즈닝|소스|�
   }
   lap(`식단 — ${days.toLocaleString()}일 · 음식 ${items.toLocaleString()}건을 이름으로 다시 봄`)
   if (items < days * 5) hard.push(`식단 검사가 헛돎 — 하루 평균 ${(items / Math.max(1, days)).toFixed(1)}건`)
+}
+
+/* ════ 6-1. 데워서 · 씻어서 — 2026-10-13 전문의 지시 ══════════════════
+ *
+ * 살라미·건조 소시지·훈제오리는 호중구가 낮은 동안 '주의' 와 "데워서". 생과일·생채소는 "씻어서" 를 반드시 함께.
+ * 이름으로 찾아 29만 종에서 본다(내장 자료만 보면 받아 온 것의 구멍을 못 본다).
+ */
+{
+  const neut = person({ cancer: 'lung', phase: 'neutropenia', conditions: [], medications: [], subtypes: [] })
+  const DELI = /살라미|초리조|페퍼로니|훈제\s*오리|오리\s*훈제/
+  const DELI_NOT = /향|맛$|맛\s|비건|식물성|스낵|과자|칩|시즈닝|소스|크래커/
+  let deli = 0, deliOk = 0
+  for (const f of ALL) {
+    if (!DELI.test(f.name) || DELI_NOT.test(f.name)) continue
+    deli++
+    const v = evaluateFood(f, neut, 1)
+    if (v.level === 'avoid' || (v.level === 'caution' && howToLines(v).some((t) => /데워/.test(t)))) deliOk++
+    else note('호중구감소 시기인데 살라미·건조 소시지·훈제오리에 "데워서" 가 없음', `${f.name} [${f.group}] → ${v.level ?? '표시 없음'}`)
+  }
+  if (deli < 300) hard.push(`데워 먹기 이름 검사가 헛돎 — ${deli}종`)
+  if (deliOk / Math.max(1, deli) < 0.97) hard.push(`살라미·훈제오리에 주의·데워서가 안 붙은 것이 많음 — ${deliOk}/${deli}`)
+  /* 받아 온 과일·채소의 '생것' — 피하세요가 아닌 한 씻는 방법이 붙어야 한다 */
+  let prod = 0, prodOk = 0
+  for (const f of ALL) {
+    if (!((f.group === '과일' || f.group === '채소') && /생것/.test(f.name))) continue
+    prod++
+    const v = evaluateFood(f, neut, 1)
+    if (v.level === 'avoid' || howToLines(v).some((t) => /씻/.test(t))) prodOk++
+    else hard.push(`호중구감소 시기인데 생과일·생채소에 섭취 방법이 없음: ${f.name}`)
+  }
+  if (prod < 300) hard.push(`섭취 방법 이름 검사가 헛돎 — ${prod}종`)
+  lap(`데워서·씻어서 — 살라미·훈제오리 ${deliOk}/${deli} · 받아 온 생과일·생채소 ${prodOk}/${prod}`)
 }
 
 /* ════ 6-2. 와파린과 낫토·청국장 — '주의' 로 정해짐 ═════════════════

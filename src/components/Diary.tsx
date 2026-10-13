@@ -11,6 +11,7 @@ import { FOOD_BY_ID } from '../data/foods'
 import { GRADE_STYLE, reportNutrients, summarizeDay, summarizePeriod } from '../engine/dayScore'
 import { sumIntake } from '../engine/nutrition'
 import { DayNoteList, NutrientReportList, Section, ShortfallAdviceList, Stat } from './ui'
+import { BODY_LIMITS, parseInRange, rangeHint } from '../lib/bodyInput'
 import { adviseForShortfall } from '../engine/supplementAdvice'
 import { MEAL_SLOTS } from '../data/types'
 
@@ -174,6 +175,7 @@ function DayView({
   const s = summarizeDay(items, patient, supps)
   const st = GRADE_STYLE[s.grade]
   const [w, setW] = useState(weight ? String(weight) : '')
+  const wBad = String(w).trim() !== '' && parseInRange(String(w), BODY_LIMITS.weightKg) === null
 
   const byMeal = MEAL_SLOTS.map((m) => ({
     meal: m,
@@ -207,16 +209,20 @@ function DayView({
         <div className="card flex items-center gap-2 p-3.5">
           <input
             aria-label="체중 (kg)"
-            type="number" inputMode="decimal" className="input flex-1"
+            aria-invalid={wBad || undefined}
+            type="text" inputMode="decimal" className={`input flex-1 ${wBad ? 'border-warn-500' : ''}`}
             placeholder="예: 58.5"
             value={w}
             onChange={(e) => setW(e.target.value)}
           />
           <span className="text-sm text-stone-500">kg</span>
-          <button className="btn-primary py-2 text-xs" onClick={() => onSetWeight(Number(w) || 0)}>
+          {/* 빈칸으로 누르면 그날 기록을 지운다. 범위 밖 값은 저장하지 않는다 — 1000 kg 이 한 번 들어가면 감소율 계산이 통째로 틀어진다 */}
+          <button className="btn-primary py-2 text-xs" disabled={wBad}
+            onClick={() => onSetWeight(String(w).trim() === '' ? 0 : (parseInRange(String(w), BODY_LIMITS.weightKg) ?? 0))}>
             기록
           </button>
         </div>
+        {wBad && <p className="mt-1 text-[11px] text-warn-700">{rangeHint(BODY_LIMITS.weightKg, 'kg')}</p>}
       </Section>
 
       <Section title="그날 식단" right={

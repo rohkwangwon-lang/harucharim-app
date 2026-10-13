@@ -31,6 +31,22 @@ import { CHINESE_MORE, WORLD_FOODS } from './worldMore'
 import { CUISINE_MAP, SEASON_MAP } from './seasonCuisine'
 import { GENERATED_CORE } from './generated'
 
+/**
+ * 날로 먹는 과일·채소에 '생채소과일' 을 붙인다.
+ *
+ * 손으로 등록한 것에는 '생식'(날로 먹는 것)이 이미 붙어 있다 — 사과·상추·무생채·쌈밥. 그 가운데 식물성인 것이 대상이다.
+ * 육회·날달걀·회에도 '생식' 이 붙어 있으므로 동물성 군과 외식 메뉴는 뺀다(그쪽은 호중구가 낮으면 '피하세요' 다).
+ *
+ * 바나나·아보카도·라임에는 '생식' 이 없다. 껍질을 벗겨 먹는 것이라 예전에는 빼 두었는데,
+ * FDA 지침은 "껍질을 먹지 않는 것도 씻으라" 고 한다. 그래서 여기서 더한다.
+ */
+const NOT_PRODUCE = new Set<FoodGroup>(['육류', '가금류·난류', '어패류', '우유·유제품', '외식·프랜차이즈'])
+const PEELED_FRESH = new Set(['banana', 'avocado', 'lime'])
+function withProduceTag(f: Food): FoodTag[] {
+  const raw = (f.tags.includes('생식') && !NOT_PRODUCE.has(f.group)) || PEELED_FRESH.has(f.id)
+  return raw && !f.tags.includes('생채소과일') ? [...f.tags, '생채소과일'] : f.tags
+}
+
 /** 손으로 검토해 태그를 붙인 식품. 검색에서 먼저 보여 준다. */
 /**
  * '고나트륨' 을 실제로 드시는 양으로 다시 매긴다.
@@ -68,7 +84,7 @@ export const CURATED_FOODS: Food[] = [
 ].map((f) => ({
   // 제철·요리 계통은 seasonCuisine.ts 한 곳에서 관리하고 여기서 붙인다
   ...f,
-  tags: withSodiumTag(f),
+  tags: withProduceTag({ ...f, tags: withSodiumTag(f) }),
   season: f.season ?? SEASON_MAP[f.id],
   cuisine: f.cuisine ?? CUISINE_MAP[f.id] ?? '한식'
 }))

@@ -7,12 +7,13 @@ import { FOOD_BY_ID } from '../data/foods'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
 import { CANCER_BY_ID } from '../data/cancers'
 import { buildDayMenu, currentSeason, dayNotes, fiberGoal, ideasFromIngredients, intakeTrend, microUnknownNames, naUnknownNames, planNotes, recentFoods } from '../engine/menu'
-import { evaluateSelection } from '../engine/rules'
+import { evaluateFood, evaluateSelection, howToLines } from '../engine/rules'
 import { foodContribution, observedWeightGain, personalTarget, sumIntake, targetNotes } from '../engine/nutrition'
 import { BASE_EXERCISE, CONDITION_EXERCISE_NOTES, EXERCISE_BY_CANCER, INTAKE_EXERCISE_ADVICE } from '../data/exercise'
 import { REF_BY_ID } from '../data/references'
-import { ChipGroup, DayNoteList, EvidenceBadge, LevelBadge, NutrientPanel, NutrientRow, nutrientState, Section, TodayStatus } from './ui'
-import { MEDICATIONS } from '../data/interactions'
+import { ChipGroup, DayNoteList, EvidenceBadge, HowTo, LevelBadge, NutrientPanel, NutrientRow, nutrientState, Section, TodayStatus } from './ui'
+import { toggleMedication, visibleMedications } from '../data/interactions'
+import { BODY_LIMITS, parseInRange } from '../lib/bodyInput'
 import type { EvidenceLevel, Phase, PatientCondition } from '../data/types'
 
 /* 화면에 보여 줄 이름. 저장은 id 로 한다 — 약을 이름으로 견주면 규칙이 비켜 간다. */
@@ -217,15 +218,9 @@ export function TodayMeals({
         />
         <ChipGroup
           label="복용 중인 약"
-          options={MEDICATIONS.map((m) => ({ id: m.id, name: m.name }))}
+          options={visibleMedications(patient.medications).map((m) => ({ id: m.id, name: m.parent ? `↳ ${m.name}` : m.name }))}
           value={patient.medications}
-          onToggle={(id) =>
-            onPatch({
-              medications: patient.medications.includes(id)
-                ? patient.medications.filter((m) => m !== id)
-                : [...patient.medications, id]
-            })
-          }
+          onToggle={(id) => onPatch({ medications: toggleMedication(patient.medications, id) })}
         />
         {/*
           * 요리 계통.
@@ -315,13 +310,17 @@ export function TodayMeals({
         </span>
         <input
           aria-label="오늘 체중 (kg)"
-          type="number" inputMode="decimal"
+          type="text" inputMode="decimal"
           className="input flex-1 text-right"
           placeholder="기록 안 함"
           defaultValue={weight ?? ''}
           onBlur={(e) => {
-            const v = Number(e.target.value)
-            if (v !== (weight ?? 0)) onSetWeight(v || 0)
+            /* 빈칸은 "기록 안 함" 이다. 범위 밖(0·음수·1000·글자)은 저장하지 않고 적혀 있던 값으로 돌려 놓는다 */
+            const t = e.target.value.trim()
+            if (t === '') { if (weight !== undefined) onSetWeight(0); return }
+            const v = parseInRange(t, BODY_LIMITS.weightKg)
+            if (v === null) { e.target.value = weight === undefined ? '' : String(weight); return }
+            if (v !== weight) onSetWeight(v)
           }}
         />
         <span className="shrink-0 text-sm text-stone-500">kg</span>
@@ -468,6 +467,7 @@ export function TodayMeals({
                               {portionLabel(food.serving.label, item.servings)} · {Math.round(per.kcal ?? 0)} kcal ·
                               나트륨 {per.na === undefined ? '정보 없음' : `${Math.round(per.na)} mg`}
                             </div>
+                            {v && <HowTo lines={howToLines(v)} />}
                           </div>
                           <div className="flex shrink-0 items-center gap-1">
                             <button
@@ -503,6 +503,7 @@ export function TodayMeals({
                               {e.seasonal && <span className="ml-1 text-[10px] text-brand-600">제철</span>}
                             </p>
                             <p className="truncate text-[11px] text-stone-500">{e.contribution}</p>
+                            <HowTo lines={howToLines(evaluateFood(e.food, patient, e.servings ?? 1))} />
                           </div>
                           <button
                             className="shrink-0 rounded-lg bg-brand-600 px-2.5 py-1 text-[11px] font-medium text-white"
@@ -698,7 +699,8 @@ function ExerciseAdvice({
             </>
           ) : (
             <>
-              오늘 열량은 목표 범위 안에 있습니다. 이 상태를 유지하면서{' '}
+              {/* 목표를 조금(15 % 이내) 넘은 날도 이 갈래로 온다 — "범위 안" 이라고 하면 틀린 말이 된다 */}
+              {kcal > target[1] ? '오늘 열량은 목표를 조금 넘는 정도입니다.' : '오늘 열량은 목표 범위 안에 있습니다.'} 이 상태를 유지하면서{' '}
               <strong>근육을 지키는 운동</strong>을 더하시면 됩니다.
             </>
           )}

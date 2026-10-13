@@ -3,10 +3,10 @@ import { IconBarcode } from './icons'
 import type { Cuisine, Food, FoodGroup, MealSlot, PatientContext } from '../data/types'
 import { MEAL_SLOTS } from '../data/types'
 import { FOODS } from '../data/foods'
-import { activeInteractions, activeRules, evaluateFood } from '../engine/rules'
+import { activeInteractions, activeRules, evaluateFood, howToLines } from '../engine/rules'
 import { foodContribution } from '../engine/nutrition'
 import { FoodDetail } from './FoodDetail'
-import { LevelDot, BetaChip } from './ui'
+import { BetaChip, HowTo, LevelDot } from './ui'
 import { BarcodeScanner } from './BarcodeScanner'
 import { getStatus, linkBarcode, lookupBarcode, searchExtended } from '../lib/foodStore'
 import { InquiryDialog } from './InquiryDialog'
@@ -485,6 +485,7 @@ export function FoodSearch({
                       {food.serving.label} · {Math.round(per.kcal ?? 0)} kcal · 단백질{' '}
                       {(per.protein ?? 0).toFixed(1)} g · 나트륨 {per.na === undefined ? '정보 없음' : `${Math.round(per.na)} mg`}
                     </div>
+                    <HowTo lines={howToLines(verdict)} />
                   </div>
                   <span className="shrink-0 text-stone-300">›</span>
                 </button>

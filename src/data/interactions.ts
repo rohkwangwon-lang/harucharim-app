@@ -6,10 +6,34 @@ import type { Interaction } from './types'
  */
 
 /** 사용자가 고를 수 있는 약제 목록 (성분명 기준, 상품명은 aliases 로 검색) */
-export const MEDICATIONS: { id: string; name: string; aliases: string[]; cls: string }[] = [
+export interface Medication {
+  id: string
+  name: string
+  aliases: string[]
+  cls: string
+  /**
+   * 이 약이 딸린 윗칸. 윗칸을 고르셨을 때만 화면에 나온다.
+   *
+   * 2026-10-13 에 생겼다. 자몽을 두고 레트로졸·아나스트로졸·엑스메스탄의 근거가 서로 달라
+   * '아로마타제 억제제' 한 칸으로는 답할 수 없게 됐다. 윗칸('ai')은 그대로 두고 그 아래에 약 이름을 고르게 했다 —
+   * 뼈 건강 안내처럼 계열 전체에 해당하는 것은 윗칸 id 로 계속 걸리고, 약마다 다른 것만 아랫칸 id 로 건다.
+   * 2세대 호르몬제(자이티가·엑스탄디·얼리다·뉴베카)도 같다. 이 약들은 안드로겐 차단요법에 더해 쓰는 약이다
+   * (허가사항: GnRH 유사체를 함께 쓰거나 고환절제를 받은 환자).
+   */
+  parent?: string
+}
+
+export const MEDICATIONS: Medication[] = [
   { id: 'tamoxifen', name: '타목시펜', aliases: ['놀바덱스', 'tamoxifen'], cls: '항호르몬' },
   { id: 'ai', name: '아로마타제 억제제', aliases: ['아나스트로졸', '레트로졸', '엑스메스탄', '페마라', '아리미덱스'], cls: '항호르몬' },
+  { id: 'ai-letrozole', name: '레트로졸 (페마라)', aliases: ['페마라', 'letrozole', 'femara'], cls: '항호르몬', parent: 'ai' },
+  { id: 'ai-anastrozole', name: '아나스트로졸 (아리미덱스)', aliases: ['아리미덱스', 'anastrozole', 'arimidex'], cls: '항호르몬', parent: 'ai' },
+  { id: 'ai-exemestane', name: '엑스메스탄 (아로마신)', aliases: ['아로마신', 'exemestane', 'aromasin'], cls: '항호르몬', parent: 'ai' },
   { id: 'adt', name: '안드로겐 차단요법(ADT)', aliases: ['졸라덱스', '루프린', '엘리가드', '비칼루타미드'], cls: '항호르몬' },
+  { id: 'adt-abiraterone', name: '아비라테론 (자이티가)', aliases: ['자이티가', 'abiraterone', 'zytiga'], cls: '항호르몬', parent: 'adt' },
+  { id: 'adt-enzalutamide', name: '엔잘루타미드 (엑스탄디)', aliases: ['엑스탄디', 'enzalutamide', 'xtandi'], cls: '항호르몬', parent: 'adt' },
+  { id: 'adt-apalutamide', name: '아팔루타미드 (얼리다)', aliases: ['얼리다', 'apalutamide', 'erleada'], cls: '항호르몬', parent: 'adt' },
+  { id: 'adt-darolutamide', name: '다롤루타미드 (뉴베카)', aliases: ['뉴베카', 'darolutamide', 'nubeqa'], cls: '항호르몬', parent: 'adt' },
   { id: 'capecitabine', name: '카페시타빈', aliases: ['젤로다', 'xeloda'], cls: '경구 항암제' },
   { id: 'tki-egfr', name: 'EGFR 표적치료제', aliases: ['이레사', '타쎄바', '지오트립', '타그리소', '오시머티닙', '게피티닙'], cls: '표적치료제' },
   { id: 'tki-alk', name: 'ALK 표적치료제', aliases: ['잴코리', '알레센자', '로비큐아'], cls: '표적치료제' },
@@ -26,6 +50,72 @@ export const MEDICATIONS: { id: string; name: string; aliases: string[]; cls: st
   { id: 'ppi', name: '위산분비억제제(PPI)', aliases: ['넥시움', '판토록', '란스톤'], cls: '보조약제' },
   { id: 'levothyroxine', name: '갑상선호르몬제', aliases: ['씬지로이드', '신지록신'], cls: '보조약제' }
 ]
+
+export const MED_BY_ID: Record<string, Medication> = Object.fromEntries(MEDICATIONS.map((m) => [m.id, m]))
+
+/** 윗칸을 고르셨을 때 그 아래에서 고르는 약들 */
+export const childrenOf = (id: string): Medication[] => MEDICATIONS.filter((m) => m.parent === id)
+
+/** 화면에 보일 약 — 윗칸은 늘, 아랫칸은 윗칸을 고르셨을 때만 */
+export function visibleMedications(selected: readonly string[]): Medication[] {
+  return MEDICATIONS.filter((m) => !m.parent || selected.includes(m.parent))
+}
+
+/**
+ * 약 하나를 켜거나 끈다.
+ *
+ * 윗칸을 끄면 아랫칸도 함께 꺼진다 — 화면에서 사라진 칸이 켜진 채 남으면 끌 길이 없다.
+ * 같은 윗칸 아래에서는 하나만 고른다(레트로졸과 아나스트로졸을 함께 드시지는 않는다).
+ * 화면 두 군데(내 정보·내 식단)가 이 함수 하나를 쓴다.
+ */
+export function toggleMedication(selected: readonly string[], id: string): string[] {
+  const med = MED_BY_ID[id]
+  if (!med) return [...selected]
+  if (selected.includes(id)) {
+    const drop = new Set([id, ...childrenOf(id).map((c) => c.id)])
+    return selected.filter((m) => !drop.has(m))
+  }
+  if (!med.parent) return [...selected, id]
+  const siblings = new Set(childrenOf(med.parent).map((c) => c.id))
+  const kept = selected.filter((m) => !siblings.has(m))
+  return [...(kept.includes(med.parent) ? kept : [...kept, med.parent]), id]
+}
+
+/**
+ * 저장된 약 목록을 성하게 만든다 — 모르는 id 는 버리고, 윗칸 없는 아랫칸에는 윗칸을 채운다.
+ * 예전 판이 남긴 자료나 손상된 자료를 읽을 때 쓴다(lib/store.ts).
+ */
+export function normalizeMedications(list: readonly unknown[]): string[] {
+  const known = list.filter((m): m is string => typeof m === 'string' && !!MED_BY_ID[m])
+  const out: string[] = []
+  for (const m of known) {
+    const parent = MED_BY_ID[m].parent
+    if (parent && !out.includes(parent) && !known.includes(parent)) out.push(parent)
+    if (!out.includes(m)) out.push(m)
+  }
+  return out
+}
+
+/**
+ * 식사와 얽힌 복용법 — 음식 하나에 매이지 않아 상호작용 표에 넣을 수 없는 것.
+ *
+ * 2026-10-13 에 2세대 호르몬제를 넣으면서 생겼다. 자이티가는 "무엇을 피하는가" 가 아니라 "언제 먹는가" 가 전부다 —
+ * 음식과 함께 먹으면 약 농도가 5~10배가 된다. 이것을 빼고 자몽 이야기만 하면 정작 중요한 것을 빠뜨린 것이 된다.
+ * 허가사항(DailyMed, 2026-10-13 확인)에 적힌 문장만 옮긴다. 용량·횟수는 적지 않는다 — 그것은 처방이다.
+ */
+export const MEAL_TIMING: { med: string; text: string; refIds: string[] }[] = [
+  {
+    med: 'adt-abiraterone',
+    text: '자이티가(아비라테론)는 빈속에 드세요 — 드시기 전 2시간과 드신 뒤 1시간은 음식을 드시지 않습니다. ' +
+      '음식과 함께 드시면 약 농도가 5~10배까지 올라갑니다(허가사항).',
+    refIds: ['fda-label-arpi']
+  },
+  { med: 'adt-darolutamide', text: '뉴베카(다롤루타미드)는 음식과 함께 드세요(허가사항).', refIds: ['fda-label-arpi'] },
+  { med: 'ai-exemestane', text: '아로마신(엑스메스탄)은 식후에 드세요(허가사항).', refIds: ['fda-label-ai'] }
+]
+
+/** 고르신 약 가운데 식사와 얽힌 복용법이 있는 것 */
+export const mealTimingFor = (medications: readonly string[]) => MEAL_TIMING.filter((t) => medications.includes(t.med))
 
 export const INTERACTIONS: Interaction[] = [
   // ── CYP3A4 ──────────────────────────────────────────────────
@@ -86,6 +176,126 @@ evidence: 'C',
     reason: 'CYP3A4 억제로 농도가 올라가면 수족피부반응과 고혈압 등 부작용이 심해집니다.',
     evidence: 'C',
     refIds: ['bailey2013grapefruit']
+  },
+
+  // ── 항호르몬제와 자몽 ─────────────────────────────────────────
+  /*
+   * 2026-10-13 전문의 결정: 항호르몬제를 드시는 동안 자몽은 피하도록(타목시펜·레트로졸),
+   * 근거를 찾지 못한 약(아나스트로졸·엑스메스탄·ADT)은 '주의' 로.
+   *
+   * 같은 날 원문을 확인했다. 숨기지 않고 적는다.
+   *  · 미국 허가사항 11종(Soltamox·Femara·Arimidex·Aromasin·Casodex·Zoladex·Lupron·Zytiga·Xtandi·Erleada·Nubeqa)에
+   *    'grapefruit' 라는 낱말이 **한 번도 나오지 않는다.**
+   *  · PubMed 에 타목시펜·아로마타제 억제제·ADT 계열과 자몽을 함께 쓴 임상 연구가 없다.
+   *  · 라드바우드·리버풀대 Cancer Drug Interactions(2022-06 보관본)만 등급을 매겨 두었다 —
+   *    타목시펜 'Do Not Coadminister', 레트로졸 'Potential Interaction(not recommended)', 아팔루타미드·엔잘루타미드
+   *    'Potential Weak Interaction', 아비라테론 'No Interaction Expected'. 근거의 질은 모두 Very Low~Low 이고
+   *    요약은 한결같이 "Coadministration has not been studied" 로 시작한다.
+   *    아나스트로졸·엑스메스탄·비칼루타미드·고세렐린·류프로렐린·다롤루타미드는 그 자료에 항목이 없다.
+   *
+   * 그래서 등급은 전부 'C'(기전) 이고, 이유 글마다 "함께 써 본 연구는 없다" 를 적는다.
+   * 권고 수준(피하세요·주의)은 전문의가 정한 것이고 등급은 인용한 것에 맞춘 것이다 — 둘은 별개다.
+   */
+  {
+    id: 'int-grapefruit-tamoxifen',
+    agent: 'tamoxifen',
+    match: { tags: ['자몽계'] },
+    level: 'avoid',
+    title: '타목시펜을 드시는 동안 자몽은 피하세요',
+    reason:
+      '타목시펜은 몸 안에서 CYP3A4·CYP2D6 효소를 거쳐 훨씬 강한 활성 대사물(엔독시펜 등)로 바뀌어 작용합니다. ' +
+      '자몽은 장의 CYP3A4 를 억제하므로 타목시펜 농도는 올리고 활성 대사물은 낮출 수 있습니다. ' +
+      '다만 두 가지를 함께 써 본 임상 연구는 없습니다. ' +
+      '라드바우드·리버풀대의 암 약물 상호작용 자료는 근거의 질을 "매우 낮음" 으로 매기면서도 함께 쓰지 말라고 하고, ' +
+      '캐나다 BC Cancer 약물 자료는 "임상적 의미는 알 수 없다" 고 적습니다. 미국 허가사항에는 자몽에 관한 말이 없습니다. ' +
+      '즉 확인된 해가 아니라 기전에 근거해 조심하는 것입니다. ' +
+      '라임·포멜로도 같고, 귤과 보통 단맛 오렌지는 해당하지 않습니다.',
+    evidence: 'C',
+    refIds: ['cdi-liverpool', 'bccancer-tamoxifen', 'fda-label-tamoxifen']
+  },
+  {
+    id: 'int-grapefruit-letrozole',
+    agent: 'ai-letrozole',
+    match: { tags: ['자몽계'] },
+    level: 'avoid',
+    title: '레트로졸(페마라)을 드시는 동안 자몽은 피하세요',
+    reason:
+      '레트로졸은 CYP3A4 와 CYP2A6 로 대사됩니다. 자몽이 CYP3A4 를 억제하면 레트로졸 농도가 올라갈 수 있습니다. ' +
+      '함께 써 본 임상 연구는 없습니다. 라드바우드·리버풀대의 암 약물 상호작용 자료는 근거의 질을 "매우 낮음" 으로 매기고 ' +
+      '"권장하지 않는다 — 피할 수 없으면 부작용을 잘 살필 것" 이라고 적습니다. 미국 허가사항에는 자몽에 관한 말이 없습니다. ' +
+      '확인된 해가 아니라 기전에 근거해 조심하는 것입니다.',
+    evidence: 'C',
+    refIds: ['cdi-liverpool', 'fda-label-ai']
+  },
+  {
+    id: 'int-grapefruit-anastrozole',
+    agent: 'ai-anastrozole',
+    match: { tags: ['자몽계'] },
+    level: 'caution',
+    title: '아나스트로졸(아리미덱스)과 자몽 — 근거는 없지만 많이 드시지는 마세요',
+    reason:
+      '아나스트로졸과 자몽을 함께 본 연구는 없고, 미국 허가사항에도, 암 약물 상호작용 자료에도 이 조합은 실려 있지 않습니다. ' +
+      '허가사항에서 함께 쓰지 말라고 한 것은 에스트로겐이 든 제제와 타목시펜뿐이고, 음식이 약 농도를 바꾼다는 내용은 없습니다. ' +
+      '같은 계열인 레트로졸에 "권장하지 않는다" 는 의견이 있어, 그에 준해 조심하는 쪽으로 둔 것입니다. ' +
+      '가끔 한두 쪽 드시는 것까지 막을 근거는 없습니다. 매일 드시거나 주스로 많이 드시는 것은 삼가세요.',
+    evidence: 'C',
+    refIds: ['fda-label-ai', 'cdi-liverpool']
+  },
+  {
+    id: 'int-grapefruit-exemestane',
+    agent: 'ai-exemestane',
+    match: { tags: ['자몽계'] },
+    level: 'caution',
+    title: '엑스메스탄(아로마신)과 자몽 — 근거는 없지만 많이 드시지는 마세요',
+    reason:
+      '엑스메스탄은 CYP3A4 로 대사되지만, 허가사항에 따르면 강한 CYP3A4 억제제(케토코나졸)를 함께 썼을 때 ' +
+      '엑스메스탄 농도에 의미 있는 변화가 없었고 "억제제에 의한 영향은 없을 것으로 보인다" 고 적혀 있습니다. ' +
+      '자몽과 직접 본 연구는 없고 허가사항에도 자몽에 관한 말은 없습니다. ' +
+      '그래서 피하시라고 할 근거는 없으며, 매일 드시거나 주스로 많이 드시는 것만 삼가시면 됩니다.',
+    evidence: 'C',
+    refIds: ['fda-label-ai']
+  },
+  {
+    id: 'int-grapefruit-ai',
+    agent: 'ai',
+    unlessTaking: ['ai-letrozole', 'ai-anastrozole', 'ai-exemestane'],
+    match: { tags: ['자몽계'] },
+    level: 'caution',
+    title: '아로마타제 억제제와 자몽 — 어느 약인지에 따라 다릅니다',
+    reason:
+      '레트로졸(페마라)은 자몽과 함께 쓰는 것을 권장하지 않는다는 의견이 있고, ' +
+      '아나스트로졸(아리미덱스)과 엑스메스탄(아로마신)은 그런 근거가 없습니다. 어느 쪽이든 함께 써 본 임상 연구는 없습니다. ' +
+      '"내 정보" 의 복용 중인 약에서 드시는 약 이름을 골라 주시면 그 약에 맞춰 알려 드립니다.',
+    evidence: 'C',
+    refIds: ['cdi-liverpool', 'fda-label-ai']
+  },
+  {
+    id: 'int-grapefruit-adt',
+    agent: 'adt',
+    match: { tags: ['자몽계'] },
+    level: 'caution',
+    title: '안드로겐 차단요법과 자몽 — 근거는 없지만 많이 드시지는 마세요',
+    reason:
+      '주사제(졸라덱스·루프린)와 비칼루타미드의 미국 허가사항에는 자몽에 관한 말이 없습니다. ' +
+      '졸라덱스 허가사항은 다른 약과의 상호작용이 확인된 바 없다고 적고, 비칼루타미드는 음식이 흡수에 영향을 주지 않는다고 적습니다. ' +
+      '자몽과 함께 본 임상 연구도 없습니다. 피하시라고 할 근거는 없으며, ' +
+      '오래 드시는 약이라 매일 드시거나 주스로 많이 드시는 것만 삼가도록 둔 것입니다. ' +
+      '함께 드시는 약(자이티가·엑스탄디·얼리다·뉴베카)이 있으면 "내 정보" 에서 골라 주세요.',
+    evidence: 'C',
+    refIds: ['fda-label-adt', 'cdi-liverpool']
+  },
+  {
+    id: 'int-grapefruit-apalutamide',
+    agent: 'adt-apalutamide',
+    match: { tags: ['자몽계'] },
+    level: 'caution',
+    title: '아팔루타미드(얼리다)를 드시는 동안 자몽은 조심하세요',
+    reason:
+      '아팔루타미드는 CYP2C8 과 CYP3A4 로 대사됩니다. 허가사항은 강한 CYP3A4 억제제(케토코나졸)를 계속 함께 쓰면 ' +
+      '약 농도가 올라갈 것으로 예측된다고 적고(정상상태 AUC 51 % 증가 예측), 부작용이 생기면 용량을 줄이도록 합니다. ' +
+      '자몽과 직접 본 연구는 없습니다. 암 약물 상호작용 자료는 "약한 상호작용 가능 — 주의할 것" 으로 분류합니다(근거의 질 매우 낮음).',
+    evidence: 'C',
+    refIds: ['cdi-liverpool', 'fda-label-arpi']
   },
 
   // ── 와파린 ───────────────────────────────────────────────────

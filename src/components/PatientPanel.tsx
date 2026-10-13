@@ -2,10 +2,11 @@ import { useState } from 'react'
 import type { PatientContext, PatientCondition, Phase, CancerSubtype } from '../data/types'
 import { SUBTYPE_OPTIONS } from '../data/types'
 import { CANCERS } from '../data/cancers'
-import { MEDICATIONS } from '../data/interactions'
+import { childrenOf, toggleMedication, visibleMedications } from '../data/interactions'
 import { nutritionRisk, personalTarget } from '../engine/nutrition'
 import { CANCER_BY_ID } from '../data/cancers'
-import { Section, Stat } from './ui'
+import { NumberField, Section, Stat } from './ui'
+import { BODY_LIMITS } from '../lib/bodyInput'
 
 const PHASES: { id: Phase; label: string; desc: string }[] = [
   { id: 'during_rt', label: '방사선치료 중', desc: '점막염·설사 등 급성 부작용 시기' },
@@ -63,12 +64,7 @@ export function PatientPanel({
 
   const subtypeOptions = SUBTYPE_OPTIONS[patient.cancer]
 
-  const toggleMed = (id: string) =>
-    onChange({
-      medications: patient.medications.includes(id)
-        ? patient.medications.filter((x) => x !== id)
-        : [...patient.medications, id]
-    })
+  const toggleMed = (id: string) => onChange({ medications: toggleMedication(patient.medications, id) })
 
   return (
     <div>
@@ -168,33 +164,13 @@ export function PatientPanel({
               maxLength={20}
             />
           </div>
-          <div>
-            <label className="label">체중 (kg)</label>
-            <input
-              aria-label="체중 (kg)"
-              type="number" inputMode="decimal" className="input"
-              value={patient.weightKg}
-              onChange={(e) => onChange({ weightKg: Number(e.target.value) || 0 })}
-            />
-          </div>
-          <div>
-            <label className="label">신장 (cm)</label>
-            <input
-              aria-label="신장 (cm)"
-              type="number" inputMode="decimal" className="input"
-              value={patient.heightCm}
-              onChange={(e) => onChange({ heightCm: Number(e.target.value) || 0 })}
-            />
-          </div>
-          <div>
-            <label className="label">나이</label>
-            <input
-              aria-label="나이"
-              type="number" inputMode="numeric" className="input"
-              value={patient.age}
-              onChange={(e) => onChange({ age: Number(e.target.value) || 0 })}
-            />
-          </div>
+          {/* 범위 안의 값만 저장한다 — 치는 도중의 "6" 이나 실수로 친 "1000" 이 그대로 저장되던 것을 막는다 (lib/bodyInput.ts) */}
+          <NumberField label="체중 (kg)" value={patient.weightKg} limit={BODY_LIMITS.weightKg} unit="kg"
+            onCommit={(v) => onChange({ weightKg: v })} />
+          <NumberField label="신장 (cm)" value={patient.heightCm} limit={BODY_LIMITS.heightCm} unit="cm"
+            onCommit={(v) => onChange({ heightCm: v })} />
+          <NumberField label="나이" value={patient.age} limit={BODY_LIMITS.age} unit="세" integer
+            onCommit={(v) => onChange({ age: v })} />
           <div>
             <label className="label">성별</label>
             <div className="flex gap-1.5">
@@ -263,7 +239,7 @@ export function PatientPanel({
 
       <Section title="복용 중인 약" desc="선택한 약제와 관련된 식품·영양제 상호작용만 표시됩니다.">
         <div className="flex flex-wrap gap-1.5">
-          {MEDICATIONS.map((m) => (
+          {visibleMedications(patient.medications).map((m) => (
             <button
               key={m.id}
               onClick={() => toggleMed(m.id)}
@@ -271,13 +247,24 @@ export function PatientPanel({
               className={`chip border transition-colors ${
                 patient.medications.includes(m.id)
                   ? 'border-accent-600 bg-accent-600 text-white'
-                  : 'border-stone-300 bg-white text-stone-600 hover:bg-stone-50'
+                  : m.parent
+                    ? 'border-accent-300 bg-accent-50 text-accent-800 hover:bg-accent-100'
+                    : 'border-stone-300 bg-white text-stone-600 hover:bg-stone-50'
               }`}
             >
-              {m.name}
+              {m.parent ? `↳ ${m.name}` : m.name}
             </button>
           ))}
         </div>
+        {/*
+          * 윗칸을 고르면 그 아래 약 이름이 나타난다. 왜 더 여쭙는지 한 줄 적는다 —
+          * 자몽처럼 같은 계열 안에서도 약마다 안내가 다른 것이 있어서다.
+          */}
+        {patient.medications.some((id) => childrenOf(id).length > 0) && (
+          <p className="mt-2 text-[11px] leading-relaxed text-stone-500">
+            ↳ 표시는 방금 고르신 약의 종류입니다. 같은 계열이라도 약마다 안내가 달라, 아시면 골라 주세요. 모르시면 그대로 두셔도 됩니다.
+          </p>
+        )}
       </Section>
 
       <Section
@@ -341,13 +328,8 @@ function WeightBefore({
 
   return (
     <div>
-      <label className="label" htmlFor="panel-weight-before">6개월 전 몸무게 (kg)</label>
-      <input
-        id="panel-weight-before"
-        type="number" inputMode="decimal" className="input"
-        value={before}
-        onChange={(e) => apply(Number(e.target.value) || 0)}
-      />
+      <NumberField id="panel-weight-before" label="6개월 전 몸무게 (kg)" value={before}
+        limit={BODY_LIMITS.weightKg} unit="kg" onCommit={apply} />
       <p className="mt-1 text-[11px] text-stone-400">
         {lost > 0
           ? <><strong className="text-stone-600">{lost} kg 줄어 {pct} %</strong> 입니다.
