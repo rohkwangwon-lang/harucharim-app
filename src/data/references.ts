@@ -261,8 +261,15 @@ export const REFERENCES: Reference[] = [
   { id: 'cdc-vibrio', kind: 'guideline', year: 2024,
     citation: 'U.S. CDC. Clinical Overview of Vibriosis. — 비브리오 불니피쿠스 감염자의 약 5명 중 1명이 사망하며, 간질환이 있으면 특히 위험하다.',
     url: 'https://www.cdc.gov/vibrio/hcp/clinical-overview/index.html' },
-  { id: 'fda-foodsafety', kind: 'guideline', year: 2023,
-    citation: 'U.S. FDA. Food Safety for Older Adults and People with Cancer, Diabetes, HIV/AIDS, Organ Transplants, and Autoimmune Diseases. — 위험이 높은 것과 낮은 것을 짝지어 제시한다. 생 새싹채소는 높은 쪽, 익힌 새싹이 낮은 쪽이다. 조리 후 2시간 안에 냉장(32 ℃ 넘으면 1시간).',
+  /*
+   * 연도를 2023 으로 적어 두었으나 문서 표지와 마지막 쪽은 'July 2020' 이다(2026-10-13 에 PDF 를 받아 확인).
+   * 같은 날 덜 익힌 것의 짝도 원문에서 확인했다 — "Refrigerated smoked fish", "Soft-boiled or over-easy eggs,
+   * as the yolks are not fully cooked", "Hot dogs, deli, and luncheon meats that have not been reheated" 가 높은 쪽,
+   * "Previously cooked seafood heated to 165°F", "Fully cooked eggs with firm yolk and whites" 가 낮은 쪽.
+   * 프로슈토·하몽·전복장이라는 이름은 원문에 없다 — 데우지 않은 델리 미트, 다시 데우지 않은 익힌 해산물로 묶인다.
+   */
+  { id: 'fda-foodsafety', kind: 'guideline', year: 2020,
+    citation: 'U.S. FDA. Food Safety for Older Adults and People with Cancer, Diabetes, HIV/AIDS, Organ Transplants, and Autoimmune Diseases. July 2020. — 위험이 높은 것과 낮은 것을 짝지어 제시한다. 생 새싹채소는 높은 쪽, 익힌 새싹이 낮은 쪽이다. 냉장 훈제 생선·노른자가 덜 익은 달걀·데우지 않은 햄(델리 미트)은 높은 쪽, 속까지 익힌 것과 74 ℃(165 °F)로 다시 데운 것이 낮은 쪽이다. 조리 후 2시간 안에 냉장(32 ℃ 넘으면 1시간).',
     url: 'https://www.fda.gov/media/83744/download' },
 
   // ── 상호작용 ─────────────────────────────────────────────────

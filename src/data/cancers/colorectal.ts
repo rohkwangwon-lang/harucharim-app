@@ -1,5 +1,5 @@
 import type { CancerProfile } from '../types'
-import { PLANT_FOOD_GROUPS } from '../types'
+import { PLANT_FOOD_GROUPS, SOURCE_PER_SERVING } from '../types'
 
 export const colorectal: CancerProfile = {
   id: 'colorectal',
@@ -114,7 +114,7 @@ export const colorectal: CancerProfile = {
     {
       id: 'crc-calcium-dairy',
       level: 'prefer',
-      match: { minServing: { key: 'ca', value: 80 }, tags: ['고칼슘'], groups: ['우유·유제품'] },
+      match: { minServing: SOURCE_PER_SERVING.ca, tags: ['고칼슘'], groups: ['우유·유제품'] },
       title: '유제품과 칼슘은 대장암 위험을 낮추는 쪽입니다',
       reason:
         'WCRF/AICR 는 유제품과 칼슘 섭취가 대장암 위험을 낮춘다는 근거에 "probable" 등급을 부여했습니다. ' +

@@ -52,8 +52,46 @@ const RAW = new RegExp(
    * 초밥 자체를 피하라는 것이 FDA 식품안전 권고이고 임상에서 쓰는 기준이다.
    */
   '|초밥|^스시|스시$' +
-  '|생굴|굴회|산낙지|낙지탕탕이|생연어'
+  /* 그라브락스는 훈제가 아니라 소금·설탕에 절인 날연어다 — '훈제 그라브락스' 도 열을 가하지 않는다 */
+  '|생굴|굴회|산낙지|낙지탕탕이|생연어|그라브락스'
 )
+/* '훈제' 는 익힌 것으로 치지만 그라브락스 앞에 붙은 훈제는 차게 그을린 것이다 */
+const RAW_DESPITE_SMOKE = /그라브락스/
+
+/* ── 덜 익혔거나 데우지 않고 먹는 것 ───────────────────────
+ *
+ * 날것은 아니다. 그래서 위의 걸름망이 '익힌 것' 으로 보아 내보냈고, 호중구가 낮은 분께
+ * 훈제연어 74종·반숙란 100여 종·생햄 90여 종이 '주의' 에 그쳤다(2026-10, 상식 검사가 찾음).
+ * 2026-10-13 에 '피하세요' 로 올리기로 정했다(전문의 결정). 근거는 미국 FDA 식품안전 지침(2020):
+ *
+ *   위험 높은 쪽                                          낮은 쪽
+ *   Refrigerated smoked fish                             Fully cooked fish or seafood
+ *   Soft-boiled or "over-easy" eggs, as the yolks        Fully cooked eggs with firm yolk and whites
+ *     are not fully cooked
+ *   Hot dogs, deli, and luncheon meats that have         … reheated to steaming hot or 165ºF
+ *     not been reheated
+ *   (전복장) Partially cooked seafood                      Previously cooked seafood heated to 165°F
+ *
+ * FDA 는 프로슈토·하몽을 이름으로 들지 않는다 — '데우지 않은 델리 미트' 로 묶는다. 생햄은 익히지 않고
+ * 소금에 절여 말린 것이라 그 묶음에 든다고 보았다. 전복장도 이름이 없다 — 날전복으로 담그기도 하고,
+ * 쪄서 담가도 장에 재워 데우지 않고 먹으므로 '다시 데운 것' 이라는 낮은 쪽 조건을 채우지 못한다.
+ *
+ * 걸러 낼 것은 실제 이름을 훑어 정했다.
+ *   · 훈제연어 '스테이크·카츠·구이' 는 익혀 먹는 것이다(훈제연어스테이크 14종)
+ *   · 하몽 '코시도'·프로슈토 '꼬또' 는 삶은 햄이다. 하몽 크래커·하몽향·하몽 감자칩은 과자다
+ *   · '반숙 카스테라' 는 구운 과자다. '전복장어죽'·'전복장아찌' 는 전복장이 아니고,
+ *     레토르트는 포장한 채 가열 살균한 것이다
+ *   · '온센' 은 소스 이름에 더 많이 쓰인다(온센우동소스·온센간장드레싱) — 달걀이 뒤따를 때만 본다
+ *
+ * 살라미·초리조·코파 같은 건조 소시지, 훈제오리, 다른 훈제 생선은 넣지 않았다. 정해 주신 범위가 아니다.
+ */
+const UNDERCOOKED = new RegExp(
+  '반숙|(?<![가-힣])수란|에그\\s*베네딕트|온센\\s*(타마고|다마고|란|계란|달걀)' +
+  '|훈제\\s*연어|연어\\s*훈제|스모크드?\\s*(연어|살몬|새먼)' +
+  '|생햄|프로슈[토또]|하몽|하몬\\s+(디|데|드)' +
+  '|전복장(?!어|아찌)'
+)
+const UNDERCOOKED_NOT = /스테이크|카츠|구이|코시도|꼬시도|꼬또|코또|베지|비건|비스킷|크래커|감자칩|포테토칩|스낵|과자|향$|향\s|생강청|시즈닝|카스테라|케이크|레토르트/
 
 /* ── 생 새싹채소 ──────────────────────────────────
  *
@@ -173,9 +211,11 @@ export function autoTags(name: string): FoodTag[] {
   const out: FoodTag[] = []
 
   const rawJang = RAW_JANG.test(s) && !RAW_JANG_NOT.test(s)
-  if (rawJang || (!COOKED.test(s) && !NOT_FOOD.test(s) && !SUSHI_COOKED.test(s) && RAW.test(s))) {
+  const cooked = COOKED.test(s) && !RAW_DESPITE_SMOKE.test(s)
+  if (rawJang || (!cooked && !NOT_FOOD.test(s) && !SUSHI_COOKED.test(s) && RAW.test(s))) {
     out.push('생식동물성' as FoodTag)
   }
+  if (UNDERCOOKED.test(s) && !UNDERCOOKED_NOT.test(s)) out.push('덜익힘' as FoodTag)
   if (SALTED.test(s) && !SALTED_NOT.test(s)) out.push('염장' as FoodTag)
   if (VITK.test(s) && !VITK_NOT.test(s)) out.push('고비타민K' as FoodTag)
   if (SPROUT.test(s) && !SPROUT_COOKED.test(s)) out.push('생새싹' as FoodTag)

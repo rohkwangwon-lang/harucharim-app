@@ -1,5 +1,5 @@
 import type { CancerProfile } from '../types'
-import { PLANT_FOOD_GROUPS } from '../types'
+import { PLANT_FOOD_GROUPS, SOURCE_PER_SERVING } from '../types'
 
 export const breast: CancerProfile = {
   id: 'breast',
@@ -32,7 +32,7 @@ export const breast: CancerProfile = {
       match: { tags: ['식물성에스트로겐'] },
       title: '두부·두유·된장은 피하지 않아도 됩니다 — 오히려 이득 쪽입니다',
       reason:
-        '대두 이소플라본이 에스트로겐과 구조가 비슷하다는 이유로 오랫동안 금기로 여겨졌지만, 사람 대상 연구는 반대 방향을 가리킵니다. ' +
+        '대두 이소플라본이 에스트로겐과 구조가 비슷하다는 이유로 오랫동안 피해야 할 음식으로 여겨졌지만, 사람 대상 연구는 반대 방향을 가리킵니다. ' +
         '중국·미국 코호트 9,514명을 통합 분석한 연구에서, 이소플라본을 하루 10 mg 이상 드신 군은 재발이 25 % 낮았습니다 ' +
         '(위험비 0.75, 95 % 신뢰구간 0.61~0.92). 다만 같은 연구에서 사망률 감소는 통계적으로 유의하지 않았습니다. ' +
         '수용체 상태와 타목시펜에 대한 답은 상하이 코호트 5,042명 연구에서 나왔습니다 — ' +
@@ -96,7 +96,7 @@ export const breast: CancerProfile = {
     {
       id: 'breast-calcium-vitd',
       level: 'prefer',
-      match: { minServing: { key: 'ca', value: 80 }, tags: ['고칼슘'], supplementCategories: ['칼슘·마그네슘', '비타민D'] },
+      match: { minServing: SOURCE_PER_SERVING.ca, tags: ['고칼슘'], supplementCategories: ['칼슘·마그네슘', '비타민D'] },
       subtypes: ['호르몬수용체양성'],
       title: '아로마타제 억제제를 쓰는 동안 칼슘과 비타민 D를 챙기세요',
       reason:

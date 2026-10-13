@@ -1,5 +1,5 @@
 import type { CancerProfile } from '../types'
-import { PLANT_FOOD_GROUPS } from '../types'
+import { PLANT_FOOD_GROUPS, SOURCE_PER_SERVING } from '../types'
 
 export const prostate: CancerProfile = {
   id: 'prostate',
@@ -82,7 +82,7 @@ export const prostate: CancerProfile = {
       id: 'prostate-adt-protein',
       subtypes: ['안드로겐차단요법중'],
       level: 'prefer',
-      match: { minServing: { key: 'protein', value: 5 }, tags: ['고단백'] },
+      match: { minServing: SOURCE_PER_SERVING.protein, tags: ['고단백'] },
       title: 'ADT 중에는 단백질과 근력운동으로 근육을 지켜야 합니다',
       reason:
         '안드로겐이 차단되면 근육량이 줄고 내장지방이 늘어 인슐린 저항성과 심혈관 위험이 함께 올라갑니다. ' +
@@ -100,7 +100,7 @@ export const prostate: CancerProfile = {
       id: 'prostate-adt-bone',
       subtypes: ['안드로겐차단요법중'],
       level: 'prefer',
-      match: { minServing: { key: 'ca', value: 80 }, supplementCategories: ['칼슘·마그네슘', '비타민D'], tags: ['고칼슘'] },
+      match: { minServing: SOURCE_PER_SERVING.ca, supplementCategories: ['칼슘·마그네슘', '비타민D'], tags: ['고칼슘'] },
       title: 'ADT 중 칼슘·비타민 D 는 골절 예방의 기본입니다',
       reason:
         /*

@@ -21,7 +21,8 @@ import { DEFAULT_PATIENT } from '../../src/lib/store'
 import { microTargets } from '../../src/engine/nutrition'
 import { adviseSupplements } from '../../src/engine/supplementAdvice'
 import type { NutritionRule, CancerSubtype, PatientContext, Phase } from '../../src/data/types'
-import { SUBTYPE_OPTIONS } from '../../src/data/types'
+import { SUBTYPE_OPTIONS, SOURCE_PER_SERVING } from '../../src/data/types'
+import ts from 'typescript'
 
 const bugs: string[] = []
 const seenB = new Set<string>()
@@ -955,6 +956,126 @@ for (const id of orphan) bad('아무 데서도 인용하지 않는 문헌', `${i
   }
   /* 판정까지 — 경고가 뜨는 분께는 실제로 '피하세요' 여야 한다 */
   if (evaluateFood(sample[0], who('during_chemo', []), 1).level !== 'avoid') bad('자몽 경고의 등급이 피하세요가 아님', sample[0].name)
+}
+
+/* ── 호중구감소 — 고르는 자리가 둘이어도 답은 하나 ─────────────
+ *
+ * 호중구가 낮다는 것은 두 군데서 고를 수 있다 — 치료 시기('호중구감소 시기')와 증상('호중구감소증').
+ * 한동안 두 길의 답이 달랐다. 증상으로만 고르신 분께는 회덮밥이 아무 말 없이 지나갔고 모듬회는 '권장' 이었으며,
+ * 거꾸로 사과·상추는 '피하세요' 였다(시기로 고르신 분께는 권장). 2026-10-13 에 맞췄다.
+ * 잣대는 "두 길이 같은가" 하나뿐이라 엔진의 규칙을 빌리지 않는다.
+ */
+{
+  const NEUT_RULES = new Set(['common-raw-neutropenia', 'common-raw-sprouts-neutropenia', 'common-raw-animal-neutropenia', 'cond-neut-raw'])
+  const byPhase: PatientContext = { ...DEFAULT_PATIENT, cancer: 'lung', phase: 'neutropenia', conditions: [], medications: [], onboarded: true }
+  const byCond: PatientContext = { ...DEFAULT_PATIENT, cancer: 'lung', phase: 'during_chemo', conditions: ['호중구감소증'], medications: [], onboarded: true }
+  const both: PatientContext = { ...byPhase, conditions: ['호중구감소증'] }
+  const raw = (v: ReturnType<typeof evaluateFood>) => v.hits.filter((h) => NEUT_RULES.has(h.rule.id))
+  let warned = 0
+  for (const f of [...CURATED_FOODS, ...GENERATED_CORE]) {
+    const a = raw(evaluateFood(f, byPhase, 1)), b = raw(evaluateFood(f, byCond, 1)), c = raw(evaluateFood(f, both, 1))
+    if (a.length) warned++
+    if ((a.length > 0) !== (b.length > 0)) bad('호중구감소 — 시기로 고를 때와 증상으로 고를 때 답이 다름', `${f.name} [${f.group}] 시기 ${a.length ? '피하세요' : '없음'} · 증상 ${b.length ? '피하세요' : '없음'}`)
+    /* 같은 말을 두 번 하지 않는다 — 공통 규칙과 증상 규칙이 한 음식에 나란히 붙지 않게 */
+    for (const hits of [b, c]) {
+      const ids = hits.map((h) => h.rule.id)
+      if (ids.includes('cond-neut-raw') && ids.includes('common-raw-neutropenia')) bad('호중구감소 — 같은 말이 두 번 붙음', `${f.name} (${ids.join(' + ')})`)
+    }
+  }
+  if (warned < 50) bad('호중구감소 검사가 헛돎', `경고된 음식 ${warned}종`)
+  /* 씻어 드시면 되는 것 — 증상으로 골라도 '피하세요' 가 아니어야 한다 */
+  for (const id of ['apple', 'lettuce', 'strawberry', 'cucumber']) {
+    const f = FOOD_BY_ID[id]
+    if (!f) continue
+    if (evaluateFood(f, byCond, 1).level === 'avoid') bad('호중구감소증을 고르면 생과일·생채소가 피하세요가 됨', f.name)
+  }
+  const fresh = CURATED_FOODS.filter((f) => (f.group === '과일' || f.group === '채소') && (f.tags as string[]).includes('생식') && !(f.tags as string[]).includes('생새싹'))
+  if (fresh.length < 10) bad('생과일·생채소 검사가 헛돎', `${fresh.length}종`)
+  for (const f of fresh) if (raw(evaluateFood(f, byCond, 1)).length) bad('호중구감소증을 고르면 생과일·생채소가 피하세요가 됨', f.name)
+}
+
+/* ── 덜 익힌 것 — 2026-10-13 전문의 결정으로 '피하세요' ──────────
+ *
+ * 훈제연어 · 반숙/수란 · 프로슈토·하몽(생햄) · 전복장. 이름을 여기 적어 못 박는다.
+ * 익혀 먹는 것(훈제연어 스테이크), 삶은 햄(코시도·꼬또), 과자는 반대쪽으로 못 박는다 —
+ * 아무 데나 붙으면 진짜 경고를 믿지 않게 된다.
+ */
+{
+  const neut: PatientContext = { ...DEFAULT_PATIENT, cancer: 'breast', phase: 'neutropenia', conditions: [], medications: [], onboarded: true }
+  const well: PatientContext = { ...neut, phase: 'survivorship' }
+  const pool = [...CURATED_FOODS, ...GENERATED_CORE]
+  const MUST = [/^훈제연어$/, /훈제연어\s*샐러드/, /반숙란/, /반숙\s*계란장/, /수란/, /프로슈토/, /하몽/, /전복장/]
+  const MUST_NOT = [/훈제연어\s*스테이크/, /반숙\s*카스테라/, /하몽.*크래커/]
+  let seen = 0
+  for (const re of MUST) {
+    const fs = pool.filter((f) => re.test(f.name) && !MUST_NOT.some((x) => x.test(f.name)) && !/코시도|꼬시도|꼬또|감자칩|비스킷|생강청|베지|레토르트|전복장어|전복장아찌|향$/.test(f.name))
+    seen += fs.length
+    for (const f of fs) {
+      if (evaluateFood(f, neut, 1).level !== 'avoid') bad('호중구감소 시기에 덜 익힌 것이 피하세요가 아님', `${f.name} → ${evaluateFood(f, neut, 1).level}`)
+      /* 호중구가 낮지 않은 분께까지 '날것' 규칙으로 막지는 않는다 */
+      if (evaluateFood(f, well, 1).hits.some((h) => h.rule.id === 'common-raw-animal-neutropenia')) bad('호중구가 낮지 않은데 날것 규칙이 뜸', f.name)
+    }
+  }
+  /* 내장 자료에는 몇 종뿐이다(훈제연어·반숙란샌드위치…). 내려받는 27만 종은 sense.ts 가 이름으로 훑는다 */
+  if (seen < 2) bad('덜 익힌 것 검사가 헛돎', `내장 자료에서 찾은 것 ${seen}종`)
+  for (const re of MUST_NOT) for (const f of pool.filter((x) => re.test(x.name))) {
+    if ((f.tags as string[]).includes('덜익힘')) bad('익혀 먹는 것·과자에 덜익힘 태그', f.name)
+  }
+}
+
+/* ── 권장의 문턱은 한 자리에서 ───────────────────────────────
+ *
+ * "1회 분량에 이만큼은 들어 있어야 권장" 의 숫자는 식약처 고시에서 온다(types.ts 의 SOURCE_PER_SERVING).
+ * 규칙에 숫자를 직접 적으면 출처 없는 숫자가 다시 생긴다 — 처음의 5 g · 80 mg 이 그랬다.
+ */
+{
+  const official = Object.values(SOURCE_PER_SERVING) as readonly { key: string; value: number; liquidPer100: number }[]
+  const all = [...COMMON_RULES, ...Object.values(CONDITION_RULES).flat(), ...CANCERS.flatMap((c) => c.rules)]
+  let n = 0
+  for (const r of all) {
+    const ms = r.match.minServing
+    if (!ms) continue
+    n++
+    if (!official.some((o) => o === ms)) bad('권장의 문턱을 규칙에 직접 적음', `${r.id} — ${ms.key} ${ms.value}. SOURCE_PER_SERVING 에서 가져올 것`)
+  }
+  if (n < 5) bad('문턱 검사가 헛돎', `minServing 을 쓰는 규칙 ${n}건`)
+  /* 고시의 셈 그대로인가 — 기준치 55 g · 700 mg 의 10 % · 15 %, 마시는 것은 그 절반 */
+  const want = { protein: [55 * 0.10, 55 * 0.05], ca: [700 * 0.15, 700 * 0.075] } as Record<string, number[]>
+  for (const o of official) {
+    const w = want[o.key]
+    if (!w || Math.abs(o.value - w[0]) > 1e-9 || Math.abs(o.liquidPer100 - w[1]) > 1e-9) bad('문턱이 고시의 셈과 다름', `${o.key} ${o.value}/${o.liquidPer100} — 기준 ${w?.join('/')}`)
+  }
+}
+
+/* ── 화면에 '금기' 라는 말을 쓰지 않는다 ───────────────────────
+ *
+ * 2026-10-13 에 '피하세요' 로 통일했다(전문의 결정). 주석은 보지 않고 화면에 나갈 글자만 본다 —
+ * 문자열과 JSX 글자를 TypeScript 로 읽어 낸다. 정규식으로 주석을 걷으면 문자열 속 '//' 에서 틀린다.
+ */
+{
+  const walk = (dir: string, out: string[] = []): string[] => {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      const p = `${dir}/${e.name}`
+      if (e.isDirectory()) walk(p, out)
+      else if (/\.tsx?$/.test(e.name)) out.push(p)
+    }
+    return out
+  }
+  const files = walk('src')
+  let strings = 0
+  for (const file of files) {
+    const src = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true, file.endsWith('x') ? ts.ScriptKind.TSX : ts.ScriptKind.TS)
+    const visit = (n: ts.Node) => {
+      if (ts.isStringLiteralLike(n) || ts.isJsxText(n) || n.kind === ts.SyntaxKind.TemplateHead || n.kind === ts.SyntaxKind.TemplateMiddle || n.kind === ts.SyntaxKind.TemplateTail) {
+        strings++
+        const text = (n as ts.StringLiteralLike).text ?? n.getText()
+        if (text.includes('금기')) bad("화면 글에 '금기' 가 남음", `${file}:${src.getLineAndCharacterOfPosition(n.getStart()).line + 1} — ${text.trim().slice(0, 60)}`)
+      }
+      ts.forEachChild(n, visit)
+    }
+    visit(src)
+  }
+  if (files.length < 60 || strings < 5000) bad("'금기' 검사가 헛돎", `파일 ${files.length}개 · 문자열 ${strings}개`)
 }
 
 console.log(`\n규칙 검사 완료 — 문제 ${bugs.length}종`)

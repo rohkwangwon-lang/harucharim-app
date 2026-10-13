@@ -94,6 +94,13 @@ function note(kind: string, example: string) {
   f.n++; if (f.ex.length < 6 && !f.ex.includes(example)) f.ex.push(example)
   look.set(kind, f)
 }
+/*
+ * 정해진 것 — 전문의가 보고 "그대로 둔다" 고 정한 것. 다시 '살펴볼 것' 으로 올리지 않고 건수만 적는다.
+ *  · 상황을 전제로 한 문구("수술적 폐경 이후에는…", "위 수술을 받았다면…")는 그 상황을 고르지 않아도 띄운다 (2026-10-13)
+ *  · 낫토·청국장은 와파린을 드시는 분께 '주의' — '피하세요' 로 올리지 않는다 (2026-10-13)
+ */
+const decided = new Map<string, number>()
+const keep = (kind: string) => decided.set(kind, (decided.get(kind) ?? 0) + 1)
 const t0 = Date.now()
 const lap = (what: string) => console.log(`  [${((Date.now() - t0) / 1000).toFixed(0)}초] ${what}`)
 
@@ -205,8 +212,7 @@ const CONTEXT: { word: RegExp; name: string; ok: (p: PatientContext) => boolean 
   }
   for (const [k, r] of [...fired].sort((a, b) => b[1].off / b[1].total - a[1].off / a[1].total)) {
     if (r.off === 0) continue
-    note(`'${r.ctx}' 를 고르지 않은 분께 그 상황을 전제로 말함`,
-      `[${r.level}] "${r.title}" (${k.split('|')[0]}) — 이 규칙이 뜬 ${r.total}명 중 ${r.off}명(${Math.round(r.off / r.total * 100)}%)이 해당 없음 · 예: ${r.ex}`)
+    keep('상황을 전제로 한 문구가 그 상황을 고르지 않은 분께도 뜸 — 그대로 둠 (규칙 수)')
   }
   lap(`전제 — 가상 환자 ${(PEOPLE * 5).toLocaleString()}명의 유효 규칙을 훑음`)
 }
@@ -222,7 +228,12 @@ const CONTEXT: { word: RegExp; name: string; ok: (p: PatientContext) => boolean 
  */
 const RAW = /(육회|뭉티기|육사시미|생선회|모[둠듬]회|광어회|우럭회|연어회|참치회|방어회|숭어회|전어회|한치회|물회|회덮밥|회무침|회냉면|사시미|초밥|생굴|굴회|간장게장|양념게장|새우장|연어장|날달걀|생달걀|카르파초|세비체)/
 const RAW_NOT = /(숙회|익힌|튀김|구이|찜|볶음|전골|탕|찌개|조림|향|소스|양념$|양념장|육수|간장$|쇼유|시즈닝|분말|가루|드레싱|다대기|담는|과자|스낵|칩|젤리|모양|유부|계란\s*초밥|달걀\s*초밥|김\s*초밥|초밥김|김류|초밥용|롤|생굴전|가열(?!하지)|게장\s*용?\s*(양념|간장)|덮죽|볶음밥)/
-const UNDERCOOKED = /(반숙|수란|온센|훈제연어|생햄|프로슈토|하몽|육사시미)/
+/*
+ * 덜 익힌 것 — 2026-10-13 에 '피하세요' 로 정해졌다(전문의 결정). 그전에는 '살펴볼 것' 이었다.
+ * 익혀 먹는 것(스테이크·카츠·구이), 삶은 햄(코시도·꼬또), 과자, 레토르트는 이름으로 덜어 낸다.
+ */
+const UNDERCOOKED = /(반숙|(?<![가-힣])수란|훈제\s*연어|생햄|프로슈토|하몽|전복장(?!어|아찌))/
+const UNDERCOOKED_NOT = /(맛|향|소스|과자|칩|스낵|크래커|비스킷|카스테라|케이크|스테이크|카츠|구이|코시도|꼬시도|꼬또|레토르트|생강청|베지|비건)/
 const ALCOHOL = /(소주|맥주|막걸리|와인|위스키|사케|칵테일|하이볼|보드카|데킬라|샴페인|동동주|복분자주|매실주|과실주|탁주|브랜디|코냑|츄하이|담금주|인삼주)/
 /* '채소주스' 가 소주로, '사케라또' 가 사케로 잡혔다. 술은 음료 군에서만 본다(아래) */
 const ALCOHOL_NOT = /(무알코올|무알콜|논알코올|논알콜|비알코올|0\.0|제로|식초|효모|맛|향|소스|양념|안주|주스|쥬스|커피|라떼|라또|에이드|스무디|티$|차$|칵테일$|믹스)/
@@ -231,6 +242,8 @@ const CURED_NOT = /(향|과자|스낵|칩|크래커|비스킷|시즈닝|소스|�
 {
   const neut = person({ cancer: 'colorectal', phase: 'neutropenia', conditions: [], medications: [], subtypes: [] })
   const surv = person({ cancer: 'colorectal', phase: 'survivorship', conditions: [], medications: [], subtypes: [] })
+  /* 같은 상태를 증상에서 고르신 분 — 시기는 '항암치료 중' 그대로 */
+  const neutByCond = person({ cancer: 'colorectal', phase: 'during_chemo', conditions: ['호중구감소증'], medications: [], subtypes: [] })
   const tally = { raw: 0, rawOk: 0, under: 0, underOk: 0, alc: 0, alcOk: 0, cured: 0, curedOk: 0 }
   for (const f of ALL) {
     const nm = f.name
@@ -239,11 +252,14 @@ const CURED_NOT = /(향|과자|스낵|칩|크래커|비스킷|시즈닝|소스|�
       const lv = evaluateFood(f, neut, 1).level
       if (lv === 'avoid') tally.rawOk++
       else note('호중구감소 시기인데 날것이 피하세요가 아님', `${nm} [${f.group}] → ${lv ?? '표시 없음'}`)
-    } else if (UNDERCOOKED.test(nm) && !/(맛|향|소스|과자|칩)/.test(nm)) {
+      if (lv === 'avoid' && evaluateFood(f, neutByCond, 1).level !== 'avoid') hard.push(`증상으로 호중구감소증을 고르면 날것이 피하세요가 아님: ${nm}`)
+    } else if (UNDERCOOKED.test(nm) && !UNDERCOOKED_NOT.test(nm)) {
       tally.under++
       const lv = evaluateFood(f, neut, 1).level
       if (lv === 'avoid') tally.underOk++
-      else note('호중구감소 시기 — 덜 익힌 것·훈제연어·생햄 (앱이 다루는지 살펴볼 것)', `${nm} [${f.group}] → ${lv ?? '표시 없음'}`)
+      else note('호중구감소 시기인데 덜 익힌 것(반숙·훈제연어·생햄·전복장)이 피하세요가 아님', `${nm} [${f.group}] → ${lv ?? '표시 없음'}`)
+      /* 증상으로만 고르신 분께도 같아야 한다 — 한동안 이 길은 손으로 붙인 태그만 보았다 */
+      if (lv === 'avoid' && evaluateFood(f, neutByCond, 1).level !== 'avoid') hard.push(`증상으로 호중구감소증을 고르면 덜 익힌 것이 피하세요가 아님: ${nm}`)
     }
     if (f.group === '음료' && ALCOHOL.test(nm) && !ALCOHOL_NOT.test(nm)) {
       tally.alc++
@@ -265,6 +281,9 @@ const CURED_NOT = /(향|과자|스낵|칩|크래커|비스킷|시즈닝|소스|�
    * 2026-10 에 고치기 전 — 날것 31 %(322/1033) · 가공육 98.6 %. 고친 뒤의 수준 아래로 내려가면 실패다.
    */
   if (tally.rawOk / tally.raw < 0.95) hard.push(`호중구감소 시기에 날것이 피하세요가 아닌 것이 많음 — ${tally.rawOk}/${tally.raw}`)
+  /* 덜 익힌 것 — 고치기 전에는 32 %(97/303) 였다 */
+  if (tally.under < 200) hard.push(`덜 익힌 것 이름 검사가 헛돎 — ${tally.under}종`)
+  if (tally.underOk / tally.under < 0.97) hard.push(`호중구감소 시기에 덜 익힌 것이 피하세요가 아닌 것이 많음 — ${tally.underOk}/${tally.under}`)
   if (tally.curedOk / tally.cured < 0.985) hard.push(`가공육이 주의·피하세요가 아닌 것이 많음 — ${tally.curedOk}/${tally.cured}`)
   /*
    * 술은 이름으로 가리기 어렵다 — '위스키 콜드브루', '제주맥주 탄산수', '소주친구' 는 술이 아니다.
@@ -407,12 +426,30 @@ const CURED_NOT = /(향|과자|스낵|칩|크래커|비스킷|시즈닝|소스|�
         const chemo = p.phase === 'during_chemo' || p.phase === 'neutropenia' || p.medications.some((x) => MY_ANTICANCER.has(x))
         if (chemo && /자몽|포멜로/.test(nm) && !/맛|향/.test(nm)) note('항암제를 쓰는 분 식단에 자몽이 올라옴', `${nm} · ${label(p)}`)
         if (CURED.test(nm) && !CURED_NOT.test(nm)) note('식단에 가공육으로 보이는 것이 올라옴', `${nm} · ${label(p)}`)
-        if (p.medications.includes('warfarin') && /낫토|청국장/.test(nm)) note('와파린을 드시는 분 식단에 낫토·청국장', `${nm} · ${label(p)}`)
+        if (p.medications.includes('warfarin') && /낫토|청국장/.test(nm)) keep("와파린을 드시는 분 식단에 낫토·청국장 — '주의' 로 둠 (건수)")
+        if ((p.phase === 'neutropenia' || has(p, '호중구감소증')) && UNDERCOOKED.test(nm) && !UNDERCOOKED_NOT.test(nm)) hard.push(`호중구감소 시기 식단에 덜 익힌 것이 올라옴: ${nm} · ${label(p)}`)
       }
     }
   }
   lap(`식단 — ${days.toLocaleString()}일 · 음식 ${items.toLocaleString()}건을 이름으로 다시 봄`)
   if (items < days * 5) hard.push(`식단 검사가 헛돎 — 하루 평균 ${(items / Math.max(1, days)).toFixed(1)}건`)
+}
+
+/* ════ 6-2. 와파린과 낫토·청국장 — '주의' 로 정해짐 ═════════════════
+ *
+ * 올리지는 않되 사라져서도 안 된다. 이름으로 찾아 모두 '주의' 이상인지 본다.
+ */
+{
+  const w = person({ cancer: 'colorectal', phase: 'survivorship', conditions: [], medications: ['warfarin'], subtypes: [] })
+  const beans = ALL.filter((f) => /낫토|청국장/.test(f.name) && !/과자|쿠키|칩|스낵|캔디|사탕|젤리|빵|케이크|크래커|향|국수|파스타|소스|시즈닝|환$|분말|가루|키나제/.test(f.name))
+  if (beans.length < 20) hard.push(`낫토·청국장 검사가 헛돎 — ${beans.length}종`)
+  let ok = 0
+  for (const f of beans) {
+    const lv = evaluateFood(f, w, 1).level
+    if (lv === 'caution' || lv === 'avoid') ok++
+    else note('와파린을 드시는데 낫토·청국장에 주의가 없음', `${f.name} → ${lv ?? '표시 없음'}`)
+  }
+  if (ok / Math.max(1, beans.length) < 0.9) hard.push(`와파린을 드시는데 낫토·청국장이 주의가 아닌 것이 많음 — ${ok}/${beans.length}`)
 }
 
 /* ════ 7. 모든 분께 뜨는 '피하세요·주의' — 사람이 한 번 읽어 볼 목록 ═══ */
@@ -430,6 +467,10 @@ if (hard.length) {
 for (const [k, f] of [...look].sort((a, b) => b[1].n - a[1].n)) {
   console.log(`\n■ ${k} — ${f.n.toLocaleString()}건`)
   for (const e of f.ex) console.log('   -', e)
+}
+if (decided.size) {
+  console.log('\n□ 정해진 것 (다시 묻지 않음)')
+  for (const [k, n] of decided) console.log(`   - ${k}: ${n}`)
 }
 console.log(`\n□ 시기·약과 무관하게 뜨는 피하세요·주의 ${universal.length}건 (읽어 보실 목록)`)
 for (const { r, where } of universal) console.log(`   - [${r.level === 'avoid' ? '피하세요' : '주의'}·${where}] ${r.title}`)

@@ -2,6 +2,7 @@ import type {
   Food, NutritionRule, PatientContext, RuleLevel, RuleMatch,
   SelectedItem, Supplement, Interaction
 } from '../data/types'
+import { isDrink } from '../data/types'
 import { FOOD_BY_ID } from '../data/foods'
 import { CANCER_BY_ID } from '../data/cancers'
 import { COMMON_RULES } from '../data/commonRules'
@@ -51,8 +52,14 @@ function matchesFood(match: RuleMatch, food: Food, servings = 1): boolean {
      * 한 성분만 곱해 본다. foodContribution 은 성분 스물아홉 개를 모두 계산해 새 객체를 만드는데,
      * 이 자리는 음식 하나를 볼 때마다 규칙 수만큼 불린다 — 그대로 불렀더니 29만 종 훑기가 여섯 배 느려졌다.
      */
-    const per100 = food.per100[match.minServing.key]
-    if (typeof per100 === 'number' && (per100 * food.serving.g) / 100 < match.minServing.value) return false
+    const { key, value, liquidPer100 } = match.minServing
+    const per100 = food.per100[key]
+    if (typeof per100 === 'number' && (per100 * food.serving.g) / 100 < value) {
+      /* 마시는 것은 고시대로 100 mL 당으로도 본다 — 100 g 으로만 적힌 우유가 여기서 살아난다 */
+      const drink = liquidPer100 !== undefined && food.serving.g >= 100 &&
+        per100 >= liquidPer100 && isDrink(food)
+      if (!drink) return false
+    }
   }
 
   if (match.foodIds?.includes(food.id)) return true
@@ -83,6 +90,14 @@ function matchesSupplement(match: RuleMatch, s: Supplement): boolean {
 function appliesToPhase(rule: NutritionRule, patient: PatientContext): boolean {
   if (!rule.phases || rule.phases.length === 0) return true
   if (rule.phases.includes('all')) return true
+  /*
+   * 증상에서 '호중구감소증' 을 고르신 분도 호중구가 낮은 분이다.
+   *
+   * 한동안 '호중구감소 시기' 규칙은 치료 시기로 고르신 분께만 켜졌다. 그래서 시기는 '항암치료 중' 으로 두고
+   * 증상에서 호중구감소증을 고르신 분께는 회덮밥·육회비빔밥이 아무 말 없이 지나갔고 모듬회는 '권장' 으로 떴다
+   * (증상 규칙은 손으로 붙인 '생식' 태그만 보았다). 같은 상태를 두 군데서 고를 수 있으면 두 길 모두 같은 답이 나와야 한다.
+   */
+  if (rule.phases.includes('neutropenia') && patient.conditions.includes('호중구감소증')) return true
   return rule.phases.includes(patient.phase)
 }
 
@@ -213,7 +228,11 @@ export function evaluateFood(
    * 다만 화면에 "견과를 드세요" 와 "견과를 피하세요" 가 나란히 붙으면
    * 무엇을 믿어야 할지 알 수 없다. 결론이 '피하세요' 라면 그 이유만 보여 준다.
    */
-  const hits = level === 'avoid' ? all.filter((h) => h.rule.level !== 'prefer') : all
+  const shown = level === 'avoid' ? all.filter((h) => h.rule.level !== 'prefer') : all
+
+  /* 같은 말을 두 번 하지 않는다 — 다른 규칙이 '내가 대신 말한다' 고 한 것은 뺀다 (types.ts 의 supersedes) */
+  const covered = new Set(shown.flatMap((h) => h.rule.supersedes ?? []))
+  const hits = covered.size ? shown.filter((h) => !covered.has(h.rule.id)) : shown
 
   return { food, level, hits, interactions }
 }

@@ -1,4 +1,5 @@
 import type { CancerProfile } from '../types'
+import { SOURCE_PER_SERVING } from '../types'
 
 export const liver: CancerProfile = {
   id: 'liver',
@@ -54,7 +55,7 @@ export const liver: CancerProfile = {
     {
       id: 'liver-protein',
       level: 'prefer',
-      match: { minServing: { key: 'protein', value: 5 }, tags: ['고단백'] },
+      match: { minServing: SOURCE_PER_SERVING.protein, tags: ['고단백'] },
       title: '간이 나쁘다고 단백질을 줄이는 것은 오래된 오해입니다',
       reason:
         '유럽간학회 지침은 간경변 환자에게 체중 1 kg 당 1.2~1.5 g 의 단백질을 권고합니다. ' +
@@ -106,7 +107,7 @@ export const liver: CancerProfile = {
         '국물·젓갈·장아찌·라면 국물이 실제로 제한을 깨뜨리는 주범입니다. ' +
         '반대로 하루 60 mmol(나트륨 약 1,400 mg) 아래로 줄이는 것은 권하지 않습니다 — ' +
         '음식이 맛없어져 드시는 양 자체가 줄면 영양이 먼저 무너집니다. ' +
-        '위에서 복수를 동반 상태로 선택하시면 판정이 금기 수준으로 올라갑니다.',
+        "위에서 복수를 동반 상태로 선택하시면 판정이 '피하세요' 로 올라갑니다.",
       evidence: 'G',
       refIds: ['easl-nutrition']
     },

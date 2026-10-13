@@ -16,7 +16,7 @@ export const poultryEgg = [
     ['고단백', '부드러움', '수분보충'], { note: '국물까지 먹으면 1그릇 나트륨이 2,000 mg 을 넘길 수 있다' }),
   F('egg-boiled', '달걀(삶은 것)', '가금류·난류', 'ingredient', 55, '1개',
     { kcal: 155, carb: 1.1, protein: 12.6, fat: 10.6, satFat: 3.3, chol: 373, na: 124, k: 126, ca: 50, p: 172, mg: 10, fe: 1.2, zn: 1.1, se: 31, vitA: 149, vitD: 2.0, vitE: 1.0, b2: 0.51, b12: 1.1, folate: 44 },
-    ['고단백', '부드러움'], { src: 'rda', note: '완전히 익힌 것만 섭취 — 반숙은 호중구감소증에서 금기' }),
+    ['고단백', '부드러움'], { src: 'rda', note: '완전히 익힌 것만 섭취 — 반숙은 호중구감소증에서 피하세요' }),
   F('egg-raw-yolk', '날달걀·반숙', '가금류·난류', 'ingredient', 55, '1개',
     { kcal: 143, carb: 0.7, protein: 12.6, fat: 9.5, satFat: 3.1, chol: 372, na: 142, k: 138, ca: 56, p: 198, fe: 1.8, zn: 1.3, vitA: 160, vitD: 2.0, b12: 0.9 },
     ['생식', '고단백'], { note: '살모넬라 위험 — 호중구감소증·항암 중에는 피한다' }),

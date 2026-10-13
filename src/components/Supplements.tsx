@@ -289,7 +289,7 @@ export function Supplements({
           <>
             <p className="mb-2 text-[11px] text-stone-400">
               {pick !== 'none'
-                ? <>{pick === 'good' ? '권장' : '주의·금기'} 원료가 든 제품 {market.length}건{market.length >= 60 && ' 이상'}</>
+                ? <>{pick === 'good' ? '권장' : '주의·피하세요'} 원료가 든 제품 {market.length}건{market.length >= 60 && ' 이상'}</>
                 : q.trim()
                   ? <>&lsquo;{q.trim()}&rsquo; 검색 결과 {market.length}건{market.length >= 30 && ' 이상'}</>
                   : <>45,618종 가운데 처음 {market.length}건입니다. 위 단추나 검색으로 좁혀 보세요.</>}
