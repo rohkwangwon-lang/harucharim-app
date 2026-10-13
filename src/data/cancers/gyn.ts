@@ -83,7 +83,7 @@ export const gyn: CancerProfile = {
     {
       id: 'gyn-bone',
       level: 'prefer',
-      match: { tags: ['고칼슘'], supplementCategories: ['칼슘·마그네슘', '비타민D'] },
+      match: { minServing: { key: 'ca', value: 80 }, tags: ['고칼슘'], supplementCategories: ['칼슘·마그네슘', '비타민D'] },
       title: '수술적 폐경 이후에는 골밀도가 빠르게 떨어집니다',
       reason:
         '난소를 절제하면 에스트로겐이 급격히 사라져, 자연 폐경보다 골 소실 속도가 빠릅니다. ' +

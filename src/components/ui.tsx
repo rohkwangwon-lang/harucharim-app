@@ -181,11 +181,18 @@ export function Stat({
     : tone === 'bad' ? 'text-danger-700'
     : 'text-stone-900'
   return (
-    <div className="card px-3.5 py-3">
+    <div className="card min-w-0 px-3.5 py-3">
       <div className="text-[11px] font-medium text-stone-500">{label}</div>
-      <div className={`mt-1 text-xl font-bold tabular-nums ${toneCls}`}>
-        {value}
-        {unit && <span className="ml-0.5 text-xs font-medium text-stone-400">{unit}</span>}
+      {/*
+        * 숫자가 칸보다 길면 줄을 바꾼다. 가장 큰 글씨로 폭 360 px 폰에서 보면 "2100~2400 kcal" 이나
+        * 다섯 자리 나트륨이 칸을 넘어 화면 전체가 옆으로 밀렸다. '~' 는 줄바꿈 자리가 아니라서
+        * 뒤에 보이지 않는 틈을 넣고, 그래도 안 들어가면 숫자 사이에서라도 꺾는다.
+        * 보통 크기에서도 폭 360 px 에서는 "1865~223" 처럼 뒤가 잘려 보였다 — 넘치지 않고 잘려서 시험에 안 걸렸다.
+        * 키운 글씨에서 숫자를 덜 키우는 것은 index.css 의 .stat-value.
+        */}
+      <div className={`stat-value mt-1 flex flex-wrap items-baseline gap-x-0.5 text-xl font-bold tabular-nums ${toneCls}`}>
+        <span className="min-w-0 [overflow-wrap:anywhere]">{value.replace(/~/g, '~\u200b')}</span>
+        {unit && <span className="text-xs font-medium text-stone-400">{unit}</span>}
       </div>
       {hint && <div className="mt-0.5 text-[11px] leading-tight text-stone-400">{hint}</div>}
     </div>

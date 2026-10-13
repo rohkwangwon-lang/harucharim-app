@@ -1,4 +1,5 @@
 import { readFileSync, readdirSync } from 'node:fs'
+import { envSeed } from './_seed'
 import { portionLabel } from '../../src/lib/portion'
 import { INGREDIENT_DISHES } from '../../src/data/foods/ingredientDishes'
 /**
@@ -20,7 +21,7 @@ import { evaluateFood } from '../../src/engine/rules'
 /** 조미료처럼 이름에 조리가 들어가도 재료인 것 */
 const SEASONING_LIKE = /^(고춧가루|참기름|들기름|멸치액젓|새우젓|멸치젓|멸치육수)$/
 
-let seed = 777
+let seed = envSeed(777)
 const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff }
 const pick = <T,>(a: T[]): T => a[Math.floor(rnd() * a.length) % a.length]
 

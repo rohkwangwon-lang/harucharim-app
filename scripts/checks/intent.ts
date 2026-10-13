@@ -15,6 +15,7 @@
  * 기준에 못 미칠 때만 신고한다.
  */
 import { buildDayMenu, fiberGoal, ideasFromIngredients } from '../../src/engine/menu'
+import { envSeed } from './_seed'
 import { adviseSupplements } from '../../src/engine/supplementAdvice'
 import { evaluateFood, activeRules, activeInteractions } from '../../src/engine/rules'
 import { microTargets, personalTarget, foodContribution, sumIntake, restingEnergy } from '../../src/engine/nutrition'
@@ -40,7 +41,7 @@ const bad = (k: string, d: string) => {
   if (!seenBug.has(s)) { seenBug.add(s); bugs.push(s) }
 }
 
-let seed = 20260826
+let seed = envSeed(20260826)
 const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff }
 const pick = <T,>(a: readonly T[]): T => a[Math.floor(rnd() * a.length) % a.length]
 const some = <T,>(a: readonly T[], p: number): T[] => a.filter(() => rnd() < p)

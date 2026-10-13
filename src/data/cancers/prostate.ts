@@ -1,4 +1,5 @@
 import type { CancerProfile } from '../types'
+import { PLANT_FOOD_GROUPS } from '../types'
 
 export const prostate: CancerProfile = {
   id: 'prostate',
@@ -81,7 +82,7 @@ export const prostate: CancerProfile = {
       id: 'prostate-adt-protein',
       subtypes: ['안드로겐차단요법중'],
       level: 'prefer',
-      match: { tags: ['고단백'] },
+      match: { minServing: { key: 'protein', value: 5 }, tags: ['고단백'] },
       title: 'ADT 중에는 단백질과 근력운동으로 근육을 지켜야 합니다',
       reason:
         '안드로겐이 차단되면 근육량이 줄고 내장지방이 늘어 인슐린 저항성과 심혈관 위험이 함께 올라갑니다. ' +
@@ -99,7 +100,7 @@ export const prostate: CancerProfile = {
       id: 'prostate-adt-bone',
       subtypes: ['안드로겐차단요법중'],
       level: 'prefer',
-      match: { supplementCategories: ['칼슘·마그네슘', '비타민D'], tags: ['고칼슘'] },
+      match: { minServing: { key: 'ca', value: 80 }, supplementCategories: ['칼슘·마그네슘', '비타민D'], tags: ['고칼슘'] },
       title: 'ADT 중 칼슘·비타민 D 는 골절 예방의 기본입니다',
       reason:
         /*
@@ -135,7 +136,7 @@ export const prostate: CancerProfile = {
     {
       id: 'prostate-veg-fat',
       level: 'prefer',
-      match: { tags: ['고식이섬유'], groups: ['채소', '두류·대두가공'] },
+      match: { restrictGroups: PLANT_FOOD_GROUPS, tags: ['고식이섬유'], groups: ['채소', '두류·대두가공'] },
       title: '전립선암에서는 체중보다 식사 패턴 쪽 근거가 더 뚜렷합니다',
       reason:
         '미국암학회 2022년 지침은 서구식 식사가 전립선암 사망·전체 사망과, 지중해식 식사가 낮은 전체 사망과 연결된다고 정리했습니다. ' +

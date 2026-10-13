@@ -6,7 +6,8 @@
  * 화면에 밝히고 있는지를 본다. 조용히 목표를 낮추면 앱이 덜 먹으라고
  * 하는 것처럼 읽히는데, 그건 암환자에게 위험한 오해다.
  */
-import { personalTarget, dosingWeight, targetNotes, nutritionRisk } from '../../src/engine/nutrition'
+import { personalTarget, dosingWeight, targetNotes, nutritionRisk, effectiveLossPct, restingEnergy } from '../../src/engine/nutrition'
+import { envSeed } from './_seed'
 import { fiberGoal, planNotes } from '../../src/engine/menu'
 import { CANCERS } from '../../src/data/cancers'
 import { DEFAULT_PATIENT } from '../../src/lib/store'
@@ -16,7 +17,7 @@ const bugs: string[] = []
 const seenB = new Set<string>()
 const bad = (k: string, d: string) => { const s = `${k} :: ${d}`; if (!seenB.has(s)) { seenB.add(s); bugs.push(s) } }
 
-let seed = 90210
+let seed = envSeed(90210)
 const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff }
 const pick = <T,>(a: T[]): T => a[Math.floor(rnd() * a.length) % a.length]
 
@@ -87,6 +88,21 @@ for (let i = 0; i < 3000; i++) {
     adjusted++
     if (t.kcal[0] < base.kcal[0]) lowered++
     if (notes.length === 0) bad('목표를 조정했는데 사유를 밝히지 않음', `${ctx} ${base.kcal} → ${t.kcal}`)
+    /*
+     * 사유가 말하는 숫자가 실제로 낮춘 만큼인가.
+     * 한동안 사유 글은 6 % 를 낮추고도 늘 "13 %만 낮췄습니다" 라고 적었다 — 낮추는 셈과
+     * 사유를 적는 셈이 따로 있었기 때문이다. 여기서는 목표 숫자에서 직접 비율을 구해 견준다.
+     */
+    const gainNote = targetNotes(patient).find((n) => /체중 증가를 걱정/.test(n.reason))
+    if (gainNote && base.kcal[1] > 0 && effectiveLossPct(patient) < 5) {
+      const actual = (1 - t.kcal[1] / base.kcal[1]) * 100
+      const said = gainNote.reason.match(/(\d+) %만 낮췄습니다/)
+      const lt1 = /1 % 미만만 낮췄습니다/.test(gainNote.reason)
+      if (!said && !lt1) bad('하향 사유에 얼마나 낮췄는지가 없음', `${ctx}`)
+      /* 목표는 정수로 반올림되고 바닥(휴식대사량)이 걸릴 수 있어 2 %p 의 여유를 둔다 */
+      else if (said && Math.abs(Number(said[1]) - actual) > 2 && t.kcal[0] > Math.round(restingEnergy(patient) * 1.05))
+        bad('하향 사유의 숫자가 실제와 다름', `${ctx} 사유 ${said[1]} % · 실제 ${actual.toFixed(1)} %`)
+    }
   }
   for (const a of notes) {
     if (!a.label?.trim()) bad('조정 사유에 제목 없음', ctx)

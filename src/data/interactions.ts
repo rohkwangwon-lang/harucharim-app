@@ -189,6 +189,11 @@ evidence: 'C',
   {
     id: 'int-capecitabine-warfarin',
     agent: 'capecitabine',
+    /*
+     * 와파린을 함께 드실 때만 낸다. 이 조건이 없던 동안에는 카페시타빈만 고른 분께도
+     * 비타민 K 음식마다 "와파린 효과를 크게 증폭시킵니다" 가 떴다 — 드시지 않는 약 이야기다.
+     */
+    alsoTaking: { medications: ['warfarin'], conditions: ['와파린복용'] },
     match: { tags: ['고비타민K'] },
     level: 'caution',
     title: '카페시타빈은 와파린 효과를 크게 증폭시킵니다',

@@ -15,6 +15,7 @@
  *   7. 바꿔 넣은 뒤에도 합계와 끼니별 소계가 어긋나지 않는다
  */
 import { buildDayMenu, recentFoods } from '../../src/engine/menu'
+import { envSeed } from './_seed'
 import { foodContribution } from '../../src/engine/nutrition'
 import { mealRole } from '../../src/data/foods'
 import { CANCERS, CANCER_BY_ID } from '../../src/data/cancers'
@@ -25,7 +26,7 @@ import type { Food, MealSlot, PatientCondition, Phase, SelectedItem } from '../.
 const PEOPLE = Number(process.env.PEOPLE ?? 600)
 const DAYS = Number(process.env.DAYS ?? 21)
 
-let seed = 20260826
+let seed = envSeed(20260826)
 const rnd = () => {
   seed = (seed + 0x6d2b79f5) | 0
   let t = seed

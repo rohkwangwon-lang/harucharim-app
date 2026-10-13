@@ -168,6 +168,12 @@ export const COMMON_RULES: NutritionRule[] = [
   {
     id: 'common-grapefruit',
     level: 'avoid',
+    /*
+     * 항암제를 쓰는 동안에만 낸다(2026-10 — 감수하신 선생님의 결정).
+     * 그전에는 약을 안 드시는 분, 치료를 마친 분께도 떴다. 아래 이유 글의 마지막 문장이
+     * "문제가 되는 것은 먹는 약" 이라고 하면서, 규칙은 모두에게 걸려 있었다.
+     */
+    onAnticancer: true,
     match: { tags: ['자몽계'] },
     title: '자몽·자몽주스는 항암제 농도를 예측할 수 없게 바꿉니다',
     reason:
@@ -229,7 +235,7 @@ export const COMMON_RULES: NutritionRule[] = [
     id: 'common-protein',
     level: 'prefer',
     // 젓갈·자반도 단백질이지만 그것 때문에 권할 것은 아니다
-    match: { tags: ['고단백'], excludeTags: ['염장', '가공육', '훈제'] },
+    match: { minServing: { key: 'protein', value: 5 }, tags: ['고단백'], excludeTags: ['염장', '가공육', '훈제'] },
     /*
      * 제목에 '치료 중' 을 못박아 두었더니, 치료를 마치신 분께도 그대로 떴다.
      * 단백질을 챙길 이유는 시기마다 다르다 — 치료 중에는 완주와 회복이고,

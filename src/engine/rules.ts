@@ -6,11 +6,14 @@ import { FOOD_BY_ID } from '../data/foods'
 import { CANCER_BY_ID } from '../data/cancers'
 import { COMMON_RULES } from '../data/commonRules'
 import { CONDITION_RULES } from '../data/conditionRules'
-import { INTERACTIONS } from '../data/interactions'
+import { INTERACTIONS, MEDICATIONS } from '../data/interactions'
 import { foodContribution } from './nutrition'
 
 /** 규칙의 강도 — 여러 규칙이 같은 식품에 걸리면 강한 쪽을 대표로 쓴다 */
 const LEVEL_RANK: Record<RuleLevel, number> = { avoid: 3, caution: 2, prefer: 1, info: 0 }
+
+/** 이 태그가 붙은 음식은 권할 음식으로 내세우지 않는다 — evaluateFood 참조 */
+const NO_PRAISE_TAGS = new Set<string>(['염장', '가공육', '훈제'])
 
 export interface RuleHit {
   rule: NutritionRule
@@ -42,6 +45,15 @@ function matchesFood(match: RuleMatch, food: Food, servings = 1): boolean {
   if (match.restrictGroups && !match.restrictGroups.includes(food.group)) return false
   // excludeTags 도 AND 조건. 하나라도 걸리면 이 규칙은 이 음식에 해당하지 않는다.
   if (match.excludeTags?.some((t) => food.tags.includes(t))) return false
+  // minServing 도 AND 조건. 1회 분량에 그만큼 들어 있지 않으면 해당하지 않는다(모르면 통과).
+  if (match.minServing) {
+    /*
+     * 한 성분만 곱해 본다. foodContribution 은 성분 스물아홉 개를 모두 계산해 새 객체를 만드는데,
+     * 이 자리는 음식 하나를 볼 때마다 규칙 수만큼 불린다 — 그대로 불렀더니 29만 종 훑기가 여섯 배 느려졌다.
+     */
+    const per100 = food.per100[match.minServing.key]
+    if (typeof per100 === 'number' && (per100 * food.serving.g) / 100 < match.minServing.value) return false
+  }
 
   if (match.foodIds?.includes(food.id)) return true
   if (match.groups?.includes(food.group)) return true
@@ -87,7 +99,31 @@ function appliesToSubtype(rule: NutritionRule, patient: PatientContext): boolean
   return rule.subtypes.some((t) => mine.includes(t))
 }
 
+/**
+ * 항암제로 치는 약의 계열.
+ *
+ * 항호르몬제(타목시펜·아로마타제 억제제·ADT)는 넣지 않았다. 수년씩 드시는 약이라
+ * 여기에 넣으면 그 기간 내내 '항암제를 쓰는 중' 이 된다. 넣을지는 임상 판단이다.
+ * 항응고제·보조약제는 항암제가 아니다.
+ */
+const ANTICANCER_CLASSES = new Set(['경구 항암제', '표적치료제', '항암제'])
+const MED_CLASS: Record<string, string> = Object.fromEntries(MEDICATIONS.map((m) => [m.id, m.cls]))
+
+/**
+ * 지금 항암제를 쓰고 계신가.
+ *
+ * 두 길 가운데 하나면 그렇다고 본다.
+ *  · 치료 시기가 '항암치료 중' 이거나 '호중구감소증' — 약을 고르지 않으셨어도 항암제를 쓰는 시기다
+ *  · 복용 약에 항암제 계열이 있다 — 시기를 무엇으로 고르셨든 (방사선과 함께 드시는 카페시타빈,
+ *    치료를 마쳤다고 고르고 유지요법으로 드시는 표적치료제)
+ */
+export function onAnticancerDrug(patient: PatientContext): boolean {
+  if (patient.phase === 'during_chemo' || patient.phase === 'neutropenia') return true
+  return (patient.medications ?? []).some((id) => ANTICANCER_CLASSES.has(MED_CLASS[id]))
+}
+
 function applies(rule: NutritionRule, patient: PatientContext): boolean {
+  if (rule.onAnticancer && !onAnticancerDrug(patient)) return false
   return appliesToPhase(rule, patient) && appliesToSubtype(rule, patient)
 }
 
@@ -117,7 +153,12 @@ export function activeRules(patient: PatientContext): RuleHit[] {
 
 /** 환자가 복용 중인 약제에 해당하는 상호작용만 추린다 */
 export function activeInteractions(patient: PatientContext): InteractionHit[] {
-  return INTERACTIONS.filter((i) => patient.medications.includes(i.agent)).map((i) => ({
+  const also = (i: (typeof INTERACTIONS)[number]) => {
+    if (!i.alsoTaking) return true
+    const meds = i.alsoTaking.medications ?? [], conds = i.alsoTaking.conditions ?? []
+    return meds.some((m) => patient.medications.includes(m)) || conds.some((c) => patient.conditions.includes(c))
+  }
+  return INTERACTIONS.filter((i) => patient.medications.includes(i.agent) && also(i)).map((i) => ({
     interaction: i,
     medicationName: i.agent
   }))
@@ -140,8 +181,23 @@ export function evaluateFood(
   const rules = cached?.rules ?? activeRules(patient)
   const inter = cached?.interactions ?? activeInteractions(patient)
 
-  const all = rules.filter((h) => matchesFood(h.rule.match, food, servings))
-  const interactions = inter.filter((h) => matchesFood(h.interaction.match, food, servings))
+  /*
+   * 염장·가공육·훈제 음식에는 '권장' 을 붙이지 않는다.
+   *
+   * 공통 단백질 규칙은 이 셋을 제외한다고 적어 두었고, 공통 채소 규칙도 염장을 뺀다.
+   * 그런데 그 제외가 그 두 규칙에만 있었다. 암종별 권장 규칙 22개에는 없어서
+   * 굴비(자반)가 폐암·췌장암에서 "체중을 지키는 것이 가장 중요한 영양 목표" 로,
+   * 런천미트가 간암에서 "자기 전 간단한 야식이 근육 손실을 줄입니다" 로,
+   * 배추김치가 유방암에서 "채소 중심 식사" 로 **권장**이 되었다(2026-10, 상식 검사가 찾음).
+   *
+   * 규칙마다 제외를 달면 다음 규칙에서 또 빠진다. 그래서 판정하는 이 한 자리에서 막는다.
+   * 드시지 말라는 뜻이 아니다 — 권할 음식으로 내세우지 않을 뿐이고, 주의·피하세요는 그대로 간다.
+   */
+  const noPraise = food.tags.some((t) => NO_PRAISE_TAGS.has(t))
+  const all = rules.filter((h) =>
+    !(noPraise && h.rule.level === 'prefer') && matchesFood(h.rule.match, food, servings))
+  const interactions = inter.filter((h) =>
+    !(noPraise && h.interaction.level === 'prefer') && matchesFood(h.interaction.match, food, servings))
 
   const level = strongestLevel([
     ...all.map((h) => h.rule.level),

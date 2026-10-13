@@ -13,6 +13,7 @@
  * 놓이는 것을 이 앱은 이미 한 번 겪었다(위암의 갓김치).
  */
 import { microTargets, foodContribution, nutritionRisk } from '../../src/engine/nutrition'
+import { envSeed } from './_seed'
 import { buildDayMenu, dayNotes, microUnknownNames } from '../../src/engine/menu'
 import { adviseSupplements, adviseForShortfall } from '../../src/engine/supplementAdvice'
 import { activeInteractions, activeRules, evaluateFood, evaluateSupplement } from '../../src/engine/rules'
@@ -27,7 +28,7 @@ const bugs: string[] = []
 const seen = new Set<string>()
 const bad = (k: string, d: string) => { const s = `${k} :: ${d}`; if (!seen.has(s)) { seen.add(s); bugs.push(s) } }
 
-let seed = 20260825
+let seed = envSeed(20260825)
 const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff }
 const pick = <T,>(a: T[]): T => a[Math.floor(rnd() * a.length) % a.length]
 const some = <T,>(a: T[], p: number): T[] => a.filter(() => rnd() < p)

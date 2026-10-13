@@ -4,6 +4,7 @@
  * "이건 절대 일어나면 안 된다"에 해당하는 것들을 잡아낸다.
  */
 import { buildDayMenu, dayNotes, ideasFromIngredients, suggestAlternative, defaultSlotFor, MEAL_SLOTS } from '../../src/engine/menu'
+import { envSeed } from './_seed'
 import { evaluateFood, evaluateSelection, activeRules, activeInteractions, evaluateSupplement } from '../../src/engine/rules'
 import { foodContribution, sumIntake, personalTarget, nutritionRisk, getDailyReference } from '../../src/engine/nutrition'
 import { summarizeDay } from '../../src/engine/dayScore'
@@ -39,7 +40,7 @@ function mustNotServe(f: Food, servings: number): string | null {
 }
 
 // 재현 가능한 난수
-let seed = 20260821
+let seed = envSeed(20260821)
 const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff }
 const pick = <T,>(a: T[]): T => a[Math.floor(rnd() * a.length) % a.length]
 const some = <T,>(a: T[], max: number): T[] => {

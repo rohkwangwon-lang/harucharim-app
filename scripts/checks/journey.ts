@@ -10,6 +10,7 @@
  * 상태가 바뀌었는데 식단이 그대로이지 않은지, 어느 날 갑자기 무너지지 않는지.
  */
 import { buildDayMenu, recentFoods, fiberGoal, dayNotes, naUnknownNames } from '../../src/engine/menu'
+import { envSeed } from './_seed'
 import { summarizeDay } from '../../src/engine/dayScore'
 import { evaluateFood, activeRules, activeInteractions, evaluateSelection } from '../../src/engine/rules'
 import { foodContribution, personalTarget, targetNotes } from '../../src/engine/nutrition'
@@ -44,7 +45,7 @@ function mustNotServe(f: Food, servings: number): string | null {
   return null
 }
 
-let seed = 20260824
+let seed = envSeed(20260824)
 const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff }
 const pick = <T,>(a: T[]): T => a[Math.floor(rnd() * a.length) % a.length]
 

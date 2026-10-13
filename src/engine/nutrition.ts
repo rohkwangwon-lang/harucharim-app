@@ -279,6 +279,35 @@ export function restingEnergy(patient: PatientContext): number {
 }
 
 /** 환자 상태에 따른 개인별 열량·단백질 목표 (ESPEN 기반, 암종 프로필의 target 을 받아 계산) */
+/**
+ * 열량 목표를 얼마나 낮추는가.
+ *
+ * 이 셈이 두 군데에 따로 있었다 — 목표를 내는 자리(personalTarget)와 사유를 적는 자리(targetNotes).
+ * 낮추는 쪽은 경계에서 툭 떨어지지 않게 BMI 22 부터 서서히 걸었는데, 사유는 BMI 23 부터 적었다.
+ * 그래서 BMI 22~23 인 분은 목표가 깎이면서 설명을 듣지 못했고, 사유 글은 실제로 6 % 를 낮추고도
+ * 늘 "13 %만 낮췄습니다" 라고 적었다. 치료를 마친 분의 하향(BMI 19 부터 걸고 20 부터 적음)도 같았다.
+ * 새 씨앗으로 돌린 무작위 시험이 142 cm·45 kg 인 분에게서 찾았다(2026-10).
+ *
+ *  · gain   — 체중 증가를 걱정하시는 분. BMI 22~24 에 걸쳐 0 → 13 %
+ *  · settle — 치료를 마치고 체중이 지켜지는 분. BMI 19~21 에 걸쳐 0 → 15 %
+ *  · applied — 둘 가운데 큰 쪽. 체중이 5 % 이상 줄었으면 낮추지 않는다(0)
+ */
+export function kcalCut(patient: PatientContext): { gain: number; settle: number; applied: number } {
+  const h = patient.heightCm / 100
+  const bmi = h > 0 ? patient.weightKg / (h * h) : 22
+  if (effectiveLossPct(patient) >= 5) return { gain: 0, settle: 0, applied: 0 }
+  const ramp = (v: number, from: number, to: number) => Math.max(0, Math.min(1, (v - from) / (to - from)))
+  const gain = patient.conditions.includes('체중증가') ? 0.13 * ramp(bmi, 22, 24) : 0
+  const settle = patient.phase === 'survivorship' ? 0.15 * ramp(bmi, 19, 21) : 0
+  return { gain, settle, applied: Math.max(gain, settle) }
+}
+
+/** 낮춘 정도를 사람에게 말하는 꼴로 — 0.4 % 를 "1 %" 라 하지 않는다 */
+function cutText(cut: number): string {
+  const pct = cut * 100
+  return pct < 0.5 ? '1 % 미만' : `${Math.round(pct)} %`
+}
+
 export function personalTarget(
   patient: PatientContext,
   kcalPerKg: [number, number],
@@ -309,8 +338,6 @@ export function personalTarget(
    * 49 kg 일 때 1,225~1,470 이던 목표가 50 kg 이 되자 1,063~1,275 로 떨어졌다.
    * 1 kg 늘었다고 하루 180 kcal 을 덜 드시라는 말이 된다.
    */
-  const ramp = (v: number, from: number, to: number) =>
-    Math.max(0, Math.min(1, (v - from) / (to - from)))
 
   /*
    * 치료를 마치신 분은 유지 수준으로 본다.
@@ -322,10 +349,8 @@ export function personalTarget(
    *
    * 체중이 줄고 있거나 저체중이면 이 조정을 하지 않는다 — 그때는 채우는 것이 먼저다.
    */
-  /* 체중이 늘고 있는 분(BMI 22~24 에 걸쳐) · 치료를 마치고 자리 잡으신 분(BMI 19~21 에 걸쳐) */
-  const gainCut = patient.conditions.includes('체중증가') ? 0.13 * ramp(bmi, 22, 24) : 0
-  const settleCut = patient.phase === 'survivorship' && !losing ? 0.15 * ramp(bmi, 19, 21) : 0
-  const scale = losing ? 1 : 1 - Math.max(gainCut, settleCut)
+  /* 얼마나 낮추는지는 kcalCut 한 곳에서 셈한다 — 사유를 적는 targetNotes 도 같은 값을 본다 */
+  const scale = 1 - kcalCut(patient).applied
 
   /*
    * 30~35 kcal/kg 은 실제로 마르고 계신 분께만 쓴다.
@@ -457,16 +482,18 @@ export function targetNotes(patient: PatientContext): TargetNote[] {
     })
   }
 
-  if (patient.conditions.includes('체중증가') && bmi >= 23 && loss < 5) {
+  const cut = kcalCut(patient)
+  if (cut.gain > 0) {
     out.push({
       label: '열량 목표를 한 단계 낮췄습니다',
       reason:
-        '체중 증가를 걱정하고 계시고 과체중 범위입니다. 암종별 기준값은 체중을 지키거나 회복시키기 위한 것이라 ' +
-        '그대로 두면 매일 "열량이 모자랍니다" 라고 말하게 됩니다. 다만 치료 중 급격한 감량은 권하지 않아 13 %만 낮췄습니다.'
+        '체중 증가를 걱정하고 계십니다. 암종별 기준값은 체중을 지키거나 회복시키기 위한 것이라 ' +
+        '그대로 두면 매일 "열량이 모자랍니다" 라고 말하게 됩니다. 다만 치료 중 급격한 감량은 권하지 않아 ' +
+        `${cutText(cut.applied)}만 낮췄습니다.`
     })
   }
 
-  if (patient.phase === 'survivorship' && loss < 5 && bmi >= 20) {
+  if (cut.settle > 0) {
     out.push({
       label: '치료를 마치셔서 유지 수준으로 잡았습니다',
       reason:

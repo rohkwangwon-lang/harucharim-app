@@ -4,6 +4,10 @@ import { normalizeSlot } from '../data/types'
 import { FOOD_BY_ID } from '../data/foods'
 import { observedWeightLoss } from '../engine/nutrition'
 import { defaultSlotFor } from '../engine/menu'
+import { CANCER_BY_ID } from '../data/cancers'
+import { CONDITION_RULES } from '../data/conditionRules'
+import { MEDICATIONS } from '../data/interactions'
+import { SUBTYPE_OPTIONS } from '../data/types'
 import { today as todayKey, type DayKey } from './day'
 
 const STORAGE_KEY = 'harucharim.state.v1'
@@ -98,39 +102,155 @@ function normalizeDay(list: SelectedItem[]): SelectedItem[] {
   return out
 }
 
+/* ── 불러올 때 자료를 정리한다 ─────────────────────────────
+ *
+ * 이 앱의 건강 기록은 서버에 사본이 없다. 그래서 저장된 값 하나가 어긋나 화면이 멈추면
+ * 환자분은 기록에 닿을 길이 없다 — "다시 열기" 를 눌러도 같은 자리에서 또 멈춘다.
+ *
+ * 한동안 불러오기는 저장된 것을 그대로 믿었다. 화면 자가시험(2026-10)이 낡거나 망가진
+ * 자료 서른네 가지를 넣어 보니 다섯 가지가 화면을 멈췄다 — 없어진 암종, 목록 모양으로 적힌 체중,
+ * 목록이 아닌 증상·영양제, null 인 약. 두 가지는 "NaN kcal"·"BMI Infinity" 를 화면에 냈다.
+ * 예전 판이 남긴 자료와 앞으로 없앨 항목이 모두 이 길로 들어온다.
+ *
+ * 원칙은 둘이다.
+ *  · 성한 것은 손대지 않는다. 고칠 수 있는 것은 고쳐서 살린다(목록 모양 체중 → 날짜별 표).
+ *  · 암종·시기·몸 치수처럼 판정의 바탕이 되는 값이 어긋났으면, 기본값으로 **조용히 바꾸지 않고**
+ *    처음 설정을 다시 여쭌다. 유방암으로 슬쩍 바뀐 채 다른 암의 안내를 보시면 안 된다.
+ *    그때도 적어 두신 식단과 체중은 그대로 둔다.
+ */
+const isObj = (v: unknown): v is Record<string, unknown> =>
+  typeof v === 'object' && v !== null && !Array.isArray(v)
+const asNum = (v: unknown): number | undefined => {
+  const n = typeof v === 'string' && v.trim() !== '' ? Number(v) : v
+  return typeof n === 'number' && Number.isFinite(n) ? n : undefined
+}
+const asList = (v: unknown): unknown[] => (Array.isArray(v) ? v : [])
+const DAY_KEY = /^\d{4}-\d{2}-\d{2}$/
+const KNOWN_PHASES: readonly string[] = ['during_rt', 'during_chemo', 'neutropenia', 'post_op', 'survivorship']
+const KNOWN_CONDITIONS = new Set(Object.keys(CONDITION_RULES))
+const KNOWN_MEDS = new Set(MEDICATIONS.map((m) => m.id))
+const TEXT_SIZES: readonly string[] = ['normal', 'large', 'xlarge']
+
+/** 환자 설정. 바탕이 되는 값이 어긋났으면 onboarded 를 내려 다시 여쭙게 한다 */
+export function restorePatient(raw: unknown): PatientContext {
+  const p = isObj(raw) ? raw : {}
+  let sound = isObj(raw)
+  const within = (v: unknown, lo: number, hi: number, fallback: number): number => {
+    const n = asNum(v)
+    if (n !== undefined && n >= lo && n <= hi) return n
+    sound = false
+    return fallback
+  }
+  const cancer = typeof p.cancer === 'string' && p.cancer in CANCER_BY_ID
+    ? (p.cancer as PatientContext['cancer']) : (sound = false, DEFAULT_PATIENT.cancer)
+  const phase = typeof p.phase === 'string' && KNOWN_PHASES.includes(p.phase)
+    ? (p.phase as PatientContext['phase']) : (sound = false, DEFAULT_PATIENT.phase)
+  const sex = p.sex === 'M' || p.sex === 'F' ? p.sex : (sound = false, DEFAULT_PATIENT.sex)
+  const validSubs = new Set(((SUBTYPE_OPTIONS as Record<string, { id: string }[] | undefined>)[cancer] ?? []).map((x) => x.id))
+  const loss = asNum(p.weightLossPct)
+
+  return {
+    ...DEFAULT_PATIENT,
+    ...(p as Partial<PatientContext>),
+    cancer, phase, sex,
+    weightKg: within(p.weightKg, 20, 300, DEFAULT_PATIENT.weightKg),
+    heightCm: within(p.heightCm, 100, 230, DEFAULT_PATIENT.heightCm),
+    age: within(p.age, 1, 120, DEFAULT_PATIENT.age),
+    weightLossPct: loss !== undefined && loss >= 0 && loss <= 60 ? loss : 0,
+    /* 없어진 증상·약·세부 유형은 덜어 낸다 — 남은 것은 그대로 쓴다 */
+    conditions: asList(p.conditions).filter((c): c is PatientContext['conditions'][number] => typeof c === 'string' && KNOWN_CONDITIONS.has(c)),
+    medications: asList(p.medications).filter((m): m is string => typeof m === 'string' && KNOWN_MEDS.has(m)),
+    subtypes: asList(p.subtypes).filter((t): t is NonNullable<PatientContext['subtypes']>[number] => typeof t === 'string' && validSubs.has(t)),
+    history: asList(p.history).filter((x): x is NonNullable<PatientContext['history']>[number] => typeof x === 'string'),
+    cuisines: (() => {
+      const c = asList(p.cuisines).filter((x): x is NonNullable<PatientContext['cuisines']>[number] => typeof x === 'string')
+      return c.length ? c : DEFAULT_PATIENT.cuisines
+    })(),
+    onboarded: p.onboarded === true && sound
+  }
+}
+
+/** 하루 기록. 분량이 없거나 0 이하면 1인분으로 본다 — 예전 판은 분량 칸 없이 담았다 */
+function restoreDay(raw: unknown): SelectedItem[] {
+  const list = Array.isArray(raw) ? raw : isObj(raw) ? [raw] : []
+  const items: SelectedItem[] = []
+  for (const x of list) {
+    if (!isObj(x) || typeof x.foodId !== 'string' || !x.foodId) continue
+    const n = asNum(x.servings)
+    const servings = n === undefined || n <= 0 ? 1 : Math.min(n, 50)
+    items.push({ ...(x as unknown as SelectedItem), foodId: x.foodId, servings })
+  }
+  return normalizeDay(items)
+}
+
+/** 체중. 목록 모양([{date, kg}])으로 적힌 것도 날짜별 표로 살린다 */
+export function restoreWeights(raw: unknown): Record<DayKey, number> {
+  const out: Record<DayKey, number> = {}
+  const put = (d: unknown, kg: unknown) => {
+    const n = asNum(kg)
+    if (typeof d === 'string' && DAY_KEY.test(d) && n !== undefined && n >= 20 && n <= 300) out[d as DayKey] = n
+  }
+  if (Array.isArray(raw)) { for (const x of raw) if (isObj(x)) put(x.date, x.kg ?? x.weightKg) }
+  else if (isObj(raw)) { for (const [d, kg] of Object.entries(raw)) put(d, kg) }
+  return out
+}
+
+/** 저장된 것을 앱이 쓸 수 있는 꼴로 되살린다. 무엇이 들어와도 던지지 않는다 */
+export function restoreState(parsed: unknown, today: DayKey = todayKey()): AppState {
+  const src = isObj(parsed) ? parsed : {}
+
+  const diary: Record<DayKey, SelectedItem[]> = {}
+  if (isObj(src.diary)) {
+    for (const [k, v] of Object.entries(src.diary)) {
+      if (!DAY_KEY.test(k)) continue
+      const day = restoreDay(v)
+      if (day.length) diary[k as DayKey] = day
+    }
+  }
+  // 예전 판은 하루치만 담고 있었다. 그 내용을 오늘 기록으로 옮긴다.
+  if (!diary[today]) {
+    const legacy = restoreDay(src.selected)
+    if (legacy.length) diary[today] = legacy
+  }
+
+  /*
+   * 이미 체중을 적어 오신 분들을 위해, 불러올 때 한 번 읽어 둔다.
+   * 이 계산이 없던 동안 쌓인 기록도 이제부터는 반영된다.
+   */
+  const weights = restoreWeights(src.weights)
+  const observed = observedWeightLoss(weights, today)
+
+  const shown: Record<string, string[]> = {}
+  if (isObj(src.shown)) {
+    for (const [k, v] of Object.entries(src.shown)) {
+      if (DAY_KEY.test(k) && Array.isArray(v)) shown[k] = v.filter((x): x is string => typeof x === 'string')
+    }
+  }
+
+  return {
+    patient: {
+      ...restorePatient(src.patient),
+      observedLossPct: observed?.pct,
+      observedLossNote: observed ? `${observed.fromKg} → ${observed.toKg} kg (${observed.days}일)` : undefined
+    },
+    diary,
+    shown: pruneShown(shown),
+    weights,
+    supplements: asList(src.supplements).filter((x): x is string => typeof x === 'string'),
+    /*
+     * 글자 크기도 돌려준다. 한동안 이 칸을 빼먹고 돌려줘서, 글자를 키워 두셔도
+     * 앱을 다시 여실 때마다 원래 크기로 돌아갔다 — 저장은 되고 있었는데 읽지를 않았다.
+     */
+    textSize: typeof src.textSize === 'string' && TEXT_SIZES.includes(src.textSize)
+      ? (src.textSize as NonNullable<AppState['textSize']>) : 'normal'
+  }
+}
+
 function load(): AppState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return DEFAULT_STATE
-    const parsed = JSON.parse(raw) as Partial<AppState> & { selected?: SelectedItem[] }
-
-    // 예전 판은 하루치만 담고 있었다. 그 내용을 오늘 기록으로 옮긴다.
-    const diary = parsed.diary ?? {}
-    if (parsed.selected?.length && !diary[todayKey()]) {
-      diary[todayKey()] = parsed.selected
-    }
-    for (const key of Object.keys(diary)) {
-      diary[key as DayKey] = normalizeDay(diary[key as DayKey] ?? [])
-    }
-
-    /*
-     * 이미 체중을 적어 오신 분들을 위해, 불러올 때 한 번 읽어 둔다.
-     * 이 계산이 없던 동안 쌓인 기록도 이제부터는 반영된다.
-     */
-    const weights = parsed.weights ?? {}
-    const observed = observedWeightLoss(weights, todayKey())
-
-    return {
-      patient: {
-        ...DEFAULT_PATIENT, ...parsed.patient,
-        observedLossPct: observed?.pct,
-        observedLossNote: observed ? `${observed.fromKg} → ${observed.toKg} kg (${observed.days}일)` : undefined
-      },
-      diary,
-      shown: pruneShown(parsed.shown ?? {}),
-      weights,
-      supplements: parsed.supplements ?? []
-    }
+    return restoreState(JSON.parse(raw))
   } catch {
     return DEFAULT_STATE
   }

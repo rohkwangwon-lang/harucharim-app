@@ -14,6 +14,7 @@
  * 그래서 수천 가지 상태를 지어내 옮겨 보고, 옮긴 뒤에도 값이 같은지 본다.
  */
 import { migrateStorage } from '../../src/lib/migrate'
+import { envSeed } from './_seed'
 
 const RUNS = Number(process.env.RUNS ?? 3000)
 
@@ -26,7 +27,7 @@ const RUNS = Number(process.env.RUNS ?? 3000)
  * 검사는 통과했지만 제가 말한 만큼 덮지 못한 것이라 통과에 뜻이 없다.
  * mulberry32 로 바꾼다 — 짧고 분포가 고르다.
  */
-let seed = 20260826
+let seed = envSeed(20260826)
 const rnd = () => {
   seed = (seed + 0x6d2b79f5) | 0
   let t = seed

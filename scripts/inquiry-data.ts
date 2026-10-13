@@ -21,11 +21,15 @@ const row = (scope: string, r: { level: string; evidence: string; title: string;
 })
 
 const rules = [
-  ...COMMON_RULES.map((r) => row('공통', r)),
+  /* 항암제를 쓰는 동안에만 뜨는 규칙은 그렇게 적는다 — '공통' 이라고만 쓰면 누구에게나 뜨는 것으로 읽힌다 */
+  ...COMMON_RULES.map((r) => row(r.onAnticancer ? '공통 · 항암제 사용 중' : '공통', r)),
   ...Object.entries(CONDITION_RULES).flatMap(([k, rs]) => rs.map((r) => row(`상태 · ${k}`, r))),
   ...CANCERS.flatMap((c) => c.rules.map((r) => row(`암종 · ${c.name}`, r)))
 ]
-const interactions = INTERACTIONS.map((i) => row(`약 · ${med.get(i.agent) ?? i.agent}`, i))
+const interactions = INTERACTIONS.map((i) => {
+  const also = (i.alsoTaking?.medications ?? []).map((id) => med.get(id) ?? id)
+  return row(`약 · ${med.get(i.agent) ?? i.agent}${also.length ? ` + ${also.join('·')}` : ''}`, i)
+})
 const references = ALL_REFERENCES.map((r, i) => ({ no: i + 1, kind: r.kind, year: r.year, citation: r.citation }))
 
 process.stdout.write(JSON.stringify({ rules, interactions, references }))

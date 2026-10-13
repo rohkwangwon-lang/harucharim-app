@@ -20,12 +20,43 @@ node_modules/.bin/jiti scripts/checks/notice.ts   # 약관이 약속한 고지 �
 node_modules/.bin/jiti scripts/checks/autotag.ts  # 받아 온 식품에 날것·가공육·자몽 태그가 붙는가 (양쪽 방향)
 node_modules/.bin/jiti scripts/checks/login.ts    # 로그인 문 — 소셜이 없는 분의 길, 재설정 순서, 오류 문구, 날짜 문, 편지 서식
 node_modules/.bin/jiti scripts/checks/expiry.ts   # 기한 목록이 키·바깥 주소·도메인을 다 덮는가, 휴면 점검 간격
+node_modules/.bin/jiti scripts/checks/sense.ts    # 상식 — 권장의 이유가 그 음식에 맞는가, 날것·젓갈·술이 이름으로 봐도 걸리는가 (약 29만 종)
+node_modules/.bin/jiti scripts/checks/restore.ts  # 저장된 자료가 낡았거나 깨졌어도 앱이 열리는가
 PEOPLE=3000 node_modules/.bin/jiti scripts/checks/patient.ts  # 환자 입장 — 읽을 수 있는가, 이유가 오는가, 앱이 스스로 어긋나지 않는가
 
 # 대규모 실행 — 위 규칙들을 한자리에 모아 훨씬 큰 표본으로 돌린다.
 # 돌면서 무엇이 얼마나 자주 추천되는지 세어 docs/추천-식단-top100.md 에 적는다.
 PEOPLE=2000 DAYS=90 node_modules/.bin/jiti scripts/checks/bigrun.ts
 ```
+
+## 다른 씨앗으로 돌리기
+
+난수를 쓰는 검사는 `SEED=<정수>` 로 씨앗을 바꿀 수 있다. 고정 씨앗만 돌리면
+"그 씨앗에서 안 걸리는 것" 은 영영 안 걸린다 — 2026-10-13 에 새 씨앗 여섯 개로 돌려서
+고정 씨앗으로는 한 번도 안 걸리던 것 두 가지를 찾았다(목표를 낮추고 사유를 안 밝힌 경우,
+하루에 읽을 것이 25가지인 날).
+
+```bash
+SEED=20261013 node_modules/.bin/jiti scripts/checks/compose.ts
+```
+
+- 정수가 아닌 값을 주면 검사가 멈춘다(`_seed.ts`). 예전에는 NaN 이 조용히 0 으로 바뀌어
+  "다른 씨앗 여섯 개" 가 실은 같은 씨앗 하나였다.
+- `bigrun.ts` 는 SEED 를 주면 `docs/추천-식단-top100.md` 를 덮어쓰지 않는다.
+
+## 화면 자가시험
+
+엔진 검사는 화면을 열어 보지 않는다. `scripts/selftest/ui-monkey.mjs` 는 무작위 상태
+(보통 · 극단 · 낡거나 깨진 저장 자료)를 머리 없는 크롬에 넣고 일곱 탭을 다 눌러 보며
+멈춤 · 깨진 글자(NaN·undefined) · 가로 넘침 · 콘솔 오류 · 글자 크기 미적용을 찾는다.
+
+```bash
+VITE_SUPABASE_URL= VITE_SUPABASE_ANON_KEY= npx vite build --outDir /tmp/hc-nologin --emptyOutDir
+node_modules/.bin/jiti scripts/selftest/dump-ids.ts > /tmp/harucharim-ids.json
+node scripts/selftest/ui-monkey.mjs /tmp/hc-nologin /tmp/harucharim-ids.json /tmp/hc-monkey 200 <씨앗>
+```
+
+10분쯤 걸려 평소 검사 묶음에는 넣지 않았다. 저장 형식(`AppState`)이나 화면 틀을 바꾼 뒤에 돌린다.
 
 검사가 헛돌지 않는지 보려면 engine.ts 가 찍는 커버리지 숫자를 본다.
 제외 건수나 추천 건수가 0 이면 그 검사는 아무것도 확인하지 않은 것이다.

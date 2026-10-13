@@ -2,6 +2,7 @@
  * 세 번째 검사 — 기록 저장/정규화와 기록 화면 집계.
  */
 import { defaultSlotFor } from '../../src/engine/menu'
+import { envSeed } from './_seed'
 import { summarizeDay } from '../../src/engine/dayScore'
 import { sumIntake, foodContribution } from '../../src/engine/nutrition'
 import { FOODS, FOOD_BY_ID } from '../../src/data/foods'
@@ -12,7 +13,7 @@ import { DEFAULT_PATIENT } from '../../src/lib/store'
 import { addDays, toKey, weekOf, monthOf } from '../../src/lib/day'
 import type { MealSlot, SelectedItem } from '../../src/data/types'
 
-let seed = 4242
+let seed = envSeed(4242)
 const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff }
 const pick = <T,>(a: T[]): T => a[Math.floor(rnd() * a.length) % a.length]
 const bugs: string[] = []

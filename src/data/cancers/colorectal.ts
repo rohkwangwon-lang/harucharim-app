@@ -1,4 +1,5 @@
 import type { CancerProfile } from '../types'
+import { PLANT_FOOD_GROUPS } from '../types'
 
 export const colorectal: CancerProfile = {
   id: 'colorectal',
@@ -55,7 +56,7 @@ export const colorectal: CancerProfile = {
     {
       id: 'crc-fiber',
       level: 'prefer',
-      match: { tags: ['고식이섬유'] },
+      match: { restrictGroups: PLANT_FOOD_GROUPS, tags: ['고식이섬유'] },
       phases: ['survivorship', 'all'],
       title: '회복 후에는 식이섬유를 하루 30 g 이상으로 올리세요',
       reason:
@@ -113,7 +114,7 @@ export const colorectal: CancerProfile = {
     {
       id: 'crc-calcium-dairy',
       level: 'prefer',
-      match: { tags: ['고칼슘'], groups: ['우유·유제품'] },
+      match: { minServing: { key: 'ca', value: 80 }, tags: ['고칼슘'], groups: ['우유·유제품'] },
       title: '유제품과 칼슘은 대장암 위험을 낮추는 쪽입니다',
       reason:
         'WCRF/AICR 는 유제품과 칼슘 섭취가 대장암 위험을 낮춘다는 근거에 "probable" 등급을 부여했습니다. ' +

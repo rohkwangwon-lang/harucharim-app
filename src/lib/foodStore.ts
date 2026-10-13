@@ -1,6 +1,5 @@
-import type { Food, FoodGroup, FoodTag, NutrientKey, Nutrients } from '../data/types'
-import { displayName, withAutoTags } from '../data/foods/autoTag'
-import type { PackedFoods } from '../data/foods/generated'
+import type { Food } from '../data/types'
+import { rowToFood, type PackedFoods, type PackedRow } from '../data/foods/generated'
 
 /**
  * 확장 식품 데이터 저장소.
@@ -242,30 +241,9 @@ async function schema() {
 
 type Row = PackedFoods['items'][number]
 
+/* 한 줄을 음식으로 푸는 일은 data/foods/generated.ts 의 rowToFood 한 곳에서 한다 */
 function toFood(i: number, row: Row, sc: { cols: string[]; groups: string[]; tags: string[] }): Food {
-  const [name, gi, servingG, tagIdx, vals, maker, reportNo] = row
-  const per100 = {} as Nutrients
-  for (let c = 0; c < vals.length; c++) {
-    const v = vals[c]
-    if (v !== null && v !== undefined) per100[sc.cols[c] as NutrientKey] = v
-  }
-  // 에너지만은 있어야 계산이 성립한다. 나머지는 없으면 없는 대로 둔다.
-  if (per100.kcal === undefined) per100.kcal = 0
-  const food: Food = {
-    id: `kx-${i}`,
-    /* 보이는 이름은 다듬고, 태그는 원본 이름으로 판정한다 */
-    name: displayName(name),
-    group: sc.groups[gi] as FoodGroup,
-    form: 'processed',
-    serving: { g: servingG, label: `1회 제공량 ${servingG} g` },
-    per100,
-    tags: withAutoTags(name, tagIdx.map((t) => sc.tags[t] as FoodTag)),
-    src: 'kfda',
-    auto: true
-  }
-  if (maker) food.maker = String(maker)
-  if (reportNo) food.reportNo = String(reportNo)
-  return food
+  return rowToFood(row as PackedRow, sc, `kx-${i}`)
 }
 
 /** 이름 앞글자로 확장 데이터를 찾는다 */

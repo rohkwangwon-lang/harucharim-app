@@ -9,6 +9,7 @@
  * 앱은 매일 체중을 받아 적으면서도 그 기록을 계산에 쓰지 않고 있었다.
  */
 import { observedWeightLoss, observedWeightGain, effectiveLossPct, nutritionRisk, personalTarget, targetNotes, dosingWeight } from '../../src/engine/nutrition'
+import { envSeed } from './_seed'
 import { buildDayMenu, intakeTrend } from '../../src/engine/menu'
 import { adviseSupplements } from '../../src/engine/supplementAdvice'
 import { CANCERS } from '../../src/data/cancers'
@@ -19,7 +20,7 @@ const bugs: string[] = []
 const seenB = new Set<string>()
 const bad = (k: string, d: string) => { const s = `${k} :: ${d}`; if (!seenB.has(s)) { seenB.add(s); bugs.push(s) } }
 
-let seed = 771103
+let seed = envSeed(771103)
 const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff }
 const pick = <T,>(a: T[]): T => a[Math.floor(rnd() * a.length) % a.length]
 

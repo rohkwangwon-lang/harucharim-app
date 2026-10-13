@@ -22,6 +22,7 @@
  * 잣대는 엔진에서 빌리지 않는다. 아래 기준은 사람이 읽고 손으로 적은 것이다.
  */
 import { buildDayMenu, recentFoods } from '../../src/engine/menu'
+import { envSeed } from './_seed'
 import { evaluateFood } from '../../src/engine/rules'
 import { COMMON_RULES } from '../../src/data/commonRules'
 import { CANCERS } from '../../src/data/cancers'
@@ -122,7 +123,7 @@ for (const r of COMMON_RULES as { id: string; level: string; title: string; reas
 
 /* ── 2. 환자 3,000명이 하루씩 받아 본다 ───────────────── */
 const ALL_FOODS = [...CURATED_FOODS, ...GENERATED_CORE]
-const rand = rng(20260908)
+const rand = rng(envSeed(20260908))
 const N = Number(process.env.PEOPLE ?? 3000)
 
 let days = 0, items = 0, asked = 0, neutral = 0, removedSeen = 0, removedWithAlt = 0

@@ -54,7 +54,7 @@ export const liver: CancerProfile = {
     {
       id: 'liver-protein',
       level: 'prefer',
-      match: { tags: ['고단백'] },
+      match: { minServing: { key: 'protein', value: 5 }, tags: ['고단백'] },
       title: '간이 나쁘다고 단백질을 줄이는 것은 오래된 오해입니다',
       reason:
         '유럽간학회 지침은 간경변 환자에게 체중 1 kg 당 1.2~1.5 g 의 단백질을 권고합니다. ' +

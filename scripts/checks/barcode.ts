@@ -5,6 +5,7 @@
  * 없는지, 그리고 표 자체가 성한지를 본다.
  */
 import fs from 'node:fs'
+import { envSeed } from './_seed'
 import path from 'node:path'
 
 const ROOT = path.resolve(process.cwd())
@@ -42,7 +43,7 @@ for (const r of bar) {
 console.log(`  바코드 ${bar.length.toLocaleString()}건 · 고유 ${index.size.toLocaleString()}건`)
 
 /* ── 2. 스캐너 표기 흔들림을 견디는가 ───────────────── */
-let seed = 31337
+let seed = envSeed(31337)
 const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff }
 const lookup = (raw: string) => {
   for (const v of variants(raw)) { const hit = index.get(v); if (hit) return hit }

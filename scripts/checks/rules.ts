@@ -904,6 +904,59 @@ for (const id of orphan) bad('아무 데서도 인용하지 않는 문헌', `${i
   }
 }
 
+/* ── 자몽은 항암제를 쓰는 동안에만 '피하세요' ──────────────────
+ *
+ * 한동안 자몽은 약을 하나도 고르지 않은 분, 치료를 마친 분께도 "항암제 농도를 예측할 수 없게
+ * 바꿉니다" 라며 '피하세요' 로 떴다. 감수하신 선생님이 "항암제 복용 중에만" 으로 정하셨다(2026-10).
+ *
+ * 잣대를 엔진에서 빌리지 않는다. 약마다 '항암제인가' 를 여기에 따로 적어 두고 견준다.
+ * 약이 하나 늘면 이 표에 없어서 검사가 멈춘다 — 그때 누군가 판단을 내려야 넘어간다.
+ */
+{
+  const IS_ANTICANCER: Record<string, boolean> = {
+    /* 항호르몬제 — 수년씩 드시는 약이라 넣지 않았다. 넣을지는 임상 판단이다 */
+    tamoxifen: false, ai: false, adt: false,
+    capecitabine: true,
+    'tki-egfr': true, 'tki-alk': true, cdk46: true, sorafenib: true,
+    warfarin: false, doac: false,
+    bortezomib: true, cisplatin: true, oxaliplatin: true, irinotecan: true, methotrexate: true,
+    steroid: false, ppi: false, levothyroxine: false
+  }
+  for (const m of MEDICATIONS) {
+    if (!(m.id in IS_ANTICANCER)) bad('항암제인지 정하지 않은 약', `${m.name}(${m.id}) — 자몽 경고가 걸릴지 말지 정해야 한다`)
+  }
+  const grape = [...CURATED_FOODS, ...GENERATED_CORE].filter((f) => (f.tags ?? []).includes('자몽계' as never))
+  if (grape.length < 20) bad('자몽 검사가 헛돎', `자몽계 음식이 ${grape.length}종뿐`)
+  const sample = [grape[0], grape[Math.floor(grape.length / 2)], grape[grape.length - 1]]
+
+  const fires = (p: PatientContext) =>
+    sample.every((f) => evaluateFood(f, p, 1).hits.some((h) => h.rule.id === 'common-grapefruit'))
+  const silent = (p: PatientContext) =>
+    sample.every((f) => !evaluateFood(f, p, 1).hits.some((h) => h.rule.id === 'common-grapefruit'))
+  const who = (phase: Phase, meds: string[]): PatientContext =>
+    ({ ...DEFAULT_PATIENT, cancer: 'breast', phase, medications: meds, conditions: [], subtypes: [], onboarded: true })
+
+  /* 시기만으로 */
+  const CHEMO_PHASES: Phase[] = ['during_chemo', 'neutropenia']
+  const OTHER_PHASES: Phase[] = ['during_rt', 'post_op', 'survivorship']
+  for (const ph of CHEMO_PHASES) {
+    if (!fires(who(ph, []))) bad('항암제를 쓰는 시기인데 자몽 경고가 안 뜸', ph)
+  }
+  for (const ph of OTHER_PHASES) {
+    if (!silent(who(ph, []))) bad('항암제를 안 쓰는데 자몽이 피하세요로 뜸', `${ph} · 약 없음`)
+  }
+  /* 약으로 — 시기가 무엇이든 */
+  for (const m of MEDICATIONS) {
+    for (const ph of OTHER_PHASES) {
+      const p = who(ph, [m.id])
+      if (IS_ANTICANCER[m.id] && !fires(p)) bad('항암제를 드시는데 자몽 경고가 안 뜸', `${ph} · ${m.name}`)
+      if (IS_ANTICANCER[m.id] === false && !silent(p)) bad('항암제가 아닌 약인데 자몽이 피하세요로 뜸', `${ph} · ${m.name}`)
+    }
+  }
+  /* 판정까지 — 경고가 뜨는 분께는 실제로 '피하세요' 여야 한다 */
+  if (evaluateFood(sample[0], who('during_chemo', []), 1).level !== 'avoid') bad('자몽 경고의 등급이 피하세요가 아님', sample[0].name)
+}
+
 console.log(`\n규칙 검사 완료 — 문제 ${bugs.length}종`)
 const g = new Map<string, string[]>()
 for (const b of bugs) { const k = b.split(' :: ')[0]; if (!g.has(k)) g.set(k, []); g.get(k)!.push(b.split(' :: ')[1]) }

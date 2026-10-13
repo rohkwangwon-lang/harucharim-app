@@ -1,4 +1,5 @@
 import type { CancerProfile } from '../types'
+import { PLANT_FOOD_GROUPS } from '../types'
 
 export const breast: CancerProfile = {
   id: 'breast',
@@ -95,7 +96,7 @@ export const breast: CancerProfile = {
     {
       id: 'breast-calcium-vitd',
       level: 'prefer',
-      match: { tags: ['고칼슘'], supplementCategories: ['칼슘·마그네슘', '비타민D'] },
+      match: { minServing: { key: 'ca', value: 80 }, tags: ['고칼슘'], supplementCategories: ['칼슘·마그네슘', '비타민D'] },
       subtypes: ['호르몬수용체양성'],
       title: '아로마타제 억제제를 쓰는 동안 칼슘과 비타민 D를 챙기세요',
       reason:
@@ -174,7 +175,7 @@ export const breast: CancerProfile = {
     {
       id: 'breast-fiber-veg',
       level: 'prefer',
-      match: { tags: ['고식이섬유', '십자화과'] },
+      match: { restrictGroups: PLANT_FOOD_GROUPS, tags: ['고식이섬유', '십자화과'] },
       title: '채소 중심 식사는 체중과 대사 양쪽에서 도움이 됩니다',
       reason:
         '식이섬유가 풍부한 식사는 포만감을 통해 체중 관리에 유리하고, 인슐린 저항성과 만성 염증을 낮추는 방향으로 작용합니다. ' +

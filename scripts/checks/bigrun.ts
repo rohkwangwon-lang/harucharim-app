@@ -9,6 +9,7 @@
  * "무엇을 실제로 내놓는가" 는 돌려 봐야 안다. 그 둘은 같지 않을 수 있다.
  */
 import fs from 'node:fs'
+import { envSeed } from './_seed'
 import path from 'node:path'
 import { buildDayMenu, recentFoods, fiberGoal, dayNotes, naUnknownNames, intakeTrend } from '../../src/engine/menu'
 import { summarizeDay } from '../../src/engine/dayScore'
@@ -38,7 +39,7 @@ const DAYS = Number(process.env.DAYS ?? 90)
  * 실제로는 0.2% 만 일어난 적이 있다. 드문 조합을 찾자는 검사에서 그것은 치명적이다.
  * mulberry32 는 32비트 전체를 고르게 섞는다.
  */
-let seed = 19700101
+let seed = envSeed(19700101)
 const rnd = () => {
   seed |= 0; seed = (seed + 0x6d2b79f5) | 0
   let t = Math.imul(seed ^ (seed >>> 15), 1 | seed)
@@ -645,8 +646,16 @@ lines.push('난수는 고정 씨앗이라 같은 결과가 나옵니다.')
 
 const out = path.join(process.cwd(), 'docs', '추천-식단-top100.md')
 fs.mkdirSync(path.dirname(out), { recursive: true })
-fs.writeFileSync(out, lines.join('\n'))
-console.log(`  → docs/추천-식단-top100.md 에 적었습니다`)
+/*
+ * 다른 씨앗으로 돌릴 때는 문서를 덮어쓰지 않는다.
+ * 그 문서는 고정 씨앗의 결과를 적어 둔 기록이라, 무작위 시험이 그것을 바꾸면 안 된다.
+ */
+if (process.env.SEED) {
+  console.log(`  (씨앗 ${process.env.SEED} — docs/추천-식단-top100.md 는 건드리지 않음)`)
+} else {
+  fs.writeFileSync(out, lines.join('\n'))
+  console.log(`  → docs/추천-식단-top100.md 에 적었습니다`)
+}
 
 console.log(`\n대규모 실행 완료 — 문제 ${bugs.length}종`)
 const g = new Map<string, string[]>()

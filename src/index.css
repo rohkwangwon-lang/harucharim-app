@@ -90,3 +90,11 @@
 html { font-size: 16px; }
 html[data-text='large'] { font-size: 18px; }
 html[data-text='xlarge'] { font-size: 20px; }
+
+/*
+ * 숫자 칸(Stat)은 한 줄에 셋씩 놓인다. 글자를 키우면 칸은 그대로인데 숫자만 커져
+ * "3690~4305" 가 숫자 한가운데서 꺾였다. 키운 글씨에서는 이 숫자만 한 단계 덜 키워
+ * "3690~" 과 "4305" 가 한 줄씩 들어가게 한다 (폭 360 px 기준으로 잡음).
+ */
+html[data-text='large'] .stat-value { font-size: 1.05rem; }
+html[data-text='xlarge'] .stat-value { font-size: 0.9rem; }

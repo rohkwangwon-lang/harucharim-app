@@ -1,4 +1,5 @@
 import type { NutritionRule, PatientCondition } from './types'
+import { PLANT_FOOD_GROUPS } from './types'
 
 /**
  * 동반 증상·상태별 규칙. 암종과 무관하게 해당 상태가 선택되면 적용된다.
@@ -203,7 +204,7 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
       evidence: 'B', refIds: ['asco2022', 'acs2022']
     },
     {
-      id: 'cond-gain-veg', level: 'prefer', match: { tags: ['고식이섬유'], groups: ['채소', '해조·버섯'] },
+      id: 'cond-gain-veg', level: 'prefer', match: { restrictGroups: PLANT_FOOD_GROUPS, tags: ['고식이섬유'], groups: ['채소', '해조·버섯'] },
       title: '먼저 채소로 배를 채우면 총량이 자연스럽게 줄어듭니다',
       reason:
         '식사 순서를 채소 → 단백질 → 밥으로 바꾸는 것만으로 총섭취량이 줄어듭니다. ' +
