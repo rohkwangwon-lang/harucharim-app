@@ -100,6 +100,32 @@ const GUIDE = 'docs/지침서/암환자-식이영양-지침서.html'
 expect(GUIDE, '지침서 — 규칙', /규칙 (\d+)개와 참고 문헌/, N.total)
 expect(GUIDE, '지침서 — 문헌', /참고 문헌 (\d+)종으로/, N.references)
 
+/* ── HTML 문서는 글자 부호를 스스로 밝혀야 한다 ───────────────────
+ *
+ * 2026-10-14 에 홍보 자료(하루차림-무엇이-다른가.html)가 글자가 깨져 열렸다. <!doctype> 도 <meta charset> 도 없이
+ * <title> 로 시작하는 조각이었다. 웹 서버는 부호를 머리말에 실어 보내지만, 받아서 컴퓨터에서 바로 여는 파일은 그럴 데가 없어
+ * 브라우저가 짐작한다 — 사파리는 한글을 다른 부호로 읽었다. 지침서도 같은 꼴이었다.
+ * 나눠 드리는 HTML 은 전부 첫머리에 부호를 적는다. 브라우저는 첫 1,024 바이트 안에서만 그것을 찾는다.
+ */
+{
+  const walk = (dir: string, out: string[] = []): string[] => {
+    if (!fs.existsSync(dir)) return out
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = `${dir}/${e.name}`
+      if (e.isDirectory()) walk(p, out)
+      else if (e.name.endsWith('.html')) out.push(p)
+    }
+    return out
+  }
+  const pages = [...walk('docs'), ...walk('public'), 'index.html']
+  if (pages.length < 6) bads.push(`HTML 검사가 헛돎 — ${pages.length}개`)
+  for (const p of pages) {
+    const head = fs.readFileSync(p).subarray(0, 1024).toString('utf8')
+    if (!/^\s*<!doctype html>/i.test(head)) bads.push(`${p} — <!doctype html> 로 시작하지 않는다`)
+    if (!/<meta\s+charset=["']?utf-8/i.test(head)) bads.push(`${p} — 첫 1,024 바이트 안에 <meta charset="utf-8"> 가 없다. 컴퓨터에서 바로 열면 한글이 깨진다`)
+  }
+}
+
 if (seen < 55) bads.push(`문서 검사가 헛돎 — 견준 자리 ${seen}곳`)
 console.log(`문서 검사 완료 — 문서 10종 · 숫자 ${seen}곳 대조, ${bads.length ? `문제 ${bads.length}건` : '문제 없음'}`)
 for (const b of bads) console.log('   -', b)

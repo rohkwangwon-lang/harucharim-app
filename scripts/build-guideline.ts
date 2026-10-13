@@ -467,7 +467,17 @@ const partB = `<section id="pB" class="part">
 
 const today = new Date().toISOString().slice(0, 10)
 
-const html = `<title>암 환자 식이·영양 지침서</title>
+/*
+ * 온전한 문서로 낸다 — <!doctype>·<meta charset> 없이 <title> 로 시작하는 조각이었다.
+ * 그 조각을 컴퓨터에서 바로 열면 브라우저가 글자 부호를 짐작해야 하는데, 한글을 EUC-KR 이나 서유럽어로 읽어 전부 깨졌다
+ * (2026-10-14, 같은 꼴이던 홍보 자료를 여시다 발견). 웹 서버는 머리말에 부호를 실어 보내 주지만 파일은 그럴 데가 없다.
+ */
+const html = `<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>암 환자 식이·영양 지침서</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@400;600;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
@@ -649,6 +659,8 @@ a:focus-visible,.toc a:focus-visible{outline:2px solid var(--celadon);outline-of
 @page{size:A4;margin:16mm 15mm}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
+</head>
+<body>
 
 <div class="wrap">
   <header class="cover">
@@ -715,7 +727,10 @@ a:focus-visible,.toc a:focus-visible{outline:2px solid var(--celadon);outline-of
     <span>하루차림 — 암 환자 식이·영양 도우미 · 감수 방사선종양학과 전문의</span>
     <span>본문 생성일 ${today} · 앱 데이터에서 자동 생성</span>
   </footer>
-</div>`
+</div>
+</body>
+</html>
+`
 
 const dest = process.env.OUT ?? 'guideline.html'
 fs.writeFileSync(dest, html)
