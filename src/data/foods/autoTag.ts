@@ -123,10 +123,26 @@ export function autoTags(name: string): FoodTag[] {
   return out
 }
 
-/** 이미 있는 태그에 자동 태그를 합친다 */
-export function withAutoTags(name: string, tags: FoodTag[]): FoodTag[] {
-  const extra = autoTags(name).filter((t) => !tags.includes(t))
-  return extra.length ? [...tags, ...extra] : tags
+/**
+ * 고기 요리에는 '고식이섬유' 를 붙이지 않는다.
+ *
+ * 받아 온 자료는 식이섬유가 1회 5 g 을 넘으면 기계적으로 이 태그를 단다. 그런데 이 태그는
+ * "채소 중심 식사는 체중과 대사 양쪽에서 도움이 됩니다"(유방암), "식이섬유를 하루 30 g 이상으로
+ * 올리세요"(대장암) 같은 **권장** 규칙을 끌어온다. 그래서 치료를 마친 분께 육회가
+ * '권장 — 채소 중심 식사' 로 나오고 있었다(원자료는 육회 150 g 에 섬유 9.9 g — 곁들인 배·채소 몫이다).
+ * 베이컨칩과 탕수육도 같았다. 숫자가 맞더라도 고기를 채소로 권하는 것은 틀렸다.
+ *
+ * 어패류는 건드리지 않는다. 그 군에 걸린 넷은 미역튀각·김자반·파래자반으로, 실제로 섬유가 많은 해조다.
+ */
+const NO_FIBER_PRAISE = new Set<string>(['육류', '가금류·난류'])
+
+/** 이미 있는 태그에 자동 태그를 합친다. 군을 주면 그 군에 맞지 않는 태그를 덜어 낸다 */
+export function withAutoTags(name: string, tags: FoodTag[], group?: string): FoodTag[] {
+  const kept = group && NO_FIBER_PRAISE.has(group)
+    ? tags.filter((t) => t !== ('고식이섬유' as FoodTag))
+    : tags
+  const extra = autoTags(name).filter((t) => !kept.includes(t))
+  return extra.length ? [...kept, ...extra] : kept
 }
 
 /**

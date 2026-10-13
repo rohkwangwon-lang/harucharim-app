@@ -37,7 +37,7 @@ export function unpack(p: PackedFoods, idPrefix: string): Food[] {
       form: 'processed',
       serving: { g: servingG, label: `1회 제공량 ${servingG} g` },
       per100,
-      tags: withAutoTags(name, tagIdx.map((t) => p.tags[t] as FoodTag)),
+      tags: withAutoTags(name, tagIdx.map((t) => p.tags[t] as FoodTag), p.groups[gi] as string),
       src: 'kfda',
       auto: true
     }

@@ -135,6 +135,20 @@ no(underscored.length > 0,
 const emptied = GENERATED_CORE.filter((f) => !f.name.trim())
 no(emptied.length > 0, `다듬은 뒤 이름이 빈 것 ${emptied.length}건`)
 
+/*
+ * 고기를 '채소·섬유' 이유로 권하지 않는가.
+ *
+ * 받아 온 자료가 식이섬유 숫자만 보고 '고식이섬유' 를 달아, 치료를 마친 유방암 환자에게
+ * 육회가 "권장 — 채소 중심 식사" 로 나오고 있었다(2026-10-13, 식약처 질의서의 예시를
+ * 앱과 대조하다 발견). 태그가 아니라 결과를 본다 — 군이 고기인데 섬유 태그가 남아 있으면 걸린다.
+ */
+const meatFiber = GENERATED_CORE.filter(
+  (f) => (f.group === '육류' || f.group === '가금류·난류') && (f.tags ?? []).includes('고식이섬유' as never)
+)
+no(meatFiber.length > 0,
+   `고기 군에 '고식이섬유' 가 붙은 것 ${meatFiber.length}종 — 채소 권장 규칙이 고기에 걸린다: ${meatFiber.slice(0, 4).map((f) => f.name).join(', ')}`)
+no(GENERATED_CORE.filter((f) => f.group === '육류').length < 100, '육류 군이 100종도 안 됨 — 이 검사가 헛돌고 있다')
+
 /* 검사가 헛돌지 않는지 — 훑은 것이 0 이면 아무것도 확인하지 않은 것이다 */
 const tagged = { raw: 0, cured: 0, grape: 0 }
 for (const f of GENERATED_CORE) {
