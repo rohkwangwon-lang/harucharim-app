@@ -64,24 +64,27 @@ Resend → **Domains → Add Domain**
 Resend 화면의 줄을 **하나씩 그대로** 옮깁니다. 가비아의 '호스트' 칸에는
 **도메인 뒷부분을 빼고** 적습니다.
 
-| Resend 에 보이는 이름 | 가비아 '호스트' 칸 | 타입 |
-|---|---|---|
-| `send.harucharim.com` | `send` | MX (우선순위도 Resend 값 그대로) |
-| `send.harucharim.com` | `send` | TXT (`v=spf1 …`) |
-| `resend._domainkey.harucharim.com` | `resend._domainkey` | TXT (`p=…` 긴 값) |
+> **2026-10-14 에 Resend 화면이 바뀐 것을 확인했습니다.** 예전처럼 `send` 에 MX·TXT 를 넣는 방식이 아니라
+> 아래처럼 **TXT 둘 + CNAME 둘** 입니다. 화면에 보이는 대로 넣으시면 됩니다.
+> Resend 화면은 긴 값을 `p=MIGfMA[…]QIDAQAB` 처럼 **가운데를 줄여서** 보여 줍니다.
+> 보이는 글자를 손으로 옮기지 말고, 값을 눌러(또는 옆의 복사 단추로) **복사**해서 붙여 넣으십시오.
 
-그리고 한 줄을 더 넣으십시오 — 스팸함으로 덜 빠지게 합니다.
+| Resend 에 보이는 것 | 가비아 '타입' | 가비아 '호스트' | 가비아 '값' |
+|---|---|---|---|
+| DKIM · TXT · `resend._domainkey` | TXT | `resend._domainkey` | `p=MIGfMA…` 긴 값 통째로(복사) |
+| SPF · CNAME · `rsend` | CNAME | `rsend` | `rsend.fo…mta.net` 통째로(복사) |
+| SPF · CNAME · `send` | CNAME | `send` | `send.for…mta.net` 통째로(복사) |
+| DMARC · TXT · `_dmarc` | TXT | `_dmarc` | `v=DMARC1; p=none;` |
 
-| 호스트 | 타입 | 값 |
-|---|---|---|
-| `_dmarc` | TXT | `v=DMARC1; p=none;` |
+- CNAME 값 끝에 점(`.`)을 붙이라는 칸이 따로 있으면 가비아 안내를 따르십시오. 가비아는 보통 점 없이 넣어도 됩니다.
+- **Enable Receiving(받기)은 켜지 마십시오.** 이 앱은 메일을 보내기만 합니다. 켜면 MX 줄이 더 생깁니다.
 
-> 지금 이 도메인에는 MX·TXT 가 하나도 없어서 부딪칠 것이 없습니다(9월 11일 조회).
+> 지금 이 도메인에는 A 넷·www CNAME 하나 말고는 아무것도 없어서 부딪칠 것이 없습니다(10월 14일 조회).
 > 기존 **A 레코드 넷과 www CNAME 은 절대 건드리지 마십시오** — 앱 주소입니다.
 
 ### 1-4. 확인
 Resend 로 돌아가 **Verify DNS Records**. 몇 분~몇 시간 걸립니다.
-세 줄 모두 초록색 **Verified** 가 되면 준비 끝입니다.
+줄마다 초록색 **Verified** 가 되면 준비 끝입니다.
 
 ---
 
