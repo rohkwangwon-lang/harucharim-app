@@ -26,7 +26,7 @@ import { StatsConsent } from './components/StatsConsent'
 import { track, flush } from './lib/stats'
 import { StatsAsk, shouldAsk } from './components/StatsAsk'
 import { checkAdmin } from './lib/inquiry'
-import { displayName, useSession, lastProvider } from './lib/auth'
+import { displayName, useSession, lastProvider, signOut } from './lib/auth'
 import { isSupabaseConfigured } from './lib/supabase'
 import { Credentials, Section } from './components/ui'
 import { NoticeBanner, NoticeList } from './components/NoticeBanner'
@@ -415,11 +415,24 @@ export default function App() {
               </p>
               {user && (
                 <>
-                  <p className="mt-2 text-xs text-stone-600">
-                    <span className="chip bg-brand-100 text-brand-700">로그인됨</span>{' '}
-                    {displayName(user)}
-                    {user.email ? ` · ${user.email}` : ''}
-                  </p>
+                  {/*
+                    * 로그아웃은 여기서 한다. 한동안 '문의하기' 창 안에만 있어서, 심사용 계정을 만들던 날
+                    * "내 정보에서 로그아웃을 찾지 못했다" 는 말을 들었다(2026-10-14). 함께 쓰는 기기에서는 꼭 필요한 단추다.
+                    * 로그아웃해도 이 기기에 적어 두신 식단·체중은 지워지지 않는다 — 다시 로그인하면 그대로 있다.
+                    */}
+                  <div className="mt-2 flex items-center justify-between gap-2">
+                    <p className="min-w-0 truncate text-xs text-stone-600">
+                      <span className="chip bg-brand-100 text-brand-700">로그인됨</span>{' '}
+                      {displayName(user)}
+                      {user.email ? ` · ${user.email}` : ''}
+                    </p>
+                    <button
+                      className="shrink-0 rounded-lg border border-stone-300 px-2.5 py-1 text-xs font-medium text-stone-600 hover:bg-stone-50"
+                      onClick={() => { void signOut() }}
+                    >
+                      로그아웃
+                    </button>
+                  </div>
                   {!isAdmin && (
                     <details className="mt-2">
                       <summary className="cursor-pointer text-[11px] text-stone-400">
