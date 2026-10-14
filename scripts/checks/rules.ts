@@ -1296,10 +1296,9 @@ for (const id of orphan) bad('아무 데서도 인용하지 않는 문헌', `${i
   if (soyFoods < 25) bad('콩 근거 검사가 헛돎', `'대두이소플라본' 음식이 ${soyFoods}종뿐`)
   /*
    * 석류·아마씨는 이름(식물성에스트로겐)은 남기되 콩 근거는 받지 않는다.
-   * 각자의 근거 규칙은 식약처 회신 뒤에 넣는다 — docs/근거/2026-10-14-석류-아마씨-보류.md.
-   * 넣으면 아래 목록에 규칙 id 를 적어 "자기 근거가 붙는가" 까지 보게 할 것.
+   * 각자의 근거 규칙(breast-pomegranate · breast-flax)이 실제로 붙는지까지 본다.
    */
-  const OWN_RULE: Record<string, string | undefined> = { pomegranate: undefined, flaxseed: undefined }
+  const OWN_RULE: Record<string, string | undefined> = { pomegranate: 'breast-pomegranate', flaxseed: 'breast-flax' }
   for (const [id, rule] of Object.entries(OWN_RULE)) {
     const f = FOOD_BY_ID[id]
     if (!f) { bad('석류·아마씨 검사 대상이 없음', id); continue }

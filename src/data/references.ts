@@ -326,6 +326,13 @@ export const REFERENCES: Reference[] = [
   { id: 'jang2024', kind: 'review', year: 2024,
     citation: 'Jang JY, Kim D, Im E, Kim ND. Therapeutic potential of pomegranate extract for women\'s reproductive health and breast cancer. Life (Basel). 2024;14(10):1264. (3.5절: 석류 씨에 에스트론·에스트리올·테스토스테론 등 성호르몬이 있음 · 7.3절: 유방암 관련 임상 연구는 Kapoor 2015 하나뿐 — 건강한 폐경 후 여성 64명, 석류즙 3주, 전체적으로 성호르몬·SHBG 유의한 변화 없음 · 결론: 유방암 세포의 호르몬 수용체에 영향을 줄 수 있고, 제형·용량을 정하려면 임상 연구가 더 필요)',
     url: 'https://doi.org/10.3390/life14101264' },
+  /* 석류·아마씨 규칙의 출처 — 둘 다 PMC 원문 대조(2026-10-14) */
+  { id: 'chen2018juice', kind: 'review', year: 2018,
+    citation: 'Chen M, et al. Food-drug interactions precipitated by fruit juices other than grapefruit juice: an update review. J Food Drug Anal. 2018;26(2S):S61-S71. (무작위 연구 46편 종설 · 3.2.7절: 석류즙은 사람에서 플루르비프로펜(CYP2C9)·미다졸람(CYP3A) 청소율을 바꾸지 않음, 자몽과 대비 · 4.3절: 석류즙 증례 보고 — 와파린 2·로수바스타틴 1·농축액-타크롤리무스 1)',
+    url: 'https://doi.org/10.1016/j.jfda.2018.01.009' },
+  { id: 'vandie2024', kind: 'meta', year: 2024,
+    citation: 'van Die MD, et al. Phytonutrients and outcomes following breast cancer: a systematic review and meta-analysis of observational studies. JNCI Cancer Spectr. 2024;8(1):pkad104. (진단 전 리그난 3편: 유방암 사망 HR 0.91, 0.74~1.12 · 폐경 후 0.66, 0.42~1.03 · 폐경 전 1.55, 1.01~2.39 / 혈중 엔테로락톤 3편: 유방암 사망 0.72, 0.58~0.90 · 전체 사망 0.69 · ER 양성 0.75, 0.56~1.00 · 재발 0.91, 0.67~1.23 / 고찰: 아마씨 하루 25 g 에서 Ki-67·HER2 감소, 세포사멸 증가)',
+    url: 'https://doi.org/10.1093/jncics/pkad104' },
   { id: 'sjw-interaction', kind: 'rct', year: 2002,
     citation: 'Mathijssen RH, et al. Effects of St. John\'s wort on irinotecan metabolism. J Natl Cancer Inst. 2002;94(16):1247-1249. (환자 5명 무작위배정 교차설계 · SN-38 농도 42 % 감소, 95 % CI 14~70 %)',
     url: 'https://doi.org/10.1093/jnci/94.16.1247' },
