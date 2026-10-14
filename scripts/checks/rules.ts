@@ -1262,6 +1262,57 @@ for (const id of orphan) bad('아무 데서도 인용하지 않는 문헌', `${i
   if (files.length < 60 || strings < 5000) bad("'금기' 검사가 헛돎", `파일 ${files.length}개 · 문자열 ${strings}개`)
 }
 
+/* ── 콩 근거는 콩에만 — 2026-10-14 전문의 확인 ────────────────────
+ *
+ * '식물성에스트로겐' 태그 하나에 콩 규칙 셋(유방암 권장·타목시펜·자궁내막암)이 걸려 있었다.
+ * 석류와 아마씨에도 그 태그가 있어, 석류를 열면 "두부·두유·된장은 피하지 않아도 됩니다" 와
+ * 상하이 코호트 숫자가 근거로 떴다. 그 논문들은 석류를 다루지 않는다.
+ *
+ * 잣대는 엔진이 아니라 이름이다 — 콩으로 만든 음식인지는 이름을 보면 안다.
+ */
+{
+  const SOY_NAME = /두부|두유|대두|검은콩|콩나물|된장|청국장|낫토|유바|유부|비지|콩자반|콩국수|미소/
+  const SOY_TAG = '대두이소플라본'
+  const soyRules = [...COMMON_RULES, ...Object.values(CONDITION_RULES).flat(), ...CANCERS.flatMap((c) => c.rules ?? []), ...INTERACTIONS]
+    .filter((r) => (r.refIds ?? []).some((id) => ['shu2009', 'nechuta2012', 'chi2013'].includes(id)))
+  if (soyRules.length < 3) bad('콩 근거 검사가 헛돎', `콩 코호트를 인용한 규칙이 ${soyRules.length}개뿐`)
+  for (const r of soyRules) {
+    const tags = r.match.tags ?? []
+    if (tags.length !== 1 || tags[0] !== SOY_TAG) bad('콩 근거 규칙이 콩 아닌 것에도 걸릴 수 있음', `${r.id} — match.tags ${JSON.stringify(tags)}`)
+  }
+  /* '식물성에스트로겐' 은 보여 드리는 이름일 뿐 — 거기에 규칙을 걸면 다시 석류가 끌려 들어온다 */
+  for (const r of [...COMMON_RULES, ...Object.values(CONDITION_RULES).flat(), ...CANCERS.flatMap((c) => c.rules ?? []), ...INTERACTIONS]) {
+    if ((r.match.tags ?? []).includes('식물성에스트로겐') || (r.match.excludeTags ?? []).includes('식물성에스트로겐')) {
+      bad("'식물성에스트로겐' 에 규칙이 걸림", r.id)
+    }
+  }
+  let soyFoods = 0
+  for (const f of [...CURATED_FOODS, ...GENERATED_CORE]) {
+    if (!f.tags.includes(SOY_TAG)) continue
+    soyFoods++
+    if (!SOY_NAME.test(f.name)) bad("콩이 아닌데 '대두이소플라본'", `${f.id} ${f.name}`)
+    if (!f.tags.includes('식물성에스트로겐')) bad("'대두이소플라본' 인데 '식물성에스트로겐' 표시가 빠짐", `${f.id} ${f.name}`)
+  }
+  if (soyFoods < 25) bad('콩 근거 검사가 헛돎', `'대두이소플라본' 음식이 ${soyFoods}종뿐`)
+  /*
+   * 석류·아마씨는 이름(식물성에스트로겐)은 남기되 콩 근거는 받지 않는다.
+   * 각자의 근거 규칙은 식약처 회신 뒤에 넣는다 — docs/근거/2026-10-14-석류-아마씨-보류.md.
+   * 넣으면 아래 목록에 규칙 id 를 적어 "자기 근거가 붙는가" 까지 보게 할 것.
+   */
+  const OWN_RULE: Record<string, string | undefined> = { pomegranate: undefined, flaxseed: undefined }
+  for (const [id, rule] of Object.entries(OWN_RULE)) {
+    const f = FOOD_BY_ID[id]
+    if (!f) { bad('석류·아마씨 검사 대상이 없음', id); continue }
+    if (!f.tags.includes('식물성에스트로겐')) bad("'식물성에스트로겐' 표시가 사라짐", f.name)
+    if (f.tags.includes(SOY_TAG)) bad('콩이 아닌데 콩 근거를 받음', f.name)
+    const p = { ...DEFAULT_PATIENT, cancer: 'breast', sex: 'F', subtypes: ['호르몬수용체양성'], onboarded: true, phase: 'survivorship', medications: ['tamoxifen'] } as PatientContext
+    const v = evaluateFood(f, p, 1)
+    const ids = [...v.hits.map((h) => h.rule.id), ...v.interactions.map((i) => i.interaction.id)]
+    for (const s of soyRules) if (ids.includes(s.id)) bad('콩 근거가 석류·아마씨에 붙음', `${f.name} ← ${s.id}`)
+    if (rule && !ids.includes(rule)) bad('석류·아마씨 자기 근거가 안 붙음', `${f.name} — ${rule} 없음 (${ids.join(',')})`)
+  }
+}
+
 console.log(`\n규칙 검사 완료 — 문제 ${bugs.length}종`)
 const g = new Map<string, string[]>()
 for (const b of bugs) { const k = b.split(' :: ')[0]; if (!g.has(k)) g.set(k, []); g.get(k)!.push(b.split(' :: ')[1]) }

@@ -4,7 +4,7 @@ import { F } from './_helper'
 export const processed = [
   F('tofu-processed-nugget', '두부과자', '가공식품', 'snack', 30, '1봉',
     { kcal: 450, carb: 55.0, protein: 12.0, fat: 20.0, satFat: 6.0, na: 500, k: 200, ca: 150, p: 180, fe: 2.0 },
-    ['초가공식품', '고나트륨', '식물성에스트로겐'], {}),
+    ['초가공식품', '고나트륨', '식물성에스트로겐', '대두이소플라본'], {}),
   F('canned-corn', '옥수수통조림', '가공식품', 'processed', 80, '1/2캔',
     { kcal: 81, carb: 18.0, protein: 2.6, fat: 0.8, sugar: 5.0, fiber: 2.0, na: 250, k: 170, ca: 4, p: 60, fe: 0.4 },
     ['초가공식품', '고나트륨', '가스유발'], {}),

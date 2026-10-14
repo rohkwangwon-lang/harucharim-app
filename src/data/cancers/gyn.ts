@@ -110,7 +110,7 @@ export const gyn: CancerProfile = {
     {
       id: 'gyn-phytoestrogen',
       level: 'info',
-      match: { tags: ['식물성에스트로겐'] },
+      match: { tags: ['대두이소플라본'] },
       title: '자궁내막암에서 콩 식품은 제한 대상이 아닙니다',
       reason:
         '유방암에서와 마찬가지로, 식품 형태의 대두 섭취가 자궁내막암 예후를 나쁘게 한다는 근거는 없습니다. ' +

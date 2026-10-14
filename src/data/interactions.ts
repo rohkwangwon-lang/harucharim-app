@@ -516,7 +516,7 @@ evidence: 'C',
   {
     id: 'int-tamoxifen-soy',
     agent: 'tamoxifen',
-    match: { tags: ['식물성에스트로겐'] },
+    match: { tags: ['대두이소플라본'] },
     level: 'info',
     title: '타목시펜을 드시는 중에도 콩 음식은 괜찮습니다',
     reason:

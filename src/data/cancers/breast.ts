@@ -29,7 +29,7 @@ export const breast: CancerProfile = {
     {
       id: 'breast-soy',
       level: 'prefer',
-      match: { tags: ['식물성에스트로겐'] },
+      match: { tags: ['대두이소플라본'] },
       title: '두부·두유·된장은 피하지 않아도 됩니다 — 오히려 이득 쪽입니다',
       reason:
         '대두 이소플라본이 에스트로겐과 구조가 비슷하다는 이유로 오랫동안 피해야 할 음식으로 여겨졌지만, 사람 대상 연구는 반대 방향을 가리킵니다. ' +

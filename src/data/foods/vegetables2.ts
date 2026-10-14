@@ -31,7 +31,7 @@ export const vegetables2 = [
     ['염장', '고나트륨', '발효'], {}),
   F('bean-sprout-raw', '콩나물(생)', '채소', 'ingredient', 80, '1줌',
     { kcal: 42, carb: 4.0, protein: 5.4, fat: 1.5, fiber: 2.4, na: 6, k: 190, ca: 30, p: 70, mg: 25, fe: 0.9, vitC: 12, folate: 120 },
-    ['식물성에스트로겐', '생식', '생새싹'], {}),
+    ['식물성에스트로겐', '대두이소플라본', '생식', '생새싹'], {}),
   F('aster', '취나물', '채소', 'ingredient', 50, '1접시',
     { kcal: 43, carb: 7.5, protein: 3.5, fat: 0.5, fiber: 5.0, na: 12, k: 500, ca: 120, p: 60, mg: 35, fe: 2.0, vitA: 340, vitC: 15, vitK: 200 },
     ['고식이섬유', '고비타민K', '거친질감'], {}),
