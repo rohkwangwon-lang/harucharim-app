@@ -1,0 +1,583 @@
+{
+ "files": [
+  "/Users/kwangwonroh/클로드 작업/harucharim-app/src/data/cancers/breast.ts",
+  "/Users/kwangwonroh/클로드 작업/harucharim-app/src/data/cancers/stomach.ts",
+  "/Users/kwangwonroh/클로드 작업/harucharim-app/src/data/cancers/colorectal.ts",
+  "/Users/kwangwonroh/클로드 작업/harucharim-app/src/data/cancers/lung.ts"
+ ],
+ "changes": [
+  {
+   "rule": "breast-soy",
+   "what": "ER·타목시펜 하위군 '똑같이 나타났다'를 원문대로 '같은 방향으로 보였으나 하위군은 수가 적어 통계적으로 확정되지 않음'으로 낮춤. 4년 재발률은 JAMA 출판본 초록 값임을 주석에 남김.",
+   "before": "이득은 ER 양성·음성, 타목시펜 복용·비복용에서 똑같이 나타났습니다",
+   "after": "모두에서 같은 방향으로 보였으나, 하위군은 수가 적어 통계적으로 확정되지 않았다고 저자들이 적음",
+   "sources": [
+    "shu2009"
+   ]
+  },
+  {
+   "rule": "breast-alcohol",
+   "what": "'안전 구간이 보이지 않는다'를 53편 재분석(오히려 저용량 결론 불가라 씀)에서 떼어 WCRF('유방암에서 역치 확인 안 됨')로 귀속. 출처에 없는 '맥주 300 mL' 삭제(원문은 10 g = 한 잔). 이 숫자가 '발생' 연구이고 진단 후 음주와 재발은 일관되지 않다는 ACS 2022 문장 추가(판정 avoid 유지).",
+   "before": "53편·15만 명…용량이 늘수록 계속 올라가 안전 구간이 보이지 않습니다 · 맥주 300 mL",
+   "after": "유방암 58,515명·대조 95,067명 재분석 7.1 %/10 g · WCRF 역치 없음 · 발생 연구이며 진단 후 음주-재발은 비일관(ACS 2022)",
+   "sources": [
+    "hamajima2002",
+    "wcrf2018",
+    "acs2022"
+   ]
+  },
+  {
+   "rule": "breast-weight",
+   "what": "출처에 없는 '폐경 후 지방조직은 아로마타제로 에스트로겐을 만드는 주된 장소' 삭제, ACS 2022 원문 문장(진단 전·때·후 비만 BMI≥30 → 재발·사망 높은 쪽, 진단 후 체중 증가 → 유방암 사망)으로 교체.",
+   "before": "폐경 후 지방조직은 아로마타제를 통해 에스트로겐을 만드는 주된 장소 · 여러 코호트에서 일관",
+   "after": "미국암학회 2022: 진단 전·때·후 비만이면 재발·유방암 사망·전체 사망이 높은 쪽 연구가 대부분, 진단 후 체중 증가도 유방암 사망 높은 쪽",
+   "sources": [
+    "acs2022"
+   ]
+  },
+  {
+   "rule": "breast-calcium-vitd",
+   "what": "범위 축소: 비타민D 5000 IU(125 µg, 이유문이 적은 상한 100 µg 초과) 제외 — supplementCategories 대신 supplementIds(cal-mag-d, calcium-carbonate, vitd-1000, vitd-2000). 음식은 excludeTags 고나트륨·염장(용기라면·염장대구 제거). 제목을 조건문('아로마타제 억제제를 쓰신다면')으로. 404 인 kdca-bone 제거.",
+   "before": "supplementCategories 칼슘·마그네슘·비타민D 전체 · 고나트륨 식품 포함 · '아로마타제 억제제를 쓰는 동안' · refIds에 kdca-bone",
+   "after": "5000 IU 제외·고나트륨/염장 제외 · '아로마타제 억제제를 쓰신다면' · refIds hadji2017aibl, kdri2020",
+   "sources": [
+    "hadji2017aibl",
+    "kdri2020"
+   ]
+  },
+  {
+   "rule": "breast-her2-cardiac",
+   "what": "지침에 없는 '이 손상을 막아 준다고 입증된 보충제는 없습니다'를 '미국임상종양학회 지침에는 보충제 권고가 없습니다'로 출처가 말하는 만큼으로 줄임.",
+   "before": "이 손상을 막아 준다고 입증된 보충제는 없습니다",
+   "after": "미국임상종양학회 지침에는 심장 손상을 막으려고 먹는 보충제에 대한 권고가 없습니다. 대신 이 지침은…",
+   "sources": [
+    "asco-cardio"
+   ]
+  },
+  {
+   "rule": "stomach-salted",
+   "what": "Ge 2012 에 없는 'DNA 손상 증폭' 삭제(점막 손상·H. pylori 집락 증가만). 2.05·1.27 을 오즈비로 표기. WCRF '염장식품 probable' 명시. 일반인 '위암 발생' 연구이고 재발 자료가 아니라는 문장 추가.",
+   "before": "H. pylori 집락 형성과 DNA 손상을 함께 증폭 · 위암 위험은 2.05배",
+   "after": "점막 손상이 H. pylori 가 자리 잡기 쉬운 환경 · 위암 오즈비 2.05배/아시아 1.27배 · 발생 연구임을 밝힘",
+   "sources": [
+    "ge2012salt",
+    "wcrf2018",
+    "yoo2020pickled"
+   ]
+  },
+  {
+   "rule": "stomach-sodium",
+   "what": "출처 없는 '나트륨 절반 이상이 국·찌개·김치'·'국물만 남겨도 절반 가까이'를 삭제하고, 국민건강영양조사 2013~2017 분석 논문(PMC 원문)의 숫자와 결론으로 교체. URL 없는 knhanes 제거. 등급 B→C(위암 환자 국물 감량 효과 근거가 아님).",
+   "before": "한국인 나트륨 절반 이상이 국·찌개·김치 · 국물만 남겨도 한 끼 나트륨 절반 가까이 · 등급 B · refIds ge2012salt, knhanes",
+   "after": "하루 3,477~3,890 mg · 면·만두, 김치(487~540 mg), 국(368~429 mg) 순 · 저자 결론 '국과 김치를 줄이는 것이 효과적' · 등급 C · refIds jeong2021sodium, ge2012salt",
+   "sources": [
+    "jeong2021sodium",
+    "ge2012salt"
+   ]
+  },
+  {
+   "rule": "stomach-kimchi",
+   "what": "출처에 없는 '유산균과 식이섬유라는 이점' 삭제. 김치를 절임채소로 명시해 본 Yoo 2020(한국인 코호트) 추가하고 그 수치(40 g 당 15 %) 연결.",
+   "before": "김치에는 유산균과 식이섬유라는 이점… · refIds kimhj2010veg, kim2010saltpref, ge2012salt",
+   "after": "김치는 절인 음식이라 나트륨이 높음 · 김치·장아찌를 절임채소로 본 한국인 코호트 분석 40 g 당 15 % · yoo2020pickled 추가",
+   "sources": [
+    "kimhj2010veg",
+    "yoo2020pickled",
+    "kim2010saltpref"
+   ]
+  },
+  {
+   "rule": "stomach-grilled",
+   "what": "두 출처 어디에도 없는 'PAH·HCA 는 위·대장 유전독성 물질로 분류'·'탄 부분만 잘라도 노출 크게 감소' 삭제. WCRF '직화구이 고기·생선 = 제한적·시사' + IARC '조리법이 위험을 바꾸는지 결론낼 자료 부족'으로 교체. 근거 대상이 아닌 '훈제' 태그를 match 에서 제거하고 제목을 '직화로 굽거나 태운 고기·생선은 줄이세요'로.",
+   "before": "match 직화구이·훈제 · '태운 부분과 훈제식품은 피하세요' · 유전독성 분류·노출 크게 감소",
+   "after": "match 직화구이 · '직화로 굽거나 태운 고기·생선은 줄이세요' · WCRF limited-suggestive, IARC 결론 불가",
+   "sources": [
+    "wcrf2018",
+    "iarc114"
+   ]
+  },
+  {
+   "rule": "stomach-b12",
+   "what": "'전절제 후 경구로 흡수되지 않아 보통 주사' 오류 정정 — 주사(1,000 µg 매달·격월) 또는 매일 메코발라민 1,000~1,500 µg 두 방법, 평생 관리·해마다 검사(PMC 원문 2편). 전절제 결핍 78.0~100 %/4년 추가. 범위: 종합비타민(B12 2.4~25 µg) 제외, 일반 B군 제품 함량이 부족함을 문장에 명시. 구독제 종설(gastrectomy-nutr) 제거.",
+   "before": "경구 섭취만으로 흡수되지 않아 보통 주사 · match 비타민B군+종합비타민 · refIds gastrectomy-nutr, b12-gastrectomy-meta",
+   "after": "주사 또는 고용량 먹는 약, 평생·매년 검사 · match 비타민B군 · refIds park2023b12, teixeira2023micro, b12-gastrectomy-meta",
+   "sources": [
+    "park2023b12",
+    "teixeira2023micro",
+    "b12-gastrectomy-meta"
+   ]
+  },
+  {
+   "rule": "stomach-b12-partial",
+   "what": "전절제 대상인 b12-gastrectomy-meta 를 떼고 부분절제 수치(4년 내 3.2~15.7 %)가 있는 PMC 원문으로 교체. 초록만 본 종설의 '남은 점막 위축' 문장 축소. '미리 고용량 드실 이유 없음'과 어긋나던 고함량 B군(임팩타민 파워)을 범위에서 제외. 등급 B→C.",
+   "before": "match 비타민B군+종합비타민(임팩타민 파워 포함) · 남은 위 점막이 위축되면서… · 등급 B · refIds gastrectomy-nutr, b12-gastrectomy-meta",
+   "after": "match 종합비타민 + aronamin-gold·bcomplex-generic · 4년 내 3.2~15.7 % · 등급 C · refIds park2023b12, teixeira2023micro",
+   "sources": [
+    "park2023b12",
+    "teixeira2023micro"
+   ]
+  },
+  {
+   "rule": "stomach-dumping",
+   "what": "원문 공개 덤핑 국제 합의(Scarpellini 2020)로 교정: 후기 덤핑 1~3시간(기존 2~3시간), 합의에서 채택되지 못한 '식후 20~30분 눕기' 삭제, '물은 식후 30분 이상 뒤', '단 음식·음료의 빨리 흡수되는 당 빼기', '과일·채소는 권함' 추가. 범위를 restrictGroups 음료·간식·디저트·유지·당류로 좁혀 군고구마·포도·망고 등 제외. 등급 C→G(국제 Delphi 합의).",
+   "before": "2~3시간 뒤 후기 덤핑 · 20~30분 비스듬히 눕기 · 고당 태그 2,839종 · 등급 C · refIds gastrectomy-nutr",
+   "after": "식후 1~3시간 · 양 줄이기·물은 30분 뒤·빠른 당 빼기·과일채소 권장 · 고당∩(음료·간식·당류) · 등급 G · refIds scarpellini2020dumping, gastrectomy-nutr",
+   "sources": [
+    "scarpellini2020dumping",
+    "gastrectomy-nutr"
+   ]
+  },
+  {
+   "rule": "stomach-small-meals",
+   "what": "대조 불가한 '하루 5~6회' 삭제, 덤핑 합의의 '한 번에 먹는 양 줄이기·단백질 풍부한 음식'으로 근거 연결. 같은 시기 덤핑 규칙과 충돌하던 고당 식품(도넛 등)을 excludeTags 로 제외.",
+   "before": "하루 5~6회 · 고당 식품 포함 · refIds gastrectomy-nutr",
+   "after": "한 번에 조금씩 여러 번 · excludeTags 고당 · refIds scarpellini2020dumping, gastrectomy-nutr",
+   "sources": [
+    "scarpellini2020dumping"
+   ]
+  },
+  {
+   "rule": "stomach-bezoar",
+   "what": "초록만 본 종설 대신 위암 원위부 위절제 15개월 후 감 위석(시부올 탄닌+위액) 장폐색 수술 증례(PMC 원문)로 교체. '드물지 않게 보고'를 '보고되어 있다'로.",
+   "before": "탄닌이 위산과 만나 굳어… 드물지 않게 보고 · refIds gastrectomy-nutr",
+   "after": "시부올(탄닌)+위액 → 섬유 엉김, 위절제 후 배출 지연, 증례 보고 · refIds yamagata2017bezoar",
+   "sources": [
+    "yamagata2017bezoar"
+   ]
+  },
+  {
+   "rule": "stomach-iron-ca",
+   "what": "범위: 소금(프랑스 소금꽃)·초코 머핀 등에 '권장'이 붙던 것을 excludeTags 고나트륨·염장·고당으로 제거. 대조 불가한 '구연산칼슘 유리'·'수년에 걸쳐' 삭제, PMC 원문 종설 수치(수술 2년 뒤 철 결핍 40~70 %, 철결핍빈혈 31 %, 칼슘 부족이 뼈 질환 주원인, 경구 철로 늘 정상화되지는 않음)로 교체.",
+   "before": "구연산칼슘 형태가 유리 · 소금·머핀 권장 · refIds gastrectomy-nutr",
+   "after": "십이지장 우회·위산 감소 · 40~70 %/31 % · excludeTags 고나트륨·염장·고당 · refIds teixeira2023micro",
+   "sources": [
+    "teixeira2023micro"
+   ]
+  },
+  {
+   "rule": "crc-red-meat",
+   "what": "등급 A→B(관찰 근거, IARC '제한적'). '헴철이 주요 기전' 을 IARC 원문대로 '거론되나 아직 완전히 밝혀지지 않음'으로.",
+   "before": "헴철이 N-니트로소 화합물 생성을 촉진하는 것이 주요 기전 · 등급 A",
+   "after": "헴철 등 거론되나 기전은 완전히 밝혀지지 않음(IARC) · 등급 B",
+   "sources": [
+    "iarc114",
+    "wcrf2018"
+   ]
+  },
+  {
+   "rule": "crc-fiber",
+   "what": "phases 에서 'all' 제거(엔진은 'all'이면 시기 무관 적용 → 수술 직후·골반 RT 중 저잔사 규칙과 충돌) → ['during_chemo','survivorship']. 곡물 섬유 HR 0.67 표기. ACS 2022 의 반대 방향 요약(대장암 생존자 건강식 패턴-재발·사망 무관) 추가.",
+   "before": "phases ['survivorship','all'] · 반대 근거 없음",
+   "after": "phases ['during_chemo','survivorship'] · '관찰 연구 한 편, ACS 2022 는 식사 패턴과 재발·사망 무관' · acs2022 추가",
+   "sources": [
+    "song2018fiber",
+    "acs2022"
+   ]
+  },
+  {
+   "rule": "crc-highfiber-stricture",
+   "what": "원문에 섬유·협착·장루가 0건인 ESPEN 2021 을 떼고 장루 식이 종설(ileostomy-diet-review, cond-stoma-fiber 와 같은 출처)로 교체, 근거가 얇다는 결론 명시. 등급 G→C. 현미밥·잡곡밥·통밀빵에 걸리지 않게 restrictGroups 채소·해조·버섯·견과·종실·과일.",
+   "before": "refIds espen2021 · 등급 G · 고식이섬유 647종(곡류 포함)",
+   "after": "refIds ileostomy-diet-review · 등급 C · 채소·버섯·견과·과일만",
+   "sources": [
+    "ileostomy-diet-review"
+   ]
+  },
+  {
+   "rule": "crc-calcium-dairy",
+   "what": "WCRF 는 비유제품 칼슘 급원을 '결론 없음'으로 분류 — 고칼슘 태그 OR 를 지워 유제품 군만(가당 유제품 excludeTags 고당). '전립선암에서는 정반대' 과장을 '제한적이지만 시사'로. 대조 못 한 담즙산 기전 삭제. 발생 연구임을 명시.",
+   "before": "tags 고칼슘 OR 유제품(두부·멸치·아이스크림·피자 포함) · 전립선암 정반대 · 담즙산 결합 기전",
+   "after": "유제품 군 ∩ 칼슘 105 mg, 고당 제외 · 전립선 limited-suggestive, 유제품 권고 없음 · 발생 연구 명시",
+   "sources": [
+    "wcrf2018"
+   ]
+  },
+  {
+   "rule": "crc-diarrhea-rt",
+   "what": "ESPEN 2021 원문에 섬유·지방·유당·카페인·매운 음식 서술 0건 → 출처를 코크란 2018(PMC)로 교체. '고섬유가 악화시킨다' 단정 삭제(반대 방향 RCT: 고섬유 군 1년 장 증상 개선, 108명, 낮은 확실성). 제목에서 근거 없는 '유당' 삭제, '설사가 심할 때 잠시'로. 등급 G→C. 판정 prefer 는 유지.",
+   "before": "제목 '잔사와 유당을 줄이세요' · 고섬유·고지방·유당·카페인·매운 음식이 악화 · 등급 G · refIds espen2021",
+   "after": "제목 '설사가 심할 때는 잠시 부드럽고 잔사가 적은 음식으로' · 예방적 섬유 제한 근거 없음, 코크란 2018 · 등급 C · refIds lawrie2018cochrane",
+   "sources": [
+    "lawrie2018cochrane"
+   ]
+  },
+  {
+   "rule": "crc-lifestyle",
+   "what": "점수 항목은 '통곡물'인데 곡류·전분 전체(흰쌀밥·소면)에 붙던 것을 채소·과일 + 곡류 중 고식이섬유로 좁힘. 본문에 이 연구가 없는 acs2022 제거, '당시 미국암학회 권고'로 표현.",
+   "before": "groups 채소·과일·곡류·전분 · refIds vanblarigan2018, acs2022",
+   "after": "groups 채소·과일, tags 고식이섬유, restrictGroups 채소·과일·곡류·전분 · refIds vanblarigan2018",
+   "sources": [
+    "vanblarigan2018"
+   ]
+  },
+  {
+   "rule": "lung-betacarotene",
+   "what": "본문에 베타카로틴이 0건인 acs2022 를 refIds 에서 제거. 종합비타민 '피하세요'는 지시대로 손대지 않고 judgements 로만.",
+   "before": "refIds atbc1994, caret1996, acs2022",
+   "after": "refIds atbc1994, caret1996",
+   "sources": [
+    "atbc1994",
+    "caret1996"
+   ]
+  },
+  {
+   "rule": "lung-ons",
+   "what": "ESPEN 2021 에 없는 '60 % 미만 1~2주면 ONS 시작'(2017 판의 '섭취 부족 정의')을 2021 원문 기준(1주 넘게 50 % 미만 또는 2주 넘게 50~75 % → 의료영양 적응, 보강식으로 부족하면 ONS 추가)으로 교체.",
+   "before": "60 % 미만 1~2주 이상이면 ONS 시작",
+   "after": "보강식으로 목표 미달 시 ONS · <50 % 1주 넘게 또는 50~75 % 2주 넘게면 영양 지원",
+   "sources": [
+    "espen2021"
+   ]
+  },
+  {
+   "rule": "lung-esophagitis",
+   "what": "두 출처에 없는 '2주를 넘어서면' 삭제. MASCC 는 구강·위장관 점막염 지침임을 밝히고, ESPEN 2021 권고 26(흉부 RT 중 개별 상담·ONS)을 실제 문장으로 연결.",
+   "before": "흉부 방사선치료가 2주를 넘어서면… 점막염 지침도…",
+   "after": "치료를 받는 동안 식도 점막염 흔함 · 구강·위장관 점막염 국제 지침 + ESPEN 권고 26",
+   "sources": [
+    "mascc-mucositis",
+    "espen2021"
+   ]
+  },
+  {
+   "rule": "lung-spicy-acid-rt",
+   "what": "MASCC 가 식도염 식이를 다루지 않는데 '국제 지침이 근거 부족으로 권고를 내지 못했다'고 넓게 읽은 문장을 '식도염 때 뺄 음식을 정한 국제 지침은 없다'로. 출처 없는 '치료 후 2~4주면 회복' 삭제. 판정 avoid 유지(judgement 참조).",
+   "before": "국제 지침이 근거 부족으로 권고를 내지 못한 영역 · 2~4주면 대개 회복",
+   "after": "식도염 때 뺄 음식을 정한 국제 지침은 없음 · 아픈 동안의 한시적 조정",
+   "sources": [
+    "mascc-mucositis"
+   ]
+  },
+  {
+   "rule": "lung-steroid-sugar",
+   "what": "ESPEN 2021 에 항구토 덱사메타손-혈당 서술이 없어 PMC 원문 국내 연구(위장관암 77명, 3~6개월 내 22.1 % 스테로이드 당뇨, 누적 용량과 연관)로 교체, 등급 G→C. 출처 없는 '며칠간 뚜렷하게' 삭제. 범위를 음료·간식·당류의 고당으로 좁혀 과일 제외.",
+   "before": "투여 후 며칠간 혈당을 뚜렷하게 올립니다 · 고당 전부(과일 포함) · 등급 G · refIds espen2021",
+   "after": "77명 중 22.1 % 스테로이드 당뇨 · 고당∩(음료·간식·당류) · 등급 C · refIds jeong2016dexa",
+   "sources": [
+    "jeong2016dexa"
+   ]
+  }
+ ],
+ "new_refs": [
+  {
+   "id": "jeong2021sodium",
+   "kind": "cohort",
+   "year": 2021,
+   "citation": "Jeong Y, Kim ES, Lee J, Kim Y. Trends in sodium intake and major contributing food groups and dishes in Korea: the Korea National Health and Nutrition Examination Survey 2013-2017. Nutr Res Pract. 2021;15(3):382-395. (국민건강영양조사 24시간 회상 · 하루 나트륨 3,477~3,890 mg · 나트륨 기여 음식군 1~3위 면·만두 537~573 mg, 김치 487~540 mg, 국 368~429 mg · 결론 '국과 김치를 줄이는 것이 효과적')",
+   "url": "https://doi.org/10.4162/nrp.2021.15.3.382",
+   "access": "pmc",
+   "fulltext": "PMC8155222",
+   "note": "단면 조사라 kind 는 'db' 가 더 맞을 수 있음 — 코디네이터 판단(등급 C 로 둠)"
+  },
+  {
+   "id": "park2023b12",
+   "kind": "cohort",
+   "year": 2023,
+   "citation": "Park SH, et al. Effect of Vitamin B12 Replacement Intervals on Clinical Symptoms and Laboratory Findings in Gastric Cancer Patients after Total Gastrectomy. Cancers (Basel). 2023;15(20):4938. (국립암센터 후향 · 전절제 B12 결핍 4년 내 78.0~100 %, 부분절제 3.2~15.7 % · 보충은 시아노코발라민 1,000 µg 근주 매달·격월 또는 메코발라민 1,000~1,500 µg 매일 경구 · 정기 190명 대 검사 기반 216명, 혈색소·증상 차이 없음)",
+   "url": "https://doi.org/10.3390/cancers15204938",
+   "access": "pmc",
+   "fulltext": "PMC10605534"
+  },
+  {
+   "id": "teixeira2023micro",
+   "kind": "review",
+   "year": 2023,
+   "citation": "Teixeira Farinha H, et al. Gastro-Intestinal Disorders and Micronutrient Deficiencies following Oncologic Esophagectomy and Gastrectomy. Cancers (Basel). 2023;15(14):3554. (B12 결핍은 먹는 약·주사로 평생 관리, 매년 검사 · 위절제 2년 뒤 철 결핍 40~70 %·철결핍빈혈 31 % · 칼슘 부족이 위절제 후 뼈 질환의 주원인)",
+   "url": "https://doi.org/10.3390/cancers15143554",
+   "access": "pmc",
+   "fulltext": "PMC10376982"
+  },
+  {
+   "id": "scarpellini2020dumping",
+   "kind": "guideline",
+   "year": 2020,
+   "citation": "Scarpellini E, et al. International consensus on the diagnosis and management of dumping syndrome. Nat Rev Endocrinol. 2020;16(8):448-466. (Delphi 합의 · 후기 덤핑 식후 1~3시간 · 식이 조절이 첫 치료 · 식사량 줄이고 물은 식후 30분 이상 뒤(동의 90 %) · 빠른 흡수 당 제거 · 식후 30분 눕기는 채택 안 됨(동의 55 %))",
+   "url": "https://doi.org/10.1038/s41574-020-0357-5",
+   "access": "pmc",
+   "fulltext": "PMC7351708"
+  },
+  {
+   "id": "yamagata2017bezoar",
+   "kind": "case",
+   "year": 2017,
+   "citation": "Yamagata Y, et al. Obstruction in the third portion of the duodenum due to a diospyrobezoar: a case report. BMC Surg. 2017;17(1):117. (조기 위암 원위부 위절제 15개월 후 감 위석 장폐색·수술 · 감의 시부올(탄닌)이 위액과 만나 섬유가 엉김 · 위절제가 위석 형성과 관련)",
+   "url": "https://doi.org/10.1186/s12893-017-0308-9",
+   "access": "pmc",
+   "fulltext": "PMC5706413"
+  },
+  {
+   "id": "lawrie2018cochrane",
+   "kind": "meta",
+   "year": 2018,
+   "citation": "Lawrie TA, et al. Interventions to reduce acute and late adverse gastrointestinal effects of pelvic radiotherapy for primary pelvic cancers. Cochrane Database Syst Rev. 2018;1(1):CD012529. (예방 중재 중 질 높은 근거 있는 것 없음 · 고섬유 식이 1편 108명: 1년 장 증상·삶의 질 개선, 낮은 확실성)",
+   "url": "https://doi.org/10.1002/14651858.CD012529.pub2",
+   "access": "pmc",
+   "fulltext": "PMC6491191",
+   "note": "PMC XML 에는 초록만 실려 대조는 초록·결론으로 함(PMC 에 PDF 전문 있음)"
+  },
+  {
+   "id": "jeong2016dexa",
+   "kind": "cohort",
+   "year": 2016,
+   "citation": "Jeong Y, et al. A Pilot Study Evaluating Steroid-Induced Diabetes after Antiemetic Dexamethasone Therapy in Chemotherapy-Treated Cancer Patients. Cancer Res Treat. 2016;48(4):1429-1437. (당뇨 없던 위장관암 77명 · 항암 3·6개월에 22.1 % 스테로이드 당뇨, 58.4 % 인슐린 저항 · 덱사메타손 누적 용량과 연관)",
+   "url": "https://doi.org/10.4143/crt.2015.464",
+   "access": "pmc",
+   "fulltext": "PMC5080830"
+  }
+ ],
+ "ref_annotations": [
+  {
+   "id": "shu2009",
+   "add": "상하이 유방암 생존자 5,042명 · 4년 재발 11.2 % 대 8.0 %(JAMA 출판본 초록 — PMC 저자원고는 5년 13.0 % 대 8.9 %) · 재발 HR 0.68(95 % CI 0.54~0.87) · 타목시펜 하위군 HR 0.60·0.61 은 통계적으로 유의하지 않음"
+  },
+  {
+   "id": "nechuta2012",
+   "add": "미국·중국 코호트 9,514명 · 이소플라본 ≥10 mg/일 재발 HR 0.75(95 % CI 0.61~0.92) · 전체 사망 0.87(0.70~1.10)·유방암 사망 0.83(0.64~1.07) 유의하지 않음 (PMC 원문은 PDF)"
+  },
+  {
+   "id": "hamajima2002",
+   "add": "유방암 58,515명·대조 95,067명(약 15만 명) · 흡연자·비흡연자에서 같은 7.1 % · 10 g = 한 잔(1 unit)"
+  },
+  {
+   "id": "wcrf2018",
+   "add": "적색육 주 3회분 = 조리 후 350~500 g(생고기 700~750 g) · 식이섬유 하루 30 g 이상 · 유방암 음주 역치 확인 안 됨 · 염장식품 위암 probable · 직화구이 고기·생선 위암 limited-suggestive · 유제품·칼슘 보충제 대장암 감소 strong, 유제품 전립선암 증가 limited-suggestive(유제품 권고 없음)"
+  },
+  {
+   "id": "iarc114",
+   "add": "가공육 Group 1 — 10편, 하루 50 g 당 대장암 약 18 % · 적색육 Group 2A(제한적 근거) — 인과 가정 시 100 g 당 17 % · 기전 아직 완전히 밝혀지지 않음 · 조리법이 위험을 바꾸는지 결론 낼 자료 부족"
+  },
+  {
+   "id": "hadji2017aibl",
+   "add": "골표적치료: T < −2.0, 또는 T < −1.5 + 위험인자 1개, 또는 위험인자 2개 이상"
+  },
+  {
+   "id": "kdri2020",
+   "add": "칼슘 권장 성인 700~800 mg · 상한 50세 이상 2,000 mg · 비타민 D 충분섭취량 10~15 µg · 상한 100 µg (B-cancer1 갈래가 KNS 자료실 원문 표로 대조, B-fix 는 재확인 못 함)"
+  },
+  {
+   "id": "asco-cardio",
+   "add": "권고 3.1 위험 요인(흡연·고혈압·당뇨·이상지질혈증·비만) 관리, 근거 수준 불충분 · 심장 포함 방사선 30 Gy 이상 고위험 (B-cancer1 갈래 브라우저 대조 — B-fix 는 403 으로 재확인 못 함)"
+  },
+  {
+   "id": "ge2012salt",
+   "add": "95 % CI · 총 2,076,498명(환자대조 7·코호트 4편이라 오즈비)"
+  },
+  {
+   "id": "yoo2020pickled",
+   "add": "95 % CI · 김치·장아찌를 절임채소로 정의"
+  },
+  {
+   "id": "b12-gastrectomy-meta",
+   "add": "B12 결핍 48.8 %(95 % CI 32.4~65.2, I² 98.85) · 초록만 대조(구독제)"
+  },
+  {
+   "id": "song2018fiber",
+   "add": "1~3기 1,575명·중앙 8년 · 진단 후 섬유 5 g/일 당 대장암 사망 HR 0.78(0.65~0.93) · 진단 후 증가 5 g 당 18 % 감소 · 곡물 섬유 HR 0.67(0.50~0.90) · 채소 섬유 전체 사망만 0.83 · 과일 섬유 무관"
+  },
+  {
+   "id": "ng2019",
+   "add": "SUNSHINE 2상 139명 · 무진행생존 13.0 대 11.0개월(P=.07), 다변량 HR 0.64 · 전체 생존 24.3 대 24.3개월"
+  },
+  {
+   "id": "manson2019",
+   "add": "VITAL 25,871명 · 비타민 D 2,000 IU · 중앙 5.3년 · 암 발생 HR 0.96(0.88~1.06) · 대장암 1.09(0.73~1.62)"
+  },
+  {
+   "id": "vanblarigan2018",
+   "add": "CALGB 89803 3기 결장암 992명·중앙 7년 · 점수 5~6 대 0~1 사망 HR 0.58(0.34~0.99) · 음주 포함 6~8 대 0~2 HR 0.49(0.32~0.76) · 점수 기준은 ACS 2012 지침 (PMC 는 초록만, 원문 미대조)"
+  },
+  {
+   "id": "atbc1994",
+   "add": "남성 흡연자 29,133명 · 베타카로틴 20 mg/일 · 폐암 발생 18 % 증가(95 % CI 3~36 %) · 전체 사망 8 % 증가(1~16 %) (PubMed 초록 대조)"
+  },
+  {
+   "id": "caret1996",
+   "add": "흡연자·석면 노출자 18,314명 · 베타카로틴 30 mg + 레티놀 25,000 IU · 폐암 RR 1.28(95 % CI 1.04~1.57) · 폐암 사망 1.46(1.07~2.00) · 21개월 조기 중단 (PubMed 초록 대조)"
+  },
+  {
+   "id": "espen2021",
+   "add": "의료영양 적응: 필요량 50 % 미만이 1주 넘게 또는 50~75 % 가 2주 넘게 · 권고 26: 두경부·흉부·위장관 방사선 중 개별 상담·ONS 로 섭취 확보"
+  },
+  {
+   "id": "espen-cachexia",
+   "add": "EFSA: EPA+DHA 하루 5 g, EPA 단독 1.8 g 까지 성인 안전 · 섭취 부족 정의 <60 % 가 1~2주"
+  }
+ ],
+ "remove_refs_from_rules": [
+  {
+   "rule": "breast-calcium-vitd",
+   "ref": "kdca-bone",
+   "why": "주소 HTTP 404(2026-10-14). 같은 숫자는 kdri2020 원문 표에 있음. kdca-bone 이 다른 규칙에 안 쓰이면 references.ts 에서 삭제 가능"
+  },
+  {
+   "rule": "stomach-sodium",
+   "ref": "knhanes",
+   "why": "URL·표 위치 없음, 규칙 문장 출처가 아님 → jeong2021sodium(PMC)로 교체. 다른 규칙 사용 여부 확인 필요"
+  },
+  {
+   "rule": "stomach-b12",
+   "ref": "gastrectomy-nutr",
+   "why": "구독제 종설(초록만) — 규칙 문장은 PMC 원문 2편으로 대체"
+  },
+  {
+   "rule": "stomach-b12-partial",
+   "ref": "b12-gastrectomy-meta",
+   "why": "제목부터 '전절제 후' 메타분석이라 부분절제 근거가 아님. scripts/checks/rules.ts MUST_CITE 의 ['stomach-b12-partial','b12-gastrectomy-meta'] 줄을 지워야 검사가 통과함"
+  },
+  {
+   "rule": "stomach-b12-partial",
+   "ref": "gastrectomy-nutr",
+   "why": "구독제 종설(초록만) — 부분절제 수치는 park2023b12 로 대체"
+  },
+  {
+   "rule": "stomach-bezoar",
+   "ref": "gastrectomy-nutr",
+   "why": "초록만 — 감 위석을 직접 다룬 PMC 원문 증례로 대체"
+  },
+  {
+   "rule": "stomach-iron-ca",
+   "ref": "gastrectomy-nutr",
+   "why": "초록만 — '구연산칼슘 유리' 미대조, PMC 원문 종설로 대체"
+  },
+  {
+   "rule": "crc-highfiber-stricture",
+   "ref": "espen2021",
+   "why": "원문에 fibre/stricture/stoma 0건"
+  },
+  {
+   "rule": "crc-diarrhea-rt",
+   "ref": "espen2021",
+   "why": "원문에 섬유·지방·유당·카페인·매운 음식 0건"
+  },
+  {
+   "rule": "crc-lifestyle",
+   "ref": "acs2022",
+   "why": "본문에 CALGB 89803 서술 없음(점수는 ACS 2012 기준)"
+  },
+  {
+   "rule": "lung-betacarotene",
+   "ref": "acs2022",
+   "why": "본문에 'carotene' 0건"
+  },
+  {
+   "rule": "lung-steroid-sugar",
+   "ref": "espen2021",
+   "why": "항구토 덱사메타손-혈당 서술 없음"
+  }
+ ],
+ "judgements": [
+  {
+   "rule": "lung-betacarotene",
+   "proposal": "종합비타민 2종(multi-generic, centrum-adult)의 '피하세요' 를 info('베타카로틴 함량을 확인하세요 — 시험 용량 20~30 mg 보다 훨씬 적습니다')로 낮추고, avoid 는 베타카로틴 단일·고함량(수 mg 이상) 제품에만. 제목은 '흡연력이 있다면' 인데 흡연 조건이 없어 모든 폐암 환자에게 뜸.",
+   "why": "ATBC 20 mg·CARET 30 mg 단일 고용량 시험. 앱 자료의 종합비타민 비타민A 700~800 µg RAE 를 모두 보충제 베타카로틴으로 가정해도 1.4~1.6 mg(추정). scope.ts 가 '제목 성분이 붙는 영양제에 없음' 2건으로 계속 잡음. PHS II(종합비타민 RCT)·VITAL 코호트는 '개별(단일) 베타카로틴 보충제' 장기 복용 위험을 말함(B-cancer1 findings)."
+  },
+  {
+   "rule": "breast-weight",
+   "proposal": "1회 500 kcal 초과 음식 전부(비빔밥·삼계탕 등 3,986종)에 생존기 모든 유방암 환자 '주의' — 체중 증가/체질량지수 조건이 있을 때만 걸리게 하거나 info 로.",
+   "why": "근거(ACS 2022)는 '사람의 체중 상태·진단 후 체중 증가' 에 대한 것이지 한 끼 열량이 아님. 체중이 줄고 있는 환자에게도 뜸."
+  },
+  {
+   "rule": "breast-tnbc-focus",
+   "proposal": "음식(고식이섬유·고단백 2,725종, 피자·핫윙 포함)에 붙이지 말고 아형 안내 카드로 옮기기 — match 를 비우면 scope.ts 의 '죽은 규칙' 으로 잡히므로 엔진·검사 쪽 결정 필요.",
+   "why": "내용은 '삼중음성이면 항호르몬 주의 해당 없음 + 운동·체중' 일반 안내로, 특정 음식의 설명처럼 읽힘."
+  },
+  {
+   "rule": "breast-calcium-vitd",
+   "proposal": "아로마타제 억제제 복용(약 목록) 조건으로 좁히는 기능 추가 검토. 지금은 세부 변수 '호르몬수용체양성' 뿐이라 타목시펜만 드시는 폐경 전 환자에게도 뜸 — 제목은 조건문으로 바꿔 둠.",
+   "why": "Hadji 2017 은 AI 시작 환자 대상(AIBL)."
+  },
+  {
+   "rule": "stomach-salted",
+   "proposal": "배추김치·깍두기는 stomach-kimchi('주의 — 끊기보다 덜 짜게')만 적용되게 염장 규칙에서 제외할지 판단 필요(같은 음식에 '피하세요' 와 '주의' 가 동시).",
+   "why": "한 음식에 상반된 두 판정. 제외하면 김치의 최종 판정이 avoid→caution 이 되므로 판정 수준 변경에 해당해 손대지 않음."
+  },
+  {
+   "rule": "stomach-b12",
+   "proposal": "비타민B군 제품(아로나민 골드 b12 0.02·임팩타민 파워 0.5·B컴플렉스 0.05)에 '권장' 을 유지할지, info 로 낮출지. 전절제 후 필요량(경구 1,000~1,500 µg)에 미치는 제품이 목록에 없음.",
+   "why": "Park 2023: 메코발라민 1,000~1,500 µg 매일 경구 또는 1,000 µg 근주. 함량 단위 혼선(아래 unresolved)도 있음."
+  },
+  {
+   "rule": "crc-diarrhea-rt",
+   "proposal": "level prefer → info 검토(저잔사 음식 '권장' 자체를 뒷받침하는 공개 근거를 못 찾음).",
+   "why": "Cochrane 2018: 예방 식이 중재 중 고품질 근거 없음, 고섬유 식이 1편은 오히려 이로움(낮은 확실성). Wedlake 2017(AJCN RCT, 구독제라 미인용) 저자는 섬유 제한 조언을 버려야 한다고 함."
+  },
+  {
+   "rule": "lung-spicy-acid-rt",
+   "proposal": "avoid → caution, 그리고 식도 증상(연하통) 조건이 있을 때만 적용 검토.",
+   "why": "근거 C(기전 추론)이고 이유 글 스스로 지침이 없다고 함. 지금은 폐암 방사선 중 모든 환자(뇌 전이·말초 SBRT 포함)에게 현미밥·토마토·견과 등에 '피하세요'."
+  },
+  {
+   "rule": "lung-cachexia",
+   "proposal": "체중감소 증상 선택 시에만 prefer, 아니면 info 검토.",
+   "why": "고열량밀도·고단백 4,963종(도넛·버거·피자 포함)에 체중 상태 무관하게 '권장'."
+  },
+  {
+   "rule": "lung-steroid-sugar",
+   "proposal": "당뇨 동반 상태·스테로이드 사용 조건에서만 적용 검토.",
+   "why": "근거(Jeong 2016)는 덱사메타손 항구토 사용자. 지금은 항암 중 모든 폐암 환자."
+  },
+  {
+   "rule": "stomach-small-meals",
+   "proposal": "고열량밀도 태그에 버거·피자 같은 외식이 남아 있어 '권장' 이 붙는지 확인 후 restrictGroups 추가 여부 판단.",
+   "why": "고당만 뺐고 고지방 외식은 남음."
+  }
+ ],
+ "unresolved": [
+  {
+   "rule": "breast-alcohol",
+   "issue": "첫 문장 '에스트로겐 농도를 올리고 아세트알데하이드로 DNA 손상' 의 출처 iarc100e(모노그래프 100E)를 열지 못해 미대조. 등급 A 는 관찰 연구 재분석이라 다른 규칙 기준(관찰 메타 = B)과 어긋날 수 있음."
+  },
+  {
+   "rule": "breast-soy",
+   "issue": "chi2013 은 APJCP 원문 미대조(초록만). nechuta2012 는 PMC 에 PDF 만 있어 XML 로는 초록만 확인."
+  },
+  {
+   "rule": "breast-her2-cardiac",
+   "issue": "asco-cardio 원문(ascopubs)이 WebFetch 403 — '30 Gy 이상 고위험'·권고 3.1 은 B-cancer1 갈래의 브라우저 대조에 기댐."
+  },
+  {
+   "rule": "breast-calcium-vitd",
+   "issue": "KDRI 수치(700~800 mg, 10~15 µg, 상한 2,000 mg·100 µg)를 이번에 직접 재열람하지 못함(B-cancer1 갈래가 KNS 원문 표로 대조, references.ts 주석도 대조 기록 있음)."
+  },
+  {
+   "rule": "stomach-kimchi",
+   "issue": "kim2010saltpref(AJCN)는 초록만 대조. kimhj2010veg 는 PMC 에 PDF 만."
+  },
+  {
+   "rule": "stomach-dumping",
+   "issue": "rules.ts 검사가 '등급 G 인데 인용은 review 뿐' 이라고 잡음 — scarpellini2020dumping 을 kind 'guideline' 으로 합치면 풀림."
+  },
+  {
+   "rule": "stomach-b12",
+   "issue": "b12-gastrectomy-meta 는 구독제(초록만)인데 rules.ts MUST_CITE 가 붙여 두라고 해서 남김. '전부 원문 대조' 와 어긋나므로 코디네이터 판단 필요."
+  },
+  {
+   "rule": "stomach (target.notes / phaseNotes)",
+   "issue": "규칙 밖 문구 '하루 5~6회 소량 분할', '식사와 물은 30분 간격', '체중 10 % 이상 빠지면 ONS', 프로필 refIds 의 espen2021 은 이번 범위(규칙) 밖이라 손대지 않음 — 같은 근거 문제."
+  },
+  {
+   "rule": "colorectal (phaseNotes)",
+   "issue": "post_op '저잔사식으로 시작해 4~6주에 걸쳐 섬유를 늘립니다' 는 crc-lowresidue 주석('ERAS 방향은 그 반대')과 모순, during_rt '유당·고지방·고섬유를 한꺼번에 줄여' 는 crc-diarrhea-rt 수정과 어긋남. target.notes '하루 10 g 이하 저잔사식' 도 출처 미확인."
+  },
+  {
+   "rule": "crc-red-meat",
+   "issue": "'적색육' 태그에 소간(내장)이 들어 있음 — IARC·WCRF 정의는 포유류 근육 고기. 음식 데이터 태그 수정 필요(배정 파일 밖)."
+  },
+  {
+   "rule": "crc-lifestyle",
+   "issue": "vanblarigan2018 PMC(PMC6145685)는 초록만(has-pdf no) — 숫자는 초록과 일치하나 원문 미대조."
+  },
+  {
+   "rule": "lung-betacarotene",
+   "issue": "atbc1994·caret1996 는 NEJM 원문 미열람, PubMed 초록으로 숫자 대조."
+  },
+  {
+   "rule": "lung-cachexia",
+   "issue": "fearon2011(Lancet Oncol 구독제) 초록만 대조."
+  },
+  {
+   "rule": "supplements.ts (배정 밖)",
+   "issue": "b12 단위가 µg 라고 types.ts 에 적혀 있는데 비타민B군 3종은 0.02·0.5·0.05 로 mg 값처럼 적혀 있음(folate 0.4 도 동일). 화면·검사에서 B12 함량 비교가 틀릴 수 있음."
+  }
+ ]
+}

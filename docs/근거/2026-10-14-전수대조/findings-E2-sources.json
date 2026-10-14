@@ -1,0 +1,1373 @@
+{
+ "batch": "E2-sources",
+ "date": "2026-10-14",
+ "scope": "ingredientRules.ts 원료 규칙 23개의 이유 문장별 공개 원문 출처 대조",
+ "rules": [
+  {
+   "rule": "코엔자임 Q10",
+   "claims": [
+    {
+     "claim": "항암 효과를 뒷받침하는 임상 근거가 없습니다.",
+     "status": "supported",
+     "source": {
+      "title": "Coenzyme Q10",
+      "org_or_journal": "NIH NCCIH (Herbs at a Glance / fact sheet)",
+      "year": 2019,
+      "url": "https://www.nccih.nih.gov/health/coenzyme-q10",
+      "access": "open",
+      "pmcid_or_url": "https://www.nccih.nih.gov/health/coenzyme-q10",
+      "kind": "db"
+     },
+     "quote": "CoQ10 has not been shown to be of value in treating cancer, but it may reduce the risk of heart damage caused by one type of cancer chemotherapy drug.",
+     "loc": "Bottom Line (Last Updated: January 2019)",
+     "proposed_ko": "항암 효과를 보인 임상 근거는 없습니다.",
+     "also": "같은 페이지 Safety: 'it may not be compatible with some types of cancer treatment.' — 치료 중 문장 근거로 추가 가능"
+    },
+    {
+     "claim": "구조가 비타민 K 와 비슷해 와파린 효과를 줄일 수 있습니다.",
+     "status": "supported",
+     "source": {
+      "title": "About Herbs: Coenzyme Q10",
+      "org_or_journal": "Memorial Sloan Kettering Cancer Center",
+      "year": 2026,
+      "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/coenzyme-q10",
+      "access": "open",
+      "pmcid_or_url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/coenzyme-q10",
+      "kind": "db"
+     },
+     "quote": "CoQ10 is structurally similar to vitamin K and may antagonize the effects of warfarin (11). However, CoQ10 has been reported to increase bleeding risk when used with warfarin (12).",
+     "loc": "For Healthcare Professionals > Herb-Drug Interactions > Warfarin (Last Updated 2026-09-29)",
+     "proposed_ko": "비타민 K 와 구조가 비슷해 와파린 효과를 약하게 했다는 보고가 있습니다(반대로 출혈이 늘었다는 보고도 있습니다)."
+    },
+    {
+     "claim": "[와파린] 와파린의 항응고 효과를 떨어뜨려 INR 이 흔들립니다.",
+     "status": "partly",
+     "source": {
+      "title": "Navigating the Effects of Anti-Atherosclerotic Supplements and Acknowledging Associated Bleeding Risks",
+      "org_or_journal": "Int J Mol Sci",
+      "year": 2025,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12564107/",
+      "access": "pmc",
+      "pmcid_or_url": "PMC12564107 / doi:10.3390/ijms262010183",
+      "kind": "review"
+     },
+     "quote": "multiple clinical reports/interaction databases describe reduced warfarin anticoagulation with INR returning to baseline after CoQ10 discontinuation",
+     "loc": "본문 'Coenzyme Q10' 단락(항응고 관련 보충제 절)",
+     "proposed_ko": "와파린 효과를 떨어뜨렸다는 보고가 있어, 시작하거나 끊을 때 INR 을 확인해야 합니다. 다만 24명 무작위 교차 연구에서는 INR 변화가 없었습니다.",
+     "counter": {
+      "quote": "the only randomized, double-blind, placebo-controlled crossover trial in 24 stable VKA-treated outpatients (CoQ10 100 mg/day for 4 weeks) found no significant change in INR",
+      "source": "같은 문헌(PMC12564107) 같은 단락"
+     }
+    }
+   ],
+   "note": "기존 출처 warfarin-vitk(ACCP 2012)는 CoQ10 을 다루지 않음(E 배치 결과). 위 3개(NCCIH·MSK·IJMS 2025 종설)로 교체 권장. 등급 C 유지."
+  },
+  {
+   "rule": "은행잎추출물",
+   "claims": [
+    {
+     "claim": "혈소판 응집을 억제해 출혈 경향을 높입니다.",
+     "status": "partly",
+     "source": {
+      "title": "Navigating the Effects of Anti-Atherosclerotic Supplements and Acknowledging Associated Bleeding Risks",
+      "org_or_journal": "Int J Mol Sci",
+      "year": 2025,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12564107/",
+      "access": "pmc",
+      "pmcid_or_url": "PMC12564107 / doi:10.3390/ijms262010183",
+      "kind": "review"
+     },
+     "quote": "Ginkgo biloba standardized extracts (EGb 761) contain terpene trilactones—most notably ginkgolide B—which act as potent antagonists of the platelet-activating factor (PAF) receptor",
+     "loc": "본문 'Ginkgo biloba' 단락",
+     "proposed_ko": "혈소판 기능에 관여하는 성분(징코라이드)이 있어, 항응고·항혈소판제와 함께 쓰면 출혈 위험이 커질 수 있습니다.",
+     "also": "NCCIH Ginkgo(2025-02) Safety: 'Ginkgo may increase the risk of bleeding in people who are taking anticoagulant drugs, such as warfarin.' — 출혈 증가는 주로 항응고제 병용 맥락. 반대 근거: 건강인 RCT 메타분석(Kellermann 2011)에서 응고 지표 영향 없음 — 원문 구독제라 미대조(초록만)."
+    },
+    {
+     "claim": "항암 치료로 혈소판이 낮아지는 시기에는 특히 주의 / [호중구감소증] 골수억제 시기에는 혈소판도 함께 낮아집니다.",
+     "status": "unsupported",
+     "source": null,
+     "quote": null,
+     "loc": "은행잎을 혈소판감소 환자에서 다룬 공개 출처를 찾지 못함",
+     "proposed_ko": "혈소판이 낮은 시기에는 출혈에 영향을 줄 수 있는 원료를 피하는 편이 안전합니다(이 상황을 직접 본 연구는 없습니다).",
+     "comment": "임상적 추론으로는 타당하나 출처가 받쳐 주는 문장은 아님 — '연구는 없다'를 밝히는 쪽으로."
+    },
+    {
+     "claim": "[와파린] 와파린과 함께 쓰면 출혈 위험이 뚜렷하게 올라갑니다.",
+     "status": "partly",
+     "source": {
+      "title": "Navigating the Effects of Anti-Atherosclerotic Supplements and Acknowledging Associated Bleeding Risks",
+      "org_or_journal": "Int J Mol Sci",
+      "year": 2025,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12564107/",
+      "access": "pmc",
+      "pmcid_or_url": "PMC12564107 / doi:10.3390/ijms262010183",
+      "kind": "review"
+     },
+     "quote": "a Veterans Administration electronic health record cohort reported a 38% higher hazard of bleeding with co-prescribed ginkgo (HR 1.38, 95% CI 1.20–1.58)",
+     "loc": "본문 'Ginkgo biloba' 단락",
+     "proposed_ko": "와파린과 함께 쓴 사람에서 출혈이 더 많았다는 대규모 관찰 자료가 있습니다(무작위 연구에서는 응고 수치 변화가 뚜렷하지 않았습니다).",
+     "comment": "'뚜렷하게'는 관찰 연구(HR 1.38) 수준보다 강함. 원 코호트 논문은 미대조(종설 경유)."
+    },
+    {
+     "claim": "[DOAC] 항응고 작용이 더해져 출혈 위험이 커집니다.",
+     "status": "partly",
+     "source": {
+      "title": "Navigating the Effects of Anti-Atherosclerotic Supplements and Acknowledging Associated Bleeding Risks",
+      "org_or_journal": "Int J Mol Sci",
+      "year": 2025,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12564107/",
+      "access": "pmc",
+      "pmcid_or_url": "PMC12564107 / doi:10.3390/ijms262010183",
+      "kind": "review"
+     },
+     "quote": "Authoritative safety sources therefore caution against concurrent use of ginkgo with aspirin, clopidogrel, nonsteroidal anti-inflammatory drugs (NSAIDs), or warfarin due to the potential for additive antiplatelet effects",
+     "loc": "본문 'Ginkgo biloba' 단락 — DOAC 는 이름으로 나오지 않음",
+     "proposed_ko": "DOAC 와 함께 쓴 직접 자료는 없지만, 항혈소판 작용이 더해질 수 있어 주의가 필요합니다."
+    }
+   ],
+   "note": "기존 출처 warfarin-vitk 교체 필요. 판정 수준(와파린 avoid)은 바꾸자고 하지 않음 — 근거 강도는 관찰 연구·증례 수준."
+  },
+  {
+   "rule": "오메가-3 (EPA·DHA)",
+   "claims": [
+    {
+     "claim": "체중이 줄고 있는 진행암 환자에서 근육 소실을 늦출 가능성. ESPEN 은 '고려할 수 있다' 수준.",
+     "status": "supported",
+     "source": {
+      "title": "ESPEN practical guideline: Clinical Nutrition in cancer",
+      "org_or_journal": "Clin Nutr 40:2898-2913 (ESPEN)",
+      "year": 2021,
+      "url": "https://doi.org/10.1016/j.clnu.2021.02.005",
+      "access": "open",
+      "pmcid_or_url": "https://doi.org/10.1016/j.clnu.2021.02.005 (ESPEN 공개 PDF)",
+      "kind": "guideline"
+     },
+     "quote": "In patients with advanced cancer undergoing chemotherapy and at risk of weight loss or malnourished, we suggest using supplementation with long-chain N-3 fatty acids or fish oil",
+     "loc": "권고 16 (B5-7; strength weak, level of evidence low)",
+     "proposed_ko": "항암치료 중이며 체중이 줄 위험이 있는 진행암 환자에게 ESPEN 은 식욕·체중·제지방량 유지를 위해 오메가-3 를 '약하게 권고(제안)'합니다."
+    },
+    {
+     "claim": "[와파린] 혈소판 응집을 억제해 와파린과 함께 쓰면 출혈 경향이 더해집니다. INR 확인이 필요합니다.",
+     "status": "partly",
+     "source": {
+      "title": "Navigating the Effects of Anti-Atherosclerotic Supplements and Acknowledging Associated Bleeding Risks",
+      "org_or_journal": "Int J Mol Sci",
+      "year": 2025,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12564107/",
+      "access": "pmc",
+      "pmcid_or_url": "PMC12564107 / doi:10.3390/ijms262010183",
+      "kind": "review"
+     },
+     "quote": "omega-3 supplementation can increase bleeding risk by inhibiting platelet function, particularly in patients on anticoagulants, as illustrated by an elderly patient on warfarin and fish oil",
+     "loc": "본문 omega-3 단락 — 근거는 증례 1건",
+     "proposed_ko": "고용량에서 혈소판 기능에 영향을 줄 수 있고 와파린 병용 중 INR 변화 보고가 있어, 시작·중단 때 INR 을 확인하세요. 다만 하루 5 g 이하에서는 항혈전제 복용자도 출혈이 늘지 않았다는 평가가 있습니다.",
+     "counter": {
+      "quote": "do not increase the risk of spontaneous bleeding episodes or bleeding complications, even in subjects at high risk of bleeding (e.g. in antiplatelet or antithrombotic medications)",
+      "source": "EFSA 2026 DHA UL 의견(PMC12802091) 'Bleeding complications' 절 — EFSA 2012 결론(EPA+DHA 약 5 g/일·2년) 재인용"
+     },
+     "also": "같은 EFSA 의견: DHA 2 g/일 RCT 에서 와파린 복용자 3명 INR '저하'(Quinn 2010) — 방향이 출혈이 아니라 INR 저하. ESPEN 2021 권고 16 해설: 'ibrutinib has been associated with epistaxis in patients taking fish oil supplements' — 이브루티닙 병용은 별도 경고로 쓸 만함."
+    },
+    {
+     "claim": "[DOAC] 항응고 작용이 더해질 수 있어 멍·코피가 잦아지면 알려야 합니다.",
+     "status": "partly",
+     "source": {
+      "title": "Scientific Opinion on the tolerable upper intake level for supplemental docosahexaenoic acid",
+      "org_or_journal": "EFSA Journal 24(1):e9858",
+      "year": 2026,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12802091/",
+      "access": "pmc",
+      "pmcid_or_url": "PMC12802091 / doi:(doi 미확인 — EFSA J 24(1):e9858)",
+      "kind": "guideline"
+     },
+     "quote": "supplemental intakes of EPA and DHA combined of up to about 5 g/day for up to 2 years",
+     "loc": "'Bleeding complications, bleeding time, platelet function' 절 (EFSA 2012 결론 재인용)",
+     "proposed_ko": "DOAC 와 함께 쓴 직접 자료는 없습니다. 멍·코피가 잦아지면 알려 주세요."
+    }
+   ],
+   "note": "와파린·DOAC 문장의 출처로 ESPEN 은 해당 없음(E 배치 확인). NIH ODS 오메가-3 팩트시트는 봇 차단(Cloudflare)으로 열지 못함."
+  },
+  {
+   "rule": "감마리놀렌산",
+   "claims": [
+    {
+     "claim": "혈소판 기능에 영향을 줄 수 있고",
+     "status": "partly",
+     "source": {
+      "title": "About Herbs: Evening Primrose Oil",
+      "org_or_journal": "Memorial Sloan Kettering Cancer Center",
+      "year": 2022,
+      "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/evening-primrose-oil",
+      "access": "open",
+      "pmcid_or_url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/evening-primrose-oil",
+      "kind": "db"
+     },
+     "quote": "In a small study of humans on several months of supplementation with GLA from evening primrose oil, a significant increase in bleeding time was observed in 9 of 12 patients",
+     "loc": "For Healthcare Professionals > Herb-Drug Interactions > Anticoagulants/Antiplatelets (Last Updated 2022-02-16)",
+     "proposed_ko": "출혈 시간을 늘렸다는 소규모 연구(12명)가 있어, 항응고·항혈소판제를 드시면 알려 주세요.",
+     "also": "MSK Borage(2022-03-31) 같은 취지: 'caution should be taken as borage oil is approximately 25% GLA, while evening primrose oil is about 10% GLA'."
+    },
+    {
+     "claim": "암 환자에서 이득을 보인 임상 근거는 없습니다.",
+     "status": "partly",
+     "source": {
+      "title": "Evening Primrose Oil",
+      "org_or_journal": "NIH NCCIH (Herbs at a Glance / fact sheet)",
+      "year": 2024,
+      "url": "https://www.nccih.nih.gov/health/evening-primrose-oil",
+      "access": "open",
+      "pmcid_or_url": "https://www.nccih.nih.gov/health/evening-primrose-oil",
+      "kind": "db"
+     },
+     "quote": "There’s not enough evidence to support the use of evening primrose oil for any health condition.",
+     "loc": "What Have We Learned? (Last Updated: November 2024)",
+     "proposed_ko": "암 환자에서 효과를 확인한 연구는 거의 없습니다.",
+     "counter": {
+      "quote": "Studies in cancer patients are quite limited, with one trial involving liver cancer patients that showed no effect on tumor size or survival",
+      "source": "MSK Evening Primrose Oil, Purported uses — 같은 문장에 'another that suggested GLA may be an effective adjunctive therapy for breast cancer'(Kenny 2000) 가 이어짐 → '없다'보다 '거의 없다'가 정확"
+     }
+    }
+   ],
+   "note": "유일 출처 espen2021 교체. 등급 C 유지."
+  },
+  {
+   "rule": "홍삼·인삼",
+   "claims": [
+    {
+     "claim": "항암 중 피로 개선에 대한 소규모 연구가 있으나 결과가 일정하지 않습니다.",
+     "status": "partly",
+     "source": {
+      "title": "Wisconsin Ginseng (Panax quinquefolius) to Improve Cancer-Related Fatigue: A Randomized, Double-Blind Trial, N07C2",
+      "org_or_journal": "J Natl Cancer Inst 105:1230",
+      "year": 2013,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3888141/",
+      "access": "pmc",
+      "pmcid_or_url": "PMC3888141 / doi:10.1093/jnci/djt181",
+      "kind": "rct"
+     },
+     "quote": "Data support the benefit of American ginseng, 2000mg daily, on CRF over an 8-week period.",
+     "loc": "Abstract Conclusions (364명, 1차 종점 4주 P=.07, 8주 P=.003)",
+     "proposed_ko": "암 관련 피로에 대해 미국삼(2,000 mg) 364명 무작위 연구에서 8주째 개선이 있었으나(4주째 1차 평가는 유의하지 않음), 홍삼(고려인삼)의 효과는 분명하지 않습니다.",
+     "also": "MSK Asian Ginseng(2026-07-23): 'whether or not ginseng helps alleviate cancer-related fatigue is not clear' — 고려인삼(Panax ginseng)에 대해서는 '일정하지 않다'가 맞음. '소규모'는 미국삼 3상(364명)이 있어 부정확. 전문(full_text)은 PMC 도구에서 비어 있어 초록(PMC 게재)으로 대조."
+    },
+    {
+     "claim": "혈소판 응집을 억제하고 혈당·혈압에도 영향을 주어, 여러 약과 부딪힐 여지가 있습니다.",
+     "status": "partly",
+     "source": {
+      "title": "Asian Ginseng",
+      "org_or_journal": "NIH NCCIH (Herbs at a Glance / fact sheet)",
+      "year": 2025,
+      "url": "https://www.nccih.nih.gov/health/asian-ginseng",
+      "access": "open",
+      "pmcid_or_url": "https://www.nccih.nih.gov/health/asian-ginseng",
+      "kind": "db"
+     },
+     "quote": "Asian ginseng may worsen autoimmune disorders and interfere with blood clotting.",
+     "loc": "What Do We Know About Safety? (Last Updated: February 2025)",
+     "proposed_ko": "혈액 응고에 영향을 줄 수 있고 혈당을 낮출 수 있어(당뇨약과 겹침), 여러 약과 부딪힐 여지가 있습니다.",
+     "also": "같은 페이지: 'Some evidence suggests that Asian ginseng might lower blood sugar levels.' 혈압: MSK Asian Ginseng 'benefit patients with prehypertension or hypertension'(소규모). '혈소판 응집 억제'라는 표현 자체를 쓴 공개 원문은 이번에 찾지 못함(식약처 기능성 문구 '혈소판 응집 억제를 통한 혈액흐름에 도움'은 E 배치가 제품 DB 에서 본 것 — 고시 원문은 미대조)."
+    },
+    {
+     "claim": "[와파린] INR 을 올린 사례와 내린 사례가 모두 보고되어 있습니다. 예측이 안 되는 것 자체가 문제입니다.",
+     "status": "partly",
+     "source": {
+      "title": "About Herbs: Asian Ginseng",
+      "org_or_journal": "Memorial Sloan Kettering Cancer Center",
+      "year": 2026,
+      "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/ginseng-asian",
+      "access": "open",
+      "pmcid_or_url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/ginseng-asian",
+      "kind": "db"
+     },
+     "quote": "Anticoagulants: Studies on whether P. ginseng can antagonize the effects of anticoagulants are mixed (6) (7) (8) (50) (51). Clinical relevance needs further assessment.",
+     "loc": "For Healthcare Professionals > Herb-Drug Interactions",
+     "proposed_ko": "와파린 효과를 약하게 했다는 연구(미국삼 무작위 연구)가 있고, 고려인삼은 결과가 엇갈립니다. 시작·중단 때 INR 을 확인해야 합니다.",
+     "also": "IJMS 2025 종설(PMC12564107): 'primarily through attenuation of warfarin’s anticoagulant effect' — 주 방향은 INR 저하. 'INR 을 올린 사례'를 직접 적은 공개 원문은 이번에 확인 못 함(Lee 2008 초록 서론 언급은 E 배치 확인, 원문 구독제)."
+    },
+    {
+     "claim": "[DOAC] 혈소판 억제 작용이 더해져 출혈 위험이 커질 수 있습니다.",
+     "status": "unsupported",
+     "source": {
+      "title": "Navigating the Effects of Anti-Atherosclerotic Supplements and Acknowledging Associated Bleeding Risks",
+      "org_or_journal": "Int J Mol Sci",
+      "year": 2025,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12564107/",
+      "access": "pmc",
+      "pmcid_or_url": "PMC12564107 / doi:10.3390/ijms262010183",
+      "kind": "review"
+     },
+     "quote": "For DOACs, direct clinical data are lacking, but potential CYP3A4/P-gp modulation implies a theoretical risk of reduced exposure (notably apixaban/rivaroxaban)",
+     "loc": "본문 'Asian ginseng' 단락",
+     "proposed_ko": "DOAC 와 함께 쓴 직접 자료는 없습니다. 이론상 약 농도에 영향을 줄 수 있어 복용 중이면 알려 주세요.",
+     "comment": "공개 출처가 말하는 이론적 위험은 '출혈 증가'가 아니라 '약 농도 감소' 쪽 — 문장 방향이 다름."
+    },
+    {
+     "claim": "[호중구감소증] 혈소판이 낮은 시기에 응집 억제 작용이 겹칩니다.",
+     "status": "partly",
+     "source": {
+      "title": "Asian Ginseng",
+      "org_or_journal": "NIH NCCIH (Herbs at a Glance / fact sheet)",
+      "year": 2025,
+      "url": "https://www.nccih.nih.gov/health/asian-ginseng",
+      "access": "open",
+      "pmcid_or_url": "https://www.nccih.nih.gov/health/asian-ginseng",
+      "kind": "db"
+     },
+     "quote": "Asian ginseng may worsen autoimmune disorders and interfere with blood clotting.",
+     "loc": "What Do We Know About Safety?",
+     "proposed_ko": "혈소판이 낮은 시기에는 혈액 응고에 영향을 줄 수 있는 원료를 피하는 편이 안전합니다."
+    }
+   ],
+   "note": "espen2021·warfarin-vitk 는 인삼을 다루지 않음 → NCCIH·MSK·Barton 2013(PMC3888141)·IJMS 2025 로 교체. ASCO-SIO 2024 피로 지침(MSK 가 '미국삼 권고'로 인용)은 원문 미대조."
+  },
+  {
+   "rule": "마늘추출물",
+   "claims": [
+    {
+     "claim": "음식으로 먹는 마늘은 권장 대상입니다.",
+     "status": "unsupported",
+     "source": {
+      "title": "Garlic",
+      "org_or_journal": "NIH NCCIH (Herbs at a Glance / fact sheet)",
+      "year": 2025,
+      "url": "https://www.nccih.nih.gov/health/garlic",
+      "access": "open",
+      "pmcid_or_url": "https://www.nccih.nih.gov/health/garlic",
+      "kind": "db"
+     },
+     "quote": "Consuming garlic does not seem to reduce the risk of stomach cancer. It’s uncertain whether garlic influences the risk of colorectal cancer.",
+     "loc": "What Have We Learned? (Last Updated: February 2025)",
+     "proposed_ko": "음식으로 드시는 마늘은 괜찮습니다(암 예방 효과는 분명하지 않습니다)."
+    },
+    {
+     "claim": "농축 보충제는 혈소판 억제 작용이 강해질 수 있습니다.",
+     "status": "supported",
+     "source": {
+      "title": "Garlic",
+      "org_or_journal": "NIH NCCIH (Herbs at a Glance / fact sheet)",
+      "year": 2025,
+      "url": "https://www.nccih.nih.gov/health/garlic",
+      "access": "open",
+      "pmcid_or_url": "https://www.nccih.nih.gov/health/garlic",
+      "kind": "db"
+     },
+     "quote": "Taking garlic supplements may increase the risk of bleeding.",
+     "loc": "What Do We Know About Safety?",
+     "proposed_ko": "마늘 보충제는 출혈 위험을 높일 수 있습니다.",
+     "also": "MSK Garlic(2022-11-18): 'Because garlic is known to decrease platelet aggregation and potentially elevate INR values, it should not be used with anticoagulants or in patients with platelet dysfunction'"
+    },
+    {
+     "claim": "[와파린] 출혈 경향을 더할 수 있습니다.",
+     "status": "supported",
+     "source": {
+      "title": "About Herbs: Garlic",
+      "org_or_journal": "Memorial Sloan Kettering Cancer Center",
+      "year": 2022,
+      "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/garlic",
+      "access": "open",
+      "pmcid_or_url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/garlic",
+      "kind": "db"
+     },
+     "quote": "Warfarin: Anticoagulant activity may be enhanced due to increased fibrinolytic activity and diminished human platelet aggregation (17) (49).",
+     "loc": "For Healthcare Professionals > Herb-Drug Interactions",
+     "proposed_ko": "와파린과 함께 드시면 출혈 경향이 더해질 수 있습니다.",
+     "counter": {
+      "quote": "But overall, the use of garlic appeared to be safe among individuals on warfarin",
+      "source": "IJMS 2025 종설(PMC12564107) garlic 단락"
+     }
+    }
+   ],
+   "note": "wcrf2018 교체(NCCIH Garlic·MSK Garlic)."
+  },
+  {
+   "rule": "백수오·승마 등 갱년기 원료",
+   "claims": [
+    {
+     "claim": "여성호르몬 유사 작용을 표방하는 원료입니다.",
+     "status": "partly",
+     "source": {
+      "title": "About Herbs: Black Cohosh",
+      "org_or_journal": "Memorial Sloan Kettering Cancer Center",
+      "year": 2022,
+      "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/black-cohosh",
+      "access": "open",
+      "pmcid_or_url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/black-cohosh",
+      "kind": "db"
+     },
+     "quote": "It is also not clear whether or not black cohosh acts as a phytoestrogen.",
+     "loc": "For Healthcare Professionals > Purported uses (Last Updated 2022-05-26)",
+     "proposed_ko": "갱년기 증상 완화를 표방하는 원료입니다. 실제로 여성호르몬처럼 작용하는지는 분명하지 않습니다.",
+     "also": "같은 페이지 Mechanism: 'studies show it has no effect on LH, FSH, prolactin, or estradiol levels' — '표방'은 맞지만 '유사 작용'은 근거가 엇갈림."
+    },
+    {
+     "claim": "간독성 보고가 있고",
+     "status": "partly",
+     "source": {
+      "title": "Black Cohosh",
+      "org_or_journal": "NIH NCCIH (Herbs at a Glance / fact sheet)",
+      "year": 2024,
+      "url": "https://www.nccih.nih.gov/health/black-cohosh",
+      "access": "open",
+      "pmcid_or_url": "https://www.nccih.nih.gov/health/black-cohosh",
+      "kind": "db"
+     },
+     "quote": "Cases of liver damage—some very serious—have been reported in people taking products labeled as black cohosh. These problems are rare, and it’s uncertain whether black cohosh was responsible for them.",
+     "loc": "What Do We Know About Safety? (Last Updated: November 2024)",
+     "proposed_ko": "승마(블랙코호시) 제품에서 드물지만 간 손상 사례가 보고되었습니다(인과관계는 불확실). 백수오는 사람에서 간독성 증례를 찾지 못했습니다.",
+     "counter": {
+      "quote": "CW water extract didn’t show any adverse effects whereas administering CW powder decreased body weights in complication with decreased food consumptions.",
+      "source": "PMC9133291(쥐 90일 독성시험) 초록 — 간독성(ALT·AST 상승, 간세포 괴사)은 혼입 문제였던 이엽우피소(C. auriculatum) 분말에서 나타남. 백수오 사람 간독성 증례는 PubMed/Europe PMC/웹 검색에서 찾지 못함."
+     }
+    },
+    {
+     "claim": "호르몬 감수성 종양에서의 안전성 자료가 없습니다.",
+     "status": "supported",
+     "source": {
+      "title": "Black Cohosh",
+      "org_or_journal": "NIH NCCIH (Herbs at a Glance / fact sheet)",
+      "year": 2024,
+      "url": "https://www.nccih.nih.gov/health/black-cohosh",
+      "access": "open",
+      "pmcid_or_url": "https://www.nccih.nih.gov/health/black-cohosh",
+      "kind": "db"
+     },
+     "quote": "It’s uncertain whether black cohosh is safe for women who have had hormone-sensitive conditions such as breast or uterine cancer.",
+     "loc": "What Do We Know About Safety?",
+     "proposed_ko": "유방암·자궁암을 겪은 분에게 안전한지는 확인되지 않았습니다.",
+     "comment": "승마 근거. 백수오는 같은 취지의 기관 자료를 찾지 못함 — '자료가 없다'는 백수오에도 사실상 맞음(부재 진술)."
+    },
+    {
+     "claim": "[유방암] 에스트로겐 수용체 양성 종양에서 호르몬 유사 작용 원료는 권하지 않습니다.",
+     "status": "partly",
+     "source": {
+      "title": "About Herbs: Black Cohosh",
+      "org_or_journal": "Memorial Sloan Kettering Cancer Center",
+      "year": 2022,
+      "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/black-cohosh",
+      "access": "open",
+      "pmcid_or_url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/black-cohosh",
+      "kind": "db"
+     },
+     "quote": "Talk to your healthcare provider if you have breast cancer, or if you’re at risk of breast cancer. Whether black cohosh is safe or not is unclear.",
+     "loc": "Patient section > What else do I need to know?",
+     "proposed_ko": "유방암에서 안전한지 확인되지 않아 권하지 않습니다."
+    },
+    {
+     "claim": "[부인암] 자궁내막은 에스트로겐 자극에 직접 반응합니다.",
+     "status": "partly",
+     "source": {
+      "title": "Black Cohosh",
+      "org_or_journal": "NIH NCCIH (Herbs at a Glance / fact sheet)",
+      "year": 2024,
+      "url": "https://www.nccih.nih.gov/health/black-cohosh",
+      "access": "open",
+      "pmcid_or_url": "https://www.nccih.nih.gov/health/black-cohosh",
+      "kind": "db"
+     },
+     "quote": "It’s uncertain whether black cohosh is safe for women who have had hormone-sensitive conditions such as breast or uterine cancer.",
+     "loc": "What Do We Know About Safety?",
+     "proposed_ko": "자궁암을 겪은 분에게 안전한지 확인되지 않았습니다.",
+     "comment": "자궁내막 생리는 일반 지식이고, 이 원료가 에스트로겐 자극을 준다는 근거는 없음(MSK: estradiol 영향 없음)."
+    },
+    {
+     "claim": "[간암] 간독성 보고가 있어 간 기능이 떨어진 상태에서는 피해야 합니다.",
+     "status": "supported",
+     "source": {
+      "title": "About Herbs: Black Cohosh",
+      "org_or_journal": "Memorial Sloan Kettering Cancer Center",
+      "year": 2022,
+      "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/black-cohosh",
+      "access": "open",
+      "pmcid_or_url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/black-cohosh",
+      "kind": "db"
+     },
+     "quote": "Talk to your healthcare provider if you have a liver disorder. Black cohosh can worsen your condition.",
+     "loc": "Patient section",
+     "proposed_ko": "승마는 간 손상 보고가 있어 간 기능이 떨어진 상태에서는 피하는 편이 안전합니다."
+    }
+   ],
+   "note": "acs2022·easl-nutrition 교체. 범위 문제(match '갱년기')는 E 배치 지적대로 별도 처리 필요 — 이 출처들은 승마에 관한 것이며 홍삼·석류에는 해당하지 않음. NIH LiverTox 는 reCAPTCHA 로 열지 못함."
+  },
+  {
+   "rule": "가르시니아캄보지아",
+   "claims": [
+    {
+     "claim": "간독성 사례가 반복 보고되어",
+     "status": "supported",
+     "source": {
+      "title": "Garcinia Cambogia",
+      "org_or_journal": "NIH NCCIH (Herbs at a Glance / fact sheet)",
+      "year": 2025,
+      "url": "https://www.nccih.nih.gov/health/garcinia-cambogia",
+      "access": "open",
+      "pmcid_or_url": "https://www.nccih.nih.gov/health/garcinia-cambogia",
+      "kind": "db"
+     },
+     "quote": "Several cases of liver damage have been reported. Some of these cases were severe, but this appears to be uncommon.",
+     "loc": "What Do We Know About Safety? (Last Updated: February 2025)",
+     "proposed_ko": "간 손상 사례가 여러 건 보고되었습니다(드물지만 심한 경우도 있음)."
+    },
+    {
+     "claim": "식약처도 주의를 안내한 바 있습니다.",
+     "status": "supported",
+     "source": {
+      "title": "가르시니아캄보지아 추출물 이상사례 해당 제품 회수 (보도자료)",
+      "org_or_journal": "식품의약품안전처 건강기능식품정책과",
+      "year": 2025,
+      "url": "https://www.mfds.go.kr/brd/m_99/view.do?seq=49356",
+      "access": "open",
+      "pmcid_or_url": "https://www.mfds.go.kr/brd/m_99/view.do?seq=49356 (첨부 PDF, 2025-09-23)",
+      "kind": "guideline"
+     },
+     "quote": "‘섭취시 주의사항’(｢건강기능식품 기준 및 규격｣)에 ‘드물게 간에 해를 끼칠 수 있으며 섭취 기간 중 알코올 섭취를 피해야 한다’는 소비자 안내 사항을 추가할 예정",
+     "loc": "보도자료 1쪽 본문(2025-09-23). 간 관련 이상사례 2건·해당 제품 회수",
+     "proposed_ko": "식약처는 2025년 9월 간 이상사례로 제품을 회수하고, '드물게 간에 해를 끼칠 수 있으며 섭취 중 음주를 피하라'는 주의 문구를 넣겠다고 밝혔습니다.",
+     "also": "2025-01-07 보도참고(seq=48799): 재평가 결과 '체지방 감소 기능성의 건강기능식품과 함께 섭취를 피할 것' 추가(주요 이상사례: 구토, 황달, 간 수치 상승 등). '추가 예정' 문구가 실제 고시로 시행됐는지는 확인 못 함."
+    },
+    {
+     "claim": "체중 관리가 필요하시더라도 식사와 운동으로 하시는 편이 낫습니다.",
+     "status": "supported",
+     "source": {
+      "title": "ESPEN practical guideline: Clinical Nutrition in cancer",
+      "org_or_journal": "Clin Nutr 40:2898-2913 (ESPEN)",
+      "year": 2021,
+      "url": "https://doi.org/10.1016/j.clnu.2021.02.005",
+      "access": "open",
+      "pmcid_or_url": "https://doi.org/10.1016/j.clnu.2021.02.005 (ESPEN 공개 PDF)",
+      "kind": "guideline"
+     },
+     "quote": "Cancer survivors should strive to maintain a healthy weight and avoid excessive weight gain throughout life by balancing calorie intake with physical activity.",
+     "loc": "권고 40 해설(cancer survivors)",
+     "proposed_ko": "치료를 마친 뒤 체중 관리는 식사 조절과 신체 활동으로 하는 것이 권고됩니다."
+    },
+    {
+     "claim": "[치료 중] 치료 중 체중 감량은 목표가 아니며, 이 시기에 빠지는 것은 지방이 아니라 근육입니다.",
+     "status": "partly",
+     "source": {
+      "title": "ESPEN guidelines on nutrition in cancer patients",
+      "org_or_journal": "Clin Nutr 36:11-48 (ESPEN)",
+      "year": 2017,
+      "url": "https://doi.org/10.1016/j.clnu.2016.07.015",
+      "access": "open",
+      "pmcid_or_url": "https://doi.org/10.1016/j.clnu.2016.07.015 (ESPEN 공개 PDF)",
+      "kind": "guideline"
+     },
+     "quote": "Weight loss before chemotherapy is associated with an increased risk of dose-limiting toxicity as well as a worse performance status, impaired quality of life, and shorter survival.",
+     "loc": "본문 'Medical oncology' 절(권고 해설)",
+     "proposed_ko": "치료 중 체중이 줄면 근육도 함께 줄기 쉽고, 체중·근육 감소는 항암제 독성 증가와 관련됩니다.",
+     "counter": {
+      "quote": "There is currently insufficient evidence to recommend for or against intentional weight loss or prevention of weight gain interventions during active treatment",
+      "source": "ASCO 2022 권고 3 — '목표가 아니다'는 지침의 '근거 부족'보다 단정적"
+     },
+     "comment": "'지방이 아니라 근육'을 그대로 말하는 원문은 찾지 못함."
+    }
+   ],
+   "note": "espen2021·easl-nutrition 은 가르시니아를 다루지 않음 → NCCIH Garcinia·식약처 보도자료 2건으로 교체."
+  },
+  {
+   "rule": "녹차추출물(카테킨·EGCG)",
+   "claims": [
+    {
+     "claim": "마시는 녹차와 달리 농축 추출물은 간독성 사례가 보고되어 있습니다.",
+     "status": "supported",
+     "source": {
+      "title": "Green Tea",
+      "org_or_journal": "NIH NCCIH (Herbs at a Glance / fact sheet)",
+      "year": 2025,
+      "url": "https://www.nccih.nih.gov/health/green-tea",
+      "access": "open",
+      "pmcid_or_url": "https://www.nccih.nih.gov/health/green-tea",
+      "kind": "db"
+     },
+     "quote": "Although uncommon, liver injury has been reported in some people who used green tea products, primarily green tea extracts in tablet or capsule form.",
+     "loc": "What Do We Know About Safety? (Last Updated: February 2025)",
+     "proposed_ko": "마시는 녹차와 달리, 알약·캡슐 형태의 농축 추출물에서 드물게 간 손상이 보고되었습니다. 하루 EGCG 800 mg 이상에서는 간수치가 올랐습니다(EFSA 2018).",
+     "also": "EFSA 2018(PMC7009618) 결론: 'intake of doses equal or above 800 mg EGCG/day taken as a food supplement statistically significant increase serum transaminases in treated subjects compared to control.' 또 '마시는 녹차'도 증례가 극히 드물게 있음('the number of human cases with hepatotoxicity associated with consumption of green tea infusions is extremely low')."
+    },
+    {
+     "claim": "[보르테조밉] EGCG 가 보르테조밉과 직접 결합해 약효를 무력화시키는 것이 실험적으로 확인되었습니다.",
+     "status": "partly",
+     "source": {
+      "title": "About Herbs: Green Tea",
+      "org_or_journal": "Memorial Sloan Kettering Cancer Center",
+      "year": 2026,
+      "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/green-tea",
+      "access": "open",
+      "pmcid_or_url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/green-tea",
+      "kind": "db"
+     },
+     "quote": "Bortezomib: EGCG and other polyphenols can inhibit the therapeutic effect of bortezomib and other boronic acid-based proteasome inhibitors (49).",
+     "loc": "For Healthcare Professionals > Herb-Drug Interactions (Last Updated 2026-08-12)",
+     "proposed_ko": "실험실·동물 연구에서 EGCG 가 보르테조밉과 결합해 효과를 막았습니다(사람에서 확인된 자료는 없음).",
+     "comment": "원 논문 Golden 2009 Blood(PMID 19190249)는 PMC 미수록 — 이번에 원문 미대조. '무력화'는 시험관·동물 결과로서 표현이 강함."
+    },
+    {
+     "claim": "[간암] 간 기능이 떨어진 상태에서 간독성 보고가 있는 농축 추출물은 피해야 합니다.",
+     "status": "supported",
+     "source": {
+      "title": "About Herbs: Green Tea",
+      "org_or_journal": "Memorial Sloan Kettering Cancer Center",
+      "year": 2026,
+      "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/green-tea",
+      "access": "open",
+      "pmcid_or_url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/green-tea",
+      "kind": "db"
+     },
+     "quote": "Do not use if you have a liver problem and discontinue use and consult a healthcare practitioner if you develop symptoms of liver trouble",
+     "loc": "Adverse reactions 앞 USP 권장 표시문구 인용 단락",
+     "proposed_ko": "간 질환이 있으면 농축 녹차 추출물은 피하세요(미국약전 권장 표시 문구)."
+    }
+   ],
+   "note": "easl-nutrition 교체 → NCCIH Green Tea·EFSA 2018(PMC7009618)·MSK Green Tea. LiverTox 는 reCAPTCHA 로 열지 못함."
+  },
+  {
+   "rule": "밀크씨슬(실리마린)",
+   "claims": [
+    {
+     "claim": "간수치 개선에 대한 근거는 제한적입니다.",
+     "status": "supported",
+     "source": {
+      "title": "Milk Thistle",
+      "org_or_journal": "NIH NCCIH (Herbs at a Glance / fact sheet)",
+      "year": 2025,
+      "url": "https://www.nccih.nih.gov/health/milk-thistle",
+      "access": "open",
+      "pmcid_or_url": "https://www.nccih.nih.gov/health/milk-thistle",
+      "kind": "db"
+     },
+     "quote": "have been conflicting or too limited to allow conclusions to be reached",
+     "loc": "What Have We Learned? — 'Results from clinical trials of milk thistle for liver diseases… liver problems caused by cancer chemotherapy…' 문장의 술부",
+     "proposed_ko": "간 질환(항암제로 인한 간 문제 포함)에 대한 임상 결과는 엇갈리거나 부족해 결론을 내리기 어렵습니다.",
+     "also": "MSK Milk Thistle(2026-07-22): 'silymarin did not significantly reduce serum ALT levels'(만성 C형 간염 다기관 시험)."
+    },
+    {
+     "claim": "주요 대사효소에 큰 영향을 주지 않아 병용 위험은 낮은 편입니다.",
+     "status": "partly",
+     "source": {
+      "title": "About Herbs: Milk Thistle",
+      "org_or_journal": "Memorial Sloan Kettering Cancer Center",
+      "year": 2026,
+      "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/milk-thistle",
+      "access": "open",
+      "pmcid_or_url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/milk-thistle",
+      "kind": "db"
+     },
+     "quote": "Milk thistle inhibits cytochrome P450 3A4 (4) and can affect the intracellular concentration of drugs metabolized by this enzyme. However, conflicting data indicate no such effects",
+     "loc": "For Healthcare Professionals > Herb-Drug Interactions",
+     "proposed_ko": "대사효소(CYP3A4·UGT)에 영향을 준다는 자료와 영향이 없다는 자료가 엇갈립니다. 항암제·면역억제제·와파린을 드시면 알려 주세요.",
+     "also": "같은 절: UGT 조절, 시롤리무스 청소율 감소 가능, 와파린 병용 중 INR 2.64→4.12 증례(밀크씨슬 함유 '간 청소' 제품). NCCIH: 제품 품질(실리마린 함량 불일치·오염) 우려."
+    }
+   ],
+   "note": "easl-nutrition 교체."
+  },
+  {
+   "rule": "헛개나무추출물",
+   "claims": [
+    {
+     "claim": "간 건강을 표방하지만 임상 근거가 약하고",
+     "status": "partly",
+     "source": {
+      "title": "A Pediatric Case of Toxic Hepatitis Induced by Hovenia Dulcis",
+      "org_or_journal": "Pediatr Gastroenterol Hepatol Nutr 15(2):111-116",
+      "year": 2012,
+      "url": "https://synapse.koreamed.org/articles/1080715",
+      "access": "open",
+      "pmcid_or_url": "doi:10.5223/pghn.2012.15.2.111",
+      "kind": "case"
+     },
+     "quote": "However, there hasn't been many studies on pharmacokinetics, internal metabolism, proper usage and side effects of hovenia dulcis.",
+     "loc": "Introduction",
+     "proposed_ko": "간 건강을 표방하지만, 사람에서 간 기능 개선을 확인한 연구는 부족합니다.",
+     "comment": "Europe PMC 검색에서 사람 RCT 는 숙취 완화(Foods 2024 등)뿐이고 간 기능 개선 RCT 는 찾지 못함(검색 한도 내)."
+    },
+    {
+     "claim": "간독성 사례 보고가 있습니다.",
+     "status": "supported",
+     "source": {
+      "title": "A Pediatric Case of Toxic Hepatitis Induced by Hovenia Dulcis",
+      "org_or_journal": "Pediatr Gastroenterol Hepatol Nutr 15(2):111-116",
+      "year": 2012,
+      "url": "https://synapse.koreamed.org/articles/1080715",
+      "access": "open",
+      "pmcid_or_url": "doi:10.5223/pghn.2012.15.2.111",
+      "kind": "case"
+     },
+     "quote": "In Korea, two cases of toxic hepatitis have been reported in adult patients after ingesting hovenia dulcis [3,6]",
+     "loc": "Introduction + 본 증례(3세, 헛개 달인 물 1년, RUCAM 6점 'probable', 전격성 간염)",
+     "proposed_ko": "헛개나무 달인 물을 오래 마신 뒤 생긴 독성 간염이 국내에 소아 1건·성인 2건 보고되어 있습니다.",
+     "comment": "E 배치는 PubMed 에서 증례를 못 찾았으나, KoreaMed(대한소아소화기영양학회지 2012) 공개 원문에 증례가 있음. 성인 2건(참고문헌 3·6)은 원문 미대조. 모두 '달인 물'이며 표준화 추출물 제품의 증례는 아님."
+    },
+    {
+     "claim": "[간암] 간 기능이 떨어진 상태에서 성분·용량이 확인되지 않은 생약은 피하는 것이 안전합니다.",
+     "status": "partly",
+     "source": {
+      "title": "A Pediatric Case of Toxic Hepatitis Induced by Hovenia Dulcis",
+      "org_or_journal": "Pediatr Gastroenterol Hepatol Nutr 15(2):111-116",
+      "year": 2012,
+      "url": "https://synapse.koreamed.org/articles/1080715",
+      "access": "open",
+      "pmcid_or_url": "doi:10.5223/pghn.2012.15.2.111",
+      "kind": "case"
+     },
+     "quote": "Because acute liver failure due to herbs or dietary supplement taken for a long time is often fetal, it is important to make early diagnosis and stop taking the drug",
+     "loc": "Abstract 마지막 문장(원문 철자 'fetal' 그대로)",
+     "proposed_ko": "간 기능이 떨어진 상태에서는 성분·용량이 확인되지 않은 생약을 피하는 편이 안전합니다(유지)."
+    }
+   ],
+   "note": "easl-nutrition 교체 → 국내 증례 보고(공개). 근거 등급 C(증례) 적절."
+  },
+  {
+   "rule": "철분",
+   "claims": [
+    {
+     "claim": "[위절제후] 위산이 줄어 철 흡수가 떨어집니다. 수술 후 수년에 걸쳐 결핍이 나타나는 경우가 많습니다.",
+     "status": "partly",
+     "source": {
+      "title": "Anemia after gastrectomy for early gastric cancer: long-term follow-up observational study",
+      "org_or_journal": "World J Gastroenterol 18:6114",
+      "year": 2012,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3496888/",
+      "access": "pmc",
+      "pmcid_or_url": "PMC3496888 / doi:10.3748/wjg.v18.i42.6114",
+      "kind": "cohort"
+     },
+     "quote": "The incidence of iron deficiency anemia increased during the follow up and became the major cause of anemia at 48 mo after surgery.",
+     "loc": "Abstract Results (조기위암 위절제 161명, 48개월 추적; 빈혈 3개월 24.5%→48개월 37.1%)",
+     "proposed_ko": "위절제 후에는 철 결핍이 흔하고 해가 갈수록 늘어, 수술 4년 뒤에는 빈혈의 주원인이 됩니다.",
+     "comment": "'위산이 줄어'라는 기전 문장은 이번에 공개 원문에서 확인 못 함(PMC 본문 페이지가 봇 차단, 도구는 초록만 반환). Lee 2013 Ann Surg(3년 내 철결핍 69.1%)는 구독제 — 초록만."
+    },
+    {
+     "claim": "[변비] 철분제는 변비를 흔히 악화시킵니다.",
+     "status": "supported",
+     "source": {
+      "title": "Ferrous sulfate supplementation causes significant gastrointestinal side-effects in adults: a systematic review and meta-analysis",
+      "org_or_journal": "PLoS One 10:e0117383",
+      "year": 2015,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4336293/",
+      "access": "pmc",
+      "pmcid_or_url": "PMC4336293 / doi:10.1371/journal.pone.0117383",
+      "kind": "meta"
+     },
+     "quote": "For the 27 studies that reported constipation, the pooled estimate of incidence in the FeSO4 arm was 12% [95% CI 10%-15%].",
+     "loc": "Results — individual gastrointestinal symptoms (Table 3)",
+     "proposed_ko": "철분제(황산제일철)는 변비를 흔히 일으킵니다(복용자의 약 12%)."
+    }
+   ],
+   "note": "kdri2020 은 위절제 철결핍을 다루지 않음(E 배치) → Lim 2012(PMC3496888) 추가. base·변비는 KDRI 로도 맞음(E 배치 확인)."
+  },
+  {
+   "rule": "아연",
+   "claims": [
+    {
+     "claim": "미각 변화에 흔히 쓰이지만 무작위배정 연구 결과가 일관되지 않습니다.",
+     "status": "supported",
+     "source": {
+      "title": "About Herbs: Zinc",
+      "org_or_journal": "Memorial Sloan Kettering Cancer Center",
+      "year": 2022,
+      "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/zinc",
+      "access": "open",
+      "pmcid_or_url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/zinc",
+      "kind": "db"
+     },
+     "quote": "Results are mixed on whether zinc can preserve sense of taste or help relieve mouths sores and inflammation from radiation therapy.",
+     "loc": "Patient section > To prevent or treat radiation therapy side effects (Last Updated 2022-05-25)",
+     "proposed_ko": "미각 변화에 쓰이지만, 연구 결과가 엇갈립니다(유지).",
+     "also": "HCP 절: 'Data are also mixed on whether it can help in taste preservation'. MASCC 2020(PMC7540329): 두경부 방사선 구강점막염에 대한 아연 '제안'을 '지침 없음'으로 뒤집음 — 점막염 근거이며 미각 근거는 아님."
+    },
+    {
+     "claim": "장기 고용량은 구리 결핍을 부르므로",
+     "status": "supported",
+     "source": {
+      "title": "About Herbs: Zinc",
+      "org_or_journal": "Memorial Sloan Kettering Cancer Center",
+      "year": 2022,
+      "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/zinc",
+      "access": "open",
+      "pmcid_or_url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/zinc",
+      "kind": "db"
+     },
+     "quote": "When taken orally at large doses (100-300 mg/day), zinc can cause chronic toxicity including copper deficiency, depressed immune function, headache, chills, fever, and fatigue",
+     "loc": "For Healthcare Professionals > Adverse reactions/Toxicity",
+     "proposed_ko": "고용량(하루 100 mg 이상 등)을 오래 드시면 구리 결핍이 생길 수 있습니다."
+    },
+    {
+     "claim": "몇 주 써 보고 변화가 없으면 중단하는 편이 낫습니다.",
+     "status": "unsupported",
+     "source": null,
+     "quote": null,
+     "loc": "이 실무 조언을 그대로 지지하는 공개 원문은 찾지 못함",
+     "proposed_ko": "효과가 분명하지 않으므로 오래 이어 드시기보다 의료진과 상의하세요."
+    },
+    {
+     "claim": "[오심·구토 prefer] 미각 변화가 동반된 경우 결핍 교정 차원에서 시도해 볼 수 있습니다.",
+     "status": "partly",
+     "source": {
+      "title": "About Herbs: Zinc",
+      "org_or_journal": "Memorial Sloan Kettering Cancer Center",
+      "year": 2022,
+      "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/zinc",
+      "access": "open",
+      "pmcid_or_url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/zinc",
+      "kind": "db"
+     },
+     "quote": "Results are mixed on whether zinc can preserve sense of taste or help relieve mouths sores and inflammation from radiation therapy.",
+     "loc": "Patient section",
+     "proposed_ko": "미각 변화가 있을 때 시도해 볼 수는 있으나 효과는 일정하지 않습니다.",
+     "comment": "'prefer(권장)' 수준은 '엇갈린 근거'보다 강함 — 판단 필요(판정 변경 제안 아님). 조건(오심·구토)과 문장(미각) 불일치는 E 배치 지적."
+    }
+   ],
+   "note": "espen2021 교체 → MSK Zinc. NIH ODS 아연 팩트시트는 봇 차단으로 열지 못함. KDRI 아연 상한(구리 흡수 저해)은 이번에 원문 미대조."
+  },
+  {
+   "rule": "프로바이오틱스(유산균)",
+   "claims": [
+    {
+     "claim": "골반 방사선치료 설사에 대한 소규모 연구들이 있으나 결과가 엇갈립니다.",
+     "status": "supported",
+     "source": {
+      "title": "ESPEN practical guideline: Clinical Nutrition in cancer",
+      "org_or_journal": "Clin Nutr 40:2898-2913 (ESPEN)",
+      "year": 2021,
+      "url": "https://doi.org/10.1016/j.clnu.2021.02.005",
+      "access": "open",
+      "pmcid_or_url": "https://doi.org/10.1016/j.clnu.2021.02.005 (ESPEN 공개 PDF)",
+      "kind": "guideline"
+     },
+     "quote": "There are insufficient consistent clinical data to recommend probiotics to reduce radiation-induced diarrhea.",
+     "loc": "권고 31 (C2-5; strength none, level of evidence low)",
+     "proposed_ko": "골반 방사선치료 설사 예방에 대해서는 지침마다 판단이 다릅니다(ESPEN 은 '권할 근거 부족', MASCC 는 유산균 '제안').",
+     "counter": {
+      "quote": "The panel suggests that probiotics containing Lactobacillus spp. may be beneficial for the prevention of RT‐induced or RT‐CT–induced diarrhea in patients with pelvic malignancy.",
+      "source": "MASCC/ISOO 2020(PMC7540329) Table 3, LoE III"
+     }
+    },
+    {
+     "claim": "일반적으로는 안전합니다.",
+     "status": "partly",
+     "source": {
+      "title": "Probiotics: What You Need To Know",
+      "org_or_journal": "NIH NCCIH (Herbs at a Glance / fact sheet)",
+      "year": 2019,
+      "url": "https://www.nccih.nih.gov/health/probiotics-what-you-need-to-know",
+      "access": "open",
+      "pmcid_or_url": "https://www.nccih.nih.gov/health/probiotics-what-you-need-to-know",
+      "kind": "db"
+     },
+     "quote": "The risk of harmful effects from probiotics is greater in people with severe illnesses or compromised immune systems.",
+     "loc": "What about safety? (Last Updated: August 2019)",
+     "proposed_ko": "건강한 사람에게는 대체로 안전하지만, 중병이거나 면역이 떨어진 경우는 위험이 커집니다."
+    },
+    {
+     "claim": "[호중구감소증] 중증 호중구감소증이나 중심정맥관 보유 환자에서 균혈증·패혈증 사례가 보고되었습니다.",
+     "status": "partly",
+     "source": {
+      "title": "ESPEN practical guideline: Clinical Nutrition in cancer",
+      "org_or_journal": "Clin Nutr 40:2898-2913 (ESPEN)",
+      "year": 2021,
+      "url": "https://doi.org/10.1016/j.clnu.2021.02.005",
+      "access": "open",
+      "pmcid_or_url": "https://doi.org/10.1016/j.clnu.2021.02.005 (ESPEN 공개 PDF)",
+      "kind": "guideline"
+     },
+     "quote": "the safety of using probiotics has to be reliably addressed, before these products can be recommended in immunocompromised patients",
+     "loc": "권고 31 해설",
+     "proposed_ko": "면역이 크게 떨어진 환자에서는 안전성이 확인되지 않았고 프로바이오틱스 균에 의한 감염 보고가 있어, 이 시기에는 피하는 편이 낫습니다.",
+     "comment": "'중심정맥관'·'균혈증' 증례를 직접 적은 공개 원문은 이번에 확인 못 함(NCCIH 는 미숙아 중증 감염·'infections' 가능성만 언급)."
+    },
+    {
+     "claim": "[설사] 항생제 관련 설사에는 도움이 될 수 있으나, 항암제로 인한 설사에는 근거가 부족합니다.",
+     "status": "supported",
+     "source": {
+      "title": "Probiotics: What You Need To Know",
+      "org_or_journal": "NIH NCCIH (Herbs at a Glance / fact sheet)",
+      "year": 2019,
+      "url": "https://www.nccih.nih.gov/health/probiotics-what-you-need-to-know",
+      "access": "open",
+      "pmcid_or_url": "https://www.nccih.nih.gov/health/probiotics-what-you-need-to-know",
+      "kind": "db"
+     },
+     "quote": "a 2018 review of 12 studies (1,554 participants) found that the evidence for a beneficial effect of probiotics was inconclusive.",
+     "loc": "Diarrhea Caused by Cancer Treatment",
+     "proposed_ko": "항생제 관련 설사 예방에는 도움이 될 수 있으나, 항암·방사선치료로 인한 설사에는 근거가 분명하지 않습니다.",
+     "also": "같은 페이지 C. difficile 절: 'it is moderately certain that probiotics can reduce the risk of C. difficile diarrhea in adults and children who are receiving antibiotics'."
+    }
+   ],
+   "note": "fda-foodsafety 교체 → ESPEN 2021 권고 31 + NCCIH Probiotics + MASCC 2020."
+  },
+  {
+   "rule": "루테인·지아잔틴",
+   "claims": [
+    {
+     "claim": "황반 건강을 위한 원료로, 암 치료와 직접적인 상호작용은 알려져 있지 않습니다.",
+     "status": "partly",
+     "source": {
+      "title": "About Herbs: Lutein",
+      "org_or_journal": "Memorial Sloan Kettering Cancer Center",
+      "year": 2022,
+      "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/lutein",
+      "access": "open",
+      "pmcid_or_url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/lutein",
+      "kind": "db"
+     },
+     "quote": "Side effects have not been reported.",
+     "loc": "Patient section > What are the side effects? (Last Updated 2022-11-16) — HCP 절에 Herb-Drug Interactions 항목 없음",
+     "proposed_ko": "황반 건강을 표방하는 원료입니다. 암 치료와의 상호작용은 보고된 바 없습니다(연구가 없다는 뜻이기도 합니다).",
+     "comment": "부재 진술이라 출처가 '지지'할 수 있는 범위가 제한적. 등급은 G 가 아니라 C 가 맞음(E 배치와 같은 결론)."
+    }
+   ],
+   "note": "kdri2020 교체 → MSK Lutein."
+  },
+  {
+   "rule": "글루코사민·MSM",
+   "claims": [
+    {
+     "claim": "관절 증상에 쓰이며 암 치료와의 상호작용은 알려져 있지 않습니다.",
+     "status": "partly",
+     "source": {
+      "title": "About Herbs: Glucosamine",
+      "org_or_journal": "Memorial Sloan Kettering Cancer Center",
+      "year": 2026,
+      "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/glucosamine",
+      "access": "open",
+      "pmcid_or_url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/glucosamine",
+      "kind": "db"
+     },
+     "quote": "Warfarin: Although more information is needed to define this interaction, glucosamine-chondroitin may potentiate warfarin effects and increase INR levels (22).",
+     "loc": "For Healthcare Professionals > Herb-Drug Interactions (Last Updated 2026-09-30)",
+     "proposed_ko": "항암제와의 상호작용 보고는 없지만, 와파린과 함께 드시면 INR 이 오른 보고가 있습니다.",
+     "also": "NCCIH Glucosamine(2023-10): 'glucosamine and chondroitin have been associated with an increased risk of bleeding in people who are taking the anticoagulant warfarin.' → byMedication.warfarin(caution) 신설 검토."
+    },
+    {
+     "claim": "혈당을 약간 올릴 수 있다는 보고가 있습니다.",
+     "status": "supported",
+     "source": {
+      "title": "Glucosamine and Chondroitin for Osteoarthritis",
+      "org_or_journal": "NIH NCCIH (Herbs at a Glance / fact sheet)",
+      "year": 2023,
+      "url": "https://www.nccih.nih.gov/health/glucosamine-and-chondroitin-for-osteoarthritis",
+      "access": "open",
+      "pmcid_or_url": "https://www.nccih.nih.gov/health/glucosamine-and-chondroitin-for-osteoarthritis",
+      "kind": "db"
+     },
+     "quote": "glucosamine may cause increases in blood glucose (sugar) levels in some people",
+     "loc": "Are glucosamine and chondroitin safe?",
+     "proposed_ko": "일부 사람에서 혈당을 올릴 수 있습니다(유지).",
+     "counter": {
+      "quote": "(제목만) The effect of glucosamine-chondroitin supplementation on glycosylated hemoglobin levels in patients with type 2 diabetes mellitus: a placebo-controlled, double-blinded, randomized clinical trial",
+      "source": "MSK 참고문헌 Scroggie 2003 — 원문 구독제, 미대조(당화혈색소 변화 없음으로 알려짐 — 추정)"
+     }
+    },
+    {
+     "claim": "[당뇨] 혈당을 약간 올릴 수 있어 확인이 필요합니다.",
+     "status": "supported",
+     "source": {
+      "title": "About Herbs: Glucosamine",
+      "org_or_journal": "Memorial Sloan Kettering Cancer Center",
+      "year": 2026,
+      "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/glucosamine",
+      "access": "open",
+      "pmcid_or_url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/glucosamine",
+      "kind": "db"
+     },
+     "quote": "Patients with poorly controlled diabetes or glucose intolerance should be monitored as glucosamine could worsen insulin resistance",
+     "loc": "For Healthcare Professionals > Purported uses/Safety",
+     "proposed_ko": "혈당 조절이 잘 안 되는 당뇨라면 혈당을 확인하며 드세요."
+    }
+   ],
+   "note": "kdri2020 교체 → NCCIH·MSK Glucosamine. MSM 은 공개 기관 자료를 찾지 못함(MSK 항목 없음) — 규칙 문장이 MSM 에 대해 말하는 것은 없음."
+  },
+  {
+   "rule": "콜라겐",
+   "claims": [
+    {
+     "claim": "먹은 콜라겐이 그대로 피부나 관절로 가지 않습니다. 소화되면 아미노산으로 분해됩니다.",
+     "status": "partly",
+     "source": {
+      "title": "About Herbs: Collagen",
+      "org_or_journal": "Memorial Sloan Kettering Cancer Center",
+      "year": 2025,
+      "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/collagen",
+      "access": "open",
+      "pmcid_or_url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/collagen",
+      "kind": "db"
+     },
+     "quote": "Hydrolyzed collagen peptides are absorbed in the gastrointestinal tract and stimulate fibroblast activity, leading to increased collagen synthesis and extracellular matrix remodeling (1) (2).",
+     "loc": "For Healthcare Professionals > Mechanism of Action (Last Updated 2025-05-09)",
+     "proposed_ko": "먹은 콜라겐은 대부분 소화되지만, 일부는 작은 펩타이드 형태로 흡수됩니다. 피부 보습 효과는 연구마다 결과가 다릅니다.",
+     "also": "같은 페이지: 'There are no conclusive data on the skin protective effects of collagen.' 식약처 2025-01-07 재평가(seq=48799): 콜라겐펩타이드 기능성 '피부보습에 도움을 줄 수 있음' 현행 유지."
+    },
+    {
+     "claim": "해롭지는 않지만",
+     "status": "supported",
+     "source": {
+      "title": "About Herbs: Collagen",
+      "org_or_journal": "Memorial Sloan Kettering Cancer Center",
+      "year": 2025,
+      "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/collagen",
+      "access": "open",
+      "pmcid_or_url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/collagen",
+      "kind": "db"
+     },
+     "quote": "Adverse effects have not been reported.",
+     "loc": "For Healthcare Professionals > Adverse Reactions",
+     "proposed_ko": "부작용 보고는 없습니다."
+    },
+    {
+     "claim": "같은 값이면 단백질 보충이 목적에 더 맞습니다.",
+     "status": "unsupported",
+     "source": null,
+     "quote": null,
+     "loc": "이 비교를 직접 다룬 공개 원문은 찾지 못함",
+     "proposed_ko": "단백질 보충이 목적이라면 일반 단백질 식품이 더 알맞습니다(전문가 의견)."
+    }
+   ],
+   "note": "espen2021 교체 → MSK Collagen·식약처 재평가."
+  },
+  {
+   "rule": "프로폴리스",
+   "claims": [
+    {
+     "claim": "구내염에 쓰이기도 하나 근거는 제한적입니다.",
+     "status": "supported",
+     "source": {
+      "title": "About Herbs: Propolis",
+      "org_or_journal": "Memorial Sloan Kettering Cancer Center",
+      "year": 2022,
+      "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/propolis",
+      "access": "open",
+      "pmcid_or_url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/propolis",
+      "kind": "db"
+     },
+     "quote": "Its effects on chemotherapy-induced mucositis are thus far equivocal (32) (33) (34) (65) (66).",
+     "loc": "For Healthcare Professionals > Purported uses (Last Updated 2022-07-06)",
+     "proposed_ko": "항암치료 구내염에 쓰이기도 하나 효과는 아직 분명하지 않습니다(유지).",
+     "also": "MASCC 2020(PMC7540329): 'New evidence was identified for several natural remedies and herbs. However, it was insufficient to form a guideline' — 프로폴리스 이름은 본문에 없음(보충표 2)."
+    },
+    {
+     "claim": "벌 산물 알레르기가 있으면 피해야 합니다.",
+     "status": "supported",
+     "source": {
+      "title": "About Herbs: Propolis",
+      "org_or_journal": "Memorial Sloan Kettering Cancer Center",
+      "year": 2022,
+      "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/propolis",
+      "access": "open",
+      "pmcid_or_url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/propolis",
+      "kind": "db"
+     },
+     "quote": "Patients who are allergic to bee stings, honey, ragweed, or chrysanthemum should not take either of these supplements.",
+     "loc": "Patient/HCP section",
+     "proposed_ko": "벌·꿀·돼지풀·국화 알레르기가 있으면 피하세요.",
+     "also": "같은 페이지 Herb-Drug Interactions: 벌 화분과 와파린 병용 중 INR 상승 증례 1건."
+    }
+   ],
+   "note": "mascc-mucositis 는 일반 문장만 지지 → MSK Propolis 추가. Yarom 2020(프로폴리스 직접 검토)은 PMC 미수록, 미대조."
+  },
+  {
+   "rule": "클로렐라·스피루리나",
+   "claims": [
+    {
+     "claim": "비타민 K 가 많아 와파린 복용자에게 문제가 됩니다.",
+     "status": "partly",
+     "source": {
+      "title": "Chlorella and Arthrospira (Spirulina) as Multi-Pathway Biological Response Modulators",
+      "org_or_journal": "Molecules",
+      "year": 2026,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13209791/",
+      "access": "pmc",
+      "pmcid_or_url": "PMC13209791 / doi:(PMC 기재 doi 미확인)",
+      "kind": "review"
+     },
+     "quote": "Potential drug interactions (e.g., with anticoagulants due to vitamin K content) and contraindications in phenylketonuria (phenylalanine content) should be noted",
+     "loc": "본문 안전성 단락(서론부)",
+     "proposed_ko": "비타민 K 가 들어 있어 와파린 효과에 영향을 줄 수 있습니다.",
+     "comment": "서술 종설(2026). '많다'의 정량값·클로렐라와 스피루리나의 함량 차이는 공개 원문에서 확인 못 함. Ohkawa 1995 증례(PMID 8777808)는 원문 미대조."
+    },
+    {
+     "claim": "요오드가 많아 갑상선 검사·치료를 앞둔 분에게 문제가 됩니다.",
+     "status": "unsupported",
+     "source": null,
+     "quote": null,
+     "loc": "Europe PMC·MSK·NCCIH 에서 클로렐라·스피루리나 요오드 과다를 지지하는 공개 원문을 찾지 못함",
+     "proposed_ko": "(삭제) — 요오드 문장은 출처를 확인하기 전까지 빼는 것을 권장.",
+     "comment": "해조류(다시마·미역)와 혼동했을 가능성 — 추정."
+    },
+    {
+     "claim": "중금속 오염 가능성도 제품에 따라 다릅니다.",
+     "status": "supported",
+     "source": {
+      "title": "Chlorella and Arthrospira (Spirulina) as Multi-Pathway Biological Response Modulators",
+      "org_or_journal": "Molecules",
+      "year": 2026,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13209791/",
+      "access": "pmc",
+      "pmcid_or_url": "PMC13209791 / doi:(PMC 기재 doi 미확인)",
+      "kind": "review"
+     },
+     "quote": "The primary safety concern lies not in intrinsic toxicity but in product contamination—specifically heavy metal accumulation and cyanotoxin co-contamination",
+     "loc": "결론부 안전성 요약",
+     "proposed_ko": "제품에 따라 중금속이나 남조류 독소에 오염될 수 있습니다.",
+     "also": "MSK Blue-Green Algae(2023-06-05): 'blue-green algae may be contaminated by strains of algae (e.g. Microcystis species) that are toxic.'"
+    },
+    {
+     "claim": "[와파린] 비타민 K 함량이 높아 INR 을 흔듭니다.",
+     "status": "partly",
+     "source": {
+      "title": "Chlorella and Arthrospira (Spirulina) as Multi-Pathway Biological Response Modulators",
+      "org_or_journal": "Molecules",
+      "year": 2026,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13209791/",
+      "access": "pmc",
+      "pmcid_or_url": "PMC13209791 / doi:(PMC 기재 doi 미확인)",
+      "kind": "review"
+     },
+     "quote": "Potential drug interactions (e.g., with anticoagulants due to vitamin K content)",
+     "loc": "본문 안전성 단락",
+     "proposed_ko": "비타민 K 가 들어 있어 와파린 효과에 영향을 줄 수 있습니다. 드신다면 의료진에게 알리고 INR 을 확인하세요."
+    }
+   ],
+   "note": "warfarin-vitk 는 원리만 맞고 클로렐라를 다루지 않음. NIH ODS 비타민 K 팩트시트는 봇 차단으로 열지 못함."
+  },
+  {
+   "rule": "쏘팔메토",
+   "claims": [
+    {
+     "claim": "전립선비대 증상에 쓰이는 원료입니다.",
+     "status": "partly",
+     "source": {
+      "title": "Saw Palmetto",
+      "org_or_journal": "NIH NCCIH (Herbs at a Glance / fact sheet)",
+      "year": 2025,
+      "url": "https://www.nccih.nih.gov/health/saw-palmetto",
+      "access": "open",
+      "pmcid_or_url": "https://www.nccih.nih.gov/health/saw-palmetto",
+      "kind": "db"
+     },
+     "quote": "A 2023 review of 27 studies on saw palmetto in men with BPH found that this herb, when administered alone, provides little or no benefit for BPH symptoms.",
+     "loc": "What Have We Learned? (Last Updated: April 2025)",
+     "proposed_ko": "전립선비대 증상에 쓰이지만, 단독으로는 증상 개선 효과가 거의 없다는 분석이 있습니다."
+    },
+    {
+     "claim": "PSA 수치에 영향을 줄 수 있어, 전립선암 추적 중에는 판단을 흐릴 수 있습니다.",
+     "status": "unsupported",
+     "source": {
+      "title": "The Effect of Increasing Doses of Saw Palmetto Fruit Extract on Serum PSA Levels: Analysis of the CAMUS Randomized Trial",
+      "org_or_journal": "J Urol 189:486",
+      "year": 2013,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3979451/",
+      "access": "pmc",
+      "pmcid_or_url": "PMC3979451 / doi:10.1016/j.juro.2012.09.037",
+      "kind": "rct"
+     },
+     "quote": "Saw palmetto extract does not affect serum PSA levels more than placebo even at relatively high doses.",
+     "loc": "Abstract Conclusions (369명, 72주, 320→640→960 mg)",
+     "proposed_ko": "무작위 연구에서 고용량까지 PSA 를 낮추지 않았습니다.",
+     "also": "NCCIH Saw Palmetto: 'Saw palmetto does not appear to affect readings of prostate-specific antigen (PSA) levels, even when taken in higher-than-usual amounts.'"
+    },
+    {
+     "claim": "[전립선암 avoid] PSA 를 낮출 수 있어 재발 추적을 방해합니다. 복용 중이면 반드시 알려야 합니다.",
+     "status": "unsupported",
+     "source": {
+      "title": "The Effect of Increasing Doses of Saw Palmetto Fruit Extract on Serum PSA Levels: Analysis of the CAMUS Randomized Trial",
+      "org_or_journal": "J Urol 189:486",
+      "year": 2013,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3979451/",
+      "access": "pmc",
+      "pmcid_or_url": "PMC3979451 / doi:10.1016/j.juro.2012.09.037",
+      "kind": "rct"
+     },
+     "quote": "was found to have had no effect on serum PSA levels compared with placebo.",
+     "loc": "Conclusions(본문)",
+     "proposed_ko": "무작위 연구에서 PSA 를 낮추지 않았습니다. 다만 전립선 치료 약과 겹칠 수 있으니 복용 중이면 알려 주세요.",
+     "comment": "판정(avoid)의 핵심 이유가 반대 근거와 충돌 — 판정 수준은 전문의 판단 필요(바꾸자고 하지 않음)."
+    }
+   ],
+   "note": "wcrf-prostate 는 쏘팔메토를 다루지 않음 → CAMUS(PMC3979451)·NCCIH 로 교체."
+  },
+  {
+   "rule": "알로에",
+   "claims": [
+    {
+     "claim": "설사를 유발할 수 있어, 항암·방사선치료로 장이 예민한 시기에는 증상을 키웁니다.",
+     "status": "partly",
+     "source": {
+      "title": "Aloe Vera",
+      "org_or_journal": "NIH NCCIH (Herbs at a Glance / fact sheet)",
+      "year": 2025,
+      "url": "https://www.nccih.nih.gov/health/aloe-vera",
+      "access": "open",
+      "pmcid_or_url": "https://www.nccih.nih.gov/health/aloe-vera",
+      "kind": "db"
+     },
+     "quote": "Oral use of aloe latex can cause abdominal pain, cramps, and diarrhea.",
+     "loc": "What Do We Know About Safety? (Last Updated: February 2025)",
+     "proposed_ko": "알로에 전잎·라텍스(안트라퀴논 함유) 제품은 복통·설사를 일으킬 수 있어, 장이 예민한 치료 시기에는 피하는 편이 낫습니다. 알로에 겔(속살) 제품은 이에 해당하지 않습니다.",
+     "also": "같은 페이지: 'Research studies suggest that short-term use of oral aloe gel up to 42 days is safe.' MSK Aloe(2026-10-02): 'Aloe gel should not be confused with aloe juice or aloe latex, both of which contain anthraquinone, a cathartic laxative.' 및 항암 중 저칼륨혈증 증례."
+    },
+    {
+     "claim": "[설사 avoid] 설사를 직접 악화시킵니다.",
+     "status": "partly",
+     "source": {
+      "title": "About Herbs: Aloe Vera",
+      "org_or_journal": "Memorial Sloan Kettering Cancer Center",
+      "year": 2026,
+      "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/aloe-vera",
+      "access": "open",
+      "pmcid_or_url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/aloe-vera",
+      "kind": "db"
+     },
+     "quote": "Aloe gel should not be confused with aloe juice or aloe latex, both of which contain anthraquinone, a cathartic laxative.",
+     "loc": "For Healthcare Professionals > Contraindications/Warnings",
+     "proposed_ko": "알로에 전잎·라텍스 제품은 설사를 악화시킵니다.",
+     "comment": "겔 제품까지 적용하면 근거 범위를 넘음(E 배치의 match 범위 지적과 같음)."
+    }
+   ],
+   "note": "espen2021 교체 → NCCIH·MSK Aloe."
+  },
+  {
+   "rule": "체지방 감소 표방 원료",
+   "claims": [
+    {
+     "claim": "효과는 대개 미미하고",
+     "status": "supported",
+     "source": {
+      "title": "Garcinia Cambogia",
+      "org_or_journal": "NIH NCCIH (Herbs at a Glance / fact sheet)",
+      "year": 2025,
+      "url": "https://www.nccih.nih.gov/health/garcinia-cambogia",
+      "access": "open",
+      "pmcid_or_url": "https://www.nccih.nih.gov/health/garcinia-cambogia",
+      "kind": "db"
+     },
+     "quote": "It’s unclear whether garcinia cambogia products help with weight loss. Some evidence suggests a modest effect, while other evidence shows no effect.",
+     "loc": "What Have We Learned?",
+     "proposed_ko": "효과는 작거나 분명하지 않습니다(유지).",
+     "also": "NCCIH Green Tea: 'The catechins and caffeine in green tea and its extracts may have a modest effect on body weight.' — 원료 전체(4,161 제품)에 대한 일반화는 두 원료 근거로만 받쳐짐."
+    },
+    {
+     "claim": "가르시니아·녹차추출물처럼 간독성이 보고된 것도 있습니다.",
+     "status": "supported",
+     "source": {
+      "title": "Garcinia Cambogia",
+      "org_or_journal": "NIH NCCIH (Herbs at a Glance / fact sheet)",
+      "year": 2025,
+      "url": "https://www.nccih.nih.gov/health/garcinia-cambogia",
+      "access": "open",
+      "pmcid_or_url": "https://www.nccih.nih.gov/health/garcinia-cambogia",
+      "kind": "db"
+     },
+     "quote": "Several cases of liver damage have been reported. Some of these cases were severe, but this appears to be uncommon.",
+     "loc": "What Do We Know About Safety?",
+     "proposed_ko": "가르시니아·녹차추출물처럼 간 손상이 보고된 원료도 있습니다(유지).",
+     "also": "녹차추출물: NCCIH Green Tea·EFSA 2018(PMC7009618) — 녹차 규칙 항목 참조."
+    },
+    {
+     "claim": "치료를 마친 뒤의 체중 관리는 식사와 운동으로 하는 것이 근거가 분명합니다.",
+     "status": "supported",
+     "source": {
+      "title": "ESPEN practical guideline: Clinical Nutrition in cancer",
+      "org_or_journal": "Clin Nutr 40:2898-2913 (ESPEN)",
+      "year": 2021,
+      "url": "https://doi.org/10.1016/j.clnu.2021.02.005",
+      "access": "open",
+      "pmcid_or_url": "https://doi.org/10.1016/j.clnu.2021.02.005 (ESPEN 공개 PDF)",
+      "kind": "guideline"
+     },
+     "quote": "Cancer survivors should strive to maintain a healthy weight and avoid excessive weight gain throughout life by balancing calorie intake with physical activity.",
+     "loc": "권고 40(strong, level of evidence low) 해설",
+     "proposed_ko": "치료를 마친 뒤의 체중 관리는 식사 조절과 신체 활동으로 하는 것이 권고됩니다.",
+     "comment": "'근거가 분명'은 권고 강도(strong)에는 맞지만 근거 수준은 low — '권고됩니다'가 더 정확."
+    },
+    {
+     "claim": "[치료 중] 치료 중에는 체중 감량 자체가 목표가 아닙니다.",
+     "status": "partly",
+     "source": {
+      "title": "ESPEN practical guideline: Clinical Nutrition in cancer",
+      "org_or_journal": "Clin Nutr 40:2898-2913 (ESPEN)",
+      "year": 2021,
+      "url": "https://doi.org/10.1016/j.clnu.2021.02.005",
+      "access": "open",
+      "pmcid_or_url": "https://doi.org/10.1016/j.clnu.2021.02.005 (ESPEN 공개 PDF)",
+      "kind": "guideline"
+     },
+     "quote": "During anticancer drug treatment, we recommend to ensure an adequate nutritional intake and to maintain physical activity.",
+     "loc": "권고 32 (C3-1; strong, level of evidence very low)",
+     "proposed_ko": "치료 중에는 충분히 드시고 활동을 유지하는 것이 권고됩니다. 치료 중 의도적 감량이 도움이 되는지는 근거가 부족합니다.",
+     "counter": {
+      "quote": "There is currently insufficient evidence to recommend for or against intentional weight loss or prevention of weight gain interventions during active treatment",
+      "source": "ASCO 2022 권고 3"
+     }
+    },
+    {
+     "claim": "[치료 중] 이 시기에 빠지는 것은 지방이 아니라 근육이고, 근육량은 항암제 용량 유지와 치료 완주율에 직접 연결됩니다.",
+     "status": "partly",
+     "source": {
+      "title": "ESPEN guidelines on nutrition in cancer patients",
+      "org_or_journal": "Clin Nutr 36:11-48 (ESPEN)",
+      "year": 2017,
+      "url": "https://doi.org/10.1016/j.clnu.2016.07.015",
+      "access": "open",
+      "pmcid_or_url": "https://doi.org/10.1016/j.clnu.2016.07.015 (ESPEN 공개 PDF)",
+      "kind": "guideline"
+     },
+     "quote": "Not only weight loss but also a low muscle mass may be associated with increased toxicity of cytostatic agents [386].",
+     "loc": "본문 'Medical oncology' 절 해설",
+     "proposed_ko": "치료 중 체중이 줄면 근육도 함께 줄기 쉽고, 근육이 적으면 항암제 독성이 커지는 경향이 관찰됩니다.",
+     "also": "같은 문헌: 'Muscle mass below these values is strongly associated with mortality in cancer patients, as well as complications of cancer surgery and dose-limiting toxicity during systemic anticancer therapy.' — '연관(associated)'이지 '직접 연결'·'완주율'은 원문에 없음. ESPEN 2021 권고 32 해설에도 'low muscle mass has been shown to be a risk factor for toxicity'."
+    }
+   ],
+   "note": "asco2022 는 건강기능식품을 범위에서 제외 — 이 규칙의 직접 근거는 아님. ESPEN 2017(전체판) 추가 권장."
+  },
+  {
+   "rule": "커큐민(강황)",
+   "claims": [
+    {
+     "claim": "전임상 근거는 풍부하나 사람에서 항암 효과는 확립되지 않았습니다.",
+     "status": "partly",
+     "source": {
+      "title": "Turmeric",
+      "org_or_journal": "NIH NCCIH (Herbs at a Glance / fact sheet)",
+      "year": 2025,
+      "url": "https://www.nccih.nih.gov/health/turmeric",
+      "access": "open",
+      "pmcid_or_url": "https://www.nccih.nih.gov/health/turmeric",
+      "kind": "db"
+     },
+     "quote": "There isn’t enough evidence to definitively conclude whether oral turmeric or curcumin has beneficial effects on other health conditions.",
+     "loc": "What Have We Learned? (Last Updated: April 2025)",
+     "proposed_ko": "사람에서 항암 효과는 확인되지 않았습니다(유지).",
+     "comment": "NCCIH 는 '암' 을 이름으로 말하지 않음(일반 진술). 같은 페이지: 항암치료 구강점막염에 '초기 연구' 긍정 신호. 추가 안전 정보: 'liver damage has been reported in some people who have consumed these bioavailable formulations' — 흡수 강화 제형 간 손상, 규칙에 없음(추가 검토)."
+    },
+    {
+     "claim": "고용량은 철 흡수를 방해할 수 있습니다.",
+     "status": "partly",
+     "source": {
+      "title": "Iron Deficiency Anemia Due to High-dose Turmeric",
+      "org_or_journal": "Cureus 11:e3858",
+      "year": 2019,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6414192/",
+      "access": "pmc",
+      "pmcid_or_url": "PMC6414192 / doi:10.7759/cureus.3858",
+      "kind": "case"
+     },
+     "quote": "It is known to bind iron in the gut and can cause iron deficiency in mice [3].",
+     "loc": "Introduction (+ 증례: 66세, 강황 추출물 538 mg 캡슐 6개/일, 중단 후 회복)",
+     "proposed_ko": "고용량 강황 보충제를 먹은 뒤 철 결핍성 빈혈이 생긴 증례가 1건 있고, 동물에서는 철과 결합해 결핍을 일으켰습니다.",
+     "also": "같은 문헌: 'This may be the first case of documented iron deficiency anemia in people due to turmeric supplements.' MSK Turmeric(2026-06-09) 이상반응에 같은 증례 수록. 동물 연구 Jiao 2009 Blood(PMC2615657)는 PMC 에 있으나 Europe PMC 본문 미제공으로 미대조.",
+     "counter": {
+      "quote": "(제목) Chili, but not turmeric, inhibits iron absorption in young women from an iron-fortified composite meal.",
+      "source": "Tuntipopipat 2006 J Nutr(PMID 17116705) — 원문 미대조(PMC 미수록), 식사 속 강황 양에서는 철 흡수 저해 없음"
+     }
+    }
+   ],
+   "note": "espen2021 은 커큐민을 다루지 않음 → NCCIH Turmeric·Cureus 증례(PMC6414192). 등급 C(증례·동물) 적절."
+  }
+ ],
+ "access_notes": [
+  "NIH ODS 팩트시트(ods.od.nih.gov)는 Cloudflare 봇 확인, NIH LiverTox(ncbi.nlm.nih.gov/books)는 reCAPTCHA 로 막혀 열지 못함 — 우회하지 않음. 해당 내용은 NCCIH·MSK·EFSA·PMC 원문으로 대체.",
+  "NCCIH·MSK 는 2026-10-14 에 내려받은 페이지 본문에서 문장을 그대로 옮김(MSK 날짜는 각 페이지 Last Updated).",
+  "PMC 원문은 Europe PMC fullTextXML 또는 PubMed PMC 도구로 대조. Barton 2013·Lim 2012 는 도구가 본문 없이 초록만 반환해 초록(PMC 게재)으로 대조.",
+  "kind 값: 증례 보고는 enum 에 없어 'case', 동물 독성시험(PMC9133291)은 'animal' 로 표기(enum 밖).",
+  "인용 중 '(제목)'으로 표시한 것은 원문을 못 열어 제목만 옮긴 것 — 근거로 쓰지 말 것."
+ ]
+}

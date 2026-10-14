@@ -10,7 +10,7 @@ import { CONDITION_RULES } from '../../src/data/conditionRules'
 import { INTERACTIONS, MEAL_TIMING, MEDICATIONS, mealTimingFor, normalizeMedications, toggleMedication, visibleMedications } from '../../src/data/interactions'
 import { INGREDIENT_RULES } from '../../src/data/ingredientRules'
 import { CANCERS } from '../../src/data/cancers'
-import { REF_BY_ID } from '../../src/data/references'
+import { ALL_REFERENCES, REF_BY_ID } from '../../src/data/references'
 import { BASE_EXERCISE, BONE_METS_NOTE, EXERCISE_BY_CANCER, INTAKE_EXERCISE_ADVICE } from '../../src/data/exercise'
 import { CURATED_FOODS, FOOD_BY_ID } from '../../src/data/foods'
 import { GENERATED_CORE } from '../../src/data/foods/generated'
@@ -157,6 +157,9 @@ const KIND_MAX: Record<string, string[]> = {
    * 실제로 위절제 규칙 여섯 건이 그렇게 올라가 있었다.
    */
   review: ['C'],
+  /* 증례 보고·세포·동물 실험 — 사람 집단의 근거가 아니다 */
+  case: ['C'],
+  preclinical: ['C'],
   guideline: ['G', 'A', 'B', 'C'],
   db: ['C', 'G']
 }
@@ -257,7 +260,8 @@ for (const [rid, refId, why] of MUST_NOT_CITE) {
 const MUST_CITE: [string, string][] = [
   ['prostate-selenium', 'kristal2014'],
   ['liver-raw-seafood', 'vibrio-meta2019'],
-  ['lung-cachexia', 'fearon2011'],
+  /* Fearon 2011 정의(구독제·초록만) → 그 기준 표를 옮긴 원문 공개 종설 Tan 2014(2026-10-14 전수 대조) */
+  ['lung-cachexia', 'tan2014-panc-cachexia'],
   ['panc-fat-symptom', 'ueg-pei2025'],
   /* 알코올 수치의 실제 출처 — IARC·WCRF 는 분류와 권고를 말하지 이 숫자를 말하지 않는다 */
   ['breast-alcohol', 'hamajima2002'],
@@ -267,11 +271,14 @@ const MUST_CITE: [string, string][] = [
   ['hn-antioxidant', 'meyer2008smoking'],
   /* ASCO 2022 권고 2.2 는 호중구감소증 식단을 정면으로 권고하지 않는다 — 지침급 뒷받침이라 붙여 둔다 */
   ['common-neutropenic-diet-myth', 'asco2022'],
-  /* ADT 중 단백질 목표는 ESPEN 몫, 저항운동 회복 근거는 Galvão 무작위배정 시험이다 */
+  /* ADT 중 단백질 목표는 ESPEN 몫, 저항운동 근거는 Galvão 무작위배정 시험이었다 —
+     Galvão(구독제·초록만)를 포함한 원문 공개 메타분석 Shao 2022 로 바꿨다(2026-10-14 전수 대조) */
   ['prostate-adt-protein', 'espen2021'],
-  ['prostate-adt-protein', 'galvao2010'],
-  /* 카페시타빈 증례를 실제로 보고한 문헌이 그 규칙에 없었다 */
-  ['int-capecitabine-warfarin', 'capecitabine-warfarin'],
+  ['prostate-adt-protein', 'shao2022-adt-exercise'],
+  /* 카페시타빈 증례를 실제로 보고한 문헌이 그 규칙에 없었다 — Copur 2001(구독제·초록만) 대신
+     Copur 두 증례를 포함해 6건을 표로 정리한 원문 공개 증례·문헌고찰과 허가사항으로 못 박는다(2026-10-14 전수 대조) */
+  ['int-capecitabine-warfarin', 'althiab2021-cape-warf'],
+  ['int-capecitabine-warfarin', 'fda-label-capecitabine'],
   ['int-warfarin-ginger', 'warfarin-vitk'],
   ['cond-nau-ginger', 'warfarin-vitk'],
   /* 확인되지 않는 출처를 뺀 자리에 실제 한국 자료를 넣었다 */
@@ -282,10 +289,17 @@ const MUST_CITE: [string, string][] = [
   ['crc-vitd', 'manson2019'],
   ['liver-coffee', 'iarc116'],
   ['cond-stoma-fiber', 'ileostomy-diet-review'],
-  /* 위절제 후 B12 결핍의 빈도를 실제로 말하는 것은 이 메타분석뿐이다 */
-  ['stomach-b12', 'b12-gastrectomy-meta'],
-  ['stomach-b12-partial', 'b12-gastrectomy-meta'],
-  ['cond-gx-b12', 'b12-gastrectomy-meta']
+  /* 위절제 후 B12 결핍의 빈도를 실제로 말하는 것은 이 메타분석뿐이다 — 원 메타분석(구독제·초록만)의 2,627명·48.8 % 를
+     옮긴 원문 공개 종설 Tan 2024 로 바꿨다(2026-10-14 전수 대조) */
+  ['stomach-b12', 'tan2024-ugi-micro'],
+  /* 부분절제는 이 메타분석(전절제 위주)이 아니라 부분절제 수치를 직접 적은 원문(park2023b12)으로 — 2026-10-14 전수 대조 */
+  ['stomach-b12-partial', 'park2023b12'],
+  ['cond-gx-b12', 'tan2024-ugi-micro'],
+  /* 두경부 항산화 시험(Bairati 2005, 구독제·초록만)의 숫자를 옮긴 원문 공개 종설 — 2026-10-14 전수 대조 */
+  ['common-antioxidant-rt', 'meliante2023-hnc-antiox'],
+  ['hn-antioxidant', 'meliante2023-hnc-antiox'],
+  /* 호중구감소증 식단 메타분석 — Sonbol 2019(구독제·초록만) 대신 원문 공개 Ma 2022 */
+  ['common-neutropenic-diet-myth', 'ma2022-neutropenic-diet']
 ]
 for (const [rid, refId] of MUST_CITE) {
   const r = ALL_RULES.find((x) => x.id === rid)
@@ -318,8 +332,13 @@ const MUST_SAY: [string, RegExp, string][] = [
    */
   ['common-antioxidant-rt', /담배를 피우신 분/, 'Meyer 2008 의 핵심은 흡연자에 몰렸다는 것이다'],
   ['common-antioxidant-rt', /2\.9배/, '이차암 HR 2.88(95 % CI 1.56~5.31)이다'],
-  /* 호중구감소증 식단은 '이득 없음' 을 넘어 이식군에서 감염이 더 많았다 */
-  ['common-neutropenic-diet-myth', /1\.25/, '조혈모세포이식군에서 제한식이 쪽 감염이 더 많았다(RR 1.25, 1.02~1.54)'],
+  /*
+   * 호중구감소증 식단은 '이득 없음' 을 넘어 이식군에서 일반식 쪽 감염이 더 적었다.
+   * 2026-10-14 전수 대조로 출처를 Sonbol 2019(구독제, 이식군 RR 1.25) → Ma 2022(감염 RR 1.13)·Pedretti 2024(Trifilio 726명)로 바꿔
+   * 고정 문구도 바꿨다.
+   */
+  ['common-neutropenic-diet-myth', /1\.13/, '원문 공개 메타분석(Ma 2022, 6편·1,114명)의 감염 RR 1.13(0.97~1.31)이다'],
+  ['common-neutropenic-diet-myth', /726명/, '조혈모세포이식 성인 726명에서 일반식 쪽 확진 감염이 더 적었다(Trifilio 2012 — Pedretti 2024 2차 인용)'],
   /*
    * IDDSI 는 두 문서를 받아 대조했다. 환자가 집에서 확인할 수 있는 숫자는 이 둘뿐이다 —
    * 어른 한 조각 1.5 cm(포크 폭), 다진 단계 4 mm(포크 살 사이). 말로만 '작게' 는 실행할 수 없다.
@@ -354,8 +373,10 @@ const MUST_SAY: [string, RegExp, string][] = [
   /*
    * Rogers 2011 의 결론은 '표준 위절제 후 식단을 뒷받침할 문헌이 충분하지 않다' 이다.
    * 환자들이 받아 드는 빡빡한 식단표가 근거에서 나온 것이 아니라는 뜻이라, 그 말을 화면에 남긴다.
+   * 2026-10-14 전수 대조: Rogers(구독제)를 떼고, 같은 취지를 덤핑 합의문 원문('Controlled data … are not available')으로 받친다.
    */
-  ['stomach-dumping', /표준 식단이 아닙니다/, 'Rogers 2011 은 표준 위절제 후 식단의 근거 부족을 결론으로 적는다'],
+  ['stomach-dumping', /표준 식단이 아닙니다/, '덤핑 합의문은 물 미루기·단백질 늘리기의 대조 연구가 없다고 적는다'],
+  ['stomach-dumping', /대조 연구는 아직 없다/, "Scarpellini 2020 원문: 'Controlled data … are not available in the literature'"],
   ['cond-gx-dumping', /증상을 보아 가며 맞추는 것이 원칙/, '같은 결론을 증상 규칙 쪽에도 남긴다'],
   ['stomach-b12', /48\.8 %/, '메타분석(14편·2,627명)의 값이다'],
   ['cond-gx-b12', /48\.8 %/, '메타분석(14편·2,627명)의 값이다'],
@@ -366,9 +387,13 @@ const MUST_SAY: [string, RegExp, string][] = [
   ['cond-muc-cold', /볼루스/, 'MASCC 권고는 bolus 5-FU 주입 중에 한정된다'],
   ['cond-muc-cold', /30분/, 'MASCC 권고의 시간이다'],
   ['cond-muc-cold', /멜팔란/, '두 번째 권고 상황(고용량 멜팔란 자가이식)이 빠지면 절반만 전한 것이다'],
-  /* 지침이 식이에 대해 권고를 내지 못했다는 사실은 환자가 알아야 할 근거의 무게다 */
-  ['cond-muc-avoid', /권고를 내지 못했습니다/, 'MASCC 는 식이 중재에 권고를 내지 못했다'],
-  ['hn-mucositis-avoid', /권고를 내지 못했습니다/, 'MASCC 는 식이 중재에 권고를 내지 못했다'],
+  /*
+   * 지침이 어떤 음식을 뺄지 정하지 않았다는 사실은 환자가 알아야 할 근거의 무게다.
+   * 2026-10-14 전수 대조로 고정 문구를 바꿨다: MASCC/ISOO 2020 전문에 spicy·acidic 은 0건이고, '권고를 내지 못했다' 는
+   * 하부 위장관의 지방 조절 식이·섬유에 쓴 말이었다. 음식 목록은 '다루지 않았다' 가 맞다.
+   */
+  ['cond-muc-avoid', /다루지 않았습니다/, 'MASCC 는 어떤 음식을 뺄지 다루지 않았다'],
+  ['hn-mucositis-avoid', /다루지 않았습니다/, 'MASCC 는 어떤 음식을 뺄지 다루지 않았다'],
   /*
    * IARC 114 공개 Q&A 대조. 등급을 위험의 크기로 읽는 오해가 이 항목의 가장 큰 문제라
    * IARC 자신의 해명을 그대로 싣는다.
@@ -452,9 +477,10 @@ const MUST_SAY: [string, RegExp, string][] = [
   ['breast-her2-cardiac', /흡연·고혈압·당뇨·이상지질혈증·비만/, 'ASCO 권고 3.1 이 든 다섯 가지다'],
   ['breast-her2-cardiac', /30 Gy/, '심장이 조사야에 들어간 고위험 기준이다'],
   /* 운동 시험의 대상 제한 — 뼈 전이가 있으면 처방이 달라진다 */
-  ['prostate-adt-protein', /뼈 전이가 없는 분들만/, 'Galvão 시험은 뼈 전이가 없는 남성만 대상으로 했다'],
+  /* 2026-10-14 전수 대조: Galvão(구독제·초록만) 문장을 Shao 2022 메타분석으로 바꾸면서, 뼈 전이 안전 경고는 골전이 운동 합의(PMC)로 받쳐 남긴다 */
+  ['prostate-adt-protein', /뼈 전이가 있으시면/, '뼈 전이가 있으면 병변 위치·상태에 따라 운동 처방이 달라진다(골전이 운동 국제 합의)'],
   /* 녹차-보르테조밉은 사람 대상 시험이 아니다 */
-  ['int-bortezomib-greentea', /세포와 동물 실험/, 'Golden 2009 는 in vitro·in vivo 연구다'],
+  ['int-bortezomib-greentea', /세포와 동물 실험/, 'Golden 2009(Jia 2013 종설이 옮김)는 in vitro·in vivo 연구다'],
   /*
    * ERAS 대장수술 지침은 오히려 반대쪽을 말한다 —
    * 정상 식사 재개가 늦어지면 감염이 늘고 회복이 느려지므로 수술 당일부터 시작하라(강한 권고).
@@ -479,7 +505,8 @@ const MUST_SAY: [string, RegExp, string][] = [
   ['breast-calcium-vitd', /T값이 −2\.0/, '골표적 약물치료로 넘어가는 기준이다'],
   ['gyn-bone', /골절을 줄인다는 것까지는 아직 입증되지 않았/, '체중부하 운동의 근거 한계를 원문대로 적는다'],
   ['int-ai-calcium', /25-OH/, '골절 고위험군에서는 혈중 농도 측정이 권장된다'],
-  ['cond-const-opioid', /완하제를 계속 유지/, '합의문은 오피오이드를 쓰는 동안 완하제 유지를 권한다'],
+  /* 2026-10-14 전수 대조: 합의문 원문은 '완하제' 가 아니라 '변비 치료를 계속 유지' 다 */
+  ['cond-const-opioid', /계속 유지/, '합의문은 오피오이드를 쓰는 동안 변비 치료 유지를 권한다'],
   ['hn-caries', /3개월/, '방사선 우식증은 치료 후 3개월 안에 시작될 수 있다'],
   ['hn-caries', /턱뼈 괴사/, '치료 후 발치를 따로 판단하는 이유다']
 ]
@@ -1102,18 +1129,25 @@ for (const id of orphan) bad('아무 데서도 인용하지 않는 문헌', `${i
     if (r.howTo && r.howTo.length > 60) bad('한 줄 안내가 너무 김', `${r.id} — ${r.howTo.length}자`)
   }
   /* 햄·소시지·살라미·훈제오리 — 호중구가 낮은 동안 '주의' 와 "데워서" */
-  const deli = [...CURATED_FOODS, ...GENERATED_CORE].filter((f) => /살라미|훈제\s*오리|소시지|비엔나|^햄$|런천미트/.test(f.name) && !/향|맛$|비건|식물성|스낵|과자|칩/.test(f.name))
+  const deli = [...CURATED_FOODS, ...GENERATED_CORE].filter((f) => /살라미|훈제\s*오리|소시지|비엔나|^햄$|런천미트/.test(f.name) && !/향|맛$|비건|식물성|스낵|과자|칩|커피|콜드브루|라떼/.test(f.name))  /* 비엔나커피는 소시지가 아니다(2026-10-14) */
   if (deli.length < 60) bad('데워 먹기 검사가 헛돎', `${deli.length}종`)
+  /*
+   * 볶음·피자·떡볶이처럼 뜨겁게 익혀 내는 요리는 "데워서" 가 필요 없다 — 규칙 문장 스스로 "익힌 요리는 해당하지 않는다" 고 한다.
+   * 2026-10-14 전수 대조에서 이 모순(부대찌개·피자에 "데워서")을 고쳤다. 잣대는 엔진(익힌요리 태그)과 따로 둔다.
+   */
+  const cookedDish = /볶음|구이|피자|떡볶이|찌개|솥밥|덮밥|파스타|스파게티|국밥|탕$/
+  const deliCold = deli.filter((f) => !cookedDish.test(f.name) || /샐러드|냉/.test(f.name))
   let warm = 0
   /* 대장암에서는 가공육이 아예 '피하세요' 라 "데워서" 가 나올 자리가 없다 — 폐암으로 본다 */
   const lungNeut: PatientContext = { ...byPhase, cancer: 'lung' }
   for (const f of deli) {
     const v = evaluateFood(f, lungNeut, 1)
     if (v.level !== 'caution' && v.level !== 'avoid') { bad('호중구가 낮은데 햄·소시지·훈제오리에 주의가 없음', `${f.name} → ${v.level}`); continue }
+    if (!deliCold.includes(f)) continue
     if (v.level === 'caution' && howToLines(v).some((t) => /데워/.test(t))) warm++
     if (howToLines(evaluateFood(f, well, 1)).some((t) => /데워/.test(t))) bad('호중구가 낮지 않은 분께 "데워서" 가 붙음', f.name)
   }
-  if (warm / deli.length < 0.9) bad('햄·소시지·훈제오리에 "데워서 드세요" 가 안 붙은 것이 많음', `${warm}/${deli.length}`)
+  if (warm / deliCold.length < 0.9) bad('햄·소시지·훈제오리에 "데워서 드세요" 가 안 붙은 것이 많음', `${warm}/${deliCold.length}`)
 }
 
 /* ── 호중구감소 — 고르는 자리가 둘이어도 답은 하나 ─────────────
@@ -1309,6 +1343,22 @@ for (const id of orphan) bad('아무 데서도 인용하지 않는 문헌', `${i
     const ids = [...v.hits.map((h) => h.rule.id), ...v.interactions.map((i) => i.interaction.id)]
     for (const s of soyRules) if (ids.includes(s.id)) bad('콩 근거가 석류·아마씨에 붙음', `${f.name} ← ${s.id}`)
     if (rule && !ids.includes(rule)) bad('석류·아마씨 자기 근거가 안 붙음', `${f.name} — ${rule} 없음 (${ids.join(',')})`)
+  }
+}
+
+/* ── 참고 문헌은 전부 원문 대조 — 2026-10-14 전수 대조로 못 박음 ─────────────────
+ *
+ * 홍보·스토어·지침서에 "참고 문헌 N종 전부 원문 대조" 라고 적었다. 그런데 출처마다 원문을 정말 봤는지는
+ * 어디에도 적혀 있지 않았고, 전수 대조에서 초록만 볼 수 있는(구독제) 출처가 13종 나왔다.
+ * 이제 출처마다 access(pmc|open|abstract)를 적는다. 적지 않았거나 abstract 이면 실패 —
+ * 원문이 공개된 대체 문헌을 찾거나, 그 출처에 기대는 문장을 줄인다.
+ */
+{
+  for (const r of ALL_REFERENCES) {
+    if (!r.access) bad('원문 대조 기록이 없는 출처', `${r.id} — access(pmc|open|abstract) 를 적을 것`)
+    else if (r.access === 'abstract') bad('초록만 본 출처 — "전부 원문 대조" 와 어긋남', `${r.id} — 원문 공개 대체 문헌으로 바꿀 것`)
+    if (r.access === 'pmc' && !/^PMC\d+$/.test(r.fulltext ?? '')) bad('PMC 출처인데 PMCID 가 없음', r.id)
+    if (!r.url && !r.fulltext) bad('출처에 주소가 없음 — 화면에서 원문으로 갈 수 없다', r.id)
   }
 }
 

@@ -37,21 +37,22 @@ export const SUPPLEMENTS: Supplement[] = [
   {
     id: 'aronamin-gold', name: '아로나민 골드', brand: '일동제약', category: '비타민B군',
     dosageLabel: '1일 1~2정', otc: true,
-    perDay: { b1: 50, b2: 20, b6: 20, b12: 0.02, vitC: 100, vitE: 10 },
+    /* b12·folate 칸은 µg 이다. mg 값(0.02 mg)을 그대로 적어 1,000분의 1로 계산되고 있었다(2026-10-14 전수 대조) */
+    perDay: { b1: 50, b2: 20, b6: 20, b12: 20, vitC: 100, vitE: 10 },
     actives: [{ name: '푸르설티아민(활성형 B1)', amount: '50 mg' }],
     note: '활성형 비타민 B1 제제. 피로·신경통에 널리 쓰인다'
   },
   {
     id: 'impactamin-power', name: '임팩타민 파워', brand: '대웅제약', category: '비타민B군',
     dosageLabel: '1일 1정', otc: true,
-    perDay: { b1: 100, b2: 30, b6: 50, b12: 0.5, b3: 40, folate: 0.4, vitC: 500, vitE: 100, zn: 15, mg: 50 },
+    perDay: { b1: 100, b2: 30, b6: 50, b12: 500, b3: 40, folate: 400, vitC: 500, vitE: 100, zn: 15, mg: 50 },
     actives: [{ name: '벤포티아민(활성형 B1)', amount: '100 mg' }],
     note: '고함량 B군 — 소변이 진한 노란색이 되는 것은 리보플라빈 때문으로 정상이다'
   },
   {
     id: 'bcomplex-generic', name: '비타민B 컴플렉스 (대표 조성)', brand: '-', category: '비타민B군',
     dosageLabel: '1일 1정', otc: true,
-    perDay: { b1: 50, b2: 50, b3: 50, b6: 50, b12: 0.05, folate: 0.4 },
+    perDay: { b1: 50, b2: 50, b3: 50, b6: 50, b12: 50, folate: 400 },
     note: '항암 중 말초신경병증에 B6 를 자가로 고용량 복용하는 사례가 있으나, B6 는 장기 과량 시 오히려 신경병증을 유발한다'
   },
 

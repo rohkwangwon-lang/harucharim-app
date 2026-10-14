@@ -101,7 +101,9 @@ const UNDERCOOKED_NOT = /스테이크|카츠|구이|코시도|꼬시도|꼬또|�
  * 데친·볶은·무친 것은 익힌 것이므로 뺀다.
  */
 const SPROUT = /숙주|콩나물|새싹|무순|알팔파|스프라우트/
-const SPROUT_COOKED = /데친|삶은|볶음|무침|국|탕|찌개|찜|전|밥|죽|구이|조림|튀김/
+/* 찐것·잡채·라면·냉채·불고기·분말·나물(데친 반찬)도 익힌 것이다 — 빠져 있어 숙주나물·콩나물잡채에 '날 새싹 피하세요' 가 붙었다(2026-10-14 전수 대조).
+   쌀국수는 넣지 않는다 — 날 숙주를 얹어 낸다. */
+const SPROUT_COOKED = /데친|삶은|볶음|무침|국|탕|찌개|찜|찐|전|밥|죽|구이|조림|튀김|잡채|라면|냉채|불고기|분말|나물/
 
 /* ── 가공육 ────────────────────────────────────────── */
 /* 햄버거의 패티는 가공육이 아니고, 비엔나커피는 고기가 아니다 */
@@ -171,7 +173,8 @@ const VITK_NOT = /과자|쿠키|칩|스낵|캔디|사탕|젤리|빵|케이크|�
  */
 const CURED = /햄(?!버거)|소시지|소세지|쏘시지|쏘세지|베이컨|살라미|페퍼로니|프랑크|비엔나(?!커피)|스팸|런천미트|초리조|파스트라미|프로슈토|하몽|잠봉|판체타|육포|핫도그|훈제\s*오리|오리\s*훈제/
 /* 과자·향·시즈닝과 식물성 대체품은 가공육이 아니다 — 하몽 크래커, 페퍼로니맛 감자칩, 비건 소세지 */
-const CURED_NOT = /햄버거|비엔나커피|햄스터|크래커|비스킷|감자칩|포테토칩|스낵|생강청|시즈닝|비건|식물성|베지|향$/
+/* '화이트비엔나 콜드브루'·'아몬드 비엔나 커피' 도 커피다(2026-10-14 전수 대조) */
+const CURED_NOT = /햄버거|비엔나커피|비엔나 커피|커피|콜드브루|라떼|햄스터|크래커|비스킷|감자칩|포테토칩|스낵|생강청|시즈닝|비건|식물성|베지|향$/
 
 /* ── 생강 ──────────────────────────────────────────── */
 /*
@@ -217,6 +220,18 @@ const DISH_WITH_SAUCE = /_양념장$/
  * 같은 과일이 화면마다 다르게 보였다. 이름이 꼭 맞는 것만 잡는다 — 석류차·석류주스·아마씨유는 아니다.
  */
 const PHYTO_DISPLAY = /^(석류|아마씨)([ _](생것|볶은것))?$/
+/*
+ * 칡뿌리 — 이소플라본(푸에라린·다이드제인)이 많아 갱년기용으로 팔린다. 즙과 생뿌리만 잡는다.
+ * 칡 전분과 칡냉면은 녹말을 걸러 낸 것이라 대상이 아니다.
+ */
+const KUDZU = /^칡(즙|뿌리[ _]생것)$/
+/*
+ * 뜨겁게 익혀 내는 요리. 호중구가 낮을 때 가공육에 붙는 "김이 날 만큼 데워서" 는 이런 요리에는 필요 없다(이미 익힌다).
+ * 밥 요리를 통째로 빼면 차게 먹는 햄김밥·훈제오리 월남쌈까지 빠진다 — 그래서 분류가 아니라 이름으로 가른다(2026-10-14).
+ * 핫바·도시락은 넣지 않는다 — 데워 드시라는 말이 그대로 맞다.
+ */
+const HOT_DISH = /볶음|덮밥|찌개|국밥|짜글이|전골|탕$|탕[ _(]|구이|떡볶이|피자|라면|우동|짬뽕|솥밥|그라탕|스튜|카레|부침|커틀릿|돈까스|돈가스|리조또|파스타|스파게티/
+const ROYAL_JELLY = /로[열얄]\s?젤리/
 
 export function autoTags(name: string): FoodTag[] {
   const s = name.replace(DISH_WITH_SAUCE, '').replace(BRAND, ' ')
@@ -235,6 +250,9 @@ export function autoTags(name: string): FoodTag[] {
   if (GRAPEFRUIT.test(s) && !GRAPEFRUIT_NOT.test(s)) out.push('자몽계' as FoodTag)
   if (GINGER.test(s) && !GINGER_NOT.test(s)) out.push('생강' as FoodTag)
   if (PHYTO_DISPLAY.test(name.trim())) out.push('식물성에스트로겐' as FoodTag)
+  if (KUDZU.test(name.trim())) out.push('칡뿌리' as FoodTag, '식물성에스트로겐' as FoodTag)
+  if (ROYAL_JELLY.test(s)) out.push('로열젤리' as FoodTag)
+  if (HOT_DISH.test(s) && !/샐러드|냉/.test(s)) out.push('익힌요리' as FoodTag)  // 스파게티샐러드·냉파스타는 차게 먹는다
 
   return out
 }
@@ -272,7 +290,15 @@ function rawProduce(name: string, group?: string): boolean {
 }
 
 /** 이미 있는 태그에 자동 태그를 합친다. 군을 주면 그 군에 맞지 않는 태그를 덜어 낸다 */
+/*
+ * 식약처 DB 의 '가공식품' 분류를 그대로 '초가공식품' 으로 옮겨 왔더니, 순두부·연두부·두부·우유·된장·통조림 참치까지
+ * "초가공식품이 식사의 중심이 되지 않게" 를 받았다(2026-10-14 전수 대조). 원재료에 가깝게 가공한 것(NOVA 1·3군)은 뺀다.
+ * 우유식빵·요구르트 소다·두부과자처럼 첨가물로 만든 것은 그대로 둔다.
+ */
+const NOT_UPF = /^(?:순두부|연두부|두부|건두부|검은깨두부|두부[ _/]칼슘강화|우유|흰우유|저지방 ?우유|무지방 ?우유|플레인 ?요[거구]르?트|된장|청국장|고추장|간장|참치 ?통조림.*)$/
+
 export function withAutoTags(name: string, tags: FoodTag[], group?: string): FoodTag[] {
+  if (tags.includes('초가공식품' as FoodTag) && NOT_UPF.test(name.trim())) tags = tags.filter((t) => t !== ('초가공식품' as FoodTag))
   const kept = group && NO_FIBER_PRAISE.has(group)
     ? tags.filter((t) => t !== ('고식이섬유' as FoodTag))
     : tags

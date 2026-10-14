@@ -1,0 +1,697 @@
+{
+ "files": [
+  "src/data/commonRules.ts",
+  "src/data/conditionRules.ts"
+ ],
+ "changes": [
+  {
+   "rule": "common-alcohol",
+   "what": "등급 A→G(인용 3건 모두 기관 평가·지침). '같은 지침은 1잔/2잔' → 생존자 지침이 따르라고 한 ACS 예방 지침(표 2)의 문구임을 밝힘",
+   "before": "evidence A · '같은 지침은 그래도 드신다면 1잔/2잔'",
+   "after": "evidence G · '이 지침이 따르라고 한 ACS 암 예방 지침은 \"마시지 않는 것이 가장 좋다\", 그래도 드신다면 1잔/2잔'",
+   "sources": [
+    "acs2022",
+    "iarc100e",
+    "wcrf2018"
+   ]
+  },
+  {
+   "rule": "common-processed-meat",
+   "what": "등급 A→G. '아질산염+단백질 N-니트로소가 주된 기전' 과장 → IARC Q&A 원문(가공 중 생기는 발암물질의 예: N-니트로소·PAH)대로. '주 1회 이하' 는 앱 제안임을 구분. WCRF 'very little, if any' 원문대로",
+   "before": "A · 주된 기전 단정 · 주 1회 이하를 출처처럼",
+   "after": "G · '기전의 하나로 꼽힙니다' · '먹더라도 아주 조금, 되도록 먹지 말 것' · '이 앱은 현실적인 목표로 제안'",
+   "sources": [
+    "iarc114",
+    "wcrf2018"
+   ]
+  },
+  {
+   "rule": "common-ultraprocessed",
+   "what": "등급 B→G(인용이 지침 2건). 범위 문제(두부·요거트·우유·된장·참치통조림에 초가공식품 태그)는 autoTag 문제라 unresolved",
+   "before": "B",
+   "after": "G",
+   "sources": [
+    "wcrf2018",
+    "acs2022"
+   ]
+  },
+  {
+   "rule": "common-sugary-drink",
+   "what": "등급 B→G. '과일 당은 대상 아님' 이 100% 주스까지 괜찮다는 뜻으로 읽힘 → WCRF 정의(과일주스 당 포함, 무가당 주스도 많이 마시지 말 것) 추가",
+   "before": "B · 과일 당은 대상 아님",
+   "after": "G · 통째 과일만 제외, 과일주스는 WCRF 정의상 당 음료",
+   "sources": [
+    "wcrf2018",
+    "acs2022"
+   ]
+  },
+  {
+   "rule": "common-raw-neutropenia",
+   "what": "'비브리오' 삭제(FDA 소책자·Sonbol 에 없음). 판정·match 는 그대로 두고, 외식 샐러드가 걸리는 이유를 FDA 외식 안내 문장('익히지 않은 재료가 들었는지 묻고, 확실하지 않으면 다른 메뉴')으로 한 줄 추가 — 코디네이터 지시",
+   "before": "살모넬라·리스테리아·비브리오 · '동물성 식품에만 적용'",
+   "after": "살모넬라·리스테리아 같은 식중독균 · '동물성 식품과 외식 메뉴에만 적용' · 가게 샐러드는 씻었는지 확인할 수 없어 익힌 메뉴 권함",
+   "sources": [
+    "fda-foodsafety"
+   ]
+  },
+  {
+   "rule": "common-raw-sprouts-neutropenia",
+   "what": "'싹 틔우는 따뜻하고 습한 환경… 씻어도 해결 안 됨' 은 FDA 소책자에 없는 문장 → 소책자가 실제로 보여 주는 것(다른 생채소는 '씻은 것' 이 낮은 쪽, 새싹만 '익힌 것' 이 낮은 쪽; 외식 시 생 새싹 든 샐러드·랩·샌드위치 위험)으로 줄임. SPROUT_COOKED 는 코디네이터가 autoTag.ts 에서 처리",
+   "before": "따뜻하고 습한 환경 서술",
+   "after": "FDA 위험 높음/낮음 짝 서술",
+   "sources": [
+    "fda-foodsafety"
+   ]
+  },
+  {
+   "rule": "common-raw-animal-neutropenia",
+   "what": "'비브리오' 삭제. 초밥 문장을 앱 추론('같은 자리에서 날생선을 다루므로') 대신 FDA 원문('회와 비채식 초밥을 위험 높은 쪽')으로",
+   "before": "비브리오 · 같은 자리에서 날생선을 다루므로",
+   "after": "FDA 는 회와 (채소만 든 것이 아닌) 초밥을 위험이 높은 쪽에 둡니다",
+   "sources": [
+    "fda-foodsafety"
+   ]
+  },
+  {
+   "rule": "common-antioxidant-rt",
+   "what": "숫자 정정: HR 2.88 은 비타민 E 군 보충 기간 중 값이고 베타카로틴은 156명 등록 뒤 중단, 보충 중단 뒤엔 차이가 이어지지 않음(HR 0.41). during_chemo 시기의 근거로 SWOG S0221(Ambrosone 2020, PMC7062457) 관찰연구 추가(재발 adjHR 1.41, 95% CI 0.98~2.04, P=.06 — 확정 아님). 등급 A 유지(RT 시기 RCT)",
+   "before": "비타민 E 400 IU·베타카로틴 30 mg 을 드신 군 2.9배",
+   "after": "비타민 E 400 IU(처음 156명은 베타카로틴 30 mg 병용 — 그 뒤 중단) 군 보충 중 2.9배, 끊은 뒤 차이 이어지지 않음 + 항암 중 관찰연구 1,134명",
+   "sources": [
+    "bairati2005b",
+    "meyer2008smoking",
+    "bairati2005",
+    "ambrosone2020"
+   ]
+  },
+  {
+   "rule": "common-grapefruit",
+   "what": "이유 글 끝 문장이 규칙의 켜짐 조건(정맥 항암만 받는 분께도 뜸)과 어긋남 → 판정은 두고 '주사로만 맞고 먹는 항암제·표적치료제가 없으면 담당 의료진께 확인' 안내로 바꿈. Bailey 2013 원문 'The pharmacokinetics of intravenously administered drugs are unchanged' 확인. 엔진 수정은 unresolved",
+   "before": "정맥으로 맞는 항암제는 이 영향을 받지 않습니다(끝)",
+   "after": "먹는 약만 문제 · 정맥 약은 영향 없음 · 주사로만 치료받는 분은 담당 의료진께 확인",
+   "sources": [
+    "bailey2013grapefruit"
+   ]
+  },
+  {
+   "rule": "common-sodium",
+   "what": "3,255 mg(2018)·2,300·1,500·2,100·1,700 을 KDRI 2020 원문(무기질 편 나트륨 장 본문·요약표)에서 확인 → URL 없는 knhanes 떼고 kdri2020 으로. '국물을 남기면 절반 가까이' 는 출처 없어 삭제",
+   "before": "refIds kdri2020+knhanes · 국물 남기면 절반 가까이",
+   "after": "refIds kdri2020 · '국물을 남기시면 그만큼 덜 드시게 됩니다'",
+   "sources": [
+    "kdri2020"
+   ]
+  },
+  {
+   "rule": "common-protein",
+   "what": "'근육량이 완주율·회복 속도에 직접 연결' 과장 → ESPEN 2017 원문('근육량 기준 미만은 사망·수술 합병증·용량 제한 독성과 강하게 연관')대로. 범위: excludeTags 에 튀김·초가공식품 추가(닭튀김·피자에 권장과 초가공 주의가 동시에)",
+   "before": "직접 연결 · excludeTags 염장·가공육·훈제",
+   "after": "강하게 연관(ESPEN) · excludeTags +튀김·초가공식품",
+   "sources": [
+    "espen2021",
+    "espen-cachexia"
+   ]
+  },
+  {
+   "rule": "common-neutropenic-diet-myth",
+   "what": "ASCO 권고 2.2 원문 등급(근거 수준 낮음·권고 강도 약함) 덧붙임, '못 박았습니다' → '밝혔습니다'. 제목·howTo·FDA 방법 문장은 전문의 결정대로 유지",
+   "before": "못 박았습니다",
+   "after": "밝혔습니다(근거 수준은 낮고 권고 강도는 약함)",
+   "sources": [
+    "asco2022"
+   ]
+  },
+  {
+   "rule": "common-deli-neutropenia",
+   "what": "범위 좁힘: '볶거나 끓여 익힌 요리는 해당 안 됨' 이라면서 부대찌개·순대국밥·순대볶음·김치찌개 햄·햄볶음밥·'비엔나' 커피에 붙던 것 → restrictGroups(육류·가금류·난류·어패류·가공식품·반찬·간식·유제품). '훈제' 태그 매칭 제거(베이컨은 가공육으로 걸리고, 완숙 훈제란은 델리 미트 아님). 제목은 코디네이터 수정 유지",
+   "before": "tags 가공육·훈제(644+2종, 국·찌개 포함)",
+   "after": "restrictGroups 7종 + tags 가공육(623종 — 남은 대부분은 간식·디저트로 분류된 피자·버거)",
+   "sources": [
+    "fda-foodsafety",
+    "cdc-listeria"
+   ]
+  },
+  {
+   "rule": "cond-dys-soft",
+   "what": "범위: excludeTags 에 수분보충(국밥·탕·미소국·두유·우유)·글루텐함유(식빵·모닝빵) 추가 — IDDSI 가 혼합 질감(건더기 든 국)·마른 빵을 위험으로 두고, 같은 앱의 cond-dys-rough·thin 과 상충하던 것",
+   "before": "excludeTags 점착성",
+   "after": "excludeTags 점착성·수분보충·글루텐함유",
+   "sources": [
+    "iddsi"
+   ]
+  },
+  {
+   "rule": "cond-muc-avoid",
+   "what": "'MASCC 가 근거 불충분으로 권고 못 냄' → 원문은 맵고 신 음식 회피를 아예 다루지 않음(spicy·acidic 0건). '가장 자주 문제' 빈도 주장 삭제, 피할 음식 목록의 출처로 NCI PDQ 'Sore Mouth'(감귤·매운·토마토·케첩·짠·생채소·날카롭고 바삭한·술) 추가",
+   "before": "MASCC 권고를 내지 못했습니다 · 토마토…과자류가 가장 자주 문제",
+   "after": "NCI 목록 · MASCC 는 다루지 않았습니다",
+   "sources": [
+    "nci-pdq-nutrition",
+    "mascc-mucositis"
+   ]
+  },
+  {
+   "rule": "cond-muc-cold",
+   "what": "범위: excludeTags 점착성(가래떡·인절미) 추가. 날생선 권장은 호중구감소 시 avoid 가 이겨 prefer 가 숨겨지므로 그대로",
+   "before": "tags 부드러움",
+   "after": "tags 부드러움, excludeTags 점착성",
+   "sources": [
+    "mascc-mucositis"
+   ]
+  },
+  {
+   "rule": "cond-diar-lowres",
+   "what": "출처 교체 espen2021(섬유·잔사·수분 0건) → NCI PDQ 설사 항목(저섬유, 수분·이온음료, 나트륨·칼륨 음식: 바나나·감자·맑은 국물)",
+   "before": "espen2021 · 경구수액이나 이온음료",
+   "after": "nci-pdq-nutrition · 물·이온음료 + 바나나·감자·맑은 국물",
+   "sources": [
+    "nci-pdq-nutrition"
+   ]
+  },
+  {
+   "rule": "cond-diar-avoid",
+   "what": "출처 교체 espen2021 → NCI PDQ(유제품(유당 뺀 것 제외)·기름진·튀긴·고섬유·카페인·매운·가스 유발 음식 피하기). '지방은 담즙산 흡수 장애로' 등 근거 없는 기전 삭제",
+   "before": "유당분해효소·담즙산·장운동 기전 · espen2021",
+   "after": "NCI 피할 음식 목록 · nci-pdq-nutrition",
+   "sources": [
+    "nci-pdq-nutrition"
+   ]
+  },
+  {
+   "rule": "cond-const-fiber",
+   "what": "출처 교체 espen2021 → NCI PDQ 변비 항목(수분·따뜻한 음료·푸룬 주스, 섬유 음식, 섬유 보충제). '하루 1.5~2 L'·'키위'·'물 없이 섬유만 늘리면 더 단단' 은 출처 없어 삭제",
+   "before": "1.5~2 L · 푸룬·키위·차전자피 · espen2021",
+   "after": "NCI 문장 · 섬유 보충제(차전자피 등) · nci-pdq-nutrition",
+   "sources": [
+    "nci-pdq-nutrition"
+   ]
+  },
+  {
+   "rule": "cond-const-opioid",
+   "what": "합의문 원문에 맞춤: 유지하라는 것은 '완하제' 가 아니라 '변비 치료'(항목: 개인화·정기 재평가·오피오이드 쓰는 동안 유지 91.5 %), '식이 권고는 필요하나 충분치 않다'(항목 30). '섬유로 대신하면 배가 더 불편' 삭제(fiber 0건). 등급 C(코디네이터) 유지",
+   "before": "완하제를 계속 유지 · 섬유로 대신하면 오히려 불편",
+   "after": "변비 치료를 맞춤·재평가·유지 · 식이 조절은 필요하지만 충분하지 않음",
+   "sources": [
+    "oic-consensus2021"
+   ]
+  },
+  {
+   "rule": "cond-nau-ginger",
+   "what": "시험 약은 생강 추출물 캡슐(1캡슐=생강 뿌리 250 mg 상당)임을 밝힘(생강차 1건에 붙는 규칙). 와파린 문장을 원문 세기로: 시험이 항응고제 환자를 제외했고, ACCP 표 8 의 관찰 결과(생강 병용 출혈 OR 3.20, '확인 필요')는 D 갈래 원문 대조에 기댐",
+   "before": "출혈 위험이 높아진다는 관찰이 있어",
+   "after": "시험에서 제외되었고, 출혈이 더 많았다는 관찰이 있지만 확인이 더 필요",
+   "sources": [
+    "ryan2012ginger",
+    "warfarin-vitk"
+   ]
+  },
+  {
+   "rule": "cond-nau-avoid",
+   "what": "출처 교체 espen2021 → NCI PDQ(담백·부드러운 음식, 강한 냄새 피하기, 너무 뜨겁거나 차지 않게). '지방은 위 배출을 늦춰' 삭제, '상온이나 찬 음식' 은 NCI 와 어긋나 고침. 범위: 견과·종실·경장영양 그룹 제외(restrictGroups)",
+   "before": "espen2021 · 위 배출 기전 · 찬 음식 · 견과에 피하세요",
+   "after": "nci-pdq-nutrition · NCI 문장 · 견과·종실 제외",
+   "sources": [
+    "nci-pdq-nutrition"
+   ]
+  },
+  {
+   "rule": "cond-nau-dry",
+   "what": "출처 교체 espen2021 → NCI PDQ('아침 오심이면 일어나기 전 마른 토스트·크래커', '빈속이면 오심 악화', '하루 중 크래커 같은 마른 음식')",
+   "before": "espen2021",
+   "after": "nci-pdq-nutrition",
+   "sources": [
+    "nci-pdq-nutrition"
+   ]
+  },
+  {
+   "rule": "cond-anor-soup",
+   "what": "출처 교체 espen2021(국물 0건) → NCI PDQ 식욕부진 항목('식사 중 액체는 조금씩', '입맛이 가장 좋을 때 단백질 음식 먼저'), 반대쪽 문장('고형식을 못 드시면 수프라도')도 함께 적음",
+   "before": "espen2021 · 국물은 열량·단백질이 거의 없음",
+   "after": "nci-pdq-nutrition · 적습니다 · 반대 문장 병기",
+   "sources": [
+    "nci-pdq-nutrition"
+   ]
+  },
+  {
+   "rule": "cond-wl-ons",
+   "what": "'5 % 넘게 줄면 이미 개입 기준, BMI 20 미만·근감소면 2 %' 는 ESPEN 에 없는 Fearon 2011 악액질 '진단' 기준(그 논문은 초록만 공개) → 원문 공개 GLIM 2019 영양불량 진단 기준(6개월 내 5 % 초과 + 원인 질환)으로 교체, '개입 기준' 을 '진단 기준' 으로",
+   "before": "5 %/2 % 개입 기준",
+   "after": "GLIM: 6개월 안 5 % 초과 + 암 같은 원인 병 → 영양불량 진단",
+   "sources": [
+    "espen2021",
+    "espen-cachexia",
+    "glim2019"
+   ]
+  },
+  {
+   "rule": "cond-gain-dense",
+   "what": "등급 B→G. 제목·이유의 '늘어난 것은 지방이고 한번 붙으면 잘 안 빠짐' 미확인 → ACS 2022 원문(진단 뒤 체중 증가와 유방암 사망 연관 연구들, 성인기 체중 증가 피하기)으로. 제목 변경. 범위: 견과·종실·두류·경장영양 그룹, 생과일 제외",
+   "before": "B · 이때 늘어난 체중은 나중에 잘 빠지지 않습니다",
+   "after": "G · 체중이 늘고 있다면 열량 밀도가 높은 음식부터 줄여 보세요",
+   "sources": [
+    "asco2022",
+    "acs2022"
+   ]
+  },
+  {
+   "rule": "cond-gain-veg",
+   "what": "'식사 순서를 채소→단백질→밥으로 바꾸면 총섭취량이 준다' 는 ACS·KDRI 에 없음 → WCRF 원문('비전분 채소는 섬유가 많고 에너지 밀도가 낮다')으로 줄이고 출처 교체. 범위: 현미밥·보리밥·통밀식빵·고구마에 붙던 것 → restrictGroups 채소·해조·버섯·반찬, excludeTags 염장·고나트륨. 제목 변경",
+   "before": "refIds acs2022+kdri2020 · 먼저 채소로 배를 채우면 총량이 자연스럽게 줄어듭니다",
+   "after": "refIds wcrf2018 · 열량이 낮은 채소로 먼저 배를 채우세요",
+   "sources": [
+    "wcrf2018"
+   ]
+  },
+  {
+   "rule": "cond-gain-move",
+   "what": "'한 달에 체중 2 % 넘게 빼면 근육부터 빠진다' 출처 없음 → 삭제. '치료 중 감량 자체가 목표가 아님' → ASCO 원문(유산소·저항운동 권고, 치료 중 감량 이득은 근거 부족)",
+   "before": "2 % 숫자",
+   "after": "ASCO 권고 문장",
+   "sources": [
+    "acsm2019",
+    "asco2022"
+   ]
+  },
+  {
+   "rule": "cond-neut-raw",
+   "what": "판정·match 그대로. 외식 샐러드가 걸리는 이유를 FDA 외식 안내 문장으로 한 줄 추가(코디네이터 지시)",
+   "before": "—",
+   "after": "가게 샐러드는 씻었는지 확인할 수 없어 익힌 메뉴 권함",
+   "sources": [
+    "fda-foodsafety"
+   ]
+  },
+  {
+   "rule": "cond-neut-probiotic",
+   "what": "범위: '프로바이오틱스' 태그 매칭 제거(김치·요거트·청국장·낫토에 주의가 붙던 자기모순) → 유산균 보충제 분류만. 출처 교체: FDA 소책자(probiotic 0건) → NCCIH 'Probiotics: What You Need To Know'(면역 약한 분 위험 더 큼) + ESPEN 2017 C2-5 해설(면역저하 환자에 권하기 전 안전성 확인 필요). 출처 없는 '균혈증·패혈증 사례' 삭제",
+   "before": "supplementCategories 유산균 + tags 프로바이오틱스 · fda-foodsafety",
+   "after": "supplementCategories 유산균만 · nccih-probiotics + espen-cachexia",
+   "sources": [
+    "nccih-probiotics",
+    "espen-cachexia"
+   ]
+  },
+  {
+   "rule": "cond-gx-dumping",
+   "what": "'식후 20~30분 비스듬히 누우면 증상이 줄어든다' 는 국제 합의에서 채택 안 된 문항(동의 55 %) → 삭제. 출처를 구독제 Rogers 2011 에서 Scarpellini 2020(PMC7351708, B-fix 가 정의한 scarpellini2020dumping)으로: 식사량 줄이기, 물은 식후 30분 이상 뒤, 빠른 흡수 당 제거, 과일·채소는 권함. 범위: 생과일·장류·채소·해조·곡류 제외(restrictGroups+excludeTags 생채소과일)",
+   "before": "gastrectomy-nutr · 비스듬히 눕기 · 포도·망고·고추장에 피하세요",
+   "after": "scarpellini2020dumping · 합의문 권고 · 단 음료·간식·가공식품 등으로 한정",
+   "sources": [
+    "scarpellini2020dumping"
+   ]
+  },
+  {
+   "rule": "cond-gx-b12",
+   "what": "'전절제 후에는 경구 흡수 불가능해 주사 필요' 는 틀림 → 고용량(하루 500~1,500 µg) 경구로도 정상화된 연구들(Rogaczewski 2026 종설 7편·449명, PMC 공개). '아절제 후에도 결핍이 많다' 과장 → Park 2023 서론 값(4년 내 3.2~15.7 %). 복합제 용량은 제품마다 다르니 의료진과. 구독제 gastrectomy-nutr 뗌. '위절제를 받은 2,627명' → '위암 수술을 받은 2,627명'",
+   "before": "경구 흡수 불가능 · 아절제도 결핍 많음 · gastrectomy-nutr",
+   "after": "고용량 경구 가능(근거 제한) · 아절제 3.2~15.7 % · rogaczewski2026b12+park2023b12",
+   "sources": [
+    "rogaczewski2026b12",
+    "park2023b12",
+    "b12-gastrectomy-meta"
+   ]
+  },
+  {
+   "rule": "cond-stoma-fiber",
+   "what": "'수술 후 6~8주' 숫자가 종설 초록에서 확인 안 됨(전문 구독제) → '수술 뒤 몇 주가 지나 장이 안정되면'",
+   "before": "6~8주",
+   "after": "몇 주",
+   "sources": [
+    "ileostomy-diet-review"
+   ]
+  },
+  {
+   "rule": "cond-stoma-fluid",
+   "what": "출처 교체 espen2021(장루 0건) → nightingale2020stoma(PMC8862462, 기존 출처): 고배출 기준 대개 하루 1.5~2.0 L 초과, 저장성 음료(물·차·커피·주스)는 배출·나트륨 손실을 늘리므로 제한, 나트륨 90 mmol/L 이상 포도당-식염 용액을 조금씩, 만성 탈수는 말기 신부전으로. '하루 1 L' 삭제. 범위: '수분보충' 태그(녹차·커피·생과일·주스에 권장 — 출처가 줄이라고 하는 바로 그것) → foodIds ['ors']만. 등급 G→C(단독 저자 종설)",
+   "before": "espen2021 · 1 L · tags 수분보충(92종)",
+   "after": "nightingale2020stoma · 1.5~2 L · foodIds ors(1종) · C",
+   "sources": [
+    "nightingale2020stoma"
+   ]
+  },
+  {
+   "rule": "cond-asc-na",
+   "what": "EASL 원문에 맞춤: '2,000 mg 이하가 표준' → '약 80 mmol(=2 g, 소금 5 g)', 근거가 제한적·엇갈림 병기. '수분 제한은 저나트륨혈증 때만' 은 이 지침에 없음 → '나트륨을 줄이며 물을 그대로/더 마시면 저나트륨혈증이 생기기 쉬워 물 양은 의료진과 함께 살핌'(원문: 나트륨·물 섭취 함께 관찰)",
+   "before": "2,000 mg 이하가 표준 · 수분 제한은 저나트륨혈증 때만",
+   "after": "약 2,000 mg(80 mmol) · 근거 제한적 · 나트륨·물 함께 관찰",
+   "sources": [
+    "easl-nutrition"
+   ]
+  },
+  {
+   "rule": "cond-ckd-k",
+   "what": "3,500 mg 을 KDRI 2020 요약표에서 확인, 칼륨 배설·대체 소금 고칼륨혈증 사례도 같은 책 칼륨 장에 있음. '데쳐서 물 버리면 상당히 줄어든다' 는 출처 확인 못 함 → '조리법으로 줄이는 방법은 의료진·영양사께'",
+   "before": "데쳐서 물을 버리면 상당히 줄일 수 있습니다",
+   "after": "조리법은 의료진·영양사께 여쭤 보십시오",
+   "sources": [
+    "kdri2020"
+   ]
+  },
+  {
+   "rule": "cond-ckd-p",
+   "what": "KDRI 2020 인 장 원문 '흡수율이 일반 식품 속의 인에 비하여 상당히 높다' 로 세기 맞춤('훨씬'→'상당히'). 상한 75세 이상 3,000 mg 병기",
+   "before": "훨씬 높습니다 · 상한 3,500",
+   "after": "상당히 높습니다 · 상한 3,500(75세 이상 3,000)",
+   "sources": [
+    "kdri2020"
+   ]
+  },
+  {
+   "rule": "cond-dm-sugar",
+   "what": "출처 문제: KDRI·ESPEN 에 '스테로이드 날 혈당'·'탄수화물 매끼 고르게' 없음 → ESPEN 2021 이 실제로 적은 것(스테로이드 부작용: 인슐린 저항성)만 남기고 kdri2020 뗌, 끼니 나누기 문장은 의료진과 식사 계획으로 낮춤. 범위: 생과일·장류·채소·해조·곡류 제외",
+   "before": "kdri2020+espen2021 · 탄수화물을 매 끼 비슷하게 · 포도·망고·고추장에 주의",
+   "after": "espen2021 · 인슐린 저항성(ESPEN) · 단 음료·과자 줄이기",
+   "sources": [
+    "espen2021"
+   ]
+  },
+  {
+   "rule": "cond-htn-na",
+   "what": "2,300·2,100·1,700·3,255(2018)를 KDRI 2020 원문에서 확인 → knhanes 떼고 kdri2020 만. '세 가지만으로도 기준 가까이' 출처 없어 삭제",
+   "before": "kdri2020+knhanes · 세 가지만으로 기준 가까이",
+   "after": "kdri2020 · '…것부터 시작해 보십시오'",
+   "sources": [
+    "kdri2020"
+   ]
+  },
+  {
+   "rule": "cond-warf-vitk",
+   "what": "Holbrook 2012(ACCP) 원문을 열지 못했고(PMC 비공개 본문·Europe PMC 없음) D 갈래 대조로도 '식이 비타민 K 일정하게' 문장 미확인 → MedlinePlus 와파린 약 정보(내가 원문 확인: 'Eat consistent amounts of vitamin K-containing food on a week-to-week basis', 'Do not eat large amounts of leafy, green vegetables…')와 DailyMed 허가사항(D-fix 의 fda-label-warfarin)으로 교체. '와파린은 비타민 K 작용을 막아' 기전 문장은 MedlinePlus 표현('피가 굳는 힘을 낮춤')으로",
+   "before": "warfarin-vitk",
+   "after": "medlineplus-warfarin + fda-label-warfarin",
+   "sources": [
+    "medlineplus-warfarin",
+    "fda-label-warfarin"
+   ]
+  }
+ ],
+ "new_refs": [
+  {
+   "id": "nci-pdq-nutrition",
+   "kind": "guideline",
+   "year": 2024,
+   "citation": "PDQ® Supportive and Palliative Care Editorial Board. Nutrition in Cancer Care (PDQ®)–Health Professional Version. National Cancer Institute. Updated 2024-09-20. (Behavioral strategies for symptom management · 식욕부진: 식사 중 액체는 조금씩, 입맛이 가장 좋을 때 단백질 음식 먼저, 고형식을 못 먹으면 밀크셰이크·스무디·수프 · 오심: 담백·부드러운 음식, 강한 냄새 피하기, 너무 뜨겁거나 차지 않게, 아침 오심이면 일어나기 전 마른 토스트·크래커, 빈속이면 오심 악화 · 설사: 수분·스포츠음료, 나트륨·칼륨 음식(바나나·감자·맑은 국물), 저섬유, 피할 것: 고섬유·고당·기름지고 튀긴 음식·가스 유발·유제품(유당 뺀 것 제외)·매운 음식·카페인 · 변비: 물·따뜻한 음료·푸룬 주스, 섬유 음식, 섬유 보충제 고려 · 입 헐었을 때 피할 것: 감귤·매운 음식·토마토·케첩·짠 음식·생채소·날카롭고 바삭한 음식·술)",
+   "url": "https://www.cancer.gov/about-cancer/treatment/side-effects/appetite-loss/nutrition-hp-pdq",
+   "access": "open",
+   "fulltext": "https://www.cancer.gov/about-cancer/treatment/side-effects/appetite-loss/nutrition-hp-pdq"
+  },
+  {
+   "id": "ambrosone2020",
+   "kind": "cohort",
+   "year": 2020,
+   "citation": "Ambrosone CB, et al. Dietary Supplement Use During Chemotherapy and Survival Outcomes of Patients With Breast Cancer Enrolled in a Cooperative Group Clinical Trial (SWOG S0221). J Clin Oncol. 2020;38(8):804-814. (임상시험 S0221 부속 전향 연구 1,134명 · 치료 전과 중 모두 항산화 보충제(비타민 A·C·E, 카로티노이드, 코엔자임Q10) 사용 시 재발 adjHR 1.41(95 % CI 0.98~2.04, P=.06 — 재발 위험 41 % 높은 경향, 확정 아님) · 사망 adjHR 1.40(0.90~2.18))",
+   "url": "https://doi.org/10.1200/JCO.19.01203",
+   "access": "pmc",
+   "fulltext": "PMC7062457"
+  },
+  {
+   "id": "glim2019",
+   "kind": "guideline",
+   "year": 2019,
+   "citation": "Cederholm T, Jensen GL, et al. GLIM criteria for the diagnosis of malnutrition – A consensus report from the global clinical nutrition community. J Cachexia Sarcopenia Muscle. 2019;10(1):207-217. (영양불량 진단 = 표현형 기준 1개 이상 + 원인 기준 1개 이상 · 체중 감소: 6개월 안 5 % 초과 또는 6개월 넘어 10 % 초과 · 원인 기준의 염증/질병 부담에 암 포함)",
+   "url": "https://doi.org/10.1002/jcsm.12383",
+   "access": "pmc",
+   "fulltext": "PMC6438340"
+  },
+  {
+   "id": "rogaczewski2026b12",
+   "kind": "review",
+   "year": 2026,
+   "citation": "Rogaczewski P, et al. Oral vitamin B12 after total gastrectomy for gastric cancer: mapping the evidence. Gastric Cancer. 2026;29(5):920-929. (주제 범위 종설 · 7편·449명(경구 310명) · 대부분 메코발라민 하루 500~1,500 µg · 경구로 혈중 농도 정상화·증상 완화, 생화학 반응은 주사에 열등하지 않음 · 추적 대개 6개월 미만, 무작위배정 1편 · 전절제 후 내인자 없음 → 수동 확산만 남음)",
+   "url": "https://doi.org/10.1007/s10120-026-01745-8",
+   "access": "pmc",
+   "fulltext": "PMC13524985"
+  },
+  {
+   "id": "nccih-probiotics",
+   "kind": "guideline",
+   "year": 2019,
+   "citation": "National Center for Complementary and Integrative Health (NIH). Probiotics: What You Need To Know. Last updated August 2019. (\"프로바이오틱스의 해로운 영향 위험은 중병이 있거나 면역이 약한 사람에서 더 크다\" · 항생제와 함께 쓰는 것은 대체로 안전하나 매우 쇠약하거나 면역 기능이 낮은 환자는 예외)",
+   "url": "https://www.nccih.nih.gov/health/probiotics-what-you-need-to-know",
+   "access": "open",
+   "fulltext": "https://www.nccih.nih.gov/health/probiotics-what-you-need-to-know"
+  },
+  {
+   "id": "medlineplus-warfarin",
+   "kind": "guideline",
+   "year": 2026,
+   "citation": "U.S. National Library of Medicine. MedlinePlus Drug Information: Warfarin (a682277). Last revised 2026-03-15. (\"비타민 K 가 든 음식을 주마다 일정한 양으로\" · \"비타민 K 가 많은 잎채소·식물성 기름을 많이 먹지 말 것\" · 와파린은 피가 굳는 능력을 낮춤)",
+   "url": "https://medlineplus.gov/druginfo/meds/a682277.html",
+   "access": "open",
+   "fulltext": "https://medlineplus.gov/druginfo/meds/a682277.html"
+  }
+ ],
+ "ref_annotations": [
+  {
+   "id": "kdri2020",
+   "add": "무기질 편 나트륨 장: 2018년 한국인 나트륨 일일 평균섭취량 3,255 mg · 요약표(다량무기질, 남녀 같음): 나트륨 충분섭취량 19-64세 1,500 · 만성질환위험감소섭취량 2,300(65-74세 2,100, 75세 이상 1,700) (3,255 ÷ 2,300 ≈ 1.4배) · 칼륨 충분섭취량 3,500 · 인 권장 700, 상한 3,500(75세 이상 3,000) · 인 장: 첨가물 무기 인산염은 흡수율이 일반 식품 속 인보다 상당히 높음 · 칼륨 장: 신기능 정상이면 소변으로 배설, 칼륨 대체 소금으로 고칼륨혈증(말기 신부전 사례). (KDRI 나트륨 개정 논문 PMC9127518 본문의 노인 남녀별 값 1,900/1,800·2,200/1,700 은 요약표와 다름 — 요약표를 따름)"
+  },
+  {
+   "id": "bairati2005b",
+   "add": "540명 무작위 · 비타민 E 400 IU/일 + 베타카로틴 30 mg/일로 시작했으나 베타카로틴은 156명 등록 뒤 중단 · 보충 기간 중 이차암 HR 2.88(약 2.9배, 95 % CI 1.56~5.31), 보충 중단 뒤 HR 0.41(0.16~1.03) · 8년 시점 이차암 없는 비율 비슷 (초록 대조)"
+  },
+  {
+   "id": "meyer2008smoking",
+   "add": "재발 2.41(약 2.4배) · 전체 사망 2.26(약 2.3배) (초록 대조)"
+  },
+  {
+   "id": "ryan2012ginger",
+   "add": "744명 무작위·576명 분석 · 위약/생강 0.5·1.0·1.5 g/일, 항암 3일 전부터 6일 · 1일째 급성 오심 감소 P=0.003 · 0.5·1.0 g 에서 감소 가장 큼 · 1캡슐 = 생강 뿌리 250 mg 상당(진저롤 등 8.5 mg) · 와파린·헤파린 치료 중인 환자는 제외"
+  },
+  {
+   "id": "easl-nutrition",
+   "add": "복수 시 나트륨 약 80 mmol/일(= 나트륨 2 g = 2,000 mg = 소금 5 g) · 나트륨 제한 근거는 제한적이고 엇갈림 · 60 mmol/일(나트륨 약 1,400 mg) 아래로는 줄이지 말 것 · 저나트륨혈증은 나트륨이 적고 물은 그대로·많을 때 생기기 쉬워 나트륨·물 섭취를 함께 관찰"
+  },
+  {
+   "id": "nightingale2020stoma",
+   "add": "고배출 장루: 대개 하루 1.5~2.0 L 초과 · 저장성 음료(차·커피·물·주스)는 배출과 나트륨 손실을 늘림 → 제한 · 나트륨 90~120 mmol/L 포도당-식염 용액을 하루 동안 조금씩 · 알아차리지 못한 만성 탈수는 말기 신부전으로 (PMC 본문 대조)"
+  },
+  {
+   "id": "mascc-mucositis",
+   "add": "볼루스 5-FU 투여 중 30분 구강 냉각(권고) · 고용량 멜팔란 전처치 자가조혈모세포이식에서 구강 냉각(권고) · '통증 조절·식이 지원·이차 감염 예방이 관리의 핵심' · 맵고 신 음식 회피는 다루지 않음(spicy·acidic 0건)"
+  },
+  {
+   "id": "iddsi",
+   "add": "Level 6 어른 한 조각 1.5 cm × 1.5 cm 이하 · Level 5 다진 것 4 mm · 엄지손톱이 하얘질 만큼의 포크 압력 · 마른 빵·토스트·샌드위치 불가 · 혼합 질감(건더기 든 국 등) 주의"
+  },
+  {
+   "id": "espen2021",
+   "add": "단백질 1 g/kg/일 초과, 가능하면 1.5 g/kg/일까지(60 kg 이면 60 g 초과~90 g) · 스테로이드(식욕 촉진) 부작용으로 인슐린 저항성 · 섬유·잔사·유당·카페인·국물·크래커·장루 서술 없음"
+  },
+  {
+   "id": "espen-cachexia",
+   "add": "근육량이 기준 미만이면 사망·수술 합병증·전신치료의 용량 제한 독성과 강하게 연관 · C2-5 해설: 프로바이오틱스는 면역저하 환자에 권하기 전에 안전성이 확인되어야 함"
+  },
+  {
+   "id": "wcrf2018",
+   "add": "가공육 'very little, if any' · 당 음료 정의에 과일주스·농축액의 당 포함, 무가당 과일주스도 많이 마시지 말 것 · 비전분 채소·과일 하루 400 g 이상(1회분 약 80 g × 5회) · 비전분 채소는 섬유가 많고 에너지 밀도가 낮음 · 지방·전분·당이 많은 가공식품 제한, 견과·종실은 체중 증가와 연관 안 됨"
+  },
+  {
+   "id": "acs2022",
+   "add": "음주와 사망의 근거는 생존자 별도 권고를 낼 만큼 충분하지 않으나 새로운 암 예방 위해 금주 권고 관련 · 표 2(ACS 암 예방 지침): 술은 마시지 않는 것이 가장 좋고 마신다면 여성 하루 1잔·남성 2잔 이하 · 진단 뒤 체중 증가가 유방암 사망 증가와 연관된다는 연구들 · 성인기 체중 증가 피하기"
+  },
+  {
+   "id": "asco2022",
+   "add": "권고 2.2 호중구감소증 식단 비권고 — 근거 수준 낮음·권고 강도 약함('harms likely to outweigh benefits') · 권고 3 치료 중 의도적 감량·체중 증가 예방은 찬반 근거 불충분 · 완치 목적 치료 중 유산소·저항운동 권고"
+  },
+  {
+   "id": "iarc114",
+   "add": "가공 중 생기는 발암물질의 예: N-니트로소 화합물·다환방향족탄화수소 · 보존법이 얼마나 기여하는지는 알 수 없음 · Group 1 은 근거의 확실성이지 위험의 크기가 아님"
+  },
+  {
+   "id": "fda-foodsafety",
+   "add": "외식: 익히지 않은 재료(달걀·새싹·고기·가금·해산물)가 들었는지 묻고 확실하지 않으면 다른 메뉴 · 회·비채식 초밥·세비체 위험 높음 · 생 새싹 든 샐러드·랩·샌드위치 위험 높음, 다른 생채소는 씻은 것이 낮은 쪽 · 가게에서 만든 델리 샐러드 위험 높음 · Vibrio·probiotic 언급 없음"
+  },
+  {
+   "id": "oic-consensus2021",
+   "add": "변비 치료는 개인화(100 %)·정기 재평가·오피오이드 쓰는 동안 유지(91.5 %) · 항목 30 식이 권고는 필요하나 충분히 효과적이지 않음 · 항목 31 완하제는 흔히 효과가 없음 · PAMORA 권장(97.9 %)"
+  },
+  {
+   "id": "bailey2013grapefruit",
+   "add": "정맥 투여 약의 약동학은 변하지 않음('intravenously administered drugs are unchanged') — 상호작용은 먹는 약에만"
+  }
+ ],
+ "remove_refs_from_rules": [
+  {
+   "rule": "cond-diar-lowres",
+   "ref": "espen2021",
+   "why": "ESPEN 2021·2017 원문에 섬유·잔사·수분 보충 0건 → nci-pdq-nutrition"
+  },
+  {
+   "rule": "cond-diar-avoid",
+   "ref": "espen2021",
+   "why": "원문에 유당·섬유·카페인 0건 → nci-pdq-nutrition"
+  },
+  {
+   "rule": "cond-const-fiber",
+   "ref": "espen2021",
+   "why": "원문에 섬유·수분 0건 → nci-pdq-nutrition"
+  },
+  {
+   "rule": "cond-nau-avoid",
+   "ref": "espen2021",
+   "why": "원문에 지방·위 배출·냄새 0건 → nci-pdq-nutrition"
+  },
+  {
+   "rule": "cond-nau-dry",
+   "ref": "espen2021",
+   "why": "원문에 크래커·마른 음식 0건 → nci-pdq-nutrition"
+  },
+  {
+   "rule": "cond-anor-soup",
+   "ref": "espen2021",
+   "why": "원문에 국물·수프 0건 → nci-pdq-nutrition"
+  },
+  {
+   "rule": "cond-stoma-fluid",
+   "ref": "espen2021",
+   "why": "원문에 장루·경구수액 0건 → nightingale2020stoma"
+  },
+  {
+   "rule": "cond-gain-veg",
+   "ref": "acs2022",
+   "why": "식사 순서·총섭취량 서술 없음 → wcrf2018"
+  },
+  {
+   "rule": "cond-gain-veg",
+   "ref": "kdri2020",
+   "why": "체중 관리·채소 선식과 무관"
+  },
+  {
+   "rule": "cond-neut-probiotic",
+   "ref": "fda-foodsafety",
+   "why": "소책자에 probiotic 0건 → nccih-probiotics, espen-cachexia"
+  },
+  {
+   "rule": "cond-gx-dumping",
+   "ref": "gastrectomy-nutr",
+   "why": "구독제(초록만), 눕기 문장 확인 불가 → scarpellini2020dumping(B-fix 정의)"
+  },
+  {
+   "rule": "cond-gx-b12",
+   "ref": "gastrectomy-nutr",
+   "why": "구독제(초록만) → rogaczewski2026b12, park2023b12(B-fix 정의)"
+  },
+  {
+   "rule": "cond-dm-sugar",
+   "ref": "kdri2020",
+   "why": "스테로이드·혈당·탄수화물 분배 서술 없음"
+  },
+  {
+   "rule": "common-sodium",
+   "ref": "knhanes",
+   "why": "URL·표 위치 없음. 3,255 mg(2018)은 kdri2020 원문(나트륨 장)에 있음"
+  },
+  {
+   "rule": "cond-htn-na",
+   "ref": "knhanes",
+   "why": "같은 이유. B-fix 도 stomach-sodium 에서 뗌 — knhanes 가 더 쓰이지 않으면 references.ts 에서 삭제 가능"
+  },
+  {
+   "rule": "cond-warf-vitk",
+   "ref": "warfarin-vitk",
+   "why": "원문을 열지 못했고 D 갈래 대조에서도 '식이 비타민 K 일정하게' 문장 미확인 → medlineplus-warfarin, fda-label-warfarin(D-fix 정의)"
+  }
+ ],
+ "judgements": [
+  {
+   "rule": "common-raw-neutropenia / cond-neut-raw / common-raw-animal-neutropenia",
+   "proposal": "세 규칙을 하나로 합칠지(현재 supersedes 로 둘 중 하나만 보이게 처리됨)",
+   "why": "대상·내용이 겹쳐 같은 음식에 '피하세요' 가 2~3번 붙을 수 있다는 지적(A 갈래). 외식 샐러드 처리(전문의 결정 대기)와 함께 정하면 좋음"
+  },
+  {
+   "rule": "common-antioxidant-rt",
+   "proposal": "셀레늄을 대상에서 뺄지(또는 '결핍 확인 시 예외' 문구)",
+   "why": "Muecke 2010 IJROBP(자궁경부·자궁내막암 방사선치료 중 셀레늄 RCT 81명)에서 설사 감소, 효과 저하 신호 없음. 이 규칙의 근거(두경부 RT 비타민 E·베타카로틴 RCT, 유방암 항암 중 관찰연구)는 셀레늄을 직접 다루지 않음"
+  },
+  {
+   "rule": "common-antioxidant-rt",
+   "proposal": "항암화학요법 시기(during_chemo)에 대해 등급을 나눌지",
+   "why": "방사선 시기는 RCT(A)지만 항암 시기는 관찰연구 1편(adjHR 1.41, P=.06 — 확정 아님)뿐"
+  },
+  {
+   "rule": "cond-diar-avoid / cond-diar-lowres",
+   "proposal": "골반 방사선치료 중에는 고식이섬유를 '피하세요' 에서 빼거나 '주의' 로 낮출지",
+   "why": "Wedlake 2017 Am J Clin Nutr(골반 RT 166명 RCT): 고섬유 권고군이 급성·1년 위장관 독성이 적었고 저자들은 섬유 제한 권고를 버려야 한다고 결론. ASCO 2022 도 인용. 현재 규칙은 현미밥·보리밥·고구마 등 2,700여 종에 '피하세요'"
+  },
+  {
+   "rule": "cond-nau-ginger",
+   "proposal": "등급 A→B 검토, 그리고 생강차(식품)에 붙는 것을 유지할지",
+   "why": "근거는 표준화 추출물 캡슐 RCT 1건. NCCIH(2025-02)는 '표준 치료에 보탬이 되는지 불확실', 메타분석은 급성 오심에 한해 이득. '근거가 있는 몇 안 되는 식품' 제목도 함께 검토"
+  },
+  {
+   "rule": "cond-anor-soup",
+   "proposal": "'건더기 위주' 국을 제외할지, 수준(caution)을 info 로 낮출지",
+   "why": "NCI PDQ 는 고형식을 못 먹으면 수프라도 드시라고 함. 현재 미역국(건더기 위주) 등도 '주의'"
+  },
+  {
+   "rule": "cond-gx-b12",
+   "proposal": "B군 복합제(아로나민·임팩타민·B 컴플렉스)에 '권장' 대신 '용량 확인' 안내(info)로",
+   "why": "전절제 후 교정 용량은 하루 500~1,500 µg 경구 또는 주사. 복합제의 B12 함량은 제품마다 다르고 미확인"
+  },
+  {
+   "rule": "cond-gx-dumping",
+   "proposal": "등급 C→G 검토",
+   "why": "출처가 국제 덤핑증후군 Delphi 합의(Nat Rev Endocrinol 2020)로 바뀜 — 주요 학회 지침 합의로 볼지 판단 필요(OIC 스페인 46인 합의는 C 로 둠)"
+  },
+  {
+   "rule": "cond-stoma-fluid",
+   "proposal": "제목 '회장루가 있으면…' 을 고배출 장루로 한정할지",
+   "why": "출처(Nightingale)는 고배출 장루 관리. 배출량이 정상인 회장루 환자에게까지 경구수액 권장이 맞는지 임상 판단"
+  }
+ ],
+ "unresolved": [
+  {
+   "rule": "common-grapefruit",
+   "issue": "엔진 수정 필요: src/engine/rules.ts onAnticancerDrug 가 phase during_chemo/neutropenia 이거나 '항암제' 계열(정맥 시스플라틴·옥살리플라틴·이리노테칸 등 포함)이면 켜져, 정맥 항암만 받는 분께도 '피하세요' 가 뜸. 자몽 규칙은 '경구 항암제·표적치료제' 계열에만 켜지도록(예: onAnticancer:'oral' 옵션) 바꾸는 것이 맞음. 이번엔 이유 글만 고쳐 모순을 설명함"
+  },
+  {
+   "rule": "scripts/checks/rules.ts",
+   "issue": "MUST_SAY 374행 ['cond-muc-avoid', /권고를 내지 못했습니다/] 와 486행 ['cond-const-opioid', /완하제를 계속 유지/] 가 이번 대조에서 틀렸다고 확인된 문장을 지키고 있음 → 각각 /다루지 않았습니다/, /계속 유지/ 로 바꿔야 rules.ts 가 통과(375행 hn-mucositis-avoid 도 같은 문제 — C-fix 담당). 그 밖의 '없는 출처' 실패는 new_refs 를 합치면 사라짐"
+  },
+  {
+   "rule": "(외부 정의 출처)",
+   "issue": "이 갈래가 refIds 에 쓴 scarpellini2020dumping·park2023b12 는 fix-B-fix.json, fda-label-warfarin 은 fix-D-fix.json 의 new_refs 에 정의되어 있음 — 같이 합쳐야 함"
+  },
+  {
+   "rule": "common-processed-meat / common-deli-neutropenia",
+   "issue": "autoTag 문제: '가공육' 태그가 커피 '비엔나'(4종)·핫바(어육) 등에 붙음. deli 규칙은 그룹으로 좁혔지만 '간식·디저트' 로 분류된 구운 피자·버거 550여 종은 여전히 걸림(식품군 자료 문제)"
+  },
+  {
+   "rule": "common-ultraprocessed",
+   "issue": "autoTag 문제: '초가공식품' 태그가 순두부·연두부·두부·비지·묵류·된장·플레인 요거트·칼슘강화 우유·참치통조림·즉석밥 등에 붙음(837종). 규칙 match 로는 못 거름 — 태그 기준을 고쳐야 함"
+  },
+  {
+   "rule": "common-sugary-drink / common-protein",
+   "issue": "피자 2,936종이 '간식·디저트' 로 분류되어 당 음료·간식 규칙에 걸리고, 일부 피자는 고단백 권장에도 걸림(초가공식품 태그가 없는 것)"
+  },
+  {
+   "rule": "common-neutropenic-diet-myth",
+   "issue": "참다랑어 샐러드(kf-12797)처럼 날생선이 든 샐러드에 '생채소과일' 태그 — '씻어서 드세요' 와 날것 규칙이 엇갈림(autoTag)"
+  },
+  {
+   "rule": "cond-dys-soft",
+   "issue": "단팥빵·크림빵·머핀처럼 '글루텐함유' 태그가 없는 빵은 아직 '삼키기 쉬운 형태' 권장. 순대국밥(수분보충 태그 없음)도 걸림 — '빵' 태그·국밥 태그 정비 필요"
+  },
+  {
+   "rule": "cond-nau-avoid",
+   "issue": "우유·유제품 그룹의 '2단계분유'(고지방)에 '피하세요' — 분유 자료 정리 필요"
+  },
+  {
+   "rule": "cond-dm-sugar",
+   "issue": "'탄수화물을 매끼 고르게 나누기' 를 받칠 공개 출처(ADA Standards of Care 공개판 등)를 이번에 대조하지 못해 문장을 뺌 — 필요하면 출처 대조 후 되살릴 것"
+  },
+  {
+   "rule": "cond-ckd-k / cond-ckd-p",
+   "issue": "KDOQI 2020(kdoqi2020, 이미 references 에 있음) 원문이 403 으로 막혀 칼륨 침출(데치기)·신장 환자 인 관리 문장을 대조하지 못함 — 데치기 문장은 낮춤"
+  },
+  {
+   "rule": "cond-warf-vitk / cond-nau-ginger",
+   "issue": "Holbrook 2012(warfarin-vitk) 원문을 이 갈래에서는 열지 못함(PMC 본문 비공개 표시, Europe PMC 없음). 생강 OR 3.20 은 D 갈래 대조에 기댐"
+  },
+  {
+   "rule": "common-antioxidant-rt",
+   "issue": "bairati2005·bairati2005b·meyer2008smoking 이 초록만(구독제) — G-replace 갈래 결과에 따라 대체 필요. 수치는 초록과 일치하게 고침"
+  }
+ ]
+}

@@ -730,13 +730,14 @@ function ExerciseAdvice({
             <p className="mt-1.5 text-[11px] leading-relaxed text-stone-600">
               대신 두 가지를 함께 하시는 편이 낫습니다. 섭취는 조금씩 줄이시고,
               <strong className="text-stone-800"> 활동은 주 150분에서 300분 쪽으로 늘리세요</strong>.
-              운동은 상쇄가 아니라 그 자체로 이득이 있습니다 — 대장암에서는 보조항암 후
+              운동은 상쇄가 아니라 그 자체로 이득이 있습니다 — 결장암(3기·고위험 2기)에서는 보조항암 후
               3년 운동 프로그램이 5년 무병생존을 73.9 %에서 80.3 %로 올렸습니다.
             </p>
             <details className="mt-2">
               <summary className="cursor-pointer text-[10px] font-medium text-brand-700/70">근거 2건</summary>
               <ul className="mt-1 space-y-0.5">
-                {['challenge2025', 'acs2022'].map((id) => REF_BY_ID[id]).filter(Boolean).map((r) => (
+                {/* CHALLENGE 원문(NEJM)은 구독제라 초록만 — 숫자(80.3 % 대 73.9 %)를 옮긴 원문 공개 종설(Shida 2026, PMC)로 바꿨다(2026-10-14 전수 대조) */}
+                {['shida2026-challenge', 'acs2022'].map((id) => REF_BY_ID[id]).filter(Boolean).map((r) => (
                   <li key={r.id} className="text-[10px] leading-relaxed text-stone-500">
                     {r.url
                       ? <a href={r.url} target="_blank" rel="noreferrer" className="underline decoration-stone-300">{r.citation}</a>

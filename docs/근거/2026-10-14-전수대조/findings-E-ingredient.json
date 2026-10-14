@@ -1,0 +1,968 @@
+{
+ "batch": "E-ingredient",
+ "reviewed": 34,
+ "items": [
+  {
+   "id": "ingr:비타민 E",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "byCancer.prostate 의 SELECT 숫자(400 IU·17 %·35,000명)와 duringTreatment 의 두경부암 RCT 가 규칙 refIds(kdri2020 하나)에 없다. 화면은 규칙 단위 refIds 만 보여 주므로 SELECT 숫자에 KDRI 가 출처로 붙는다. 숫자 자체는 select2011 원문과 맞다.",
+     "source_quote": "the risk of prostate cancer at 7 years of median follow-up was increased by 17% in men randomized to supplementation with vitamin E alone",
+     "source_loc": "PMC4169010 Discussion",
+     "fix": "refIds 에 select2011 과 Bairati 2006(PMID 16841333, doi:10.1002/ijc.22042)·Bairati 2005(PMID 16027437) 추가."
+    },
+    {
+     "type": "number",
+     "detail": "두경부암 RCT 문장: '국소 재발과 사망이 오히려 늘었습니다' — 사망은 유의(HR 1.38, 1.03~1.85)하지만 국소 재발은 경향(HR 1.37, 0.93~2.02, 유의하지 않음)이다. 또 보충군은 비타민 E 400 IU 에 초기엔 베타카로틴 30 mg 이 함께였다(중도 중단).",
+     "source_quote": "The rate of local recurrence of the head and neck tumor tended to be higher in the supplement arm",
+     "source_loc": "PMID 16027437 초록(JCO 2005, 구독제) · PMID 16841333 초록(IJC 2006)",
+     "fix": "'두경부암 방사선치료 환자 540명 무작위배정 연구에서 비타민 E 400 IU(초기엔 베타카로틴 병용) 군은 전체 사망이 38 % 높았고(위험비 1.38), 국소 재발도 늘어나는 경향이었습니다(유의하지 않음).'"
+    },
+    {
+     "type": "scope",
+     "detail": "duringTreatment 'avoid' 가 비타민 E 낱말이 든 모든 제품에 걸린다. 45,618 제품 중 2,536 개가 걸리고 이름에 비타민 E 가 있는 것은 70 개뿐 — 대부분 종합비타민·복합제(기능성 문구 [비타민E] 항산화…)라 하루 10 mg α-TE 안팎이다. 근거는 400 IU(≈180~270 mg) 고용량. 저용량 종합비타민까지 '피하세요'가 되는 것은 근거 범위를 넘는다. 범위 점검은 public/data/supplements-extended.json 45,618 제품에 findIngredients 와 같은 방식(공백 제거·CLAIM_PHRASES 제거 후 부분 문자열)을 파이썬으로 재현해 셈.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "판단 필요: duringTreatment 를 '고용량(예: 1일 100 mg α-TE 이상) 단일제'로 한정하거나, 주성분(primary)일 때만 적용. 문장에 '고용량 보충제'임을 명시."
+    },
+    {
+     "type": "counter",
+     "detail": "ESPEN 2021 권고 5: 비타민·무기질은 권장량 수준으로, 고용량 미량영양소는 권하지 않음 — 이 규칙의 치료 중 판단을 뒷받침하는 지침 근거로 쓸 수 있다(현재 미인용).",
+     "source_quote": "We recommend that vitamins and minerals be supplied in amounts approximately equal to the recommended daily allowance and discourage the use of high-dose micronutrients",
+     "source_loc": "ESPEN 2021 권고 5 (espen.org PDF)",
+     "fix": "refIds 에 espen2021 추가 고려."
+    },
+    {
+     "type": "other",
+     "detail": "base 문장 '결핍이 드물어'는 KDRI 2020 비타민 E 장 본문과 맞다(명백한 결핍 증세를 보이는 사람은 없는 실정). 이상 없음.",
+     "source_quote": "",
+     "source_loc": "KDRI 2020 비타민 E 2-1-1",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "kdri2020": "fulltext-url (kns.or.kr 2020 KDRIs 개정본 zip PDF)",
+    "select2011(미인용)": "fulltext-PMC4169010",
+    "bairati2006(미인용)": "abstract-only"
+   },
+   "verified_numbers": {
+    "400 IU": "select2011(규칙 refIds 에 없음) | Interventions ... vitamin E (400 IU/d of all rac-α-tocopheryl acetate) | PMC4169010 Abstract",
+    "17 %": "select2011(규칙 refIds 에 없음) | 1.17(99% CI 1.004-1.36, p=.008, n=620) for vitamin E | PMC4169010 Abstract Results",
+    "35,000명": "select2011(규칙 refIds 에 없음) | SELECT randomized 35,533 men from 427 study sites | PMC4169010 Abstract"
+   }
+  },
+  {
+   "id": "ingr:베타카로틴",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "number",
+     "detail": "ATBC 18 %·CARET 28 % 는 초록과 맞다. 다만 CARET 은 베타카로틴 30 mg + 레티닐 팔미테이트 25,000 IU 병용이었고, 대상은 흡연자·과거 흡연자·석면 노출자다. '흡연자에게 베타카로틴을 투여한 … CARET' 은 병용·대상이 생략됨.",
+     "source_quote": "involving a total of 18,314 smokers, former smokers, and workers exposed to asbestos",
+     "source_loc": "PMID 8602180 초록(NEJM 1996)",
+     "fix": "'…CARET 연구(베타카로틴에 비타민 A 를 함께, 흡연자·석면 노출자 대상)에서는 28 % 증가해 시험이 21개월 앞당겨 중단되었습니다.'"
+    },
+    {
+     "type": "claim",
+     "detail": "byCancer.headneck 문장(두경부암 방사선치료 중 고용량 항산화제군 재발·사망 증가, 흡연자에서 뚜렷)은 refIds(atbc1994·caret1996)에 없는 Bairati/Meyer 시험 내용이다. 그 시험은 주로 비타민 E(400 IU) 이고 베타카로틴은 도중 중단되었다.",
+     "source_quote": "Among cigarette smokers, the HR were 2.41 (95% CI: 1.25-4.64) for recurrence, 2.26 (95% CI: 1.29-3.97) for all-cause mortality",
+     "source_loc": "PMID 18059031 초록(Meyer, IJC 2008)",
+     "fix": "refIds 에 Meyer 2008(doi:10.1002/ijc.23200)·Bairati 2005 추가, 문장을 '비타민 E 와 베타카로틴(도중 중단)을 함께 준 연구'로 명시."
+    },
+    {
+     "type": "grade",
+     "detail": "evidence A 는 RCT 이므로 맞다. 다만 ATBC·CARET 은 암 예방 시험(암 없는 흡연자)이고 폐암 환자 대상이 아니다 — 문장은 이를 '흡연력이 있다면'으로 적어 대체로 정확.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "atbc1994": "abstract-only (NEJM, PMC 없음)",
+    "caret1996": "abstract-only (NEJM, PMC 없음)"
+   },
+   "verified_numbers": {
+    "18 %": "atbc1994 | change in incidence, 18 percent; 95 percent confidence interval, 3 to 36 percent | PMID 8127329 abstract",
+    "28 %": "caret1996 | active-treatment group had a relative risk of lung cancer of 1.28 | PMID 8602180 abstract"
+   }
+  },
+  {
+   "id": "ingr:셀레늄",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "'기저 셀레늄이 높았던 사람에서 고위험 전립선암 증가 신호'는 select2011(Klein 2011) 에 없다 — 이 논문은 기저 셀레늄 분석을 '앞으로 할 것'이라고만 적는다. 실제 출처는 Kristal 2014 JNCI(토이네일 셀레늄 상위군에서 고등급 전립선암 91 % 증가, P=.007).",
+     "source_quote": "Selenium supplementation ... increased the risk of high-grade PCa among men with higher selenium status by 91% (P = .007)",
+     "source_loc": "PMID 24563519 초록 · PMC3975165",
+     "fix": "refIds 에 kristal2014 (doi:10.1093/jnci/djt456) 추가. 문장 유지 가능."
+    },
+    {
+     "type": "scope",
+     "detail": "셀레늄 낱말 제품 1,417 개 중 이름에 셀레늄/셀렌이 있는 것은 155 개, 나머지는 복합제의 소량(기능성 문구 [셀렌]). 판정 수준이 전립선암 'avoid' 이므로 종합비타민의 50 µg 수준까지 피하라고 나온다. SELECT 는 200 µg 셀레노메티오닌.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "판단 필요: 전립선암 avoid 를 고용량 단일제(주성분)로 한정 검토."
+    }
+   ],
+   "refs_fulltext": {
+    "select2011": "fulltext-PMC4169010",
+    "kristal2014(미인용)": "fulltext-PMC3975165(미열람, 초록 확인)"
+   },
+   "verified_numbers": {
+    "200 µg": "select2011 | Oral selenium (200 μg/day from L-selenomethionine) | PMC4169010 Abstract"
+   }
+  },
+  {
+   "id": "ingr:고용량 비타민 C",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "number",
+     "detail": "'하루 500 mg 안팎은 문제가 되지 않습니다. 1,000 mg 이상 고용량이 논의 대상' — KDRI 2020 은 권장 100 mg·상한 2,000 mg 이며 500 mg 기준은 없다. 1 g 에서 일부 위장 증상이 있다는 서술만 있다. 문장이 말하는 '논의'(항암 중 항산화)는 KDRI 의 주제가 아니다.",
+     "source_quote": "",
+     "source_loc": "KDRI 2020 비타민 C 표 17(상한 2,000 mg) 및 상한 설정 본문",
+     "fix": "'권장섭취량은 하루 100 mg, 상한은 2,000 mg 입니다(2020 KDRI). 1 g 이상에서는 설사 등 위장 증상이 생길 수 있습니다.'"
+    },
+    {
+     "type": "claim",
+     "detail": "duringTreatment 문장(고용량 항산화제가 방사선·항암제 작용을 방해할 우려)에 해당하는 출처가 refIds 에 없다(KDRI 뿐).",
+     "source_quote": "use of any antioxidant supplement ... both before and during treatment was associated with an increased hazard of recurrence (adjusted hazard ratio [adjHR], 1.41",
+     "source_loc": "PMID 31855498 초록(Ambrosone, JCO 2020) · ESPEN 2021 권고 5",
+     "fix": "refIds 에 espen2021(권고 5) 와 ambrosone2020 추가. Ambrosone 는 관찰 연구·P=.06 임을 밝힐 것."
+    },
+    {
+     "type": "scope",
+     "detail": "비타민 C 낱말 제품 3,792 개(이름에 있는 것 1,070)에 치료 중 'caution' 이 붙는다. 규칙 이름은 '고용량'인데 실제로는 100 mg 종합비타민도 걸린다.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "판단 필요: 고용량 단일제·주성분일 때만 duringTreatment 적용."
+    }
+   ],
+   "refs_fulltext": {
+    "kdri2020": "fulltext-url (kns.or.kr 2020 KDRIs 개정본 zip PDF)"
+   },
+   "verified_numbers": {
+    "500 mg": "unverified (KDRI 2020 에 500 mg 기준 없음)",
+    "1,000 mg": "kdri2020 | 이러한 증상은 2-3 g/일의 섭취로 나타나며 일부는 1 g/일 정도의 섭취량에서도 증상을 경험할 수 있다 | KDRI 2020 비타민 C 상한 설정 본문(한국어 원문)"
+   }
+  },
+  {
+   "id": "ingr:코엔자임 Q10",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "warfarin-vitk(Holbrook 2012 ACCP)는 초록상 INR 목표·비타민 K 보충·피해야 할 약물 상호작용(NSAID 등)을 다루며, 코엔자임 Q10·생약 상호작용표는 이 장이 아니라 같은 호 Ageno 2012 / Holbrook 2005 체계적 고찰 쪽이다(본문은 접근 차단으로 직접 확인 못 함 — 추정). '구조가 비타민 K 와 비슷해' 는 기전 가설이며 출처 미확인.",
+     "source_quote": "Weak recommendations deal with such issues as loading doses, ... vitamin K supplementation, ... drug interactions to avoid",
+     "source_loc": "PMID 22315259 초록",
+     "fix": "출처를 Holbrook 2005 Arch Intern Med(PMID 15911722, 와파린-약물·음식 상호작용 체계적 고찰) 또는 CoQ10-와파린 원 증례·시험으로 교체."
+    },
+    {
+     "type": "counter",
+     "detail": "항암 효과 근거 없음은 맞는 방향. Ambrosone 2020 에서는 CoQ10 포함 항산화제 사용이 재발 위험 증가 경향(관찰)과 연관.",
+     "source_quote": "",
+     "source_loc": "PMID 31855498 초록",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "warfarin-vitk": "abstract-only (PMC3278055 이 있으나 이번 점검에서 PMC·Chest 모두 접근 차단되어 본문 미확인)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:은행잎추출물",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "'혈소판 응집을 억제해 출혈 경향을 높입니다' 를 warfarin-vitk(ACCP 2012)가 뒷받침한다는 근거를 찾지 못했다(초록상 생약 언급 없음, 본문 미확인).",
+     "source_quote": "",
+     "source_loc": "PMID 22315259 초록",
+     "fix": "출처 교체 필요."
+    },
+    {
+     "type": "counter",
+     "detail": "RCT 18편 메타분석(1,985명)에서 표준화 은행잎 추출물은 ADP 유도 혈소판 응집·PT·aPTT 에 의미 있는 영향이 없었고 출혈 위험 증가를 시사하지 않았다. 와파린 병용 교차시험(Jiang 2005 등)도 INR 영향 없음 보고. '와파린과 함께 쓰면 출혈 위험이 뚜렷하게 올라갑니다'는 근거보다 강하다.",
+     "source_quote": "comparison of mean difference or baseline change between treatment and placebo groups did not indicate a higher bleeding risk associated with standardized GBE",
+     "source_loc": "PMID 21923430 초록(Kellermann, Pharmacotherapy 2011)",
+     "fix": "판단 필요(수준): 와파린 avoid 유지 여부. 문장은 '사례 보고가 있으나 무작위 연구에서는 응고 지표 변화가 뚜렷하지 않았습니다. 항응고제와 함께라면 의료진과 상의하세요.' 로 완화 검토."
+    }
+   ],
+   "refs_fulltext": {
+    "warfarin-vitk": "abstract-only (PMC3278055 이 있으나 이번 점검에서 PMC·Chest 모두 접근 차단되어 본문 미확인)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:오메가-3 (EPA·DHA)",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "other",
+     "detail": "base 문장은 ESPEN 2021 권고 16(진행암·항암 중·체중감소 위험군, 약한 권고·근거 수준 낮음)과 맞다.",
+     "source_quote": "we suggest using supplementation with long-chain N-3 fatty acids or fish oil to stabilize or improve appetite, food intake, lean body mass, and body weight",
+     "source_loc": "ESPEN 2021 권고 16 (B5-7)",
+     "fix": ""
+    },
+    {
+     "type": "scope",
+     "detail": "근거는 '진행암·항암 중·체중감소 위험' 환자 대상인데 base 가 prefer 라 모든 환자·모든 단계(치료 후 생존자 포함)에 '권장'으로 나온다. 2,503 제품 해당.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "판단 필요: base 를 info 로 두고 체중감소·진행암 조건에서 prefer, 또는 문장에 대상 명시."
+    },
+    {
+     "type": "claim",
+     "detail": "와파린·DOAC 출혈 경향 문장은 refIds(ESPEN)에 근거가 없다. ESPEN 2021 본문에 warfarin·platelet·bleeding 0건. 반대 근거: 아이코사펜트 에틸 4 g 1상 연구에서 와파린 PK·INR 영향 없음(PMID 24760401), 증례 보고는 있음(PMID 14742793).",
+     "source_quote": "",
+     "source_loc": "ESPEN 2021 PDF 검색 · PMID 24760401",
+     "fix": "출처 추가(Buckley 2004 증례·PMID 24760401) 후 '고용량에서 드물게 INR 상승 보고' 수준으로."
+    }
+   ],
+   "refs_fulltext": {
+    "espen-cachexia": "fulltext-url (espen.org ESPEN_guidelines_on_nutrition_in_cancer_patients.pdf)",
+    "espen2021": "fulltext-url (espen.org ESPEN-practical-guideline-clinical-nutrition-in-cancer.pdf)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:감마리놀렌산",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "유일한 출처 espen2021 본문에 linolenic·primrose·platelet 이 0건. '혈소판 기능에 영향' 과 '암 환자 이득 임상 근거 없음' 모두 이 출처에서 나오지 않는다.",
+     "source_quote": "",
+     "source_loc": "ESPEN 2021 PDF 전문 검색",
+     "fix": "출처 교체(예: NIH ODS/NCCIH evening primrose oil 팩트시트 등 기관 자료) 또는 문장을 '암 환자에서 효과를 본 임상 근거는 찾지 못했습니다' 로 줄이고 등급 C 유지."
+    }
+   ],
+   "refs_fulltext": {
+    "espen2021": "fulltext-url (espen.org ESPEN-practical-guideline-clinical-nutrition-in-cancer.pdf)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:홍삼·인삼",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "espen2021 본문에 ginseng·herbal·platelet·warfarin 0건 — 이 규칙의 어떤 문장도 ESPEN 2021 에서 나오지 않는다. warfarin-vitk(ACCP 2012) 도 초록상 인삼을 다루지 않으며(본문은 접근 차단으로 미확인), 인삼-와파린 표는 Holbrook 2005 체계적 고찰 쪽이다(추정).",
+     "source_quote": "",
+     "source_loc": "ESPEN 2021 PDF 전문 검색 · PMID 22315259 초록",
+     "fix": "refIds 를 barton2013(PMID 23853057, PMC3888141)·yuan2004(PMID 15238367)·lee2008(PMID 18637764) 로 교체."
+    },
+    {
+     "type": "counter",
+     "detail": "'피로 개선에 대한 소규모 연구' 는 부정확 — 364명 다기관 3상 이중맹검 RCT(N07C2)가 있고 1차 종점(4주)은 유의하지 않았으나(P=.07) 8주에 유의한 개선(P=.003). 미국삼(Panax quinquefolius) 2,000 mg 이며 홍삼(Panax ginseng)과 종이 다르다.",
+     "source_quote": "Three hundred sixty-four participants were enrolled from 40 institutions",
+     "source_loc": "PMID 23853057 초록 · PMC3888141",
+     "fix": "'항암 중 피로에 대해 미국삼 2,000 mg 을 쓴 364명 무작위 연구에서 8주째 피로가 줄었지만(4주째 1차 평가는 유의하지 않음), 홍삼으로 본 큰 연구는 없습니다.'"
+    },
+    {
+     "type": "claim",
+     "detail": "와파린 문장 'INR 을 올린 사례와 내린 사례가 모두 보고' 는 Lee 2008 초록 서론과 맞다. 다만 무작위 연구: 미국삼은 건강인 20명에서 INR 감소(Yuan 2004), 고려인삼은 건강인 12명(Jiang 2004)·뇌졸중 환자 25명(Lee 2008)에서 영향 없음. 현재 refIds 는 이를 담지 않음.",
+     "source_quote": "Case reports and healthy volunteer trials have had conflicting results on the effect Panax ginseng has on warfarin",
+     "source_loc": "PMID 18637764 초록",
+     "fix": "refIds 교체 후 문장 유지 가능."
+    },
+    {
+     "type": "scope",
+     "detail": "match '인삼' 등은 정상. 그러나 홍삼 제품 대부분의 식약처 기능성 문구에 '갱년기 여성의 건강에 도움' 이 있어, 별도 규칙 '백수오·승마 등 갱년기 원료' 가 홍삼 899 개 제품에 같이 걸린다 → 유방암·부인암에서 홍삼이 '피하세요'(호르몬 유사·간독성 문장)로 판정된다. 홍삼 규칙의 '주의' 와 충돌. 상세는 백수오 항목.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "백수오 규칙 match 에서 '갱년기' 제거."
+    },
+    {
+     "type": "other",
+     "detail": "혈소판 응집 억제는 식약처 인정 기능성 문구('혈소판 응집 억제를 통한 혈액흐름에 도움')이기도 하다 — 출처로 식약처 고시를 쓸 수 있다.",
+     "source_quote": "",
+     "source_loc": "제품 DB 기능성 문구",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "espen2021": "fulltext-url (espen.org ESPEN-practical-guideline-clinical-nutrition-in-cancer.pdf)",
+    "warfarin-vitk": "abstract-only (PMC3278055 이 있으나 이번 점검에서 PMC·Chest 모두 접근 차단되어 본문 미확인)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:마늘추출물",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "'음식으로 먹는 마늘은 권장 대상' 을 wcrf2018 이 뒷받침하지 않는다 — WCRF 2018 대장암 보고서는 마늘을 'limited – no conclusion' 으로 내렸다(2011 의 'probable decreases risk' 에서 강등). '농축 보충제 혈소판 억제' 도 WCRF 에 없다.",
+     "source_quote": "The evidence for garlic, previously judged as ‘probable decreases risk’ ... [now] ‘limited – no conclusion’",
+     "source_loc": "WCRF/AICR CUP Colorectal cancer report 2018, Section 8(2011 비교) · wcrf.org PDF",
+     "fix": "'음식으로 드시는 마늘은 괜찮습니다' 로 낮추고, 혈소판·와파린 문장에는 상호작용 출처(Holbrook 2005 등) 추가."
+    }
+   ],
+   "refs_fulltext": {
+    "wcrf2018": "fulltext-url (WCRF Colorectal-cancer-report.pdf)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:대두 이소플라본(농축)",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "other",
+     "detail": "식품 대두의 이득 방향은 shu2009·acs2022 와 맞고, '보충제는 그 근거 대상이 아님' 은 Shu 2009 고찰과 맞다.",
+     "source_quote": "It has been previously reported in some studies that the health effects of soy supplements and soy isoflavone supplements may differ.",
+     "source_loc": "PMC2874068 Discussion",
+     "fix": ""
+    },
+    {
+     "type": "claim",
+     "detail": "'수십 배 농축' 은 출처 없는 표현. 또 acs2022 본문에 isoflavone supplement·phytoestrogen 언급이 없어 '안전성 자료가 없다' 의 출처가 되지 않는다(ACS 2022 의 보충제 언급은 'Caution regarding the overuse and misuse of dietary supplements' 한 줄).",
+     "source_quote": "Caution regarding the overuse and misuse of dietary supplements during and after treatment",
+     "source_loc": "acs2022 본문(Wiley full text)",
+     "fix": "'수십 배' 삭제 → '식품보다 많은 양을 알약으로 농축한'."
+    },
+    {
+     "type": "scope",
+     "detail": "breast avoid 문장은 '항호르몬 치료 중에는' 이라 적지만 byCancer 는 항호르몬 치료 여부와 무관하게 모든 유방암에 적용된다.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "판단 필요: 문장을 '유방암에서는' 으로 바꾸거나 byMedication(tamoxifen·AI)로 옮김."
+    }
+   ],
+   "refs_fulltext": {
+    "shu2009": "fulltext-PMC2874068",
+    "nechuta2012": "abstract-only (PMC3374736 있으나 본문 XML 제한, 미열람)",
+    "acs2022": "fulltext-url (acsjournals.onlinelibrary.wiley.com/doi/full/10.3322/caac.21719)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:백수오·승마 등 갱년기 원료",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "scope",
+     "detail": "match 의 '갱년기' 가 식약처 기능성 문구 '갱년기 여성의 건강에 도움' 을 잡아, 걸리는 1,223 제품 중 백수오가 이름·문구에 있는 것은 54 개뿐. 홍삼·흑삼 제품 899 개(홍삼 기능성 문구에 '갱년기 여성의 건강' 포함), 회화나무열매 ~114, 석류 ~65, 루바브 ~38, 피크노제놀 ~27, 남성 갱년기용 호로파 ~16 등이 이 규칙으로 판정된다. 결과: 유방암·부인암 환자에게 홍삼·석류가 '피하세요', 간암 환자에게 '간독성 보고' 문장이 붙는다. 석류 규칙(유방암 caution)을 뒤엎는다. 범위 점검은 public/data/supplements-extended.json 45,618 제품에 findIngredients 와 같은 방식(공백 제거·CLAIM_PHRASES 제거 후 부분 문자열)을 파이썬으로 재현해 셈.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "match 에서 '갱년기' 제거(백수오·승마·이엽우피소·블랙코호시만). 다른 갱년기 원료는 각자 규칙으로."
+    },
+    {
+     "type": "claim",
+     "detail": "acs2022 본문에 black cohosh·herbal·hepatotoxicity·phytoestrogen 0건, easl-nutrition 본문에 herbal·hepatotox·cohosh 0건 — '간독성 보고' 와 '호르몬 감수성 종양 안전성 자료 없음' 모두 인용 출처에 없다.",
+     "source_quote": "",
+     "source_loc": "acs2022 Wiley 전문 검색 · PMC6657019 전문 검색",
+     "fix": "출처 교체: NIH LiverTox 'Black Cohosh' 항목(기관 페이지), 식약처 2015 백수오·이엽우피소 조사 발표, EASL DILI 지침 2019(J Hepatol 2019;70:1222) 등. 교체 전 원문 대조 필요."
+    }
+   ],
+   "refs_fulltext": {
+    "acs2022": "fulltext-url (acsjournals.onlinelibrary.wiley.com/doi/full/10.3322/caac.21719)",
+    "easl-nutrition": "fulltext-PMC6657019"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:석류추출물",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "other",
+     "detail": "jang2024 원문과 대조: (1) 석류 씨에 에스트론·에스트리올·테스토스테론 — 3.5절 확인, (2) 유방암 관련 사람 연구는 Kapoor 하나 — 7.3절 확인, (3) 건강한 폐경 후 여성 64명·석류즙 3주·전체적으로 성호르몬·SHBG 유의한 변화 없음 — 확인(정상체중 38명 하위군에서만 감소, 앱 문장은 '전체적으로'라 정확), (4) 결론 '제형·용량 결정 위해 임상 연구 더 필요' — 8절 확인. byCancer.breast 의 '호르몬 수용체에 영향을 줄 수 있다는 실험실 결과' 도 8절과 맞다.",
+     "source_quote": "However, presently, there is only one reported clinical study [114].",
+     "source_loc": "PMC11509572 7.3절",
+     "fix": ""
+    },
+    {
+     "type": "scope",
+     "detail": "match '석류' 101 제품 중 46 개는 기능성 문구에 석류가 없다 — '석류맛' 가르시니아 젤리·비타민 젤리(다이어트톡 석류맛, 듀이프리 석류맛), 석류콜라겐젤리(기능성은 아연뿐), 석류히알루론산콜라겐젤리(히알루론산) 등. 이 제품들에 '석류 추출물·씨 기름은 식물성 에스트로겐 제품…' 문장이 붙는다. 또 피부보습용 석류농축분말(제2018-8호)도 같은 문장을 받는다.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "match 를 '석류추출', '석류농축', '석류씨', '석류종자' 로 좁히고 '석류맛' 은 제외."
+    },
+    {
+     "type": "scope",
+     "detail": "석류 제품 65 개는 '갱년기' 낱말로 백수오 규칙에도 걸려, 유방암에서 최종 판정이 이 규칙의 'caution' 이 아니라 백수오 규칙의 'avoid'(간독성·호르몬 유사 문장)가 된다. 오늘 정한 '주의' 가 화면에서 지켜지지 않는다.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "백수오 규칙의 '갱년기' 제거."
+    },
+    {
+     "type": "grade",
+     "detail": "jang2024 는 서술형 종설(review) — 등급 C 적절. 다만 핵심 사람 자료(Kapoor 2015)는 종설 경유 2차 인용이다(원문은 구독제).",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "jang2024": "fulltext-PMC11509572"
+   },
+   "verified_numbers": {
+    "64명": "jang2024 | Sixty-four post-menopausal women, who were in good health, were randomly assigned | PMC11509572 7.3절",
+    "2024년": "jang2024 | Life (Basel) 2024;14(10):1264 | PMC11509572 서지"
+   }
+  },
+  {
+   "id": "ingr:가르시니아캄보지아",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "espen2021 본문에 Garcinia·herbal 0건, easl-nutrition 본문에 Garcinia·hepatotox 0건 — '간독성 사례 반복 보고' 의 출처가 아니다. '식약처도 주의를 안내' 는 2025년 9월 식약처 회수·주의문구 추가 발표로 사실로 보이나(보도 기준), 식약처 1차 자료를 refIds 에 넣어야 한다.",
+     "source_quote": "",
+     "source_loc": "ESPEN 2021 PDF · PMC6657019 전문 검색 · 2025-09 언론 보도(식약처 회수)",
+     "fix": "출처 교체: 식약처 2025-09 보도자료(가르시니아 회수·주의사항 개정), NIH LiverTox 'Garcinia cambogia', PMID 41262061(2025 종설) 등."
+    },
+    {
+     "type": "other",
+     "detail": "duringTreatment '빠지는 것은 지방이 아니라 근육' 은 출처 없음. ESPEN 2021 은 치료 중 체중 유지를 권하지만 이 문장 자체는 없음.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "ESPEN 2021 의 체중·근육 유지 권고 문구로 바꾸거나 '체중이 빠지면 근육도 함께 빠지기 쉽습니다' 로 완화."
+    }
+   ],
+   "refs_fulltext": {
+    "espen2021": "fulltext-url (espen.org ESPEN-practical-guideline-clinical-nutrition-in-cancer.pdf)",
+    "easl-nutrition": "fulltext-PMC6657019"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:녹차추출물(카테킨·EGCG)",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "base '농축 추출물은 간독성 사례' — easl-nutrition 본문에 green tea·hepatotox 0건. 출처가 아니다.",
+     "source_quote": "",
+     "source_loc": "PMC6657019 전문 검색",
+     "fix": "EFSA 2018 녹차 카테킨 안전성 의견(EFSA J 2018;16:5239, 800 mg/일 이상 간수치 상승) 또는 NIH LiverTox 'Green Tea' 로 교체."
+    },
+    {
+     "type": "other",
+     "detail": "보르테조밉: Golden 2009 초록과 맞다(EGCG 가 보론산과 직접 반응, 시험관·생체 내). 다만 동물·세포 실험이며 사람 자료 아님 — 문장의 '실험적으로' 표현은 적절. references 의 kind 'review' 는 틀림(원저 실험 연구).",
+     "source_quote": "EGCG directly reacted with BZM and blocked its proteasome inhibitory function",
+     "source_loc": "PMID 19190249 초록(Blood, 구독제)",
+     "fix": "references kind 를 'preclinical'/'study' 로."
+    }
+   ],
+   "refs_fulltext": {
+    "golden2009": "abstract-only (Blood, OA 아님)",
+    "easl-nutrition": "fulltext-PMC6657019"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:밀크씨슬(실리마린)",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "유일한 출처 easl-nutrition 에 silymarin·milk thistle 0건. '간수치 개선 근거 제한적' 과 '대사효소 영향 적어 병용 위험 낮음' 모두 출처 없음.",
+     "source_quote": "",
+     "source_loc": "PMC6657019 전문 검색",
+     "fix": "NIH NCCIH/LiverTox 'Milk Thistle' 또는 실리마린-CYP 상호작용 체계적 고찰로 교체. 교체 전 원문 확인."
+    }
+   ],
+   "refs_fulltext": {
+    "easl-nutrition": "fulltext-PMC6657019"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:헛개나무추출물",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "easl-nutrition 에 헛개(Hovenia) 언급 없음. PubMed 에서 'Hovenia dulcis hepatotoxicity / liver injury' 로 찾았을 때 간독성 증례는 나오지 않고 간 보호 전임상 연구만 나왔다 — '간독성 사례 보고가 있습니다' 를 확인하지 못함(국내 학술지 증례가 있을 수는 있음, 미확인).",
+     "source_quote": "",
+     "source_loc": "PMC6657019 · PubMed 검색 2026-10-14",
+     "fix": "증례 출처를 찾지 못하면 '간 건강을 표방하지만 사람에서 효과를 확인한 연구가 부족합니다' 로 줄이고 간독성 문장 삭제."
+    }
+   ],
+   "refs_fulltext": {
+    "easl-nutrition": "fulltext-PMC6657019"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:칼슘",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "number",
+     "detail": "'하루 1,000~1,200 mg 을 식품과 합쳐 맞추는 것이 기준' 은 KDRI 2020 과 다르다. KDRI 권장섭취량: 남 19~49세 800, 50~64세 750, 65세 이상 700 / 여 19~49세 700, 50세 이상 800 mg. 상한 2,500(19~49)·2,000(50세 이상). 1,000~1,200 은 미국 기준.",
+     "source_quote": "",
+     "source_loc": "KDRI 2020 무기질 칼슘 표 15(한국인의 1일 칼슘 섭취기준)",
+     "fix": "'2020 한국인 영양소 섭취기준의 권장량은 성인 하루 700~800 mg 이고, 보충제를 포함한 상한은 50세 이상 2,000 mg 입니다.'"
+    },
+    {
+     "type": "claim",
+     "detail": "byCancer.colorectal 'WCRF probable' 은 WCRF 2018 대장암 보고서와 맞지만(유제품·칼슘보충제 probable decreases risk) wcrf2018 이 refIds 에 없다. prostate 의 '1,500 mg' 은 WCRF 2018 에 없는 수치(2007 보고서 표현으로 추정, 2018 은 limited-suggestive). breast(AI 골소실·칼슘/비타민D 표준관리)·위절제후·신기능저하 문장도 출처 없음.",
+     "source_quote": "taking calcium supplements decreases the risk of colorectal cancer",
+     "source_loc": "WCRF CUP Colorectal 2018 요약 매트릭스",
+     "fix": "refIds 에 wcrf2018·wcrf-prostate 추가, '1,500 mg' 은 출처 확인 전 삭제."
+    },
+    {
+     "type": "scope",
+     "detail": "프로바이오틱스 제품의 기능성 문구 '…칼슘 흡수·배변활동 원활에 도움' 에서 '칼슘' 이 잡혀 유산균 제품 최소 146 개가 칼슘 규칙(대장암·유방암 '권장')을 받는다.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "CLAIM_PHRASES 에 '칼슘흡수' 추가 또는 '칼슘흡수에도움' 제외."
+    }
+   ],
+   "refs_fulltext": {
+    "kdri2020": "fulltext-url (kns.or.kr 2020 KDRIs 개정본 zip PDF)"
+   },
+   "verified_numbers": {
+    "1,000~1,200 mg": "unverified — kdri2020 와 불일치 | 남자 19-29 650 800 2,500 … 여자 19-29 550 700 2,500 | KDRI 2020 무기질 표 15",
+    "1,500 mg": "unverified (WCRF 2018 에서 확인 못 함)"
+   }
+  },
+  {
+   "id": "ingr:비타민 D",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "other",
+     "detail": "상한 100 µg(4,000 IU) 는 KDRI 2020 과 맞다.",
+     "source_quote": "",
+     "source_loc": "KDRI 2020 비타민 D 표 12",
+     "fix": ""
+    },
+    {
+     "type": "counter",
+     "detail": "'초고용량 복용은 임상시험에서 확인되지 않았습니다' — SUNSHINE(2상, 139명)은 다변량 PFS 위험비 0.64 로 유의한 신호를 보였다(1차 분석의 중앙 PFS 차이는 유의하지 않음). VITAL 은 일반인 예방으로 암 발생 감소 없음. '확인되지 않았다' 는 맞지만 SUNSHINE 의 양성 신호를 빼면 근거를 낮춘다.",
+     "source_quote": "a multivariable hazard ratio of 0.64 for progression-free survival or death that was statistically significant",
+     "source_loc": "PMC6459117 Key Points",
+     "fix": "'진행성 대장암 2상 연구에서 고용량군의 무진행 생존이 좋아지는 신호가 있었으나, 확증 연구로 확인되지는 않았습니다.'"
+    },
+    {
+     "type": "claim",
+     "detail": "'암 환자에서 결핍이 매우 흔하다' 의 출처가 refIds 에 없다(KDRI 는 일반인 기준).",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "근거 문헌 추가 또는 '흔합니다' 로 완화."
+    }
+   ],
+   "refs_fulltext": {
+    "kdri2020": "fulltext-url (kns.or.kr 2020 KDRIs 개정본 zip PDF)",
+    "ng2019": "fulltext-PMC6459117",
+    "manson2019": "fulltext-PMC6425757"
+   },
+   "verified_numbers": {
+    "100 µg(4,000 IU)": "kdri2020 | 성인의 비타민 D 상한섭취량은 250 μg/일÷2.5＝100 μg/일(4,000 IU/일)로 설정 | KDRI 2020 비타민 D 3-2 성인기(한국어 원문)"
+   }
+  },
+  {
+   "id": "ingr:철분",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "other",
+     "detail": "base·변비 문장은 KDRI 2020 철 장(과량 철 보충 시 변비·구역 흔함)과 맞다.",
+     "source_quote": "",
+     "source_loc": "KDRI 2020 무기질 철",
+     "fix": ""
+    },
+    {
+     "type": "claim",
+     "detail": "위절제후 '수술 후 수년에 걸쳐 결핍' 은 KDRI 에 없다(KDRI 의 위절제 언급은 비타민 B12 뿐).",
+     "source_quote": "",
+     "source_loc": "KDRI 2020 전문 검색",
+     "fix": "위절제 후 철결핍 코호트·지침 출처 추가."
+    },
+    {
+     "type": "scope",
+     "detail": "match '철(' 는 5개 제품에서만 걸림, 오작동 없음.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "kdri2020": "fulltext-url (kns.or.kr 2020 KDRIs 개정본 zip PDF)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:아연",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "'무작위배정 연구 결과가 일관되지 않습니다' 는 맞지만 근거는 espen2021 이 아니라 ESPEN 2017 전체판(espen-cachexia)의 미각 항목이다. ESPEN 2021 본문에 zinc·taste 관련 아연 언급 0건. '구리 결핍' 문장은 두 출처 모두에 없다.",
+     "source_quote": "a recent RCT in 58 cancer patients undergoing chemotherapy comparing zinc ... could not detect differences",
+     "source_loc": "ESPEN 2017 (Arends) 'Other modulators of taste'",
+     "fix": "refIds 를 espen-cachexia 로 교체, 구리 결핍은 KDRI 아연 상한 근거(구리 흡수 저해) 인용."
+    },
+    {
+     "type": "scope",
+     "detail": "byCondition '오심·구토' 에 prefer 를 걸었지만 문장은 '미각 변화' 이야기 — 조건이 맞지 않는다. 아연 낱말 제품 4,307 개(대부분 복합제).",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "판단 필요: 미각 변화 조건이 없으면 이 byCondition 제거."
+    },
+    {
+     "type": "counter",
+     "detail": "방사선 유발 미각장애 메타분석(3편)은 발생을 줄였으나(RR 0.72) 회복은 앞당기지 못했다.",
+     "source_quote": "zinc-based therapy reduces the incidence of RID but has a minimal effect on ongoing RID",
+     "source_loc": "PMID 32642950 초록",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "espen2021": "fulltext-url (espen.org ESPEN-practical-guideline-clinical-nutrition-in-cancer.pdf)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:마그네슘",
+   "verdict": "ok",
+   "problems": [
+    {
+     "type": "other",
+     "detail": "base(과량은 설사)는 KDRI 2020 마그네슘 장과 맞다. 시스플라틴 저마그네슘혈증·신기능저하 문장은 일반 약리 지식이나 refIds 에 출처 없음(경미).",
+     "source_quote": "",
+     "source_loc": "KDRI 2020 마그네슘 3-2",
+     "fix": "선택: 시스플라틴 허가사항 추가."
+    }
+   ],
+   "refs_fulltext": {
+    "kdri2020": "fulltext-url (kns.or.kr 2020 KDRIs 개정본 zip PDF)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:프로바이오틱스(유산균)",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "유일한 출처 fda-foodsafety(FDA 식품안전 소책자)에 probiotic·Lactobacillus·bacteremia 0건 — 이 규칙의 어떤 문장도 이 출처에서 나오지 않는다.",
+     "source_quote": "",
+     "source_loc": "fda.gov/media/83744 PDF 전문 검색",
+     "fix": "espen2021 권고 31 로 교체(방사선 설사 근거 불충분 + 면역저하 환자 안전성 문제)."
+    },
+    {
+     "type": "other",
+     "detail": "대체 출처 ESPEN 2021 권고 31 은 base·호중구감소증 문장을 함께 뒷받침한다.",
+     "source_quote": "There are insufficient consistent clinical data to recommend probiotics to reduce radiation-induced diarrhea.",
+     "source_loc": "ESPEN 2021 권고 31 (C2-5)",
+     "fix": ""
+    },
+    {
+     "type": "counter",
+     "detail": "MASCC/ISOO 2019 위장관 점막염 지침은 골반 방사선(항암)치료 설사 예방에 Lactobacillus 포함 프로바이오틱스를 '제안'으로 유지 — '결과가 엇갈립니다' 와 함께 적을 만하다.",
+     "source_quote": "the evidence continues to support use of probiotics containing Lactobacillus spp. for prevention of chemoradiotherapy and radiotherapy-induced diarrhea",
+     "source_loc": "PMID 31286233 초록",
+     "fix": "'지침마다 판단이 다릅니다(MASCC 는 제안, ESPEN 은 근거 불충분)'."
+    }
+   ],
+   "refs_fulltext": {
+    "fda-foodsafety": "fulltext-url (fda.gov PDF)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:단백질 보충",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "other",
+     "detail": "1.0~1.5 g/kg 는 ESPEN 2021 권고 4 와 맞다.",
+     "source_quote": "protein intake should be above 1 g/kg/day and, if possible up to 1.5 g/kg/day",
+     "source_loc": "ESPEN 2021 권고 4 (B2-2)",
+     "fix": ""
+    },
+    {
+     "type": "scope",
+     "detail": "match '단백질' 이 비타민 B군·비오틴·크롬 기능성 문구 변형('지방, 탄수화물, 단백질 대사와…' 의 번호·띄어쓰기 변형, '탄수화물, 지방, 단백질 대사에 관여')에서 걸려, 이름에 단백질이 없는 제품 1,294 개가 '단백질 보충—권장' 항목을 받는다(CLAIM_PHRASES 가 변형을 못 걷어냄).",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "CLAIM_PHRASES 에 '탄수화물,지방,단백질대사에관여' 와 번호 붙은 변형 추가, 또는 '단백질' 을 이름에서만 찾기."
+    }
+   ],
+   "refs_fulltext": {
+    "espen2021": "fulltext-url (espen.org ESPEN-practical-guideline-clinical-nutrition-in-cancer.pdf)",
+    "espen-cachexia": "fulltext-url (espen.org ESPEN_guidelines_on_nutrition_in_cancer_patients.pdf)"
+   },
+   "verified_numbers": {
+    "1.0~1.5 g": "espen2021 | protein intake should be above 1 g/kg/day and, if possible up to 1.5 g/kg/day | ESPEN 2021 권고 4"
+   }
+  },
+  {
+   "id": "ingr:루테인·지아잔틴",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "kdri2020 은 루테인 섭취기준을 두지 않는다(본문 언급 4회는 비타민 A 장의 카로티노이드 흡수 경쟁 설명). '암 치료와 직접 상호작용 알려져 있지 않음' 의 출처가 되지 않는다. evidence G 도 맞지 않음.",
+     "source_quote": "",
+     "source_loc": "KDRI 2020 전문 검색",
+     "fix": "refIds 비우고 등급 C('알려진 바 없음'은 근거 부재 진술), 또는 NIH ODS 등 기관 자료."
+    }
+   ],
+   "refs_fulltext": {
+    "kdri2020": "fulltext-url (kns.or.kr 2020 KDRIs 개정본 zip PDF)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:글루코사민·MSM",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "kdri2020 에 글루코사민·MSM·콘드로이친 0건 — 출처가 아니다.",
+     "source_quote": "",
+     "source_loc": "KDRI 2020 전문 검색",
+     "fix": "출처 교체."
+    },
+    {
+     "type": "counter",
+     "detail": "'혈당을 약간 올릴 수 있다' — 비당뇨 골관절염 환자 RCT(90일)에서 공복혈당·당부하·인슐린 변화 없음. 반면 빠진 위험: 글루코사민(±콘드로이친)과 와파린 병용 시 INR 상승 증례·MedWatch 21건, EFSA 2011 성명.",
+     "source_quote": "Oral glucosamine with routine dosage was safe in our non-diabetic patients with osteoarthritis and had no significant effect on glucose metabolism",
+     "source_loc": "PMID 30375553 초록 · PMID 18363538 초록(와파린)",
+     "fix": "당뇨 caution 은 판단 필요(근거 약함). byMedication.warfarin caution 추가 검토: '와파린과 함께 드시면 INR 이 오른 보고가 있습니다'."
+    }
+   ],
+   "refs_fulltext": {
+    "kdri2020": "fulltext-url (kns.or.kr 2020 KDRIs 개정본 zip PDF)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:콜라겐",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "espen2021 에 collagen 0건 — 출처가 아니다.",
+     "source_quote": "",
+     "source_loc": "ESPEN 2021 PDF 전문 검색",
+     "fix": "출처 교체 또는 비움."
+    },
+    {
+     "type": "counter",
+     "detail": "'먹은 콜라겐이 그대로 가지 않고 아미노산으로 분해' 는 절반만 맞다 — 저분자 콜라겐 펩타이드는 일부 디·트리펩타이드(Pro-Hyp)로 흡수되며, 피부 보습 RCT 메타분석이 있고 식약처가 '피부 보습' 기능성을 인정했다(제품 DB 문구). '같은 값이면 단백질 보충이 목적에 맞다' 는 영양 관점에서 타당(콜라겐은 트립토판이 없는 불완전 단백질).",
+     "source_quote": "",
+     "source_loc": "PMID 41924746(2026 메타분석, 초록 미열람) · 제품 DB '저분자콜라겐펩타이드 피부보습'",
+     "fix": "'피부 보습 효과가 일부 보고되지만, 단백질 보충 목적이라면 일반 단백질이 낫습니다.'"
+    }
+   ],
+   "refs_fulltext": {
+    "espen2021": "fulltext-url (espen.org ESPEN-practical-guideline-clinical-nutrition-in-cancer.pdf)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:프로폴리스",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "mascc-mucositis(Elad 2020) 본문에 propolis 0건 — '천연물·생약은 지침을 만들기에 근거 불충분(보충표 2)' 이라는 일반 문장만 있다. '근거 제한적' 방향은 맞지만 프로폴리스를 직접 다룬 것은 보충표/Yarom 2020 쪽. '벌 산물 알레르기' 는 출처 없음.",
+     "source_quote": "New evidence was identified for several natural remedies and herbs. However, it was insufficient to form a guideline",
+     "source_loc": "PMC7540329 Results",
+     "fix": "Yarom 2020(Support Care Cancer, MASCC 천연물 체계적 고찰)으로 교체·추가 후 원문 확인."
+    }
+   ],
+   "refs_fulltext": {
+    "mascc-mucositis": "fulltext-PMC7540329"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:클로렐라·스피루리나",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "warfarin-vitk(ACCP 2012)는 비타민 K 섭취 일관성을 다루므로 '비타민 K 가 와파린에 영향' 원리에는 맞지만 클로렐라를 직접 다루지는 않는다(본문 미확인). 클로렐라-와파린 증례는 일본 보고(Ohkawa 1995, PMID 8777808). '요오드가 많아 갑상선 검사·치료 문제' 는 출처 없음 — 스피루리나·클로렐라의 요오드 함량은 해조류와 달리 낮은 편이라는 자료도 있어 확인 필요(미확인).",
+     "source_quote": "",
+     "source_loc": "PMID 22315259 초록 · PMID 8777808 초록",
+     "fix": "와파린 문장 유지 + 증례 출처 추가. 요오드 문장은 출처 확인 전 삭제."
+    },
+    {
+     "type": "scope",
+     "detail": "클로렐라(비타민 K 높음)와 스피루리나는 비타민 K 함량이 다른데 한 규칙으로 묶임.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "판단 필요."
+    }
+   ],
+   "refs_fulltext": {
+    "warfarin-vitk": "abstract-only (PMC3278055 이 있으나 이번 점검에서 PMC·Chest 모두 접근 차단되어 본문 미확인)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:쏘팔메토",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "유일한 출처 wcrf-prostate 는 '유제품·칼슘 고섭취' 에 관한 문헌(references 주석 그대로)이며 쏘팔메토를 다루지 않는다 — 인용-주장 완전 불일치.",
+     "source_quote": "",
+     "source_loc": "references.json wcrf-prostate 주석",
+     "fix": "출처 교체."
+    },
+    {
+     "type": "counter",
+     "detail": "핵심 주장 'PSA 를 낮출 수 있어 재발 추적을 방해' 에 반대되는 RCT: CAMUS(369명, 72주, 최대 960 mg)에서 PSA 변화는 위약과 같았다.",
+     "source_quote": "Saw palmetto extract does not affect serum prostate specific antigen more than placebo, even at relatively high doses.",
+     "source_loc": "PMID 23253958 초록 · PMC3979451",
+     "fix": "판단 필요(수준): 전립선암 avoid 근거가 약해짐. 문장은 '무작위 연구에서 PSA 를 낮추지는 않았지만, 전립선 증상 약과 겹칠 수 있어 복용 중이면 알려 주세요' 로."
+    }
+   ],
+   "refs_fulltext": {
+    "wcrf-prostate": "not-found (url 없음, 쏘팔메토와 무관한 문헌)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:커큐민(강황)",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "number",
+     "detail": "Hussaarts 2019 원문과 대조: 16명(유방암 환자, 평가 가능 16), 커큐민 1,200 mg 하루 3번(3.6 g), 엔독시펜 AUC −7.7 %(95 % CI −15.4~0.7, p=0.07, 유의하지 않음), 피페린 병용 −12.4 %(p=0.02). 앱 문장은 7.7 % 를 '낮아졌고' 로만 적어 유의하지 않다는 점이 빠졌다.",
+     "source_quote": "The endoxifen AUC 0–24h decreased with 7.7% (95%CI: −15.4 to 0.7%; p = 0.07)",
+     "source_loc": "PMC6468355 Abstract",
+     "fix": "'…엔독시펜 농도가 7.7 % 낮아지는 경향(통계적으로 유의하지 않음)이었고, 피페린을 더한 제제에서는 12.4 % 유의하게 낮아졌습니다.'"
+    },
+    {
+     "type": "claim",
+     "detail": "base '고용량은 철 흡수를 방해' 는 espen2021(curcumin 0건)·hussaarts2019 어디에도 없다. '사람에서 항암 효과 확립 안 됨' 도 ESPEN 2021 에 커큐민 언급이 없어 출처가 아니다.",
+     "source_quote": "",
+     "source_loc": "ESPEN 2021 PDF 검색 · PMC6468355",
+     "fix": "철 문장 삭제 또는 출처 추가(커큐민-철 흡수 연구)."
+    },
+    {
+     "type": "scope",
+     "detail": "match '강황' 82 제품 — 대부분 강황 추출물 기능성 제품이라 범위 문제는 작음.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "espen2021": "fulltext-url (espen.org ESPEN-practical-guideline-clinical-nutrition-in-cancer.pdf)",
+    "hussaarts2019": "fulltext-PMC6468355"
+   },
+   "verified_numbers": {
+    "16명": "hussaarts2019 | resulting in 16 evaluable patients | PMC6468355 2.1 Patient Characteristics",
+    "3.6 g": "hussaarts2019 | curcumin (1200 mg three times daily (t.i.d.)) +/− piperine (10 mg t.i.d.) | PMC6468355 Abstract",
+    "7.7 %": "hussaarts2019 | decreased with 7.7% (95%CI: −15.4 to 0.7%; p = 0.07) | PMC6468355 Abstract",
+    "12.4 %": "hussaarts2019 | 12.4% (95%CI: −21.9 to −1.9%; p = 0.02) with curcumin and piperine | PMC6468355 Abstract"
+   }
+  },
+  {
+   "id": "ingr:세인트존스워트(성요한초)",
+   "verdict": "ok",
+   "problems": [
+    {
+     "type": "other",
+     "detail": "이리노테칸 42 %(Mathijssen 초록), 타목시펜 허가사항(강한 CYP3A4 유도제 병용 금지·리팜핀 AUC −86 %), 엑스메스탄 허가사항(세인트존스워트를 이름으로 듦), 자이티가 허가사항(강한 CYP3A4 유도제 회피)을 확인. 엑스탄디·얼리다·뉴베카 허가사항과 Liverpool 분류는 이번에 재확인하지 못함(기존 주석 신뢰).",
+     "source_quote": "The plasma levels of the active metabolite SN-38 decreased by 42% (95% confidence interval [CI] = 14% to 70%)",
+     "source_loc": "PMID 12189228 초록(JNCI, 구독제)",
+     "fix": ""
+    },
+    {
+     "type": "other",
+     "detail": "참고: 엑스메스탄 허가사항은 강한 유도제와 함께 쓸 때 '피하라'가 아니라 용량 조정(50 mg)을 권한다. 앱 문장('농도를 크게 낮출 수 있다고 적습니다')은 정확하나 판정 avoid 는 허가사항보다 강함 — 판정 변경 요구 아님.",
+     "source_quote": "Dose modification is recommended for patients who are also receiving a strong CYP 3A4 inducer",
+     "source_loc": "DailyMed AROMASIN 2.2/7절",
+     "fix": ""
+    },
+    {
+     "type": "scope",
+     "detail": "45,618 제품 중 걸리는 제품 0개(국내 건강기능식품 원료 아님) — 수입 보충제용 규칙으로 범위 문제 없음.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "sjw-interaction": "abstract-only",
+    "cdi-liverpool": "not-found (이번에 미열람)",
+    "fda-label-tamoxifen": "fulltext-url (DailyMed)",
+    "fda-label-ai": "fulltext-url (DailyMed AROMASIN)",
+    "fda-label-arpi": "fulltext-url (DailyMed ZYTIGA 만 확인)"
+   },
+   "verified_numbers": {
+    "42 %": "sjw-interaction | plasma levels of the active metabolite SN-38 decreased by 42% | PMID 12189228 abstract",
+    "86 %": "fda-label-tamoxifen | Rifampin, a cytochrome P450 3A4 inducer, reduced tamoxifen AUC and Cmax by 86% and 55% | DailyMed SOLTAMOX 12.3"
+   }
+  },
+  {
+   "id": "ingr:알로에",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "espen2021 에 aloe 0건 — 출처가 아니다.",
+     "source_quote": "",
+     "source_loc": "ESPEN 2021 PDF 전문 검색",
+     "fix": "출처 교체(예: 식약처 알로에 전잎 기능성·주의사항 고시, FDA 2002 알로에 완하제 OTC 제외 결정)."
+    },
+    {
+     "type": "scope",
+     "detail": "'설사 유발' 은 안트라퀴논이 든 알로에 전잎(라텍스)에 해당. match '알로에' 263 제품 중 179 개는 알로에 겔(기능성: 피부건강·장 건강·면역력) 이고 전잎은 25 개뿐. 겔 제품까지 '설사 시 피하세요' 가 된다.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "match 를 '알로에전잎','알로에 전잎' 으로 좁히고, 겔은 별도(info) 처리."
+    }
+   ],
+   "refs_fulltext": {
+    "espen2021": "fulltext-url (espen.org ESPEN-practical-guideline-clinical-nutrition-in-cancer.pdf)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "ingr:체지방 감소 표방 원료",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "other",
+     "detail": "asco2022 는 치료 중 의도적 체중 감량에 대해 '권하지도 말리지도 않을 근거 부족'(권고 3)이며 건강기능식품은 범위에서 제외한다고 명시. '치료 중 체중 감량이 목표가 아니다' 와 방향은 맞으나 이 규칙(보충제)의 직접 근거는 아니다.",
+     "source_quote": "There is currently insufficient evidence to recommend for or against intentional weight loss or prevention of weight gain interventions during active treatment",
+     "source_loc": "ASCO 2022 권고 3 (ascopubs full text)",
+     "fix": ""
+    },
+    {
+     "type": "claim",
+     "detail": "'근육량은 항암제 용량 유지와 치료 완주율에 직접 연결' 은 두 출처에 없다(관찰 연구 수준의 연관). '치료 후 체중 관리는 식사와 운동' 은 ESPEN 2021 생존자 해설과 맞음.",
+     "source_quote": "Survivors who are overweight or obese should strive to reduce weight",
+     "source_loc": "ESPEN 2021 생존자 해설",
+     "fix": "'직접 연결' → '근육이 적으면 항암제 독성이 커지는 경향이 관찰됩니다' 로 완화하고 출처(Prado 2009 등) 추가."
+    },
+    {
+     "type": "scope",
+     "detail": "'체지방' 은 기능성 문구로 잡혀 4,161 제품. 녹차추출물·가르시니아 규칙과 중복은 의도된 것으로 보임. '슬림' 284 개는 모두 체지방 문구와 함께 걸려 단독 오작동은 없음.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "espen2021": "fulltext-url (espen.org ESPEN-practical-guideline-clinical-nutrition-in-cancer.pdf)",
+    "asco2022": "fulltext-url (ascopubs.org full text)"
+   },
+   "verified_numbers": {}
+  }
+ ],
+ "notes": [
+  "화면(ingredientVerdict.judge)은 byCancer·byMedication·byCondition·duringTreatment 이유 문장을 보여 줄 때도 규칙 단위 refIds·evidence 를 그대로 붙인다. 그래서 조건별 문장에 든 숫자(SELECT·Bairati 등)가 그 문장과 무관한 출처(KDRI 등)와 함께 표시된다 — 구조적 문제.",
+  "범위 점검은 public/data/supplements-extended.json 45,618 제품에 findIngredients 와 같은 방식(공백 제거·CLAIM_PHRASES 제거 후 부분 문자열)을 파이썬으로 재현해 셈.",
+  "ESPEN 2021/2017 은 espen.org 공개 PDF, KDRI 2020 은 한국영양학회 공개 zip, EASL 영양 지침은 PMC6657019, ACS 2022·ASCO 2022 는 출판사 전문 페이지로 확인. ACCP 2012(Holbrook)는 PMC 에 있으나 접근 차단으로 초록만 확인."
+ ]
+}

@@ -1,0 +1,1007 @@
+{
+ "batch": "F-references",
+ "reviewed": 90,
+ "refs": [
+  {
+   "id": "wcrf2018",
+   "verdict": "warn",
+   "biblio": "ok (WCRF/AICR Third Expert Report 2018)",
+   "url": "url 이 https://www.wcrf.org/research-policy/ 로 리디렉트됨 — 보고서 자체를 가리키지 않음. 공개 PDF 확인: https://www.wcrf.org/wp-content/uploads/2024/11/Summary-of-Third-Expert-Report-2018.pdf (200, PDF)",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "https://www.wcrf.org/wp-content/uploads/2024/11/Summary-of-Third-Expert-Report-2018.pdf — 3차 전문가 보고서 요약 PDF(공개)"
+   ],
+   "notes": "24개 항목에서 인용. url 을 보고서 PDF 또는 CUP 페이지로 교체 권장."
+  },
+  {
+   "id": "espen2021",
+   "verdict": "ok",
+   "biblio": "ok — PMID 33946039, Clin Nutr 2021;40(5):2898-2913 일치",
+   "url": "ok (DOI → 같은 제목)",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "Unpaywall: 저장소 사본(publishedVersion) Bond Univ./Amsterdam UMC/WUR — 출판사판은 구독. espen.org PDF 는 봇 차단으로 직접 열람 확인 못함"
+   ],
+   "notes": "PMC 없음. '전부 원문 대조'를 유지하려면 저장소 PDF 링크를 url 로 쓰는 편이 안전."
+  },
+  {
+   "id": "asco2022",
+   "verdict": "warn",
+   "biblio": "ok — PMID 35576506, J Clin Oncol 2022;40(22):2491-2507",
+   "url": "ok (DOI 해석 제목 일치)",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "Unpaywall: Utrecht 저장소 submittedVersion(https://dspace.library.uu.nl/handle/1874/446361). ascopubs 는 403(봇 차단)으로 무료 여부 직접 확인 못함"
+   ],
+   "notes": "asco-exercise2022 와 같은 논문(중복 출처). 하나로 합칠 것."
+  },
+  {
+   "id": "acs2022",
+   "verdict": "ok",
+   "biblio": "ok — PMID 35294043, CA Cancer J Clin 2022;72(3):230-262",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "Wiley 출판사 무료(gold OA) PDF"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "hadji2017aibl",
+   "verdict": "ok",
+   "biblio": "ok — PMID 28413771, J Bone Oncol 2017;7:1-12. 괄호 주석 확인: 'IOF recommends a daily intake of 1200 mg calcium and 800–1000 IU vitamin D'·'Bone-directed therapy ... T-score<−2.0' 원문 일치",
+   "url": "ok",
+   "kind": "ok (학회 공동 입장문)",
+   "fulltext": "fulltext-PMC5384888",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "oic-consensus2021",
+   "verdict": "warn",
+   "biblio": "ok — PMID 33388041, BMC Palliat Care 2021;20:1. 46인·91% 원문 일치(67문항 중 91% 합의)",
+   "url": "ok",
+   "kind": "제안: 스페인 단일국가 전문가 46인 Delphi 합의(ActEIO 프로젝트)로 주요 학회·기관 지침이 아님 → guideline 대신 review(전문가 합의)로 두고 등급 G 사용 재검토",
+   "fulltext": "fulltext-PMC7778791",
+   "alt_fulltext": [],
+   "notes": "첫 저자 표기: PubMed 는 'Sarrió RG'(Gironés Sarrió R 과 동일인)."
+  },
+  {
+   "id": "radiation-caries-review",
+   "verdict": "ok",
+   "biblio": "ok — PMID 27390489, Natl J Maxillofac Surg 2015;6(2):160-6. 주석(3개월 이내·빠르게 진행·불소 자가도포·발치 예외) 원문 일치",
+   "url": "ok",
+   "kind": "ok (제목은 'systematic review'이나 서술 종설)",
+   "fulltext": "fulltext-PMC4922225",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "acr-giop",
+   "verdict": "ok",
+   "biblio": "ok — PMID 37845798, Arthritis Rheumatol 2023;75(12):2088-2102",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "escholarship.org 제출본 PDF(https://escholarship.org/content/qt2b89s5xw/qt2b89s5xw.pdf) — 최종 출판본 아님"
+   ],
+   "notes": "supplementAdvice.ts 에서만 사용(규칙 refIds 에는 없음)."
+  },
+  {
+   "id": "fda-ppi-mg",
+   "verdict": "warn",
+   "biblio": "ok (2011-03-02 FDA Drug Safety Communication, 웹검색으로 존재 확인)",
+   "url": "curl·WebFetch 모두 404(FDA 봇 차단 페이지로 리디렉트) — 실제 링크 생존 여부 확인 못함. 옛 주소 www.fda.gov/Drugs/DrugSafety/ucm245011.htm 이 검색됨",
+   "kind": "ok (기관 안전성 공지)",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [],
+   "notes": "내용(1년 이상 장기 사용 시 저마그네슘혈증)은 2차 출처로만 확인. 브라우저로 링크 재확인 필요."
+  },
+  {
+   "id": "lam2013ppi-b12",
+   "verdict": "warn",
+   "biblio": "ok — PMID 24327038, JAMA 2013;310(22):2435-42",
+   "url": "ok",
+   "kind": "제안: 실제 설계는 인구기반 환자-대조군 연구(cohort 아님). kind 체계에 case-control 이 없으므로 cohort 유지 시 notes 에 '환자-대조군' 명시",
+   "fulltext": "abstract-only",
+   "alt_fulltext": [
+    "PMC6054240 — Miller JW. PPI·H2RA·메트포르민과 B12 결핍 임상 의미 종설(Adv Nutr 2018), Lam 2013 결과 포함"
+   ],
+   "notes": "Unpaywall closed. supplementAdvice.ts 에서 사용."
+  },
+  {
+   "id": "nice-refeeding",
+   "verdict": "ok",
+   "biblio": "ok — NICE CG32, 2006 발행·2017-08-04 최종 개정(페이지 확인)",
+   "url": "ok (200, 제목 일치)",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "nightingale2020stoma",
+   "verdict": "warn",
+   "biblio": "저자·제목·학술지·권호·쪽 ok(Frontline Gastroenterol 2022;13(2):140-151, PMID 35300464). 단 year 필드 2020 ≠ 인용 연도 2022",
+   "url": "ok",
+   "kind": "ok (서술 종설)",
+   "fulltext": "fulltext-PMC8862462",
+   "alt_fulltext": [],
+   "notes": "year 필드를 2022 로 맞출 것(DOI 는 2018 투고번호라 혼동 가능)."
+  },
+  {
+   "id": "lyckholm2012zinc",
+   "verdict": "ok",
+   "biblio": "ok — PMID 22764846",
+   "url": "ok",
+   "kind": "ok (이중맹검 RCT, 군당 29명)",
+   "fulltext": "fulltext-PMC4042409",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "kdoqi2020",
+   "verdict": "ok",
+   "biblio": "ok — PMID 32829751, Am J Kidney Dis 2020;76(3 Suppl 1):S1-S107",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "Griffith Univ. 저장소 제출본(http://hdl.handle.net/10072/397665). ajkd.org 무료 여부는 직접 확인 못함"
+   ],
+   "notes": "nutrition.ts 에서 사용."
+  },
+  {
+   "id": "kdca-bone",
+   "verdict": "error",
+   "biblio": "기관 자료이나 2023 연도·보도자료 원문 확인 불가",
+   "url": "url 이 404 '페이지를 찾을 수 없습니다'(curl·WebFetch 모두). 링크 깨짐",
+   "kind": "ok",
+   "fulltext": "not-found",
+   "alt_fulltext": [
+    "보건복지부·한국영양학회 2020(또는 2025) 한국인 영양소 섭취기준 원문 — 칼슘 권장섭취량·비타민 D 충분섭취량의 1차 출처"
+   ],
+   "notes": "인용한 수치(칼슘 700~800 mg, 비타민 D 10~15 µg)는 2020 KDRI 성인 값과 일치하나 '질병관리청 보도자료'라는 출처 자체를 확인 못함. 출처를 KDRI 로 바꾸거나 살아 있는 KDCA/국가건강정보포털 주소로 교체."
+  },
+  {
+   "id": "kdri2020",
+   "verdict": "warn",
+   "biblio": "ok — 2020 KDRIs(2020-12-22 발표, 4차 정오표) 한국영양학회 자료실 확인",
+   "url": "ok (200, 원문 zip 공개)",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [],
+   "notes": "보건복지부가 2025-12-31 '2025 한국인 영양소 섭취기준'을 개정 배포함(탄수화물 50~65%, 단백질 10~20% 등). 앱이 2020판을 쓰는 것이 최신이 아님 — 칼슘·비타민 D·나트륨 등 앱이 쓰는 값이 2025판에서 바뀌었는지 대조 필요(판단 필요). 4차 정오표(에너지·판토텐산·칼슘 수정)를 반영했는지도 확인."
+  },
+  {
+   "id": "knhanes",
+   "verdict": "warn",
+   "biblio": "나트륨 3,255 mg(2018) 출처 확인 못함 — 공개 보도(식약처)는 2018년 3,274 mg, 2019년 3,289 mg, 2022년 3,074 mg, 2023년 3,136 mg. year 필드 2023 과 인용 자료 연도(2018) 불일치",
+   "url": "url 필드 없음",
+   "kind": "ok",
+   "fulltext": "not-found",
+   "alt_fulltext": [
+    "질병관리청 국민건강영양조사 통계(knhanes.kdca.go.kr) — 연도별 나트륨 섭취량 통계표"
+   ],
+   "notes": "url 필드 없음 — 화면에서 원문으로 갈 수 없음. 수치 3,255 가 어느 통계표(연령 범위·가중치)인지 명시하거나 최신 연도 값으로 교체. 배수 계산(1.4배·2.2배)은 3,255 기준 산술은 맞음."
+  },
+  {
+   "id": "kfda-db",
+   "verdict": "warn",
+   "biblio": "ok (식약처 식품영양성분 DB)",
+   "url": "url 필드 없음",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "식품영양성분 데이터베이스 공개 누리집(식약처) — 정확한 현행 주소는 직접 확인 필요"
+   ],
+   "notes": "url 필드 없음 — 화면에서 원문으로 갈 수 없음. FoodDetail.tsx 에서 사용. 데이터 버전·추출 일자를 적어 둘 것."
+  },
+  {
+   "id": "rda-table",
+   "verdict": "error",
+   "biblio": "'국가표준식품성분표 제9개정판'과 year 2021 이 맞지 않음 — 제9개정판은 2016년, 2021년은 제10개정판(이후 DB 10.x 로 매년 갱신, 최신 10.4)",
+   "url": "url 필드 없음",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "농촌진흥청 국가표준식품성분 데이터베이스(농식품올바로) 공개"
+   ],
+   "notes": "url 필드 없음 — 화면에서 원문으로 갈 수 없음. 앱에 실제로 들어간 데이터의 판(9판/10판/DB 10.x)을 확인해 판·연도를 맞출 것."
+  },
+  {
+   "id": "iarc114",
+   "verdict": "ok",
+   "biblio": "ok (IARC Monographs Vol.114 적색육·가공육; Q&A PDF)",
+   "url": "ok (200, PDF)",
+   "kind": "ok (전문가 작업반 평가)",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [],
+   "notes": "url 은 Q&A 문서. 모노그래프 본문도 publications.iarc.who.int 에서 무료."
+  },
+  {
+   "id": "iarc100e",
+   "verdict": "ok",
+   "biblio": "ok — publications.iarc.who.int/122 = Vol.100E 'Personal Habits and Indoor Combustions'(2012), 무료 PDF 있음",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [],
+   "notes": "Group 1 부위 목록(구강·인두·후두·식도·간·대장·여성 유방)은 원 PDF 를 열어 문장 대조하지는 않음(지식상 일치, 미대조)."
+  },
+  {
+   "id": "iarc116",
+   "verdict": "warn",
+   "biblio": "ok — 내용 확인: 'very hot (above 65 °C) ... Group 2A' 'limited evidence', 커피 Group 3·1991년 2B 원문 일치",
+   "url": "url 이 보도자료(Press Release N°244, 2016-06-15)이지 Vol.116 모노그래프가 아님",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "IARC Monographs Vol.116 본문(publications.iarc.who.int, 무료) 또는 Loomis D, Lancet Oncol 2016 요약"
+   ],
+   "notes": "citation 을 '보도자료'로 고치거나 url 을 모노그래프로 교체."
+  },
+  {
+   "id": "iarc-aflatoxin",
+   "verdict": "warn",
+   "biblio": "ok — NBK304413 = IARC Vol.100F 'Chemical Agents and Related Occupations' 아플라톡신 장(2012), 검색으로 확인",
+   "url": "NCBI Bookshelf 가 봇 확인(reCAPTCHA) 화면을 돌려줘 본문 열람 못함",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "IARC 100F 전권 무료 PDF(publications.iarc.who.int)"
+   ],
+   "notes": "'B형 간염과 곱셈보다 더 크게 겹침'·'TP53 코돈 249' 문구는 원문 대조하지 못함 — 브라우저로 확인 필요."
+  },
+  {
+   "id": "shu2009",
+   "verdict": "ok",
+   "biblio": "ok — PMID 19996398, JAMA 2009;302(22):2437-43",
+   "url": "ok",
+   "kind": "ok (전향 코호트, 상하이 유방암 생존 연구)",
+   "fulltext": "fulltext-PMC2874068",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "nechuta2012",
+   "verdict": "warn",
+   "biblio": "제목이 잘림 — 원제 끝 'of US and Chinese women' 누락. 나머지 ok(PMID 22648714)",
+   "url": "ok",
+   "kind": "ok에 가까움 — 메타분석이 아니라 3개 코호트 개인자료 합동분석(ABCPP). meta 유지 가능하나 notes 에 'pooled analysis' 명시 권장",
+   "fulltext": "fulltext-PMC3374736",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "chi2013",
+   "verdict": "ok",
+   "biblio": "ok — PMID 23725149, APJCP 2013;14(4):2407-12",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "APJCP 출판사 무료(gold OA)"
+   ],
+   "notes": "PMC 없음. 저널 웹 원문은 공개."
+  },
+  {
+   "id": "bairati2005",
+   "verdict": "warn",
+   "biblio": "ok — PMID 16027437, J Clin Oncol 2005;23(24):5805-13",
+   "url": "url 필드 없음 (DOI 10.1200/JCO.2005.05.514)",
+   "kind": "ok",
+   "fulltext": "abstract-only",
+   "alt_fulltext": [
+    "PMC5736082 — Yasueda A 2016 Integr Cancer Ther, 항산화 보충제 병용 체계적 문헌고찰",
+    "meyer2008smoking 출처(Wiley 무료열람 bronze) — 같은 시험의 장기 결과"
+   ],
+   "notes": "url 필드 없음 — 화면에서 원문으로 갈 수 없음. Unpaywall closed."
+  },
+  {
+   "id": "meyer2008smoking",
+   "verdict": "ok",
+   "biblio": "ok — PMID 18059031. HR 2.41(1.25-4.64)·2.26(1.29-3.97)·3.38(1.11-10.34), 비흡연자 1 근처 — 초록 일치",
+   "url": "ok",
+   "kind": "ok (RCT 사후 상호작용 분석 — 하위군 분석임을 notes 에 적어 두면 좋음)",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "Wiley 출판사 무료열람(Unpaywall bronze) — 직접 열람은 확인 못함"
+   ],
+   "notes": "흡연×보충 상호작용은 사후 분석(2차) 결과."
+  },
+  {
+   "id": "bairati2005b",
+   "verdict": "warn",
+   "biblio": "ok — PMID 15812073, JNCI 2005;97(7):481-8. HR 2.88(1.56-5.31) 초록 일치. 단 베타카로틴은 156명 등록 후 중단되어 HR 2.88 은 '알파토코페롤 대 위약' 비교 — 주석이 두 성분 병용 효과처럼 읽힘",
+   "url": "url 필드 없음 (DOI 10.1093/jnci/dji095)",
+   "kind": "ok",
+   "fulltext": "abstract-only",
+   "alt_fulltext": [
+    "PMC5736082 — Yasueda A 2016 항산화 보충제 체계적 문헌고찰",
+    "보충 중단 후에는 HR 0.41(0.16-1.03)로 역전, 8년 무이차암 비율은 양군 비슷 — 함께 적을 것"
+   ],
+   "notes": "url 필드 없음 — 화면에서 원문으로 갈 수 없음. Unpaywall closed."
+  },
+  {
+   "id": "atbc1994",
+   "verdict": "warn",
+   "biblio": "원제 'on the incidence of lung cancer and other cancers in male smokers' 에서 'and other cancers' 누락. 나머지 ok(PMID 8127329)",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "NEJM 출판사 무료(bronze)"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "caret1996",
+   "verdict": "ok",
+   "biblio": "ok — PMID 8602180",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "NEJM 출판사 무료(bronze)"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "select2011",
+   "verdict": "ok",
+   "biblio": "ok — PMID 21990298. 비타민 E HR 1.17(99% CI 1.004-1.36)·셀레늄 1.09(0.93-1.27) 일치. n=35,533 은 무작위 배정 수(1차 분석 34,887명)",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-PMC4169010",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "kristal2014",
+   "verdict": "ok",
+   "biblio": "ok — PMID 24563519. 'increased the risk of high-grade PCa among men with higher selenium status by 91% (P = .007)' 일치(셀레늄 '보충' 시라는 조건을 주석에 넣으면 정확)",
+   "url": "ok",
+   "kind": "ok (SELECT 내 case-cohort)",
+   "fulltext": "fulltext-PMC3975165",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "ng2019",
+   "verdict": "ok",
+   "biblio": "ok — PMID 30964527, JAMA 2019;321(14):1370-9",
+   "url": "ok",
+   "kind": "ok (2상 RCT)",
+   "fulltext": "fulltext-PMC6459117",
+   "alt_fulltext": [],
+   "notes": "2상 시험임을 알 것."
+  },
+  {
+   "id": "manson2019",
+   "verdict": "ok",
+   "biblio": "ok — PMID 30415629",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-PMC6425757",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "ge2012salt",
+   "verdict": "ok",
+   "biblio": "ok — PMID 23125851. 11편(대조 7·코호트 4)·n=2,076,498·OR 2.05[1.60-2.62]·아시아 1.27[1.22-1.32] 초록 일치",
+   "url": "ok",
+   "kind": "ok (제목은 SR, 실제 메타분석 수행)",
+   "fulltext": "fulltext-PMC3485508",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "kim2010saltpref",
+   "verdict": "ok",
+   "biblio": "ok — PMID 20219954. 2,248,129명·HR 1.10(1.04-1.16)·'marginal' 일치",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "AJCN 출판사 무료(bronze)"
+   ],
+   "notes": "PMC 없음."
+  },
+  {
+   "id": "yoo2020pickled",
+   "verdict": "ok",
+   "biblio": "ok — PMID 32316595. 40 g/일 당 RR 1.15(1.07-1.23)·젓갈 1.17(0.99-1.38) 일치",
+   "url": "ok",
+   "kind": "ok (코호트 2개 분석 + 메타분석)",
+   "fulltext": "fulltext-PMC7225928",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "kimhj2010veg",
+   "verdict": "ok",
+   "biblio": "ok — PMID 19860848. OR 0.62(0.46-0.85)·1.28(1.06-1.53) 일치",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-PMC11159166",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "gastrectomy-nutr",
+   "verdict": "warn",
+   "biblio": "ok — PMID 21447764, Nutr Clin Pract 2011;26(2):126-36. 주석 내용 초록 일치",
+   "url": "ok",
+   "kind": "ok (서술 종설)",
+   "fulltext": "abstract-only",
+   "alt_fulltext": [
+    "PMC4924460 — Rosania R 2016 Gastrointest Tumors, 위암 환자 영양 종설(위절제 후 덤핑·결핍 포함)",
+    "PMC7382435 — Kubota T 2020 Ann Gastroenterol Surg, 위암 수술 영양 업데이트"
+   ],
+   "notes": "9개 항목에서 인용되는 핵심 출처인데 구독제(Unpaywall closed). 공개 대체 문헌으로 보강 권장."
+  },
+  {
+   "id": "b12-gastrectomy-meta",
+   "verdict": "warn",
+   "biblio": "ok — PMID 37669168. 14편·2,627명 일치(유병률 48.8%, 95% CI 32.4-65.2, I² 98.85%)",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "abstract-only",
+   "alt_fulltext": [
+    "PMC13524985 — Rogaczewski P 2026 Gastric Cancer, 위전절제 후 경구 B12 근거 지도화 종설",
+    "PMC6412945 — Lee SM 2019 Nutrients, 위절제 후 B12 결핍 지표(MMA·Hcy) 연구"
+   ],
+   "notes": "Unpaywall closed. 이질성 매우 큼(I² 98.85%) — 단일 수치 인용 시 주의."
+  },
+  {
+   "id": "song2018fiber",
+   "verdict": "ok",
+   "biblio": "ok — PMID 29098294",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-PMC5776713",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "vanblarigan2018",
+   "verdict": "warn",
+   "biblio": "제목을 줄여 바꿔 씀 — 원제 'Association of Survival With Adherence to the American Cancer Society Nutrition and Physical Activity Guidelines for Cancer Survivors After Colon Cancer Diagnosis: The CALGB 89803/Alliance Trial'. 서지 숫자는 ok",
+   "url": "ok",
+   "kind": "ok (RCT 참여자 대상 전향 코호트)",
+   "fulltext": "fulltext-PMC6145685",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "kennedy2017coffee",
+   "verdict": "ok",
+   "biblio": "ok — PMID 28490552",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-PMC5730000",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "easl-nutrition",
+   "verdict": "warn",
+   "biblio": "ok — PMID 30144956, J Hepatol 2019;70(1):172-193",
+   "url": "url 필드 없음 (DOI 10.1016/j.jhep.2018.06.024)",
+   "kind": "ok",
+   "fulltext": "fulltext-PMC6657019",
+   "alt_fulltext": [],
+   "notes": "url 필드 없음 — 화면에서 원문으로 갈 수 없음. 13개 항목에서 인용 — url 추가 필요."
+  },
+  {
+   "id": "wcrf-prostate",
+   "verdict": "warn",
+   "biblio": "WCRF/AICR CUP 전립선암 보고서 — 유제품·고칼슘 식이 limited-suggestive 는 알려진 결론과 일치하나, 공개 PDF 의 문장은 텍스트 추출 실패로 직접 대조 못함(추정 일치)",
+   "url": "url 필드 없음. 공개 PDF 확인: https://www.wcrf.org/wp-content/uploads/2024/10/prostate-cancer-report.pdf (200)",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "https://www.wcrf.org/wp-content/uploads/2024/10/prostate-cancer-report.pdf — CUP 전립선암 보고서(공개)"
+   ],
+   "notes": "url 필드 없음 — 화면에서 원문으로 갈 수 없음. 연도(2014 보고서 / 2018 개정) 명시 권장."
+  },
+  {
+   "id": "adt-bone",
+   "verdict": "warn",
+   "biblio": "ok — PMID 31990618, J Clin Oncol 2020;38(15):1736-43",
+   "url": "ok (DOI). ascopubs 는 봇 차단(403)",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "Unpaywall: ascopubs 출판사 무료(bronze) — 직접 열람은 403 으로 확인 못함"
+   ],
+   "notes": "주석의 'ADT 시작 전 골밀도 검사 권장'·'칼슘 500 mg 이상·비타민 D 400 IU 이상'은 초록에 없고 본문을 못 열어 확인하지 못함. 원 CCO 지침(PEBC 3-14) 본문으로 대조 필요."
+  },
+  {
+   "id": "smith2001adt",
+   "verdict": "ok",
+   "biblio": "ok — PMID 11575286. 48주·요추 3.3%·대전자 2.1%·고관절 1.8%·해면골 8.5% 초록 일치",
+   "url": "ok",
+   "kind": "ok (오픈라벨 RCT, 47명)",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "NEJM 출판사 무료(bronze)"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "asco-cardio",
+   "verdict": "warn",
+   "biblio": "ok — PMID 27918725, J Clin Oncol 2017;35(8):893-911",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "abstract-only",
+   "alt_fulltext": [
+    "PMC9982291 — Cheng RK 2023 JACC CardioOncol, 2022 ESC 심장종양학 지침 해설(공개)",
+    "Lyon AR 2022 ESC Cardio-Oncology Guidelines(Eur Heart J, 출판사 공개 — PMCID 미확인)"
+   ],
+   "notes": "Unpaywall closed(ASCO 누리집 무료 PDF 여부는 확인 못함). 인용 문장(혈압·체중·지질 관리)은 일반적 요약으로 초록 범위 내."
+  },
+  {
+   "id": "sonbol2015",
+   "verdict": "warn",
+   "biblio": "ok — PMID 30948447, BMJ Support Palliat Care 2019;9(4):425-433. 6편(5편 무작위)·1,116명·RR 1.16(0.94-1.42)·HCT RR 1.25(1.02-1.54)·FDA 식품취급 권고 모두 초록 일치",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "abstract-only",
+   "alt_fulltext": [
+    "PMC8959862 — Ma Y 2022 Front Oncol, 호중구감소 식이 체계적 문헌고찰·메타분석",
+    "PMC10385845 — Matteucci S 2023 Nutrients, 저세균식 체계적 문헌고찰"
+   ],
+   "notes": "id 는 2015 이나 실제 논문은 2019 갱신판(year 필드 2019 는 맞음). Unpaywall closed."
+  },
+  {
+   "id": "vibrio-meta2019",
+   "verdict": "ok",
+   "biblio": "ok — PMID 31652263. 12편·1,157명·53.9% 대 16.1%·RR 2.61(2.14-3.19) 일치",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-PMC6814278",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "cdc-vibrio",
+   "verdict": "ok",
+   "biblio": "ok — 'about 1 in 5 people with this infection die' 확인, 페이지 날짜 2024-05-13",
+   "url": "WebFetch 로 열림(curl 은 403 봇 차단)",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [],
+   "notes": "간질환 위험 문장은 페이지에서 Vibrio 일반(혈류감염)으로 서술됨."
+  },
+  {
+   "id": "fda-foodsafety",
+   "verdict": "ok",
+   "biblio": "ok — 'Food Safety for Older Adults and People with Cancer...' July 2020. 날 새싹/익힌 새싹, 냉장 훈제 해산물, 델리미트 165°F 재가열, 2시간(90°F 초과 1시간) 원문 확인",
+   "url": "ok (PDF; curl 은 봇 차단, WebFetch 로 받음)",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "bailey2013grapefruit",
+   "verdict": "ok",
+   "biblio": "ok — PMID 23184849, CMAJ 2013;185(4):309-16",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-PMC3589309",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "golden2009",
+   "verdict": "warn",
+   "biblio": "ok — PMID 19190249, Blood 2009;113(23):5927-37",
+   "url": "ok",
+   "kind": "오류: review 아님 — 세포주·동물(in vitro/in vivo) 전임상 실험 연구. kind 체계에 맞는 값이 없으면 notes 에 '전임상'을 적고 근거 등급 C 로만 쓸 것",
+   "fulltext": "abstract-only",
+   "alt_fulltext": [
+    "PMC3860349 — Jia L 2013 Cancer Biol Med, 'Why bortezomib cannot go with green?' 종설",
+    "PMC4607952 — Modernelli A 2015 Sci Rep, EGCG 의 보르테조밉 길항 실험(공개)"
+   ],
+   "notes": "Unpaywall closed. 사람 자료가 아님."
+  },
+  {
+   "id": "capecitabine-warfarin",
+   "verdict": "warn",
+   "biblio": "ok — PMID 12450435. 증례 2건·병용 6주·INR>10·위장관 출혈 초록 일치",
+   "url": "ok",
+   "kind": "ok (증례보고+문헌고찰)",
+   "fulltext": "abstract-only",
+   "alt_fulltext": [
+    "PMC8842720 — Althiab K 2021 Front Cardiovasc Med, 카페시타빈-와파린 상호작용 증례·문헌고찰",
+    "PMC2909789 — Giunta G 2010 Case Rep Med, 같은 주제 문헌고찰"
+   ],
+   "notes": "Unpaywall closed."
+  },
+  {
+   "id": "cdi-liverpool",
+   "verdict": "warn",
+   "biblio": "인용 내용(자몽·세인트존스워트 판정, 근거 질 Very Low~Low, 항목 없는 약 목록)을 이번에 확인하지 못함 — 대화형 DB 이고 API 는 키가 필요해 우회하지 않음",
+   "url": "url 은 현행 checker 첫 화면(200)이지 '2022년 6월 보관본'이 아님. Wayback 에는 2022-08-16 스냅숏(web.archive.org/web/20220816132044/...)이 있음",
+   "kind": "ok (db)",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [],
+   "notes": "인용과 url 이 서로 다른 판을 가리킴. 보관본 URL 을 적거나 현행판으로 다시 대조해 날짜를 고칠 것. 판정 문구는 공개 화면에서 사람이 다시 확인 필요."
+  },
+  {
+   "id": "bccancer-tamoxifen",
+   "verdict": "ok",
+   "biblio": "ok — 'Revised: 1 May 2024' 확인. 자몽주스 각주 원문 'may increase tamoxifen plasma levels ... clinical significance ... is unknown' 일치",
+   "url": "ok (PDF 200)",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [],
+   "notes": "원문 관리 지침 'Monitor for tamoxifen toxicity'도 함께 적으면 정확."
+  },
+  {
+   "id": "fda-label-tamoxifen",
+   "verdict": "ok",
+   "biblio": "ok — DailyMed SOLTAMOX. 'Rifampin ... reduced tamoxifen AUC and Cmax by 86% and 55%', 'Strong CYP3A4 inducers should not be used', 음식 영향 없음, 자몽 언급 0건 확인. 라벨 개정 12/2020(year 필드 2021)",
+   "url": "ok (setid → SOLTAMOX)",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "fda-label-ai",
+   "verdict": "warn",
+   "biblio": "엑스메스탄 부분 확인: 'after a meal'·세인트존스워트 등 CYP3A4 유도제·케토코나졸 영향 없음·자몽 0건, 라벨 12/2024. 페마라·아리미덱스 문장은 대조하지 않음",
+   "url": "url 의 setid 는 AROMASIN 하나뿐 — 인용한 FEMARA·ARIMIDEX 라벨로 가는 링크 없음",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [],
+   "notes": "세 라벨 setid 를 모두 적을 것."
+  },
+  {
+   "id": "fda-label-adt",
+   "verdict": "warn",
+   "biblio": "카소덱스 부분 확인: 음식 영향 없음·자몽 0건(라벨 9/2025). 졸라덱스·루프론 문장은 대조하지 않음",
+   "url": "url 의 setid 는 CASODEX 하나뿐",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [],
+   "notes": "세 라벨 링크를 모두 적을 것."
+  },
+  {
+   "id": "fda-label-arpi",
+   "verdict": "warn",
+   "biblio": "자이티가 부분 확인: 빈속 복용(2시간 전·1시간 후), 저지방식 AUC 약 5배·고지방식 약 10배, 강한 CYP3A4 유도제 피함, 자몽 0건(라벨 11/2024). 엑스탄디·얼리다·뉴베카 문장은 대조하지 않음",
+   "url": "url 의 setid 는 ZYTIGA 하나뿐",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [],
+   "notes": "네 라벨 링크를 모두 적을 것."
+  },
+  {
+   "id": "hussaarts2019",
+   "verdict": "warn",
+   "biblio": "ok — PMID 30909366. 16명·커큐민 1,200 mg 하루 3회(=3.6 g)·엔독시펜 AUC −7.7%(−15.4~0.7)·피페린 −12.4%(−21.9~−1.9) 일치",
+   "url": "ok",
+   "kind": "오류: cohort 아님 — 'two-arm, three-period, randomized, cross-over' 약동학 연구(n=16). rct 로 바꾸되 소규모 PK 연구라 등급은 C 가 맞음",
+   "fulltext": "fulltext-PMC6468355",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "cdc-listeria",
+   "verdict": "ok",
+   "biblio": "ok — 페이지 날짜 2025-01-31, 'Unheated deli meat, cold cuts, hot dogs, and fermented or dry sausages' 피하고 165°F 재가열 확인",
+   "url": "WebFetch 로 열림(curl 403 봇 차단)",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [],
+   "notes": "냉장 훈제 생선은 CDC 가 '재가열'이 아니라 '상온보관 밀봉 제품 또는 조리해 먹기'로 제시 — '냉장 훈제 생선도 같다'는 표현을 '냉장 훈제 생선도 피한다'로 다듬을 것."
+  },
+  {
+   "id": "jang2024",
+   "verdict": "ok",
+   "biblio": "ok — PMID 39459564. 3.5절 'Sex steroids, including estrone, estriol, and testosterone, are found in pomegranate seeds', 7.3절 Kapoor 2015(64명·3주·전체 유의 변화 없음), 결론 'may influence hormonal receptors in breast cancer cells' 원문 일치",
+   "url": "ok",
+   "kind": "ok (서술 종설)",
+   "fulltext": "fulltext-PMC11509572",
+   "alt_fulltext": [],
+   "notes": "Kapoor 2015 정상체중 하위군 38명에서는 에스트로겐·테스토스테론 감소가 있었음 — 주석에 하위군 결과도 있음을 덧붙이면 균형적."
+  },
+  {
+   "id": "chen2018juice",
+   "verdict": "ok",
+   "biblio": "ok — PMID 29703387. 'Among 46 finally included RCTs', 3.2.7절 석류즙(플루르비프로펜·미다졸람), 4.3절 증례(와파린 2·로수바스타틴 1·농축액-타크롤리무스 1) 원문 일치",
+   "url": "ok",
+   "kind": "ok (RCT 대상 체계적 종설, 메타분석 아님)",
+   "fulltext": "fulltext-PMC9326888",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "vandie2024",
+   "verdict": "warn",
+   "biblio": "서지 ok(PMID 38070485). 숫자: 리그난(진단 전 3편) 0.91·폐경후 0.66·폐경전 1.55 일치, 엔테로락톤 유방암 사망 0.72·전체 사망 0.69 일치. 단 'ER 양성 0.75(0.56~1.00)'는 엔테로락톤의 '전체 사망' ER 양성 하위군(2편)이고, '재발 0.91(0.67~1.23)'은 2편 메타분석 — 주석의 '엔테로락톤 3편' 아래 모두 묶으면 오해",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-PMC10868383",
+   "alt_fulltext": [],
+   "notes": "주석 수정안: '혈중 엔테로락톤: 유방암 사망 0.72(3편)·전체 사망 0.69(3편)·ER 양성 전체 사망 0.75, 0.56~1.00(2편)·재발 0.91, 0.67~1.23(2편)'. 25 g 아마씨 Ki-67·HER2 문장은 고찰의 2차 인용(원 연구 ref 69)."
+  },
+  {
+   "id": "sjw-interaction",
+   "verdict": "ok",
+   "biblio": "ok — PMID 12189228. 5명·비맹검 무작위 교차·SN-38 42%(14~70%) 감소 일치",
+   "url": "ok",
+   "kind": "ok (무작위 교차지만 n=5 — 근거 등급은 C 수준)",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "OUP 출판사 무료(bronze), Erasmus 저장소 사본"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "warfarin-vitk",
+   "verdict": "ok",
+   "biblio": "ok — PMID 22315259, Chest 2012;141(2 Suppl):e152S-e184S",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-PMC3278055",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "ryan2012ginger",
+   "verdict": "ok",
+   "biblio": "ok — PMID 21818642",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-PMC3361530",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "mascc-mucositis",
+   "verdict": "ok",
+   "biblio": "ok — PMID 32786044",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-PMC7540329",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "iddsi",
+   "verdict": "ok",
+   "biblio": "ok — Detailed Definitions 2.2(2026년 4월 공개, 변경 로그 확인)·원 논문 Cichero 2017 Dysphagia 32:293-314(PMID 27913916) 일치",
+   "url": "ok (iddsi.org/framework 는 문서 목록 페이지; curl 403·WebFetch 열림)",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "PMC5380696 — Cichero 2017 원 논문"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "hamajima2002",
+   "verdict": "ok",
+   "biblio": "ok — PMID 12439712(원제 끝 'including 58,515 women with breast cancer and 95,067 women without the disease' 생략은 허용 범위). '7.1% (95% CI 5.5–8.7%) for each additional 10 g per day' 일치",
+   "url": "ok",
+   "kind": "ok (53개 연구 개인자료 재분석)",
+   "fulltext": "fulltext-PMC2562507",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "brooks2009aldh2",
+   "verdict": "ok",
+   "biblio": "ok — PMID 19320537, PLoS Med 2009;6(3):e1000050. 약 36%·OR 3.7~18.1·53% 원문 일치",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-PMC2659709",
+   "alt_fulltext": [],
+   "notes": "53% 는 일본 남성 대상 기여위험 추정(저자 재계산)임을 알 것."
+  },
+  {
+   "id": "ileostomy-diet-review",
+   "verdict": "ok",
+   "biblio": "ok — PMID 34054034. 인용 문장은 초록 서론 'Dietary advice is commonly provided ... inconsistent, conflicting, and inadequate. There is a lack of high-quality research' 와 일치",
+   "url": "ok",
+   "kind": "ok (scoping review)",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "Bristol 저장소 publishedVersion(https://research-information.bris.ac.uk/en/publications/62645a6d-bb05-4516-b167-dbf757c04a5e) — 출판사판은 구독"
+   ],
+   "notes": "'장루'보다 '회장루(ileostomy)'가 정확."
+  },
+  {
+   "id": "eras-colorectal",
+   "verdict": "warn",
+   "biblio": "ok — PMID 30426190, World J Surg 2019;43(3):659-695",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "Springer 출판사 OA(hybrid, Unpaywall) · Lausanne/Nottingham 저장소 사본"
+   ],
+   "notes": "인용 문장('수술 당일부터 음식과 ONS, 강한 권고')은 Springer 로그인 리디렉트로 본문을 열지 못해 대조 못함(지식상 일치 추정)."
+  },
+  {
+   "id": "ueg-pei2025",
+   "verdict": "ok",
+   "biblio": "ok — PMID 40097316, Pancreatology 2025;25(3):293-300",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "Elsevier 출판사 OA(hybrid) · Szeged 저장소 accepted 원고"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "fearon2011",
+   "verdict": "warn",
+   "biblio": "ok — PMID 21296615. 진단 기준(체중감소 >5%, 또는 BMI<20·근감소 시 >2%) 초록 일치",
+   "url": "ok",
+   "kind": "ok (국제 합의)",
+   "fulltext": "abstract-only",
+   "alt_fulltext": [
+    "PMC10570088 — Arai H 2023 J Cachexia Sarcopenia Muscle, 아시아 악액질 작업반 합의(Fearon 정의 비교)",
+    "PMC11402144 — Takaoka T 2024 Adv Nutr, 암 악액질 유병률 메타분석(Fearon 기준 사용)"
+   ],
+   "notes": "Unpaywall closed."
+  },
+  {
+   "id": "espen-cachexia",
+   "verdict": "warn",
+   "biblio": "ok — PMID 27637832, Clin Nutr 2017;36(1):11-48",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "Bond Univ. 저장소 publishedVersion(Unpaywall green) — 출판사판은 구독. 저장소 PDF 실제 열람은 확인 못함"
+   ],
+   "notes": "id 가 'espen-cachexia' 이나 내용은 암 영양 지침 전체판 — id 명칭 혼동 주의. PMC 없음."
+  },
+  {
+   "id": "acsm2019",
+   "verdict": "ok",
+   "biblio": "ok — PMID 31626055",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-PMC8576825",
+   "alt_fulltext": [],
+   "notes": ""
+  },
+  {
+   "id": "asco-exercise2022",
+   "verdict": "error",
+   "biblio": "asco2022 와 같은 논문(Ligibel 2022, PMID 35576506) — 중복 출처",
+   "url": "url 필드 없음",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "asco2022 와 동일"
+   ],
+   "notes": "references-exercise.ts 에서만 사용. asco2022 로 통합하고 하나를 지울 것."
+  },
+  {
+   "id": "challenge2025",
+   "verdict": "warn",
+   "biblio": "저자·권호·쪽 ok(PMID 40450658). 원제는 'Structured Exercise after Adjuvant Chemotherapy for Colon Cancer'('in' 아님)",
+   "url": "ok",
+   "kind": "ok (3상 RCT)",
+   "fulltext": "abstract-only",
+   "alt_fulltext": [
+    "PMC2601017 — Courneya 2008 Curr Oncol, CHALLENGE 시험 설계 논문",
+    "PMC13247338 — Courneya 2026 JNCI, CHALLENGE 동기 결과 2차 분석"
+   ],
+   "notes": "Unpaywall closed(NEJM 은 원저를 6개월 뒤 공개하기도 하나 이번에 확인 못함)."
+  },
+  {
+   "id": "pal2009",
+   "verdict": "warn",
+   "biblio": "ok — PMID 19675330, NEJM 2009;361(7):664-73",
+   "url": "url 필드 없음 (DOI 10.1056/NEJMoa0810118)",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "NEJM 출판사 무료(Unpaywall hybrid)",
+    "PMC7316683 — Hasenoehrl 2020 저항운동과 림프부종 메타분석"
+   ],
+   "notes": "url 필드 없음 — 화면에서 원문으로 갈 수 없음. "
+  },
+  {
+   "id": "galvao2010",
+   "verdict": "warn",
+   "biblio": "ok — PMID 19949016. 57명·12주·뼈전이 없는 남성 일치",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "abstract-only",
+   "alt_fulltext": [
+    "PMC8846498 — Shao W 2022 PLoS One, ADT 중 운동과 체성분 메타분석",
+    "PMC5527087 — Keilani M 2017 Support Care Cancer, 전립선암 저항운동 메타분석"
+   ],
+   "notes": "Unpaywall closed."
+  },
+  {
+   "id": "prehab-lung",
+   "verdict": "warn",
+   "biblio": "ok — PMID 31284372, Cancers 2019;11(7):944",
+   "url": "url 필드 없음 (DOI 10.3390/cancers11070944)",
+   "kind": "ok",
+   "fulltext": "fulltext-PMC6678369",
+   "alt_fulltext": [],
+   "notes": "url 필드 없음 — 화면에서 원문으로 갈 수 없음. "
+  },
+  {
+   "id": "mckenzie-shoulder",
+   "verdict": "error",
+   "biblio": "인용 자체(McGarvey AC 2011 Head Neck 33(2):274-80, PMID 20222043)는 맞으나 id 'mckenzie-…'·year 필드 2020 이 인용(2011)과 다름",
+   "url": "url 필드 없음 (DOI 10.1002/hed.21366)",
+   "kind": "ok (문헌 종설)",
+   "fulltext": "abstract-only",
+   "alt_fulltext": [
+    "PMC11537249 — Carvalho AP 2012 Cochrane, 두경부암 치료 후 어깨 기능장애 운동 중재",
+    "PMC10219996 — Pérez 2023 Sci Rep, 두경부암 생존자 운동재활 메타분석"
+   ],
+   "notes": "url 필드 없음 — 화면에서 원문으로 갈 수 없음. year 를 2011 로 고칠 것."
+  },
+  {
+   "id": "cochrane-cachexia-exercise",
+   "verdict": "ok",
+   "biblio": "ok — PMID 33735441, CD010804.pub3. RCT 4편·178명·very low certainty 초록 일치",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-PMC8094916",
+   "alt_fulltext": [],
+   "notes": "PMC XML 은 내려받기 제한(본문 없음)이나 PMC 열람 페이지는 있음."
+  },
+  {
+   "id": "asco-cachexia2020",
+   "verdict": "ok",
+   "biblio": "ok — PMID 32432946. '20 systematic reviews and 13 additional RCTs', 'other evaluated interventions either had no benefit or insufficient evidence' 초록 일치",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "Copenhagen 대학 저장소 publishedVersion(Unpaywall green)"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "longland2016",
+   "verdict": "ok",
+   "biblio": "ok — PMID 26817506. 젊은 남성 40명(군당 20)·4주 일치",
+   "url": "ok",
+   "kind": "ok",
+   "fulltext": "fulltext-url",
+   "alt_fulltext": [
+    "AJCN(Elsevier) 출판사 무료(bronze)"
+   ],
+   "notes": ""
+  },
+  {
+   "id": "bone-mets-exercise",
+   "verdict": "error",
+   "biblio": "서지 오류: Campbell KL 'Exercise Recommendation for People With Bone Metastases: Expert Consensus...'는 J Cancer Surviv 가 아니라 JCO Oncol Pract 2022;18(5):e697-e709(PMID 34990293), 연도 2018 아님. Sheill G 2018 은 PM R 2018;10(8):843-864(PMID 29474996) 별개 논문. 두 문헌을 한 출처로 섞음",
+   "url": "url 필드 없음",
+   "kind": "제안: Campbell 2022 는 전문가 합의(guideline 성격), Sheill 2018 은 서술 종설 — 둘로 나눌 것",
+   "fulltext": "fulltext-PMC9810134",
+   "alt_fulltext": [
+    "PMC9810134 — Campbell KL 2022 JCO Oncol Pract 전문가 합의(공개)"
+   ],
+   "notes": "url 필드 없음 — 화면에서 원문으로 갈 수 없음. Sheill 2018 은 PMC 없음(구독, 초록만)."
+  }
+ ]
+}

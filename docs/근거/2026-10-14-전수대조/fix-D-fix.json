@@ -1,0 +1,479 @@
+{
+ "files": [
+  "/Users/kwangwonroh/클로드 작업/harucharim-app/src/data/interactions.ts"
+ ],
+ "changes": [
+  {
+   "rule": "int-grapefruit-tki",
+   "what": "제목·이유를 약별 허가사항에 맞춤. 자몽을 적은 것은 엘로티닙뿐이고 오시머티닙은 강한 억제제로도 의미 있는 변화 없음, 아파티닙은 CYP3A4 대사가 거의 없음. '수 배까지' 삭제. 허가사항 출처 추가.",
+   "before": "자몽은 표적치료제의 혈중 농도를 예측 불가능하게 올립니다 — 대부분 CYP3A4 기질, 수 배까지",
+   "after": "EGFR 표적치료제 복용 중 자몽은 피하세요 — 엘로티닙은 허가사항이 자몽을 피하라고 함, 게피티닙 AUC 80 %↑, 오시머티닙 변화 없음, 아파티닙 CYP3A4 거의 무관",
+   "sources": [
+    "fda-label-egfr",
+    "bailey2013grapefruit"
+   ]
+  },
+  {
+   "rule": "int-grapefruit-cdk",
+   "what": "Bailey 2013 에 CDK4/6 억제제가 없어 허가사항 출처 추가. 키스칼리 미국 허가사항에는 자몽 문장이 없어 '모두 금함' 을 고침. '직결' 을 '심해질 수 있다' 로.",
+   "before": "세 약 모두 제품 설명서가 자몽을 금함, 호중구감소증 악화로 직결",
+   "after": "입랜스·버제니오 허가사항이 자몽을 피하라고 함, 키스칼리는 강한 억제제로 AUC 3.2배·강한 억제제 회피",
+   "sources": [
+    "fda-label-cdk46",
+    "bailey2013grapefruit"
+   ]
+  },
+  {
+   "rule": "int-grapefruit-alk",
+   "what": "예시 알렉티닙 → 크리조티닙(허가사항이 자몽 회피 명시)·로라티닙(강한 억제제 회피)으로, 알렉티닙은 '의미 있는 변화 없음' 으로. 간독성(Bailey 에 없음) → QT 연장·골수 억제.",
+   "before": "크리조티닙·알렉티닙 등 CYP3A4 기질, 간독성과 QT 연장",
+   "after": "크리조티닙 허가사항 자몽 회피(QT·골수 억제), 로라티닙 강한 억제제 회피, 알렉티닙 영향 없음",
+   "sources": [
+    "fda-label-alk",
+    "bailey2013grapefruit"
+   ]
+  },
+  {
+   "rule": "int-grapefruit-sorafenib",
+   "what": "'CYP3A4 억제로 농도가 오른다' 는 허가사항과 반대(넥사바 변화 없음, 렌비마 15 %). Bailey 는 소라페닙을 대체 약으로 둠. 사실대로 고치고 '조심하는 쪽으로 둔 안내' 로 맺음. 판정은 그대로(judgements).",
+   "before": "CYP3A4 억제로 농도가 오르면 수족피부반응·고혈압이 심해진다",
+   "after": "강한 억제제로도 농도 거의 불변, 허가사항에 자몽 없음, 종설은 대체 약으로 듦 — 조심하는 쪽의 안내",
+   "sources": [
+    "fda-label-sorafenib-lenvatinib",
+    "bailey2013grapefruit"
+   ]
+  },
+  {
+   "rule": "int-grapefruit-tamoxifen",
+   "what": "출처에 없는 '귤' 을 빼고 네이블·발렌시아로.",
+   "before": "귤과 보통 단맛 오렌지는 해당하지 않습니다",
+   "after": "보통 단맛 오렌지(네이블·발렌시아)는 해당하지 않습니다",
+   "sources": [
+    "bailey2013grapefruit"
+   ]
+  },
+  {
+   "rule": "int-grapefruit-anastrozole",
+   "what": "허가사항은 음식이 흡수 속도를 늦춘다고 적음(흡수량 불변) — '음식이 약 농도를 바꾼다는 내용은 없다' 를 고침.",
+   "before": "음식이 약 농도를 바꾼다는 내용은 없습니다",
+   "after": "음식은 흡수 속도만 조금 늦출 뿐 흡수되는 양은 바꾸지 않는다고 적혀 있습니다",
+   "sources": [
+    "fda-label-ai"
+   ]
+  },
+  {
+   "rule": "int-warfarin-vitk",
+   "what": "'매일 비슷한 양 유지' 는 ACCP 에 직접 없어, 그 말을 하는 와파린 허가사항을 출처로 추가. '하루 기준치' → '충분섭취량'.",
+   "before": "매일 비슷한 양을 유지하는 것이 목표 · 한국인 하루 기준치",
+   "after": "허가사항: 비타민 K 일정량 유지·큰 식사 변화 피하기 · 한국인 하루 충분섭취량",
+   "sources": [
+    "fda-label-warfarin",
+    "warfarin-vitk",
+    "kdri2020"
+   ]
+  },
+  {
+   "rule": "int-warfarin-omega3",
+   "what": "'혈소판 응집 억제'·'INR 확인' 은 ESPEN 에 없음. 혈소판(관여)은 Javaid 2024 메타분석(PMC), INR 은 와파린 허가사항 7.5 로 뒷받침. 메타분석 결과(전체 출혈 증가 없음, 고용량 EPA 만 상대 50 %·절대 0.6 %p)를 함께 적음.",
+   "before": "오메가-3 는 혈소판 응집을 억제합니다 … INR 확인(출처 없음)",
+   "after": "혈소판 응집에 관여 · 허가사항도 다른 약·허브 시작/중단 시 INR 확인 · 11개 시험 12만 명 분석에서 출혈 증가 없음(1.09)",
+   "sources": [
+    "espen-cachexia",
+    "javaid2024omega3",
+    "fda-label-warfarin"
+   ]
+  },
+  {
+   "rule": "int-warfarin-coq10",
+   "what": "3.7배를 오즈비로 명시. 출처 없던 '구조가 비타민 K 와 비슷'·'인삼 INR 오르내림' 을 와파린 허가사항(코엔자임Q10·인삼이 효과를 줄일 수 있음)으로 교체. 판정(주의)과 어긋난 '피해야 할 이유' → 'INR 확인'. 같은 표 생강 언급은 생강 규칙이 맡아 뺌.",
+   "before": "이론상 반대… 출혈 위험이 3.7배 높았습니다 … 인삼류는 INR 을 올린·내린 사례 … 피해야 할 이유",
+   "after": "허가사항: 코엔자임Q10·인삼이 효과를 줄일 수 있음 · 관찰은 반대쪽(오즈비 3.69, 출혈 오즈 약 3.7배) · 예측 어려우니 시작·중단 때 INR 확인",
+   "sources": [
+    "warfarin-vitk",
+    "fda-label-warfarin"
+   ]
+  },
+  {
+   "rule": "int-warfarin-ginger",
+   "what": "3.2배를 오즈비로 명시(상대위험처럼 읽히지 않게).",
+   "before": "출혈 위험이 3.2배 높았습니다",
+   "after": "출혈이 더 많이 보고되었습니다(오즈비 3.20 … 출혈 오즈가 약 3.2배)",
+   "sources": [
+    "warfarin-vitk"
+   ]
+  },
+  {
+   "rule": "int-bortezomib-greentea",
+   "what": "제목을 실제 대상(우린 녹차)에 맞추고, 반대 방향 동물 실험(Bannerman 2011, PMC)을 함께 적음. 판정은 그대로(judgements).",
+   "before": "녹차·녹차추출물은 약효를 떨어뜨릴 수 있습니다 / 반대 근거 없음",
+   "after": "녹차는 약효를 떨어뜨릴 수 있습니다 / 제조사 연구진 실험: 아주 높은 농도에서만 방해, 보통 녹차는 피할 필요 없다는 결론도 있음",
+   "sources": [
+    "golden2009",
+    "bannerman2011"
+   ]
+  },
+  {
+   "rule": "int-capecitabine-warfarin",
+   "what": "Copur 증례는 기전을 모른다고 적음. 'CYP2C9 억제' 를 허가사항 문장(S-와파린 AUC 57 %↑, 상자 경고, CYP2C9 기질 노출 증가)으로 바꾸고 허가사항 출처 추가.",
+   "before": "카페시타빈은 CYP2C9 를 억제해 와파린 농도를 올리며 경고문이 붙어 있습니다",
+   "after": "S-와파린 노출 57 %↑, 상자 경고에 출혈(사망 포함), CYP2C9 기질 노출 증가",
+   "sources": [
+    "capecitabine-warfarin",
+    "fda-label-capecitabine"
+   ]
+  },
+  {
+   "rule": "int-oxaliplatin-cold",
+   "what": "ESPEN 2021 원문에 oxaliplatin 0건 → 옥살리플라틴 허가사항으로 교체. 효과 크기 없는 '미지근하게 드시면 상당히 줄일 수 있다' 삭제, 허가사항 환자 안내('따뜻하게 또는 상온으로')를 howTo 로 추가해 물·보리차에 붙어도 '줄이라' 로 읽히지 않게.",
+   "before": "미지근하게 드시는 것만으로 상당히 줄일 수 있습니다 (espen2021)",
+   "after": "허가사항: 찬 음료·얼음 피하고 음료는 따뜻하게 또는 상온으로 · 물을 줄이라는 뜻 아님 · howTo '따뜻하게 또는 상온으로 드세요'",
+   "sources": [
+    "fda-label-oxaliplatin"
+   ]
+  },
+  {
+   "rule": "int-cisplatin-mg",
+   "what": "ESPEN 2021 원문에 cisplatin 0건 → 시스플라틴 허가사항으로 교체. 허가사항에 빈도가 없어 '흔합니다·보충이 필요한 경우가 많다' 를 줄임.",
+   "before": "저마그네슘혈증·저칼륨혈증이 흔합니다. 보충이 필요한 경우가 많고",
+   "after": "마그네슘·칼륨·칼슘이 낮아질 수 있음, 보충 여부는 혈액검사로, 투여 뒤 수분·소변량 유지",
+   "sources": [
+    "fda-label-cisplatin"
+   ]
+  },
+  {
+   "rule": "int-mtx-folate",
+   "what": "ESPEN 2021 원문에 folate·methotrexate 0건 → 메토트렉세이트 허가사항(5.12·7.1)으로 교체.",
+   "before": "(espen2021) 엽산 보충 시점·용량은 치료 목적에 따라",
+   "after": "허가사항: 엽산 함유 제품이 약효를 떨어뜨릴 수 있어 필요할 때만, 부작용 줄이려 처방하기도",
+   "sources": [
+    "fda-label-methotrexate"
+   ]
+  },
+  {
+   "rule": "int-ppi-calcium",
+   "what": "구독제·무관 출처(Rogers 2011) 교체. 원문 공개 종설은 PPI 의 칼슘 흡수 저하를 확인하지 못함(에스오메프라졸 RCT 차이 없음) — 제목·이유를 그만큼으로 줄이고, B12·마그네슘은 PPI 허가사항으로 뒷받침.",
+   "before": "위산억제제를 드시면 탄산칼슘 흡수가 떨어집니다 (gastrectomy-nutr)",
+   "after": "위산억제제를 오래 드시면 칼슘제 형태와 B12·마그네슘을 함께 살피세요 — 우려는 있으나 RCT 에서 차이 없음, 구연산칼슘 흡수 약 24 % 높음",
+   "sources": [
+    "vandervelde2014calcium",
+    "fda-label-ppi"
+   ]
+  },
+  {
+   "rule": "int-levothyroxine-ca-fe",
+   "what": "KDRI(무관) → SYNTHROID 허가사항, 등급 B→G. 4시간은 약·보충제 기준이라 match 에서 '고칼슘' 음식 579종을 뗌. '두유·우유도 마찬가지'(허가사항에 없음) → 콩가루·호두·식이섬유. '점심 이후로' → '아침 식사 30분~1시간 전'.",
+   "before": "칼슘·철과 결합해 흡수를 크게 방해, 두유·우유도 마찬가지 (kdri2020, B) · 고칼슘 음식에도 붙음",
+   "after": "허가사항: 칼슘제·철분제와 4시간 간격, 빈속에 아침 식사 30분~1시간 전, 콩가루·호두·식이섬유 주의 (G) · 영양제에만",
+   "sources": [
+    "fda-label-levothyroxine"
+   ]
+  },
+  {
+   "rule": "int-steroid-sugar-na",
+   "what": "ESPEN 은 인슐린 저항성만 말함 → 덱사메타손 허가사항(고혈당·염분·수분 저류·식사 소금 제한)으로 교체. 근거 없는 '조절해도 충분합니다' 를 고침.",
+   "before": "(espen2021) … 이 시기만 한시적으로 조절해도 충분합니다",
+   "after": "허가사항: 고혈당·부종 살피고 필요하면 소금 줄이기 · 이 시기에 둘 다 조금 덜어 내 보세요",
+   "sources": [
+    "fda-label-dexamethasone"
+   ]
+  },
+  {
+   "rule": "int-tamoxifen-soy",
+   "what": "'똑같았습니다' → '모두에서 나타났습니다'(원문 present in both). 재발 종점을 '재발(또는 유방암 사망)' 으로 밝힘.",
+   "before": "재발이 32 % 낮았고 … 타목시펜 복용 여부와 무관하게 똑같았습니다",
+   "after": "재발(또는 유방암 사망)이 32 % 낮았고 … 복용·비복용 모두에서 나타났습니다",
+   "sources": [
+    "shu2009"
+   ]
+  },
+  {
+   "rule": "int-adt-calcium",
+   "what": "범위: 분류 전체 → 상한(100 µg)을 넘지 않는 제품 id(vitd-1000·vitd-2000·cal-mag-d·calcium-carbonate)로, 비타민D 5000 IU 의 '권장' 제거. 제목을 이유 글과 맞춤. '권장량' → '권장섭취량·충분섭취량'.",
+   "before": "supplementCategories 칼슘·마그네슘·비타민D (vitd-5000 prefer) · 'ADT 중에는 칼슘·비타민 D 보충이 권고됩니다'",
+   "after": "supplementIds 4종 · 'ADT 중에는 칼슘·비타민 D 를 충분히 드세요 — 보충은 골밀도를 보고 정합니다'",
+   "sources": [
+    "adt-bone",
+    "kdri2020"
+   ]
+  },
+  {
+   "rule": "int-ai-calcium",
+   "what": "범위: vitd-5000 제외(위와 같음). 1,200 mg·800~1,000 IU(IOF 폐경 여성 일반)와 AI 복용자 비타민 D 800 IU 이상(최대 2,000 IU)을 갈라 적음. Hadji 에 없는 관절통 문장 삭제.",
+   "before": "그 기준은 하루 칼슘 1,200 mg·비타민 D 800~1,000 IU · 관절통 … 결핍 교정이 도움",
+   "after": "IOF 폐경 여성 1,200 mg·800~1,000 IU, 입장문은 AI 복용자 비타민 D 800 IU 이상(최대 2,000 IU) · 관절통 문장 삭제",
+   "sources": [
+    "hadji2017aibl"
+   ]
+  }
+ ],
+ "new_refs": [
+  {
+   "id": "fda-label-egfr",
+   "kind": "guideline",
+   "year": 2026,
+   "citation": "ERLOTINIB (Armas, 구 TARCEVA 판) · IRESSA (gefitinib) · GILOTRIF (afatinib) · TAGRISSO (osimertinib) 미국 허가사항. DailyMed. (엘로티닙: 강한 CYP3A4 억제제 — 자몽·자몽주스 포함 — 병용을 피할 것, 케토코나졸로 AUC 67 % 증가 · 게피티닙: 이트라코나졸로 AUC 80 % 증가, 자몽 언급 없음 · 오시머티닙: 이트라코나졸로 AUC 24 % 증가 — '임상적으로 의미 없음' · 아파티닙: CYP 대사 약 9 %, CYP3A4 탈메틸화 검출 안 됨)",
+   "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=2c4c7353-b81c-4651-8aac-6d15e88145af",
+   "access": "open",
+   "fulltext": "erlotinib 2c4c7353-b81c-4651-8aac-6d15e88145af; IRESSA 827d60e8-7e07-41b7-c28b-49ef1c4a5a41; GILOTRIF fd638e5e-8032-e7ca-0179-95e96ab5d387; TAGRISSO 5e81b4a7-b971-45e1-9c31-29cea8c87ce7 (DailyMed setid)"
+  },
+  {
+   "id": "fda-label-alk",
+   "kind": "guideline",
+   "year": 2026,
+   "citation": "XALKORI (crizotinib) · ALECENSA (alectinib) · LORBRENA (lorlatinib) 미국 허가사항. DailyMed. (크리조티닙: 자몽·자몽주스를 피할 것, 케토코나졸로 AUC 216 % 증가 · 알렉티닙: 강한 CYP3A 억제제(포사코나졸)로 알렉티닙+M4 노출에 의미 있는 변화 없음 · 로라티닙: 강한 CYP3A 억제제 병용을 피할 것, 자몽 언급 없음)",
+   "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=2a51b0de-47d6-455e-a94c-d2c737b04ff7",
+   "access": "open",
+   "fulltext": "XALKORI 2a51b0de-47d6-455e-a94c-d2c737b04ff7; ALECENSA 42c49deb-713b-427a-9670-08af08adcffb; LORBRENA 2b34d62d-e02a-4af3-bc0d-1571dd4ee76d"
+  },
+  {
+   "id": "fda-label-cdk46",
+   "kind": "guideline",
+   "year": 2026,
+   "citation": "IBRANCE (palbociclib) · VERZENIO (abemaciclib) · KISQALI (ribociclib) 미국 허가사항. DailyMed. (입랜스: \"Avoid grapefruit or grapefruit juice\" · 버제니오: 자몽 제품을 피할 것 · 키스칼리: 주로 CYP3A4 대사, 리토나비르로 AUC 3.2배, 강한 CYP3A 억제제를 피할 것 — 미국 허가사항에 자몽 문장은 없음)",
+   "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=fecbdd7d-b729-41b5-9872-231b8fe104ce",
+   "access": "open",
+   "fulltext": "IBRANCE fecbdd7d-b729-41b5-9872-231b8fe104ce; VERZENIO be4bc0de-0fdc-4d46-8d25-be43c79e6a06; KISQALI aaeaef94-f3f5-4367-8ea2-b181d7be2da8"
+  },
+  {
+   "id": "fda-label-sorafenib-lenvatinib",
+   "kind": "guideline",
+   "year": 2026,
+   "citation": "NEXAVAR (sorafenib) · LENVIMA (lenvatinib) 미국 허가사항. DailyMed. (넥사바: 케토코나졸(강한 CYP3A4·P-gp 억제제)이 소라페닙 AUC 를 바꾸지 않음 · 렌비마: 케토코나졸로 AUC 15 %·Cmax 19 % 증가 · 두 약 모두 자몽 언급 없음)",
+   "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=b50667e4-5ebc-4968-a646-d605058dbef0",
+   "access": "open",
+   "fulltext": "NEXAVAR b50667e4-5ebc-4968-a646-d605058dbef0; LENVIMA f4bedd21-efde-44c6-9d9c-b48b78d7ed1e"
+  },
+  {
+   "id": "fda-label-warfarin",
+   "kind": "guideline",
+   "year": 2026,
+   "citation": "Warfarin sodium tablets (Amneal) 미국 허가사항. DailyMed. (7.5: 비타민 K 를 일정한 양으로 유지하는 고른 식사, 녹색 잎채소를 많이 먹는 것 같은 큰 식사 변화를 피할 것 · 코엔자임Q10·세인트존스워트·인삼은 와파린 효과를 줄일 수 있음 · 허브 제품·다른 약을 시작·중단할 때 INR 을 더 자주 확인)",
+   "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=558b7a0d-5490-4c1b-802e-3ab3f1efe760",
+   "access": "open",
+   "fulltext": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=558b7a0d-5490-4c1b-802e-3ab3f1efe760"
+  },
+  {
+   "id": "javaid2024omega3",
+   "kind": "meta",
+   "year": 2024,
+   "citation": "Javaid M, et al. Bleeding Risk in Patients Receiving Omega-3 Polyunsaturated Fatty Acids: A Systematic Review and Meta-Analysis of Randomized Clinical Trials. J Am Heart Assoc. 2024;13(10):e032390. (무작위 시험 11건·120 643명(약 12만 명) · 오메가-3 전체 출혈 비율비 1.09(95 % CI 0.91~1.31) · 고용량 정제 EPA 만 상대위험 50 % 증가(RR 1.50), 절대위험 0.6 %p · 서론: 오메가-3 는 혈소판 응집 조절에 관여 · 연구비 일부 Amarin)",
+   "url": "https://doi.org/10.1161/JAHA.123.032390",
+   "access": "pmc",
+   "fulltext": "PMC11179820"
+  },
+  {
+   "id": "bannerman2011",
+   "kind": "review",
+   "year": 2011,
+   "citation": "Bannerman B, et al. Preclinical evaluation of the antitumor activity of bortezomib in combination with vitamin C or with epigallocatechin gallate, a component of green tea. Cancer Chemother Pharmacol. 2011;68(5):1145-1154. (전임상 동물 실험 — 등급 C 까지만 · 제조사(Millennium) 연구진 · EGCG 혈중 >200 µM 에서만 보르테조밉 효과 소실, 11~16 µM(보충제 복용 시 0.6~3 µM 의 몇 배)에서는 방해 없음 · 결론: 보통의 녹차 섭취는 피할 필요 없음)",
+   "url": "https://doi.org/10.1007/s00280-011-1591-2",
+   "access": "pmc",
+   "fulltext": "PMC3215871"
+  },
+  {
+   "id": "fda-label-capecitabine",
+   "kind": "guideline",
+   "year": 2025,
+   "citation": "XELODA (capecitabine) 미국 허가사항(2025-10 개정). DailyMed. (상자 경고: 비타민 K 길항제 병용 시 출혈 위험 증가·사망 포함 · 7.2 CYP2C9 기질 노출 증가 · 12.3 암 환자 4명에서 S-와파린 AUC 57 % 증가, 청소율 37 % 감소)",
+   "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=e702d84d-7162-4751-bf37-d724cc7e45a5",
+   "access": "open",
+   "fulltext": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=e702d84d-7162-4751-bf37-d724cc7e45a5"
+  },
+  {
+   "id": "fda-label-oxaliplatin",
+   "kind": "guideline",
+   "year": 2024,
+   "citation": "Oxaliplatin injection (Hospira) 미국 허가사항(2024-9 개정). DailyMed. (5.2 급성 신경독성: 투여 뒤 몇 시간~2일 안에 생기고 14일 안에 회복, 찬 온도·찬 물체에 노출되면 생기거나 심해짐 · 17 환자 상담: 찬 음료·얼음을 피할 것 · 환자용 안내: 음료는 따뜻하게 또는 상온으로)",
+   "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=e51a62ba-d163-4c57-835c-8c86cf097e40",
+   "access": "open",
+   "fulltext": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=e51a62ba-d163-4c57-835c-8c86cf097e40"
+  },
+  {
+   "id": "fda-label-cisplatin",
+   "kind": "guideline",
+   "year": 2024,
+   "citation": "Cisplatin injection (Fresenius Kabi) 미국 허가사항. DailyMed. (저마그네슘혈증·저칼슘혈증·저나트륨혈증·저칼륨혈증·저인산혈증 보고, 세뇨관 손상과 관련 · 투여 뒤 24시간 동안 충분한 수분·소변량 유지)",
+   "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=de6302d5-85f0-4116-a709-57826c2c84fe",
+   "access": "open",
+   "fulltext": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=de6302d5-85f0-4116-a709-57826c2c84fe"
+  },
+  {
+   "id": "fda-label-methotrexate",
+   "kind": "guideline",
+   "year": 2026,
+   "citation": "Methotrexate injection (Accord) 미국 허가사항. DailyMed. (5.12·7.1: 엽산이나 그 유도체가 든 제품은 약효를 떨어뜨릴 수 있어 임상적으로 필요할 때만 · 비종양 적응증에서는 부작용을 줄이려 엽산·폴린산 투여)",
+   "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=dd035a9f-cd40-4314-b9d8-2294b8a924e2",
+   "access": "open",
+   "fulltext": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=dd035a9f-cd40-4314-b9d8-2294b8a924e2"
+  },
+  {
+   "id": "fda-label-levothyroxine",
+   "kind": "guideline",
+   "year": 2024,
+   "citation": "SYNTHROID (levothyroxine) 미국 허가사항. DailyMed. (2.1: 빈속에, 아침 식사 30분~1시간 전(one-half to one hour) · 흡수를 방해하는 약과는 4시간 이상 간격 · 표: 탄산칼슘·황산철 4시간 간격 · 7.9: 콩가루·면실박·호두·식이섬유가 흡수를 줄일 수 있고 자몽주스는 흡수를 늦출 수 있음)",
+   "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=1e11ad30-1041-4520-10b0-8f9d30d30fcc",
+   "access": "open",
+   "fulltext": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=1e11ad30-1041-4520-10b0-8f9d30d30fcc"
+  },
+  {
+   "id": "fda-label-dexamethasone",
+   "kind": "guideline",
+   "year": 2026,
+   "citation": "HEMADY (dexamethasone) 미국 허가사항. DailyMed. (5.1 고혈당 · 5.3 혈압 상승, 염분·수분 저류, 칼륨·칼슘 배설 증가 — 식사의 소금 제한과 칼륨 보충이 필요할 수 있음)",
+   "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=6b9cf32c-6d60-4853-bbfd-2304ffc2c129",
+   "access": "open",
+   "fulltext": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=6b9cf32c-6d60-4853-bbfd-2304ffc2c129"
+  },
+  {
+   "id": "fda-label-ppi",
+   "kind": "guideline",
+   "year": 2026,
+   "citation": "NEXIUM (esomeprazole) 미국 허가사항. DailyMed. (5.8 비타민 B12(시아노코발라민) — 장기(예: 3년 넘게) 매일 쓰면 흡수 장애·결핍 가능 · 5.9 저마그네슘혈증 — 3개월 이상 쓴 환자에서 드물게 보고)",
+   "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=f4853677-1622-4037-688b-fdf533a11d96",
+   "access": "open",
+   "fulltext": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=f4853677-1622-4037-688b-fdf533a11d96"
+  },
+  {
+   "id": "vandervelde2014calcium",
+   "kind": "review",
+   "year": 2014,
+   "citation": "van der Velde RY, et al. Calcium and vitamin D supplementation: state of the art for daily practice. Food Nutr Res. 2014;58:21796. (종설 · 구연산칼슘 흡수가 탄산칼슘보다 약 24 % 높음(식사와 무관, Sakhaee 1999 메타분석) · 에스오메프라졸 20 mg 과 위약의 무작위 시험에서 칼슘 흡수 차이 없음 · PPI 복용자에서 칼슘 염 종류별 흡수 차이를 본 연구는 없음)",
+   "url": "https://doi.org/10.3402/fnr.v58.21796",
+   "access": "pmc",
+   "fulltext": "PMC4126954"
+  }
+ ],
+ "ref_annotations": [
+  {
+   "id": "bailey2013grapefruit",
+   "add": "자몽 1개 또는 주스 200 mL 로 충분 · 펠로디핀에서 24시간 간격이면 최대 효과의 25 %(4분의 1) · 라임·포멜로·세비야 오렌지도 같고 네이블·발렌시아 단맛 오렌지는 아님 · 정맥 투여 약은 영향 없음 · 표1: 엘로티닙·크리조티닙 위험 High(크리조티닙 용량 관련 이상반응 QT·골수 억제), 소라페닙은 파조파닙·수니티닙의 '대체 약' 칸"
+  },
+  {
+   "id": "warfarin-vitk",
+   "add": "표 8 보완요법: 코엔자임Q10 오즈비 3.69(95 % CI 1.88~7.24, 약 3.7배) · 생강 오즈비 3.20(95 % CI 2.42~4.24, 약 3.2배) — Shalansky 2007 · 본문 3.8: 'these also require confirmation' · 3.4: 비타민 K 보충은 일상적으로 쓰지 말 것(2C)"
+  },
+  {
+   "id": "kdri2020",
+   "add": "비타민 K 충분섭취량 성인 남 75 µg·여 65 µg · 비타민 D 충분섭취량 19~64세 10 µg·65세 이상 15 µg, 상한섭취량 100 µg · 칼슘 권장섭취량 성인 700~800 mg"
+  },
+  {
+   "id": "shu2009",
+   "add": "상하이 유방암 생존자 5,042명(수술 5,033명, 중앙 3.9년) · 대두 단백 최상위 vs 최하위 4분위: 총사망 HR 0.71(95 % CI 0.54~0.92), 재발·유방암 사망 HR 0.68(0.54~0.87) — 출판본(JAMA) 초록 값 · 타목시펜 복용·비복용 모두에서 관련(present in both) · 주의: PMC 저자 원고판(PMC2874068)에는 0.67·0.66 으로 실려 있다"
+  },
+  {
+   "id": "hadji2017aibl",
+   "add": "아로마타제 억제제 복용 폐경 여성에게 비타민 D 하루 800 IU 이상(최대 2000 IU) · 골절 고위험군은 혈중 25-OH 비타민 D 측정 · 관절통 언급 없음"
+  },
+  {
+   "id": "fda-label-arpi",
+   "add": "얼리다: 케토코나졸 병용 시 아팔루타미드 정상상태 AUC 51 % 증가 예측(활성 성분 합계 28 %)"
+  },
+  {
+   "id": "fda-label-ai",
+   "add": "url 이 AROMASIN 하나만 가리킨다 — FEMARA setid 82b77d74-085f-45ac-a7dd-1f5c038bf406, ARIMIDEX setid acbfaaa9-503c-4691-9828-76a7146ed6de 를 함께 적을 것 · 아리미덱스: 음식은 흡수 속도만 늦추고 흡수량은 그대로(Cmax 16 % 감소, Tmax 2→5시간) · 페마라: CYP3A4·CYP2A6 대사"
+  }
+ ],
+ "remove_refs_from_rules": [
+  {
+   "rule": "int-oxaliplatin-cold",
+   "ref": "espen2021",
+   "why": "ESPEN 2021 원문(scratchpad/audit/dl/espen2021.txt)에 oxaliplatin 0건"
+  },
+  {
+   "rule": "int-cisplatin-mg",
+   "ref": "espen2021",
+   "why": "ESPEN 2021 원문에 cisplatin 0건"
+  },
+  {
+   "rule": "int-mtx-folate",
+   "ref": "espen2021",
+   "why": "ESPEN 2021 원문에 folate·folic·methotrexate 0건"
+  },
+  {
+   "rule": "int-steroid-sugar-na",
+   "ref": "espen2021",
+   "why": "ESPEN 2021 은 스테로이드 부작용으로 인슐린 저항성만 언급, 나트륨·부종 없음"
+  },
+  {
+   "rule": "int-ppi-calcium",
+   "ref": "gastrectomy-nutr",
+   "why": "구독제(초록만), 초록에 PPI·탄산칼슘 없음"
+  },
+  {
+   "rule": "int-levothyroxine-ca-fe",
+   "ref": "kdri2020",
+   "why": "KDRI 에 레보티록신 관련 내용 0건"
+  }
+ ],
+ "judgements": [
+  {
+   "rule": "int-grapefruit-tki",
+   "proposal": "타그리소(오시머티닙)·지오트립(아파티닙) 복용자에게 '피하세요' 를 둘지 — 약을 나눠(엘로티닙·게피티닙 avoid / 오시머티닙·아파티닙 caution 또는 info) 아랫칸을 두는 안",
+   "why": "TAGRISSO 12.3: 이트라코나졸로 AUC +24 %, 'no clinically significant effect' · GILOTRIF 12.3: 'CYP3A4-dependent N-demethylation was not detected' · 자몽을 명시한 것은 엘로티닙 허가사항뿐"
+  },
+  {
+   "rule": "int-grapefruit-alk",
+   "proposal": "알레센자(알렉티닙) 복용자에게 '피하세요' 유지 여부 — 약별 아랫칸 고려",
+   "why": "ALECENSA 12.3: 'No clinically meaningful effect on the combined exposure of alectinib plus M4' (포사코나졸)"
+  },
+  {
+   "rule": "int-grapefruit-sorafenib",
+   "proposal": "avoid → info(또는 caution)로 낮추거나 규칙 삭제 검토",
+   "why": "NEXAVAR 12.3: 케토코나졸이 소라페닙 AUC 를 바꾸지 않음 · LENVIMA: AUC +15 % · 두 허가사항 자몽 0건 · Bailey 2013 표1 은 소라페닙을 '대체 약' 칸에 둠"
+  },
+  {
+   "rule": "int-grapefruit-cdk",
+   "proposal": "키스칼리에 석류(pomegranate) 추가 여부 — EU SmPC 확인 필요(이번에 원문 미확인)",
+   "why": "미국 KISQALI 허가사항에는 자몽·석류 문장 0건. EU 쪽 문구는 추정 단계"
+  },
+  {
+   "rule": "int-bortezomib-greentea",
+   "proposal": "우린 녹차(음료)는 caution 으로 낮추고 농축 녹차추출물(EGCG) 보충제만 avoid 로 두는 안",
+   "why": "Bannerman 2011(PMC3215871): EGCG >200 µM 에서만 길항, 11~16 µM 에서는 길항 없음, 'do not need to avoid normal dietary consumption of green tea' (제조사 연구진 이해상충)"
+  },
+  {
+   "rule": "int-ppi-calcium",
+   "proposal": "caution → info 로 낮추는 안",
+   "why": "van der Velde 2014(PMC4126954): 에스오메프라졸 20 mg RCT 에서 칼슘 흡수 차이 없음, PPI 복용자에서 염 종류별 비교 연구 없음 · Recker 1985 초록: 식사와 함께면 무산증에서도 정상 흡수"
+  },
+  {
+   "rule": "int-levothyroxine-ca-fe",
+   "proposal": "허가사항 7.9 가 자몽주스(흡수 지연)와 콩가루·호두·식이섬유를 든다 — 이 약에 따로 음식 안내(새 규칙)를 둘지",
+   "why": "SYNTHROID 7.9 'Soybean flour, cottonseed meal, walnuts, and dietary fiber may bind…', 'Grapefruit juice may delay the absorption'"
+  }
+ ],
+ "unresolved": [
+  {
+   "rule": "common-grapefruit",
+   "issue": "commonRules.ts 범위 — 정맥 항암제(이 상호작용을 받지 않음)만 맞는 분께도 자몽 '피하세요' 가 붙는 문제는 이 갈래에서 고치지 않았다(onAnticancer 조건이 경구 여부를 가리지 않음). 담당 갈래 확인 필요."
+  },
+  {
+   "rule": "int-oxaliplatin-cold",
+   "issue": "아이스 음료·아이스크림·빙수·냉면·냉국은 이 규칙에 걸리지 않는다(찬 음식 태그가 없고, restrictGroups ['음료'] 때문에 foodIds 를 더해도 걸러진다). '찬음식' 태그를 만들어 autoTag 로 붙이거나 별도 규칙이 필요 — 새 태그/규칙은 이 갈래 권한 밖."
+  },
+  {
+   "rule": "int-warfarin-vitk",
+   "issue": "nutrient(1회 분량 비타민K>100 µg) 경로가 1회 분량이 100 g 으로 잡힌 향신료·기름(후추 가루·산초 가루·혼합식물성유·말린 고추)과 '햄 오리고기'·'일반과자 참깨'를 잡는다. 음식 자료의 serving.g 문제라 이 파일로는 못 고침. '케일 생것' 비타민K 0 도 자료 확인 필요."
+  },
+  {
+   "rule": "int-adt-calcium",
+   "issue": "adt-bone(Saylor 2020 JCO·CCO) 원문을 열지 못함(ascopubs·CCO 403, PMC 없음) — 'ADT 시작 전 골밀도 검사' 는 원문 미확인. cancers/prostate.ts 의 prostate-adt-bone 도 같은 출처라 그 갈래와 함께 정리 필요. 또 prostate-adt-bone 도 vitd-5000 에 '권장' 을 붙이는지 확인 필요(대조 갈래 실측)."
+  },
+  {
+   "rule": "int-capecitabine-warfarin",
+   "issue": "capecitabine-warfarin(Copur 2001)은 구독제·초록만이다. MUST_CITE 로 못 박혀 있어 빼지 않았다 — 이제 허가사항(fda-label-capecitabine)이 핵심 진술을 모두 뒷받침하므로 Copur 를 빼고 MUST_CITE 를 허가사항으로 바꿀지 코디네이터 판단."
+  },
+  {
+   "rule": "int-bortezomib-greentea",
+   "issue": "golden2009(Blood)는 이번에도 원문을 열지 못함(ashpublications 403) — Blood 는 12개월 뒤 무료 공개라 원문 접근 가능성이 있으나 확인 못 함."
+  },
+  {
+   "rule": "int-tamoxifen-soy",
+   "issue": "Shu 2009 의 PMC 판(저자 원고, PMC2874068)은 HR 0.67·0.66 이고 출판본(JAMA, PubMed 초록)은 0.71·0.68 이다. 앱은 출판본 값을 쓴다 — 출처 주석에 차이를 적어 두었다. nechuta2012·chi2013 은 대조 갈래 기준 초록만."
+  },
+  {
+   "rule": "int-warfarin-coq10",
+   "issue": "홍삼 무작위 시험(Lee YH 2010, PMID 19913311)·상반 보고(PMID 18637764)는 구독제라 넣지 않았다. 홍삼에 대한 직접 근거는 와파린 허가사항의 '인삼' 한 줄뿐."
+  }
+ ]
+}

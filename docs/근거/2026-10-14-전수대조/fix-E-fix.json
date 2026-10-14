@@ -1,0 +1,929 @@
+{
+ "files": [
+  "/Users/kwangwonroh/클로드 작업/harucharim-app/src/data/ingredientRules.ts"
+ ],
+ "changes": [
+  {
+   "rule": "ingr:비타민 E",
+   "what": "SELECT·두경부암 시험 숫자의 출처가 KDRI 하나뿐이었다 → select2011·meyer2008smoking·espen2021 추가. 두경부암 문장을 Meyer 2008 이 말하는 대로(치료 중 흡연자에서만) 고침, SELECT 인원 35,533명으로, \"어떤 가이드라인도 권하지 않는다\" 삭제.",
+   "before": "고용량 비타민 E 군 국소 재발·사망 증가 / 35,000명 이상 / 어떤 가이드라인도 권하지 않음",
+   "after": "540명 시험, 치료 중 흡연자에서 재발 2.4배·사망 2.3배(비흡연자 차이 거의 없음) + ESPEN 고용량 비권고 / 35,533명",
+   "sources": [
+    "select2011",
+    "meyer2008smoking",
+    "espen2021"
+   ]
+  },
+  {
+   "rule": "ingr:베타카로틴",
+   "what": "두경부암 문장 출처(Meyer 2008) 추가·흡연자 한정으로 고침. ATBC·CARET 대상과 CARET 의 비타민 A 병용·21개월 조기중단을 밝힘.",
+   "before": "흡연자에게 투여 ATBC 18 %·CARET 28 % 조기 중단 / 두경부암 고용량 항산화제 재발·사망, 특히 흡연자",
+   "after": "남성 흡연자 29,133명 ATBC 18 % / 흡연자·석면 노출자 18,314명, 베타카로틴+비타민 A CARET 28 %, 21개월 조기중단 / 540명 시험, 치료 중 흡연자에서만",
+   "sources": [
+    "atbc1994",
+    "caret1996",
+    "meyer2008smoking"
+   ]
+  },
+  {
+   "rule": "ingr:셀레늄",
+   "what": "기저 셀레늄 결과는 SELECT 본 논문이 아니라 Kristal 2014 사후분석 → kristal2014 추가, \"고위험\"→\"고등급\".",
+   "before": "select2011 하나",
+   "after": "select2011+kristal2014, 사후 분석에서 고등급 전립선암 증가",
+   "sources": [
+    "kristal2014"
+   ]
+  },
+  {
+   "rule": "ingr:고용량 비타민 C",
+   "what": "\"500 mg 안팎 문제없음·1,000 mg 이상 논의\" 는 KDRI 에 없는 기준 → KDRI 실제 값(권장 100·상한 2,000 mg, 1 g 에서도 일부 위장 증상)으로. 치료 중 문장에 ESPEN 권고 5·Meyer 2008 출처 추가.",
+   "before": "하루 500 mg 안팎 문제없음 / 출처 KDRI 만",
+   "after": "권장 100 mg·상한 2,000 mg / ESPEN 권장량 수준·고용량 비권고",
+   "sources": [
+    "kdri2020",
+    "espen2021",
+    "meyer2008smoking"
+   ]
+  },
+  {
+   "rule": "ingr:코엔자임 Q10",
+   "what": "ACCP 와파린 지침은 CoQ10 을 다루지 않음 → NCCIH·MSK·Dobre 2025 로 교체. 반대 근거(24명 무작위 교차시험 INR 변화 없음)를 함께 적음.",
+   "before": "구조가 비타민 K 와 비슷해 와파린 효과 감소 / INR 이 흔들림",
+   "after": "항암 효과 근거 없음, 와파린 효과 약화 보고(반대로 출혈 보고도) / 24명 RCT 변화 없음, 시작·중단 때 INR 확인",
+   "sources": [
+    "nccih-coq10",
+    "msk-coq10",
+    "dobre2025bleeding"
+   ]
+  },
+  {
+   "rule": "ingr:은행잎추출물",
+   "what": "warfarin-vitk 교체 → NCCIH·Dobre 2025. \"뚜렷하게\" 를 관찰 연구 수준으로, 혈소판감소 시기 문장은 \"직접 본 연구 없음\" 명시, DOAC 은 직접 자료 없음 명시.",
+   "before": "혈소판 응집 억제로 출혈 경향 / 와파린 병용 출혈 뚜렷 증가",
+   "after": "징코라이드 — 항응고·항혈소판제와 함께 출혈 위험 / 대규모 진료기록 분석에서 큰 출혈 증가(관찰)",
+   "sources": [
+    "nccih-ginkgo",
+    "dobre2025bleeding"
+   ]
+  },
+  {
+   "rule": "ingr:오메가-3 (EPA·DHA)",
+   "what": "base 를 ESPEN 권고 16 원문대로(대상·약한 권고). 와파린·DOAC 문장은 ESPEN 에 없음 → Dobre 2025(증례)·EFSA 2026(5 g 이하 출혈 증가 없음) 추가, 양쪽을 적음.",
+   "before": "근육 소실 늦출 가능성, 고려할 수 있다 / 혈소판 억제로 출혈 경향 더해짐",
+   "after": "체중감소 위험 진행암 항암 중 제안(약한 권고) / 출혈 증례 있음·INR 확인, 단 5 g 이하 출혈 증가 없음 평가 / DOAC 직접 자료 없음",
+   "sources": [
+    "dobre2025bleeding",
+    "efsa2026dha"
+   ]
+  },
+  {
+   "rule": "ingr:감마리놀렌산",
+   "what": "유일 출처 espen2021 에 해당 내용 0건 → MSK·NCCIH 달맞이꽃. \"근거 없다\" → \"거의 없다\"(MSK 소규모 시험 존재).",
+   "before": "혈소판 기능 영향, 암 환자 이득 근거 없음",
+   "after": "12명 중 9명 출혈 시간 증가 / 암 환자 효과 확인 연구 거의 없음",
+   "sources": [
+    "msk-epo",
+    "nccih-epo"
+   ]
+  },
+  {
+   "rule": "ingr:홍삼·인삼",
+   "what": "espen2021·warfarin-vitk 는 인삼을 다루지 않음 → Barton 2013(364명 3상)·NCCIH·MSK·Dobre 로 교체. \"소규모 연구\" 는 틀림, 미국삼과 홍삼 구별. 혈압 문장·\"혈소판 응집 억제\" 표현은 공개 원문 미확인이라 \"혈액 응고에 영향\" 으로. DOAC 문장은 출처가 말하는 방향(약 농도 감소)으로.",
+   "before": "소규모 연구·결과 일정치 않음 / INR 올린·내린 사례 / DOAC 혈소판 억제로 출혈",
+   "after": "미국삼 364명 8주 개선(4주 1차 평가 비유의), 홍삼 효과 불분명 / 미국삼 RCT INR 저하, 고려인삼 엇갈림 / DOAC 직접 자료 없음, 이론상 농도 감소",
+   "sources": [
+    "barton2013ginseng",
+    "nccih-asian-ginseng",
+    "msk-asian-ginseng",
+    "dobre2025bleeding"
+   ]
+  },
+  {
+   "rule": "ingr:마늘추출물",
+   "what": "WCRF 2018 은 마늘을 limited–no conclusion 으로 내림 → \"권장 대상\" 삭제, 출처 NCCIH·MSK·Dobre 로 교체.",
+   "before": "음식 마늘은 권장 대상",
+   "after": "음식 마늘은 괜찮음(예방 효과 불분명) / 보충제 출혈 위험 / 와파린: 출혈 경향 보고, 전반적 안전 정리도",
+   "sources": [
+    "nccih-garlic",
+    "msk-garlic",
+    "dobre2025bleeding"
+   ]
+  },
+  {
+   "rule": "ingr:대두 이소플라본(농축)",
+   "what": "\"수십 배\" 출처 없음 삭제, \"안전성 자료 없음\" → Shu 2009 이 말하는 \"효과가 다를 수 있다\" 로. 유방암 문장은 조건(유방암 전체)과 맞게.",
+   "before": "수십 배 농축·안전성 자료 없음 / 항호르몬 치료 중에는",
+   "after": "알약으로 농축, 식품과 효과 다를 수 있음 / 유방암에서는(항호르몬 치료 중이면 더욱)",
+   "sources": [
+    "shu2009"
+   ]
+  },
+  {
+   "rule": "ingr:백수오·승마 등 갱년기 원료",
+   "what": "acs2022·easl-nutrition 본문에 해당 내용 0건 → NCCIH·MSK 승마로 교체. \"여성호르몬 유사 작용\" 은 근거가 엇갈려 \"표방\" 까지, 자궁내막 문장은 근거 없음 → 안전성 미확인으로.",
+   "before": "호르몬 유사 작용·간독성·안전성 자료 없음 / 자궁내막은 에스트로겐 자극에 직접 반응",
+   "after": "갱년기 표방, 승마 호르몬 작용 불분명·드문 간 손상(인과 불확실)·유방암·자궁암 안전성 미확인",
+   "sources": [
+    "nccih-black-cohosh",
+    "msk-black-cohosh"
+   ]
+  },
+  {
+   "rule": "ingr:가르시니아캄보지아",
+   "what": "espen2021·easl-nutrition 에 가르시니아 0건 → NCCIH·식약처 2025-09-23 보도자료. 치료 중 \"지방이 아니라 근육\" 단정 삭제 → ESPEN 권고 32·ASCO 권고 3 만큼.",
+   "before": "간독성 반복 보고·식약처 주의 / 빠지는 것은 근육",
+   "after": "간 손상 여러 건·식약처 2025년 9월 회수·주의문구 추가 예정 / 충분한 섭취·활동 유지 권고, 치료 중 감량 근거 부족, 근육 적으면 독성 위험 요인",
+   "sources": [
+    "nccih-garcinia",
+    "mfds2025garcinia",
+    "espen2021",
+    "asco2022"
+   ]
+  },
+  {
+   "rule": "ingr:녹차추출물(카테킨·EGCG)",
+   "what": "easl-nutrition 에 녹차 0건 → NCCIH·EFSA 2018·MSK. 보르테조밉은 세포·동물 실험임을 명시(\"무력화\" 완화).",
+   "before": "농축 추출물 간독성 / 보르테조밉 무력화 실험적 확인",
+   "after": "캡슐형 추출물 드문 간 손상, EGCG 800 mg 이상 간수치 상승 / 세포·동물 실험에서 약효 차단, 사람 자료 없음",
+   "sources": [
+    "nccih-green-tea",
+    "efsa2018catechins",
+    "msk-green-tea"
+   ]
+  },
+  {
+   "rule": "ingr:밀크씨슬(실리마린)",
+   "what": "easl-nutrition 에 0건 → NCCIH·MSK. \"병용 위험 낮음\" 은 자료가 엇갈려 그대로 적음.",
+   "before": "간수치 근거 제한적, 대사효소 영향 적어 병용 위험 낮음",
+   "after": "임상 결과 엇갈림·부족 / CYP3A4 영향 자료 엇갈림, 항암제·와파린 복용 시 알릴 것",
+   "sources": [
+    "nccih-milk-thistle",
+    "msk-milk-thistle"
+   ]
+  },
+  {
+   "rule": "ingr:헛개나무추출물",
+   "what": "easl-nutrition 에 헛개 0건 → 국내 증례 보고(공개 원문, kind case). 등급 C 유지.",
+   "before": "임상 근거 약함, 간독성 사례",
+   "after": "간 기능 개선 확인 연구 부족, 달인 물 장기 복용 뒤 독성 간염 국내 보고",
+   "sources": [
+    "kim2012hovenia"
+   ]
+  },
+  {
+   "rule": "ingr:칼슘",
+   "what": "\"1,000~1,200 mg\" 은 KDRI 숫자가 아님 → KDRI 권장 700~800·상한 2,500/2,000 mg. 전립선 \"1,500 mg\" 은 WCRF 2018 에 없어 삭제, 근거 강도(limited) 명시. 대장암·유방암 문장 출처(wcrf2018·hadji2017aibl) 추가.",
+   "before": "1,000~1,200 mg / 1,500 mg 넘기지 말 것 / 출처 KDRI 만",
+   "after": "700~800 mg, 상한 49세 이하 2,500·50세 이상 2,000 / WCRF 제한적 근거 / 대장암 강한 근거(probable) / AI 골소실 국제 공동 권고",
+   "sources": [
+    "kdri2020",
+    "wcrf2018",
+    "wcrf-prostate",
+    "hadji2017aibl"
+   ]
+  },
+  {
+   "rule": "ingr:비타민 D",
+   "what": "\"암 환자에서 결핍이 매우 흔하다\" 출처 없음 → 삭제. SUNSHINE 양성 신호와 VITAL 결과를 함께 적음(근거 낮추지 않게).",
+   "before": "결핍 매우 흔함·교정 근거 분명 / 초고용량 확인 안 됨",
+   "after": "결핍 있으면 교정 / 139명 2상 신호(1차 비유의)·25,871명 VITAL 암 발생 감소 없음",
+   "sources": [
+    "ng2019",
+    "manson2019",
+    "kdri2020"
+   ]
+  },
+  {
+   "rule": "ingr:철분",
+   "what": "위절제 후 문장은 KDRI 에 없음 → Lim 2012(161명) 숫자로, \"위산이 줄어\" 기전은 공개 원문 미확인이라 뺌. 변비는 Tolkien 2015 메타분석(12 %).",
+   "before": "위산이 줄어 흡수 저하·수년에 걸쳐 결핍 / 변비 흔히 악화",
+   "after": "161명 빈혈 24.5 %→37.1 %, 철 결핍이 주원인 / 복용자 약 12 % 변비",
+   "sources": [
+    "lim2012gastrectomy",
+    "tolkien2015iron"
+   ]
+  },
+  {
+   "rule": "ingr:아연",
+   "what": "espen2021 에 아연·미각 0건 → MSK + KDRI 아연 장(상한 35 mg, 과량 시 구리 흡수 저하). \"몇 주 써 보고 중단\" 은 출처 없는 실무 조언 → 의료진 상의로. 오심·구토 조건 문장은 수준 유지하고 근거만큼.",
+   "before": "무작위 결과 일관되지 않음, 구리 결핍, 몇 주 써 보고 중단 / 결핍 교정 차원에서 시도",
+   "after": "결과 엇갈림, 상한 35 mg·과량 시 구리 흡수 저하, 의료진 상의 / 시도해 볼 수는 있으나 효과 엇갈림",
+   "sources": [
+    "msk-zinc",
+    "kdri2020"
+   ]
+  },
+  {
+   "rule": "ingr:프로바이오틱스(유산균)",
+   "what": "fda-foodsafety 에 프로바이오틱스 0건 → ESPEN 권고 31·MASCC 2020·NCCIH. 지침 간 판단 차이를 그대로 적고, 중심정맥관·균혈증은 공개 원문 미확인이라 면역저하 안전성 미확립으로 줄임.",
+   "before": "소규모 연구 엇갈림·일반적으로 안전 / 중심정맥관 환자 균혈증·패혈증 / 항암제 설사 근거 부족",
+   "after": "ESPEN 근거 부족 vs MASCC 제안, 면역저하 시 위험 큼 / 면역저하 안전성 미확립 / 12편 1,554명 결론 없음",
+   "sources": [
+    "espen2021",
+    "mascc-mucositis",
+    "nccih-probiotics"
+   ]
+  },
+  {
+   "rule": "ingr:루테인·지아잔틴",
+   "what": "KDRI 는 루테인 기준이 없음 → MSK. 근거 부재 진술이라 등급 G→C.",
+   "before": "KDRI, 등급 G",
+   "after": "MSK, 등급 C, \"보고된 바 없음(연구 거의 없음)\"",
+   "sources": [
+    "msk-lutein"
+   ]
+  },
+  {
+   "rule": "ingr:글루코사민·MSM",
+   "what": "KDRI 에 0건 → NCCIH·MSK. 빠져 있던 와파린 출혈 보고를 info 문장에 추가(판정 신설은 judgement).",
+   "before": "상호작용 알려지지 않음 / 출처 KDRI",
+   "after": "항암제 상호작용 보고 없음, 와파린 출혈 위험 증가 관련 보고 / 당뇨: 조절 안 되면 혈당 확인",
+   "sources": [
+    "nccih-glucosamine",
+    "msk-glucosamine"
+   ]
+  },
+  {
+   "rule": "ingr:콜라겐",
+   "what": "espen2021 에 0건 → MSK. \"그대로 가지 않는다·아미노산으로 분해\" 를 원문대로(일부 펩타이드 흡수).",
+   "before": "소화되면 아미노산으로 분해",
+   "after": "대부분 소화, 일부 펩타이드 흡수, 피부 효과 결론 없음, 부작용 보고 없음",
+   "sources": [
+    "msk-collagen"
+   ]
+  },
+  {
+   "rule": "ingr:프로폴리스",
+   "what": "MASCC 는 천연물 일반만 언급 → MSK 프로폴리스 추가. 알레르기 대상 원문대로.",
+   "before": "근거 제한적·벌 산물 알레르기",
+   "after": "효과 불분명·벌독·꿀·돼지풀·국화 알레르기",
+   "sources": [
+    "msk-propolis"
+   ]
+  },
+  {
+   "rule": "ingr:클로렐라·스피루리나",
+   "what": "\"요오드가 많다\" 출처 없음 → 삭제. warfarin-vitk 는 클로렐라를 다루지 않음 → Rzeski 2026·MSK 로 교체. \"비타민 K 함량이 높다\" 는 정량 확인 못해 \"들어 있다\" 로.",
+   "before": "비타민 K·요오드가 많아 와파린·갑상선 문제 / INR 을 흔듦",
+   "after": "비타민 K 가 들어 있어 와파린 영향 가능, 중금속·남조류 독소 오염 / INR 확인",
+   "sources": [
+    "rzeski2026algae",
+    "msk-blue-green-algae"
+   ]
+  },
+  {
+   "rule": "ingr:쏘팔메토",
+   "what": "출처(wcrf-prostate)가 쏘팔메토를 다루지 않음 → CAMUS(PMC 전문)·NCCIH. \"PSA 를 낮춘다\" 는 CAMUS 와 반대라 원문대로 고침(전립선암 avoid 수준은 유지, judgements).",
+   "before": "PSA 에 영향·재발 추적 방해",
+   "after": "단독 증상 개선 거의 없음, 369명 72주·960 mg 까지 PSA 영향 없음 / 그래도 복용 중이면 알릴 것",
+   "sources": [
+    "camus2013",
+    "nccih-saw-palmetto"
+   ]
+  },
+  {
+   "rule": "ingr:커큐민(강황)",
+   "what": "espen2021 에 커큐민 0건 → NCCIH·증례(Smith 2019). 철 흡수 문장을 증례 수준으로. 타목시펜 7.7 % 가 유의하지 않았음을 명시.",
+   "before": "항암 효과 확립 안 됨·고용량 철 흡수 방해 / 7.7 % 낮아졌고",
+   "after": "항암 효과 확인 안 됨, 538 mg×6 캡슐 증례 철결핍 빈혈 / 7.7 % 경향(비유의), 피페린 12.4 % 유의",
+   "sources": [
+    "nccih-turmeric",
+    "smith2019turmeric",
+    "hussaarts2019"
+   ]
+  },
+  {
+   "rule": "ingr:알로에",
+   "what": "espen2021 에 0건 → NCCIH·MSK. 전잎·라텍스(안트라퀴논)만 해당, 겔 제외를 문장에 밝힘(match 는 코디네이터가 이미 좁힘).",
+   "before": "설사 유발",
+   "after": "전잎·라텍스 복통·경련·설사, 겔은 해당 안 됨",
+   "sources": [
+    "nccih-aloe",
+    "msk-aloe"
+   ]
+  },
+  {
+   "rule": "ingr:체지방 감소 표방 원료",
+   "what": "\"근거가 분명\" → ESPEN 권고 강도(strong)·근거(low)에 맞게 \"권고됩니다\". 치료 중 \"지방이 아니라 근육·완주율 직접 연결\" 단정 삭제 → ESPEN 권고 32·ASCO 권고 3 만큼. 효과·간 손상 문장 출처(NCCIH 가르시니아·녹차) 추가.",
+   "before": "효과 미미·간독성 / 식사와 운동 근거 분명 / 근육·완주율 직접 연결",
+   "after": "효과 작거나 불분명·간 손상 보고 / 권고됩니다 / 충분한 섭취·활동 유지 권고, 감량 근거 부족, 근육 적으면 독성 위험 요인",
+   "sources": [
+    "nccih-garcinia",
+    "nccih-green-tea",
+    "espen2021",
+    "asco2022"
+   ]
+  }
+ ],
+ "new_refs": [
+  {
+   "id": "nccih-coq10",
+   "kind": "db",
+   "year": 2019,
+   "citation": "National Center for Complementary and Integrative Health (NIH). Coenzyme Q10 (Last Updated January 2019). (암 치료에 가치가 입증되지 않음 · 일부 항암치료와 맞지 않을 수 있음)",
+   "url": "https://www.nccih.nih.gov/health/coenzyme-q10",
+   "access": "open",
+   "fulltext": "https://www.nccih.nih.gov/health/coenzyme-q10"
+  },
+  {
+   "id": "msk-coq10",
+   "kind": "db",
+   "year": 2026,
+   "citation": "Memorial Sloan Kettering Cancer Center. About Herbs: Coenzyme Q10. (2026-09-29 갱신 · 비타민 K 와 구조가 비슷해 와파린 효과를 약하게 할 수 있음 · 반대로 와파린 병용 출혈 증가 보고도 있음)",
+   "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/coenzyme-q10",
+   "access": "open",
+   "fulltext": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/coenzyme-q10"
+  },
+  {
+   "id": "dobre2025bleeding",
+   "kind": "review",
+   "year": 2025,
+   "citation": "Dobre MZ, et al. Navigating the Effects of Anti-Atherosclerotic Supplements and Acknowledging Associated Bleeding Risks. Int J Mol Sci. 2025;26(20):10183. (서술 종설 · 코엔자임 Q10: 와파린 복용 24명 무작위 교차시험에서 INR 변화 없음, 그 밖의 보고는 INR 저하 · 은행잎: 와파린 병용 큰 출혈 증가(진료기록 약 807,399명), 재향군인 코호트 출혈 HR 1.38(1.20~1.58) · 미국삼 무작위시험에서 INR 저하, 고려인삼-DOAC 직접 자료 없음(이론상 노출 감소) · 생선기름+와파린 출혈 증례 1건 · 마늘은 와파린 복용자에서 전반적으로 안전)",
+   "url": "https://doi.org/10.3390/ijms262010183",
+   "access": "pmc",
+   "fulltext": "PMC12564107"
+  },
+  {
+   "id": "nccih-ginkgo",
+   "kind": "db",
+   "year": 2025,
+   "citation": "National Center for Complementary and Integrative Health (NIH). Ginkgo (Last Updated February 2025). (와파린 등 항응고제 복용자에서 출혈 위험을 높일 수 있음)",
+   "url": "https://www.nccih.nih.gov/health/ginkgo",
+   "access": "open",
+   "fulltext": "https://www.nccih.nih.gov/health/ginkgo"
+  },
+  {
+   "id": "efsa2026dha",
+   "kind": "guideline",
+   "year": 2026,
+   "citation": "EFSA Panel on Nutrition, Novel Foods and Food Allergens (NDA). Scientific opinion on the tolerable upper intake level for supplemental docosahexaenoic acid (DHA). EFSA J. 2026;24(1):e9858. (출혈 합병증 절: EPA+DHA 하루 약 5 g·최장 2년까지는 항혈소판·항혈전제 복용자를 포함해 자발 출혈·출혈 합병증 증가 없음 — EFSA 2012 결론 재인용)",
+   "url": "https://doi.org/10.2903/j.efsa.2026.9858",
+   "access": "pmc",
+   "fulltext": "PMC12802091"
+  },
+  {
+   "id": "msk-epo",
+   "kind": "db",
+   "year": 2022,
+   "citation": "Memorial Sloan Kettering Cancer Center. About Herbs: Evening Primrose Oil. (2022-02-16 갱신 · 달맞이꽃 GLA 를 수개월 복용한 12명 중 9명에서 출혈 시간 유의 증가 · 암 환자 연구는 매우 제한적(간암 1건 효과 없음, 유방암 보조요법 1건))",
+   "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/evening-primrose-oil",
+   "access": "open",
+   "fulltext": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/evening-primrose-oil"
+  },
+  {
+   "id": "nccih-epo",
+   "kind": "db",
+   "year": 2024,
+   "citation": "National Center for Complementary and Integrative Health (NIH). Evening Primrose Oil (Last Updated November 2024). (어떤 건강 상태에도 쓸 만한 근거가 충분하지 않음)",
+   "url": "https://www.nccih.nih.gov/health/evening-primrose-oil",
+   "access": "open",
+   "fulltext": "https://www.nccih.nih.gov/health/evening-primrose-oil"
+  },
+  {
+   "id": "barton2013ginseng",
+   "kind": "rct",
+   "year": 2013,
+   "citation": "Barton DL, et al. Wisconsin Ginseng (Panax quinquefolius) to improve cancer-related fatigue: a randomized, double-blind trial, N07C2. J Natl Cancer Inst. 2013;105(16):1230-1238. (3상 · 40개 기관 364명 · 미국삼 2,000 mg/일 8주 · 1차 종점 4주 P=.07, 8주 P=.003 · 고려인삼(Panax ginseng)이 아님)",
+   "url": "https://doi.org/10.1093/jnci/djt181",
+   "access": "pmc",
+   "fulltext": "PMC3888141"
+  },
+  {
+   "id": "nccih-asian-ginseng",
+   "kind": "db",
+   "year": 2025,
+   "citation": "National Center for Complementary and Integrative Health (NIH). Asian Ginseng (Last Updated February 2025). (혈액 응고에 영향을 줄 수 있음 · 혈당을 낮출 수 있음)",
+   "url": "https://www.nccih.nih.gov/health/asian-ginseng",
+   "access": "open",
+   "fulltext": "https://www.nccih.nih.gov/health/asian-ginseng"
+  },
+  {
+   "id": "msk-asian-ginseng",
+   "kind": "db",
+   "year": 2026,
+   "citation": "Memorial Sloan Kettering Cancer Center. About Herbs: Asian Ginseng. (2026-07-23 갱신 · 항응고제와의 상호작용 연구는 결과가 엇갈림 · 암 관련 피로 효과는 분명하지 않음)",
+   "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/ginseng-asian",
+   "access": "open",
+   "fulltext": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/ginseng-asian"
+  },
+  {
+   "id": "nccih-garlic",
+   "kind": "db",
+   "year": 2025,
+   "citation": "National Center for Complementary and Integrative Health (NIH). Garlic (Last Updated February 2025). (마늘 보충제는 출혈 위험을 높일 수 있음 · 마늘 섭취가 위암 위험을 낮추지 않는 듯하고 대장암은 불확실)",
+   "url": "https://www.nccih.nih.gov/health/garlic",
+   "access": "open",
+   "fulltext": "https://www.nccih.nih.gov/health/garlic"
+  },
+  {
+   "id": "msk-garlic",
+   "kind": "db",
+   "year": 2022,
+   "citation": "Memorial Sloan Kettering Cancer Center. About Herbs: Garlic. (2022-11-18 갱신 · 와파린 항응고 작용을 강화할 수 있음(혈소판 응집 감소·섬유소 용해 증가))",
+   "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/garlic",
+   "access": "open",
+   "fulltext": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/garlic"
+  },
+  {
+   "id": "nccih-black-cohosh",
+   "kind": "db",
+   "year": 2024,
+   "citation": "National Center for Complementary and Integrative Health (NIH). Black Cohosh (Last Updated November 2024). (승마 표기 제품에서 간 손상 사례(드물고 일부 심함, 인과 불확실) · 유방암·자궁암 등 호르몬 민감 질환을 겪은 여성에서 안전성 불확실)",
+   "url": "https://www.nccih.nih.gov/health/black-cohosh",
+   "access": "open",
+   "fulltext": "https://www.nccih.nih.gov/health/black-cohosh"
+  },
+  {
+   "id": "msk-black-cohosh",
+   "kind": "db",
+   "year": 2022,
+   "citation": "Memorial Sloan Kettering Cancer Center. About Herbs: Black Cohosh. (2022-05-26 갱신 · 식물성 에스트로겐으로 작용하는지 불분명, LH·FSH·프로락틴·에스트라디올에 영향 없음 · 간 질환을 악화시킬 수 있음 · 유방암 안전성 불분명)",
+   "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/black-cohosh",
+   "access": "open",
+   "fulltext": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/black-cohosh"
+  },
+  {
+   "id": "nccih-garcinia",
+   "kind": "db",
+   "year": 2025,
+   "citation": "National Center for Complementary and Integrative Health (NIH). Garcinia Cambogia (Last Updated February 2025). (간 손상 사례 여러 건(일부 심함, 드묾) · 체중 감량 효과는 불분명)",
+   "url": "https://www.nccih.nih.gov/health/garcinia-cambogia",
+   "access": "open",
+   "fulltext": "https://www.nccih.nih.gov/health/garcinia-cambogia"
+  },
+  {
+   "id": "mfds2025garcinia",
+   "kind": "db",
+   "year": 2025,
+   "citation": "식품의약품안전처. 보도자료 「가르시니아캄보지아 추출물 이상사례 해당 제품 회수」 2025년 9월 23일. (간 관련 이상사례 2건 · 해당 제품 회수 · 섭취 시 주의사항에 '드물게 간에 해를 끼칠 수 있으며 섭취 기간 중 알코올 섭취를 피해야' 추가 예정)",
+   "url": "https://www.mfds.go.kr/brd/m_99/view.do?seq=49356",
+   "access": "open",
+   "fulltext": "https://www.mfds.go.kr/brd/m_99/view.do?seq=49356"
+  },
+  {
+   "id": "nccih-green-tea",
+   "kind": "db",
+   "year": 2025,
+   "citation": "National Center for Complementary and Integrative Health (NIH). Green Tea (Last Updated February 2025). (드물지만 주로 알약·캡슐형 녹차 추출물에서 간 손상 보고 · 카테킨·카페인의 체중 효과는 작음)",
+   "url": "https://www.nccih.nih.gov/health/green-tea",
+   "access": "open",
+   "fulltext": "https://www.nccih.nih.gov/health/green-tea"
+  },
+  {
+   "id": "efsa2018catechins",
+   "kind": "guideline",
+   "year": 2018,
+   "citation": "EFSA Panel on Food Additives and Nutrient Sources added to Food (ANS). Scientific opinion on the safety of green tea catechins. EFSA J. 2018;16(4):e05239. (보충제로 EGCG 하루 800 mg 이상에서 혈청 간수치 유의 상승 · 전통 방식으로 우린 녹차는 일반적으로 안전, 드문 간 손상)",
+   "url": "https://doi.org/10.2903/j.efsa.2018.5239",
+   "access": "pmc",
+   "fulltext": "PMC7009618"
+  },
+  {
+   "id": "msk-green-tea",
+   "kind": "db",
+   "year": 2026,
+   "citation": "Memorial Sloan Kettering Cancer Center. About Herbs: Green Tea. (2026-08-12 갱신 · EGCG 등 폴리페놀이 보르테조밉 등 보론산 계열 프로테아좀 억제제의 효과를 막을 수 있음(실험 근거) · 미국약전 권장 표시: 간 질환이 있으면 사용하지 말 것)",
+   "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/green-tea",
+   "access": "open",
+   "fulltext": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/green-tea"
+  },
+  {
+   "id": "nccih-milk-thistle",
+   "kind": "db",
+   "year": 2025,
+   "citation": "National Center for Complementary and Integrative Health (NIH). Milk Thistle (Last Updated February 2025). (항암제로 인한 간 문제를 포함한 간 질환 임상 결과는 엇갈리거나 부족해 결론 불가)",
+   "url": "https://www.nccih.nih.gov/health/milk-thistle",
+   "access": "open",
+   "fulltext": "https://www.nccih.nih.gov/health/milk-thistle"
+  },
+  {
+   "id": "msk-milk-thistle",
+   "kind": "db",
+   "year": 2026,
+   "citation": "Memorial Sloan Kettering Cancer Center. About Herbs: Milk Thistle. (2026-07-22 갱신 · CYP3A4 억제 자료와 영향 없음 자료가 엇갈림 · 와파린 병용 INR 상승 증례)",
+   "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/milk-thistle",
+   "access": "open",
+   "fulltext": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/milk-thistle"
+  },
+  {
+   "id": "kim2012hovenia",
+   "kind": "case",
+   "year": 2012,
+   "citation": "Kim YJ, et al. A pediatric case of toxic hepatitis induced by Hovenia dulcis. Pediatr Gastroenterol Hepatol Nutr. 2012;15(2):111-116. (증례 — 3세 남아, 헛개나무 달인 물 약 1년 · 서론에 국내 성인 독성 간염 2건 보고 언급 · 모두 달인 물)",
+   "url": "https://doi.org/10.5223/pghn.2012.15.2.111",
+   "access": "open",
+   "fulltext": "https://synapse.koreamed.org/upload/SynapseData/PDFData/1121pghn/pghn-15-111.pdf"
+  },
+  {
+   "id": "lim2012gastrectomy",
+   "kind": "cohort",
+   "year": 2012,
+   "citation": "Lim CH, et al. Anemia after gastrectomy for early gastric cancer: long-term follow-up observational study. World J Gastroenterol. 2012;18(42):6114-6119. (조기위암 위절제 161명 후향 추적 · 빈혈 3개월 24.5 % → 48개월 37.1 % · 48개월째 빈혈의 주원인은 철결핍)",
+   "url": "https://doi.org/10.3748/wjg.v18.i42.6114",
+   "access": "pmc",
+   "fulltext": "PMC3496888"
+  },
+  {
+   "id": "tolkien2015iron",
+   "kind": "meta",
+   "year": 2015,
+   "citation": "Tolkien Z, et al. Ferrous sulfate supplementation causes significant gastrointestinal side-effects in adults: a systematic review and meta-analysis. PLoS One. 2015;10(2):e0117383. (무작위 43편 6,831명 · 위약 대비 위장관 부작용 OR 2.32 · 변비 보고 27편 통합 발생률 12 %, 95 % CI 10~15 %)",
+   "url": "https://doi.org/10.1371/journal.pone.0117383",
+   "access": "pmc",
+   "fulltext": "PMC4336293"
+  },
+  {
+   "id": "msk-zinc",
+   "kind": "db",
+   "year": 2022,
+   "citation": "Memorial Sloan Kettering Cancer Center. About Herbs: Zinc. (2022-05-25 갱신 · 방사선치료 중 미각 보존 효과는 결과가 엇갈림 · 하루 100~300 mg 고용량은 구리 결핍 등 만성 독성)",
+   "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/zinc",
+   "access": "open",
+   "fulltext": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/zinc"
+  },
+  {
+   "id": "msk-lutein",
+   "kind": "db",
+   "year": 2022,
+   "citation": "Memorial Sloan Kettering Cancer Center. About Herbs: Lutein. (2022-11-16 갱신 · 부작용 보고 없음 · 약물 상호작용 항목 없음)",
+   "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/lutein",
+   "access": "open",
+   "fulltext": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/lutein"
+  },
+  {
+   "id": "nccih-glucosamine",
+   "kind": "db",
+   "year": 2023,
+   "citation": "National Center for Complementary and Integrative Health (NIH). Glucosamine and Chondroitin for Osteoarthritis (Last Updated October 2023). (일부에서 혈당 상승 · 와파린 복용자에서 출혈 위험 증가와 관련)",
+   "url": "https://www.nccih.nih.gov/health/glucosamine-and-chondroitin-for-osteoarthritis",
+   "access": "open",
+   "fulltext": "https://www.nccih.nih.gov/health/glucosamine-and-chondroitin-for-osteoarthritis"
+  },
+  {
+   "id": "msk-glucosamine",
+   "kind": "db",
+   "year": 2026,
+   "citation": "Memorial Sloan Kettering Cancer Center. About Herbs: Glucosamine. (2026-09-30 갱신 · 글루코사민·콘드로이친이 와파린 효과를 키워 INR 상승 가능 · 조절이 안 되는 당뇨·내당능장애는 혈당 관찰)",
+   "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/glucosamine",
+   "access": "open",
+   "fulltext": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/glucosamine"
+  },
+  {
+   "id": "msk-collagen",
+   "kind": "db",
+   "year": 2025,
+   "citation": "Memorial Sloan Kettering Cancer Center. About Herbs: Collagen. (2025-05-09 갱신 · 가수분해 콜라겐 펩타이드는 장에서 흡수 · 피부 보호 효과는 결론 없음 · 부작용 보고 없음)",
+   "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/collagen",
+   "access": "open",
+   "fulltext": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/collagen"
+  },
+  {
+   "id": "msk-propolis",
+   "kind": "db",
+   "year": 2022,
+   "citation": "Memorial Sloan Kettering Cancer Center. About Herbs: Propolis. (2022-07-06 갱신 · 항암치료 구강점막염 효과는 아직 불분명 · 벌독·꿀·돼지풀·국화 알레르기는 피할 것)",
+   "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/propolis",
+   "access": "open",
+   "fulltext": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/propolis"
+  },
+  {
+   "id": "rzeski2026algae",
+   "kind": "review",
+   "year": 2026,
+   "citation": "Rzeski W, Rzeska W. Chlorella and Arthrospira (Spirulina) as multi-pathway biological response modulators: molecular mechanisms, signaling pathways and clinical evidence. Molecules. 2026;31(10):1595. (서술 종설 · 비타민 K 함량으로 항응고제 상호작용 가능 · 주된 안전 문제는 중금속·남조류 독소 오염)",
+   "url": "https://doi.org/10.3390/molecules31101595",
+   "access": "pmc",
+   "fulltext": "PMC13209791"
+  },
+  {
+   "id": "msk-blue-green-algae",
+   "kind": "db",
+   "year": 2023,
+   "citation": "Memorial Sloan Kettering Cancer Center. About Herbs: Blue-Green Algae. (2023-06-05 갱신 · 독성 조류(Microcystis 등)에 오염될 수 있음)",
+   "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/blue-green-algae",
+   "access": "open",
+   "fulltext": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/blue-green-algae"
+  },
+  {
+   "id": "camus2013",
+   "kind": "rct",
+   "year": 2013,
+   "citation": "Andriole GL, et al. The effect of increasing doses of saw palmetto fruit extract on serum prostate specific antigen: analysis of the CAMUS randomized trial. J Urol. 2013;189(2):486-492. (369명 · 72주 · 320→640→960 mg 증량 · PSA 변화 위약 0.16 vs 쏘팔메토 0.23 ng/ml, p=0.50 — 고용량에서도 PSA 영향 없음)",
+   "url": "https://doi.org/10.1016/j.juro.2012.09.037",
+   "access": "pmc",
+   "fulltext": "PMC3979451"
+  },
+  {
+   "id": "nccih-saw-palmetto",
+   "kind": "db",
+   "year": 2025,
+   "citation": "National Center for Complementary and Integrative Health (NIH). Saw Palmetto (Last Updated April 2025). (2023 종설 27편: 단독으로는 전립선비대 증상 개선이 거의 없음 · 고용량에서도 PSA 수치에 영향 없음)",
+   "url": "https://www.nccih.nih.gov/health/saw-palmetto",
+   "access": "open",
+   "fulltext": "https://www.nccih.nih.gov/health/saw-palmetto"
+  },
+  {
+   "id": "nccih-turmeric",
+   "kind": "db",
+   "year": 2025,
+   "citation": "National Center for Complementary and Integrative Health (NIH). Turmeric (Last Updated April 2025). (경구 강황·커큐민이 여러 건강 상태에 이로운지 결론 내릴 근거 부족 · 흡수 강화 제형에서 간 손상 보고)",
+   "url": "https://www.nccih.nih.gov/health/turmeric",
+   "access": "open",
+   "fulltext": "https://www.nccih.nih.gov/health/turmeric"
+  },
+  {
+   "id": "smith2019turmeric",
+   "kind": "case",
+   "year": 2019,
+   "citation": "Smith TJ, Ashar BH. Iron deficiency anemia due to high-dose turmeric. Cureus. 2019;11(1):e3858. (증례 — 66세, 강황 추출물 538 mg 캡슐 하루 6개 복용 중 철결핍성 빈혈, 중단 2주 뒤 회복 · 동물에서 장내 철 결합)",
+   "url": "https://doi.org/10.7759/cureus.3858",
+   "access": "pmc",
+   "fulltext": "PMC6414192"
+  },
+  {
+   "id": "nccih-aloe",
+   "kind": "db",
+   "year": 2025,
+   "citation": "National Center for Complementary and Integrative Health (NIH). Aloe Vera (Last Updated February 2025). (알로에 라텍스 경구 복용은 복통·경련·설사 · 알로에 겔은 42일까지 단기 복용 안전)",
+   "url": "https://www.nccih.nih.gov/health/aloe-vera",
+   "access": "open",
+   "fulltext": "https://www.nccih.nih.gov/health/aloe-vera"
+  },
+  {
+   "id": "msk-aloe",
+   "kind": "db",
+   "year": 2026,
+   "citation": "Memorial Sloan Kettering Cancer Center. About Herbs: Aloe Vera. (2026-10-02 갱신 · 알로에 겔은 안트라퀴논(완하 성분)이 든 알로에 주스·라텍스와 구별)",
+   "url": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/aloe-vera",
+   "access": "open",
+   "fulltext": "https://www.mskcc.org/cancer-care/integrative-medicine/herbs/aloe-vera"
+  }
+ ],
+ "ref_annotations": [
+  {
+   "id": "kdri2020",
+   "add": "비타민 C 권장섭취량 성인 100 mg · 상한 2,000 mg · 2~3 g/일에서 위장 증상, 일부는 1 g/일에서도 · 비타민 D 상한 100 µg(4,000 IU) · 칼슘 권장 성인 700~800 mg, 상한 19~49세 2,500 mg·50세 이상 2,000 mg · 아연 상한 성인 35 mg(과량은 구리 흡수 저하) · 비타민 E 결핍 증세를 보이는 사람은 없는 실정"
+  },
+  {
+   "id": "meyer2008smoking",
+   "add": "540명 · 비타민 E 400 IU·베타카로틴 30 mg/일 · 흡연자 재발 2.4배·사망 2.3배"
+  },
+  {
+   "id": "atbc1994",
+   "add": "남성 흡연자 29,133명 · 베타카로틴 20 mg/일 · 폐암 발생 18 % 증가(95 % CI 3~36 %) — PubMed 초록 대조"
+  },
+  {
+   "id": "caret1996",
+   "add": "흡연자·과거 흡연자·석면 노출자 18,314명 · 베타카로틴 30 mg+레티닐 팔미테이트 25,000 IU · 폐암 RR 1.28(1.04~1.57) · 계획보다 21개월 일찍 중단 — PubMed 초록 대조"
+  },
+  {
+   "id": "espen2021",
+   "add": "권고 4: 단백질 1 g/kg 이상, 가능하면 1.5 g/kg/일 · 권고 5: 비타민·무기질은 권장량 수준, 고용량 미량영양소는 권하지 않음 · 권고 16: 체중감소 위험 진행암 항암 중 오메가-3 제안(약한 권고, 근거 낮음) · 권고 31: 방사선 설사에 프로바이오틱스 권할 일관된 자료 부족, 면역저하 안전성 미확립 · 권고 32 해설: 근육이 적으면 독성 위험 요인"
+  },
+  {
+   "id": "ng2019",
+   "add": "SUNSHINE 2상 139명 · 중앙 PFS 13 vs 11개월(유의하지 않음) · 다변량 HR 0.64(유의)"
+  },
+  {
+   "id": "manson2019",
+   "add": "VITAL 25,871명 · 비타민 D3 2,000 IU/일 · 암 발생 HR 0.96(0.88~1.06)"
+  },
+  {
+   "id": "wcrf2018",
+   "add": "유제품과 칼슘 보충제는 대장암을 막는다는 강한 근거(probable) · 마늘은 대장암 limited – no conclusion"
+  },
+  {
+   "id": "wcrf-prostate",
+   "add": "칼슘 고섭취 식사·유제품 — limited-suggestive(2007 의 strong 에서 강등)"
+  },
+  {
+   "id": "hadji2017aibl",
+   "add": "아로마타제 억제제는 골 소실을 가속(생리적 폐경 대비 2~4배) · AI 시작 시 운동·칼슘/비타민 D 보충 권고"
+  },
+  {
+   "id": "mascc-mucositis",
+   "add": "Table 3: 골반 방사선(항암)치료 설사 예방에 락토바실러스 함유 프로바이오틱스 제안(LoE III) · 천연물·생약은 지침을 만들기에 근거 불충분"
+  },
+  {
+   "id": "asco2022",
+   "add": "권고 3: 치료 중 의도적 체중 감량을 권하거나 말릴 근거 부족 · 건강기능식품은 범위 밖"
+  },
+  {
+   "id": "shu2009",
+   "add": "고찰: 대두 보충제·이소플라본 보충제의 효과는 식품과 다를 수 있음"
+  },
+  {
+   "id": "golden2009",
+   "add": "세포·동물 실험(종설 아님) — kind 를 preclinical 로"
+  },
+  {
+   "id": "nccih-probiotics",
+   "add": "항암치료로 인한 설사: 2018 종설 12편 1,554명, 이로운 효과 근거 불충분 · 항생제 사용 중 C. difficile 설사 위험 감소는 중등도 확실 (이미 references.ts 에 있어 new_refs 대신 주석으로)"
+  }
+ ],
+ "remove_refs_from_rules": [
+  {
+   "rule": "ingr:코엔자임 Q10",
+   "ref": "warfarin-vitk",
+   "why": "ACCP 2012 와파린 지침은 CoQ10 을 다루지 않음"
+  },
+  {
+   "rule": "ingr:은행잎추출물",
+   "ref": "warfarin-vitk",
+   "why": "은행잎을 다루지 않음"
+  },
+  {
+   "rule": "ingr:감마리놀렌산",
+   "ref": "espen2021",
+   "why": "본문에 GLA·달맞이꽃·혈소판 0건"
+  },
+  {
+   "rule": "ingr:홍삼·인삼",
+   "ref": "espen2021",
+   "why": "인삼 0건"
+  },
+  {
+   "rule": "ingr:홍삼·인삼",
+   "ref": "warfarin-vitk",
+   "why": "인삼을 다루지 않음"
+  },
+  {
+   "rule": "ingr:마늘추출물",
+   "ref": "wcrf2018",
+   "why": "마늘 limited–no conclusion, 혈소판 문장 없음"
+  },
+  {
+   "rule": "ingr:백수오·승마 등 갱년기 원료",
+   "ref": "acs2022",
+   "why": "승마·간독성·식물성 에스트로겐 0건"
+  },
+  {
+   "rule": "ingr:백수오·승마 등 갱년기 원료",
+   "ref": "easl-nutrition",
+   "why": "생약·간독성 0건"
+  },
+  {
+   "rule": "ingr:가르시니아캄보지아",
+   "ref": "easl-nutrition",
+   "why": "가르시니아 0건"
+  },
+  {
+   "rule": "ingr:녹차추출물(카테킨·EGCG)",
+   "ref": "easl-nutrition",
+   "why": "녹차 0건"
+  },
+  {
+   "rule": "ingr:밀크씨슬(실리마린)",
+   "ref": "easl-nutrition",
+   "why": "실리마린 0건"
+  },
+  {
+   "rule": "ingr:헛개나무추출물",
+   "ref": "easl-nutrition",
+   "why": "헛개 0건"
+  },
+  {
+   "rule": "ingr:아연",
+   "ref": "espen2021",
+   "why": "아연·미각 0건"
+  },
+  {
+   "rule": "ingr:프로바이오틱스(유산균)",
+   "ref": "fda-foodsafety",
+   "why": "프로바이오틱스 0건"
+  },
+  {
+   "rule": "ingr:루테인·지아잔틴",
+   "ref": "kdri2020",
+   "why": "루테인 기준 없음"
+  },
+  {
+   "rule": "ingr:글루코사민·MSM",
+   "ref": "kdri2020",
+   "why": "글루코사민 0건"
+  },
+  {
+   "rule": "ingr:콜라겐",
+   "ref": "espen2021",
+   "why": "콜라겐 0건"
+  },
+  {
+   "rule": "ingr:클로렐라·스피루리나",
+   "ref": "warfarin-vitk",
+   "why": "클로렐라를 다루지 않음"
+  },
+  {
+   "rule": "ingr:쏘팔메토",
+   "ref": "wcrf-prostate",
+   "why": "쏘팔메토를 다루지 않음(유제품·칼슘 보고서)"
+  },
+  {
+   "rule": "ingr:커큐민(강황)",
+   "ref": "espen2021",
+   "why": "커큐민 0건"
+  },
+  {
+   "rule": "ingr:알로에",
+   "ref": "espen2021",
+   "why": "알로에 0건"
+  }
+ ],
+ "judgements": [
+  {
+   "rule": "ingr:쏘팔메토",
+   "proposal": "전립선암 byCancer avoid → caution 또는 info 로 낮추는 것을 검토",
+   "why": "avoid 의 핵심 이유(PSA 를 낮춰 추적 방해)가 CAMUS RCT(369명, 72주, 최대 960 mg, PSA 변화 위약과 같음 p=0.50, PMC3979451)·NCCIH(\"does not appear to affect readings of PSA\")와 반대. 지금 문장은 \"복용 중이면 알려 주세요\" 수준이라 avoid 와 맞지 않는다."
+  },
+  {
+   "rule": "ingr:은행잎추출물",
+   "proposal": "와파린·DOAC·호중구감소증 avoid 유지 여부 검토(caution 대안)",
+   "why": "근거는 대규모 진료기록·코호트(관찰, HR 1.38)와 기전. 건강인 RCT 18편 메타분석(Kellermann 2011, PMID 21923430)은 응고 지표 변화 없음 — 다만 구독제라 원문 미대조. DOAC·혈소판감소 상황은 직접 자료 없음."
+  },
+  {
+   "rule": "ingr:코엔자임 Q10",
+   "proposal": "와파린 avoid → caution(INR 확인) 검토",
+   "why": "Dobre 2025 종설: 와파린 24명 무작위 교차시험에서 INR·용량 변화 없음, 나머지는 증례·DB 보고. 종설도 \"closer INR monitoring or avoidance\" 로 둘 다 제시."
+  },
+  {
+   "rule": "ingr:홍삼·인삼",
+   "proposal": "와파린 avoid 유지 여부 검토",
+   "why": "미국삼 RCT 에서 INR 저하(효과 감소 방향), 고려인삼은 엇갈림(MSK). \"예측 불가\" 는 맞지만 근거 수준은 C."
+  },
+  {
+   "rule": "ingr:글루코사민·MSM",
+   "proposal": "byMedication.warfarin caution 신설 검토",
+   "why": "NCCIH: \"associated with an increased risk of bleeding in people who are taking the anticoagulant warfarin\", MSK: INR 상승 가능. 지금은 info 문장에만 적었다(규칙 신설 금지)."
+  },
+  {
+   "rule": "ingr:아연",
+   "proposal": "byCondition 오심·구토 prefer 를 빼거나 미각 변화 조건을 새로 두는 것 검토, prefer 수준도 검토",
+   "why": "문장은 미각 변화인데 조건은 오심·구토. 근거(MSK \"results are mixed\")는 권장(prefer)보다 약하다. PatientCondition 에 미각 변화가 없다."
+  },
+  {
+   "rule": "ingr:오메가-3 (EPA·DHA)",
+   "proposal": "base prefer → info, 체중감소·식욕부진 조건에서 prefer 로 옮기는 것 검토",
+   "why": "ESPEN 권고 16 의 대상은 \"항암치료 중·체중감소 위험·영양불량 진행암\" 이고 약한 권고·근거 낮음. 지금은 치료 후 생존자 포함 모든 환자에게 권장으로 뜬다(2,503 제품)."
+  },
+  {
+   "rule": "ingr:클로렐라·스피루리나",
+   "proposal": "두 원료를 나누는 것 검토",
+   "why": "공개 원문에서 클로렐라와 스피루리나의 비타민 K 함량 차이를 확인하지 못했다(Rzeski 2026 은 둘 다 \"vitamin K content\" 로 묶음). 와파린 avoid 의 근거는 일본 증례(Ohkawa 1995, 원문 미대조)·종설 수준."
+  },
+  {
+   "rule": "ingr:대두 이소플라본(농축)",
+   "proposal": "유방암 avoid 를 byMedication(타목시펜·AI)로 옮기거나 caution 검토",
+   "why": "이소플라본 보충제의 유방암 위해를 직접 보인 사람 연구는 인용 출처에 없다(Shu 2009 는 \"효과가 다를 수 있다\" 까지). 칡·석류·로열젤리는 같은 이유로 caution 으로 정했다."
+  },
+  {
+   "rule": "ingr:백수오·승마 등 갱년기 원료",
+   "proposal": "백수오·이엽우피소에 대해 별도 근거 확보 또는 수준 검토",
+   "why": "공개 근거는 모두 승마(블랙코호시)에 관한 것. 백수오 사람 간독성 증례는 찾지 못했고(E2), 2015 이엽우피소 혼입 사건의 식약처 원문은 열지 못했다. 유방암·부인암 avoid 는 \"안전성 미확인\" 근거라 칡·석류(caution)와 형평 검토."
+  },
+  {
+   "rule": "ingr:헛개나무추출물",
+   "proposal": "base caution 유지 여부",
+   "why": "근거는 달인 물 장기 복용 증례 3건(소아 1, 성인 2). 표준화 추출물 제품 증례는 없음. 간암 avoid 는 일반 원칙(성분·용량 미확인 생약)으로 타당."
+  },
+  {
+   "rule": "ingr:녹차추출물(카테킨·EGCG)",
+   "proposal": "보르테조밉 avoid 근거가 세포·동물 실험뿐임을 고려",
+   "why": "Golden 2009(Blood)는 원문을 열지 못했고(403), MSK 는 같은 내용을 2차 인용. 문장에 \"사람 자료 없음\" 을 밝혔다."
+  },
+  {
+   "rule": "ingr:커큐민(강황)",
+   "proposal": "NCCIH 의 \"흡수 강화 제형 간 손상 보고\" 를 문장에 넣을지 검토",
+   "why": "NCCIH Turmeric(2025-04): \"liver damage has been reported in some people who have consumed these bioavailable formulations\". 새 사실이라 이번에는 넣지 않았다."
+  },
+  {
+   "rule": "ingr:체지방 감소 표방 원료",
+   "proposal": "등급 G 유지 여부",
+   "why": "핵심 판단(이 원료를 쓰지 말 것)은 지침(ESPEN·ASCO)이 직접 말하지 않는다 — ASCO 는 보충제를 범위에서 뺀다. 효과·간 손상은 NCCIH(기관 자료). G 보다 C 가 더 정확할 수 있다."
+  }
+ ],
+ "unresolved": [
+  {
+   "rule": "ingr:칼슘",
+   "issue": "byCondition 위절제후(구연산칼슘 유리)·신기능저하(고칼슘혈증·혈관 석회화) 문장의 공개 원문 출처를 찾지 못했다. 기존 gastrectomy-nutr 는 초록만, KDOQI 2020 은 이번에 열지 않았다."
+  },
+  {
+   "rule": "ingr:마그네슘",
+   "issue": "시스플라틴 저마그네슘혈증·신기능저하 고마그네슘혈증 문장의 출처가 refIds(KDRI)에 없다. 시스플라틴 허가사항 등 추가 필요."
+  },
+  {
+   "rule": "ingr:녹차추출물(카테킨·EGCG)",
+   "issue": "golden2009 는 access abstract — 원문 공개 대체를 못 찾아 refIds 에 남겨 두었다(MSK 가 같은 내용). kind 는 preclinical 로 바꿀 것. int-bortezomib-greentea 와 함께 처리 필요."
+  },
+  {
+   "rule": "ingr:홍삼·인삼",
+   "issue": "barton2013ginseng·lim2012gastrectomy(철분) 는 PMC 수록이지만 PubMed 도구가 본문 없이 초록만 돌려줘 PMC 게재 초록으로 숫자를 대조했다(본문 미열람)."
+  },
+  {
+   "rule": "ingr:비타민 E",
+   "issue": "meyer2008smoking 의 Wiley 본문은 403 으로 열지 못했다 — 540명·400 IU·30 mg·HR 은 PubMed 초록으로 확인. Bairati 2006(IJC, 전체 사망 HR 1.38)도 같은 이유로 넣지 않았다. ATBC·CARET 숫자도 PubMed 초록 대조."
+  },
+  {
+   "rule": "ingr:단백질 보충",
+   "issue": "이번 범위에서 문장 변경 없음. byCondition 신기능저하·간성뇌증위험 문장은 refIds(ESPEN)에 직접 근거가 없을 수 있다 — 미대조."
+  }
+ ]
+}

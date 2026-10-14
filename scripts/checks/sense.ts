@@ -447,6 +447,8 @@ const CURED_NOT = /(향|과자|스낵|칩|크래커|비스킷|시즈닝|소스|�
   let deli = 0, deliOk = 0
   for (const f of ALL) {
     if (!DELI.test(f.name) || DELI_NOT.test(f.name)) continue
+    /* 이미 뜨겁게 익혀 내는 요리는 "데워서" 가 필요 없다 — 잣대는 엔진과 따로 둔다(2026-10-14) */
+    if (/솥밥|볶음|찌개|국밥|구이|피자|전골|탕$|덮밥|파스타|스파게티/.test(f.name) && !/샐러드|냉/.test(f.name)) continue
     deli++
     const v = evaluateFood(f, neut, 1)
     if (v.level === 'avoid' || (v.level === 'caution' && howToLines(v).some((t) => /데워/.test(t)))) deliOk++

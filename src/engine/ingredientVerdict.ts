@@ -30,7 +30,18 @@ export interface IngredientVerdict {
 
 const RANK: Record<RuleLevel, number> = { avoid: 3, caution: 2, prefer: 1, info: 0 }
 
-function judge(rule: IngredientRule, patient: PatientContext): IngredientVerdict {
+/**
+ * inName — 그 원료가 제품 이름에 드러났는가. highDoseOnly 원료는 이름에 없으면(곁들여 든 소량) 조건별 판정을 쓰지 않는다.
+ * 원료만 놓고 판정할 때(ingredientKeywords)는 이름을 모르므로 true 로 본다 — 그 뒤 제품마다 judgeProduct 로 다시 거른다.
+ */
+function judge(rule: IngredientRule, patient: PatientContext, inName = true): IngredientVerdict {
+  if (rule.highDoseOnly && !inName) {
+    return {
+      ingredient: rule.name, level: rule.base,
+      reason: rule.reason + ' 이 제품에는 주성분이 아니라 곁들여 들어 있어, 고용량 보충제에서 나온 조건별 경고는 적용하지 않았습니다.',
+      evidence: rule.evidence, refIds: rule.refIds, primary: false
+    }
+  }
   let level = rule.base
   let reason = rule.reason
   let because: string | undefined
@@ -91,7 +102,8 @@ export function judgeProduct(
 
   /* 제품 이름에 드러난 것이 주성분이다 */
   const primary = new Set(findPrimaryIngredients(name, functionText).map((r) => r.name))
-  const items = rules.map((r) => ({ ...judge(r, patient), primary: primary.has(r.name) }))
+  const inName = new Set(findIngredients(name).map((r) => r.name))
+  const items = rules.map((r) => ({ ...judge(r, patient, inName.has(r.name)), primary: primary.has(r.name) }))
   const level = items.reduce<RuleLevel>(
     (acc, v) => (RANK[v.level] > RANK[acc] ? v.level : acc),
     'info'

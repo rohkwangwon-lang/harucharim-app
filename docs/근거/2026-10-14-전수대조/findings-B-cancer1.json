@@ -1,0 +1,1093 @@
+{
+ "batch": "B-cancer1",
+ "reviewed": 36,
+ "items": [
+  {
+   "id": "breast-soy",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "'이득은 ER 양성·음성, 타목시펜 복용·비복용에서 똑같이 나타났습니다' 는 원문보다 강하다. 원문은 양쪽 모두에서 '보였다(evident/present)' 고만 하고, 타목시펜 하위군 HR 은 통계적으로 유의하지 않았으며 저자 스스로 하위분석 검정력이 제한적이라고 썼다.",
+     "source_quote": "These point estimates were not statistically significant due to the small sample size.",
+     "source_loc": "PMC2874068 Results (Table 6 설명 문단) · Discussion 'limited statistical power for sub-analyses'",
+     "fix": "'이득은 에스트로겐 수용체 양성·음성, 타목시펜 복용·비복용 모두에서 같은 방향으로 보였습니다(다만 하위군은 수가 적어 통계적으로 확정되지는 않았습니다).'"
+    },
+    {
+     "type": "other",
+     "detail": "shu2009 의 PMC 판(PMC2874068)은 저자 원고라 숫자가 출판본과 다르다(원고: 5년 재발 13.0 % 대 8.9 %, HR 0.66). 앱의 4년 재발 11.2 % 대 8.0 % 는 JAMA 출판본 초록(PubMed 19996398)과 일치한다. 출처 주석에 '수치는 출판본 초록 기준'을 적어 둘 것.",
+     "source_quote": "the 4-year recurrence rates were 11.2% and 8.0%",
+     "source_loc": "PubMed 19996398 초록(JAMA 출판본) vs PMC2874068 Abstract(저자 원고)",
+     "fix": "references.ts shu2009 주석에 '4년 재발 11.2 %·8.0 % — JAMA 출판본 초록 기준(PMC 저자원고는 5년 수치)' 추가"
+    },
+    {
+     "type": "fulltext",
+     "detail": "chi2013 은 이번 대조에서 PubMed 초록만 봤다(APJCP 저널 사이트 원문은 열지 않음). reason 에 chi2013 고유 숫자는 없어 영향은 작다.",
+     "source_quote": "",
+     "source_loc": "PubMed 23725149",
+     "fix": "원문 대조 목록에서 chi2013 은 '초록만' 으로 표시하거나 저널 PDF 확인"
+    }
+   ],
+   "refs_fulltext": {
+    "shu2009": "fulltext-PMC2874068 (저자 원고 — 출판본과 수치 다름, 출판본 초록으로 대조)",
+    "nechuta2012": "fulltext-PMC3374736",
+    "chi2013": "abstract-only",
+    "acs2022": "fulltext-url (Wiley 무료 공개 CC BY-NC-ND · 브라우저로 본문 열람, 2026-10-14)"
+   },
+   "verified_numbers": {
+    "9,514명": "nechuta2012 | which resulted in a final analytic sample of 9514 women | PMC3374736 Methods",
+    "하루 10 mg 이상": "nechuta2012 | consumption of ≥10 mg isoflavones/d was associated with ... reduced risk of recurrence | PMC3374736 Abstract",
+    "25 %": "nechuta2012 | reduced risk of recurrence (HR: 0.75; 95% CI: 0.61, 0.92) | PMC3374736 Abstract (1−0.75)",
+    "0.75": "nechuta2012 | (HR: 0.75; 95% CI: 0.61, 0.92) | PMC3374736 Abstract·Table 3",
+    "0.61~0.92": "nechuta2012 | (HR: 0.75; 95% CI: 0.61, 0.92) | PMC3374736 Abstract",
+    "5,042명": "shu2009 | cohort study of 5042 female breast cancer survivors in China | PubMed 19996398 초록",
+    "11.2 %": "shu2009 | the 4-year recurrence rates were 11.2% and 8.0% | PubMed 19996398 초록(출판본)",
+    "8.0 %": "shu2009 | the 4-year recurrence rates were 11.2% and 8.0% | PubMed 19996398 초록(출판본)",
+    "2022년": "acs2022 | Limited data that soy isoflavone intake after diagnosis is associated with lower risk of breast cancer recurrence | CA Cancer J Clin 2022 Table(Summary of ... Evidence 2022), Breast-Diet"
+   }
+  },
+  {
+   "id": "breast-pomegranate",
+   "verdict": "ok",
+   "problems": [
+    {
+     "type": "other",
+     "detail": "원문 대조 결과 문제 없음. 참고: Jang 7.3절은 정상체중 하위군 38명에서는 에스트론·테스토스테론 감소가 있었다고 적는다 — 앱은 '전체적으로' 라고 한정해 정확하다. PubMed 반대 근거 검색(석류×유방암×사람)에서 재발·생존을 본 사람 연구는 찾지 못했다.",
+     "source_quote": "presently, there is only one reported clinical study",
+     "source_loc": "PMC11509572 7.3절",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "jang2024": "fulltext-PMC11509572",
+    "chen2018juice": "fulltext-PMC9326888"
+   },
+   "verified_numbers": {
+    "64명": "jang2024 | Sixty-four post-menopausal women, who were in good health, were randomly assigned | PMC11509572 7.3절",
+    "3주": "jang2024 | apple juice (as the control group) for a duration of 3 weeks | PMC11509572 7.3절"
+   }
+  },
+  {
+   "id": "breast-flax",
+   "verdict": "ok",
+   "problems": [
+    {
+     "type": "other",
+     "detail": "숫자 전부 원문과 일치. 사소한 점: 엔테로락톤에서 ER 양성(0.75)만 '유의하지 않았다' 고 쓰면 음성은 유의했던 것처럼 읽힐 수 있다 — 원문은 ER 음성도 0.55(0.28~1.08)로 유의하지 않았다. 리그난 결과는 모두 '진단 전 섭취' 이고 재발 자료는 없다(앱 문구와 일치).",
+     "source_quote": "Both the estrogen receptor–positive (HR = 0.75 ...) and estrogen receptor–negative (HR = 0.55 ...) subgroups showed nonsignificant risk reductions.",
+     "source_loc": "PMC10868383 Results (serum/plasma ENL 문단)",
+     "fix": "'에스트로겐 수용체 양성·음성으로 나누어 보면 둘 다 통계적으로 유의하지 않았고(양성 0.75), 재발과는 관련이 없었습니다.'"
+    }
+   ],
+   "refs_fulltext": {
+    "vandie2024": "fulltext-PMC10868383"
+   },
+   "verified_numbers": {
+    "2024년": "vandie2024 | JNCI Cancer Spectr. 2024;8(1):pkad104 | 서지",
+    "0.91": "vandie2024 | breast cancer–specific or all-cause mortality (HR = 0.91, 95% CI = 0.74 to 1.12 | PMC10868383 Results (Lignans)",
+    "0.66": "vandie2024 | breast cancer–specific mortality (HR = 0.66, 95% CI = 0.42 to 1.03 | PMC10868383 Results (Lignans, postmenopausal)",
+    "1.55": "vandie2024 | Increased risks were found in premenopausal women ... (HR = 1.55, 95% CI = 1.01 to 2.39 | PMC10868383 Results (Lignans)",
+    "28 %": "vandie2024 | serum and/or plasma ENL with breast cancer–specific (28%) and all-cause (31%) mortality | PMC10868383 Discussion",
+    "0.72": "vandie2024 | breast cancer–specific mortality ... (HR = 0.72, 95% CI = 0.58 to 0.90 | PMC10868383 Results (ENL)",
+    "0.75": "vandie2024 | estrogen receptor–positive (HR = 0.75, 95% CI = 0.56 to 1.00 | PMC10868383 Results (ENL)",
+    "25 g": "vandie2024 | an increase in apoptosis in breast cancer with 25 g/day flaxseed | PMC10868383 Discussion"
+   }
+  },
+  {
+   "id": "breast-isoflavone-supp",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "scope",
+     "detail": "이미 알려진 오류(제목은 이소플라본 농축 보충제인데 실제로는 홍삼 하나에만 걸림) — 수정 중이라 하여 재검토 생략.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "진행 중인 수정 따름"
+    },
+    {
+     "type": "claim",
+     "detail": "추가 발견: 유일한 출처 acs2022 본문에는 대두·이소플라본 '보충제' 에 대한 서술이 없다(본문 전체에서 'supplement' 는 감사의 글·영양섭취 일반론·오메가3 섭취 문장 3곳뿐). '농축 보충제는 안전성 자료가 없다·항호르몬 치료 중 권하지 않는다' 의 출처로 쓸 수 없다.",
+     "source_quote": "Limited data that soy isoflavone intake after diagnosis is associated with lower risk of breast cancer recurrence",
+     "source_loc": "CA Cancer J Clin 2022 본문 전체 검색('supplement'·'isoflavone')",
+     "fix": "출처 교체 필요 — 보충제 자체를 다룬 문헌(예: 기관 지침의 보충제 항목)을 찾아 달고, 없으면 '식품 연구만 있고 보충제 연구는 없다' 는 사실 진술로 낮추고 등급을 C 로 유지"
+    }
+   ],
+   "refs_fulltext": {
+    "acs2022": "fulltext-url (Wiley 무료 공개 CC BY-NC-ND · 브라우저로 본문 열람, 2026-10-14)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "breast-alcohol",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "'용량이 늘수록 계속 올라가 안전 구간이 보이지 않습니다' 를 53편 재분석의 결론처럼 붙였지만, 그 논문은 낮은 섭취량에 대한 결론은 측정오차 때문에 내릴 수 없다고 명시한다.",
+     "source_quote": "Any firm conclusion about the risk of breast cancer at low levels of alcohol intake is, however, prohibited by the likelihood of measurement errors",
+     "source_loc": "PMC2562507 Discussion",
+     "fix": "'용량이 늘수록 위험이 직선으로 올랐습니다. 안전한 양이 있다는 근거는 없습니다(국제암연구소·세계암연구기금).' 처럼 '안전 구간 없음' 은 IARC/WCRF 로 귀속하거나 삭제"
+    },
+    {
+     "type": "counter",
+     "detail": "근거는 모두 '유방암 발생' 연구다. 앱 사용자는 유방암 환자인데, 미국암학회 2022 생존자 지침은 진단 후 음주와 재발의 관련은 일관되지 않고 전체 사망과는 관련이 없다고 정리했다. 판정(피하세요)은 바꾸지 말되 이유문에 근거의 대상을 밝힐 것.",
+     "source_quote": "Alcohol intake after breast cancer diagnosis has been inconsistently associated with recurrence",
+     "source_loc": "acs2022 Table 'Summary of ... Evidence 2022' Breast-Alcohol 칸",
+     "fix": "끝에 추가: '이 숫자는 유방암이 처음 생길 위험을 본 연구입니다. 진단 후 음주와 재발의 관계는 연구마다 일관되지 않습니다(미국암학회 2022).' — 판정 수준 조정 여부는 판단 필요"
+    },
+    {
+     "type": "number",
+     "detail": "'10 g 은 소주 한 잔 반, 맥주 300 mL' 는 출처에 없는 계산값이다(계산상 맥주 4.5 % 300 mL ≈ 10.7 g, 소주 16.5 % 50 mL 잔 ≈ 6.5 g → 1.5잔 ≈ 9.8 g 로 대략 맞음).",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "출처 주석에 '앱 계산값' 이라고 표시"
+    },
+    {
+     "type": "fulltext",
+     "detail": "iarc100e(IARC 모노그래프 100E)는 이번에 열어 보지 않았다(기전 문장 '에스트로겐 상승·아세트알데하이드 DNA 손상' 미대조).",
+     "source_quote": "",
+     "source_loc": "https://publications.iarc.who.int/122",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "hamajima2002": "fulltext-PMC2562507",
+    "iarc100e": "fulltext-url (이번에 열지 않음)",
+    "wcrf2018": "fulltext-url (WCRF CUP 암종별 보고서 PDF·권고 웹페이지)"
+   },
+   "verified_numbers": {
+    "53편": "hamajima2002 | 58 515 women with invasive breast cancer and 95 067 controls from 53 studies | PMC2562507 Abstract",
+    "15만 명": "hamajima2002 | 58 515 women with invasive breast cancer and 95 067 controls | PMC2562507 Abstract (합계 153,582 — 앱의 반올림)",
+    "10 g": "hamajima2002 | increasing by 7.1% ... for each additional 10 g per day intake of alcohol | PMC2562507 Results",
+    "7.1 %": "hamajima2002 | an increase of 7.1% in the relative risk of breast cancer for each additional 10 g per day alcohol | PMC2562507 Discussion",
+    "5.5~8.7 %": "hamajima2002 | 95% CI 5.5–8.7% P <0.00001 overall | PMC2562507 Discussion",
+    "300 mL": "unverified (앱 계산값, 출처 문장 없음)"
+   }
+  },
+  {
+   "id": "breast-weight",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "scope",
+     "detail": "이유문의 근거(진단 후 비만·체중 증가와 재발·사망)는 '사람의 체중 상태' 에 대한 것인데, 규칙은 1회 제공량 500 kcal 초과 음식 3,986종(비빔밥·삼계탕·냉면 등 평범한 한 끼 포함)에 생존기 모든 유방암 환자에게 '주의' 를 붙인다. 체중이 줄고 있거나 저체중인 환자에게도 똑같이 뜬다.",
+     "source_quote": "Several studies suggest that weight gain after diagnosis is associated with greater breast cancer-specific mortality",
+     "source_loc": "acs2022 본문 Breast-Anthropometric",
+     "fix": "판단 필요: 체질량지수·체중 추세가 있을 때만 걸리게 하거나 수준을 info 로. 문장 자체는 원문과 일치"
+    },
+    {
+     "type": "claim",
+     "detail": "'폐경 후 지방조직은 아로마타제를 통해 에스트로겐을 만드는 주된 장소' 는 인용한 두 출처에서 확인하지 않았다(교과서적 사실이나 출처 미대조).",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "출처를 달거나 '알려져 있습니다' 수준 유지"
+    }
+   ],
+   "refs_fulltext": {
+    "acs2022": "fulltext-url (Wiley 무료 공개 CC BY-NC-ND · 브라우저로 본문 열람, 2026-10-14)",
+    "wcrf2018": "fulltext-url (WCRF CUP 암종별 보고서 PDF·권고 웹페이지) — 이 규칙 문장과는 대조하지 않음(유방암 생존자 보고서 PDF 다운로드 실패)"
+   },
+   "verified_numbers": {
+    "30 이상": "acs2022 | Postdiagnosis obesity (BMI ≥30 kg/m2) is associated with a higher risk for recurrence and for disease-specific and overall mortality | Table Summary 2022, Breast-Adiposity",
+    "2022년": "acs2022 | The role of weight loss after diagnosis ... and survival is unclear at this time | Table Summary 2022, Breast-Adiposity"
+   }
+  },
+  {
+   "id": "breast-calcium-vitd",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "scope",
+     "detail": "'권장(prefer)' 이 비타민D 5000 IU(=125 µg) 제품에도 붙는다. 같은 이유문이 비타민 D 상한을 100 µg 이라 적으므로 상한을 넘는 제품을 권하는 모순이다.",
+     "source_quote": "50-64 10 100 (비타민 D 충분섭취량 10 μg, 상한섭취량 100 μg)",
+     "source_loc": "kdri2020 지용성비타민 편 비타민 D 섭취기준 표",
+     "fix": "5000 IU 제품은 제외하거나 '주의(상한 초과)' 로; 2000 IU 이하만 prefer"
+    },
+    {
+     "type": "scope",
+     "detail": "minServing(칼슘 105 mg/회)으로 붙다 보니 '라면 말린것(용기라면)', '대구 소금에 절여 말린것', '잔멸치볶음 간장' 같은 고나트륨·가공식품에도 '권장' 이 붙는다.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "고나트륨 태그 식품은 제외하는 조건 추가"
+    },
+    {
+     "type": "scope",
+     "detail": "제목·이유는 '아로마타제 억제제를 쓰는 동안' 인데 subtypes 는 '호르몬수용체양성' 전체라 타목시펜만 쓰는 폐경 전 환자에게도 뜬다.",
+     "source_quote": "In all patients initiating AI treatment, fracture risk should be assessed",
+     "source_loc": "PMC5384888 Abstract",
+     "fix": "약물(아로마타제 억제제) 조건으로 좁히거나 문구를 '호르몬 치료 중' 으로 일반화"
+    },
+    {
+     "type": "fulltext",
+     "detail": "kdca-bone(질병관리청 보도자료) 주소가 404 로 열리지 않는다(2026-10-14 확인). 그 자리의 숫자(700~800 mg, 10~15 µg)는 KDRI 2020 원문 표로 확인되므로 kdca-bone 은 빼도 된다.",
+     "source_quote": "",
+     "source_loc": "https://www.kdca.go.kr/board/board.es?mid=a20501010000&bid=0015&act=view&list_no=723657 → HTTP 404",
+     "fix": "kdca-bone 삭제 또는 살아 있는 주소로 교체"
+    }
+   ],
+   "refs_fulltext": {
+    "hadji2017aibl": "fulltext-PMC5384888",
+    "kdca-bone": "not-found (HTTP 404)",
+    "kdri2020": "fulltext-url (한국영양학회 자료실 zip — 무기질·비타민 편 PDF 표로 대조)"
+   },
+   "verified_numbers": {
+    "7개": "hadji2017aibl | Joint position statement of the IOF, CABS, ECTS, IEG, ESCEO, IMS, and SIOG | PMC5384888 제목",
+    "1,200 mg": "hadji2017aibl | the International Osteoporosis Foundation recommends a daily intake of 1200 mg calcium and 800–1000 I[U] | PMC5384888 Recommendations 문단",
+    "800~1,000 IU": "hadji2017aibl | 1200 mg calcium and 800–1000 I[U] | PMC5384888 Recommendations 문단",
+    "−2.0": "hadji2017aibl | Bone-directed therapy should be given to all patients with a T-score<−2.0 | PMC5384888 Abstract",
+    "−1.5": "hadji2017aibl | or with a T-score of <–1.5 SD with one additional RF, or with ≥2 risk factors | PMC5384888 Abstract",
+    "700~800 mg": "kdri2020 | 칼슘 권장섭취량 성인 남 800·750·700, 여 700·800 mg/일 | KDRI 2020 무기질 편 칼슘 섭취기준 표",
+    "10~15 µg": "kdri2020 | 비타민 D 충분섭취량 19~64세 10, 65세 이상 15 μg/일 | KDRI 2020 비타민 편 비타민 D 섭취기준 표",
+    "2,000 mg": "kdri2020 | 50세 이상의 연령에서는 남녀 모두 칼슘의 상한섭취량을 1일 2,000 mg으로 추정하였다 | KDRI 2020 무기질 편 칼슘 상한섭취량(표 14)",
+    "100 µg": "kdri2020 | 12-14 골격 성장기로서 성인과 동일한 상한섭취량 적용 UL＝100 μg/일 | KDRI 2020 비타민 편 비타민 D 상한섭취량"
+   }
+  },
+  {
+   "id": "breast-her2-cardiac",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "'이 손상을 막아 준다고 입증된 보충제는 없습니다' 는 인용한 ASCO 2017 지침에 없는 문장이다(지침은 보충제를 다루지 않음). 사실상 맞는 말이지만 출처 없는 진술.",
+     "source_quote": "",
+     "source_loc": "JCO 2017;35:893 본문 검색 'supplement' 0건(권고 관련)",
+     "fix": "삭제하거나 '지침에 보충제 권고는 없습니다' 로"
+    },
+    {
+     "type": "other",
+     "detail": "나머지 대조 결과 일치: 권고 3.1(흡연·고혈압·당뇨·이상지질혈증·비만), 근거 수준 insufficient, 30 Gy 이상 고위험.",
+     "source_quote": "Clinicians should screen for and actively manage modifiable cardiovascular risk factors (smoking, hypertension, diabetes, dyslipidemia, obesity)",
+     "source_loc": "JCO 2017 Recommendation 3.1",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "asco-cardio": "fulltext-url (ascopubs 무료 공개 · 브라우저로 본문 열람)"
+   },
+   "verified_numbers": {
+    "30 Gy": "asco-cardio | High-dose radiotherapy (RT; ≥ 30 Gy) where the heart is in the treatment field | JCO 2017 Recommendation 1.1"
+   }
+  },
+  {
+   "id": "breast-tnbc-focus",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "scope",
+     "detail": "내용은 '삼중음성이면 항호르몬 관련 주의가 해당 없음 + 운동·체중' 이라는 일반 안내인데, 고식이섬유·고단백 태그 음식 2,725종(피자 XL·치킨 핫윙·한우 등심 포함)에 붙어 그 음식에 대한 설명처럼 보인다.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "음식에 붙이지 말고 암종·아형 안내 카드로 옮기거나 match 를 비움"
+    },
+    {
+     "type": "other",
+     "detail": "문장 대조 결과 일치: ASCO 2022 권고 1.1(강한 권고), ACS 2022 신체활동–유방암·전체 사망, 체중 감량 효과 불분명.",
+     "source_quote": "Oncology providers should recommend aerobic and resistance exercise during active treatment with curative intent",
+     "source_loc": "JCO 2022 Recommendation 1.1 (Strength: strong)",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "asco2022": "fulltext-url (ascopubs 무료 공개 · 브라우저로 본문 열람)",
+    "acs2022": "fulltext-url (Wiley 무료 공개 CC BY-NC-ND · 브라우저로 본문 열람, 2026-10-14)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "breast-fiber-veg",
+   "verdict": "ok",
+   "problems": [
+    {
+     "type": "other",
+     "detail": "ACS 2022 요약표와 일치. '포만감·인슐린 저항성·만성 염증' 기전 문장은 출처 대조하지 않음(WCRF 대장 보고서 기전 절에 유사 서술은 있음).",
+     "source_quote": "There is insufficient evidence to support that a healthy diet pattern ... is associated with breast cancer recurrence or breast cancer-specific mortality",
+     "source_loc": "acs2022 Table Summary 2022, Breast-Diet",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "wcrf2018": "fulltext-url (WCRF CUP 암종별 보고서 PDF·권고 웹페이지)",
+    "acs2022": "fulltext-url (Wiley 무료 공개 CC BY-NC-ND · 브라우저로 본문 열람, 2026-10-14)"
+   },
+   "verified_numbers": {
+    "2022년": "acs2022 | Healthy postdiagnosis diet patterns/more plant-based diets are associated with lower overall and nonbreast cancer–specific mortality | Table Summary 2022"
+   }
+  },
+  {
+   "id": "stomach-salted",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "scope",
+     "detail": "근거(Ge 2012·Yoo 2020·WCRF)는 모두 일반인의 '위암 발생' 연구다. 이미 위암 치료를 받은 환자의 재발·생존 자료가 아님을 한 줄 밝힐 것.",
+     "source_quote": "Foods preserved by salting: Consumption of foods preserved by salting is probably a cause of stomach cancer.",
+     "source_loc": "WCRF CUP Stomach 2016 Summary",
+     "fix": "'이 숫자들은 위암이 생길 위험을 본 연구입니다.' 추가"
+    },
+    {
+     "type": "scope",
+     "detail": "염장 태그로 배추김치·깍두기에도 '피하세요' 가 붙는데, 같은 음식에 stomach-kimchi 는 '주의 — 끊기보다 덜 짜게' 라고 말한다. 한 음식에 상반된 두 판정.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "판단 필요: 김치는 stomach-kimchi 만 적용되게 염장 규칙에서 제외"
+    },
+    {
+     "type": "claim",
+     "detail": "'H. pylori 집락 형성과 DNA 손상을 함께 증폭' — Ge 2012 고찰은 점막 손상·H. pylori 집락 증가·증식/돌연변이 가능성을 말하지만 'DNA 손상 증폭' 이라는 표현은 없다(경미).",
+     "source_quote": "The damage caused by salt may also increase gastric H. pylori colonization.",
+     "source_loc": "PMC3485508 Discussion",
+     "fix": "'H. pylori 가 자리 잡기 쉬운 환경을 만듭니다' 정도로"
+    }
+   ],
+   "refs_fulltext": {
+    "ge2012salt": "fulltext-PMC3485508",
+    "wcrf2018": "fulltext-url (WCRF CUP 암종별 보고서 PDF·권고 웹페이지)",
+    "yoo2020pickled": "fulltext-PMC7225928"
+   },
+   "verified_numbers": {
+    "207만 명": "ge2012salt | (total population: n = 2076498; events: n = 12039) | PMC3485508 Abstract",
+    "2.05배": "ge2012salt | (OR = 2.05 95% CI [1.60, 2.62] | PMC3485508 Results (오즈비)",
+    "1.27배": "ge2012salt | 1.27 (95% CI, [1.22, 1.32]) for studies conducted in Asia | PMC3485508 Results",
+    "40 g": "yoo2020pickled | 1.15 (95% CI 1.07–1.23) for 40 g/day increment in pickled vegetable intake | PMC7225928 Abstract",
+    "15 %": "yoo2020pickled | 1.15 (95% Confidence Interval (CI), 1.07–1.23) for 40 g/day increment | PMC7225928 Abstract",
+    "1.17": "yoo2020pickled | the pooled risk of gastric cancer incidence was 1.17 (95% CI, 0.99–1.38) times higher, comparing the highest to the lowest | PMC7225928 Abstract",
+    "0.99~1.38": "yoo2020pickled | 1.17 (95% CI, 0.99–1.38) | PMC7225928 Abstract (최고 대 최저 비교)"
+   }
+  },
+  {
+   "id": "stomach-sodium",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "'한국인 나트륨 섭취의 절반 이상이 국·찌개·김치에서 옵니다' 는 인용한 knhanes 출처에 없다(주석은 섭취량 3,255 mg 뿐이고 URL 도 없음). 식약처 보고서를 인용한 보도는 '면·만두·김치·국탕·볶음·찌개전골 다섯 군 합쳐 54 %' 로, 국·찌개·김치만으로 절반이라는 말과 다르다(1차 자료는 열지 못함 — 추정).",
+     "source_quote": "",
+     "source_loc": "knhanes 참고문헌 항목(URL 없음)",
+     "fix": "1차 자료(국민건강영양조사 식품군별 나트륨 기여 표 또는 식약처 섭취실태 보고서)를 찾아 숫자를 그대로 쓰거나 문장 삭제"
+    },
+    {
+     "type": "claim",
+     "detail": "'국물만 남겨도 한 끼 나트륨을 절반 가까이 줄일 수 있어, 실천 가능성이 가장 높은 개입' 은 어느 출처에도 없다.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "출처를 찾거나 '국물을 남기면 나트륨을 크게 줄일 수 있습니다' 로 낮추고 근거 표시 제거"
+    },
+    {
+     "type": "grade",
+     "detail": "ge2012salt 는 '고염 식사와 위암 발생' 근거일 뿐, 위암 환자에서 국물 나트륨을 줄이는 것의 효과 근거가 아니다. WCRF 는 총 소금·첨가 소금 자체에 대해서는 '결론 없음' 으로 분류했다(염장식품만 probable). 등급 B 는 과함.",
+     "source_quote": "total salt; added salt; fruit juices ... (Limited – no conclusion)",
+     "source_loc": "WCRF CUP Stomach 2016 Summary matrix",
+     "fix": "등급 C, 이유문은 '염장식품 위험(WCRF probable)' 과 '일반 나트륨 권고' 를 구분"
+    }
+   ],
+   "refs_fulltext": {
+    "ge2012salt": "fulltext-PMC3485508",
+    "knhanes": "not-found (참고문헌에 URL·표 위치 없음)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "stomach-kimchi",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "scope",
+     "detail": "Kim 2010 메타분석의 '절인 채소' 는 일본 쓰케모노·한국 장아찌 예로 정의되고 단일 식품 문항은 제외했다 — 김치를 직접 본 수치가 아니다. 김치를 절인 채소에 명시적으로 넣은 근거는 이미 등록된 yoo2020pickled(김치·장아찌를 pickled vegetables 로 정의)이다.",
+     "source_quote": "We considered kimchi, and jangajji (non-fermented pickled vegetables) as pickled vegetables",
+     "source_loc": "PMC7225928 Methods (KoGES 식사평가)",
+     "fix": "refIds 에 yoo2020pickled 추가, '김치를 포함한 절인 채소' 로 표현"
+    },
+    {
+     "type": "claim",
+     "detail": "'김치에는 유산균과 식이섬유라는 이점' 은 인용 출처에 없다. 반대 근거 검색 결과 김치와 위암의 역학은 일관되지 않다는 2025 논평이 있다(결론은 앱과 같은 방향: 나트륨 줄이기).",
+     "source_quote": "Epidemiologic findings on kimchi and gastric cancer remain inconsistent",
+     "source_loc": "PMID 41560871 (Prev Med Rep 2025, 논평) 초록",
+     "fix": "이점 문장은 출처 없이 단정하지 말 것"
+    }
+   ],
+   "refs_fulltext": {
+    "kimhj2010veg": "fulltext-PMC11159166",
+    "kim2010saltpref": "abstract-only (AJCN · PubMed 20219954 초록)",
+    "ge2012salt": "fulltext-PMC3485508"
+   },
+   "verified_numbers": {
+    "38 %": "kimhj2010veg | high intake of fresh vegetables ... (overall summary OR = 0.62, 95% CI = 0.46–0.85) | PMC11159166 Abstract (1−0.62)",
+    "0.62": "kimhj2010veg | (overall summary OR = 0.62, 95% CI = 0.46–0.85) | PMC11159166 Abstract",
+    "28 %": "kimhj2010veg | (overall summary OR = 1.28, 95% CI = 1.06–1.53) | PMC11159166 Abstract",
+    "1.28": "kimhj2010veg | high intake of pickled vegetables ... (overall summary OR = 1.28, 95% CI = 1.06–1.53) | PMC11159166 Abstract",
+    "224만 명": "kim2010saltpref | The final data analysis included 2,248,129 study subjects. | PubMed 20219954 초록",
+    "1.10배": "kim2010saltpref | The HRs were 1.10 (95% CI: 1.04, 1.16) ... for the overall total population | PubMed 20219954 초록"
+   }
+  },
+  {
+   "id": "stomach-grilled",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "'PAH·HCA 는 위·대장 점막에 대한 유전독성 물질로 분류됩니다' 와 '탄 부분을 잘라내는 것만으로 노출을 크게 줄일 수 있습니다' 는 인용 출처에 없다. 오히려 IARC 는 조리 방법이 암 위험에 영향을 주는지 결론 낼 자료가 부족하다고 했고, WCRF 는 PAH·HCA 근거가 강한 기전 뒷받침이 되지 못한다고 했다(위암에서 B[a]P 무관).",
+     "source_quote": "not enough data for the IARC Working Group to reach a conclusion about whether the way meat is cooked affects the risk",
+     "source_loc": "IARC Monographs Q&A Vol.114 p1",
+     "fix": "'고온 직화로 구운 고기·생선을 많이 먹을수록 위암 위험이 높다는 제한적 근거가 있습니다(WCRF). 탄 부분은 잘라 내시는 편이 낫습니다.' — 유전독성 분류·노출 감소 문장 삭제"
+    },
+    {
+     "type": "counter",
+     "detail": "WCRF: 위암에서 PAH(B[a]P) 추정 섭취는 관련 없음, HCA 는 한 연구 일부만 유의.",
+     "source_quote": "Evidence on polycyclic aromatic hydrocarbons and heterocyclic amines did not provide strong mechanistic support.",
+     "source_loc": "WCRF CUP Stomach 2016 7.6절",
+     "fix": ""
+    },
+    {
+     "type": "scope",
+     "detail": "WCRF 근거는 '구운(grilled/barbecued) 고기·생선' 이다. '훈제' 태그로 편의점 훈제란·베이컨까지 걸리는데 훈제 식품은 이 근거의 대상이 아니다(베이컨은 가공육 규칙으로 이미 다뤄짐).",
+     "source_quote": "Grilled (broiled) or barbecued (charbroiled) meat and fish",
+     "source_loc": "WCRF CUP Stomach 2016 Summary matrix (Limited–suggestive)",
+     "fix": "match 에서 '훈제' 제외 또는 훈제란 제외"
+    }
+   ],
+   "refs_fulltext": {
+    "wcrf2018": "fulltext-url (WCRF CUP 암종별 보고서 PDF·권고 웹페이지)",
+    "iarc114": "fulltext-url (IARC Q&A PDF — 모노그래프 본편은 열지 않음)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "stomach-b12",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "counter",
+     "detail": "'전절제 후에는 경구 섭취만으로 흡수되지 않아 보통 주사로 보충' 은 틀린 일반화다. 위암 전절제 환자에서 고용량 경구 B12(하루 500~1,500 µg)로 혈중 농도가 정상화된 전향 연구·무작위 2상이 있다. 음식 수준의 B12 가 흡수되지 않는다는 것과 고용량 경구 보충이 안 듣는다는 것은 다르다.",
+     "source_quote": "Oral vitamin B12 replacement is an effective and safe treatment for vitamin B12 deficiency after total gastrectomy",
+     "source_loc": "PubMed 21556950 (Kim HI, Ann Surg Oncol 2011) 결론; PubMed 35896261 (Aoyama 2022 무작위 2상: 500 µg 91.7 %, 1,500 µg 100 % 정상화)",
+     "fix": "'전절제 후에는 음식 속 B12 가 거의 흡수되지 않아 평생 보충이 필요합니다. 주사(예: 월 1회)나 고용량 먹는 약(하루 수백~1,500 µg) 모두 쓰이며, 방법은 담당 의사와 정하세요.'"
+    },
+    {
+     "type": "counter",
+     "detail": "'평생 정기 보충' 에 대해 국립암센터 후향 연구는 검사 기반 간헐 보충도 증상·혈색소에 차이가 없었다고 보고 — 문구를 '정기 검사와 함께 보충' 으로.",
+     "source_quote": "Replacing vitamin B12 with a lab-based protocol may be sufficient for TG patients.",
+     "source_loc": "PMC10605534 (Park 2023) Abstract",
+     "fix": ""
+    },
+    {
+     "type": "scope",
+     "detail": "'권장' 이 센트룸·종합비타민(B12 2.4~25 µg)·아로나민 골드(B12 0.02 mg)에 붙는다. 전절제 후 결핍 교정 용량이 아니라서, 종합비타민을 먹으면 해결되는 것처럼 읽힐 수 있다.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "match 를 고함량 B12 제품으로 좁히거나 문구에 '종합비타민 용량으로는 부족' 명시"
+    },
+    {
+     "type": "fulltext",
+     "detail": "두 출처 모두 구독제라 초록만 확인. Rogers 2011 본문의 '주사 월 1회' 서술은 대조하지 못함.",
+     "source_quote": "",
+     "source_loc": "PubMed 21447764 / 37669168",
+     "fix": "원문 공개 대체 출처 검토(예: PMC10605534 등)"
+    }
+   ],
+   "refs_fulltext": {
+    "gastrectomy-nutr": "abstract-only (Nutr Clin Pract 구독제 · PubMed 21447764 초록만)",
+    "b12-gastrectomy-meta": "abstract-only (Eur J Cancer Prev 구독제 · PubMed 37669168 초록만)"
+   },
+   "verified_numbers": {
+    "2,627명": "b12-gastrectomy-meta | Fourteen studies, including 2627 GC patients who underwent surgery | PubMed 37669168 초록",
+    "48.8 %": "b12-gastrectomy-meta | the prevalence of vitamin B12 deficiency after gastrectomy ... was 48.8% | PubMed 37669168 초록",
+    "32.4~65.2 %": "b12-gastrectomy-meta | 48.8% (95% CI:32.4, 65.2%, I 2 : 98.85 | PubMed 37669168 초록"
+   }
+  },
+  {
+   "id": "stomach-b12-partial",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "scope",
+     "detail": "b12-gastrectomy-meta 는 제목이 '전절제 후(after total gastrectomy)' 다. 부분절제 규칙의 출처로 달면 대상이 어긋난다(초록 본문은 'gastrectomy' 로만 적어 포함 범위 불명 — 원문 미확인).",
+     "source_quote": "Vitamin B12 deficiency after total gastrectomy for gastric cancer",
+     "source_loc": "PubMed 37669168 제목",
+     "fix": "부분절제 규칙에서는 빼거나, 부분절제 자료를 따로 보고한 문헌으로 교체"
+    },
+    {
+     "type": "claim",
+     "detail": "'남은 위 점막이 위축되면서 수년 뒤 서서히 부족 — 정기 확인 권고' 는 Rogers 초록에 없어 대조 못 함(구독제).",
+     "source_quote": "",
+     "source_loc": "PubMed 21447764",
+     "fix": "원문 확인 또는 공개 출처로 교체"
+    },
+    {
+     "type": "scope",
+     "detail": "'미리 고용량을 드실 이유는 없다' 고 하면서 match 는 임팩타민 파워 같은 고함량 B군 제품에 '권장' 을 붙인다 — 문장과 판정이 어긋남.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "부분절제에서는 level 을 info 로 하거나 고함량 제품 제외"
+    },
+    {
+     "type": "grade",
+     "detail": "근거는 초청 종설(Rogers) + 전절제 유병률 메타라 부분절제 권고의 등급 B 는 과함.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "등급 C"
+    }
+   ],
+   "refs_fulltext": {
+    "gastrectomy-nutr": "abstract-only (Nutr Clin Pract 구독제 · PubMed 21447764 초록만)",
+    "b12-gastrectomy-meta": "abstract-only (Eur J Cancer Prev 구독제 · PubMed 37669168 초록만)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "stomach-dumping",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "fulltext",
+     "detail": "유일한 출처가 구독제 종설이라 초록만 확인. 초록은 '표준 위절제 식단을 뒷받침할 문헌이 충분치 않다, 증상에 맞춘 개별 조정' 까지만 확인된다. '2~3시간 뒤 후기 덤핑', '20~30분 비스듬히 누워' 는 대조 못 함.",
+     "source_quote": "there is not sufficient literature to support a standard postgastrectomy diet",
+     "source_loc": "PubMed 21447764 초록",
+     "fix": "공개 원문 출처 추가(덤핑 국제 합의 등) 또는 '원문 미대조' 표시"
+    },
+    {
+     "type": "scope",
+     "detail": "'고당' 태그 2,839종에 걸려 군고구마·포도·망고·고추장·양파 가루까지 '주의' 가 된다. 이유문은 농축 당(단 음료·주스·과자)이다.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "단순당 함량이 높은 음료·과자·디저트로 좁힘"
+    }
+   ],
+   "refs_fulltext": {
+    "gastrectomy-nutr": "abstract-only (Nutr Clin Pract 구독제 · PubMed 21447764 초록만)"
+   },
+   "verified_numbers": {
+    "2~3시간": "unverified (Rogers 원문 미확보)",
+    "20~30분": "unverified (Rogers 원문 미확보)"
+   }
+  },
+  {
+   "id": "stomach-small-meals",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "fulltext",
+     "detail": "출처가 구독제 종설 초록뿐 — '하루 5~6회' 는 대조 못 함.",
+     "source_quote": "",
+     "source_loc": "PubMed 21447764",
+     "fix": ""
+    },
+    {
+     "type": "scope",
+     "detail": "고열량밀도·고단백 태그 4,963종에 '권장' — 크리스탈슈가 도넛·버거·피자도 포함되어, 같은 수술 직후 단계의 덤핑 규칙('고당' 주의)과 한 음식에서 충돌한다.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "고당 태그 식품은 제외"
+    }
+   ],
+   "refs_fulltext": {
+    "gastrectomy-nutr": "abstract-only (Nutr Clin Pract 구독제 · PubMed 21447764 초록만)"
+   },
+   "verified_numbers": {
+    "5~6회": "unverified (Rogers 원문 미확보)"
+   }
+  },
+  {
+   "id": "stomach-bezoar",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "fulltext",
+     "detail": "출처(Rogers 종설)는 초록만 확인되어 감·위석 서술이 실제 있는지 대조하지 못했다. 공개 원문 증례들이 있다(예: 위소매절제 후 감 위석 증례 PMC9428366, 위석 증례 PMC5706413) — '드물지 않게 보고' 는 증례 보고 수준이라는 점도 등급 C 와 맞다.",
+     "source_quote": "",
+     "source_loc": "PubMed 21447764 / PMC9428366",
+     "fix": "공개 증례·종설로 출처 교체"
+    }
+   ],
+   "refs_fulltext": {
+    "gastrectomy-nutr": "abstract-only (Nutr Clin Pract 구독제 · PubMed 21447764 초록만)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "stomach-iron-ca",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "scope",
+     "detail": "'철분풍부·고칼슘' 태그로 '프랑스 소금꽃'(소금)·초코 머핀·그래놀라 등에 위암 환자 '권장' 이 붙는다. 소금에 권장이 붙는 것은 염장·나트륨 규칙과 정면으로 충돌.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "고나트륨·염장·고당 태그 식품을 제외하는 조건 추가"
+    },
+    {
+     "type": "fulltext",
+     "detail": "출처가 구독제 종설 초록뿐 — '구연산칼슘이 유리', '수년에 걸쳐 철결핍' 은 대조 못 함.",
+     "source_quote": "",
+     "source_loc": "PubMed 21447764",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "gastrectomy-nutr": "abstract-only (Nutr Clin Pract 구독제 · PubMed 21447764 초록만)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "crc-processed-meat",
+   "verdict": "ok",
+   "problems": [
+    {
+     "type": "other",
+     "detail": "IARC Q&A 와 일치(10편·50 g·18 %, Group 1). '햄 2~3장, 소시지 1개 ≈ 50 g' 은 출처 없는 환산값. 순대는 IARC 정의(혈액 등 부산물 포함)에 맞음.",
+     "source_quote": "every 50 gram portion of processed meat eaten daily increases the risk of colorectal cancer by about 18%",
+     "source_loc": "IARC Q&A Vol.114 p3",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "iarc114": "fulltext-url (IARC Q&A PDF)",
+    "wcrf2018": "fulltext-url (WCRF CUP 암종별 보고서 PDF·권고 웹페이지)"
+   },
+   "verified_numbers": {
+    "10편": "iarc114 | An analysis of data from 10 studies estimated | IARC Q&A p3",
+    "50 g": "iarc114 | every 50 gram portion of processed meat eaten daily | IARC Q&A p3",
+    "18 %": "iarc114 | increases the risk of colorectal cancer by about 18% | IARC Q&A p3"
+   }
+  },
+  {
+   "id": "crc-red-meat",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "grade",
+     "detail": "이유문 스스로 IARC 근거가 '제한적' 이고 인과를 가정한 추정이라고 적는데 등급은 A. WCRF 판정도 probable(관찰연구). 다른 규칙(관찰 메타 = B)과도 기준이 어긋난다.",
+     "source_quote": "the classification is based on limited evidence from epidemiological studies",
+     "source_loc": "IARC Q&A p2",
+     "fix": "등급 B"
+    },
+    {
+     "type": "scope",
+     "detail": "'적색육' 태그에 소간(내장)이 들어 있다 — IARC·WCRF 정의의 적색육은 포유류 '근육' 고기. 햄은 가공육 규칙 대상.",
+     "source_quote": "Red meat refers to all mammalian muscle meat",
+     "source_loc": "IARC Q&A p1",
+     "fix": "소간·햄은 적색육 태그에서 제외"
+    },
+    {
+     "type": "claim",
+     "detail": "'헴철이 N-니트로소 화합물 생성을 촉진하는 것이 주요 기전으로 지목' — IARC 는 기전이 아직 완전히 이해되지 않았다고 적는다(헴철은 성분 중 하나로 언급). 경미.",
+     "source_quote": "it is not yet fully understood how cancer risk is increased by red meat or processed meat",
+     "source_loc": "IARC Q&A p3-4",
+     "fix": "'여러 기전 중 하나로 헴철이 거론됩니다' 로"
+    }
+   ],
+   "refs_fulltext": {
+    "wcrf2018": "fulltext-url (WCRF CUP 암종별 보고서 PDF·권고 웹페이지) (적색육 권고 웹페이지)",
+    "iarc114": "fulltext-url (IARC Q&A PDF)"
+   },
+   "verified_numbers": {
+    "350~500 g": "wcrf2018 | about 350–500g (about 12–18oz) cooked weight | WCRF 'Limit red and processed meat' 권고 페이지",
+    "500 g": "wcrf2018 | 500g of cooked red meat is equivalent to 700–750 g of raw meat | WCRF 권고 페이지",
+    "700~750 g": "wcrf2018 | 500g of cooked red meat is equivalent to 700–750 g of raw meat | WCRF 권고 페이지",
+    "100 g": "iarc114 | the risk of colorectal cancer could increase by 17% for every 100 gram portion of red meat eaten daily | IARC Q&A p3",
+    "17 %": "iarc114 | could increase by 17% for every 100 gram portion of red meat | IARC Q&A p3"
+   }
+  },
+  {
+   "id": "crc-fiber",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "other",
+     "detail": "Song 2018 숫자 전부 일치. 다만 phases 가 ['survivorship','all'] 인데 제목은 '회복 후에는' 이다. 'all' 이 수술 직후·골반 방사선 중에도 뜬다는 뜻이면 저잔사·협착 규칙과 같은 음식에서 충돌한다(엔진 의미 미확인 — 확인 필요).",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "phases 에서 'all' 제거 또는 의미 확인"
+    },
+    {
+     "type": "counter",
+     "detail": "ACS 2022: 대장암 생존자에서 '건강한(prudent) 식사 패턴' 은 재발·전체 사망과 관련이 없었다 — 섬유 단일 지표(Song 2018)와는 다른 결과이므로 '관찰 연구 1편' 이라는 한계를 적어 두면 좋다.",
+     "source_quote": "Neither prediagnosis nor postdiagnosis prudent dietary patterns are associated with cancer recurrence or all-cause mortality in CRC survivors.",
+     "source_loc": "acs2022 본문 UADT/GI-Diet",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "song2018fiber": "fulltext-PMC5776713",
+    "wcrf2018": "fulltext-url (WCRF CUP 암종별 보고서 PDF·권고 웹페이지) (통곡물·채소 권고 페이지)"
+   },
+   "verified_numbers": {
+    "30 g": "wcrf2018 | Consume a diet that provides at least 30g per day of fibre from food sources. | WCRF 'Wholegrains, veg, fruit, beans' 권고 페이지",
+    "1,575명": "song2018fiber | Among 1,575 eligible patients diagnosed with stage I to III CRC | PMC5776713 Results",
+    "8년": "song2018fiber | over a median of 8 years of follow-up | PMC5776713 Results",
+    "22 %": "song2018fiber | HR per each 5-g increment ... was 0.78 (95% CI, 0.65-0.93 ...) for CRC-specific mortality | PMC5776713 Abstract",
+    "0.78": "song2018fiber | was 0.78 (95% CI, 0.65-0.93, P =0.006) for CRC-specific mortality | PMC5776713 Abstract",
+    "18 %": "song2018fiber | each 5-g/day increase in intake was associated with 18% lower CRC-specific mortality | PMC5776713 Abstract",
+    "33 %": "song2018fiber | cereal fiber was associated with lower CRC-specific mortality (HR per 5-g/day increment, 0.67 | PMC5776713 Abstract"
+   }
+  },
+  {
+   "id": "crc-lowresidue",
+   "verdict": "ok",
+   "problems": [
+    {
+     "type": "other",
+     "detail": "ERAS 2018 원문과 일치(저잔사식 보고·재개 지연과 감염·강한 권고). 사소한 범위: '저잔사·부드러움' 태그에 마파두부(매운 양념)·잡채가 포함 — 판정에 큰 문제는 아님.",
+     "source_quote": "Most patients can and should be offered food and ONS from the day of surgery.",
+     "source_loc": "World J Surg 2019;43:659 항목 24 Summary and recommendation (Quality: Moderate, Grade: Strong)",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "eras-colorectal": "fulltext-url (Springer 오픈액세스 · 브라우저로 본문 열람)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "crc-highfiber-stricture",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "유일한 출처 espen2021 원문에 'fibre/fiber'·'stricture'·'stoma' 가 한 번도 나오지 않는다(과거에 지적된 같은 종류의 오류). 질긴 섬유가 협착·장루를 막는다는 문장의 출처가 아니다. 등급 G 도 근거 없음.",
+     "source_quote": "",
+     "source_loc": "ESPEN 2021 PDF 전문 검색 — fibre 0, fiber 0, stricture 0, 'stoma ' 0",
+     "fix": "장루·협착 식이를 실제로 다룬 공개 출처(예: 대장항문외과 학회 장루 진료지침 — 확인 후)로 교체, 못 찾으면 등급 C·'경험적 권고' 로 표시"
+    },
+    {
+     "type": "scope",
+     "detail": "제목은 '협착·장루가 있다면 특히' 인데 규칙은 수술 직후 모든 대장암 환자의 고식이섬유 식품 647종(현미밥·잡곡밥·통밀빵 포함)에 '주의' 를 붙인다.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "장루·협착 조건이 있을 때만, 또는 거친질감 태그로만 좁힘"
+    }
+   ],
+   "refs_fulltext": {
+    "espen2021": "fulltext-url (ESPEN 2021 PDF 본문 — 같은 감사 폴더 dl/espen2021.txt 로 대조)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "crc-calcium-dairy",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "scope",
+     "detail": "WCRF 의 'probable 감소' 는 유제품(우유·치즈·식이 칼슘 포함)과 칼슘 보충제(>200 mg)다. '비유제품 칼슘 급원' 은 '결론 없음' 으로 분류됐다. 그런데 규칙은 칼슘 기준으로 두부·케일·톳·멸치·고등어통조림 등 비유제품에도 '권장' 을 붙인다.",
+     "source_quote": "garlic; non-dairy sources of calcium; foods containing added sugars",
+     "source_loc": "WCRF CUP Colorectal 2017 Summary matrix (Limited – no conclusion)",
+     "fix": "match 를 groups: 우유·유제품 으로만 한정"
+    },
+    {
+     "type": "number",
+     "detail": "'전립선암에서는 정반대' 는 과장. WCRF 는 유제품–전립선암 증가를 '제한적' 근거로만 판정했다.",
+     "source_quote": "the evidence suggesting that consumption of dairy products increases the risk of prostate cancer is limited",
+     "source_loc": "WCRF 'Meat, fish and dairy products' 2018 p.(prostate 요약)",
+     "fix": "'전립선암에서는 반대 방향을 시사하는 제한적 근거가 있어'"
+    },
+    {
+     "type": "scope",
+     "detail": "근거는 대장암 '발생' 예방 연구다(생존자 재발 근거 아님). 또 아이스크림·빙수·피자까지 '권장' 이 붙는다.",
+     "source_quote": "Dairy products: Consumption of dairy products probably protects against colorectal cancer.",
+     "source_loc": "WCRF CUP Colorectal 2017 p9",
+     "fix": "가당 유제품·피자 제외, 이유문에 '발생 위험 연구' 명시"
+    }
+   ],
+   "refs_fulltext": {
+    "wcrf2018": "fulltext-url (WCRF CUP 암종별 보고서 PDF·권고 웹페이지) (대장암 CUP 2017 PDF 대조)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "crc-vitd",
+   "verdict": "ok",
+   "problems": [
+    {
+     "type": "other",
+     "detail": "SUNSHINE·VITAL 숫자 모두 원문과 일치. 반대 근거 검색에서 결론을 바꿀 자료는 없었다.",
+     "source_quote": "the median PFS for high-dose vitamin D 3 was 13.0 months ... vs 11.0 months",
+     "source_loc": "PMC6459117 Abstract",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "ng2019": "fulltext-PMC6459117 (PMC XML 은 초록·요점만 수록 — 초록으로 대조)",
+    "manson2019": "fulltext-PMC6425757"
+   },
+   "verified_numbers": {
+    "139명": "ng2019 | phase 2 randomized clinical trial of 139 patients with advanced or metastatic CRC | PMC6459117 Abstract",
+    "13.0개월": "ng2019 | the median PFS for high-dose vitamin D 3 was 13.0 months | PMC6459117 Abstract",
+    "11.0개월": "ng2019 | vs 11.0 months (95% CI, 9.5 to 14.0; 62 PFS events) | PMC6459117 Abstract",
+    "24.3개월": "ng2019 | OS (median, 24.3 months vs 24.3 months; log-rank P = .43) | PMC6459117 Abstract",
+    "25,871명": "manson2019 | There were 25,871 U.S. men aged ≥50 and women aged ≥55 | PMC6425757 Abstract",
+    "2,000 IU": "manson2019 | vitamin D 3 (cholecalciferol, 2000 IU/day) | PMC6425757 Abstract",
+    "5.3년": "manson2019 | During a median 5.3 year intervention | PMC6425757 Abstract",
+    "0.96": "manson2019 | [HR]=0.96; 95% confidence interval, 0.88–1.06 | PMC6425757 Abstract",
+    "1.09": "manson2019 | colorectal cancer 1.09 (0.73–1.62) | PMC6425757 Table 2"
+   }
+  },
+  {
+   "id": "crc-diarrhea-rt",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "유일한 출처 espen2021 원문에 섬유·지방·유당·카페인·매운 음식에 대한 서술이 전혀 없다(전문 검색 0건). ESPEN 2021 이 방사선 설사에 대해 말하는 것은 '프로바이오틱스·글루타민은 권고할 자료 불충분' 뿐이다. 인용–주장 불일치이며 등급 G 근거 없음.",
+     "source_quote": "There are insufficient consistent clinical data to recommend probiotics to reduce radiation-induced diarrhea.",
+     "source_loc": "ESPEN 2021 Recommendation C2-5",
+     "fix": "출처 교체·문장 축소"
+    },
+    {
+     "type": "counter",
+     "detail": "'고섬유가 증상을 악화' 에 반대 방향 무작위 근거가 있다: 골반 방사선 중 고섬유 식이 조언군이 일반 식이군보다 치료 종료 시점과 1년 뒤 장 증상이 적었다(저자: 섬유 제한 조언은 버려야). Cochrane 2018 도 식이 중재 근거를 저확실성으로 평가.",
+     "source_quote": "Restrictive, non-evidence-based advice to reduce fiber intake in this setting should be abandoned.",
+     "source_loc": "PubMed 28679552 (Wedlake 2017, Am J Clin Nutr RCT) 초록; PubMed 29360138 (Cochrane 2018)",
+     "fix": "판단 필요: '설사가 이미 심할 때 증상에 맞춰 잠시 부드러운 음식으로' 는 남기되, '고섬유가 악화시킨다' 단정은 삭제하고 Wedlake 2017 을 반대 근거로 적기"
+    }
+   ],
+   "refs_fulltext": {
+    "espen2021": "fulltext-url (ESPEN 2021 PDF 본문 — 같은 감사 폴더 dl/espen2021.txt 로 대조)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "crc-lifestyle",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "scope",
+     "detail": "근거의 점수는 채소·과일·'통곡물'·적색/가공육·체중·운동이다. 규칙은 채소·과일·곡류·전분 군 전체(쌀밥(백미)·백미(생쌀)·찹쌀밥·소면 등 정제 곡물 포함)에 '권장' 을 붙인다.",
+     "source_quote": "intake of vegetables, fruits, whole grains, and red/processed meats (score range, 0-6",
+     "source_loc": "PMC6145685 Abstract (Exposures)",
+     "fix": "곡류는 통곡물(현미·잡곡 등)만"
+    },
+    {
+     "type": "other",
+     "detail": "CALGB 연구의 점수는 ACS '2012' 생존자 지침 기준이다. 함께 단 acs2022 본문에는 이 연구가 따로 서술되지 않는다(본문 검색 'CALGB' 0건).",
+     "source_quote": "",
+     "source_loc": "acs2022 본문 검색",
+     "fix": "acs2022 대신 ACS 2012 지침을 달거나 '당시 미국암학회 권고' 로 표현"
+    }
+   ],
+   "refs_fulltext": {
+    "vanblarigan2018": "fulltext-PMC6145685",
+    "acs2022": "fulltext-url (Wiley 무료 공개 CC BY-NC-ND · 브라우저로 본문 열람, 2026-10-14)"
+   },
+   "verified_numbers": {
+    "992명": "vanblarigan2018 | This prospective cohort study included 992 patients with stage III colon cancer | PMC6145685 Abstract",
+    "7년": "vanblarigan2018 | Over a 7-year median follow-up | PMC6145685 Abstract",
+    "42 %": "vanblarigan2018 | patients with a 5 to 6 score (n = 91; 9%) had a 42% lower risk of death | PMC6145685 Abstract",
+    "0.58": "vanblarigan2018 | (HR, 0.58; 95% CI, 0.34-0.99; P = .01 for trend) | PMC6145685 Abstract",
+    "8점": "vanblarigan2018 | a score that also included alcohol intake in addition to the other factors (range, 0-8) | PMC6145685 Abstract",
+    "0.49": "vanblarigan2018 | scores of 6 to 8 ... vs those with scores of 0 to 2 ... were 0.49 for overall survival | PMC6145685 Abstract"
+   }
+  },
+  {
+   "id": "lung-betacarotene",
+   "verdict": "judgement",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "acs2022 본문에는 베타카로틴이 한 번도 나오지 않는다(본문 검색 'carotene' 0건) — 인용–주장 불일치. ATBC·CARET 두 RCT 로 충분하므로 acs2022 는 빼야 한다.",
+     "source_quote": "",
+     "source_loc": "acs2022 본문 전체 검색",
+     "fix": "refIds 에서 acs2022 삭제"
+    },
+    {
+     "type": "scope",
+     "detail": "items.json 기준으로는 '항산화·기타' 분류 전체(코엔자임Q10·비타민E 400 IU·커큐민·버섯균사체)에 '피하세요' 가 붙어 있었다 — 베타카로틴이 없는 제품이다. 소스(lung.ts)에는 오늘 이미 제거됐다는 주석과 함께 supplementIds 두 개만 남아 있음을 확인했다.",
+     "source_quote": "",
+     "source_loc": "src/data/cancers/lung.ts lung-betacarotene 주석(2026-10-14)",
+     "fix": "이미 수정됨 — 검사로 재발 방지"
+    },
+    {
+     "type": "scope",
+     "detail": "[요청 판단] 종합비타민 2종에 '피하세요' 는 근거가 지지하지 않는다. (1) 용량: 앱 자료의 비타민 A 는 센트룸 A to Z 800 µg RAE, 종합비타민 대표 조성 700 µg RAE 로 베타카로틴 함량 자체는 자료에 없다. 비타민 A 전부를 보충제 베타카로틴(2 µg = 1 µg RAE)으로 가정해도 최대 1.6 mg·1.4 mg — ATBC 20 mg/일의 1/12 이하, CARET 30 mg 의 1/19 이하이고, 실제 제품은 대개 일부만 베타카로틴이라 더 적다(제품 라벨 미확인 — 추정). (2) 근거: ATBC·CARET 는 단일 고용량 시험이다. 종합비타민 RCT(PHS II, 14,641명)는 총 암을 줄였고 부위별 암 증가가 없었다. VITAL 코호트도 위험 증가는 '개별(단일)' 베타카로틴 보충제 장기 복용에서 보였다고 적는다.",
+     "source_quote": "Long-term use of individual beta-carotene, retinol, and lutein supplements should not be recommended for lung cancer prevention, particularly among smokers.",
+     "source_loc": "PubMed 19208726 (Satia 2009, PMC2842198) 초록; PubMed 23162860 (Gaziano 2012 PHS II) 초록; src/data/supplements.ts perDay.vitA",
+     "fix": "판단 필요(제안): 종합비타민에는 'info — 베타카로틴 함량을 확인하세요, 시험 용량(20~30 mg)보다 훨씬 적습니다' 로 낮추고, '피하세요' 는 베타카로틴 단일·고함량(수 mg 이상) 제품에만"
+    },
+    {
+     "type": "scope",
+     "detail": "제목은 '흡연력이 있다면' 인데 match 에 흡연 조건이 없어 모든 폐암 환자에게 뜬다(ATBC·CARET 대상은 흡연자·석면 노출자). 또 시험은 암 예방(건강인) 연구다.",
+     "source_quote": "18,314 smokers, former smokers, and workers exposed to asbestos",
+     "source_loc": "PubMed 8602180 (CARET) 초록",
+     "fix": "흡연력 조건 추가 또는 제목을 대상에 맞게"
+    },
+    {
+     "type": "fulltext",
+     "detail": "ATBC·CARET 는 이번에 PubMed 초록으로만 대조했다(NEJM 원문은 열지 않음). 초록에 앱 숫자가 모두 있다.",
+     "source_quote": "",
+     "source_loc": "PubMed 8127329 / 8602180",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "atbc1994": "abstract-only (이번 대조는 PubMed 8127329 초록 — NEJM 원문 미열람)",
+    "caret1996": "abstract-only (이번 대조는 PubMed 8602180 초록 — NEJM 원문 미열람)",
+    "acs2022": "fulltext-url (Wiley 무료 공개 CC BY-NC-ND · 브라우저로 본문 열람, 2026-10-14) — 베타카로틴 언급 없음"
+   },
+   "verified_numbers": {
+    "29,133명": "atbc1994 | A total of 29,133 male smokers 50 to 69 years of age from southwestern Finland | PubMed 8127329 초록",
+    "20 mg": "atbc1994 | beta carotene (20 mg per day) alone | PubMed 8127329 초록",
+    "18 %": "atbc1994 | (change in incidence, 18 percent; 95 percent confidence interval, 3 to 36 percent) | PubMed 8127329 초록",
+    "3~36 %": "atbc1994 | 95 percent confidence interval, 3 to 36 percent | PubMed 8127329 초록",
+    "8 %": "atbc1994 | Total mortality was 8 percent higher (95 percent confidence interval, 1 to 16 percent) | PubMed 8127329 초록",
+    "1~16 %": "atbc1994 | (95 percent confidence interval, 1 to 16 percent) | PubMed 8127329 초록",
+    "18,314명": "caret1996 | involving a total of 18,314 smokers, former smokers, and workers exposed to asbestos | PubMed 8602180 초록",
+    "30 mg": "caret1996 | a combination of 30 mg of beta carotene per day and 25,000 IU of retinol | PubMed 8602180 초록",
+    "28 %": "caret1996 | relative risk of lung cancer of 1.28 (95 percent confidence interval, 1.04 to 1.57 | PubMed 8602180 초록",
+    "1.04~1.57": "caret1996 | 1.28 (95 percent confidence interval, 1.04 to 1.57; P=0.02) | PubMed 8602180 초록",
+    "46 %": "caret1996 | of death from lung cancer, 1.46 (95 percent confidence interval, 1.07 to 2.00) | PubMed 8602180 초록",
+    "21개월": "caret1996 | the randomized trial was stopped 21 months earlier than planned | PubMed 8602180 초록"
+   }
+  },
+  {
+   "id": "lung-cachexia",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "scope",
+     "detail": "악액질 기준을 설명하는 규칙인데 고열량밀도·고단백 태그 4,963종(도넛·버거·피자 포함)에 체중 상태와 무관하게 모든 폐암 환자에게 '권장' 이 붙는다.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "판단 필요: 체중 감소 입력이 있을 때만 prefer, 아니면 info"
+    },
+    {
+     "type": "fulltext",
+     "detail": "fearon2011 은 구독제라 초록으로 대조(기준 숫자는 초록에 있음). 'BMI 20 미만·근감소 2 %' 는 ESPEN 2021 에는 없고 Fearon 에만 있다 — 숫자 출처는 fearon2011 로 표기.",
+     "source_quote": "weight loss greater than 2% in individuals already showing depletion according to ... (BMI] <20 kg/m(2)) or skeletal muscle mass (sarcopenia)",
+     "source_loc": "PubMed 21296615 초록",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "fearon2011": "abstract-only (Lancet Oncol 구독제 · PubMed 21296615 초록)",
+    "espen2021": "fulltext-url (ESPEN 2021 PDF 본문 — 같은 감사 폴더 dl/espen2021.txt 로 대조)",
+    "espen-cachexia": "fulltext-url (ESPEN 2017 PDF 본문 — dl/espen2017.txt 로 대조)"
+   },
+   "verified_numbers": {
+    "5 %": "fearon2011 | The agreed diagnostic criterion for cachexia was weight loss greater than 5% | PubMed 21296615 초록",
+    "BMI 20 미만": "fearon2011 | (body-mass index [BMI] <20 kg/m(2)) | PubMed 21296615 초록",
+    "2 %": "fearon2011 | or weight loss greater than 2% in individuals already showing depletion | PubMed 21296615 초록"
+   }
+  },
+  {
+   "id": "lung-ons",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "number",
+     "detail": "'필요량의 60 % 미만이 1~2주 이상이면 ONS 시작' 은 인용한 espen2021 에 없다. ESPEN 2021 은 '1주 넘게 필요량의 50 % 미만, 또는 2주 넘게 50~75 %' 이면 의료영양(medical nutrition)을 하라고 적는다. '60 %·1~2주' 는 ESPEN 2017 에서 '섭취 부족' 의 정의로 나오며, ONS 시작 기준으로 제시된 것이 아니다.",
+     "source_quote": "less than 50% of the requirement for more than one week or only 50–75% of the requirement for more than two weeks",
+     "source_loc": "ESPEN 2021 본문(일반 권고 — Medical nutrition 적응증)",
+     "fix": "'ESPEN 은 필요량의 절반도 못 드시는 날이 1주 넘게, 또는 50~75 % 정도가 2주 넘게 이어지면 영양 지원(경구영양보충 포함)을 시작하라고 권고합니다.'"
+    },
+    {
+     "type": "other",
+     "detail": "ESPEN 2017 의 해당 문장(참고).",
+     "source_quote": "if the estimated energy intake is <60% of requirement for more than 1–2 weeks",
+     "source_loc": "ESPEN 2017 (Clin Nutr 36:11) 'inadequacy of food intake' 정의",
+     "fix": "2017 을 쓰려면 refIds 에 espen-cachexia 추가하고 '부족의 정의' 로 서술"
+    }
+   ],
+   "refs_fulltext": {
+    "espen2021": "fulltext-url (ESPEN 2021 PDF 본문 — 같은 감사 폴더 dl/espen2021.txt 로 대조)"
+   },
+   "verified_numbers": {
+    "60 %": "unverified in espen2021 (ESPEN 2017 에는 '부족' 정의로 있음)",
+    "1~2주": "unverified in espen2021"
+   }
+  },
+  {
+   "id": "lung-omega3",
+   "verdict": "ok",
+   "problems": [
+    {
+     "type": "other",
+     "detail": "ESPEN 2021 권고 16(B5-7, 약한 권고·낮은 근거)과 ESPEN 2017 의 EFSA 안전 범위 문장 일치. 참고: ESPEN 2017 에서 이 생선기름 권고만 합의율 72 %(다수 동의)였다 — '권고가 약하다' 는 앱 표현과 맞다.",
+     "source_quote": "we suggest using supplementation with long-chain N-3 fatty acids or fish oil to stabilize or improve appetite, food intake, lean body mass, and body weight",
+     "source_loc": "ESPEN 2021 Recommendation 16 (B5-7)",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "espen-cachexia": "fulltext-url (ESPEN 2017 PDF 본문 — dl/espen2017.txt 로 대조)",
+    "espen2021": "fulltext-url (ESPEN 2021 PDF 본문 — 같은 감사 폴더 dl/espen2021.txt 로 대조)"
+   },
+   "verified_numbers": {
+    "5 g": "espen-cachexia | supplemental intakes of EPA and DHA combined at doses up to 5 g/day ... do not raise safety concerns | ESPEN 2017 B5-7 commentary",
+    "1.8 g": "espen-cachexia | and supplemental intakes of EPA alone up to 1.8 g/day, do not raise safety concerns for adults | ESPEN 2017 B5-7 commentary"
+   }
+  },
+  {
+   "id": "lung-esophagitis",
+   "verdict": "warn",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "MASCC 2020 의 '통증 조절·식이 지원이 관리의 핵심' 문장은 확인되나, 이 지침 본문에는 식도염(esophagitis)이 한 번도 나오지 않는다(구강·위장관 점막염 지침). '흉부 방사선 2주 넘어서면' 은 두 출처 어디에도 없다.",
+     "source_quote": "pain relief, dietary support, and secondary infection prevention are key elements in patient management",
+     "source_loc": "PMC7540329 Discussion(마지막 문단)",
+     "fix": "'2주' 출처 추가 또는 '치료 중반부터' 로; 식도염 자체를 다룬 출처 보완"
+    },
+    {
+     "type": "scope",
+     "detail": "'부드러움·수분보충' 태그에 아메리카노(원두 커피)·탄 미숫가루·추어탕 등이 들어 있어 '뜨거운 음식 피하기' 와 어긋날 수 있음(경미).",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": ""
+    }
+   ],
+   "refs_fulltext": {
+    "mascc-mucositis": "fulltext-PMC7540329",
+    "espen2021": "fulltext-url (ESPEN 2021 PDF 본문 — 같은 감사 폴더 dl/espen2021.txt 로 대조)"
+   },
+   "verified_numbers": {}
+  },
+  {
+   "id": "lung-spicy-acid-rt",
+   "verdict": "judgement",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "'어떤 음식을 뺄지는 국제 지침이 근거 부족으로 권고를 내지 못한 영역' — MASCC 2020 은 식도염 식이를 아예 다루지 않는다(본문 'esophag' 0건). 'no guideline possible' 이 나온 것은 위장관 점막염의 지방 조절식·섬유 등이다. 표현이 출처를 넓게 해석함. '치료 후 2~4주면 회복' 도 출처 없음.",
+     "source_quote": "a fat‐modified diet, formalin, glutamine, fiber ... no guideline was possible for these agents",
+     "source_loc": "PMC7540329 Results (GI mucositis)",
+     "fix": "'식도염 때 피할 음식을 정한 국제 지침은 없습니다' 로"
+    },
+    {
+     "type": "grade",
+     "detail": "판정 '피하세요' 인데 근거 C(기전 추론)이고 이유문 스스로 지침 권고가 없다고 한다. 또 식도 증상 여부와 상관없이 폐암 방사선치료 중(뇌 전이·말초 SBRT 포함) 모든 환자에게 현미밥·잡곡밥·토마토·견과에까지 '피하세요' 가 뜬다.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "판단 필요: 식도염 증상(또는 흉부 조사)이 있을 때만, 수준은 caution"
+    }
+   ],
+   "refs_fulltext": {
+    "mascc-mucositis": "fulltext-PMC7540329"
+   },
+   "verified_numbers": {
+    "2~4주": "unverified (출처 없음)"
+   }
+  },
+  {
+   "id": "lung-steroid-sugar",
+   "verdict": "error",
+   "problems": [
+    {
+     "type": "claim",
+     "detail": "유일한 출처 espen2021 은 오심 예방 덱사메타손이 투여 후 며칠간 혈당을 올린다는 서술이 없다. 덱사메타손은 식욕 연구 맥락에서만 나오고, 코르티코스테로이드 부작용으로 '인슐린 저항성' 이 식욕 촉진 권고(14번)에 한 단어로 언급될 뿐이다. 등급 G 근거로 부족.",
+     "source_quote": "be aware of side effects (e.g. muscle wasting, insulin resistance, infections)",
+     "source_loc": "ESPEN 2021 Recommendation 14 (코르티코스테로이드 — 식욕 목적)",
+     "fix": "항구토 덱사메타손과 고혈당을 직접 다룬 출처로 교체하고 등급 재평가"
+    },
+    {
+     "type": "scope",
+     "detail": "항암 중 모든 폐암 환자에게 '고당' 태그 2,839종(과일 포함)에 '주의' — 스테로이드 사용 여부·당뇨 여부 조건이 없다.",
+     "source_quote": "",
+     "source_loc": "",
+     "fix": "판단 필요: 당뇨/스테로이드 조건이 있을 때만"
+    }
+   ],
+   "refs_fulltext": {
+    "espen2021": "fulltext-url (ESPEN 2021 PDF 본문 — 같은 감사 폴더 dl/espen2021.txt 로 대조)"
+   },
+   "verified_numbers": {}
+  }
+ ]
+}

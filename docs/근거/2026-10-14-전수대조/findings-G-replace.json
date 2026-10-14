@@ -1,0 +1,1303 @@
+{
+ "batch": "G-replace",
+ "date": "2026-10-14",
+ "reviewed": 15,
+ "method": "원문은 Europe PMC fullTextXML 내려받아 grep, PMC 웹 화면은 WebFetch, 출판사·기관 페이지는 내장 브라우저(봇 확인 화면은 우회하지 않음). quote 는 원문 그대로; WebFetch 경유 인용은 loc 에 표시.",
+ "refs": [
+  {
+   "old": "lam2013ppi-b12",
+   "cited_by": [
+    {
+     "rule": "supplementAdvice.ts:ppi → 비타민 B12(위산분비억제제)",
+     "claims": [
+      "위산분비억제제를 2년 넘게 쓴 사람에서 B12 결핍이 더 흔했다는 대규모 관찰 연구가 있다",
+      "음식 B12 는 단백질 결합이라 위산이 필요하다",
+      "보충제 B12 는 단백질에 붙어 있지 않아 위산 없이 흡수된다"
+     ]
+    }
+   ],
+   "new": {
+    "id": "porter2016-bvit",
+    "kind": "review",
+    "year": 2016,
+    "citation": "Porter K, Hoey L, Hughes CF, Ward M, McNulty H. Causes, consequences and public health implications of low B-vitamin status in ageing. Nutrients. 2016;8(11):725. (Lam 2013 을 2차 인용: 환자 25,956명·대조 184,199명, 2년 넘은 H2RA·PPI 사용과 B12 결핍 진단 위험 25~65 % 증가)",
+    "url": "https://doi.org/10.3390/nu8110725",
+    "access": "pmc",
+    "fulltext": "PMC5133110"
+   },
+   "also_new": [
+    {
+     "id": "miller2018ppi-b12",
+     "kind": "review",
+     "year": 2018,
+     "citation": "Miller JW. Proton pump inhibitors, H2-receptor antagonists, metformin, and vitamin B-12 deficiency: clinical implications. Adv Nutr. 2018;9(4):511S-518S. (음식 B12 는 위산·펩신이 떼어 내야 흡수, 보충제 B12 는 단백질 결합이 아니어서 위산 불필요)",
+     "url": "https://doi.org/10.1093/advances/nmy023",
+     "access": "pmc",
+     "fulltext": "PMC6054240 (PMC 웹 화면에서 열람 가능, API 로는 본문 미제공)"
+    }
+   ],
+   "quotes": [
+    {
+     "claim": "2년 넘게 쓰면 B12 결핍이 더 흔했다(대규모 관찰 연구)",
+     "quote": "a large community survey (25,956 cases and 184,199 controls) found that the long term use (>2 years) of H2RAs and PPIs was associated with a 25%–65% greater risk",
+     "loc": "Porter 2016, Ageing 절 B12 문단",
+     "secondary": true
+    },
+    {
+     "claim": "음식 B12 는 위산이 떼어 내야 흡수",
+     "quote": "The acid and pepsin cause the release of vitamin B-12 from food protein",
+     "loc": "Miller 2018, B-12 흡수 절 (WebFetch 로 PMC 화면에서 인용 — 요약기 경유라 단어 단위 재확인 권장)",
+     "secondary": false
+    },
+    {
+     "claim": "보충제 B12 는 위산 없이 흡수",
+     "quote": "supplemental vitamin B-12 is not protein-bound and therefore stomach acid is not required for absorption",
+     "loc": "Miller 2018 (WebFetch 경유, 위와 같음)",
+     "secondary": false
+    }
+   ],
+   "text_changes": [],
+   "notes": "Lam 2013 원문(JAMA)은 브라우저로 열려 했으나 봇 확인 화면에서 막힘 — 원문 미확인. 앱 문장에 숫자가 없어 문장 수정은 불필요. Miller 2018 은 PMC 에 있으나 출판사 제한으로 API 전문이 비어 있고 PMC 웹 화면(WebFetch)으로만 확인했다. Porter 2016 은 CC BY 전문을 내려받아 grep 으로 확인. kind: Lam 은 환자-대조군 연구라 원래 'cohort' 도 엄밀히는 틀림 — 교체하면 문제 사라짐. 등급 B 는 '종설이 2차 인용한 관찰 연구'로 바뀌므로 C 가 더 맞음(판단 필요)."
+  },
+  {
+   "old": "bairati2005",
+   "cited_by": [
+    {
+     "rule": "hn-antioxidant",
+     "claims": [
+      "540명 무작위배정",
+      "방사선치료 첫날부터 비타민 E 400 IU·베타카로틴 30 mg",
+      "급성 부작용은 줄었다"
+     ]
+    },
+    {
+     "rule": "common-antioxidant-rt",
+     "claims": [
+      "540명 무작위배정 시험(이차암·흡연 결과의 배경)"
+     ]
+    },
+    {
+     "rule": "supplementAdvice.ts:치료 중 항산화",
+     "claims": [
+      "두경부암 무작위배정 연구에서 고용량 비타민 E·베타카로틴군의 국소 재발과 사망이 오히려 늘었다"
+     ]
+    },
+    {
+     "rule": "headneck 암종 refIds(phaseNotes)",
+     "claims": [
+      "(암종 단위 근거 목록)"
+     ]
+    }
+   ],
+   "new": {
+    "id": "verro2025-hnc-cam",
+    "kind": "review",
+    "year": 2025,
+    "citation": "Verro B, Fiumara S, Saraniti G, Ottoveggio G, Saraniti C. Beyond conventional treatments: the role of complementary therapies in head and neck cancer. Cancers (Basel). 2025;17(8):1269. (Bairati 2005 JCO 를 2차 인용: 540명·베타카로틴 30 mg·비타민 E 400 IU, 방사선치료 중과 이후 3년, 후두 부작용 OR 0.38, 국소 재발 HR 1.37)",
+    "url": "https://doi.org/10.3390/cancers17081269",
+    "access": "pmc",
+    "fulltext": "PMC12026399"
+   },
+   "quotes": [
+    {
+     "claim": "540명·용량",
+     "quote": "The 540 recruited patients were divided into two arms and received therapy throughout the RT and for three years thereafter",
+     "loc": "Verro 2025, 항산화 비타민 문단(본문 84행)",
+     "secondary": true
+    },
+    {
+     "claim": "급성 부작용 감소",
+     "quote": "significantly reduced the post-RT adverse effects, most of all in the larynx [Odd Ratio OR 0.38]",
+     "loc": "Verro 2025, 같은 문단",
+     "secondary": true
+    },
+    {
+     "claim": "국소 재발 증가",
+     "quote": "higher risk of local cancer recurrence during the follow-up period compared to those in the placebo group [Hazard Ratio HR 1.37]",
+     "loc": "Verro 2025, 같은 문단",
+     "secondary": true
+    }
+   ],
+   "text_changes": [
+    {
+     "rule": "supplementAdvice.ts:치료 중 항산화",
+     "from": "고용량 비타민 E·베타카로틴군의 국소 재발과 사망이 오히려 늘었습니다",
+     "to": "고용량 비타민 E·베타카로틴군에서 국소 재발이 늘어나는 경향이 있었고(위험비 1.37, 통계적으로 유의하지 않음), 치료 중 담배를 계속 피운 분에서는 재발과 사망이 뚜렷하게 늘었습니다"
+    }
+   ],
+   "notes": "원 시험 JCO 2005 는 ascopubs 에서 브라우저로 열어 확인 — 초록만 보이고 'Get full access' 유료 표시(원문 공개 아님). 초록(PubMed)에는 OR 0.72(0.52~1.02, 전체 급성부작용 경향), 병용군 후두 OR 0.38(0.21~0.71), 국소재발 HR 1.37(0.93~2.02) 가 있다. Verro 2025 는 HR 1.37 을 '위험이 높았다'고 쓰지만 신뢰구간이 1을 포함한 경향치다 — 앱 문장은 '경향'으로 적을 것. '사망 증가'는 이 논문(JCO)이 아니라 Meyer 2008(흡연자 하위군)의 결과이므로 supplementAdvice 문장은 위처럼 나눠 쓰는 것이 정확. 원 시험 자체를 유지하고 싶으면 bairati2005 를 남기고 access 'abstract' 로 표시하는 대안도 있음."
+  },
+  {
+   "old": "bairati2005b",
+   "cited_by": [
+    {
+     "rule": "hn-antioxidant",
+     "claims": [
+      "보충 기간 중 이차암 2.9배(95 % CI 1.56~5.31)",
+      "비타민 E 400 IU·베타카로틴 30 mg, 방사선치료 첫날부터"
+     ]
+    },
+    {
+     "rule": "common-antioxidant-rt",
+     "claims": [
+      "540명",
+      "보충 기간 중 이차암 2.9배(95 % CI 1.56~5.31)"
+     ]
+    },
+    {
+     "rule": "hn-alcohol",
+     "claims": [
+      "치료 후에도 계속 마시면 이차 원발암 발생이 뚜렷하게 늘어난다"
+     ]
+    },
+    {
+     "rule": "supplementAdvice.ts:치료 중 항산화",
+     "claims": [
+      "(위 bairati2005 와 같은 문장)"
+     ]
+    }
+   ],
+   "new": {
+    "id": "meliante2023-hnc-antiox",
+    "kind": "review",
+    "year": 2023,
+    "citation": "Meliante PG, Petrella C, Fiore M, Minni A, Barbato C. Antioxidant use after diagnosis of head and neck squamous cell carcinoma (HNSCC): a systematic review of application during radiotherapy and in second primary cancer prevention. Antioxidants (Basel). 2023;12(9):1753. (Bairati 2005 JNCI 를 2차 인용: 540명, α-토코페롤 400 IU·β-카로틴 30 mg 을 방사선치료 첫날부터 3년, 이차암 HR 2.42(1.45~4.04)·α-토코페롤 단독 시기 HR 2.88(1.56~5.31), 보충 중단 후 HR 0.41(0.16~1.03); Meyer 2008 흡연자 재발 HR 2.41·전체사망 2.26·두경부암 사망 3.38)",
+    "url": "https://doi.org/10.3390/antiox12091753",
+    "access": "pmc",
+    "fulltext": "PMC10525582"
+   },
+   "also_new": [
+    {
+     "id": "nguyen2018-hnc-integrative",
+     "kind": "review",
+     "year": 2018,
+     "citation": "Nguyen CT, Taw MB, Wang MB. Integrative care of the patient with head and neck cancer. Laryngoscope Investig Otolaryngol. 2018;3(5):364-371. (Bairati 2005 JNCI 초록 수치 재인용: 보충 기간 HR 2.88, 중단 후 HR 0.41)",
+     "url": "https://doi.org/10.1002/lio2.184",
+     "access": "pmc",
+     "fulltext": "PMC6209621"
+    }
+   ],
+   "quotes": [
+    {
+     "claim": "540명·용량·첫날부터",
+     "quote": "α-tocopherol (400 IU/day) and β-carotene (30 mg/day) with placebo in patients with stage I or II HNSCC treated with radiotherapy",
+     "loc": "Meliante 2023, 결과 α-토코페롤·β-카로틴 문단",
+     "secondary": true
+    },
+    {
+     "claim": "보충 기간 중 이차암 HR 2.88",
+     "quote": "especially when α-tocopherol was the only supplement (HR = 2.88, 95% CI = 1.56 to 5.31)",
+     "loc": "Meliante 2023, 같은 문단",
+     "secondary": true
+    },
+    {
+     "claim": "보충 기간 중 이차암 HR 2.88(다른 서술)",
+     "quote": "had a higher rate of second primary cancers during the supplementation period (HR = 2.88, 95% CI = 1.56 to 5.31)",
+     "loc": "Nguyen 2018, Herbal/supplement 절",
+     "secondary": true
+    },
+    {
+     "claim": "보충 중단 후 역전",
+     "quote": "but a lower rate after supplementation was discontinued (HR = 0.41, 95% CI = 0.16 to 1.03)",
+     "loc": "Nguyen 2018, 같은 문단",
+     "secondary": true
+    },
+    {
+     "claim": "흡연자에서 재발·사망",
+     "quote": "HR 2.41 (95% CI: 1.25–4.64) for recurrence, HR 2.26 (95% CI: 1.25–4.64) for all-cause mortality",
+     "loc": "Meliante 2023, Meyer 2008 문단(사망 CI 는 원문 그대로 옮겨져 재발 CI 와 같게 적혀 있어 오기 의심)",
+     "secondary": true
+    }
+   ],
+   "text_changes": [
+    {
+     "rule": "hn-antioxidant",
+     "from": "보충 기간 중 이차암이 2.9배 많았습니다 (95 % 신뢰구간 1.56~5.31)",
+     "to": "보충 기간 중 이차암이 2.9배 많았습니다(위험비 2.88, 95 % 신뢰구간 1.56~5.31). 다만 보충을 끊은 뒤에는 오히려 적었고(0.41), 8년 시점 이차암이 없는 비율은 두 군이 비슷했습니다"
+    },
+    {
+     "rule": "common-antioxidant-rt",
+     "from": "비타민 E 400 IU·베타카로틴 30 mg 을 방사선치료 첫날부터 드신 군은 보충 기간 중 이차암이 2.9배 많았습니다(95 % 신뢰구간 1.56~5.31)",
+     "to": "비타민 E 400 IU(처음 156명은 베타카로틴 30 mg 함께)를 방사선치료 첫날부터 드신 군은 보충 기간 중 이차암이 2.9배 많았습니다(위험비 2.88, 95 % 신뢰구간 1.56~5.31). 보충을 끊은 뒤에는 이 차이가 사라졌습니다"
+    },
+    {
+     "rule": "hn-alcohol",
+     "from": "refIds: ['iarc100e', 'bairati2005b', 'wcrf2018']",
+     "to": "refIds: ['iarc100e', 'wcrf2018'] — 그리고 '치료 후에도 계속 마시면 이차 원발암 발생이 뚜렷하게 늘어납니다' 는 출처를 찾을 때까지 '음주는 이차 원발암의 위험 요인으로도 알려져 있습니다' 정도로 낮춤"
+    }
+   ],
+   "notes": "원 시험 JNCI 2005 는 OUP 에서 원문을 열지 못함(초록만). PubMed 초록 문장은 'patients receiving alpha-tocopherol supplements had a higher rate ... during the supplementation period (HR = 2.88)' — 보충군 전체(모두 α-토코페롤을 받음) 대 위약으로 읽히는데, Meliante 2023 은 전체 HR 2.42 와 'α-토코페롤 단독일 때' HR 2.88 로 나눠 적었다. 두 2차 문헌의 해석이 달라 원문 표 확인 전에는 어느 쪽인지 단정할 수 없음 — 앱 문장에 '비타민 E·베타카로틴을 드신 군' 이라고 두 성분을 모두 단 표현은 피하고 '비타민 E(처음 156명은 베타카로틴 병용)' 로 적을 것을 권함. hn-alcohol: Bairati 2005 JNCI 초록에는 음주 결과가 없음 — 인용-주장 불일치(원문 확인 못 했으므로 '초록 기준'). 음주와 이차암 메타분석(Druesne-Pecollo 2014 CEBP, RR 2.97 최고 대 최저 음주)은 초록만 확인, 원문 못 엶 — '치료 후 계속 마심'을 다룬 것도 아님."
+  },
+  {
+   "old": "gastrectomy-nutr",
+   "cited_by": [
+    {
+     "rule": "cond-gx-dumping",
+     "claims": [
+      "주스·사이다·꿀물 같은 농축 당 액체가 가장 흔한 원인",
+      "식사 중 물을 적게",
+      "식후 20~30분 비스듬히 누워 있으면 증상 감소",
+      "위절제 후 '정해진 식단'은 없고 증상 보며 맞춤"
+     ]
+    },
+    {
+     "rule": "stomach-dumping",
+     "claims": [
+      "농축 당이 소장으로 급히 → 삼투압으로 수분 이동 → 식은땀·어지럼·복통·설사(조기 덤핑)",
+      "2~3시간 뒤 반응성 저혈당(후기 덤핑)",
+      "단 음료 피하고 식사 중 물 적게, 식후 20~30분 비스듬히 눕기",
+      "표준 식단을 뒷받침할 문헌은 충분하지 않다는 것이 종설의 결론"
+     ]
+    },
+    {
+     "rule": "cond-gx-b12 / stomach-b12 / stomach-b12-partial / supplementAdvice B12",
+     "claims": [
+      "내인자는 위 벽세포에서 생성",
+      "전절제 후 경구 흡수 불가능·주사 보충(월 1회 등)",
+      "아절제 후에도 수년에 걸쳐 결핍",
+      "정기적 혈중 농도 확인"
+     ]
+    },
+    {
+     "rule": "stomach-small-meals",
+     "claims": [
+      "부피 대비 영양 높은 음식을 하루 5~6회로 나눠"
+     ]
+    },
+    {
+     "rule": "stomach-bezoar",
+     "claims": [
+      "감 탄닌이 위산과 만나 위석",
+      "수술 후 위석 폐색으로 내시경·수술 제거 사례"
+     ]
+    },
+    {
+     "rule": "stomach-iron-ca / supplementAdvice 철분·칼슘 / nutrition.ts 철 / 영양제 '철' 항목",
+     "claims": [
+      "철·칼슘은 위산이 있어야 잘 흡수",
+      "철결핍빈혈은 수술 후 수년에 걸쳐",
+      "칼슘 흡수 감소 → 골감소",
+      "구연산칼슘이 유리"
+     ]
+    },
+    {
+     "rule": "int-ppi-calcium",
+     "claims": [
+      "탄산칼슘은 위산이 있어야 녹는다",
+      "PPI·위절제 시 구연산칼슘 유리",
+      "장기 PPI 시 B12·마그네슘 확인"
+     ]
+    },
+    {
+     "rule": "stomach 암종 refIds",
+     "claims": [
+      "(암종 단위 근거 목록)"
+     ]
+    }
+   ],
+   "new": {
+    "id": "scarpellini2020-dumping",
+    "kind": "guideline",
+    "year": 2020,
+    "citation": "Scarpellini E, Arts J, Karamanolis G, et al. International consensus on the diagnosis and management of dumping syndrome. Nat Rev Endocrinol. 2020;16(8):448-466. (델파이 합의 18명·62개 문항: 조기 덤핑=고삼투 내용물로 혈관→장관 수분 이동, 후기 덤핑=식후 1~3시간 저혈당, 식사량 줄이기·식후 30분 이상 수분 미루기·빨리 흡수되는 탄수화물 제거가 1차, 단백질 음식·수분 지연의 대조 연구는 없음)",
+    "url": "https://doi.org/10.1038/s41574-020-0357-5",
+    "access": "pmc",
+    "fulltext": "PMC7351708"
+   },
+   "also_new": [
+    {
+     "id": "teixeira2023-gx-micro",
+     "kind": "review",
+     "year": 2023,
+     "citation": "Teixeira Farinha H, Bouriez D, Grimaud T, et al. Gastro-intestinal disorders and micronutrient deficiencies following oncologic esophagectomy and gastrectomy. Cancers (Basel). 2023;15(14):3554. (철: 십이지장 우회+위산 감소, 2년 시점 철결핍 40~70 %·철결핍빈혈 31 %; 칼슘: 저위산으로 칼슘염 용해 감소; B12: 평생 경구 또는 비경구 보충, 저장 12~18개월이라 수술 2년 이후 발견, 매년 검사)",
+     "url": "https://doi.org/10.3390/cancers15143554",
+     "access": "pmc",
+     "fulltext": "PMC10376982"
+    },
+    {
+     "id": "wang2025-gc-home-nutr",
+     "kind": "review",
+     "year": 2025,
+     "citation": "Wang S, Wen L, Dong L, et al. Best practices for home nutritional management in postoperative gastric cancer patients: an evidence summary. BMC Cancer. 2025;25:1399. (근거 요약 23번: 덤핑 시 마른 음식·고당 식단 피하기, 반쯤 앉아 식사하고 식후 30분 눕기 — 근거수준 4c 전문가 의견; 18번: Roux-en-Y 는 한 끼 300 mL 미만·하루 5끼 이상)",
+     "url": "https://doi.org/10.1186/s12885-025-14608-9",
+     "access": "pmc",
+     "fulltext": "PMC12398126"
+    },
+    {
+     "id": "iwamuro2015-bezoar",
+     "kind": "review",
+     "year": 2015,
+     "citation": "Iwamuro M, Okada H, Matsueda K, et al. Review of the diagnosis and management of gastrointestinal bezoars. World J Gastrointest Endosc. 2015;7(4):336-345. (감 위석: 탄닌이 위산과 반응해 덩어리, 위 부분절제 등 이전 위 수술이 위험 인자, 장폐색 시 수술 불가피)",
+     "url": "https://doi.org/10.4253/wjge.v7.i4.336",
+     "access": "pmc",
+     "fulltext": "PMC4400622"
+    },
+    {
+     "id": "vandervelde2014-ca",
+     "kind": "review",
+     "year": 2014,
+     "citation": "van der Velde RY, Brouwers JR, Geusens PP, et al. Calcium and vitamin D supplementation: state of the art for daily practice. Food Nutr Res. 2014;58:21796. (구연산칼슘이 탄산칼슘보다 흡수 24 % 많음(Sakhaee 메타분석, 공복·식사 시 모두); 저위산·PPI 에서 칼슘염별 흡수 차이는 연구된 바 없음, 에소메프라졸 RCT 에서 흡수 차이 없음)",
+     "url": "https://doi.org/10.3402/fnr.v58.21796",
+     "access": "pmc",
+     "fulltext": "PMC4126954"
+    }
+   ],
+   "quotes": [
+    {
+     "claim": "조기 덤핑 기전(삼투·수분 이동)",
+     "quote": "rapid fluid shifts occur from the plasma compartment to the intestinal lumen",
+     "loc": "Scarpellini 2020, statement 9",
+     "secondary": false
+    },
+    {
+     "claim": "조기 덤핑 증상",
+     "quote": "abdominal pain, cramps, bloating, borborygmi, nausea and diarrhoea) and vasomotor symptoms (such as fatigue, desire to lie down after meals, flushing, palpitations, perspiration",
+     "loc": "Scarpellini 2020, statement 4",
+     "secondary": false
+    },
+    {
+     "claim": "후기 덤핑 시간",
+     "quote": "Late dumping syndrome usually occurs 1–3 h after a meal and is characterized by (reactive) hypoglycaemia",
+     "loc": "Scarpellini 2020, statement 5",
+     "secondary": false
+    },
+    {
+     "claim": "식이 조절: 양 줄이기·수분 미루기·단 것 제거",
+     "quote": "reduce the amount of food ingested at each meal, to postpone fluid intake until at least 30 min after meals and to eliminate rapidly absorbable carbohydrates",
+     "loc": "Scarpellini 2020, Dietary modification 절(statement 43~47 해설)",
+     "secondary": false
+    },
+    {
+     "claim": "식이 조절의 근거 한계",
+     "quote": "Controlled data showing benefit from protein-rich foods or delaying fluid intake are not available in the literature",
+     "loc": "Scarpellini 2020, 같은 절",
+     "secondary": false
+    },
+    {
+     "claim": "식후 눕기",
+     "quote": "Meals should be taken in a semi-sitting position, with lying down for half an hour after the meal",
+     "loc": "Wang 2025, 근거 요약표 23번(근거수준 4c)",
+     "secondary": true
+    },
+    {
+     "claim": "하루 5끼 이상",
+     "quote": "Patients are more likely to consume less than 300 ml per meal and require more than 5 meals per day",
+     "loc": "Wang 2025, 근거 요약표 18번",
+     "secondary": true
+    },
+    {
+     "claim": "철 흡수와 위산",
+     "quote": "partial or total gastrectomy results in diminished gastric acid availability in the small intestine",
+     "loc": "Teixeira Farinha 2023, 6.1 Iron Deficiency",
+     "secondary": false
+    },
+    {
+     "claim": "철결핍 빈도",
+     "quote": "The prevalence of iron deficiency at two years after gastrectomy was observed between 40 and 70%",
+     "loc": "Teixeira Farinha 2023, 6.1",
+     "secondary": true
+    },
+    {
+     "claim": "칼슘과 저위산",
+     "quote": "decreased dissolution of calcium salts due to hypochlorhydria, and vitamin D deficiency",
+     "loc": "Teixeira Farinha 2023, 6.3",
+     "secondary": false
+    },
+    {
+     "claim": "B12 평생 관리·경구 또는 비경구",
+     "quote": "requires lifelong management via oral or parenteral supplements",
+     "loc": "Teixeira Farinha 2023, 6.7",
+     "secondary": false
+    },
+    {
+     "claim": "B12 2년 이후 발견·매년 검사",
+     "quote": "B12 deficiency is typically detected two years or more after surgery",
+     "loc": "Teixeira Farinha 2023, 6.7",
+     "secondary": false
+    },
+    {
+     "claim": "감 위석",
+     "quote": "Upon reaction with stomach acid, persimmon tannin is believed to polymerize and form a conglomerate",
+     "loc": "Iwamuro 2015 (PMC 화면, WebFetch 경유)",
+     "secondary": false
+    },
+    {
+     "claim": "이전 위 수술이 위험 인자",
+     "quote": "Predisposed risk factors include prior gastric surgery such as partial gastrectomy",
+     "loc": "Iwamuro 2015 (WebFetch 경유)",
+     "secondary": false
+    },
+    {
+     "claim": "구연산칼슘 흡수",
+     "quote": "More calcium is absorbed from calcium citrate compared to calcium carbonate",
+     "loc": "van der Velde 2014, 초록 결론",
+     "secondary": false
+    },
+    {
+     "claim": "저위산·PPI 에서 칼슘염 차이(반대 근거)",
+     "quote": "There has been no research to determine whether there is a difference in calcium absorption between the various calcium salts with use of proton pump inhibitors",
+     "loc": "van der Velde 2014, achlorhydria 와 PPI 절",
+     "secondary": false
+    }
+   ],
+   "text_changes": [
+    {
+     "rule": "stomach-dumping",
+     "from": "2~3시간 뒤 반응성 저혈당이 오는 후기 덤핑도 흔합니다",
+     "to": "식후 1~3시간 뒤 반응성 저혈당이 오는 후기 덤핑도 있습니다"
+    },
+    {
+     "rule": "stomach-dumping",
+     "from": "위절제 후의 \"정해진 식단\"을 뒷받침할 문헌은 충분하지 않다는 것이 이 분야 종설의 결론입니다",
+     "to": "식이 조절이 첫 치료라는 데는 국제 합의가 있지만, 물을 미루거나 단백질을 늘리는 방법이 효과를 냈다는 대조 연구는 아직 없습니다"
+    },
+    {
+     "rule": "cond-gx-dumping",
+     "from": "주스·사이다·꿀물처럼 당이 농축된 액체가 가장 흔한 원인입니다. 식사 중에는 물을 적게 드시고, 식후 20~30분 비스듬히 누워 계시면 증상이 줄어듭니다",
+     "to": "주스·사이다·꿀물처럼 빨리 흡수되는 당은 덤핑을 부르기 쉬워 빼는 것이 첫 조치입니다. 한 번에 드시는 양을 줄이고, 물은 식후 30분 이상 지나서 드시며, 식후 30분쯤 비스듬히 기대어 쉬시는 것이 흔히 권해집니다(마지막 것은 전문가 의견 수준)"
+    },
+    {
+     "rule": "stomach-small-meals",
+     "from": "하루 5~6회로 나눠 드시는 편이 좋습니다",
+     "to": "한 번에 드시는 양을 줄이고 하루 5회 이상으로 나눠 드시는 편이 좋습니다"
+    },
+    {
+     "rule": "int-ppi-calcium",
+     "from": "PPI 복용 중이거나 위절제를 받은 경우에는 위산에 덜 의존하는 구연산칼슘 형태가 유리합니다",
+     "to": "위절제 후에는 위산이 줄어 칼슘염이 덜 녹으므로 위산에 덜 의존하는 구연산칼슘이 무난한 선택입니다. 다만 PPI 가 칼슘 흡수를 실제로 떨어뜨리는지는 연구 결과가 엇갈립니다"
+    },
+    {
+     "rule": "stomach-iron-ca",
+     "from": "철결핍빈혈은 수술 후 수년에 걸쳐 서서히 나타나는 경우가 많고",
+     "to": "철 결핍은 수술 2년 무렵 40~70 % 에서 보일 만큼 흔하고"
+    }
+   ],
+   "notes": "Rogers 2011(Nutr Clin Pract)은 구독제 — 원문 미확인. 9개 이상 규칙이 이 한 편에 기대고 있어 주제별로 공개 문헌 4~5편으로 나누는 안을 제시. 확인 못 한 것: (1) '국물만 남겨도 나트륨 절반'·'위산이 있어야 철·칼슘이 잘 흡수' 중 칼슘 부분의 정량치, (2) 구연산칼슘이 '위절제 후' 유리하다는 직접 비교 연구 — 공개 문헌에서 못 찾음(van der Velde 는 일반 인구 24 % 차이만). Rosania 2016(PMC4924460)은 PMC 화면에서 확인했으나 덤핑 '잦은 소량 식사·단순당 제한'과 B12(경구·피하 모두 효과)만 있고 칼슘·위석·눕기는 없음 — 보조로만. 반대 근거: van der Velde 2014 는 PPI-칼슘 흡수 저하가 입증되지 않았다고 정리(에소메프라졸 RCT 차이 없음) → int-ppi-calcium 문장 완화 필요. Wang 2025 의 '식후 30분 눕기'는 근거수준 4c(전문가 의견)이고 중국 자료 위주라 '흔히 권해진다' 정도로만 쓸 것. 덤핑 합의문 kind 를 guideline 으로 둔 것은 다학제 델파이 합의(GRADE)이기 때문."
+  },
+  {
+   "old": "b12-gastrectomy-meta",
+   "cited_by": [
+    {
+     "rule": "cond-gx-b12",
+     "claims": [
+      "위암으로 위절제를 받은 2,627명 메타분석에서 B12 결핍 48.8 %",
+      "전절제 후 경구 흡수 불가능해 주사 보충 필요"
+     ]
+    },
+    {
+     "rule": "stomach-b12",
+     "claims": [
+      "2,627명·48.8 %",
+      "95 % CI 32.4~65.2 %",
+      "가장 흔한 증상은 빈혈·쉽게 지침·손발이 시림·저림·어지럼",
+      "전절제 후 경구 섭취만으로 흡수되지 않아 주사(월 1회 등)"
+     ]
+    },
+    {
+     "rule": "stomach-b12-partial",
+     "claims": [
+      "(숫자 없음) 아절제 후에도 수년 뒤 결핍, 정기 확인"
+     ]
+    }
+   ],
+   "new": {
+    "id": "tan2024-ugi-micro",
+    "kind": "review",
+    "year": 2024,
+    "citation": "Tan SYC, Tsoukalas T, Javier K, et al. Recommendations on the surveillance and supplementation of vitamins and minerals for upper gastrointestinal cancer survivors: a scoping review. J Cancer Surviv. 2026;20(2):506-521 (온라인 2024). (Bahardoust 2024 메타분석 2차 인용: 2,627명, 위 전절제 후 약 2명 중 1명(48.8 %) B12 결핍; 26편 권고 정리 — 대부분 B12·철·칼슘·비타민 D 감시 권고)",
+    "url": "https://doi.org/10.1007/s11764-024-01666-4",
+    "access": "pmc",
+    "fulltext": "PMC12989006"
+   },
+   "also_new": [
+    {
+     "id": "osmola2025-b12-cancer",
+     "kind": "review",
+     "year": 2025,
+     "citation": "Osmola M, Tyszka M, Jirka A, et al. Vitamin B12 in cancer patients: clinical insights into deficiency, excess, diagnosis, and management. Nutrients. 2025;17(20):3272. (위절제 후 B12 결핍 48.8 % 2차 인용; 내인자 없이도 약 1 % 수동 흡수; 전절제 후 100 %·중앙 15개월, 아전절제 4년 15.7 %(Hu 2013 2차 인용); 고위험군은 수술 직후 경구 1,000 µg/주 시작)",
+     "url": "https://doi.org/10.3390/nu17203272",
+     "access": "pmc",
+     "fulltext": "PMC12566637"
+    },
+    {
+     "id": "rogaczewski2026-oral-b12",
+     "kind": "review",
+     "year": 2026,
+     "citation": "Rogaczewski P, Janiak M, Durślewicz J, et al. Oral vitamin B12 after total gastrectomy for gastric cancer: mapping the evidence. Gastric Cancer. 2026;29(5):920-929. (7편·449명(경구 310명): 메코발라민 500~1,500 µg/일로 대부분 혈중 농도 정상화, 생화학 반응은 주사에 뒤지지 않음, 무작위배정은 1편뿐)",
+     "url": "https://doi.org/10.1007/s10120-026-01745-8",
+     "access": "pmc",
+     "fulltext": "PMC13524985"
+    }
+   ],
+   "quotes": [
+    {
+     "claim": "2,627명·48.8 %",
+     "quote": "A recent systematic review with meta-analysis of 2627 patients after gastrectomy for gastric cancer found almost 1 in 2 patients (48.8%) had B12 deficiencies after a total gastrectomy",
+     "loc": "Tan 2024, Introduction",
+     "secondary": true
+    },
+    {
+     "claim": "48.8 %",
+     "quote": "A meta-analysis found that the prevalence of vitamin B12 deficiency after gastrectomy in patients with gastric cancer was 48.8%",
+     "loc": "Osmola 2025, 5절",
+     "secondary": true
+    },
+    {
+     "claim": "아전절제 후에도 수년 뒤 결핍",
+     "quote": "100% after total gastrectomy, with the median time of 15 months to develop this deficiency, and 15.7% for subtotal gastrectomy 4 years after surgery",
+     "loc": "Osmola 2025, 5절",
+     "secondary": true
+    },
+    {
+     "claim": "경구 흡수 불가능(반대 근거)",
+     "quote": "approximately 1% of vitamin B12 can still be absorbed passively along the gastrointestinal tract",
+     "loc": "Osmola 2025, 5절",
+     "secondary": false
+    },
+    {
+     "claim": "경구 B12 효과(반대 근거)",
+     "quote": "Comparative studies showed that, in terms of biochemical response, oral supplementation was not inferior to parenteral therapy",
+     "loc": "Rogaczewski 2026, 초록 결과",
+     "secondary": false
+    }
+   ],
+   "text_changes": [
+    {
+     "rule": "cond-gx-b12",
+     "from": "위 전절제 후에는 경구 흡수가 불가능해 주사 보충이 필요합니다",
+     "to": "위 전절제 후에는 내인자가 없어 음식 속 B12 는 거의 흡수되지 않습니다. 그래서 주사로 보충하거나, 하루 수백~1,000 µg 이상의 고용량 알약으로 보충합니다(약 1 % 가 내인자 없이 흡수됨) — 방법은 담당 의료진과 정하시고 수치로 확인하십시오"
+    },
+    {
+     "rule": "stomach-b12",
+     "from": "전절제 후에는 경구 섭취만으로 흡수되지 않아 보통 주사(월 1회 등)로 보충합니다",
+     "to": "전절제 후에는 음식으로는 거의 흡수되지 않아 주사(월 1회 등)나 고용량 알약으로 보충합니다"
+    },
+    {
+     "rule": "stomach-b12",
+     "from": "(95 % 신뢰구간 32.4~65.2 % — 연구마다 편차가 매우 커 범위가 넓습니다). 가장 흔한 증상은 빈혈·쉽게 지침·손발이 시림·저림·어지럼이었습니다.",
+     "to": "연구마다 편차가 매우 큽니다. (신뢰구간과 증상 목록은 공개 원문으로 확인되지 않아 삭제 — 원 메타분석 원문을 구하면 복원)"
+    },
+    {
+     "rule": "cond-gx-b12 / stomach-b12",
+     "from": "위암으로 위절제를 받은 2,627명을 모은 메타분석",
+     "to": "위암으로 위 전절제를 받은 2,627명을 모은 메타분석"
+    }
+   ],
+   "notes": "원 메타분석(Bahardoust 2024, Eur J Cancer Prev)은 구독제 — 원문 미확인. 공개 2차 문헌 두 편이 2,627명·48.8 % 를 그대로 옮기지만 95 % CI(32.4~65.2)와 증상 목록은 어느 공개 문헌에도 없어 확인 못 함. 원 논문 제목이 'after total gastrectomy' 라 '위절제' 보다 '전절제' 가 정확. 반대 근거(중요): 전절제 후 '경구 흡수 불가능'은 사실과 다름 — 고용량 경구 B12 는 수동 확산으로 흡수되며 7편 모아 주사에 뒤지지 않는 생화학 반응(무작위배정 1편, 추적 짧음). 이 문장은 오류로 고칠 것. 앞서 F 점검이 후보로 낸 PMC6412945(Lee 2019)는 지표 연구라 이 숫자를 담지 않음."
+  },
+  {
+   "old": "asco-cardio",
+   "cited_by": [
+    {
+     "rule": "breast-her2-cardiac",
+     "claims": [
+      "ASCO 는 심장독성 약제 사용 중 고칠 수 있는 심혈관 위험 요인(흡연·고혈압·당뇨·이상지질혈증·비만)을 찾아 적극 관리하라고 권고",
+      "이 권고의 근거 수준은 충분하지 않다고 지침 스스로 밝힘",
+      "심장이 조사야에 들어가 30 Gy 이상이면 같은 지침이 고위험으로 분류",
+      "트라스투주맙·안트라사이클린 병용/선행 시 위험 증가"
+     ]
+    }
+   ],
+   "new": {
+    "id": "asco-cardio",
+    "kind": "guideline",
+    "year": 2017,
+    "citation": "Armenian SH, et al. Prevention and Monitoring of Cardiac Dysfunction in Survivors of Adult Cancers: ASCO Clinical Practice Guideline. J Clin Oncol. 2017;35(8):893-911. (권고 3.1: 흡연·고혈압·당뇨·이상지질혈증·비만을 찾아 적극 관리 — 근거 질 insufficient·권고 강도 moderate; 권고 1.1: 심장이 조사야에 든 30 Gy 이상 방사선, 저용량 안트라사이클린 후 트라스투주맙 순차 투여는 위험 증가군)",
+    "url": "https://ascopubs.org/doi/full/10.1200/JCO.2016.70.5400",
+    "access": "open",
+    "fulltext": "https://ascopubs.org/doi/full/10.1200/JCO.2016.70.5400 (출판사 'FREE ACCESS' 표시, 본문 13만 자 열람 확인)"
+   },
+   "quotes": [
+    {
+     "claim": "위험 요인 적극 관리",
+     "quote": "Clinicians should screen for and actively manage modifiable cardiovascular risk factors (smoking, hypertension, diabetes, dyslipidemia, obesity)",
+     "loc": "Recommendation 3.1",
+     "secondary": false
+    },
+    {
+     "claim": "근거 수준 불충분",
+     "quote": "Evidence quality: insufficient; Strength of recommendation: moderate",
+     "loc": "Recommendation 3.1",
+     "secondary": false
+    },
+    {
+     "claim": "30 Gy 이상",
+     "quote": "High-dose radiotherapy (RT; ≥ 30 Gy) where the heart is in the treatment field",
+     "loc": "Recommendation 1.1",
+     "secondary": false
+    },
+    {
+     "claim": "안트라사이클린 후 트라스투주맙",
+     "quote": "lower-dose anthracycline (eg, doxorubicin < 250 mg/m2, epirubicin < 600 mg/m2) followed by trastuzumab (sequential therapy)",
+     "loc": "Recommendation 1.1",
+     "secondary": false
+    }
+   ],
+   "text_changes": [
+    {
+     "rule": "breast-her2-cardiac",
+     "from": "같은 지침이 고위험으로 분류합니다",
+     "to": "같은 지침이 심장 기능 저하 위험이 높은 군(increased risk)으로 분류합니다"
+    }
+   ],
+   "notes": "교체 불필요. Unpaywall 은 closed 로 나왔지만 ascopubs 원문 페이지가 'FREE ACCESS' 로 전문 공개되어 있음을 내장 브라우저로 직접 확인(2026-10-14). references 에 access:'open', fulltext 에 위 URL 을 넣으면 됨. 지침 용어는 'increased risk' 이고 '고위험(high risk)'은 아님 — 작은 표현 조정. 참고로 같은 날 같은 방법으로 연 Bairati 2005 JCO 와 Galvão 2010 JCO 는 유료라, ASCO '지침'만 무료인 것으로 보임."
+  },
+  {
+   "old": "sonbol2015",
+   "cited_by": [
+    {
+     "rule": "common-neutropenic-diet-myth",
+     "claims": [
+      "무작위배정 메타분석 6편·1,116명에서 호중구감소증 식단의 감염 감소 근거 없음",
+      "주요 감염 RR 1.16(0.94~1.42)",
+      "조혈모세포이식군에서 제한식이 쪽 감염이 더 많음(1.25, 1.02~1.54)"
+     ]
+    },
+    {
+     "rule": "common-raw-neutropenia / cond-neut-raw / common-raw-animal-neutropenia",
+     "claims": [
+      "생과일·생채소까지 전면 금지하는 식단이 감염을 줄인다는 근거는 메타분석에서 확인되지 않음"
+     ]
+    }
+   ],
+   "new": {
+    "id": "ma2022-neutropenic-diet",
+    "kind": "meta",
+    "year": 2022,
+    "citation": "Ma Y, Lu X, Liu H. Neutropenic diet cannot reduce the risk of infection and mortality in oncology patients with neutropenia. Front Oncol. 2022;12:836371. (6편(무작위배정 4편·환자-대조군 1편 포함)·1,114명: 감염 RR 1.13, 95 % CI 0.97~1.31; 사망 RR 1.06, 0.76~1.48; 소아·성인 하위군 모두 차이 없음)",
+    "url": "https://doi.org/10.3389/fonc.2022.836371",
+    "access": "pmc",
+    "fulltext": "PMC8959862"
+   },
+   "also_new": [
+    {
+     "id": "pedretti2024-nd-peds",
+     "kind": "review",
+     "year": 2024,
+     "citation": "Pedretti L, Leardini D, Muratore E, et al. Managing the risk of foodborne infections in pediatric patients with cancer: is the neutropenic diet still an option? Nutrients. 2024;16(7):966. (Trifilio 2012 를 2차 인용: 성인 조혈모세포이식 726명, 일반식 군에서 미생물학적 확진 감염이 더 적음)",
+     "url": "https://doi.org/10.3390/nu16070966",
+     "access": "pmc",
+     "fulltext": "PMC11013746"
+    }
+   ],
+   "quotes": [
+    {
+     "claim": "감염 감소 근거 없음(수치)",
+     "quote": "patients in the study group had similar results for the incidence of infection compared with the patients in the control group (risk ratio, 1.13; 95% CI, 0.97 to 1.31; P = 0.11)",
+     "loc": "Ma 2022, Results: Meta-Analysis of the Incidence of Infection",
+     "secondary": false
+    },
+    {
+     "claim": "6편·1,114명",
+     "quote": "A total of 6 studies were included, with a total sample size of 1114 patients",
+     "loc": "Ma 2022, Abstract",
+     "secondary": false
+    },
+    {
+     "claim": "조혈모세포이식에서 제한식 쪽 감염 많음",
+     "quote": "The study found significantly fewer microbiologically confirmed infections in the general diet group (p < 0.027)",
+     "loc": "Pedretti 2024, Trifilio 문단",
+     "secondary": true
+    }
+   ],
+   "text_changes": [
+    {
+     "rule": "common-neutropenic-diet-myth",
+     "from": "무작위배정 연구들의 메타분석(6편·1,116명)에서 확인되지 않았고 (주요 감염 상대위험 1.16, 95 % 신뢰구간 0.94~1.42), 조혈모세포이식을 받은 분들에서는 오히려 제한식이 쪽의 감염이 조금 더 많았습니다(1.25, 1.02~1.54)",
+     "to": "6편·1,114명을 모은 메타분석에서 확인되지 않았고(감염 상대위험 1.13, 95 % 신뢰구간 0.97~1.31), 조혈모세포이식을 받은 성인 726명을 비교한 연구에서는 오히려 일반식 쪽의 확진 감염이 더 적었습니다"
+    }
+   ],
+   "notes": "Sonbol 2019(BMJ Support Palliat Care)은 구독제 — 원문 미확인, 공개 2차 문헌 중 RR 1.16·1.25 를 옮긴 것을 찾지 못함(Europe PMC 전문 검색). 그래서 같은 질문의 공개 메타분석(Ma 2022, CC BY)으로 바꾸고 숫자를 그 논문 것으로 교체하는 안. Ma 2022 는 Sonbol 과 거의 같은 연구들(2007~2017)을 묶었으나 환자-대조군 1편을 포함 — '무작위배정 연구들의 메타분석' 표현은 빼야 함. 조혈모세포이식 하위군 RR 1.25 는 Ma 에 없음 → Trifilio 2012(후향 726명)를 2차 인용한 문장으로 바꾸거나 삭제. 결론 방향(제한식이 이득 없음)은 두 메타분석이 같음."
+  },
+  {
+   "old": "golden2009",
+   "cited_by": [
+    {
+     "rule": "int-bortezomib-greentea",
+     "claims": [
+      "녹차 EGCG 가 보르테조밉 보론산기와 직접 결합해 프로테아좀 억제를 무력화(세포·동물 실험)",
+      "사람 대상 시험 없음",
+      "보론산 계열에서만, 다른 계열 프로테아좀 억제제에선 없음",
+      "저자들은 이 약을 쓰는 동안 녹차 제품을 피해야 할 수 있다고 적음",
+      "농축 녹차추출물 보충제는 피해야"
+     ]
+    },
+    {
+     "rule": "ingr:녹차추출물(카테킨·EGCG) base",
+     "claims": [
+      "마시는 녹차와 달리 농축 추출물은 간독성 사례가 보고"
+     ]
+    },
+    {
+     "rule": "ingr:녹차추출물 byMedication.bortezomib",
+     "claims": [
+      "(보르테조밉 상호작용)"
+     ]
+    }
+   ],
+   "new": {
+    "id": "jia2013-bortezomib-green",
+    "kind": "review",
+    "year": 2013,
+    "citation": "Jia L, Liu FT. Why bortezomib cannot go with 'green'? Cancer Biol Med. 2013;10(4):206-213. (Golden 2009 를 2차 인용: EGCG 10 µM 이 보르테조밉 10 nM 의 세포사멸을 완전 차단, 보론산 계열에만 선택적, 누드마우스 실험, NMR 로 공유결합 확인; 반대 결과로 Bannerman 2011(밀레니엄사) — 사람 혈중 농도에서는 길항 없음, 식사로 마시는 녹차는 피할 필요 없다고 결론)",
+    "url": "https://doi.org/10.7497/j.issn.2095-3941.2013.04.004",
+    "access": "pmc",
+    "fulltext": "PMC3860349"
+   },
+   "also_new": [
+    {
+     "id": "efsa2018-catechins",
+     "kind": "guideline",
+     "year": 2018,
+     "citation": "EFSA ANS Panel. Scientific opinion on the safety of green tea catechins. EFSA J. 2018;16(4):e05239. (전통 방식 녹차 우림은 대체로 안전, 드문 특이체질 간손상 보고; 보충제로 EGCG 하루 800 mg 이상이면 혈청 아미노전이효소 유의 상승)",
+     "url": "https://doi.org/10.2903/j.efsa.2018.5239",
+     "access": "pmc",
+     "fulltext": "PMC7009618"
+    }
+   ],
+   "quotes": [
+    {
+     "claim": "세포 실험 — EGCG 가 보르테조밉 차단",
+     "quote": "10 µM of EGCG completely blocked 10 nM bortezomib-induced apoptosis in primary and multiple myeloma cell lines",
+     "loc": "Jia 2013, 'Flavonoids in green tea block…' 절",
+     "secondary": true
+    },
+    {
+     "claim": "보론산 계열에만 선택적",
+     "quote": "displays selectivity toward those compounds harboring a boronic acid moiety",
+     "loc": "Jia 2013, 같은 문단",
+     "secondary": true
+    },
+    {
+     "claim": "반대 근거 — 식사 수준은 길항 없음",
+     "quote": "there appears no need for patients receiving bortezomib therapy to avoid normal dietary consumption of green tea",
+     "loc": "Jia 2013, Preclinical in vivo studies and controversies (Bannerman 2011 요약)",
+     "secondary": true
+    },
+    {
+     "claim": "저자 권고(원 논문 초록)",
+     "quote": "suggest that consumption of green tea products may be contraindicated during cancer therapy with BZM",
+     "loc": "Golden 2009 PubMed 초록(원문 아님)",
+     "secondary": false
+    },
+    {
+     "claim": "추출물 간독성",
+     "quote": "intake of doses equal or above 800 mg EGCG/day taken as a food supplement has been shown to induce a statistically significant increase of serum transaminases",
+     "loc": "EFSA 2018, Abstract",
+     "secondary": false
+    }
+   ],
+   "text_changes": [
+    {
+     "rule": "ingr:녹차추출물 base",
+     "from": "refIds: ['golden2009', 'easl-nutrition']",
+     "to": "refIds: ['efsa2018-catechins'] — 문장도 '보충제로 EGCG 를 하루 800 mg 이상 드시면 간수치가 오른다는 시험 결과가 있습니다' 로 구체화(golden2009 는 간독성을 다루지 않음 → 인용-주장 불일치)"
+    },
+    {
+     "rule": "int-bortezomib-greentea",
+     "from": "저자들은 이 약을 쓰는 동안 녹차 제품을 피해야 할 수 있다고 적었습니다.",
+     "to": "원 연구 저자들은 녹차 제품을 피해야 할 수 있다고 적었지만, 이후 제약사 동물 실험은 사람이 마시는 수준의 혈중 농도에서는 길항이 없었다고 보고했습니다."
+    }
+   ],
+   "notes": "Golden 2009(Blood)는 ashpublications 에서 봇 확인 화면에 막혀 원문 미확인(우회하지 않음). kind 는 코디네이터 안내대로 'preclinical' 로 고칠 것(현재 'review' 는 틀림) — 원 논문을 유지하든 교체하든 등급 C 상한. Jia 2013 은 종설이라 kind 'review'. 주의: Jia 2013 본문은 Golden 의 비보론산 대조약을 잘못 적음(nelfinavir·MG-132 를 보론산 계열로, MG-262 를 비보론산으로) — 원 초록은 'boronic acid-based (BZM, MG-262, PS-IX), but not … non-boronic (MG-132, PS-I, nelfinavir)'. 그래서 Jia 에서는 '선택성' 문장만 인용할 것. 반대 근거(Bannerman 2011, Cancer Chemother Pharmacol; 원문 미확인, Jia 의 요약으로만 확인): 길항에는 EGCG 혈중 >200 µM 정맥 투여가 필요했고 식사 수준 녹차는 피할 필요 없다는 결론 → 녹차 '음료'에까지 '피하세요'를 거는 것은 '판단 필요'. 추출물 보충제 회피는 유지 가능. Modernelli 2015(PMC4607952)는 전립선암 세포에서 EGCG 가 보르테조밉을 길항(자가포식 기전)한다는 또 하나의 전임상 근거."
+  },
+  {
+   "old": "capecitabine-warfarin",
+   "cited_by": [
+    {
+     "rule": "int-capecitabine-warfarin",
+     "claims": [
+      "카페시타빈이 CYP2C9 를 억제해 와파린 농도를 올린다",
+      "심각한 출혈 사례로 경고문이 붙어 있다",
+      "보고된 증례에서 병용 6주 뒤 INR 10 초과·위장관 출혈",
+      "INR 을 자주 확인"
+     ]
+    }
+   ],
+   "new": {
+    "id": "xeloda-label",
+    "kind": "guideline",
+    "year": 2026,
+    "citation": "U.S. FDA/DailyMed. XELODA (capecitabine) tablets prescribing information (H2-Pharma, SPL ver. 32, 2026-02-06). (상자 경고: 비타민 K 길항제 병용 시 출혈·사망 보고, INR 자주 확인; 7.2: CYP2C9 기질 노출 증가; 12.3: 와파린 S-형 AUC 57 % 증가·청소율 37 % 감소, 최고 INR 91 % 증가; 사건은 시작 며칠~수개월 뒤, 일부는 중단 1개월 이내)",
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=e702d84d-7162-4751-bf37-d724cc7e45a5",
+    "access": "open",
+    "fulltext": "https://dailymed.nlm.nih.gov/dailymed/services/v2/spls/e702d84d-7162-4751-bf37-d724cc7e45a5.xml"
+   },
+   "also_new": [
+    {
+     "id": "althiab2021-cape-warf",
+     "kind": "case",
+     "year": 2021,
+     "citation": "Althiab K, Aljohani M, Alraddadi S, Algarni M. Capecitabine and warfarin interaction: a case report with review of literature and management options. Front Cardiovasc Med. 2021;8:707361. (Copur 2001 증례 2건 포함 6건 표: 병용 1~8주 뒤 INR >10, 질-직장 출혈·흑색변·쇼크를 동반한 위장관 출혈)",
+     "url": "https://doi.org/10.3389/fcvm.2021.707361",
+     "access": "pmc",
+     "fulltext": "PMC8842720"
+    }
+   ],
+   "quotes": [
+    {
+     "claim": "경고문(상자 경고)",
+     "quote": "WARNING: SERIOUS ADVERSE REACTIONS OR DEATH IN PATIENTS WITH COMPLETE DPD DEFICIENCY and BLEEDING WITH CONCOMITANT USE OF VITAMIN K ANTAGONISTS",
+     "loc": "Xeloda 라벨 상자 경고(2025-10 개정)",
+     "secondary": false
+    },
+    {
+     "claim": "CYP2C9",
+     "quote": "XELODA increased exposure of CYP2C9 substrates",
+     "loc": "Xeloda 라벨 7.2",
+     "secondary": false
+    },
+    {
+     "claim": "와파린 약동학",
+     "quote": "increased the mean AUC of S-warfarin by 57% and decreased its clearance by 37%",
+     "loc": "Xeloda 라벨 12.3",
+     "secondary": false
+    },
+    {
+     "claim": "발생 시점",
+     "quote": "These events occurred within several days and up to several months after initiating XELODA",
+     "loc": "Xeloda 라벨 5.2",
+     "secondary": false
+    },
+    {
+     "claim": "증례 6주·INR>10",
+     "quote": "After 6 weeks of concurrent administration, the patient was admitted due to vagino-rectal bleeding with an INR of > 10",
+     "loc": "Althiab 2021, 증례 고찰(Copur 2001 1번 증례)",
+     "secondary": true
+    }
+   ],
+   "text_changes": [
+    {
+     "rule": "int-capecitabine-warfarin",
+     "from": "카페시타빈은 CYP2C9 를 억제해 와파린 농도를 올리며",
+     "to": "카페시타빈은 CYP2C9 로 분해되는 약의 농도를 올려(와파린의 활성형 노출이 57 % 증가) 와파린 효과를 키우며"
+    },
+    {
+     "rule": "int-capecitabine-warfarin",
+     "from": "보고된 증례에서는 병용 6주 뒤 INR 이 10을 넘고 위장관 출혈이 생겼습니다",
+     "to": "보고된 증례들에서는 함께 쓴 지 1~8주 만에 INR 이 10을 넘고 장 출혈이 생겼으며, 약 설명서는 시작 며칠 뒤부터 몇 달 뒤까지, 끊은 뒤 한 달 안에도 생길 수 있다고 적고 있습니다"
+    }
+   ],
+   "notes": "Copur 2001(Clin Colorectal Cancer) 구독제 — 원문 미확인. Copur 초록은 기전을 'exact mechanism … yet unknown' 이라 함 — 'CYP2C9 억제'는 Copur 가 아니라 라벨(CYP2C9 기질 노출 증가)·Giunta 2010(PMC2909789 'may be interacting with CYP2C9') 근거. 라벨은 'inhibit' 라고 단정하지 않으므로 '노출을 올린다'로 쓰는 편이 정확. Althiab 표에서 Copur 1번 증례는 6주·질-직장 출혈, 2번 증례는 8주·흑색변 — '병용 6주 뒤 위장관 출혈' 은 두 증례를 섞은 표현. kind: 코디네이터 안내대로 원 Copur 는 'case', Althiab 도 'case'(증례+문헌고찰), 라벨은 기관 문서라 'guideline' 로 둠(맞는 kind 가 없으면 notes 에 '허가사항' 명시). 증례만 인용하면 등급 C 상한 — 라벨이 붙어도 근거 설계는 증례·약동학 4명이라 C 유지가 맞음."
+  },
+  {
+   "old": "fearon2011",
+   "cited_by": [
+    {
+     "rule": "lung-cachexia",
+     "claims": [
+      "국제 합의 기준: 체중 5 % 넘게 줄면 악액질",
+      "BMI 20 미만이나 근감소가 있으면 2 % 만 줄어도 악액질",
+      "치료 완주율 저하·생존 악화"
+     ]
+    },
+    {
+     "rule": "cond-anor-dense",
+     "claims": [
+      "ESPEN 은 체중이 줄고 인슐린 저항성이 있으면 지방 열량 비중을 올리도록 권고(fearon2011 이 함께 달려 있음)"
+     ]
+    }
+   ],
+   "new": {
+    "id": "tan2014-panc-cachexia",
+    "kind": "review",
+    "year": 2014,
+    "citation": "Tan CR, Yaffee PM, Jamil LH, et al. Pancreatic cancer cachexia: a review of mechanisms and therapeutics. Front Physiol. 2014;5:88. (Fearon 2011 진단 기준 2차 인용·표 1: 6개월 내 체중 감소 >5 %, 또는 BMI <20 에서 >2 %, 또는 근감소가 있으면서 >2 %)",
+    "url": "https://doi.org/10.3389/fphys.2014.00088",
+    "access": "pmc",
+    "fulltext": "PMC3939686"
+   },
+   "also_new": [
+    {
+     "id": "esmo2021-cachexia",
+     "kind": "guideline",
+     "year": 2021,
+     "citation": "Arends J, Strasser F, Gonella S, et al. Cancer cachexia in adult patients: ESMO Clinical Practice Guidelines. ESMO Open. 2021;6(3):100092. (지방은 열량 밀도가 높아 적은 부피로 공급 가능, 악액질에서는 비단백 열량의 절반을 지방으로 [II, B])",
+     "url": "https://doi.org/10.1016/j.esmoop.2021.100092",
+     "access": "pmc",
+     "fulltext": "PMC8233663"
+    }
+   ],
+   "quotes": [
+    {
+     "claim": "5 %·2 % 기준",
+     "quote": "Diagnostic criteria include weight loss greater than 5% over the past 6 months, weight loss greater than 2% in individuals with body mass index (BMI) less than 20 kg/m2, or evidence of sarcopenia with any degree of weight loss greater than 2%",
+     "loc": "Tan 2014, Introduction 및 Table 1",
+     "secondary": true
+    },
+    {
+     "claim": "지방 = 적은 부피로 열량",
+     "quote": "fats are energy-dense and allow for feeding of smaller volumes",
+     "loc": "ESMO 2021, Nutritional requirements",
+     "secondary": false
+    },
+    {
+     "claim": "지방 비중 권고",
+     "quote": "In patients with cachexia, regimens with fat accounting for half of the non-protein calories are recommended [II, B]",
+     "loc": "ESMO 2021, Recommendations",
+     "secondary": false
+    }
+   ],
+   "text_changes": [
+    {
+     "rule": "lung-cachexia",
+     "from": "국제 합의 기준으로는 체중이 5 % 넘게 줄면 악액질에 해당하고",
+     "to": "국제 합의 기준으로는 최근 6개월 사이 체중이 5 % 넘게 줄면 악액질에 해당하고"
+    },
+    {
+     "rule": "cond-anor-dense",
+     "from": "refIds: ['espen2021', 'fearon2011', 'espen-cachexia']",
+     "to": "refIds: ['espen2021', 'espen-cachexia', 'esmo2021-cachexia'] — fearon2011 은 지방 열량 권고를 담지 않으므로 이 규칙에서 뺌"
+    }
+   ],
+   "notes": "Fearon 2011(Lancet Oncol) 구독제 — 원문 미확인, PubMed 초록에 기준 문장 있음('weight loss greater than 5%, or weight loss greater than 2% in individuals already showing depletion … BMI <20 … or sarcopenia'). 초록에는 '6개월'이 없고 Tan 2014 는 '6개월'을 붙임 — Fearon 본문 표에는 6개월이 있는 것으로 알려져 있으나 이번에 원문으로 확인 못 함. 원 합의문을 유지할 이유(정의의 1차 출처)가 크므로, fearon2011 은 남기되 access 를 'abstract' 로 표시하고 공개 2차 문헌(Tan 2014)을 함께 다는 안도 가능. ESMO 2021(PMC8233663)은 진단을 GLIM 방식(>5 %/6개월, BMI<20, 근육량 감소)으로 적어 Fearon 의 2 % 조건은 없음 — 기준 출처로 쓰면 안 됨. 아시아 악액질 작업반(Arai 2023, F 후보)은 자체 기준(>2 %/3~6개월 또는 BMI<21)이라 역시 Fearon 수치 출처로 부적합. Takaoka 2024(F 후보)는 본문에 수치 없음."
+  },
+  {
+   "old": "challenge2025",
+   "cited_by": [
+    {
+     "rule": "exercise.ts colorectal.summary",
+     "claims": [
+      "수술·보조항암을 마친 3기·고위험 2기 환자",
+      "구조화된 운동 3년",
+      "무병생존 유의 개선"
+     ]
+    },
+    {
+     "rule": "exercise.ts colorectal.items[구조화된 유산소 프로그램]",
+     "claims": [
+      "dose: 주 3~4회, 회당 45~60분 중강도",
+      "목표 주당 20 MET-시간 — 빠르게 걷기 주 5시간",
+      "건강교육만 받은 군보다 무병생존이 뚜렷하게 좋음",
+      "코치가 붙은 프로그램"
+     ]
+    },
+    {
+     "rule": "TodayMeals.tsx 체중 넘침 안내",
+     "claims": [
+      "보조항암 후 3년 운동 프로그램이 5년 무병생존을 73.9 %→80.3 %"
+     ]
+    }
+   ],
+   "new": {
+    "id": "shida2026-challenge",
+    "kind": "review",
+    "year": 2026,
+    "citation": "Shida D. Exercise as a disease-modifying therapy in colon cancer: practice-changing evidence from the CHALLENGE trial. Cancers (Basel). 2026;18(17):2883. (CHALLENGE 2차 인용: 889명, 절제된 3기·고위험 2기 결장암, 보조항암 후 2~6개월, 구조화 운동 3년 대 건강교육; 중앙 추적 7.9년 DFS HR 0.72(0.55~0.94), 5년 DFS 80.3 % 대 73.9 %; 목표는 기저 대비 주당 ≥10 MET-시간 증가 ≈ 빠르게 걷기 45~60분 주 3~4회)",
+    "url": "https://doi.org/10.3390/cancers18172883",
+    "access": "pmc",
+    "fulltext": "PMC13565172"
+   },
+   "also_new": [
+    {
+     "id": "courneya2026-challenge-tpb",
+     "kind": "rct",
+     "year": 2026,
+     "citation": "Courneya KS, Booth CM, Vardy JL, et al. Effects of a structured exercise program on motivational outcomes in patients with colon cancer. J Natl Cancer Inst. 2026;118(6):1054-1062. (CHALLENGE 2차 분석: 3기 또는 고위험 2기, 공인 운동 전문가가 3년간 48회 행동 지원, 목표는 처음 6개월 기저 대비 ≥10 MET-시간/주, 이후 최대 약 30 MET-시간/주)",
+     "url": "https://doi.org/10.1093/jnci/djag023",
+     "access": "pmc",
+     "fulltext": "PMC13247338"
+    }
+   ],
+   "quotes": [
+    {
+     "claim": "5년 DFS 80.3 % 대 73.9 %",
+     "quote": "with a 6.4% absolute improvement in 5-year DFS (80.3% vs. 73.9%)",
+     "loc": "Shida 2026, CHALLENGE 결과 절",
+     "secondary": true
+    },
+    {
+     "claim": "대상: 3기·고위험 2기, 건강교육 대조",
+     "quote": "enrolled 889 patients with resected (R0) stage III or high-risk stage II colon adenocarcinoma 2–6 months post-adjuvant chemotherapy",
+     "loc": "Shida 2026, 시험 설계 절",
+     "secondary": true
+    },
+    {
+     "claim": "운동량: 주 3~4회 45~60분",
+     "quote": "an increase of ≥10 MET-h/week above baseline, equivalent to approximately 45–60 min of brisk walking 3–4 times per week",
+     "loc": "Shida 2026, How Much (Dose)",
+     "secondary": true
+    },
+    {
+     "claim": "운동 전문가(코치)",
+     "quote": "access to a certified exercise specialist for 3 years",
+     "loc": "Courneya 2026 JNCI, Methods",
+     "secondary": false
+    },
+    {
+     "claim": "MET 목표",
+     "quote": "increase recreational aerobic exercise from baseline by at least 10 METs-hours/week during the first 6 months and then to maintain or further increase it to a maximum of about 30 MET-hours/week",
+     "loc": "Courneya 2026 JNCI, Methods",
+     "secondary": false
+    }
+   ],
+   "text_changes": [
+    {
+     "rule": "exercise.ts colorectal.items dose",
+     "from": "목표는 주당 \"대사당량 20 MET-시간\" — 빠르게 걷기 기준 주 5시간 정도",
+     "to": "처음 6개월은 평소보다 주당 10 MET-시간(빠르게 걷기 약 2.5시간)을 늘리는 것이 목표였고, 이후 사람에 맞춰 더 늘렸습니다(최대 주 27~30 MET-시간)"
+    }
+   ],
+   "notes": "NEJM 원문은 내장 브라우저로 열어 보니 초록·요약만 보이고 구독 안내가 떠 원문 미공개(2026-10-14). 80.3/73.9·HR 0.72 는 NEJM 초록(무료)과 Shida 2026(CC BY)에 모두 있음. '주당 20 MET-시간 — 주 5시간'은 어느 공개 문헌에도 그대로 없음: 설계 논문(Courneya 2008, PMC2601017)은 2단계에서 '최대 20 MET-시간 증가(총 20~27)'를 개인별로 둔 것이고 기본 목표는 +10 이다 — 앱 문장이 목표를 두 배로 적은 셈. 원 시험(NEJM)은 핵심 근거라 refIds 에 남기고(access 'abstract'), 공개 2차 문헌을 함께 다는 안을 권함. 제목 정정: 'in Colon Cancer' → 'for Colon Cancer'(F 지적)."
+  },
+  {
+   "old": "galvao2010",
+   "cited_by": [
+    {
+     "rule": "prostate-adt-protein",
+     "claims": [
+      "ADT 남성 57명을 12주 무작위배정",
+      "저항+유산소 병행군에서 제지방량·근력 증가",
+      "피로·삶의 질 개선",
+      "뼈 전이가 없는 분들만 대상"
+     ]
+    },
+    {
+     "rule": "exercise.ts prostate.items[저항운동 우선]",
+     "claims": [
+      "ADT 중 남성 무작위배정 연구에서 저항+유산소군의 제지방량 회복, 근력·피로·삶의 질 개선",
+      "유산소 단독보다 근육 지표에서 뚜렷"
+     ]
+    }
+   ],
+   "new": {
+    "id": "shao2022-adt-exercise",
+    "kind": "meta",
+    "year": 2022,
+    "citation": "Shao W, Zhang H, Qi H, Zhang Y. The effects of exercise on body composition of prostate cancer patients receiving androgen deprivation therapy: an update systematic review and meta-analysis. PLoS One. 2022;17(2):e0263918. (RCT 12편·715명: 운동이 제지방량·체지방량·체지방률 개선, 골밀도는 유의한 효과 없음; 저항운동이 제지방량에 가장 효과적; Galvão 2010 은 12주·유산소+저항 주 2회·제지방량 증가로 포함)",
+    "url": "https://doi.org/10.1371/journal.pone.0263918",
+    "access": "pmc",
+    "fulltext": "PMC8846498"
+   },
+   "quotes": [
+    {
+     "claim": "운동 → 제지방량 개선",
+     "quote": "exercise had a beneficial effect on the LBM, BFM and BFR, but no significant effects on regional BMD and whole-body BMD",
+     "loc": "Shao 2022, Discussion 첫 문단",
+     "secondary": false
+    },
+    {
+     "claim": "저항운동이 가장 효과적",
+     "quote": "resistance exercise is the most effective way to increase LBM and decrease BFR",
+     "loc": "Shao 2022, Discussion: Body composition",
+     "secondary": false
+    },
+    {
+     "claim": "Galvão 2010 = 12주 유산소+저항",
+     "quote": "Galvão et al. [18] | 12 weeks | Aerobic exercise (65–80% HRmax for 15–20 min) and resistance exercise (6–12 RM for 2–4 sets), twice per week",
+     "loc": "Shao 2022, 포함 연구 표",
+     "secondary": true
+    }
+   ],
+   "text_changes": [
+    {
+     "rule": "prostate-adt-protein",
+     "from": "안드로겐 차단요법을 받는 남성 57명을 12주간 무작위배정한 시험에서 저항+유산소 병행군은 제지방량과 근력이 실제로 늘었고 피로와 삶의 질도 좋아졌습니다. 다만 이 시험은 뼈 전이가 없는 분들만 대상으로 했습니다",
+     "to": "안드로겐 차단요법 중인 남성을 대상으로 한 무작위배정 시험 12편(715명)을 모은 분석에서 운동은 제지방량을 늘리고 체지방을 줄였으며, 저항운동이 가장 효과적이었습니다(골밀도는 뚜렷한 차이가 없었습니다). 다만 이런 시험은 대개 뼈 전이가 없는 분들을 대상으로 했습니다"
+    },
+    {
+     "rule": "exercise.ts prostate.items[저항운동 우선] why",
+     "from": "ADT 중인 남성을 대상으로 한 무작위배정 연구에서 저항+유산소 복합 운동군은 제지방량이 회복되고 근력·피로·삶의 질이 개선되었습니다. 유산소 단독보다 근육 지표에서 뚜렷했습니다.",
+     "to": "ADT 중인 남성의 무작위배정 시험 12편을 모은 분석에서 운동은 제지방량을 늘리고 체지방을 줄였고, 그중 저항운동이 근육 지표에 가장 효과적이었습니다."
+    }
+   ],
+   "notes": "Galvão 2010(JCO)은 ascopubs 에서 브라우저로 확인 — 초록 페이지로 돌아가고 'Get full access' 표시, 원문 미공개. 57명·12주·제지방량·근력·피로(P=.021)·삶의 질(general health P=.022)·뼈 전이 제외는 모두 PubMed 초록에 있음(초록 확인). 공개 2차 문헌 중 57명·피로·삶의 질을 옮긴 것은 Europe PMC 전문 검색으로 못 찾음 → 숫자를 빼고 메타분석 문장으로 바꾸는 안. 원 시험의 '뼈 전이 없는 남성' 한정은 안전 경고라 중요하므로, 원 시험을 refIds 에 남기고 access 'abstract' 로 표시하는 대안도 타당. 반대/보정 근거: Shao 2022 는 골밀도 효과 없음 — exercise.ts prostate.summary 의 '저항운동이 이 세 가지(근육·지방·골밀도) 모두에 작용합니다'는 골밀도 부분이 근거와 어긋남(별도 수정 권고). '유산소 단독보다 근육 지표에서 뚜렷'은 Galvão 2010(유산소 단독군 없음)이 아니라 Shao 의 하위군·3군 RCT 서술에 가까움. ASCO 2022 운동 지침은 ascopubs 에서 'FREE ACCESS' 로 열림 확인 — 권고 1.1 'aerobic and resistance exercise during active treatment … Strength of recommendation: strong'(근거 질 moderate to low)."
+  },
+  {
+   "old": "mckenzie-shoulder",
+   "cited_by": [
+    {
+     "rule": "exercise.ts headneck.items[어깨 재활]",
+     "claims": [
+      "경부 곽청술에서 부신경이 손상되면 어깨 처짐·팔 올리기 어려움",
+      "점진적 저항운동이 통증과 기능 모두를 개선한다는 보고",
+      "수술 후 조기에 시작하는 것이 권장",
+      "dose: 주 5회, 어깨 올리기·벽 오르기·견갑골 모으기 각 10회 2세트"
+     ]
+    }
+   ],
+   "new": {
+    "id": "carvalho2012-cochrane-shoulder",
+    "kind": "meta",
+    "year": 2012,
+    "citation": "Carvalho AP, Vital FM, Soares BG. Exercise interventions for shoulder dysfunction in patients treated for head and neck cancer. Cochrane Database Syst Rev. 2012;(4):CD008693. (RCT 3편·104명; 점진적 저항운동 2편 합산 69명: SPADI 통증 MD −6.26(−12.20~−0.31), 장애 MD −8.48(−15.07~−1.88), 삶의 질 차이 없음, 효과 크기 작음; 12주·주 3회)",
+    "url": "https://doi.org/10.1002/14651858.CD008693.pub2",
+    "access": "pmc",
+    "fulltext": "PMC11537249"
+   },
+   "quotes": [
+    {
+     "claim": "부신경 손상 → 어깨 증후군",
+     "quote": "shoulder droop, winged scapula, inability to shrug and a dull, non‐localized pain",
+     "loc": "Cochrane 2012, Background",
+     "secondary": false
+    },
+    {
+     "claim": "점진적 저항운동이 통증·장애 개선",
+     "quote": "Pooled data demonstrated that PRT can improve shoulder pain (mean difference (MD) ‐6.26; 95% confidence interval (CI) ‐12.20 to ‐0.31) and shoulder disability (MD ‐8.48",
+     "loc": "Cochrane 2012, Abstract: Main results",
+     "secondary": false
+    },
+    {
+     "claim": "효과는 작음",
+     "quote": "although statistically significant the measured benefits of the intervention may be small",
+     "loc": "Cochrane 2012, Authors' conclusions",
+     "secondary": false
+    },
+    {
+     "claim": "조기 시작 근거(반대)",
+     "quote": "the effectiveness of exercise interventions immediately after oncological treatments remains questionable",
+     "loc": "Cochrane 2012, Discussion",
+     "secondary": false
+    },
+    {
+     "claim": "처방 빈도",
+     "quote": "applied for 12 weeks, three times per week",
+     "loc": "Cochrane 2012, Implications for practice",
+     "secondary": false
+    }
+   ],
+   "text_changes": [
+    {
+     "rule": "exercise.ts headneck.items[어깨 재활] why",
+     "from": "점진적 저항운동이 통증과 기능 모두를 개선한다는 보고가 있어, 수술 후 조기에 시작하는 것이 권장됩니다.",
+     "to": "무작위배정 시험 2편(69명)을 합친 분석에서 점진적 저항운동이 통증과 어깨 장애를 줄였습니다(효과 크기는 작음). 수술 직후 언제 시작하는 것이 가장 좋은지는 아직 정해지지 않았으니 담당 의료진·재활팀과 시기를 정하십시오."
+    },
+    {
+     "rule": "exercise.ts headneck.items[어깨 재활] dose",
+     "from": "주 5회",
+     "to": "주 3회(시험에서는 12주간 주 3회, 탄력밴드·가벼운 아령으로 점진적으로 올림)"
+    }
+   ],
+   "notes": "McGarvey 2011(Head Neck)은 구독제 — 원문 미확인. 현재 id 'mckenzie-shoulder'·year 2020 은 인용(McGarvey 2011)과 맞지 않음(F 지적). Cochrane 2012 는 PMC 웹에서 전문 열람(내려받아 grep) 확인. 결론: '점진적 저항운동이 통증·기능 개선'은 지지되나 효과 작음, '조기 시작 권장'은 Cochrane 이 오히려 '불확실'이라 함(포함 시험의 수술-운동 간격이 2~180개월로 넓음) → 문장 수정 필요. dose '주 5회'와 동작 목록은 어떤 출처로도 확인 못 함 — 시험 프로토콜은 주 3회. 등급: Cochrane 메타분석이지만 2편·소규모·효과 작음 → A 로 올리기보다 B 유지가 보수적(판단 필요). Cochrane 이 언급한 진행 중 시험이 바로 McGarvey 2011 계열(당시 ongoing)."
+  },
+  {
+   "old": "kdca-bone",
+   "cited_by": [
+    {
+     "rule": "breast-calcium-vitd",
+     "claims": [
+      "일반 성인 기준(한국인 영양소 섭취기준 칼슘 700~800 mg, 비타민 D 10~15 µg)"
+     ]
+    },
+    {
+     "rule": "gyn-bone",
+     "claims": [
+      "일반 성인 기준(칼슘 700~800 mg)"
+     ]
+    }
+   ],
+   "new": {
+    "id": "kdri2020",
+    "kind": "guideline",
+    "year": 2020,
+    "citation": "보건복지부·한국영양학회. 2020 한국인 영양소 섭취기준(KDRIs). (이미 references 에 있는 출처 — 원문 요약표 대조 완료 주석이 references.ts 에 있음: 칼슘 권장 남 800→750→700·여 700→800, 상한 50세 이상 2,000 mg)",
+    "url": "https://www.kns.or.kr/FileRoom/FileRoom_view.asp?idx=108&BoardID=Kdr",
+    "access": "open",
+    "fulltext": "https://www.kns.or.kr/FileRoom/FileRoom_view.asp?idx=108&BoardID=Kdr"
+   },
+   "quotes": [],
+   "text_changes": [
+    {
+     "rule": "breast-calcium-vitd",
+     "from": "refIds: ['hadji2017aibl', 'kdca-bone', 'kdri2020']",
+     "to": "refIds: ['hadji2017aibl', 'kdri2020']"
+    },
+    {
+     "rule": "gyn-bone",
+     "from": "refIds: ['hadji2017aibl', 'kdca-bone', 'kdri2020']",
+     "to": "refIds: ['hadji2017aibl', 'kdri2020']"
+    }
+   ],
+   "notes": "kdca-bone 이 받치는 숫자(칼슘 700~800 mg, 비타민 D 10~15 µg)는 두 규칙 모두 이미 함께 달린 kdri2020 이 1차 출처이고, references.ts 주석에 KDRI 2020 원문 요약표를 대조했다는 기록이 있음. 따라서 깨진 질병관리청 보도자료 링크는 대체 없이 빼는 것이 가장 깔끔. 살아 있는 기관 페이지(국가건강정보포털 health.kdca.go.kr 골다공증 항목)는 내장 브라우저로 검색했으나 검색 결과가 스크립트로만 그려져 해당 페이지 URL 과 수치를 확인하지 못함 — 대체 URL 미확인. 추가 주의(범위 밖이나 중요): 보건복지부가 '2025 한국인 영양소 섭취기준'을 2025-12-31 배포했다는 언론 보도 확인(복지부 원문은 미확인). 칼슘·비타민 D·나트륨 값이 바뀌었는지 2025 원문과 대조해 kdri2020 을 kdri2025 로 바꿀지 판단 필요."
+  },
+  {
+   "old": "knhanes",
+   "cited_by": [
+    {
+     "rule": "common-sodium",
+     "claims": [
+      "국민건강영양조사에서 한국인 하루 나트륨 섭취량 3,255 mg(2018년)",
+      "2,300 mg 의 1.4배, 1,500 mg 의 두 배 넘음",
+      "그 대부분이 국·찌개·김치·젓갈에서 옴"
+     ]
+    },
+    {
+     "rule": "cond-htn-na",
+     "claims": [
+      "한국인 평균이 3,255 mg"
+     ]
+    },
+    {
+     "rule": "stomach-sodium",
+     "claims": [
+      "한국인 나트륨 섭취의 절반 이상이 국·찌개·김치에서 온다"
+     ]
+    }
+   ],
+   "new": {
+    "id": "kdca-knhanes2025",
+    "kind": "db",
+    "year": 2026,
+    "citation": "질병관리청. 「2025년 국민건강영양조사」 결과 발표(보도자료, 2026-09-30). — 1세 이상 나트륨 섭취량 2025년 3,043 mg, 2024년 대비 32 mg 감소(→ 2024년 약 3,075 mg); 30대 이상 남자 80 % 이상이 만성질환위험감소섭취량 초과. (연도 비교는 2005년 추계인구 연령표준화 값)",
+    "url": "https://www.kdca.go.kr/bbs/kdca/42/312791/artclView.do",
+    "access": "open",
+    "fulltext": "https://www.kdca.go.kr/bbs/kdca/42/312791/artclView.do"
+   },
+   "also_new": [
+    {
+     "id": "mfds2025-sodium",
+     "kind": "db",
+     "year": 2025,
+     "citation": "식품의약품안전처. 식약처, 국민의 나트륨·당류 섭취 실태분석 결과 발표(보도자료, 2025-07-01). — 국민건강영양조사 원시자료(2019~2023, 만 1세 이상 31,511명) 분석: 2023년 3,136 mg, 2019년 3,289 mg; 주요 급원 면·만두류 15.3 %·김치류 14.0 %·국·탕류 10.5 %·볶음류 7.2 %·찌개·전골류 6.9 %(다섯 가지 합 54 %)",
+     "url": "https://www.mfds.go.kr/brd/m_99/view.do?seq=49163",
+     "access": "open",
+     "fulltext": "https://www.mfds.go.kr/brd/m_99/down.do?brd_id=ntc0021&seq=49163&data_tp=A&file_seq=2 (PDF)"
+    }
+   ],
+   "quotes": [
+    {
+     "claim": "최신 나트륨 섭취량(2025년)",
+     "quote": "나트륨 섭취량은 ’25년 3,043mg으로 ’24년 대비 큰 변화가 없었고(↓32mg), 30대 이상 남자 80% 이상이 나트륨 만성질환위험감소섭취량 보다 많이 섭취하고 있었다.",
+     "loc": "질병관리청 보도자료 2026-09-30, 1-➋ 영양(1세 이상)",
+     "secondary": false
+    },
+    {
+     "claim": "2023년 값",
+     "quote": "2023년 우리 국민의 하루 평균 나트륨 섭취량은 3,136mg",
+     "loc": "식약처 보도자료 2025-07-01 본문",
+     "secondary": false
+    },
+    {
+     "claim": "급원 비중",
+     "quote": "나트륨의 주요 급원음식은 면·만두류, 김치류, 국·탕류, 볶음류, 찌개·전골류로 하루에 섭취하는 나트륨의 절반 이상(54%) 차지",
+     "loc": "식약처 보도자료 2025-07-01 붙임",
+     "secondary": false
+    }
+   ],
+   "text_changes": [
+    {
+     "rule": "common-sodium",
+     "from": "국민건강영양조사에서 한국인의 하루 나트륨 섭취량은 3,255 mg 이었습니다(2018년). 2020 한국인 영양소 섭취기준의 나트륨 만성질환위험감소섭취량이 하루 2,300 mg 이니 그 1.4배이고, 몸에 필요한 양인 충분섭취량 1,500 mg 과 견주면 두 배가 넘습니다.",
+     "to": "국민건강영양조사에서 한국인(1세 이상)의 하루 나트륨 섭취량은 3,043 mg 이었습니다(2025년). 2020 한국인 영양소 섭취기준의 나트륨 만성질환위험감소섭취량 하루 2,300 mg 의 약 1.3배이고, 충분섭취량 1,500 mg 의 약 두 배입니다."
+    },
+    {
+     "rule": "common-sodium",
+     "from": "그 대부분이 국·찌개·김치·젓갈에서 옵니다.",
+     "to": "면·만두류, 김치류, 국·탕류, 볶음류, 찌개·전골류 다섯 가지가 절반 남짓(54 %)을 차지합니다(2023년)."
+    },
+    {
+     "rule": "cond-htn-na",
+     "from": "한국인 평균이 3,255 mg 이니",
+     "to": "한국인 평균이 3,043 mg(2025년)이니"
+    },
+    {
+     "rule": "stomach-sodium",
+     "from": "한국인 나트륨 섭취의 절반 이상이 국·찌개·김치에서 옵니다.",
+     "to": "한국인 나트륨의 약 3분의 1이 김치·국·탕·찌개에서 옵니다(2023년 김치류 14.0 %, 국·탕류 10.5 %, 찌개·전골류 6.9 %)."
+    }
+   ],
+   "notes": "3,255 mg(2018) 의 출처는 끝내 찾지 못함 — 공개 보도는 2018년 3,274 mg(식약처). 최신 공식값은 질병관리청 2026-09-30 보도자료의 2025년 3,043 mg(1세 이상)이며 내장 브라우저로 본문을 직접 읽어 확인. 이 보도자료는 '연도별 비교 결과는 연령표준화, 당해 연도 결과는 조율' 이라 적고 있어 3,043 이 표준화값인지 조율인지 본문만으로는 단정 못 함 — 상세 통계보고서는 2026년 12월 발간 예정(그때 표로 재확인 권장). 2023년 3,136 mg 은 식약처 PDF(내려받아 텍스트 추출)로 확인, 분석 대상은 만 1세 이상. 중요한 오류 2건: (1) stomach-sodium '절반 이상이 국·찌개·김치' — 식약처 자료로는 김치+국·탕+찌개·전골 = 31.4 %, 절반 이상(54 %)은 면·만두·볶음까지 합친 값 → 오류. (2) common-sodium '대부분이 국·찌개·김치·젓갈' 도 과장. '국물만 남겨도 한 끼 나트륨 절반 가까이 감소'는 이번 출처들에 없음 — 확인 못 함(별도 출처 필요). 배수 재계산: 3,043/2,300=1.32, 3,043/1,500=2.03. KDRI 가 2025 판으로 개정됐으므로(위 kdca-bone 메모) 2,300·1,500 값도 2025 원문과 대조 필요."
+  }
+ ]
+}

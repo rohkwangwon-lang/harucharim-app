@@ -669,17 +669,21 @@ export function microTargets(patient: PatientContext): MicroTarget[] {
   /*
    * 철 — 위를 잘라 낸 분.
    *
-   * 철은 위산이 있어야 흡수되는데 위절제 후에는 위산이 크게 준다.
-   * 철결핍빈혈이 수술하고 몇 해 지나 서서히 나타나는 일이 흔하다.
+   * 철은 주로 십이지장에서 흡수되고 위산이 돕는데, 위절제 후에는 둘 다 잃는다.
+   * 수술 2년 뒤 철 결핍이 40~70 % 다(Teixeira Farinha 2023).
    */
   if (conds.includes('위절제후') || subs.includes('위전절제') || subs.includes('위부분절제')) {
     out.push({
       key: 'fe', label: '철', unit: 'mg', min: patient.sex === 'F' && patient.age < 50 ? 14 : 10,
       why:
-        '철은 위산이 있어야 잘 흡수되는데 위를 잘라 낸 뒤에는 위산이 크게 줄어듭니다. ' +
-        '철결핍빈혈은 수술하고 몇 해가 지나 서서히 나타나는 경우가 많아, 식사에서 미리 챙겨 두시는 편이 좋습니다. ' +
+        '철은 주로 십이지장에서 흡수되고 위산이 그 흡수를 돕는데, 위를 잘라 낸 뒤에는 대개 십이지장을 음식이 지나지 않고 위산도 줄어듭니다. ' +
+        '수술 2년 뒤 철 결핍이 40~70 % 에서 보고될 만큼 흔해, 식사에서 미리 챙겨 두시는 편이 좋습니다. ' +
         '고기·간·조개류의 철은 곡물·채소의 철보다 훨씬 잘 흡수되고, 비타민 C 를 같이 드시면 흡수가 올라갑니다.',
-      evidence: 'G', refIds: ['gastrectomy-nutr', 'kdri2020']
+      /*
+       * 2026-10-14 전수 대조 — 구독제 종설(gastrectomy-nutr)을 떼고 PMC 원문 종설(Teixeira Farinha 2023)로.
+       * '몇 해가 지나 서서히' 는 원문에 없어 원문의 숫자(2년 시점 철 결핍 40~70 %)로 바꿨다.
+       */
+      evidence: 'G', refIds: ['teixeira2023micro', 'kdri2020']
     })
   }
 

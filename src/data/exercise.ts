@@ -86,8 +86,8 @@ export const INTAKE_EXERCISE_ADVICE: Record<IntakeAdvice['id'], IntakeAdvice> = 
       '다만 이미 악액질에 이른 경우의 운동은 효과와 안전성이 아직 확실하지 않습니다 ' +
       '(Cochrane 2021, GRADE very low). 어디까지 하실지는 담당 의료진과 정하십시오.'
   },
-  over: { id: 'over', evidence: 'G', refIds: ['espen2021', 'acsm2019', 'asco-exercise2022'] },
-  within: { id: 'within', evidence: 'G', refIds: ['espen2021', 'acsm2019', 'asco-exercise2022'] }
+  over: { id: 'over', evidence: 'G', refIds: ['espen2021', 'acsm2019', 'asco2022'] },
+  within: { id: 'within', evidence: 'G', refIds: ['espen2021', 'acsm2019', 'asco2022'] }
 }
 
 export const BASE_EXERCISE: ExerciseItem[] = [
@@ -99,7 +99,7 @@ export const BASE_EXERCISE: ExerciseItem[] = [
       '치료가 끝난 뒤에는 재발과 전체 사망 위험 감소와 연결됩니다. 특별한 장비나 장소가 필요 없어 실제로 지속되는 것이 큰 장점입니다.',
     kind: '유산소',
     evidence: 'G',
-    refIds: ['acsm2019', 'asco-exercise2022']
+    refIds: ['acsm2019', 'asco2022']
   },
   {
     name: '저항운동(근력)',
@@ -109,7 +109,7 @@ export const BASE_EXERCISE: ExerciseItem[] = [
       '탄력밴드나 자기 체중(스쿼트, 벽 팔굽혀펴기)만으로도 충분히 시작할 수 있습니다.',
     kind: '저항',
     evidence: 'G',
-    refIds: ['acsm2019', 'asco-exercise2022']
+    refIds: ['acsm2019', 'asco2022']
   },
   {
     name: '스트레칭·균형 운동',
@@ -189,7 +189,7 @@ export const EXERCISE_BY_CANCER: Record<CancerId, ExercisePlan> = {
           '에스트로겐을 만드는 주된 장소가 되므로, 체중 관리 자체가 호르몬 환경에 개입하는 셈입니다.',
         kind: '유산소',
         evidence: 'B',
-        refIds: ['asco-exercise2022', 'acsm2019']
+        refIds: ['asco2022', 'acsm2019']
       },
       {
         name: '체중 부하 운동(골밀도)',
@@ -218,13 +218,19 @@ export const EXERCISE_BY_CANCER: Record<CancerId, ExercisePlan> = {
     items: [
       {
         name: '구조화된 유산소 프로그램',
-        dose: '주 3~4회, 회당 45~60분 중강도. 목표는 주당 "대사당량 20 MET-시간" — 빠르게 걷기 기준 주 5시간 정도',
+        /*
+         * 2026-10-14 전수 대조 — '목표 주당 20 MET-시간·주 5시간' 은 원문의 목표를 두 배로 적은 것이었다. 시험의 목표는
+         * 처음 6개월 동안 평소보다 주당 10 MET-시간 이상 늘리기(빠르게 걷기 45~60분을 주 3~4회 정도)였고, 이후 최대 약 30 MET-시간까지였다.
+         * NEJM 원문은 구독제라 초록만 볼 수 있어, 시험을 정리한 원문 공개 종설 Shida 2026 과 같은 시험의 2차 분석 Courneya 2026(JNCI, PMC)으로 바꿨다.
+         */
+        dose: '주 3~4회, 회당 45~60분 빠르게 걷기 수준. 시험에서는 처음 6개월 동안 평소보다 주당 10 MET-시간 이상 늘리는 것이 목표였고, 이후 사람에 따라 더 늘렸습니다(최대 주 30 MET-시간 정도)',
         why:
-          'CHALLENGE 무작위배정 시험에서 보조항암을 마친 결장암 환자에게 3년간 구조화된 운동을 제공한 군은 ' +
-          '건강교육만 받은 군보다 무병생존이 뚜렷하게 좋았습니다. 단순한 권유가 아니라 코치가 붙은 프로그램이었다는 점이 중요합니다.',
+          'CHALLENGE 무작위배정 시험에서 보조항암을 마친 3기·고위험 2기 결장암 환자에게 3년간 구조화된 운동을 제공한 군은 ' +
+          '건강교육만 받은 군보다 무병생존이 뚜렷하게 좋았습니다(5년 무병생존 80.3 % 대 73.9 %). ' +
+          '단순한 권유가 아니라 운동 전문가가 3년간 붙은 프로그램이었다는 점이 중요합니다.',
         kind: '유산소',
         evidence: 'A',
-        refIds: ['challenge2025']
+        refIds: ['shida2026-challenge', 'courneya2026-challenge-tpb']
       },
       {
         name: '코어 근력(장루 보유 시 단계적)',
@@ -247,18 +253,23 @@ export const EXERCISE_BY_CANCER: Record<CancerId, ExercisePlan> = {
   prostate: {
     summary:
       '전립선암에서 운동은 안드로겐 차단요법(ADT)의 부작용을 정면으로 되돌리는 수단입니다. ' +
-      'ADT는 근육을 줄이고 지방을 늘리며 골밀도를 떨어뜨리는데, 저항운동이 이 세 가지 모두에 작용합니다. ' +
+      /* '저항운동이 이 세 가지 모두에 작용' 은 골밀도 쪽이 근거와 어긋났다 — Shao 2022 메타분석(RCT 12편)은 골밀도 효과 없음(2026-10-14 전수 대조) */
+      'ADT는 근육을 줄이고 지방을 늘리며 골밀도를 떨어뜨리는데, 저항운동은 이 가운데 근육과 지방 쪽에 효과가 확인되었습니다(골밀도에는 뚜렷한 효과가 없었습니다). ' +
       '체중계 숫자가 그대로여도 몸의 구성이 나빠지는 것이 문제이므로, 유산소만으로는 부족합니다.',
     items: [
       {
         name: '저항운동 우선',
         dose: '주 2~3회, 하체·등·가슴 중심 6~8개 동작을 8~12회씩 2~3세트',
         why:
-          'ADT 중인 남성을 대상으로 한 무작위배정 연구에서 저항+유산소 복합 운동군은 ' +
-          '제지방량이 회복되고 근력·피로·삶의 질이 개선되었습니다. 유산소 단독보다 근육 지표에서 뚜렷했습니다.',
+          'ADT 중인 남성의 무작위배정 시험 12편(715명)을 모은 분석에서 운동은 제지방량을 늘리고 체지방을 줄였고, ' +
+          '그중 저항운동이 근육 지표에 가장 효과적이었습니다. 골밀도에는 뚜렷한 효과가 없었습니다.',
         kind: '저항',
         evidence: 'A',
-        refIds: ['galvao2010']
+        /*
+         * 2026-10-14 전수 대조 — Galvão 2010(JCO)은 구독제라 초록만 볼 수 있었고, '유산소 단독보다 뚜렷' 은 유산소 단독군이 없는
+         * 그 시험의 결과가 아니었다. Galvão 를 포함한 원문 공개 메타분석(Shao 2022, PMC8846498)으로 바꾸고 문장을 그 결과로 고쳤다.
+         */
+        refIds: ['shao2022-adt-exercise']
       },
       {
         name: '골반저근 운동(케겔)',
@@ -354,7 +365,7 @@ export const EXERCISE_BY_CANCER: Record<CancerId, ExercisePlan> = {
           '단백질만 먹고 움직이지 않으면 근육으로 가지 않습니다.',
         kind: '저항',
         evidence: 'G',
-        refIds: ['acsm2019', 'asco-exercise2022']
+        refIds: ['acsm2019', 'asco2022']
       }
     ],
     cautions: [
@@ -411,7 +422,7 @@ export const EXERCISE_BY_CANCER: Record<CancerId, ExercisePlan> = {
           '이것만으로도 근육 유지와 삶의 질에 도움이 됩니다.',
         kind: '유산소',
         evidence: 'G',
-        refIds: ['acsm2019', 'asco-exercise2022']
+        refIds: ['acsm2019', 'asco2022']
       },
       {
         name: '앉아서 하는 저항운동',
@@ -482,13 +493,20 @@ export const EXERCISE_BY_CANCER: Record<CancerId, ExercisePlan> = {
       },
       {
         name: '어깨 재활',
-        dose: '주 5회. 어깨 올리기·벽 오르기·견갑골 모으기 각 10회 2세트',
+        /*
+         * 2026-10-14 전수 대조 — 예전 출처(McGarvey 2011 종설, id 'mckenzie-shoulder')는 구독제라 초록만 볼 수 있었고,
+         * '주 5회·동작 목록' 과 '조기 시작 권장' 은 어느 공개 원문으로도 확인되지 않았다. 원문 공개 코크란 고찰(Carvalho 2012, PMC11537249)로
+         * 바꿨다 — 시험 처방은 12주·주 3회 점진적 저항운동(탄력밴드·아령 등)이었고, 수술 직후 시작의 효과는 '불확실' 이라 적는다.
+         * 등급: 메타분석이지만 2편·69명·효과 작음이라 B 를 유지한다.
+         */
+        dose: '주 3회. 시험에서는 12주 동안 탄력밴드·가벼운 아령으로 저항을 조금씩 올리는 근력운동에 어깨 관절 운동·스트레칭을 더했습니다 — 구체적인 동작은 재활팀과 정하세요',
         why:
-          '경부 곽청술에서 부신경이 손상되면 어깨가 처지고 팔을 올리기 어려워집니다. ' +
-          '점진적 저항운동이 통증과 기능 모두를 개선한다는 보고가 있어, 수술 후 조기에 시작하는 것이 권장됩니다.',
+          '경부 곽청술에서 부신경이 손상되면 어깨가 처지고 팔을 올리거나 으쓱하기 어려워집니다. ' +
+          '무작위배정 시험 2편(69명)을 합친 분석에서 점진적 저항운동이 어깨 통증과 장애를 줄였습니다(효과 크기는 작았습니다). ' +
+          '수술 직후 언제 시작하는 것이 가장 좋은지는 아직 정해지지 않았으니 시기는 담당 의료진·재활팀과 정하십시오.',
         kind: '재활',
         evidence: 'B',
-        refIds: ['mckenzie-shoulder']
+        refIds: ['carvalho2012-cochrane-shoulder']
       },
       {
         name: '입 벌리기(개구) 운동',
@@ -522,7 +540,7 @@ export const EXERCISE_BY_CANCER: Record<CancerId, ExercisePlan> = {
           '전체 사망 및 동반질환과 연관됩니다. 운동만으로 감량하기는 어려워 식이와 함께 가야 합니다.',
         kind: '유산소',
         evidence: 'B',
-        refIds: ['asco-exercise2022', 'acsm2019']
+        refIds: ['asco2022', 'acsm2019']
       },
       {
         name: '골반저근 운동',

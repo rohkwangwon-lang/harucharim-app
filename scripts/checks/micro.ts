@@ -619,11 +619,21 @@ for (let i = 0; i < N; i++) {
       bad('신고된 기능성 원료인데 권하지 않음', `${name} → ${v.primaryLevel}`)
   }
 
-  /* 말리는 쪽은 곁들여 든 것도 잡아야 한다 */
+  /*
+   * 말리는 쪽 — 2026-10-14 전수 대조로 기준을 바꿨다.
+   *
+   * 전에는 "곁들여 든 비타민 E 도 치료 중 피하세요" 로 잡았다. 그런데 그 근거(두경부암 방사선치료 시험)는 하루 400 IU 고용량이고,
+   * 오메가3 캡슐에 산화 방지용으로 든 비타민 E 는 몇 mg 이다. ESPEN 2021 권고 5 도 권장량 수준의 미량영양소는 문제 삼지 않는다.
+   * 고용량 근거를 가진 원료(highDoseOnly)는 **이름에 드러난 제품** 에서만 조건별 경고를 건다 — 그 대신 이름에 드러나면 반드시 잡아야 한다.
+   */
   const rt = { ...p, phase: 'during_rt' } as PatientContext
+  for (const name of ['비타민E 400IU', '오메가3 플러스 비타민E', '셀레늄 200', '비타민C 1000']) {
+    const v = judgeProduct(name, '', rt)
+    if (v.level !== 'avoid' && v.level !== 'caution') bad('치료 중 이름에 드러난 고용량 항산화제를 놓침', `${name} → ${v.level}`)
+  }
   const mixed = judgeProduct('오메가3 골드', '[EPA 및 DHA 함유 유지] 혈행 개선 [비타민E] 유해산소로부터 세포를 보호', rt)
-  if (mixed.level !== 'avoid' && mixed.level !== 'caution')
-    bad('치료 중 피해야 할 것이 곁들여 들었는데 놓침', `오메가3+비타민E → ${mixed.level}`)
+  if (mixed.items.find((i) => i.ingredient === '비타민 E')?.level === 'avoid')
+    bad('곁들여 든 소량 비타민 E 에 고용량 근거로 피하세요를 붙임', `오메가3 골드 → ${mixed.level}`)
 
   /*
    * 좋은 것과 피할 것이 한 통에 담겨 오면 권하지 않는다.
@@ -638,8 +648,9 @@ for (let i = 0; i < N; i++) {
     v.primaryLevel === 'prefer' && v.level !== 'caution' && v.level !== 'avoid'
 
   const MIXED: [string, string, PatientContext][] = [
-    ['알티지 오메가3 골드', '[EPA 및 DHA 함유 유지] 혈행 개선 [비타민E] 유해산소로부터 세포를 보호하는데 필요', rt],
-    ['칼슘 마그네슘 비타민D 아연', '[칼슘] 뼈와 치아 형성에 필요 [셀레늄] 유해산소로부터 세포를 보호', rt]
+    /* 이름에 고용량 항산화 원료가 드러난 복합 제품 — 권하면 안 된다 */
+    ['오메가3 비타민E 듀오', '[EPA 및 DHA 함유 유지] 혈행 개선 [비타민E] 유해산소로부터 세포를 보호하는데 필요', rt],
+    ['칼슘 마그네슘 비타민D 셀레늄', '[칼슘] 뼈와 치아 형성에 필요 [셀레늄] 유해산소로부터 세포를 보호', rt]
   ]
   for (const [name, fn, who] of MIXED) {
     if (recommendable(judgeProduct(name, fn, who)))

@@ -160,6 +160,10 @@ export type FoodTag =
    */
   | '식물성에스트로겐'
   | '대두이소플라본'
+  /* 2026-10-14 — 유방암 '주의' 규칙이 거는 이름표. 이름으로 붙인다(autoTag) — 공공데이터 id 는 목록 순서라 바뀐다 */
+  | '칡뿌리'          // 칡즙·칡뿌리 생것 (전분·냉면은 아님)
+  | '로열젤리'
+  | '익힌요리'       // 볶음·찌개·솥밥·구이처럼 뜨겁게 익혀 내는 요리 — 호중구감소 때 가공육 '데워서' 경고에서 뺀다(autoTag)
   | '십자화과'
   | '알리움'          // 마늘·양파·부추
   | '카로티노이드'
@@ -572,7 +576,26 @@ export interface Reference {
   year: number
   url?: string
   /** 근거 유형 */
-  kind: 'guideline' | 'rct' | 'meta' | 'cohort' | 'review' | 'db'
+  /*
+   * case = 증례 보고, preclinical = 세포·동물 실험 (2026-10-14 추가 — 헛개 간독성 증례·보르테조밉-녹차 실험을 종설로 적어 두었었다).
+   * 이 둘만 인용한 규칙은 등급 C 까지만 단다(scripts/checks/rules.ts KIND_MAX).
+   */
+  kind: 'guideline' | 'rct' | 'meta' | 'cohort' | 'review' | 'db' | 'case' | 'preclinical'
+  /**
+   * 원문을 어떻게 대조했나 — 홍보에 "참고 문헌 전부 원문 대조" 라고 적었으므로 초록만 본 것은 둘 수 없다.
+   *   pmc  = PubMed Central 전문
+   *   open = 학회·기관 공개 PDF/페이지, 학술지 공개 전문
+   *   abstract = 초록만 (구독제) — 검사가 막는다. 원문 공개 대체 문헌으로 바꿀 것
+   * 2026-10-14 전수 대조 때 채웠다. 새 출처는 반드시 적는다(scripts/checks/rules.ts 5절).
+   */
+  access?: 'pmc' | 'open' | 'abstract'
+  /** 원문 위치 — PMCID 또는 URL (access 가 pmc/open 일 때) */
+  fulltext?: string
+  /**
+   * 원문에서 확인한 숫자·문장의 기록(2026-10-14 전수 대조부터). 규칙 문장의 숫자는 여기나 citation 괄호에 있어야 한다
+   * — scripts/checks/numbers.ts 가 본다. 화면에 보이지는 않는다(대조 기록이다).
+   */
+  verified?: string
 }
 
 /** 암종별 영양 목표 — ESPEN/ASPEN 종양환자 권고 기반 */
