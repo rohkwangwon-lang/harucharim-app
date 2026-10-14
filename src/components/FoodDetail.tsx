@@ -134,7 +134,7 @@ export function FoodDetail({
                   <div key={h.rule.id} className="rounded-xl border border-stone-200 p-3">
                     <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
                       <LevelBadge level={h.rule.level} />
-                      <EvidenceBadge level={h.rule.evidence} />
+                      {h.source === '알레르기' ? <span className="chip bg-danger-100 text-danger-800">내가 고른 알레르기</span> : <EvidenceBadge level={h.rule.evidence} />}
                       <span className="chip bg-stone-100 text-stone-500">
                         {h.source === '증상' ? h.sourceLabel : h.source}
                       </span>

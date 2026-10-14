@@ -11,6 +11,7 @@
  *  8. 스타후르츠 — 신기능저하에서 '피하세요' 인가
  *  9. 떡 — 공공데이터 떡에 '점착성' 이 붙는가 / 나트륨 — 공공데이터 찌개에 '고나트륨' 이 붙는가
  * 10. 응급 안내 — 해당하는 분께 나오는가
+ * 11. 알레르기 — 고른 것이 식단에 오르지 않는가, 판정·저장·오탐
  */
 import { buildDayMenu, fiberGoal } from '../../src/engine/menu'
 import { foodContribution, personalTarget } from '../../src/engine/nutrition'
@@ -18,7 +19,8 @@ import { activeInteractions, evaluateFood } from '../../src/engine/rules'
 import { CANCERS, CANCER_BY_ID } from '../../src/data/cancers'
 import { FOODS, swallowSafe } from '../../src/data/foods'
 import { MEAL_SLOTS, type Food, type PatientContext } from '../../src/data/types'
-import { DEFAULT_PATIENT, linkWarfarin } from '../../src/lib/store'
+import { DEFAULT_PATIENT, linkWarfarin, restorePatient } from '../../src/lib/store'
+import { allergensIn } from '../../src/data/allergens'
 import { emergencySigns } from '../../src/data/emergencySigns'
 
 const bad: string[] = []
@@ -148,6 +150,32 @@ if (same > 0) bad.push(`다시 구성: 담은 것이 없는데도 같은 상이 
   const missing = salty.filter((f) => !f.tags.includes('고나트륨'))
   if (salty.length < 100) bad.push('나트륨: 공공데이터 표본이 적음')
   if (missing.length) bad.push(`1회 400 mg 이상인데 고나트륨 없음 ${missing.length}종 — 예: ${missing.slice(0, 3).map((f) => f.name).join(', ')}`)
+}
+
+/* 11. 알레르기 — 고르면 식단에서 빠지고, 담은 것은 '빼는 것이 좋겠습니다' 로, 판정은 '피하세요' */
+{
+  const chosen = ['우유', '새우', '밀', '대두']
+  for (let d = 0; d < 20; d++) {
+    const p = P({ cancer: pick(CANCERS).id, phase: pick([...PH]), allergies: chosen, sex: 'F' })
+    const day = new Date(Date.UTC(2026, 9, 1 + d)).toISOString().slice(0, 10)
+    const shrimp = FOODS.find((f) => f.id === 'shrimp-boiled' || f.name === '새우(데친 것)')
+    const m = buildDayMenu(shrimp ? [{ foodId: shrimp.id, servings: 1, meal: '점심' }] : [], p, { supplements: [], day, nonce: d % 3, recent: new Map() })
+    for (const s of MEAL_SLOTS) for (const e of m.meals[s]) {
+      const hit = allergensIn(e.food).filter((a) => chosen.includes(a))
+      if (hit.length) bad.push(`알레르기(${hit.join('·')}) 음식이 식단에: ${e.food.name}`)
+    }
+    if (shrimp && !m.removed.some((r) => r.food.id === shrimp.id)) bad.push('알레르기: 담은 새우가 빼는 것 목록에 없음')
+  }
+  const milk = FOODS.find((f) => f.name === '우유(일반)')!
+  const v = evaluateFood(milk, P({ allergies: ['우유'] }))
+  if (v.level !== 'avoid' || !v.hits.some((h) => h.source === '알레르기')) bad.push('알레르기: 우유 알레르기에 우유가 피하세요가 아님')
+  if (evaluateFood(milk, P({})).hits.some((h) => h.source === '알레르기')) bad.push('알레르기: 고르지 않았는데 알레르기 판정')
+  const odd = [['두유(무가당)', '우유'], ['쌀국수(삶은 것)', '밀'], ['돼지고기 등심', '쇠고기'], ['참치통조림(기름 뺀 것)', '대두'], ['두부(부침용)', '밀']] as const
+  for (const [name, a] of odd) {
+    const f = FOODS.find((x) => x.name === name)
+    if (f && allergensIn(f).includes(a)) bad.push(`알레르기 오탐: ${name} → ${a}`)
+  }
+  if (restorePatient({ ...DEFAULT_PATIENT, allergies: ['우유', '없는것', 3] }).allergies?.join() !== '우유') bad.push('알레르기: 저장 자료의 모르는 값을 걸러 내지 않음')
 }
 
 /* 10. 응급 안내 */

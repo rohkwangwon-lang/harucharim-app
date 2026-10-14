@@ -6,6 +6,7 @@ import { childrenOf, toggleMedication, visibleMedications } from '../data/intera
 import { nutritionRisk, personalTarget } from '../engine/nutrition'
 import { CANCER_BY_ID } from '../data/cancers'
 import { NumberField, Section, Stat } from './ui'
+import { ALLERGENS, ALLERGEN_HINT } from '../data/allergens'
 import { BODY_LIMITS } from '../lib/bodyInput'
 
 const PHASES: { id: Phase; label: string; desc: string }[] = [
@@ -235,6 +236,39 @@ export function PatientPanel({
             </button>
           ))}
         </div>
+      </Section>
+
+      {/*
+        * 알레르기(2026-10-15). 식약처 알레르기 유발물질 표시대상. 고르시면 그 이름이 보이는 음식은
+        * '피하세요' 가 되고 추천 식단에서 빠진다. 이름으로 찾는다는 한계를 이 자리에서 먼저 말한다.
+        */}
+      <Section
+        title="알레르기"
+        desc="고르신 것이 이름에 보이는 음식은 '피하세요' 로 표시하고 추천 식단에서 뺍니다. 음식 이름으로 찾기 때문에 이름에 드러나지 않는 재료는 놓칠 수 있습니다 — 포장의 알레르기 표시도 꼭 확인하세요."
+      >
+        <div className="flex flex-wrap gap-1.5">
+          {ALLERGENS.map((a) => {
+            const on = (patient.allergies ?? []).includes(a)
+            return (
+              <button
+                key={a}
+                onClick={() => onChange({
+                  allergies: on ? (patient.allergies ?? []).filter((x) => x !== a) : [...(patient.allergies ?? []), a]
+                })}
+                aria-pressed={on}
+                title={ALLERGEN_HINT[a]}
+                className={`chip border transition-colors ${
+                  on ? 'border-danger-500 bg-danger-500 text-white' : 'border-stone-300 bg-white text-stone-600 hover:bg-stone-50'
+                }`}
+              >
+                {a}
+              </button>
+            )
+          })}
+        </div>
+        <p className="mt-2 text-[11px] leading-relaxed text-stone-500">
+          알류는 달걀·메추리알, 조개류는 굴·전복·홍합을 포함합니다. 아황산류(와인·말린 과일 등)는 이름으로 찾기 어려워 일부만 걸러집니다.
+        </p>
       </Section>
 
       <Section title="복용 중인 약" desc="선택한 약제와 관련된 식품·영양제 상호작용만 표시됩니다.">

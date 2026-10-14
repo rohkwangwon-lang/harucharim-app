@@ -4,6 +4,7 @@ import type {
 } from '../data/types'
 import { isDrink } from '../data/types'
 import { FOOD_BY_ID, swallowSafe } from '../data/foods'
+import { allergenHits } from '../data/allergens'
 import { CANCER_BY_ID } from '../data/cancers'
 import { COMMON_RULES } from '../data/commonRules'
 import { CONDITION_RULES } from '../data/conditionRules'
@@ -19,7 +20,7 @@ const NO_PRAISE_TAGS = new Set<string>(['염장', '가공육', '훈제'])
 export interface RuleHit {
   rule: NutritionRule
   /** 어디서 온 규칙인지 — 화면에 출처를 표시한다 */
-  source: '공통' | '암종' | '증상'
+  source: '공통' | '암종' | '증상' | '알레르기'
   /** 증상 규칙이면 어떤 증상인지 */
   sourceLabel?: string
 }
@@ -212,6 +213,22 @@ function strongestLevel(levels: RuleLevel[]): RuleLevel | null {
  *    실제로 날로 먹는 것(굴·성게·연어알·생간·천엽)은 autoTag 가 '생식동물성' 을 붙여 '피하세요' 로 간다.
  */
 const ANIMAL = new Set<string>(['어패류', '육류', '가금류·난류'])
+function allergyRule(list: string[]): NutritionRule {
+  const what = list.join('·')
+  return {
+    id: `allergy-${list.join('-')}`,
+    level: 'avoid',
+    match: {},
+    title: `알레르기 — ${what}이(가) 들어 있을 수 있습니다`,
+    howTo: '드시지 마세요. 가공식품은 포장의 알레르기 표시를 꼭 확인하세요',
+    reason:
+      `내 정보에서 ${what} 알레르기를 고르셨습니다. 하루차림은 음식 이름으로 알레르기 유발물질을 찾습니다 — ` +
+      '흔히 들어가는 것(빵의 달걀·우유, 간장의 밀·대두, 해물 요리의 새우·오징어·조개)은 넓게 잡지만, ' +
+      '이름에 드러나지 않는 재료는 놓칠 수 있습니다. 포장된 식품은 포장의 알레르기 표시란을, 외식은 직원에게 꼭 확인하세요.',
+    evidence: 'G',
+    refIds: []
+  }
+}
 function praiseBlockedFor(food: Food, patient: PatientContext): boolean {
   if (patient.conditions.includes('연하곤란') && !swallowSafe(food)) return true
   const neutropenic = patient.phase === 'neutropenia' || patient.conditions.includes('호중구감소증')
@@ -245,6 +262,13 @@ export function evaluateFood(
     !(noPraise && h.rule.level === 'prefer') && matchesFood(h.rule.match, food, servings))
   const interactions = inter.filter((h) =>
     !(noPraise && h.interaction.level === 'prefer') && matchesFood(h.interaction.match, food, servings))
+
+  /*
+   * 알레르기 — 근거 등급을 다는 임상 권고가 아니라 이분이 알려 주신 사실이다. 그래서 규칙 목록에 두지 않고 여기서 붙인다.
+   * 이름으로 찾으므로 놓칠 수 있다 — 이유 글에 그 한계를 함께 적는다.
+   */
+  const allergy = allergenHits(food, patient.allergies)
+  if (allergy.length) all.push({ rule: allergyRule(allergy), source: '알레르기', sourceLabel: allergy.join('·') })
 
   const level = strongestLevel([
     ...all.map((h) => h.rule.level),

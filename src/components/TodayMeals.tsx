@@ -584,7 +584,7 @@ export function TodayMeals({
                 >
                   <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
                     <LevelBadge level={g.hit.rule.level} />
-                    <EvidenceBadge level={g.hit.rule.evidence} />
+                    {g.hit.source === '알레르기' ? <span className="chip bg-danger-100 text-danger-800">내가 고른 알레르기</span> : <EvidenceBadge level={g.hit.rule.evidence} />}
                   </div>
                   <p className="text-sm font-semibold text-stone-900">{g.hit.rule.title}</p>
                   <p className="mt-1 text-xs leading-relaxed text-stone-600">{g.hit.rule.reason}</p>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ALLERGENS } from '../data/allergens'
 import { SOURCES, setSource } from '../lib/stats'
 import { track } from '../lib/stats'
 import { isSupabaseConfigured } from '../lib/supabase'
@@ -451,6 +452,27 @@ export function Onboarding({
                   {c}
                 </button>
               ))}
+            </div>
+
+            {/* 알레르기 — 식단을 짜기 전에 여쭙는다(2026-10-15). 고르지 않고 넘어가셔도 된다 */}
+            <p className="mt-5 text-sm font-semibold text-stone-800">드시면 안 되는 알레르기가 있으세요?</p>
+            <p className="mt-1 text-xs leading-relaxed text-stone-500">
+              고르시면 그 음식은 식단에서 빼고 '피하세요' 로 알려 드립니다. 없으시면 넘어가셔도 됩니다 — 내 정보에서 언제든 고치실 수 있습니다.
+            </p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {ALLERGENS.map((a) => {
+                const on = (patient.allergies ?? []).includes(a)
+                return (
+                  <button
+                    key={a}
+                    aria-pressed={on}
+                    onClick={() => onChange({ allergies: on ? (patient.allergies ?? []).filter((x) => x !== a) : [...(patient.allergies ?? []), a] })}
+                    className={`chip border ${on ? 'border-danger-500 bg-danger-500 text-white' : 'border-stone-300 bg-white text-stone-600'}`}
+                  >
+                    {a}
+                  </button>
+                )
+              })}
             </div>
 
             <Preview patient={patient} />

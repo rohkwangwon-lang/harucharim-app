@@ -678,6 +678,11 @@ export interface PatientContext {
   conditions: PatientCondition[]
   /** 복용 중인 약제 — 상호작용 검사 */
   medications: string[]
+  /**
+   * 알레르기 — 식약처 알레르기 유발물질 표시대상 가운데 고르신 것(data/allergens.ts).
+   * 고르시면 그 이름이 보이는 음식은 '피하세요' 가 되고 식단에서 빠진다(2026-10-15).
+   */
+  allergies?: string[]
   /** 받은 치료 이력 — 영양제·운동 추천에 반영 */
   history?: TreatmentHistory[]
   /** 식단에 섞어도 되는 요리 계통. 비우면 한식만 */

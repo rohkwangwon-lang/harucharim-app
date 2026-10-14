@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { portionLabel } from '../lib/portion'
 import { menuConditionKey } from '../lib/menuIdentity'
 import { track } from '../lib/stats'
@@ -17,6 +17,9 @@ import { activeInteractions, activeRules, evaluateFood, howToLines } from '../en
 const SLOT_ICON: Record<MealSlot, typeof IconMorning> = {
   아침: IconMorning, 오전간식: IconSnack, 점심: IconNoon, 오후간식: IconSnack, 저녁: IconEvening
 }
+
+/** 탭을 옮겨도 보던 안을 이어 보이기 위한 기억 — 조건(conditionKey)이 같을 때만 쓴다 */
+let DRAFT_MEMORY: { key: string; drafts: DayMenu[]; cursor: number } = { key: '', drafts: [], cursor: 0 }
 
 /**
  * 추천 식단.
@@ -102,8 +105,16 @@ export function RecommendedMenu({
    * 그러니 만든 것을 그대로 들고 있다가 앞뒤로 오간다.
    */
   const AVOID_TOP = 2
-  const [drafts, setDrafts] = useState<DayMenu[]>([])
-  const [cursor, setCursor] = useState(0)
+  /*
+   * 다른 탭에 다녀와도 보던 안을 잃지 않는다(2026-10-15).
+   * 화면이 내려갔다 다시 올라오면 상태가 처음으로 돌아가, 다섯 번째 안을 보고 '찾기' 에 다녀오면
+   * 첫 안으로 돌아와 있었다 — 다시 구성이 저장되지 않는 것처럼 보였다. 조건이 같을 때만 이어 간다.
+   */
+  const conditionKeyEarly = menuConditionKey(patient, selected, supplements, day,
+    recentFoods(diary, day, undefined, shown))
+  const kept = DRAFT_MEMORY.key === conditionKeyEarly ? DRAFT_MEMORY : null
+  const [drafts, setDrafts] = useState<DayMenu[]>(kept?.drafts ?? [])
+  const [cursor, setCursor] = useState(kept?.cursor ?? 0)
   /*
    * 눌렀는데 바꿀 것이 없었는가.
    *
@@ -129,7 +140,14 @@ export function RecommendedMenu({
     () => menuConditionKey(patient, selected, supplements, day, recent),
     [patient, selected, supplements, day, recent]
   )
-  useEffect(() => { setDrafts([]); setCursor(0); setStuck(false) }, [conditionKey])
+  const firstKey = useRef(conditionKey)
+  useEffect(() => {
+    /* 처음 그릴 때는 기억해 둔 안을 그대로 쓴다 — 조건이 정말 바뀌었을 때만 버린다 */
+    if (firstKey.current === conditionKey) return
+    firstKey.current = conditionKey
+    setDrafts([]); setCursor(0); setStuck(false)
+  }, [conditionKey])
+  useEffect(() => { DRAFT_MEMORY = { key: conditionKey, drafts, cursor } }, [conditionKey, drafts, cursor])
   useEffect(() => { track('menu_build') }, [])
 
   const menu = cursor === 0 ? first : (drafts[cursor - 1] ?? first)
@@ -313,7 +331,7 @@ export function RecommendedMenu({
 
       {/*
         * 식단보다 병원이 먼저인 신호, 그리고 알레르기(2026-10-15 안전 검토).
-        * 앱은 아직 알레르기를 묻지 않는다 — 묻기 전까지는 그 사실을 이 자리에서 밝힌다.
+        * 알레르기는 이름으로 거르므로 그 한계를 이 자리에서 함께 밝힌다.
         */}
       <div className="mb-4 rounded-2xl border border-danger-200 bg-danger-50/50 px-4 py-3 text-[12px] leading-relaxed text-stone-700">
         {signs.length > 0 && (
@@ -327,7 +345,12 @@ export function RecommendedMenu({
           </>
         )}
         <p className={signs.length > 0 ? 'mt-2 border-t border-danger-100 pt-2' : ''}>
-          <strong>알레르기가 있는 음식</strong>은 추천에 나와도 빼고 드세요. 하루차림은 아직 알레르기를 따로 거르지 못합니다.
+          {(patient.allergies ?? []).length > 0 ? (
+            <><strong>알레르기({(patient.allergies ?? []).join('·')})</strong>가 이름에 보이는 음식은 빼고 짰습니다.
+              이름에 드러나지 않는 재료는 놓칠 수 있으니, 가공식품은 포장의 알레르기 표시를 확인하세요.</>
+          ) : (
+            <>알레르기가 있으시면 <strong>내 정보 → 알레르기</strong>에서 골라 주세요. 그 음식을 식단에서 빼고 짭니다.</>
+          )}
         </p>
       </div>
 
