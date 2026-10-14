@@ -26,34 +26,53 @@ function expect(file: string, what: string, pattern: RegExp, want: number, atLea
   }
 }
 
+/*
+ * 식약처 질의서는 2026-10-14 에 냈다(1AA-2610-0550517). 낸 뒤로는 앱이 아니라 **낸 그대로** 와 견준다 —
+ * 질의서는 그날 무엇을 냈는지의 기록이고, 앱이 바뀌었다고 고쳐 쓰면 그 기록이 사라진다.
+ * 앱과 달라진 것은 아래에서 따로 세어 보여 주고, 보완 제출이 필요한지는 docs/출시/현재-상태.md 에 적는다.
+ */
+const SUB = {
+  rules: 124, interactions: 28, total: 152, references: 87, ingredientRules: 34, medications: 18, medicationDetails: 7,
+  cancers: 10, conditions: 17,
+  ruleLevels: { prefer: 45, caution: 38, avoid: 31, info: 10 },
+  ruleGrades: { A: 16, B: 21, C: 23, G: 64 },
+  interactionLevels: { prefer: 2, caution: 16, avoid: 8, info: 2 }
+} as const
+const drift = (['rules', 'interactions', 'total', 'references', 'ingredientRules', 'medications', 'medicationDetails', 'conditions'] as const)
+  .filter((k) => SUB[k] !== N[k]).map((k) => `${k} ${SUB[k]}→${N[k]}`)
+if (drift.length) {
+  const now = fs.readFileSync('docs/출시/현재-상태.md', 'utf8')
+  if (!now.includes('제출 뒤 바뀐 것')) bads.push(`앱이 제출본과 달라졌는데(${drift.join(', ')}) 현재-상태.md 에 '제출 뒤 바뀐 것' 기록이 없다`)
+}
+
 const Q = 'docs/법무/식약처-의료기기-해당여부-질의서.md'
-expect(Q, '식이 정보 규칙 수', /식이 정보 규칙 \| (\d+)건/, N.rules)
-expect(Q, '상호작용 규칙 수', /약물·음식 상호작용 규칙 \| (\d+)건/, N.interactions)
-expect(Q, '참고 문헌 수', /참고 문헌 \| (\d+)종/, N.references)
-expect(Q, '규칙 합계', /규칙 (\d+)건의 전체 목록/, N.total)
-expect(Q, '붙임의 규칙 수', /식이 정보 규칙 (\d+)건, 약물·음식 상호작용 규칙/, N.rules)
-expect(Q, '붙임의 상호작용 수', /약물·음식 상호작용 규칙 (\d+)건 \(표시 문구/, N.interactions)
-expect(Q, '붙임의 문헌 수', /참고 문헌 (\d+)종 목록/, N.references)
-expect(Q, '권장 수', /표시 구분은 권장 (\d+)건, 주의/, N.ruleLevels.prefer)
-expect(Q, '주의 수', /권장 \d+건, 주의 (\d+)건, 피하세요/, N.ruleLevels.caution)
-expect(Q, '피하세요 수', /주의 \d+건, 피하세요 (\d+)건, 참고 \d+건입니다/, N.ruleLevels.avoid)
-expect(Q, '참고 수', /피하세요 \d+건, 참고 (\d+)건입니다/, N.ruleLevels.info)
-expect(Q, 'A 등급 수', /메타분석\(A\) (\d+)건/, N.ruleGrades.A)
-expect(Q, 'B 등급 수', /코호트\(B\) (\d+)건/, N.ruleGrades.B)
-expect(Q, 'C 등급 수', /기전 연구\(C\) (\d+)건/, N.ruleGrades.C)
-expect(Q, 'G 등급 수', /합의\(G\) (\d+)건/, N.ruleGrades.G)
-expect(Q, '상호작용 — 피하세요', /규칙은 \d+건이며\(전체 문구는 붙임 2\), 표시 구분은 피하세요 (\d+)건/, N.interactionLevels.avoid)
-expect(Q, '상호작용 — 주의', /표시 구분은 피하세요 \d+건, 주의 (\d+)건, 참고/, N.interactionLevels.caution)
-expect(Q, '상호작용 수(본문)', /규칙은 (\d+)건이며\(전체 문구는 붙임 2\)/, N.interactions)
-expect(Q, '약의 종류', /복용 약의 종류 \| (\d+)가지 가운데/, N.medications)
-expect(Q, '약 이름 아랫칸', /모두 (\d+)가지\)/, N.medicationDetails)
-expect(Q, '증상 수', /증상·상태 \| (\d+)가지 가운데/, N.conditions)
+expect(Q, '식이 정보 규칙 수', /식이 정보 규칙 \| (\d+)건/, SUB.rules)
+expect(Q, '상호작용 규칙 수', /약물·음식 상호작용 규칙 \| (\d+)건/, SUB.interactions)
+expect(Q, '참고 문헌 수', /참고 문헌 \| (\d+)종/, SUB.references)
+expect(Q, '규칙 합계', /규칙 (\d+)건의 전체 목록/, SUB.total)
+expect(Q, '붙임의 규칙 수', /식이 정보 규칙 (\d+)건, 약물·음식 상호작용 규칙/, SUB.rules)
+expect(Q, '붙임의 상호작용 수', /약물·음식 상호작용 규칙 (\d+)건 \(표시 문구/, SUB.interactions)
+expect(Q, '붙임의 문헌 수', /참고 문헌 (\d+)종 목록/, SUB.references)
+expect(Q, '권장 수', /표시 구분은 권장 (\d+)건, 주의/, SUB.ruleLevels.prefer)
+expect(Q, '주의 수', /권장 \d+건, 주의 (\d+)건, 피하세요/, SUB.ruleLevels.caution)
+expect(Q, '피하세요 수', /주의 \d+건, 피하세요 (\d+)건, 참고 \d+건입니다/, SUB.ruleLevels.avoid)
+expect(Q, '참고 수', /피하세요 \d+건, 참고 (\d+)건입니다/, SUB.ruleLevels.info)
+expect(Q, 'A 등급 수', /메타분석\(A\) (\d+)건/, SUB.ruleGrades.A)
+expect(Q, 'B 등급 수', /코호트\(B\) (\d+)건/, SUB.ruleGrades.B)
+expect(Q, 'C 등급 수', /기전 연구\(C\) (\d+)건/, SUB.ruleGrades.C)
+expect(Q, 'G 등급 수', /합의\(G\) (\d+)건/, SUB.ruleGrades.G)
+expect(Q, '상호작용 — 피하세요', /규칙은 \d+건이며\(전체 문구는 붙임 2\), 표시 구분은 피하세요 (\d+)건/, SUB.interactionLevels.avoid)
+expect(Q, '상호작용 — 주의', /표시 구분은 피하세요 \d+건, 주의 (\d+)건, 참고/, SUB.interactionLevels.caution)
+expect(Q, '상호작용 수(본문)', /규칙은 (\d+)건이며\(전체 문구는 붙임 2\)/, SUB.interactions)
+expect(Q, '약의 종류', /복용 약의 종류 \| (\d+)가지 가운데/, SUB.medications)
+expect(Q, '약 이름 아랫칸', /모두 (\d+)가지\)/, SUB.medicationDetails)
+expect(Q, '증상 수', /증상·상태 \| (\d+)가지 가운데/, SUB.conditions)
 
 const HOW = 'docs/법무/식약처-질의-제출-방법.md'
-expect(HOW, '규칙표', /고정된 규칙표\((\d+)건\)/, N.total)
-expect(HOW, '상호작용', /상호작용 정보를 표시합니다\((\d+)건\)/, N.interactions)
-expect(HOW, '첨부 — 규칙', /규칙 (\d+)건 전체 목록/, N.total)
-expect(HOW, '첨부 — 문헌', /참고 문헌 (\d+)종, 등록 예정/, N.references)
+expect(HOW, '규칙표', /고정된 규칙표\((\d+)건\)/, SUB.total)
+expect(HOW, '상호작용', /상호작용 정보를 표시합니다\((\d+)건\)/, SUB.interactions)
+expect(HOW, '첨부 — 규칙', /규칙 (\d+)건 전체 목록/, SUB.total)
+expect(HOW, '첨부 — 문헌', /참고 문헌 (\d+)종, 등록 예정/, SUB.references)
 
 const NOW = 'docs/출시/현재-상태.md'
 expect(NOW, '식이 규칙', /식이 규칙 (\d+)건 \+/, N.rules)
@@ -127,6 +146,6 @@ expect(GUIDE, '지침서 — 문헌', /참고 문헌 (\d+)종으로/, N.referenc
 }
 
 if (seen < 55) bads.push(`문서 검사가 헛돎 — 견준 자리 ${seen}곳`)
-console.log(`문서 검사 완료 — 문서 10종 · 숫자 ${seen}곳 대조, ${bads.length ? `문제 ${bads.length}건` : '문제 없음'}`)
+console.log(`문서 검사 완료 — 문서 10종 · 숫자 ${seen}곳 대조${drift.length ? ` · 제출본과 다른 것 ${drift.join(', ')}` : ''}, ${bads.length ? `문제 ${bads.length}건` : '문제 없음'}`)
 for (const b of bads) console.log('   -', b)
 if (bads.length) process.exitCode = 1

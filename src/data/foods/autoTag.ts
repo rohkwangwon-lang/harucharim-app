@@ -211,6 +211,13 @@ const GRAPEFRUIT_NOT = /자몽향|자몽맛|라임향|라임맛|프라임|케이
  */
 const DISH_WITH_SAUCE = /_양념장$/
 
+/*
+ * '식물성에스트로겐' 은 보여 드리는 이름표다 — 규칙은 걸리지 않는다(콩 근거는 '대두이소플라본').
+ * 손으로 등록한 석류·아마씨에는 붙어 있는데 공공데이터의 '석류_생것'·'아마씨_볶은것' 에는 없어,
+ * 같은 과일이 화면마다 다르게 보였다. 이름이 꼭 맞는 것만 잡는다 — 석류차·석류주스·아마씨유는 아니다.
+ */
+const PHYTO_DISPLAY = /^(석류|아마씨)([ _](생것|볶은것))?$/
+
 export function autoTags(name: string): FoodTag[] {
   const s = name.replace(DISH_WITH_SAUCE, '').replace(BRAND, ' ')
   const out: FoodTag[] = []
@@ -227,6 +234,7 @@ export function autoTags(name: string): FoodTag[] {
   if (CURED.test(s) && !CURED_NOT.test(s)) out.push('가공육' as FoodTag)
   if (GRAPEFRUIT.test(s) && !GRAPEFRUIT_NOT.test(s)) out.push('자몽계' as FoodTag)
   if (GINGER.test(s) && !GINGER_NOT.test(s)) out.push('생강' as FoodTag)
+  if (PHYTO_DISPLAY.test(name.trim())) out.push('식물성에스트로겐' as FoodTag)
 
   return out
 }
