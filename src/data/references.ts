@@ -262,6 +262,9 @@ export const REFERENCES: Reference[] = [
 
   // ── 상호작용 ─────────────────────────────────────────────────
   /* 전문 공개. 200 mL·24시간 25 %·라임/포멜로/세비야오렌지·단맛오렌지 제외·정맥주사 무영향이 모두 여기에 있다 */
+  { id: 'lakmal2021starfruit', kind: 'review', year: 2021, verified: '스타후르츠 섭취 뒤 신독성·신경독성 사례(증례·증례 모음) · 독성 성분은 카람복신과 옥살산 · 만성 콩팥병·위장 질환·만성 췌장염·탈수·빈속 섭취·옥살산 농도가 독성을 부추김 · 독성 용량은 정해지지 않음(반 개~50개, 주스 25~3,000 mL) · 빈속에는 적은 양으로도 독성 보고 · 2026-10-15 원문 대조', access: 'pmc', fulltext: 'PMC7958541',
+    citation: 'Lakmal K, Yasawardene P, Jayarajah U, Seneviratne SL. Nutritional and medicinal properties of Star fruit (Averrhoa carambola): A review. Food Sci Nutr. 2021;9(3):1810-1823. doi:10.1002/fsn3.2135',
+    url: 'https://doi.org/10.1002/fsn3.2135' },
   { id: 'bailey2013grapefruit', kind: 'review', year: 2013, verified: '자몽 1개 또는 주스 200 mL 로 충분 · 펠로디핀에서 24시간 간격이면 최대 효과의 25 %(4분의 1) · 라임·포멜로·세비야 오렌지도 같고 네이블·발렌시아 단맛 오렌지는 아님 · 정맥 투여 약은 영향 없음 · 표1: 엘로티닙·크리조티닙 위험 High(크리조티닙 용량 관련 이상반응 QT·골수 억제), 소라페닙은 파조파닙·수니티닙의 \'대체 약\' 칸 · 정맥 투여 약의 약동학은 변하지 않음(\'intravenously administered drugs are unchanged\') — 상호작용은 먹는 약에만', access: 'pmc', fulltext: 'PMC3589309',
     url: 'https://doi.org/10.1503/cmaj.120951',
     citation: 'Bailey DG, et al. Grapefruit–medication interactions: forbidden fruit or avoidable consequences? CMAJ. 2013;185(4):309-316.' },

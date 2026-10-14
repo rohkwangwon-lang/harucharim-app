@@ -195,9 +195,13 @@ const CONTEXT: { word: RegExp; name: string; ok: (p: PatientContext) => boolean 
         fired.set(k, r)
       }
     }
-    /* 상호작용은 고른 약에만 — 고르지 않은 약의 상호작용이 나오면 안 된다 */
+    /*
+     * 상호작용은 고른 약에만 — 고르지 않은 약의 상호작용이 나오면 안 된다.
+     * 증상 칸의 '와파린복용' 은 와파린을 고른 것으로 친다(2026-10-15 — 두 칸이 다른 답을 내던 것을 맞춤, engine/rules.ts effectiveMedications).
+     */
+    const chosen = new Set([...p.medications, ...(p.conditions.includes('와파린복용') ? ['warfarin'] : [])])
     for (const it of activeInteractions(p)) {
-      if (!p.medications.includes(it.interaction.agent)) hard.push(`고르지 않은 약의 상호작용이 나옴: ${it.interaction.id} · ${label(p)}`)
+      if (!chosen.has(it.interaction.agent)) hard.push(`고르지 않은 약의 상호작용이 나옴: ${it.interaction.id} · ${label(p)}`)
       /*
        * 제목이 말하는 다른 약도 고르셨는가. "카페시타빈은 와파린 효과를 크게 증폭시킵니다" 가
        * 와파린을 안 드시는 분께 뜨고 있었다. 자기 약(agent) 이야기는 당연히 해당하므로 뺀다.

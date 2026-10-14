@@ -149,7 +149,7 @@ export function restorePatient(raw: unknown): PatientContext {
   const validSubs = new Set(((SUBTYPE_OPTIONS as Record<string, { id: string }[] | undefined>)[cancer] ?? []).map((x) => x.id))
   const loss = asNum(p.weightLossPct)
 
-  return {
+  const restored: PatientContext = {
     ...DEFAULT_PATIENT,
     ...(p as Partial<PatientContext>),
     cancer, phase, sex,
@@ -168,6 +168,31 @@ export function restorePatient(raw: unknown): PatientContext {
       return c.length ? c : DEFAULT_PATIENT.cuisines
     })(),
     onboarded: p.onboarded === true && sound
+  }
+  return linkWarfarin(restored)
+}
+
+/**
+ * 와파린은 두 군데서 고를 수 있다 — 증상·상태의 '와파린복용' 과 드시는 약의 '와파린'.
+ *
+ * 둘 중 하나만 고르면 답이 갈렸다(2026-10-15 안전 검토). 엔진의 상호작용·영양제 판정은 약 쪽만 보아서,
+ * 증상 쪽으로만 고르신 분께는 오메가-3 제품이 '권장', 은행잎·홍삼이 '주의' 로 나왔다
+ * (약으로 고르면 '주의' 와 '피하세요'). 같은 분이 어느 칸을 눌렀느냐로 출혈 위험의 답이 달라지면 안 된다.
+ * 그래서 하나를 켜면 다른 하나도 켜고, 끄면 함께 끈다.
+ */
+const WARFARIN_CONDITION = '와파린복용' as PatientContext['conditions'][number]
+export function linkWarfarin(p: PatientContext, patch?: Partial<PatientContext>): PatientContext {
+  const hasCond = p.conditions.includes(WARFARIN_CONDITION)
+  const hasMed = p.medications.includes('warfarin')
+  if (hasCond === hasMed) return p
+  /* 이번에 바꾼 쪽을 따른다. 읽어 들일 때(바꾼 쪽이 없을 때)는 켜는 쪽으로 맞춘다 — 끄는 쪽으로 맞추면 경고를 잃는다 */
+  const changedMeds = !!patch && 'medications' in patch && !('conditions' in patch)
+  const changedConds = !!patch && 'conditions' in patch && !('medications' in patch)
+  const on = changedMeds ? hasMed : changedConds ? hasCond : true
+  return {
+    ...p,
+    conditions: on ? (hasCond ? p.conditions : [...p.conditions, WARFARIN_CONDITION]) : p.conditions.filter((c) => c !== WARFARIN_CONDITION),
+    medications: on ? (hasMed ? p.medications : normalizeMedications([...p.medications, 'warfarin'])) : p.medications.filter((m) => m !== 'warfarin')
   }
 }
 
@@ -343,7 +368,10 @@ export function useAppState() {
   }, [])
 
   const setPatient = useCallback((patch: Partial<PatientContext>) => {
-    setState((s) => ({ ...s, patient: { ...s.patient, ...cleanPatch(patch) } }))
+    setState((s) => {
+      const clean = cleanPatch(patch)
+      return { ...s, patient: linkWarfarin({ ...s.patient, ...clean }, clean) }
+    })
   }, [])
 
   /**

@@ -153,7 +153,7 @@ export function TodayMeals({
   const empty = selected.length === 0
   const kcalState = nutrientState(kcal, target.kcal[0], target.kcal[1], { empty })
   const proteinState = nutrientState(protein, target.protein[0], target.protein[1], { empty, overOk: !renalCare })
-  const fiberState = nutrientState(fiber, fiber_.range[0], fiber_.range[1], { empty })
+  const fiberState = nutrientState(fiber, fiber_.range[0], fiber_.range[1], { empty, overOk: !fiber_.lowResidue })
   const naState = nutrientState(na, 0, naLimit, { empty, limit: naLimit })
 
   /*

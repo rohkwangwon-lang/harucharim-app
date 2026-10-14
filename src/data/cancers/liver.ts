@@ -146,7 +146,12 @@ export const liver: CancerProfile = {
        * 2026-10-14 전수 대조. '외식·프랜차이즈' 군의 '생식' 으로 걸었더니 닭가슴살 샐러드·시저 샐러드까지 붙었다.
        * 두 샐러드와 초밥·모둠회는 태그로 가를 수 없어, 날 해산물 다섯 가지를 이름으로 적는다.
        */
-      match: { foodIds: ['salmon-sashimi', 'flounder', 'oyster-raw', 'sushi-set', 'sashimi-set'] },
+      /*
+       * 2026-10-15 안전 검토 — 다섯 가지 이름에만 걸려 있어, 날 해산물 1,330종 가운데 간경변 환자에게
+       * '피하세요' 가 붙는 것은 0종이었다(초밥 모듬·회덮밥·생굴 공공자료·해삼 무표시).
+       * 샐러드와 회를 가르려고 이름으로 적었던 것이므로, 날 해산물만 뜻하는 '날해산물' 태그를 세워 넓힌다.
+       */
+      match: { foodIds: ['salmon-sashimi', 'flounder', 'oyster-raw', 'sushi-set', 'sashimi-set'], tags: ['날해산물'] },
       title: '간경변이 있으면 생굴·생선회는 특히 위험합니다',
       /*
        * '치사율 50 % 초과' 를 유럽간학회 지침에 달아 두었는데, 그 지침에는 비브리오도 생식도
@@ -161,7 +166,8 @@ export const liver: CancerProfile = {
         '간질환군의 사망률은 53.9 %, 간질환이 없는 군은 16.1 % 였습니다(상대위험 2.61, 95 % 신뢰구간 2.14~3.19). ' +
         '여름철 생굴·조개·생선회는 호중구 수치와 무관하게 피하셔야 합니다.',
       evidence: 'B',
-      refIds: ['vibrio-meta2019', 'cdc-vibrio', 'fda-foodsafety']
+      refIds: ['vibrio-meta2019', 'cdc-vibrio', 'fda-foodsafety'],
+      supersedes: ['cond-he-raw-seafood']
     },
     {
       id: 'liver-coffee',

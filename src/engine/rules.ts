@@ -3,7 +3,7 @@ import type {
   SelectedItem, Supplement, Interaction
 } from '../data/types'
 import { isDrink } from '../data/types'
-import { FOOD_BY_ID } from '../data/foods'
+import { FOOD_BY_ID, swallowSafe } from '../data/foods'
 import { CANCER_BY_ID } from '../data/cancers'
 import { COMMON_RULES } from '../data/commonRules'
 import { CONDITION_RULES } from '../data/conditionRules'
@@ -139,6 +139,7 @@ export function onAnticancerDrug(patient: PatientContext): boolean {
 
 function applies(rule: NutritionRule, patient: PatientContext): boolean {
   if (rule.onAnticancer && !onAnticancerDrug(patient)) return false
+  if (rule.unlessTaking?.some((m) => effectiveMedications(patient).includes(m))) return false
   return appliesToPhase(rule, patient) && appliesToSubtype(rule, patient)
 }
 
@@ -167,16 +168,27 @@ export function activeRules(patient: PatientContext): RuleHit[] {
 }
 
 /** 환자가 복용 중인 약제에 해당하는 상호작용만 추린다 */
+/**
+ * 판정에 쓰는 약 목록 — 증상 칸의 '와파린복용' 은 약 '와파린' 과 같은 뜻으로 읽는다(2026-10-15 안전 검토).
+ * 저장소(linkWarfarin)가 둘을 맞춰 두지만, 엔진을 직접 부르는 자리(검사·예전 기록)에서도 같은 답이 나오게 한다.
+ */
+export function effectiveMedications(patient: PatientContext): PatientContext['medications'] {
+  return patient.conditions.includes('와파린복용') && !patient.medications.includes('warfarin')
+    ? [...patient.medications, 'warfarin']
+    : patient.medications
+}
+
 export function activeInteractions(patient: PatientContext): InteractionHit[] {
+  const meds = effectiveMedications(patient)
   const also = (i: (typeof INTERACTIONS)[number]) => {
     if (!i.alsoTaking) return true
-    const meds = i.alsoTaking.medications ?? [], conds = i.alsoTaking.conditions ?? []
-    return meds.some((m) => patient.medications.includes(m)) || conds.some((c) => patient.conditions.includes(c))
+    const want = i.alsoTaking.medications ?? [], conds = i.alsoTaking.conditions ?? []
+    return want.some((m) => meds.includes(m)) || conds.some((c) => patient.conditions.includes(c))
   }
   /* 더 자세한 약을 고르셨으면, 윗칸에 붙여 둔 "어느 약인지에 따라 다릅니다" 는 내지 않는다 */
   const unless = (i: (typeof INTERACTIONS)[number]) =>
-    !i.unlessTaking || !i.unlessTaking.some((m) => patient.medications.includes(m))
-  return INTERACTIONS.filter((i) => patient.medications.includes(i.agent) && also(i) && unless(i)).map((i) => ({
+    !i.unlessTaking || !i.unlessTaking.some((m) => meds.includes(m))
+  return INTERACTIONS.filter((i) => meds.includes(i.agent) && also(i) && unless(i)).map((i) => ({
     interaction: i,
     medicationName: i.agent
   }))
@@ -190,6 +202,23 @@ function strongestLevel(levels: RuleLevel[]): RuleLevel | null {
 }
 
 /** 식품 1건을 환자 맥락에서 평가한다 */
+/**
+ * 이분에게는 '권장' 을 붙이지 않을 음식(2026-10-15 안전 검토).
+ *
+ *  · 삼키기 어려우신 분께 질감이 맞지 않는 음식(data/foods 의 swallowSafe). 단백질·열량 규칙이 김·상추·스테이크·땅콩조림에까지
+ *    '권장' 을 붙이고 있었다. 권장은 "이대로 드셔도 된다" 로 읽힌다 — 질감이 맞는지 모르는 음식에는 붙이지 않는다.
+ *  · 호중구가 낮은 분께 동물성 '생것' 재료. 표준성분표의 '연어,육,생것'·'달걀 생것' 이 단백질 규칙으로 '권장' 이었다.
+ *    익혀 먹을 재료라 피하라고 하지는 않는다(쇠고기 생것까지 피하게 된다) — 날로 내세우지 않을 뿐이다.
+ *    실제로 날로 먹는 것(굴·성게·연어알·생간·천엽)은 autoTag 가 '생식동물성' 을 붙여 '피하세요' 로 간다.
+ */
+const ANIMAL = new Set<string>(['어패류', '육류', '가금류·난류'])
+function praiseBlockedFor(food: Food, patient: PatientContext): boolean {
+  if (patient.conditions.includes('연하곤란') && !swallowSafe(food)) return true
+  const neutropenic = patient.phase === 'neutropenia' || patient.conditions.includes('호중구감소증')
+  if (neutropenic && ANIMAL.has(food.group) && /생것/.test(food.name)) return true
+  return false
+}
+
 export function evaluateFood(
   food: Food,
   patient: PatientContext,
@@ -211,7 +240,7 @@ export function evaluateFood(
    * 규칙마다 제외를 달면 다음 규칙에서 또 빠진다. 그래서 판정하는 이 한 자리에서 막는다.
    * 드시지 말라는 뜻이 아니다 — 권할 음식으로 내세우지 않을 뿐이고, 주의·피하세요는 그대로 간다.
    */
-  const noPraise = food.tags.some((t) => NO_PRAISE_TAGS.has(t))
+  const noPraise = food.tags.some((t) => NO_PRAISE_TAGS.has(t)) || praiseBlockedFor(food, patient)
   const all = rules.filter((h) =>
     !(noPraise && h.rule.level === 'prefer') && matchesFood(h.rule.match, food, servings))
   const interactions = inter.filter((h) =>

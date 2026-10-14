@@ -63,7 +63,8 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
     },
     {
       /* 가래떡·인절미처럼 끈적하게 뭉치는 떡은 '부드러운 음식' 으로 권하지 않는다(2026-10-14 전수 대조) */
-      id: 'cond-muc-cold', level: 'prefer', match: { tags: ['부드러움'], excludeTags: ['점착성'] },
+      /* 옥살리플라틴을 맞는 분께는 찬 것이 증상을 부른다 — 이 말 대신 int-oxaliplatin-cold 가 말한다(2026-10-15 안전 검토) */
+      id: 'cond-muc-cold', level: 'prefer', match: { tags: ['부드러움'], excludeTags: ['점착성'] }, unlessTaking: ['oxaliplatin'],
       title: '미지근하거나 차가운 부드러운 음식이 견디기 쉽습니다',
       reason:
         '아이스크림·요거트·푸딩·계란찜처럼 부드럽고 온도가 낮은 음식은 통증을 덜 자극하면서 열량을 줍니다. ' +
@@ -482,6 +483,26 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
 
   간성뇌증위험: [
     {
+      /*
+       * 간질환이 있는 분의 날 해산물(2026-10-15 안전 검토).
+       * 같은 경고(liver-raw-seafood)가 간암의 '간경변 동반' 에만 있어서, 다른 암을 앓으시며
+       * 간성뇌증 위험(= 진행된 간질환)을 고르신 분께는 켜지지 않았다. 복수는 간질환 없이도 생기므로 여기에만 둔다.
+       * 숫자와 출처는 liver-raw-seafood 와 같다 — 둘 다 켜지면 그쪽이 대신 말한다(supersedes).
+       */
+      id: 'cond-he-raw-seafood', level: 'avoid',
+      match: { foodIds: ['salmon-sashimi', 'flounder', 'oyster-raw', 'sushi-set', 'sashimi-set'], tags: ['날해산물'] },
+      title: '간질환이 있으면 생굴·생선회는 특히 위험합니다',
+      reason:
+        '비브리오 불니피쿠스는 간질환이 있는 분에게 특히 위험합니다. ' +
+        '감염자 전체로 보면 약 5명 중 1명이 사망하지만(미국 CDC), ' +
+        '비브리오 괴사성 피부·연조직 감염 환자 12편·1,157명을 모은 메타분석에서 ' +
+        '간질환군의 사망률은 53.9 %, 간질환이 없는 군은 16.1 % 였습니다(상대위험 2.61, 95 % 신뢰구간 2.14~3.19). ' +
+        '생굴·조개·생선회는 익혀서 드세요.',
+      howTo: '속까지 익혀서 드세요',
+      evidence: 'B',
+      refIds: ['vibrio-meta2019', 'cdc-vibrio', 'fda-foodsafety']
+    },
+    {
       id: 'cond-he-protein', level: 'info', match: { tags: ['고단백'] },
       title: '단백질을 끊는 것이 아니라 종류를 바꾸는 것입니다',
       reason:
@@ -492,6 +513,20 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
   ],
 
   신기능저하: [
+    {
+      /*
+       * 2026-10-15 안전 검토 — '오렴자(카람볼라) 생것' 이 신기능저하 환자에게 판정 없이 '씻어서 드세요' 만 받았다.
+       * 건수는 하나지만 결과가 되돌릴 수 없는 쪽이라 이름 하나로 막는다. 근거는 증례 모음을 정리한 종설이라 C.
+       */
+      id: 'cond-ckd-starfruit', level: 'avoid', match: { tags: ['스타후르츠'] },
+      title: '신장 기능이 떨어져 있으면 스타후르츠(오렴자·카람볼라)는 드시지 마세요',
+      reason:
+        '스타후르츠에는 옥살산과 카람복신이라는 성분이 있어, 먹은 뒤 급성 신손상(신독성)과 딸꾹질·의식 혼탁·경련 같은 신경 증상(신경독성)이 생긴 사례들이 보고되어 있습니다. ' +
+        '만성 콩팥병이 있으면 이런 독성이 생기기 쉬운 쪽이고, 탈수나 빈속에 먹는 것도 위험을 키웁니다. ' +
+        '얼마부터 위험한지는 정해지지 않았고, 빈속에는 적은 양으로도 생긴 보고가 있습니다. 주스도 같습니다.',
+      evidence: 'C',
+      refIds: ['lakmal2021starfruit']
+    },
     {
       /*
        * 태그만 믿지 않는다.

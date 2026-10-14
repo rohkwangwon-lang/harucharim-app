@@ -53,7 +53,12 @@ const RAW = new RegExp(
    */
   '|초밥|^스시|스시$' +
   /* 그라브락스는 훈제가 아니라 소금·설탕에 절인 날연어다 — '훈제 그라브락스' 도 열을 가하지 않는다 */
-  '|생굴|굴회|산낙지|낙지탕탕이|생연어|그라브락스'
+  '|생굴|굴회|산낙지|낙지탕탕이|생연어|그라브락스' +
+  /*
+   * 날 연어·참치를 얹는 롤·덮밥·포케(2026-10-15 안전 검토). 이름에 '회·초밥' 이 없어 빠져 나갔고,
+   * 연어롤은 나트륨 주의만 받았다. 롤케이크·스프링롤은 생선 이름이 앞에 없어 걸리지 않는다.
+   */
+  '|(연어|참치|스파이시\\s?튜나|광어)\\s?롤|포케|사케\\s?동|연어\\s?덮밥|참치\\s?회덮밥'
 )
 /* '훈제' 는 익힌 것으로 치지만 그라브락스 앞에 붙은 훈제는 차게 그을린 것이다 */
 const RAW_DESPITE_SMOKE = /그라브락스/
@@ -232,6 +237,31 @@ const KUDZU = /^칡(즙|뿌리[ _]생것)$/
  */
 const HOT_DISH = /볶음|덮밥|찌개|국밥|짜글이|전골|탕$|탕[ _(]|구이|떡볶이|피자|라면|우동|짬뽕|솥밥|그라탕|스튜|카레|부침|커틀릿|돈까스|돈가스|리조또|파스타|스파게티/
 const ROYAL_JELLY = /로[열얄]\s?젤리/
+/* 차게 먹는 음식 — 옥살리플라틴 상호작용이 쓴다. 냉동식품(만두·피자)은 데워 먹으므로 '냉동' 은 넣지 않는다 */
+const COLD = /아이스크림|빙수|셔벗|샤베트|샤벳|젤라또|소프트\s?콘|아이스\s?(커피|티|라떼|아메리카노|초코|바|크림)|아이스바|하드바|슬러시|프라푸치노|냉면|밀면|냉모밀|냉소바|냉국|콩국수|물회|얼음/
+const COLD_NOT = /아이스크림\s?(맛|향)|쿠키|케이크|빵|과자|떡$/
+export function isCold(name: string): boolean {
+  return COLD.test(name) && !COLD_NOT.test(name)
+}
+/*
+ * 끈적하게 뭉치는 것 — 떡·찹쌀(2026-10-15 안전 검토).
+ * 연하곤란 규칙(cond-dys-rough)은 이유 글에 "떡처럼 끈적하게 뭉치는 것은 특히 위험" 이라 적어 두고,
+ * 정작 공공데이터 떡 760종 가운데 757종에는 '점착성' 이 없어 가래떡·인절미가 아무 표시 없이 지나갔다.
+ * 떡갈비는 떡이 아니고, 떡맛 과자·소스는 떡이 들어 있지 않다.
+ */
+const STICKY = /떡|인절미|경단|약식|약밥|찹쌀|모찌|찰떡|증편|송편|절편|백설기|가래떡|쑥개떡|화전/
+const STICKY_NOT = /떡갈비|떡맛|떡볶이\s?소스|떡볶이\s?양념|소스|양념장|분말|가루|시즈닝|향/
+export function isSticky(name: string): boolean {
+  return STICKY.test(name) && !STICKY_NOT.test(name)
+}
+/*
+ * 날로 먹는 일이 흔한 동물성 '생것'(2026-10-15 안전 검토).
+ * 표준성분표는 '굴류,굴,육,생것' 처럼 적어 위의 회·초밥 걸름망을 지나갔고,
+ * 호중구가 낮은 분께 연어알·성게·생간이 단백질 규칙으로 '권장' 이 되었다.
+ * 고기·생선 '생것' 을 통째로 잡지 않는 까닭 — 쇠고기 등심 생것은 익혀 먹을 재료다. 그것까지 피하라면 단백질을 끊으라는 말이 된다.
+ * 여기에는 실제로 날로 먹는 것만 둔다.
+ */
+const RAW_EATEN = /굴|성게|멍게|우렁쉥이|해삼|개불|연어\s?알|연어,\s?알|날치\s?알|천엽|처녑|간,\s?생것|간\s생것|육회/
 
 export function autoTags(name: string): FoodTag[] {
   const s = name.replace(DISH_WITH_SAUCE, '').replace(BRAND, ' ')
@@ -241,6 +271,7 @@ export function autoTags(name: string): FoodTag[] {
   const cooked = COOKED.test(s) && !RAW_DESPITE_SMOKE.test(s)
   if (rawJang || (!cooked && !NOT_FOOD.test(s) && !SUSHI_COOKED.test(s) && RAW.test(s))) {
     out.push('생식동물성' as FoodTag)
+    if (!LAND_RAW.test(s)) out.push('날해산물' as FoodTag)
   }
   if (UNDERCOOKED.test(s) && !UNDERCOOKED_NOT.test(s)) out.push('덜익힘' as FoodTag)
   if (SALTED.test(s) && !SALTED_NOT.test(s)) out.push('염장' as FoodTag)
@@ -253,6 +284,9 @@ export function autoTags(name: string): FoodTag[] {
   if (KUDZU.test(name.trim())) out.push('칡뿌리' as FoodTag, '식물성에스트로겐' as FoodTag)
   if (ROYAL_JELLY.test(s)) out.push('로열젤리' as FoodTag)
   if (HOT_DISH.test(s) && !/샐러드|냉/.test(s)) out.push('익힌요리' as FoodTag)  // 스파게티샐러드·냉파스타는 차게 먹는다
+  if (isSticky(s)) out.push('점착성' as FoodTag)
+  if (isCold(s)) out.push('찬음식' as FoodTag)
+  if (/오렴자|카람볼라|스타\s?후르츠|스타\s?프루트/.test(s)) out.push('스타후르츠' as FoodTag)
 
   return out
 }
@@ -297,6 +331,9 @@ function rawProduce(name: string, group?: string): boolean {
  */
 const NOT_UPF = /^(?:순두부|연두부|두부|건두부|검은깨두부|두부[ _/]칼슘강화|우유|흰우유|저지방 ?우유|무지방 ?우유|플레인 ?요[거구]르?트|된장|청국장|고추장|간장|참치 ?통조림.*)$/
 
+/* 날것이지만 바다에서 오지 않은 것 — 비브리오 규칙에서 뺀다 */
+const LAND_RAW = /육회|육사시미|뭉티기|생간|간\s?회|천엽|처녑|날\s?달걀|날계란|닭\s?(가슴살)?\s?회|토리사시|말고기|^생햄/
+const ANIMAL_GROUPS = new Set(['어패류', '육류', '가금류·난류'])
 export function withAutoTags(name: string, tags: FoodTag[], group?: string): FoodTag[] {
   if (tags.includes('초가공식품' as FoodTag) && NOT_UPF.test(name.trim())) tags = tags.filter((t) => t !== ('초가공식품' as FoodTag))
   const kept = group && NO_FIBER_PRAISE.has(group)
@@ -304,6 +341,11 @@ export function withAutoTags(name: string, tags: FoodTag[], group?: string): Foo
     : tags
   const extra = autoTags(name).filter((t) => !kept.includes(t))
   if (rawProduce(name, group) && !kept.includes('생채소과일' as FoodTag)) extra.push('생채소과일' as FoodTag)
+  if (group && ANIMAL_GROUPS.has(group) && /생것/.test(name) && RAW_EATEN.test(name) &&
+      !kept.includes('생식동물성' as FoodTag) && !extra.includes('생식동물성' as FoodTag)) {
+    extra.push('생식동물성' as FoodTag)
+    if (group === '어패류' && !kept.includes('날해산물' as FoodTag)) extra.push('날해산물' as FoodTag)
+  }
   return extra.length ? [...kept, ...extra] : kept
 }
 
@@ -328,4 +370,21 @@ export function displayName(raw: string): string {
   const [head, ...rest] = parts
   const redundant = rest.some((r) => r.includes(head))
   return (redundant ? rest : parts).join(' ')
+}
+
+/**
+ * 1회 제공량 나트륨으로 '고나트륨' 을 다시 매긴다(400 mg 이상).
+ *
+ * 손으로 등록한 식품에만 이 보정이 있었다(foods/index.ts). 공공데이터는 원본 분류의 태그를 그대로 써서,
+ * 1회 600~800 mg 인 음식 16,523종 가운데 63 % 에서 복수·고혈압·점막염의 나트륨 규칙이 아무 말을 하지 않았다
+ * — 복수 환자에게 김치찌개·동태찌개가 무표시였다(2026-10-15 안전 검토). 두 곳이 같은 잣대를 쓰게 여기로 모은다.
+ * 나트륨 값이 없으면 붙어 있던 판단을 그대로 둔다.
+ */
+export const HIGH_SODIUM_PER_SERVING = 400
+export function sodiumTag(tags: FoodTag[], na100: number | undefined, servingG: number): FoodTag[] {
+  if (na100 === undefined) return tags
+  const high = (na100 * servingG) / 100 >= HIGH_SODIUM_PER_SERVING
+  const has = tags.includes('고나트륨' as FoodTag)
+  if (high === has) return tags
+  return high ? [...tags, '고나트륨' as FoodTag] : tags.filter((t) => t !== ('고나트륨' as FoodTag))
 }

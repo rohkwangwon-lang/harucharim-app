@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>그 이야기, 정말일까요</title>
+<meta name="description" content="하루차림 — 암 치료 중 음식에 관해 전해 내려오는 이야기를 논문 원문으로 확인한 환자·가족용 발표 자료">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@400;600;800&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* 환자·가족용 발표. 장마다 큰 숫자 하나와 쉬운 말 한 줄. 답의 갈래마다 색이 다르다(잘못-알려진-이야기.html 과 같은 색). */
+:root{
+  --ground:#e6e4d9; --paper:#f2f0e8; --sheet:#faf9f4; --ink:#282621; --ink2:#48453c; --muted:#7a7566; --line:#e2dfd3;
+  --rice:#4b6936; --rice-deep:#324326; --rice-tint:#e6ecdb; --leaf:#ccd9ba; --leaf-2:#eef2e6;
+  --soy:#875326; --soy-deep:#6b3f1a; --soy-tint:#f4e5d2;
+  --plum:#7a3b45; --plum-deep:#5e2a33; --plum-tint:#f3e3e3;
+  --mist:#5e6b78; --mist-deep:#46515c; --mist-tint:#e5e9ec;
+  --on-acc:#faf9f4;
+  --acc:var(--rice); --acc-deep:var(--rice-deep); --tint:var(--rice-tint);
+  --display:'Hahmlet','AppleMyungjo','Nanum Myeongjo',serif;
+  --body:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0d0c0a; --paper:#1e1d19; --sheet:#282621; --ink:#ece9df; --ink2:#d3cfc1; --muted:#a29d8c; --line:#3d3a33;
+    --rice:#a8bf90; --rice-deep:#cfe0bb; --rice-tint:#2f3a27; --leaf:#3c542c; --leaf-2:#212c1a;
+    --soy:#d5a875; --soy-deep:#ecc9a0; --soy-tint:#3e3021;
+    --plum:#e0a3ab; --plum-deep:#f0c4ca; --plum-tint:#3e2a2d;
+    --mist:#a9b6c2; --mist-deep:#cbd5de; --mist-tint:#2c3238;
+    --on-acc:#1e1d19; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0d0c0a; --paper:#1e1d19; --sheet:#282621; --ink:#ece9df; --ink2:#d3cfc1; --muted:#a29d8c; --line:#3d3a33;
+  --rice:#a8bf90; --rice-deep:#cfe0bb; --rice-tint:#2f3a27; --leaf:#3c542c; --leaf-2:#212c1a;
+  --soy:#d5a875; --soy-deep:#ecc9a0; --soy-tint:#3e3021;
+  --plum:#e0a3ab; --plum-deep:#f0c4ca; --plum-tint:#3e2a2d;
+  --mist:#a9b6c2; --mist-deep:#cbd5de; --mist-tint:#2c3238;
+  --on-acc:#1e1d19; color-scheme:dark;
+}
+.g-ok{--acc:var(--rice);--acc-deep:var(--rice-deep);--tint:var(--rice-tint)}
+.g-care{--acc:var(--soy);--acc-deep:var(--soy-deep);--tint:var(--soy-tint)}
+.g-miss{--acc:var(--plum);--acc-deep:var(--plum-deep);--tint:var(--plum-tint)}
+.g-unk{--acc:var(--mist);--acc-deep:var(--mist-deep);--tint:var(--mist-tint)}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);display:grid;place-items:center;min-height:100dvh;overflow:hidden;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:break-word}
+.stage{position:relative;width:min(100vw,calc(100dvh * 16 / 9));aspect-ratio:16/9;background:var(--paper);container-type:inline-size;overflow:hidden;user-select:none}
+.progress{position:absolute;left:0;top:0;height:.32cqw;width:100%;background:var(--rice);transform-origin:left;transform:scaleX(calc(1/14));transition:transform .5s cubic-bezier(.2,.7,.2,1),background .3s;z-index:3}
+.slide{position:absolute;inset:0;padding:4.6cqw 6.2cqw 6.6cqw;display:none}
+.slide.is-active{display:block}
+
+/* 글자 */
+.eyebrow{font:600 1.15cqw/1 var(--body);letter-spacing:.06em;color:var(--rice);margin:0 0 1.6cqw}
+.tag{display:inline-flex;align-items:center;gap:.7cqw;font:700 1.25cqw/1 var(--body);color:var(--acc);background:var(--tint);border-radius:999px;padding:.75cqw 1.25cqw;margin:0 0 2cqw}
+.tag i{width:.75cqw;height:.75cqw;border-radius:50%;background:currentColor}
+.title{font:700 3.2cqw/1.3 var(--display);margin:0;letter-spacing:-.012em;text-wrap:balance}
+.big{font:800 var(--bs,9.4cqw)/1 var(--display);color:var(--acc-deep);margin:0;font-variant-numeric:tabular-nums lining-nums;letter-spacing:-.025em;display:flex;align-items:baseline;gap:.08em;white-space:nowrap}
+.big .n,.second .n{display:inline-block;text-align:right}
+.big .s{font-weight:600;color:var(--acc);margin:0 .06em}
+.big .unit{font:600 2.7cqw/1 var(--body);color:var(--ink2);letter-spacing:0;margin:0 .35em 0 .12em}
+.big .unit:last-child{margin-right:0}
+.pre{font:600 1.75cqw/1.3 var(--body);color:var(--ink2);margin:0 0 .6cqw}
+.cap{font:500 1.75cqw/1.5 var(--body);color:var(--ink2);margin:1.4cqw 0 0;text-wrap:pretty}
+.lead{font:400 1.7cqw/1.75 var(--body);color:var(--ink2);margin:0;max-width:74cqw;text-wrap:pretty}
+.note{font:400 1.1cqw/1.7 var(--body);color:var(--muted);margin:0;max-width:56cqw}
+.sf{position:absolute;left:6.2cqw;right:6.2cqw;bottom:2.4cqw;display:flex;justify-content:space-between;gap:3cqw;font:400 1cqw/1.4 var(--body);color:var(--muted);border-top:1px solid var(--line);padding-top:1.05cqw}
+.sf b{font-weight:600;color:var(--acc)}
+.sf span:last-child{text-align:right}
+
+/* 1. 표지 */
+.cover{display:grid;grid-template-columns:1.3fr .7fr;align-items:center;height:100%;gap:4cqw}
+.cover-title{font:800 8.4cqw/1.08 var(--display);color:var(--rice-deep);margin:0 0 2.6cqw;letter-spacing:-.035em}
+.cover-lead{font:500 2.15cqw/1.55 var(--body);margin:0 0 3cqw;color:var(--ink)}
+.cover-meta{font:500 1.2cqw/1.6 var(--body);color:var(--muted);margin:0}
+.bowl{width:100%;max-width:24cqw;justify-self:end;overflow:visible}
+.bowl .leaf,.bowl .dish{transform-box:fill-box;transform-origin:50% 100%}
+.hint{position:absolute;left:6.2cqw;bottom:2.4cqw;font:400 1cqw var(--body);color:var(--muted);margin:0}
+
+/* 2. 들어가며 */
+.quote{font:700 5.2cqw/1.22 var(--display);margin:1.6cqw 0 2.4cqw;color:var(--rice-deep);letter-spacing:-.02em}
+.groups{list-style:none;margin:3cqw 0 0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:1.4cqw}
+.groups li{background:var(--tint);border-radius:1.2cqw;padding:1.5cqw 1.5cqw 1.6cqw;display:grid;gap:.7cqw;align-content:start}
+.groups b{display:flex;align-items:center;gap:.7cqw;font:700 1.6cqw/1.3 var(--display);color:var(--acc)}
+.groups b i{width:.8cqw;height:.8cqw;border-radius:50%;background:currentColor;flex:none}
+.groups span{font:400 1.2cqw/1.55 var(--body);color:var(--ink2)}
+
+/* 이야기 한 장 — 왼쪽 큰 숫자, 오른쪽 들은 이야기와 확인한 답 */
+.myth{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:4.4cqw;align-items:center;height:calc(100% - 2.6cqw)}
+.second{display:grid;grid-template-columns:auto 1fr;align-items:baseline;gap:1.4cqw;margin-top:2.4cqw;padding-top:2cqw;border-top:1px solid var(--line)}
+.second .sn{margin:0;font:800 4.6cqw/1 var(--display);color:var(--acc);font-variant-numeric:tabular-nums lining-nums;white-space:nowrap}
+.second .unit{font:600 1.9cqw/1 var(--body);color:var(--ink2);margin:0 .3em 0 .15em}
+.second .unit:last-child{margin-right:0}
+.second .s{font-weight:600;margin:0 .05em}
+.second .st{margin:0;font:500 1.45cqw/1.5 var(--body);color:var(--ink2);text-wrap:pretty}
+.right{display:grid;gap:1.4cqw;align-content:center}
+.story{background:var(--sheet);border:1px solid var(--line);border-radius:1.4cqw;padding:2.2cqw 2.4cqw 2.3cqw;display:grid;gap:.5cqw}
+.lbl{margin:0;font:600 1cqw/1 var(--body);letter-spacing:.08em;color:var(--muted)}
+.lbl + .heard,.lbl + .answer{margin-bottom:1.1cqw}
+.heard{margin:0;font:600 2.15cqw/1.45 var(--display);color:var(--ink);text-wrap:pretty}
+.answer{margin:0;font:500 1.75cqw/1.5 var(--body);color:var(--ink);text-wrap:pretty}
+.answer b{font-weight:700;color:var(--acc)}
+.detail{margin:0;font:400 1.3cqw/1.65 var(--body);color:var(--ink2);text-wrap:pretty}
+.aside{border-left:.35cqw solid var(--acc);padding:.4cqw 0 .4cqw 1.6cqw}
+.aside p{margin:0;font:400 1.2cqw/1.6 var(--body);color:var(--ink2);text-wrap:pretty}
+.aside .aside-t{font:700 1.3cqw/1.45 var(--body);color:var(--ink);margin-bottom:.4cqw}
+
+/* 둘을 나란히 */
+.pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:3cqw;margin-top:1.6cqw}
+.pcol{display:grid;align-content:start;gap:0}
+.pname{margin:0 0 .6cqw;font:700 1.5cqw/1 var(--body);color:var(--acc)}
+.pcol .cap{font-size:1.3cqw;margin:.7cqw 0 1.2cqw}
+.pcol .story{padding:1.5cqw 1.9cqw 1.6cqw;gap:.35cqw}
+.pcol .lbl + .heard,.pcol .lbl + .answer{margin-bottom:.8cqw}
+.g-pair .tag{margin-bottom:1.2cqw}
+.g-pair .title{font-size:2.8cqw}
+.pcol .heard{font-size:1.6cqw}
+.pcol .answer{font-size:1.55cqw}
+.pcol .detail{font-size:1.18cqw;line-height:1.6}
+
+/* 아직 모름 */
+.bigtext{font:800 7cqw/1.1 var(--display);color:var(--acc-deep);margin:0;letter-spacing:-.03em}
+
+/* 확인한 방법 */
+.points{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.points li{display:grid;gap:.5cqw;padding:1.9cqw 0;border-bottom:1px solid var(--line)}
+.points b{font:700 2.2cqw/1.3 var(--display);color:var(--rice-deep)}
+.points span{font:400 1.5cqw/1.55 var(--body);color:var(--ink2)}
+
+/* 하지 않는 것 */
+.center{display:flex;flex-direction:column;justify-content:center;height:calc(100% - 2.6cqw)}
+.creed{font:800 4.6cqw/1.2 var(--display);color:var(--rice-deep);margin:0 0 4.4cqw;letter-spacing:-.025em;text-wrap:balance}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:3cqw}
+.three div{border-top:.4cqw solid var(--rice);padding-top:1.8cqw}
+.three b{display:block;font:700 2.3cqw/1.3 var(--display);color:var(--ink);margin-bottom:1cqw}
+.three p{font:400 1.5cqw/1.6 var(--body);color:var(--ink2);margin:0}
+
+/* 마무리 */
+.close{display:grid;grid-template-columns:1.35fr .65fr;gap:5cqw;align-items:center;height:100%}
+.url{font:800 6.6cqw/1 var(--display);color:var(--rice-deep);margin:0 0 2.8cqw;letter-spacing:-.03em}
+.close ul{list-style:none;margin:0 0 2.8cqw;padding:0;display:grid;gap:1.1cqw}
+.close li{font:500 1.6cqw/1.45 var(--body);color:var(--ink);display:flex;gap:1cqw}
+.close li::before{content:"";flex:none;width:.8cqw;height:.8cqw;border-radius:50%;background:var(--rice);margin-top:.75cqw}
+.qr{background:#faf9f4;border-radius:1.4cqw;padding:1.6cqw;justify-self:end;width:21cqw;box-shadow:0 0 0 1px var(--line)}
+.qr img{width:100%;height:auto;display:block;image-rendering:pixelated}
+.qr p{font:600 1.1cqw var(--body);color:#48453c;text-align:center;margin:1cqw 0 0}
+
+/* 조작 */
+.hud{position:absolute;right:1.6cqw;top:1.4cqw;display:flex;align-items:center;gap:.5cqw;z-index:4;opacity:.55;transition:opacity .25s}
+.hud:hover,.hud:focus-within{opacity:1}
+.hud button{font:500 1cqw var(--body);color:var(--ink2);background:transparent;border:1px solid var(--line);border-radius:.6cqw;padding:.45cqw .8cqw;cursor:pointer}
+.hud button:hover{border-color:var(--rice);color:var(--rice-deep)}
+.hud button:focus-visible{outline:2px solid var(--rice);outline-offset:2px}
+.count{font:500 1cqw var(--body);color:var(--muted);font-variant-numeric:tabular-nums;padding:0 .4cqw}
+.rotate{display:none}
+@media (orientation:portrait) and (max-width:700px){
+  .rotate{display:block;position:fixed;top:12px;left:50%;transform:translateX(-50%);background:var(--rice);color:var(--on-acc);font:500 12px/1 var(--body);padding:8px 12px;border-radius:999px;z-index:9;margin:0}
+}
+
+/* 움직임 — 쉬는 모습이 기본이고, 켜진 장에서만 움직인다 */
+@media (prefers-reduced-motion:no-preference){
+  .slide.is-active{animation:enter .55s cubic-bezier(.2,.7,.2,1) both}
+  .slide.is-active .rise{animation:rise .75s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--d,0) * 110ms + 120ms)}
+  .slide.is-active .pop{animation:pop .6s cubic-bezier(.3,1.45,.5,1) both;animation-delay:calc(var(--d,0) * 120ms + 220ms)}
+  .slide.is-active .dish{animation:pop .8s cubic-bezier(.3,1.35,.5,1) both .2s}
+  .slide.is-active .leaf{animation:sprout 1.5s cubic-bezier(.2,.7,.2,1) both .6s}
+  .slide.is-active .leaf.b{animation-delay:.85s}
+}
+@keyframes enter{from{opacity:0;transform:translateX(1.2cqw)}to{opacity:1;transform:none}}
+@keyframes rise{from{opacity:0;transform:translateY(1.6cqw)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.86)}to{opacity:1;transform:none}}
+@keyframes sprout{from{opacity:0;transform:translateY(22%) scale(.7)}to{opacity:1;transform:none}}
+
+/* 인쇄하면 한 장에 한 쪽씩 — 나눠 드릴 자료로도 쓴다 */
+@media print{
+  @page{size:297mm 167.0625mm;margin:0}
+  html,body{height:auto}
+  body{display:block;overflow:visible;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .stage{width:100%;aspect-ratio:auto;overflow:visible;background:none}
+  .slide{display:block!important;position:relative;height:56.25cqw;overflow:hidden;background:var(--paper);break-after:page;page-break-after:always;animation:none!important}
+  .slide:last-of-type{break-after:auto;page-break-after:auto}
+  .slide *{animation:none!important}
+  .hud,.progress,.hint,.rotate{display:none}
+}
+</style>
+</head>
+<body>
+<p class="rotate">가로로 돌리시면 크게 보입니다</p>
+<main class="stage" id="stage" aria-roledescription="발표" aria-live="polite">
+  <div class="progress" id="progress"></div>
+  <nav class="hud" aria-label="넘기기">
+    <button type="button" id="prev" aria-label="앞 장">←</button>
+    <span class="count" id="count">01 / 14</span>
+    <button type="button" id="next" aria-label="다음 장">→</button>
+    <button type="button" id="full" aria-label="전체 화면">전체 화면</button>
+  </nav>
+
+  <section class="slide is-active" aria-label="표지">
+    <div class="cover">
+      <div>
+        <p class="eyebrow rise" style="--d:0">환자·가족과 함께 보는 자료 · 2026년 10월</p>
+        <h1 class="cover-title rise" style="--d:1">그 이야기,<br>정말일까요?</h1>
+        <p class="cover-lead rise" style="--d:2">암 치료 중 음식에 관해 전해 내려오는 이야기를<br>논문 원문으로 하나씩 확인했습니다.</p>
+        <p class="cover-meta rise" style="--d:3">하루차림 · harucharim.com · 방사선종양학과 전문의가 만들었습니다</p>
+      </div>
+      <svg class="bowl" viewBox="0 0 512 512" role="img" aria-label="하루차림 표시 — 밥그릇 위로 잎 두 장">
+        <rect width="512" height="512" rx="102" fill="var(--rice)"/>
+        <g class="dish">
+          <rect x="112" y="227" width="288" height="24" rx="12" fill="var(--sheet)"/>
+          <path d="M112 299a144 164 0 0 0 288 0z" fill="var(--sheet)"/>
+        </g>
+        <ellipse class="leaf" cx="227.5" cy="175.5" rx="37.5" ry="52" fill="var(--leaf)"/>
+        <ellipse class="leaf b" cx="284" cy="163.5" rx="37.5" ry="52" fill="var(--leaf-2)"/>
+      </svg>
+    </div>
+    <p class="hint">→ 키 · 스페이스 · 화면 오른쪽을 누르면 넘어갑니다 &nbsp;·&nbsp; F 전체 화면</p>
+  </section>
+  <section class="slide" aria-label="들어가며">
+    <p class="eyebrow rise" style="--d:0">들어가며</p>
+    <h2 class="quote rise" style="--d:1">진료 시간에 다 여쭤보기<br>어려웠던 이야기</h2>
+    <p class="lead rise" style="--d:2">암 치료를 시작하면 음식 이야기가 쏟아집니다. 같은 병실 환자분께, 먼저 치료받은 친척에게, 인터넷 카페에서. 대부분 걱정과 정성에서 나온 말입니다. 그 이야기들을 하나씩 확인해 보니, 답은 네 갈래였습니다.</p>
+    <ol class="groups"><li class="g-ok pop" style="--d:3"><b><i></i>끊지 않으셔도 됩니다</b><span>걱정 때문에 피해 오셨지만, 확인해 보니 그럴 필요가 없던 것들</span></li><li class="g-care pop" style="--d:4"><b><i></i>조심하실 것</b><span>“몸에 좋다니까”, “조금은 괜찮겠지” 하기 쉬운 것들</span></li><li class="g-miss pop" style="--d:5"><b><i></i>몰라서 놓치기 쉬운 것</b><span>아무도 이야기해 주지 않아서 모르고 지나가기 쉬운 것들</span></li><li class="g-unk pop" style="--d:6"><b><i></i>아직 모르는 것</b><span>해롭다는 뜻이 아니라, 확인할 연구가 없다는 뜻</span></li></ol>
+    <footer class="sf"><span><b>하루차림</b></span><span>확인해 보니 이랬습니다 — 하나씩 보겠습니다</span></footer>
+  </section>
+  <section class="slide g-ok" aria-label="두부·된장·두유">
+    <div class="myth">
+      <div class="lead-num">
+        <p class="tag rise" style="--d:0"><i></i>끊지 않으셔도 됩니다</p>
+        
+        <p class="big" style="--bs:9.40cqw"><span class="n" data-to="9514" data-dec="0">9,514</span><span class="unit">명</span></p>
+        <p class="cap rise" style="--d:2">중국·미국 유방암 환자를 함께 분석한 연구</p>
+        <div class="second rise" style="--d:3"><p class="sn"><span class="n" data-to="25" data-dec="0">25</span><span class="unit">%</span></p><p class="st">재발이 낮은 쪽 — 콩 이소플라본을 하루 10 mg 이상 드신 분들</p></div>
+      </div>
+      <div class="right"><div class="story rise" style="--d:2"><p class="lbl">들은 이야기</p><p class="heard">“유방암이면 두부·된장·두유를 끊어야 한대요.”</p><p class="lbl">확인해 보니</p><p class="answer"><b>끊지 않으셔도 됩니다.</b> 사람을 대상으로 한 연구는 오히려 반대 방향을 가리킵니다.</p><p class="detail">타목시펜을 드시는 분도, 안 드시는 분도 같은 방향이었습니다(상하이 5,042명 연구). 다만 이소플라본 농축 보충제는 음식과 따로 봅니다.</p></div></div>
+    </div>
+    <footer class="sf"><span><b>끊지 않으셔도 됩니다</b></span><span>중국·미국 유방암 환자 9,514명을 함께 분석한 연구 · 상하이 5,042명 연구</span></footer>
+  </section>
+  <section class="slide g-ok" aria-label="생과일·생채소">
+    <div class="myth">
+      <div class="lead-num">
+        <p class="tag rise" style="--d:0"><i></i>끊지 않으셔도 됩니다</p>
+        
+        <p class="big" style="--bs:7.09cqw"><span class="n" data-to="6" data-dec="0">6</span><span class="unit">편</span><span class="s">·</span><span class="n" data-to="1114" data-dec="0">1,114</span><span class="unit">명</span></p>
+        <p class="cap rise" style="--d:2">을 모은 분석에서, 이른바 ‘호중구감소증 식단’이 감염을 줄인다는 근거는 확인되지 않았습니다</p>
+        <div class="second rise" style="--d:3"><p class="sn"><span class="s">2022</span><span class="unit">년</span></p><p class="st">미국임상종양학회도 이 해의 지침에서 권하지 않았습니다</p></div>
+      </div>
+      <div class="right"><div class="story rise" style="--d:2"><p class="lbl">들은 이야기</p><p class="heard">“항암 중에는 생과일·생채소를 먹으면 안 된대요.”</p><p class="lbl">확인해 보니</p><p class="answer"><b>흐르는 물에 잘 씻어 드시면 됩니다.</b> 새싹채소만은 익혀 드세요.</p><p class="detail">숙주·알팔파·브로콜리 새싹은 씻어도 세균이 남을 수 있어 데치거나 볶아 드세요. 담당 의료진이 따로 정해 주신 기준(예: 조혈모세포이식 병동)이 있으면 그것을 먼저 따르세요.</p></div></div>
+    </div>
+    <footer class="sf"><span><b>끊지 않으셔도 됩니다</b></span><span>6편·1,114명을 모은 분석 · 미국임상종양학회 2022년 지침</span></footer>
+  </section>
+  <section class="slide g-ok" aria-label="단백질">
+    <div class="myth">
+      <div class="lead-num">
+        <p class="tag rise" style="--d:0"><i></i>끊지 않으셔도 됩니다</p>
+        <p class="pre rise" style="--d:1">체중 1 kg당 단백질</p>
+        <p class="big" style="--bs:9.40cqw"><span class="n" data-to="1" data-dec="0">1</span><span class="s">~</span><span class="n" data-to="1.5" data-dec="1">1.5</span><span class="unit">g</span></p>
+        <p class="cap rise" style="--d:2">유럽임상영양대사학회가 암 환자에게 권하는 양입니다</p>
+        <div class="second rise" style="--d:3"><p class="sn"><span class="n" data-to="60" data-dec="0">60</span><span class="s">~</span><span class="n" data-to="90" data-dec="0">90</span><span class="unit">g</span></p><p class="st">체중 60 kg이면 하루 이만큼입니다</p></div>
+      </div>
+      <div class="right"><div class="story rise" style="--d:2"><p class="lbl">들은 이야기</p><p class="heard">“암 환자는 고기를 줄여야 한대요. 간이 나쁘면 더더욱.”</p><p class="lbl">확인해 보니</p><p class="answer"><b>단백질은 오히려 평소보다 넉넉히 드셔야 합니다.</b></p><p class="detail">간경변이 있어도 유럽간학회는 1.2~1.5 g을 권합니다. 줄이실 것은 햄·소시지 같은 가공육이지 단백질 자체가 아닙니다.</p></div></div>
+    </div>
+    <footer class="sf"><span><b>끊지 않으셔도 됩니다</b></span><span>유럽임상영양대사학회(ESPEN) · 유럽간학회(EASL)</span></footer>
+  </section>
+  <section class="slide g-ok g-pair" aria-label="석류·홍삼">
+    <p class="tag rise" style="--d:0"><i></i>끊지 않으셔도 됩니다</p>
+    <h2 class="title rise" style="--d:1">피하실 이유도, 일부러 챙기실 이유도 없습니다</h2>
+    <div class="pair">
+      <div class="pcol rise" style="--d:2">
+        <p class="pname">석류</p>
+        <p class="big" style="--bs:6.20cqw"><span class="n" data-to="64" data-dec="0">64</span><span class="unit">명</span><span class="s">·</span><span class="n" data-to="3" data-dec="0">3</span><span class="unit">주</span></p>
+        <p class="cap">폐경 후 여성 64명이 석류즙을 3주 마신 연구 — 사람에서 본 것은 이것 하나뿐</p>
+        <div class="story">
+          <p class="lbl">들은 이야기</p><p class="heard">“석류는 여성호르몬 과일이라 유방암에 안 좋대요.”</p>
+          <p class="lbl">확인해 보니</p><p class="answer"><b>피하지 않으셔도 됩니다.</b></p>
+          <p class="detail">혈중 호르몬은 사과즙을 마신 분들과 다르지 않았습니다. 반대로 유방암에 좋다는 사람 연구도 아직 없습니다. 과일로 드시는 것은 괜찮고, 주스는 당이 많으니 양을 정해 두세요.</p>
+        </div>
+      </div>
+      <div class="pcol rise" style="--d:4">
+        <p class="pname">홍삼</p>
+        <p class="big" style="--bs:6.20cqw"><span class="n" data-to="4149" data-dec="0">4,149</span><span class="unit">명</span></p>
+        <p class="cap">상하이 유방암 생존자를 3년간 본 연구</p>
+        <div class="story">
+          <p class="lbl">들은 이야기</p><p class="heard">“홍삼은 유방암에 나쁘대요.” / “꼭 챙겨 먹어야 한대요.”</p>
+          <p class="lbl">확인해 보니</p><p class="answer"><b>둘 다 근거가 없습니다.</b></p>
+          <p class="detail">인삼을 꾸준히 드신 분과 아닌 분의 삶의 질은 다르지 않았고, 호르몬 수용체에 따라 달라지지도 않았습니다.</p>
+        </div>
+      </div></div>
+    <footer class="sf"><span><b>끊지 않으셔도 됩니다</b></span><span>와파린 같은 약을 드신다면 석류도 홍삼도 담당 의사에게 알려 주세요</span></footer>
+  </section>
+  <section class="slide g-care" aria-label="항산화 영양제">
+    <div class="myth">
+      <div class="lead-num">
+        <p class="tag rise" style="--d:0"><i></i>조심하실 것</p>
+        
+        <p class="big" style="--bs:9.40cqw"><span class="n" data-to="540" data-dec="0">540</span><span class="unit">명</span></p>
+        <p class="cap rise" style="--d:2">방사선치료를 받은 두경부암 환자 시험</p>
+        <div class="second rise" style="--d:3"><p class="sn"><span class="n" data-to="2.9" data-dec="1">2.9</span><span class="unit">배</span></p><p class="st">치료 첫날부터 비타민 E를 보충한 분들은, 보충하는 동안 이차암이 이만큼 많았습니다</p></div>
+      </div>
+      <div class="right"><div class="story rise" style="--d:2"><p class="lbl">들은 이야기</p><p class="heard">“몸에 좋은 항산화 영양제는 많이 먹을수록 좋대요.”</p><p class="lbl">확인해 보니</p><p class="answer"><b>치료 중 고용량 항산화 보충제는 권하지 않습니다.</b> 음식으로 드시는 채소·과일은 다른 이야기입니다.</p><p class="detail">방사선치료는 활성산소로 암세포를 공격합니다.</p></div></div>
+    </div>
+    <footer class="sf"><span><b>조심하실 것</b></span><span>두경부암 환자 540명 시험 · 비타민 E 보충</span></footer>
+  </section>
+  <section class="slide g-care" aria-label="자몽">
+    <div class="myth">
+      <div class="lead-num">
+        <p class="tag rise" style="--d:0"><i></i>조심하실 것</p>
+        
+        <p class="big" style="--bs:9.40cqw"><span class="n" data-to="24" data-dec="0">24</span><span class="unit">시간</span></p>
+        <p class="cap rise" style="--d:2">자몽을 먹고 이만큼 지나도</p>
+        <div class="second rise" style="--d:3"><p class="sn"><span class="n" data-to="4" data-dec="0">4</span><span class="unit">분의</span><span class="n" data-to="1" data-dec="0">1</span></p><p class="st">효과의 이만큼이 남습니다</p></div>
+      </div>
+      <div class="right"><div class="story rise" style="--d:2"><p class="lbl">들은 이야기</p><p class="heard">“자몽은 약 먹는 시간만 피해서 먹으면 된대요.”</p><p class="lbl">확인해 보니</p><p class="answer"><b>시간을 띄워도 해결되지 않습니다.</b> 문제는 드시는 먹는 약입니다.</p><p class="detail">라임·포멜로도 같고, 네이블·발렌시아 같은 보통 오렌지는 괜찮습니다. 먹는 항암제·표적치료제·항호르몬제에 따라 판단이 다르니, 앱에 약 이름을 넣어 확인해 보세요.</p></div></div>
+    </div>
+    <footer class="sf"><span><b>조심하실 것</b></span><span>자몽 · 라임 · 포멜로</span></footer>
+  </section>
+  <section class="slide g-care" aria-label="비타민 D">
+    <div class="myth">
+      <div class="lead-num">
+        <p class="tag rise" style="--d:0"><i></i>조심하실 것</p>
+        
+        <p class="big" style="--bs:8.92cqw"><span class="n" data-to="25871" data-dec="0">25,871</span><span class="unit">명</span></p>
+        <p class="cap rise" style="--d:2">일반인 예방 연구(VITAL)에서 암 발생이 줄지 않았습니다</p>
+        <div class="second rise" style="--d:3"><p class="sn"><span class="n" data-to="100" data-dec="0">100</span><span class="unit">µg</span></p><p class="st">하루 상한입니다(4,000 IU)</p></div>
+      </div>
+      <div class="right"><div class="story rise" style="--d:2"><p class="lbl">들은 이야기</p><p class="heard">“비타민 D는 많이 먹을수록 좋대요.”</p><p class="lbl">확인해 보니</p><p class="answer"><b>결핍이 있으면 채우는 것이고,</b> 항암 효과를 기대한 고용량은 확인되지 않았습니다.</p></div><div class="aside rise" style="--d:4"><p class="aside-t">하나 더 — “햄·소시지가 담배랑 같은 1군 발암물질이래요.”</p><p>줄이시는 것이 맞지만, 담배만큼 위험하다는 뜻은 아닙니다. 국제암연구소의 1군은 “근거가 얼마나 확실한가”를 말하는 등급입니다. 완전히 끊기 어렵다면 주 1회 이하, 한 번에 조금으로 줄여 보세요.</p></div></div>
+    </div>
+    <footer class="sf"><span><b>조심하실 것</b></span><span>VITAL 25,871명 · 국제암연구소(IARC) 분류</span></footer>
+  </section>
+  <section class="slide g-miss" aria-label="위 수술 뒤">
+    <div class="myth">
+      <div class="lead-num">
+        <p class="tag rise" style="--d:0"><i></i>몰라서 놓치기 쉬운 것</p>
+        <p class="pre rise" style="--d:1">위 전절제 뒤 비타민 B12, 하루</p>
+        <p class="big" style="--bs:6.04cqw"><span class="n" data-to="500" data-dec="0">500</span><span class="s">~</span><span class="n" data-to="1500" data-dec="0">1,500</span><span class="unit">µg</span></p>
+        <p class="cap rise" style="--d:2">을 먹는 방법도 연구되어 있습니다. 주사가 흔히 쓰입니다</p>
+        
+      </div>
+      <div class="right"><div class="story rise" style="--d:2"><p class="lbl">들은 이야기</p><p class="heard">“위를 다 떼어 냈는데 종합비타민이면 충분하겠지요?”</p><p class="lbl">확인해 보니</p><p class="answer"><b>비타민 B12는 평생, 따로 챙기셔야 합니다.</b></p><p class="detail">위 전절제 뒤에는 B12 흡수에 필요한 물질이 없어집니다. 종합비타민은 제품마다 양이 달라, 방법과 용량은 담당 의료진과 정하세요.</p></div><div class="aside rise" style="--d:4"><p class="aside-t">하나 더 — “위 수술 뒤에 곶감 정도는 괜찮겠지요?”</p><p>감·곶감은 조심하세요. 감의 탄닌이 위액과 만나면 섬유가 엉겨 덩어리(위석)가 될 수 있습니다. 위절제 뒤에는 위의 움직임이 줄어 더 잘 생깁니다.</p></div></div>
+    </div>
+    <footer class="sf"><span><b>몰라서 놓치기 쉬운 것</b></span><span>위 수술을 받으셨다면</span></footer>
+  </section>
+  <section class="slide g-unk" aria-label="칡즙·로열젤리">
+    <div class="myth">
+      <div class="lead-num">
+        <p class="tag rise" style="--d:0"><i></i>아직 모르는 것</p>
+        <p class="bigtext rise" style="--d:1">아직 모릅니다</p>
+        <p class="cap rise" style="--d:2">모르는 것은 모른다고 적었습니다. 해롭다는 뜻이 아니라, 확인할 연구가 없다는 뜻입니다.</p>
+      </div>
+      <div class="right"><div class="story rise" style="--d:2"><p class="lbl">들은 이야기</p><p class="heard">“칡즙이 갱년기에 좋대요.” / “로열젤리가 기운 나게 해 준대요.”</p><p class="lbl">확인해 보니</p><p class="answer"><b>호르몬 양성 유방암이라면 ‘주의’로 둡니다.</b> 해롭다는 근거가 있어서가 아니라 근거가 없어서입니다.</p><p class="detail">칡뿌리는 식물성 에스트로겐이 많지만 유방암 환자가 먹어 본 연구는 찾지 못했습니다. 로열젤리는 동물 실험에서 에스트로겐과 비슷한 작용이 보고되었고, 벌·꽃가루 알레르기나 천식이 있으시면 드시지 마세요. 칡 전분으로 만든 냉면·묵은 해당하지 않습니다.</p></div></div>
+    </div>
+    <footer class="sf"><span><b>아직 모르는 것</b></span><span>칡뿌리 · 로열젤리</span></footer>
+  </section>
+  <section class="slide g-ok" aria-label="어떻게 확인했나요">
+    <div class="myth">
+      <div class="lead-num">
+        <p class="eyebrow rise" style="--d:0">어떻게 확인했나요</p>
+        <p class="big" style="--bs:12cqw"><span class="n" data-to="168" data-dec="0">168</span><span class="unit">종</span></p>
+        <p class="cap rise" style="--d:1">의 참고 문헌을 요약이 아니라 원문으로 찾아, 앱의 문장과 한 줄씩 맞춰 보았습니다</p>
+      </div>
+      <ul class="points"><li class="rise" style="--d:2"><b>만든 사람</b><span>방사선종양학과 전문의가 만들었습니다.</span></li><li class="rise" style="--d:3"><b>근거 등급</b><span>문장마다 근거가 얼마나 단단한지(A·B·C) 등급을 적었습니다.</span></li><li class="rise" style="--d:4"><b>“아직 모릅니다”</b><span>모르는 것은 모른다고 적었습니다.</span></li></ul>
+    </div>
+    <footer class="sf"><span><b>하루차림</b></span><span>이 자료의 숫자는 2026년 10월 15일 앱 화면의 문장과 같습니다</span></footer>
+  </section>
+  <section class="slide" aria-label="하루차림이 하지 않는 것">
+    <div class="center">
+      <p class="eyebrow rise" style="--d:0">하루차림이 하지 않는 것</p>
+      <h2 class="creed rise" style="--d:1">하지 않는 것도 분명히 말씀드립니다</h2>
+      <div class="three"><div class="rise" style="--d:2"><b>치료를 대신하지 않습니다</b><p>모든 안내는 “담당 의료진과 상의하세요”로 끝납니다.</p></div><div class="rise" style="--d:3"><b>아무것도 팔지 않습니다</b><p>건강식품 광고도, 제휴 판매도 없습니다.</p></div><div class="rise" style="--d:4"><b>기록은 기기 안에</b><p>입력하신 기록은 기기 안에 저장됩니다.</p></div></div>
+    </div>
+    <footer class="sf"><span><b>하루차림</b></span><span>하루차림은 의료기기가 아니며 진단·치료를 목적으로 하지 않습니다</span></footer>
+  </section>
+  <section class="slide" aria-label="마무리">
+    <div class="close">
+      <div>
+        <p class="eyebrow rise" style="--d:0">휴대폰 카메라로 찍으시면 바로 열립니다</p>
+        <p class="url rise" style="--d:1">harucharim.com</p>
+        <ul><li class="rise" style="--d:2">암종·치료 단계·드시는 약에 맞춰 하루 세 끼 한식 상차림을 추천합니다</li><li class="rise" style="--d:3">유방·위·대장·폐·간·전립선·췌장·식도·두경부·부인암</li><li class="rise" style="--d:4">방사선종양학과 전문의가 만든 무료 앱 · 판매 없음</li></ul>
+        <p class="note rise" style="--d:6">이 자료는 일반 정보입니다. 개인의 치료와 식사는 담당 의료진과 정하십시오.</p>
+      </div>
+      <div class="qr pop" style="--d:3"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAdAAAAHQCAIAAACeP6xXAAAIYklEQVR4nO3csW1jORhG0dHCrWziBrb/cBpQsm0osaPtYAECw+uf4jkFSM/U8wWj7/H99foFwH5/Bd8BgOACdAQXICK4ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEiH7u/4POfv3d/xVWev/89+vfa/fy7/97Tn5+f/X3dcAEiggsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4ABHBBXiXPdxV0/ZGT98zPX3f9ra92t3PP+18btsLdsMFiAguQERwASKCCxARXICI4AJEBBcgIrgAEcEFiAguQERwASKCCxARXICI4AJEBBfg1j3c0/cu7Y3+2fOZdp7T9m138//1Z7nhAkQEFyAiuAARwQWICC5ARHABIoILEBFcgIjgAkQEFyAiuAARwQWICC5ARHABIoILEDl+D5f33iedtse66rb9XP6fGy5ARHABIoILEBFcgIjgAkQEFyAiuAARwQWICC5ARHABIoILEBFcgIjgAkQEFyAiuAARe7hvbnVfdXW/9fS9V3u+lNxwASKCCxARXICI4AJEBBcgIrgAEcEFiAguQERwASKCCxARXICI4AJEBBcgIrgAEcEFiBy/hzttX5Wf3c+dtud7+vt5+vNP44YLEBFcgIjgAkQEFyAiuAARwQWICC5ARHABIoILEBFcgIjgAkQEFyAiuAARwQWICC7ArXu4q/uknLU/e/rnr9r9/Kv8f/0sN1yAiOACRAQXICK4ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEij++vV/Vd/IDd+6fT9men7cnufh7O4oYLEBFcgIjgAkQEFyAiuAARwQWICC5ARHABIoILEBFcgIjgAkQEFyAiuAARwQWICC5A5GP3F9gPPet8pp3/tL3dVdOeZ9pe8G7T3mc3XICI4AJEBBcgIrgAEcEFiAguQERwASKCCxARXICI4AJEBBcgIrgAEcEFiAguQERwASKP76/XVfuY05y+9zptb3TV7vOcdj7T3p/dpp2/Gy5ARHABIoILEBFcgIjgAkQEFyAiuAARwQWICC5ARHABIoILEBFcgIjgAkQEFyAiuAC37uHu3oe97fNv25Od9nud/veuuu38V7nhAkQEFyAiuAARwQWICC5ARHABIoILEBFcgIjgAkQEFyAiuAARwQWICC5ARHABIoILEPnY/QXT9ltP3yed9vnT3odp57lq9/mf/jzPYe/zKjdcgIjgAkQEFyAiuAARwQWICC5ARHABIoILEBFcgIjgAkQEFyAiuAARwQWICC5ARHAB3mUP93S79zSn7bGevl98+r7q7ueZ9r7dxg0XICK4ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEiggsQEVyAd9nD3b0fumranumq3Xum085n2vPsdvrvu9vn4Xu+brgAEcEFiAguQERwASKCCxARXICI4AJEBBcgIrgAEcEFiAguQERwASKCCxARXICI4AJEHt9fr61fcPp+5bT90N37p9M+/7bf6/S/d9Vz2J7v7t/LDRcgIrgAEcEFiAguQERwASKCCxARXICI4AJEBBcgIrgAEcEFiAguQERwASKCCxARXIDIx6/LTNtvvW1v9Lbfa/fzT9svXv38z2HPs5sbLkBEcAEiggsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4AJHj93Cn7Wmevtd5+vPvfp7de7unn+e09+c5bB/ZDRcgIrgAEcEFiAguQERwASKCCxARXICI4AJEBBcgIrgAEcEFiAguQERwASKCCxARXIDI4/vrVX0XP2Davuq0Pdnbnue255/GDRcgIrgAEcEFiAguQERwASKCCxARXICI4AJEBBcgIrgAEcEFiAguQERwASKCCxARXIDIx217rKdb3Rudtvc67fNPZ6/2rPNxwwWICC5ARHABIoILEBFcgIjgAkQEFyAiuAARwQWICC5ARHABIoILEBFcgIjgAkQEF+Bd9nBX2es8y+rvNW2f9Lbzv81z2Pm44QJEBBcgIrgAEcEFiAguQERwASKCCxARXICI4AJEBBcgIrgAEcEFiAguQERwASKCC3DrHu7pe6bT9jdXTdurPX3P9/T3ebfPYX/v7vfZDRcgIrgAEcEFiAguQERwASKCCxARXICI4AJEBBcgIrgAEcEFiAguQERwASKCCxARXIDI8Xu4nLUHOm1/drdpf++0/eLnsPPZzQ0XICK4ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEiggsQEVyAiD1cRu+x3raXevq+7bT353PY++CGCxARXICI4AJEBBcgIrgAEcEFiAguQERwASKCCxARXICI4AJEBBcgIrgAEcEFiAguQOT4Pdxpe6Cnm3ae0/ZVpz3/tL3Xae/PNG64ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEiggsQEVyAiOAC3LqHO23f83TO8yyre7Krv++0/d/nZfu5brgAEcEFiAguQERwASKCCxARXICI4AJEBBcgIrgAEcEFiAguQERwASKCCxARXICI4AJEHt9fr+q7AK7mhgsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4ABHBBYgILsCvxn8oJImotItV1gAAAABJRU5ErkJggg==" alt="harucharim.com 으로 가는 QR 코드"><p>harucharim.com</p></div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  var slides = [].slice.call(document.querySelectorAll('.slide'))
+  var cur = 0
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  var count = document.getElementById('count')
+  var progress = document.getElementById('progress')
+  var pad = function (n) { return (n < 10 ? '0' : '') + n }
+  var accents = { 'g-ok': '--rice', 'g-care': '--soy', 'g-miss': '--plum', 'g-unk': '--mist' }
+
+  /* 숫자는 처음부터 제 값으로 적혀 있다(인쇄·움직임 줄이기에서도 맞게). 켜지는 순간에만 0 에서 세어 올라간다 */
+  function fmt(n, dec) {
+    return Number(n).toLocaleString('ko-KR', { minimumFractionDigits: dec, maximumFractionDigits: dec })
+  }
+  function countUp(el) {
+    var end = Number(el.dataset.to), dec = Number(el.dataset.dec || 0)
+    el.textContent = fmt(end, dec)
+    if (reduce || !end) return
+    el.style.minWidth = el.getBoundingClientRect().width + 'px'
+    var dur = Math.min(2100, 800 + Math.log10(end + 1) * 260)
+    var t0 = performance.now()
+    el.textContent = fmt(0, dec)
+    requestAnimationFrame(function step(t) {
+      var p = Math.min(1, (t - t0) / dur)
+      var e = p === 1 ? 1 : 1 - Math.pow(2, -10 * p)
+      el.textContent = fmt(end * e, dec)
+      if (p < 1) requestAnimationFrame(step)
+    })
+  }
+
+  function paint() {
+    var s = slides[cur], v = '--rice'
+    for (var k in accents) if (s.classList.contains(k)) v = accents[k]
+    progress.style.background = 'var(' + v + ')'
+    count.textContent = pad(cur + 1) + ' / ' + pad(slides.length)
+    progress.style.transform = 'scaleX(' + (cur + 1) / slides.length + ')'
+  }
+
+  function go(i) {
+    i = Math.max(0, Math.min(slides.length - 1, i))
+    if (i === cur && slides[i].classList.contains('is-active')) return
+    slides[cur].classList.remove('is-active')
+    cur = i
+    var s = slides[cur]
+    void s.offsetWidth
+    s.classList.add('is-active')
+    s.querySelectorAll('[data-to]').forEach(countUp)
+    paint()
+    try { history.replaceState(null, '', '#' + (cur + 1)) } catch (e) {}
+  }
+  var next = function () { go(cur + 1) }
+  var prev = function () { go(cur - 1) }
+
+  document.getElementById('next').addEventListener('click', function (e) { e.stopPropagation(); next() })
+  document.getElementById('prev').addEventListener('click', function (e) { e.stopPropagation(); prev() })
+  document.getElementById('full').addEventListener('click', function (e) { e.stopPropagation(); toggleFull() })
+  function toggleFull() {
+    try {
+      if (document.fullscreenElement) document.exitFullscreen()
+      else document.documentElement.requestFullscreen()
+    } catch (e) {}
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.closest && e.target.closest('button') && (e.key === ' ' || e.key === 'Enter')) return
+    if (['ArrowRight', 'PageDown', ' ', 'Enter'].indexOf(e.key) >= 0) { e.preventDefault(); next() }
+    else if (['ArrowLeft', 'PageUp', 'Backspace'].indexOf(e.key) >= 0) { e.preventDefault(); prev() }
+    else if (e.key === 'Home') go(0)
+    else if (e.key === 'End') go(slides.length - 1)
+    else if (e.key === 'f' || e.key === 'F') toggleFull()
+  })
+
+  /* 화면을 누르면 — 왼쪽 삼분의 일은 앞으로, 나머지는 다음으로. 밀어도 넘어간다 */
+  var stage = document.getElementById('stage')
+  var x0 = null
+  stage.addEventListener('pointerdown', function (e) { x0 = e.clientX })
+  stage.addEventListener('pointerup', function (e) {
+    if (e.target.closest('a,button')) return
+    var dx = x0 == null ? 0 : e.clientX - x0
+    x0 = null
+    if (Math.abs(dx) > 40) { dx < 0 ? next() : prev(); return }
+    var r = stage.getBoundingClientRect()
+    ;(e.clientX - r.left) < r.width / 3 ? prev() : next()
+  })
+
+  var start = parseInt((location.hash || '').slice(1), 10)
+  if (start > 1) go(start - 1)
+  else paint()
+})()
+</script>
+
+</body>
+</html>

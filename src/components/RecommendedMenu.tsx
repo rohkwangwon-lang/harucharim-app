@@ -8,6 +8,7 @@ import { CUISINE_CHOICES, MEAL_SLOTS } from '../data/types'
 import { buildDayMenu, fiberGoal, recentFoods, type DayMenu } from '../engine/menu'
 import { foodContribution, personalTarget } from '../engine/nutrition'
 import { CANCER_BY_ID } from '../data/cancers'
+import { emergencySigns } from '../data/emergencySigns'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
 import { REF_BY_ID } from '../data/references'
 import { DayNoteList, EvidenceBadge, HowTo, NutrientPanel, NutrientRow, nutrientState, Section } from './ui'
@@ -49,8 +50,9 @@ export function RecommendedMenu({
   shown?: Record<string, string[]>
   /** 오늘 보여 드린 상을 적어 둔다 */
   onShown?: (day: string, foodIds: string[]) => void
-  onApply: (foodId: string, meal: MealSlot) => void
-  onApplyAll: (items: { foodId: string; meal: MealSlot }[]) => void
+  /** 추천에 적힌 양 그대로 담는다 — 반 공기를 한 공기로 담으면 하루 합계가 화면과 달라진다 */
+  onApply: (foodId: string, meal: MealSlot, servings?: number) => void
+  onApplyAll: (items: { foodId: string; meal: MealSlot; servings: number }[]) => void
   onGoCompose: () => void
   /** 요리 계통을 이 화면에서 바로 고치실 수 있게 한다 */
   onPatch?: (patch: { cuisines: Cuisine[] }) => void
@@ -102,6 +104,14 @@ export function RecommendedMenu({
   const AVOID_TOP = 2
   const [drafts, setDrafts] = useState<DayMenu[]>([])
   const [cursor, setCursor] = useState(0)
+  /*
+   * 눌렀는데 바꿀 것이 없었는가.
+   *
+   * 담으신 것은 그대로 두고 빈자리만 채우므로, 하루를 다 담아 두신 뒤에는
+   * 다시 구성을 눌러도 같은 상이 나온다. 예전에는 그래도 "2번째 안입니다" 라고 적어,
+   * 단추가 고장 난 것처럼 보였다(2026-10-15 사용자 보고). 이제는 바꿀 것이 없다고 밝힌다.
+   */
+  const [stuck, setStuck] = useState(false)
 
   /* 첫 안 — 조건이 바뀌면 이것부터 다시 만들어진다 */
   const first = useMemo(
@@ -119,10 +129,11 @@ export function RecommendedMenu({
     () => menuConditionKey(patient, selected, supplements, day, recent),
     [patient, selected, supplements, day, recent]
   )
-  useEffect(() => { setDrafts([]); setCursor(0) }, [conditionKey])
+  useEffect(() => { setDrafts([]); setCursor(0); setStuck(false) }, [conditionKey])
   useEffect(() => { track('menu_build') }, [])
 
   const menu = cursor === 0 ? first : (drafts[cursor - 1] ?? first)
+  const signs = useMemo(() => emergencySigns(patient), [patient])
   const seed = cursor
 
   /** 열량이 큰 두 가지 — 다음 안에서는 이것을 피한다 */
@@ -142,12 +153,22 @@ export function RecommendedMenu({
     const next = buildDayMenu(selected, patient, {
       supplements: supps, day, nonce: cursor + 1, recent: avoid
     })
+    const plate = (m: DayMenu) =>
+      MEAL_SLOTS.flatMap((slot) => m.meals[slot].map((e) => `${slot}:${e.food.id}:${e.servings}`)).sort().join(',')
+    if (plate(next) === plate(menu)) { setStuck(true); return }
+    setStuck(false)
     setDrafts((d) => [...d, next])
     setCursor(cursor + 1)
   }
 
   const added = MEAL_SLOTS.flatMap((slot) =>
-    menu.meals[slot].filter((e) => e.origin === 'added').map((e) => ({ foodId: e.food.id, meal: slot }))
+    /*
+     * 양까지 함께 넘긴다.
+     *
+     * 예전에는 음식과 끼니만 넘겨 무엇이든 1인분으로 담겼다. 추천에서 반 공기였던 밥이
+     * 내 식단에서는 한 공기가 되어, 목표 안이던 하루가 담는 순간 넘쳤다(2026-10-15 사용자 보고).
+     */
+    menu.meals[slot].filter((e) => e.origin === 'added').map((e) => ({ foodId: e.food.id, meal: slot, servings: e.servings }))
   )
 
   /*
@@ -187,7 +208,11 @@ export function RecommendedMenu({
   const fg = fiberGoal(patient, profile)
   const kcalState = nutrientState(kcal, target.kcal[0], target.kcal[1])
   const proteinState = nutrientState(protein, target.protein[0], target.protein[1], { overOk: !renalCare })
-  const fiberState = nutrientState(fiber, fg.range[0], fg.range[1])
+  /*
+   * 섬유는 저잔사 시기가 아니면 넘어도 괜찮은 쪽이다 — 아래 점검도 "채우고 넘었습니다" 로 적는다.
+   * 위 막대만 '넘음' 으로 칠하면 같은 화면이 두 말을 한다(2026-10-15 사용자 보고).
+   */
+  const fiberState = nutrientState(fiber, fg.range[0], fg.range[1], { overOk: !fg.lowResidue })
   const naState = nutrientState(na, 0, naLimit, { limit: naLimit })
 
   return (
@@ -225,7 +250,7 @@ export function RecommendedMenu({
             {cursor > 0 && (
               <button
                 className="rounded-xl border-2 border-stone-300 bg-white px-3 py-2 text-sm font-bold text-stone-600 transition-colors hover:bg-stone-50"
-                onClick={() => setCursor((c) => Math.max(0, c - 1))}
+                onClick={() => { setStuck(false); setCursor((c) => Math.max(0, c - 1)) }}
               >
                 ‹ 이전 안
               </button>
@@ -255,9 +280,23 @@ export function RecommendedMenu({
           </p>
         )}
 
+        {stuck && (
+          <div className="mt-2.5 rounded-lg border border-warn-200 bg-warn-50 px-3 py-2.5 text-[12px] leading-relaxed text-stone-700" role="status">
+            <p>
+              <strong>바꿀 수 있는 것이 없습니다.</strong> 다시 구성은 담으신 음식({selected.length}가지)은 그대로 두고
+              빈자리만 새로 채웁니다. 지금은 하루가 담으신 것으로 채워져 있어 같은 상이 나옵니다.
+            </p>
+            <p className="mt-1">다른 조합을 보시려면 내 식단에서 바꾸고 싶은 음식을 빼신 뒤 다시 눌러 주세요.</p>
+            <button className="mt-2 rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-xs font-bold text-stone-700" onClick={onGoCompose}>
+              내 식단으로 가기
+            </button>
+          </div>
+        )}
+
         <p className="mt-2.5 text-[11px] leading-relaxed text-brand-800/70">
           {seed === 0 ? (
-            <>마음에 드는 것이 없으면 <strong>다시 구성</strong>을 눌러 보세요. 같은 영양 목표로 다른 조합을 짜 드립니다.</>
+            <>마음에 드는 것이 없으면 <strong>다시 구성</strong>을 눌러 보세요. 같은 영양 목표로 다른 조합을 짜 드립니다.
+              {selected.length > 0 && <> 담으신 {selected.length}가지는 그대로 두고 나머지만 바꿉니다.</>}</>
           ) : (
             /*
               * 몇 번째 안인지 밝힌다.
@@ -269,6 +308,26 @@ export function RecommendedMenu({
             <><strong>{cursor + 1}번째 안</strong>입니다{drafts.length > cursor ? ` (지금까지 ${drafts.length + 1}가지)` : ''}.
               {' '}계속 누르시면 다른 조합을 더 보여 드리고, <strong>이전 안</strong>으로 돌아가실 수도 있습니다.</>
           )}
+        </p>
+      </div>
+
+      {/*
+        * 식단보다 병원이 먼저인 신호, 그리고 알레르기(2026-10-15 안전 검토).
+        * 앱은 아직 알레르기를 묻지 않는다 — 묻기 전까지는 그 사실을 이 자리에서 밝힌다.
+        */}
+      <div className="mb-4 rounded-2xl border border-danger-200 bg-danger-50/50 px-4 py-3 text-[12px] leading-relaxed text-stone-700">
+        {signs.length > 0 && (
+          <>
+            <p className="font-bold text-danger-800">이럴 때는 식단보다 병원이 먼저입니다</p>
+            <ul className="mt-1.5 space-y-1">
+              {signs.map((s) => (
+                <li key={s.id}><strong>{s.when}</strong> — {s.then}</li>
+              ))}
+            </ul>
+          </>
+        )}
+        <p className={signs.length > 0 ? 'mt-2 border-t border-danger-100 pt-2' : ''}>
+          <strong>알레르기가 있는 음식</strong>은 추천에 나와도 빼고 드세요. 하루차림은 아직 알레르기를 따로 거르지 못합니다.
         </p>
       </div>
 
@@ -376,7 +435,7 @@ export function RecommendedMenu({
                           ) : (
                             <button
                               className="shrink-0 rounded-lg bg-brand-600 px-2.5 py-1 text-[11px] font-medium text-white"
-                              onClick={() => onApply(e.food.id, slot)}
+                              onClick={() => onApply(e.food.id, slot, e.servings)}
                             >
                               담기
                             </button>

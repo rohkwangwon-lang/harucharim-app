@@ -30,6 +30,7 @@ import { CALCIUM_FOODS } from './calcium'
 import { CHINESE_MORE, WORLD_FOODS } from './worldMore'
 import { CUISINE_MAP, SEASON_MAP } from './seasonCuisine'
 import { GENERATED_CORE } from './generated'
+import { isCold, isSticky, sodiumTag } from './autoTag'
 
 /**
  * 날로 먹는 과일·채소에 '생채소과일' 을 붙인다.
@@ -62,16 +63,14 @@ function withProduceTag(f: Food): FoodTag[] {
  *
  * 나트륨은 농도가 아니라 드신 총량이 문제다. 실제로 드시는 한 번의 양으로 본다.
  */
-const HIGH_SODIUM_PER_SERVING = 400
 function withSodiumTag(f: Food): FoodTag[] {
-  const na = f.per100.na
-  /* 나트륨 값이 없는 것은 손으로 붙인 판단을 그대로 둔다 */
-  if (na === undefined) return f.tags
-  const perServing = (na * f.serving.g) / 100
-  const high = perServing >= HIGH_SODIUM_PER_SERVING
-  const has = f.tags.includes('고나트륨')
-  if (high === has) return f.tags
-  return high ? [...f.tags, '고나트륨'] : f.tags.filter((t) => t !== '고나트륨')
+  return sodiumTag(f.tags, f.per100.na, f.serving.g)
+}
+
+function withSticky(tags: FoodTag[], name: string): FoodTag[] {
+  let out = !tags.includes('점착성') && isSticky(name) ? [...tags, '점착성' as FoodTag] : tags
+  if (!out.includes('찬음식') && isCold(name)) out = [...out, '찬음식' as FoodTag]
+  return out
 }
 
 export const CURATED_FOODS: Food[] = [
@@ -84,7 +83,8 @@ export const CURATED_FOODS: Food[] = [
 ].map((f) => ({
   // 제철·요리 계통은 seasonCuisine.ts 한 곳에서 관리하고 여기서 붙인다
   ...f,
-  tags: withProduceTag({ ...f, tags: withSodiumTag(f) }),
+  /* 떡·찹쌀은 손으로 등록한 것에도 '점착성' 을 이름으로 붙인다 — 찹쌀밥이 연하곤란 식단에 열나흘 올랐다(2026-10-15 안전 검토) */
+  tags: withSticky(withProduceTag({ ...f, tags: withSodiumTag(f) }), f.name),
   season: f.season ?? SEASON_MAP[f.id],
   cuisine: f.cuisine ?? CUISINE_MAP[f.id] ?? '한식'
 }))
@@ -405,4 +405,23 @@ export function mealIsComplete(foods: Food[]): boolean {
   if (!roles.includes('staple')) return false
 
   return foods.some(isAnchorDish)
+}
+
+/**
+ * 삼키기 어려우신 분께 상에 올리거나 '권장' 을 붙여도 되는 질감인가(2026-10-15 안전 검토).
+ *
+ * '부드러움' 태그는 원래 "헌 입에 덜 아픈 것" 이라는 뜻으로 붙였다. 그래서 단팥빵·족발·냉면·전복·어묵·
+ * 국밥에도 붙어 있다. 삼킴의 기준(IDDSI)으로는 마른 빵, 질기거나 탄력 있는 것, 긴 면,
+ * 부서지는 밤, 단단한 생과일, 국물에 밥을 만 것(섞인 질감)이 모두 위험한 쪽이다.
+ * 같은 앱의 연하곤란 규칙(cond-dys-rough) 이유 글이 이미 그렇게 말한다 — 데이터가 그 말을 따르게 한다.
+ *
+ * 이것은 '부드러움' 을 다시 매기는 일이 아니다(점막염 화면은 그 태그를 그대로 쓴다).
+ * 연하곤란 자리에서만 덧대어 거른다. 어느 단계가 맞는지는 연하 평가로 정한다.
+ */
+const SWALLOW_RISK =
+  /빵|머핀|마카롱|샌드위치|케이크|족발|순대|보쌈|수육|불고기|안심|갈비|잡채|냉면|짜장|국수|당면|쌀국수|우동|소면|메밀|면\(|\(회\)|회$|전복$|^전복\(|어묵|숙주|닭가슴살|닭다리|마\(생\)|^밤|사과|수박|국밥|오크라|양송이|청경채|\(생물\)|샤브|감자탕|만두|완탕|떡|찹쌀|유부초밥|훈제란|콜리플라워|애호박$|^가지$/
+export function swallowSafe(f: Food): boolean {
+  if (!f.tags.includes('부드러움')) return false
+  if (f.tags.some((t) => t === '점착성' || t === '거친질감' || t === '글루텐함유')) return false
+  return !SWALLOW_RISK.test(f.name)
 }

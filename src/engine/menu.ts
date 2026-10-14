@@ -1,6 +1,6 @@
 import type { Cuisine, EvidenceLevel, Food, FoodGroup, MealSlot, NutrientKey, PatientContext, Season, SelectedItem, Supplement } from '../data/types'
 import { MEAL_SLOTS, SNACK_SLOTS, isSnack } from '../data/types'
-import { CURATED_FOODS, FOOD_BY_ID, isAnchorDish, isIngredientOnly, mealIsComplete, mealRole, type MealRole } from '../data/foods'
+import { CURATED_FOODS, FOOD_BY_ID, isAnchorDish, isIngredientOnly, mealIsComplete, mealRole, swallowSafe, type MealRole } from '../data/foods'
 import { INGREDIENT_DISHES } from '../data/foods/ingredientDishes'
 import { CANCER_BY_ID } from '../data/cancers'
 import { activeInteractions, activeRules, evaluateFood, type RuleHit, type InteractionHit } from './rules'
@@ -1886,6 +1886,105 @@ export function buildDayMenu(
   }
 
   /*
+   * 5-2b) 다 차린 상에서 넘친 것만 덜어 낸다.
+   *
+   * 앞 단계들은 상을 갖추려고 조금씩 문을 열어 준다 — 밥은 한 공기, 반찬은 하루 목표의 8 % 까지,
+   * 두 번째 반찬은 여유 안에서. 한 군데씩은 작아도 하루에서는 쌓였다.
+   * 2026-10-15 사용자가 "추천 식단에 에너지·식이섬유가 넘음, 단백질이 주의로 나오고
+   * 다시 구성을 눌러도 그대로" 라고 알려 왔다. 가상 환자 1,500명 × 3안(4,500상)을
+   * 화면과 같은 잣대로 재 보니 열량·단백질·섬유가 모두 '적정' 인 상은 33 % 뿐이었다
+   * (열량 상단 초과 33 %, 섬유 상단 초과 35 %, 단백질 1.25배 초과 24 %).
+   * 다시 구성은 음식을 바꿨지만, 바뀐 상도 같은 길로 넘쳤다.
+   *
+   * 그래서 상을 다 차린 뒤 넘친 값만 덜어 낸다.
+   *  - 앱이 고른 것만 건드린다. 담으신 것은 그대로 둔다.
+   *  - 한 번에 반 접시씩. 반 접시에서 더 덜면 뺀다 — 밥은 반 공기 아래로 내리지 않는다.
+   *  - 덜어서 다른 값이 하단 아래로 내려가면 그 수는 두지 않는다(이미 하단 아래면 더 내리지 않는다).
+   *  - 갖춰진 상이 무너지는 수도 두지 않는다.
+   *  - 간식 자리에 따로 적어 둔 말이 있으면 그 숫자가 틀어지므로 건드리지 않는다.
+   */
+  {
+    const kCap = target.kcal[1]
+    /* 단백질은 넘쳐도 모자란 것보다 낫다 — 화면도 1.25배까지는 '적정' 으로 본다. 신장이 걸리면 상단이 곧 뚜껑이다 */
+    const pCap = renalCap ? target.protein[1] : target.protein[1] * 1.25
+    const fCap = fiber.range[1]
+    const excess = (t: NutrientTotals) =>
+      Math.max(0, ((t.kcal ?? 0) - kCap) / kCap) * 3 +
+      Math.max(0, ((t.protein ?? 0) - pCap) / pCap) * 2 +
+      Math.max(0, ((t.fiber ?? 0) - fCap) / fCap)
+    const start = running()
+    const floor = {
+      kcal: Math.min(target.kcal[0], start.kcal ?? 0),
+      protein: Math.min(target.protein[0], start.protein ?? 0),
+      fiber: fiber.lowResidue ? 0 : Math.min(fiber.range[0], start.fiber ?? 0)
+    }
+    const floorOk = (t: NutrientTotals) =>
+      (t.kcal ?? 0) >= floor.kcal - 0.5 && (t.protein ?? 0) >= floor.protein - 0.05 && (t.fiber ?? 0) >= floor.fiber - 0.05
+
+    for (let step = 0; step < 16; step++) {
+      const cur = running()
+      const now = excess(cur)
+      if (now <= 0) break
+      let best: { slot: MealSlot; entry: MenuEntry; to: number; after: number } | undefined
+      for (const slot of MEAL_SLOTS) {
+        if (slotNotes[slot]) continue
+        const here = meals[slot]
+        const wasComplete = mealIsComplete(here.map((e) => e.food))
+        for (const entry of here) {
+          if (entry.origin !== 'added') continue
+          const staple = mealRole(entry.food) === 'staple' || mealRole(entry.food) === 'onedish'
+          const to = entry.servings > 0.5 ? Math.round((entry.servings - 0.5) * 10) / 10 : 0
+          if (to === 0) {
+            if (staple) continue
+            if (SNACK_SLOTS.includes(slot) ? false : here.length <= 1) continue
+            if (wasComplete && !mealIsComplete(here.filter((e) => e !== entry).map((e) => e.food))) continue
+          }
+          const delta = addTotals(foodContribution(entry.food, entry.servings), negate(foodContribution(entry.food, to)))
+          const next = addTotals(cur, negate(delta))
+          if (!floorOk(next)) continue
+          const after = excess(next)
+          if (after >= now - 1e-6) continue
+          /* 엇비슷하면 빼기보다 덜기 — 접시 수가 상의 모양이다 */
+          const score = after + (to === 0 ? 0.002 : 0)
+          if (!best || score < best.after) best = { slot, entry, to, after: score }
+        }
+      }
+      if (!best) break
+      const { slot, entry, to } = best
+      foodTotals = addTotals(foodTotals, negate(foodContribution(entry.food, entry.servings)))
+      if (to === 0) {
+        meals[slot].splice(meals[slot].indexOf(entry), 1)
+      } else {
+        /* "열량 199 kcal 보충" 같은 말은 담은 양에 맞춰 함께 줄인다 — 화면의 숫자와 어긋나면 안 된다 */
+        const ratio = to / entry.servings
+        if (entry.contribution) {
+          entry.contribution = entry.contribution.replace(/\d+(?:\.\d+)?/g, (n) =>
+            n.includes('.') ? (Number(n) * ratio).toFixed(1) : String(Math.round(Number(n) * ratio)))
+          /*
+           * 줄이고 나니 "식이섬유 1.1 g 보충" 처럼 내세울 것이 못 되는 양이면 그 숫자를 이유로 대지 않는다
+           * (환자 입장 검사의 '미미한 양' 기준과 같다 — 단백질 3 g, 식이섬유 2 g, 열량 50 kcal).
+           */
+          entry.contribution = entry.contribution.replace(
+            /(단백질|식이섬유)\s*([\d.]+)\s*g\s*보충|열량\s*([\d.]+)\s*kcal\s*보충/,
+            (all, what, g, kcal) => {
+              const small = kcal !== undefined ? Number(kcal) < 50 : Number(g) < (what === '단백질' ? 3 : 2)
+              return small ? '양을 줄여 담음' : all
+            })
+        }
+        entry.servings = to
+        foodTotals = addTotals(foodTotals, foodContribution(entry.food, to))
+      }
+    }
+
+    /* 끼니별 소계는 앞(5)에서 셌다 — 덜어 낸 뒤의 값으로 다시 센다 */
+    for (const slot of MEAL_SLOTS) {
+      let t: NutrientTotals = {}
+      for (const e of meals[slot]) t = addTotals(t, foodContribution(e.food, e.servings))
+      slotTotals[slot] = t
+    }
+  }
+
+  /*
    * 5-3) 상에 놓는 차례대로 줄을 세운다.
    *
    * 단감과 방울토마토가 나물 사이에 끼어 있었다. 담기는 차례가 곧 드시는 차례로 읽히는데,
@@ -1983,6 +2082,16 @@ export function planNotes(patient: PatientContext): { label: string; reason: str
       reason:
         '설사나 장루가 있는 동안에는 잔사를 줄이는 것이 목표입니다. ' +
         '거친 나물·통곡·생채소를 늘리는 시기가 아닙니다. 증상이 가라앉으면 원래 목표로 돌아갑니다.'
+    })
+  }
+
+  if (patient.conditions.includes('연하곤란')) {
+    out.push({
+      label: '삼키기 쉬운 질감의 음식만 골랐습니다',
+      reason:
+        '빵·떡·찹쌀, 질기거나 탄력 있는 고기·어묵, 긴 면, 밤, 단단한 생과일, 국물에 밥을 만 것은 상에 올리지 않았습니다. ' +
+        '그래도 질감은 조리에 따라 달라집니다 — 연하 평가에서 정해 주신 단계가 있으면 그 단계를 먼저 따르시고, ' +
+        '드실 때마다 기침이나 사레가 들면 담당 의료진께 알려 주세요.'
     })
   }
 
@@ -2665,6 +2774,7 @@ function collectCandidates(
       c === '식욕부진' || c === '체중감소' || c === '연하곤란' ||
       c === '구강점막염' || c === '오심·구토' || c === '위절제후')
 
+  const dysphagia = patient.conditions.includes('연하곤란')
   const out: Cand[] = []
   for (const f of CURATED_FOODS) {
     if (f.group === '경장영양·환자식' && !needsONS && !forceONS) continue
@@ -2702,6 +2812,15 @@ function collectCandidates(
      * 나머지는 상에 오른다고 본다.
      */
     if (isIngredientOnly(f)) continue
+    /*
+     * 삼키기 어려우신 분께는 질감이 맞는 것만 상에 올린다(2026-10-15 안전 검토, critical).
+     *
+     * 예전에는 죽에 가산점을 주는 것(needsSoft)이 전부였고 질감으로 거르는 단계가 없었다.
+     * 그래서 두경부암 연하곤란 환자의 21일 식단에 생배 16일, 찹쌀밥 14일, 삶은 밤, 꽃게가 올랐다.
+     * 앱이 '추천 식단' 으로 내놓으면 환자는 그대로 드신다 — 흡인과 질식은 되돌릴 수 없다.
+     * 기준은 data/foods 의 swallowSafe 한 곳에 둔다 — 음식 판정의 '권장' 막기와 같은 잣대다.
+     */
+    if (dysphagia && !swallowSafe(f)) continue
 
     const v = evaluateFood(f, patient, 1, cached)
     /*

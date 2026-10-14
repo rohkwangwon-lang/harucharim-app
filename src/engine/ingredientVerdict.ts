@@ -1,5 +1,6 @@
 import type { EvidenceLevel, PatientContext, RuleLevel } from '../data/types'
 import { findIngredients, findPrimaryIngredients, INGREDIENT_RULES, type IngredientRule } from '../data/ingredientRules'
+import { effectiveMedications } from './rules'
 
 /**
  * 시판 건강기능식품 판정.
@@ -67,7 +68,7 @@ function judge(rule: IngredientRule, patient: PatientContext, inName = true): In
     if (r) apply(r, c)
   }
   // 복용 약
-  for (const m of patient.medications) {
+  for (const m of effectiveMedications(patient)) {
     const r = rule.byMedication?.[m]
     if (r) apply(r, `${m} 복용 중`)
   }

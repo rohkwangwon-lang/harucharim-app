@@ -515,6 +515,25 @@ evidence: 'C',
     refIds: ['fda-label-oxaliplatin']
   },
   {
+    /*
+     * 찬 음식 쪽(2026-10-15 안전 검토). 위 규칙은 음료(수분보충)에만 걸려, 점막염이 있는 분께 아이스크림·빙수가
+     * '권장'(cond-muc-cold)으로 남아 있었다. 같은 허가사항, 같은 말이다. 음료는 위 규칙이 맡으므로 여기서는 뺀다.
+     */
+    id: 'int-oxaliplatin-cold-food',
+    agent: 'oxaliplatin',
+    match: { tags: ['찬음식'], excludeTags: ['수분보충'] },
+    level: 'caution',
+    title: '옥살리플라틴 투여 후 며칠간은 찬 음식·찬 음료를 피하세요',
+    reason:
+      '옥살리플라틴은 투여 뒤 몇 시간에서 이틀 사이에 손발·입 주위·목이 저리거나 조이는 느낌(급성 신경독성)을 일으킬 수 있고, ' +
+      '찬 것에 닿거나 찬 것을 마시면 이 증상이 생기거나 심해집니다. ' +
+      '허가사항은 찬 음료와 얼음을 피하고 찬 것에 닿지 않도록 안내합니다 — 아이스크림·빙수·냉면도 입과 목에 닿는 찬 것입니다. ' +
+      '입이 헐었을 때 얼음을 물고 있으라는 안내(구강 냉각)를 들으셨더라도, 이 약을 맞는 동안에는 얼음을 피하라는 허가사항이 먼저입니다.',
+    howTo: '데우거나 상온에 두었다가 드세요',
+    evidence: 'G',
+    refIds: ['fda-label-oxaliplatin']
+  },
+  {
     id: 'int-cisplatin-mg',
     agent: 'cisplatin',
     match: { supplementIds: ['magnesium-generic'], tags: ['고칼륨'] },

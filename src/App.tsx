@@ -311,9 +311,9 @@ export default function App() {
             diary={state.diary}
             shown={state.shown}
             onShown={rememberShown}
-            onApply={(id, meal) => handleAdd(id, 1, meal)}
+            onApply={(id, meal, servings) => handleAdd(id, servings ?? 1, meal)}
             onApplyAll={(items) => {
-              items.forEach((i) => addFood(i.foodId, 1, i.meal))
+              items.forEach((i) => addFood(i.foodId, i.servings, i.meal))
               setToast(`${items.length}가지를 담았습니다`)
               setTimeout(() => setToast(null), 1600)
               setTab('compose')
