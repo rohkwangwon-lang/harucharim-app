@@ -318,9 +318,14 @@ export const REFERENCES: Reference[] = [
   { id: 'cdc-listeria', kind: 'guideline', year: 2025,
     citation: 'U.S. CDC. Preventing Listeria Infection (2025년 1월 31일). — 면역이 약한 사람은 "데우지 않은 델리 미트·콜드컷·핫도그·발효 또는 건조 소시지" 를 피하고, 74 ℃(165 °F) 또는 김이 날 때까지 다시 데운 것을 고를 것. 냉장 훈제 생선도 같다.',
     url: 'https://www.cdc.gov/listeria/prevention/index.html' },
-  { id: 'auerbach2012', kind: 'rct', year: 2012,
-    citation: 'Auerbach L, et al. Pomegranate seed oil in women with menopausal symptoms: a prospective randomized, placebo-controlled, double-blinded trial. Menopause. 2012;19(4):426-432. (폐경 후 여성 81명 · 석류 씨 기름 30 mg 하루 2회, 1회에 스테로이드성 식물 에스트로겐 127 μg · 12주 · 호르몬 상태 변화 없음 · 안면홍조 감소는 12주째 위약과 차이 유의하지 않음 P=0.17)',
-    url: 'https://doi.org/10.1097/gme.0b013e3182345b2f' },
+  /*
+   * 석류추출물 원료 규칙의 출처. 처음에는 Auerbach 2012(씨 기름 RCT)를 달았으나 원문이 구독제라 초록으로만 대조할 수 있었다 —
+   * "참고 문헌 전부 원문 대조" 를 지키려고 PMC 원문이 있는 이 종설로 바꿨다(2026-10-14). 아래 괄호 안은 원문에서 확인한 문장이다.
+   * 서술적 종설이고 MDPI 학술지다. 본문에 Huber 2017 의 기간을 "46개월" 로 잘못 옮긴 곳이 있어(원 연구는 8주) 그 부분은 인용하지 않는다.
+   */
+  { id: 'jang2024', kind: 'review', year: 2024,
+    citation: 'Jang JY, Kim D, Im E, Kim ND. Therapeutic potential of pomegranate extract for women\'s reproductive health and breast cancer. Life (Basel). 2024;14(10):1264. (3.5절: 석류 씨에 에스트론·에스트리올·테스토스테론 등 성호르몬이 있음 · 7.3절: 유방암 관련 임상 연구는 Kapoor 2015 하나뿐 — 건강한 폐경 후 여성 64명, 석류즙 3주, 전체적으로 성호르몬·SHBG 유의한 변화 없음 · 결론: 유방암 세포의 호르몬 수용체에 영향을 줄 수 있고, 제형·용량을 정하려면 임상 연구가 더 필요)',
+    url: 'https://doi.org/10.3390/life14101264' },
   { id: 'sjw-interaction', kind: 'rct', year: 2002,
     citation: 'Mathijssen RH, et al. Effects of St. John\'s wort on irinotecan metabolism. J Natl Cancer Inst. 2002;94(16):1247-1249. (환자 5명 무작위배정 교차설계 · SN-38 농도 42 % 감소, 95 % CI 14~70 %)',
     url: 'https://doi.org/10.1093/jnci/94.16.1247' },
