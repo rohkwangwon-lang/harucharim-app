@@ -22,3 +22,4 @@ scripts/screenshots/store/
 # 품목제조보고 원재료(C002) — 알레르기 2단계
 data/raw-rawmtrl/
 data/raw-rawmtrl-csv/
+data/raw-rawmtrl-inc/

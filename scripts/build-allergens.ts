@@ -15,7 +15,11 @@ import { ALLERGENS, allergenMaskOfIngredients } from '../src/data/allergens'
 import { FOODS } from '../src/data/foods'
 
 const ROOT = path.resolve(__dirname, '..')
-const RAWS = [path.join(ROOT, 'data/raw-rawmtrl'), path.join(ROOT, 'data/raw-rawmtrl-csv')].filter((d) => fs.existsSync(d))
+/*
+ * 읽는 차례가 곧 우선순위다 — 뒤에 읽은 것이 앞의 것을 덮는다(원재료가 바뀌어 알레르기가 빠진 제품도 따라가게).
+ * API 일부(raw-rawmtrl) → 전체 CSV(raw-rawmtrl-csv) → 매주 증분(raw-rawmtrl-inc, 날짜 차례).
+ */
+const RAWS = [path.join(ROOT, 'data/raw-rawmtrl'), path.join(ROOT, 'data/raw-rawmtrl-csv'), path.join(ROOT, 'data/raw-rawmtrl-inc')].filter((d) => fs.existsSync(d))
 const OUT = path.join(ROOT, 'public/data/allergens.json')
 
 /* 앱이 아는 품목보고번호 */
@@ -30,11 +34,14 @@ const map = new Map<string, number>()
 let rows = 0
 const pages = RAWS.flatMap((d) => fs.readdirSync(d).filter((f) => f.endsWith('.json')).sort().map((f) => path.join(d, f)))
 for (const f of pages) {
+  /* 한 파일 안에서는 합치고(한 제품이 여러 줄일 수 있다), 파일 사이에서는 뒤의 것이 덮는다 */
+  const here = new Map<string, number>()
   for (const r of JSON.parse(fs.readFileSync(f, 'utf8')) as { n: string; m: string }[]) {
     rows++
     if (!want.has(r.n)) continue
-    map.set(r.n, (map.get(r.n) ?? 0) | allergenMaskOfIngredients(r.m))
+    here.set(r.n, (here.get(r.n) ?? 0) | allergenMaskOfIngredients(r.m))
   }
+  for (const [n, m] of here) map.set(n, m)
 }
 
 const hit = [...map.values()]
