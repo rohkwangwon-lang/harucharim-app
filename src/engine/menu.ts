@@ -1926,6 +1926,7 @@ export function buildDayMenu(
       const now = excess(cur)
       if (now <= 0) break
       let best: { slot: MealSlot; entry: MenuEntry; to: number; after: number } | undefined
+      const kcal0 = (s: MealSlot) => meals[s].reduce((n, e) => n + (foodContribution(e.food, e.servings).kcal ?? 0), 0)
       for (const slot of MEAL_SLOTS) {
         if (slotNotes[slot]) continue
         const here = meals[slot]
@@ -1942,6 +1943,18 @@ export function buildDayMenu(
           const delta = addTotals(foodContribution(entry.food, entry.servings), negate(foodContribution(entry.food, to)))
           const next = addTotals(cur, negate(delta))
           if (!floorOk(next)) continue
+          /*
+           * 끼니의 모양도 지킨다. 저녁 접시가 가장 커서 덜어 낼 것이 대개 저녁에서 나왔고,
+           * 그 바람에 아침이 저녁보다 무거운 날이 1.03 % → 1.97 % 로, 간식이 하루를 지는 날이 두 배로 늘었다
+           * (2026-10-15 대규모 실행). 덜어 낸 뒤에 아침이 저녁을 넘거나 간식이 하루의 35 % 를 넘게 되는 수는 두지 않는다.
+           */
+          const sk = (s: MealSlot) => meals[s].reduce((n, e) => n + (foodContribution(e.food, e.servings).kcal ?? 0), 0) -
+            (s === slot ? (delta.kcal ?? 0) : 0)
+          if (slot === '저녁' && sk('아침') > sk('저녁') * 1.1 && !(kcal0('아침') > kcal0('저녁') * 1.1)) continue
+          if (!SNACK_SLOTS.includes(slot)) {
+            const dayK = MEAL_SLOTS.reduce((n, s) => n + sk(s), 0)
+            if (sk('오전간식') + sk('오후간식') > dayK * 0.35) continue
+          }
           const after = excess(next)
           if (after >= now - 1e-6) continue
           /* 엇비슷하면 빼기보다 덜기 — 접시 수가 상의 모양이다 */

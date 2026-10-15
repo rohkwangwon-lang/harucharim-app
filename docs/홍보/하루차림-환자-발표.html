@@ -49,7 +49,7 @@
 html,body{height:100%}
 body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);display:grid;place-items:center;min-height:100dvh;overflow:hidden;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:break-word}
 .stage{position:relative;width:min(100vw,calc(100dvh * 16 / 9));aspect-ratio:16/9;background:var(--paper);container-type:inline-size;overflow:hidden;user-select:none}
-.progress{position:absolute;left:0;top:0;height:.32cqw;width:100%;background:var(--rice);transform-origin:left;transform:scaleX(calc(1/14));transition:transform .5s cubic-bezier(.2,.7,.2,1),background .3s;z-index:3}
+.progress{position:absolute;left:0;top:0;height:.32cqw;width:100%;background:var(--rice);transform-origin:left;transform:scaleX(calc(1/19));transition:transform .5s cubic-bezier(.2,.7,.2,1),background .3s;z-index:3}
 .slide{position:absolute;inset:0;padding:4.6cqw 6.2cqw 6.6cqw;display:none}
 .slide.is-active{display:block}
 
@@ -130,6 +130,40 @@ body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);
 .points b{font:700 2.2cqw/1.3 var(--display);color:var(--rice-deep)}
 .points span{font:400 1.5cqw/1.55 var(--body);color:var(--ink2)}
 
+/* 근거 등급 */
+.grades{display:grid;gap:1.5cqw}
+.grade{display:grid;grid-template-columns:3.4cqw 1fr 4.6cqw 15.5cqw;align-items:center;gap:1.2cqw}
+.grade .g{width:3.4cqw;height:3.4cqw;border-radius:.7cqw;display:grid;place-items:center;font:800 1.9cqw var(--display);color:var(--on-acc)}
+.grade .bar{height:1.5cqw;background:var(--line);border-radius:.75cqw;overflow:hidden}
+.grade .bar i{display:block;height:100%;width:calc(var(--v) / var(--mx) * 100%);border-radius:.75cqw;transform-origin:left}
+.grade b{font:800 2.6cqw var(--display);font-variant-numeric:tabular-nums;color:var(--ink);text-align:right}
+.grade em{font:500 1.3cqw/1.4 var(--body);font-style:normal;color:var(--ink2)}
+.gA .g,.gA .bar i{background:var(--rice-deep)} .gB .g,.gB .bar i{background:var(--rice)}
+.gC .g,.gC .bar i{background:var(--leaf)} .gC .g{color:var(--rice-deep)}
+.gG .g,.gG .bar i{background:var(--soy)}
+.gnote{margin:1cqw 0 0;font:400 1.25cqw/1.65 var(--body);color:var(--ink2);text-wrap:pretty}
+
+/* 숫자 장부 */
+.ledger{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.ledger li{display:grid;grid-template-columns:15cqw 2.4cqw 1fr;align-items:baseline;gap:.9cqw;padding:1.5cqw 0;border-bottom:1px solid var(--line)}
+.ledger b{font:800 3.1cqw/1 var(--display);color:var(--rice-deep);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ledger li.hl b{color:var(--soy)}
+.ledger span{font:600 1.4cqw var(--body);color:var(--ink2)}
+.ledger em{font:600 1.55cqw/1.4 var(--body);font-style:normal;color:var(--ink)}
+.ledger em small{display:block;font:400 1.15cqw/1.5 var(--body);color:var(--muted);margin-top:.25cqw;text-wrap:pretty}
+.chips{display:flex;gap:2.6cqw;margin-top:2.4cqw;padding-top:2cqw;border-top:1px solid var(--line)}
+.chips p{margin:0;display:flex;align-items:baseline;gap:.5cqw}
+.chips b{font:800 3.6cqw/1 var(--display);color:var(--rice)}
+.chips span{font:600 1.45cqw var(--body);color:var(--ink2)}
+
+/* 판단 엔진 */
+.inputs{margin:1.6cqw 0 0;font:600 1.5cqw/1.5 var(--body);color:var(--ink)}
+.inputs span{display:inline-block;font:600 1.05cqw/1 var(--body);color:var(--on-acc);background:var(--rice);border-radius:999px;padding:.45cqw .8cqw;margin-right:.9cqw;vertical-align:.2cqw}
+.engines{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:1.1cqw}
+.engines li{background:var(--rice-tint);border-radius:1.1cqw;padding:1.5cqw 1.6cqw;display:grid;gap:.45cqw;align-content:start}
+.engines b{font:700 1.85cqw/1.25 var(--display);color:var(--rice-deep)}
+.engines span{font:400 1.25cqw/1.5 var(--body);color:var(--ink2)}
+
 /* 하지 않는 것 */
 .center{display:flex;flex-direction:column;justify-content:center;height:calc(100% - 2.6cqw)}
 .creed{font:800 4.6cqw/1.2 var(--display);color:var(--rice-deep);margin:0 0 4.4cqw;letter-spacing:-.025em;text-wrap:balance}
@@ -165,6 +199,7 @@ body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);
   .slide.is-active{animation:enter .55s cubic-bezier(.2,.7,.2,1) both}
   .slide.is-active .rise{animation:rise .75s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--d,0) * 110ms + 120ms)}
   .slide.is-active .pop{animation:pop .6s cubic-bezier(.3,1.45,.5,1) both;animation-delay:calc(var(--d,0) * 120ms + 220ms)}
+  .slide.is-active .grow{animation:grow 1.2s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--d,0) * 140ms + 450ms)}
   .slide.is-active .dish{animation:pop .8s cubic-bezier(.3,1.35,.5,1) both .2s}
   .slide.is-active .leaf{animation:sprout 1.5s cubic-bezier(.2,.7,.2,1) both .6s}
   .slide.is-active .leaf.b{animation-delay:.85s}
@@ -172,6 +207,7 @@ body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);
 @keyframes enter{from{opacity:0;transform:translateX(1.2cqw)}to{opacity:1;transform:none}}
 @keyframes rise{from{opacity:0;transform:translateY(1.6cqw)}to{opacity:1;transform:none}}
 @keyframes pop{from{opacity:0;transform:scale(.86)}to{opacity:1;transform:none}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 @keyframes sprout{from{opacity:0;transform:translateY(22%) scale(.7)}to{opacity:1;transform:none}}
 
 /* 인쇄하면 한 장에 한 쪽씩 — 나눠 드릴 자료로도 쓴다 */
@@ -193,7 +229,7 @@ body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);
   <div class="progress" id="progress"></div>
   <nav class="hud" aria-label="넘기기">
     <button type="button" id="prev" aria-label="앞 장">←</button>
-    <span class="count" id="count">01 / 14</span>
+    <span class="count" id="count">01 / 19</span>
     <button type="button" id="next" aria-label="다음 장">→</button>
     <button type="button" id="full" aria-label="전체 화면">전체 화면</button>
   </nav>
@@ -360,9 +396,69 @@ body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);
         <p class="big" style="--bs:12cqw"><span class="n" data-to="168" data-dec="0">168</span><span class="unit">종</span></p>
         <p class="cap rise" style="--d:1">의 참고 문헌을 요약이 아니라 원문으로 찾아, 앱의 문장과 한 줄씩 맞춰 보았습니다</p>
       </div>
-      <ul class="points"><li class="rise" style="--d:2"><b>만든 사람</b><span>방사선종양학과 전문의가 만들었습니다.</span></li><li class="rise" style="--d:3"><b>근거 등급</b><span>문장마다 근거가 얼마나 단단한지(A·B·C) 등급을 적었습니다.</span></li><li class="rise" style="--d:4"><b>“아직 모릅니다”</b><span>모르는 것은 모른다고 적었습니다.</span></li></ul>
+      <ul class="points"><li class="rise" style="--d:2"><b>만든 사람</b><span>방사선종양학과 전문의가 만들었습니다.</span></li><li class="rise" style="--d:3"><b>근거 등급</b><span>문장마다 근거가 얼마나 단단한지 등급을 적었습니다.</span></li><li class="rise" style="--d:4"><b>“아직 모릅니다”</b><span>모르는 것은 모른다고 적었습니다.</span></li></ul>
     </div>
     <footer class="sf"><span><b>하루차림</b></span><span>이 자료의 숫자는 2026년 10월 15일 앱 화면의 문장과 같습니다</span></footer>
+  </section>
+  <section class="slide g-ok" aria-label="근거의 단단함">
+    <div class="myth">
+      <div class="lead-num">
+        <p class="eyebrow rise" style="--d:0">근거의 단단함</p>
+        <p class="big" style="--bs:11cqw"><span class="n" data-to="130" data-dec="0">130</span><span class="unit">개</span></p>
+        <p class="cap rise" style="--d:1">의 영양 규칙마다, 근거가 얼마나 단단한지 등급을 붙였습니다</p>
+      </div>
+      <div class="grades rise" style="--d:2"><div class="grade gA"><span class="g">A</span><span class="bar"><i class="grow" style="--v:10;--mx:65;--d:0"></i></span><b class="n" data-to="10" data-dec="0">10</b><em>무작위 시험·메타분석이 받치는 것</em></div><div class="grade gB"><span class="g">B</span><span class="bar"><i class="grow" style="--v:15;--mx:65;--d:1"></i></span><b class="n" data-to="15" data-dec="0">15</b><em>큰 관찰 연구</em></div><div class="grade gC"><span class="g">C</span><span class="bar"><i class="grow" style="--v:40;--mx:65;--d:2"></i></span><b class="n" data-to="40" data-dec="0">40</b><em>근거가 적거나 간접적인 것</em></div><div class="grade gG"><span class="g">G</span><span class="bar"><i class="grow" style="--v:65;--mx:65;--d:3"></i></span><b class="n" data-to="65" data-dec="0">65</b><em>학회 지침</em></div><p class="gnote">화면의 문장마다 이 등급이 함께 나오고, 모르는 것은 “아직 모릅니다”라고 적었습니다. 식사 연구는 무작위 시험이 드물어 학회 지침(G)이 가장 많습니다. 등급을 부풀리지 않고 그대로 보여 드립니다.</p></div>
+    </div>
+    <footer class="sf"><span><b>하루차림</b></span><span>A 무작위 시험·메타분석 · B 큰 관찰 연구 · C 적거나 간접적인 근거 · G 학회 지침</span></footer>
+  </section>
+  <section class="slide g-ok" aria-label="판단 기준">
+    <div class="myth">
+      <div class="lead-num">
+        <p class="eyebrow rise" style="--d:0">판단 기준</p>
+        <p class="big" style="--bs:11.00cqw"><span class="n" data-to="158" data-dec="0">158</span><span class="unit">개</span></p>
+        <p class="cap rise" style="--d:1">의 판단 기준으로 음식 하나하나를 봅니다</p>
+        <div class="chips rise" style="--d:6"><p><b class="n" data-to="10" data-dec="0">10</b><span>암종</span></p><p><b class="n" data-to="18" data-dec="0">18</b><span>약제</span></p><p><b class="n" data-to="17" data-dec="0">17</b><span>증상·상태</span></p></div>
+      </div>
+      <ul class="ledger"><li class="rise" style="--d:2"><b class="n" data-to="130" data-dec="0">130</b><span>개</span><em>영양 규칙<small>암종·치료 시기·증상에 따라 권장·주의·피하세요</small></em></li><li class="rise" style="--d:3"><b class="n" data-to="28" data-dec="0">28</b><span>개</span><em>약–음식 상호작용<small>드시는 약에 따라 달라지는 음식</small></em></li><li class="rise" style="--d:4"><b class="n" data-to="36" data-dec="0">36</b><span>개</span><em>영양제 성분 규칙<small>영양제에 든 원료를 하나씩</small></em></li></ul>
+    </div>
+    <footer class="sf"><span><b>하루차림</b></span><span>암종 — 유방·위·대장·폐·간·전립선·췌장·식도·두경부·부인암</span></footer>
+  </section>
+  <section class="slide g-ok" aria-label="한국 밥상 데이터">
+    <div class="myth">
+      <div class="lead-num">
+        <p class="eyebrow rise" style="--d:0">한국 밥상 데이터</p>
+        <p class="big" style="--bs:7.69cqw"><span class="n" data-to="291378" data-dec="0">291,378</span><span class="unit">건</span></p>
+        <p class="cap rise" style="--d:1">의 식품 자료 위에서 한국 밥상을 차립니다</p>
+        
+      </div>
+      <ul class="ledger"><li class="rise" style="--d:2"><b class="n" data-to="18298" data-dec="0">18,298</b><span>종</span><em>기본 식품<small>국·김치·젓갈까지, 한식을 1회 제공량으로</small></em></li><li class="rise" style="--d:3"><b class="n" data-to="273080" data-dec="0">273,080</b><span>종</span><em>시판 가공식품<small>제조사·품목보고번호가 있는 제품</small></em></li><li class="rise" style="--d:4"><b class="n" data-to="45618" data-dec="0">45,618</b><span>종</span><em>시판 영양제<small>식품과 따로 셉니다</small></em></li></ul>
+    </div>
+    <footer class="sf"><span><b>하루차림</b></span><span>기본 식품과 가공식품은 출처가 다른 별개 기록이라 더했습니다 · 영양제는 합계에 넣지 않았습니다</span></footer>
+  </section>
+  <section class="slide g-ok" aria-label="판단 엔진">
+    <div class="myth">
+      <div class="lead-num">
+        <p class="eyebrow rise" style="--d:0">판단 엔진</p>
+        <p class="big" style="--bs:11cqw"><span class="n" data-to="6" data-dec="0">6</span><span class="unit">개</span></p>
+        <p class="cap rise" style="--d:1">의 판단 엔진이 일을 나눠, 지금 이분께 맞는 한 상을 차립니다</p>
+        <p class="inputs rise" style="--d:2"><span>맞추는 것</span>암종 · 치료 시기 · 증상 · 드시는 약 · 체중</p>
+        <div class="second rise" style="--d:3"><p class="sn"><span class="n" data-to="88" data-dec="0">88</span><span class="unit">%</span></p><p class="st">가상 환자 검사에서 열량·단백질·섬유가 모두 ‘적정’인 하루 식단 — 넘친 것을 덜어 내기 전에는 33 %</p></div>
+      </div>
+      <ol class="engines"><li class="pop" style="--d:2"><b>영양 목표</b><span>체중과 치료 시기에 맞춘 열량·단백질</span></li><li class="pop" style="--d:3"><b>음식 판정</b><span>권장 · 주의 · 피하세요, 약과의 상호작용까지</span></li><li class="pop" style="--d:4"><b>식단 구성</b><span>밥 + 반찬 2~3 + 국, 넘친 것은 덜어 냄</span></li><li class="pop" style="--d:5"><b>영양제 원료 판정</b><span>제품에 든 원료를 하나씩</span></li><li class="pop" style="--d:6"><b>영양제 조언</b><span>치료 이력·증상·약에 따라 필요한 것과 피할 것</span></li><li class="pop" style="--d:7"><b>하루 평가</b><span>충분했나 모자랐나를 한눈에</span></li></ol>
+    </div>
+    <footer class="sf"><span><b>하루차림</b></span><span>영양 목표 · 음식 판정 · 식단 구성 · 영양제 원료 판정 · 영양제 조언 · 하루 평가</span></footer>
+  </section>
+  <section class="slide g-ok" aria-label="얼마나 시험했나">
+    <div class="myth">
+      <div class="lead-num">
+        <p class="eyebrow rise" style="--d:0">얼마나 시험했나</p>
+        <p class="big" style="--bs:6.35cqw"><span class="n" data-to="2299569" data-dec="0">2,299,569</span><span class="unit">건</span></p>
+        <p class="cap rise" style="--d:1">의 추천을 하나하나 검사했습니다</p>
+        
+      </div>
+      <ul class="ledger"><li class="rise" style="--d:2"><b class="n" data-to="2000" data-dec="0">2,000</b><span>명</span><em>가상 환자<small>암종·시기·증상·약을 무작위로</small></em></li><li class="rise" style="--d:3"><b class="n" data-to="90" data-dec="0">90</b><span>일</span><em>한 사람이 지나가 본 날<small>석 달 동안 날마다 식단을 받아 봄</small></em></li><li class="rise hl" style="--d:4"><b class="n" data-to="0" data-dec="0">0</b><span>건</span><em>피해야 할 것을 권한 경우<small>2,000명 × 90일 = 180,000일치 식단에서</small></em></li><li class="rise" style="--d:5"><b class="n" data-to="30" data-dec="0">30</b><span>종</span><em>자동 검사<small>고칠 때마다 다시 돌립니다 · 독립 안전 검토 반영</small></em></li></ul>
+    </div>
+    <footer class="sf"><span><b>하루차림</b></span><span>가상 환자로 돌린 검사입니다 · 실제 환자 결과가 아닙니다</span></footer>
   </section>
   <section class="slide" aria-label="하루차림이 하지 않는 것">
     <div class="center">
