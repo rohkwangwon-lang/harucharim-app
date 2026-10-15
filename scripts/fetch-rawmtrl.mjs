@@ -7,6 +7,9 @@
  * 원재료명(RAWMTRL_NM)이 쉼표로 이어져 있다. 이름만 보던 알레르기 판정을 원재료로 넓히는 데 쓴다.
  * 필요한 두 칸만 남겨 페이지마다 저장한다 — 중간에 끊겨도 받은 페이지는 건너뛰고 이어 받는다.
  * 식품안전나라는 낮 시간대에 응답이 느리거나 끊기기도 한다(I2570 수집 때 12~19시).
+ *
+ * 호출 한도(2026-10-15 확인): 변경일자(CHNG_DT) 조건 없이는 1시간에 100회까지. CHNG_DT 는 최근 7일 증분만 받는다.
+ * 그래서 전체는 한 쪽에 37초씩 쉬어 가며 받는다(1,081쪽 ≈ 11시간). 한도에 걸리면 20분 쉬고 그 쪽부터 다시.
  */
 import fs from 'node:fs'
 import path from 'node:path'
@@ -30,6 +33,7 @@ async function fetchRange(start, end, attempt = 1) {
     const code = body?.RESULT?.CODE
     if (code === 'INFO-200') return { row: [] }
     if (code === 'ERROR-503' && attempt < 8) { await sleep(10000 * attempt); return fetchRange(start, end, attempt + 1) }
+    if (/1시간당/.test(body?.RESULT?.MSG ?? '')) { console.log('  호출 한도 — 20분 쉽니다'); await sleep(20 * 60 * 1000); return fetchRange(start, end, attempt) }
     throw new Error(body?.RESULT?.MSG || '예상과 다른 응답')
   } catch (e) {
     if (attempt >= 6) throw e
@@ -38,7 +42,7 @@ async function fetchRange(start, end, attempt = 1) {
   }
 }
 
-const first = await fetchRange(1, 1)
+const first = await fetchRange(1, 1)  // 이것도 한 번으로 센다
 const total = Number(first.total_count)
 if (!total) { console.error('총 건수를 받지 못했습니다.'); process.exit(1) }
 const lastPage = Math.ceil(total / PAGE)
@@ -56,6 +60,6 @@ for (let p = 1; p <= lastPage; p++) {
   fs.writeFileSync(file, JSON.stringify(rows))
   done++
   if (done % 20 === 0 || p === lastPage) console.log(`  ${p}/${lastPage} (새로 ${done})`)
-  await sleep(120)
+  await sleep(37000)
 }
 console.log('완료. data/raw-rawmtrl/ 에 저장했습니다.')
