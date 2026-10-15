@@ -18,3 +18,6 @@ data/raw-supplement/
 # 스크린샷 중간 산출물 — 결과는 docs/출시/스크린샷 에 둔다
 scripts/screenshots/raw/
 scripts/screenshots/store/
+
+# 품목제조보고 원재료(C002) — 알레르기 2단계
+data/raw-rawmtrl/

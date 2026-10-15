@@ -1,4 +1,5 @@
 import type { Food } from '../data/types'
+import { setAllergenIndex } from '../data/allergens'
 import { rowToFood, type PackedFoods, type PackedRow } from '../data/foods/generated'
 
 /**
@@ -452,4 +453,30 @@ export async function scanSupplements(
     }
     cur.onerror = () => reject(cur.error)
   })
+}
+
+/**
+ * 원재료로 찾은 알레르기 색인을 받는다(2026-10-15 알레르기 2단계).
+ *
+ * 식품안전나라 C002 원재료에서 만든 public/data/allergens.json — 품목보고번호마다 알레르기 19항목의 비트.
+ * 알레르기를 고르신 분만 받는다(고르지 않으셨으면 쓸 데가 없다). 실패하면 이름으로만 찾던 대로 둔다.
+ */
+let allergenLoad: Promise<boolean> | null = null
+export function loadAllergenIndex(): Promise<boolean> {
+  if (allergenLoad) return allergenLoad
+  const base = import.meta.env.BASE_URL || '/'
+  allergenLoad = (async () => {
+    try {
+      const res = await fetch(`${base}data/allergens.json`)
+      if (!res.ok) return false
+      const j = (await res.json()) as { map?: Record<string, number> }
+      if (!j.map) return false
+      setAllergenIndex(new Map(Object.entries(j.map)))
+      return true
+    } catch {
+      allergenLoad = null
+      return false
+    }
+  })()
+  return allergenLoad
 }

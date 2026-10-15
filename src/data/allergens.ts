@@ -55,14 +55,76 @@ const RX: Record<Allergen, { yes: RegExp; not?: RegExp }> = {
   잣: { yes: /잣/ }
 }
 
-/** 이 음식 이름에 보이는 알레르기 유발물질 */
-export function allergensIn(food: Pick<Food, 'name'>): Allergen[] {
+/*
+ * ── 원재료로 찾기(2단계, 2026-10-15) ──
+ *
+ * 식품안전나라 C002(품목제조보고 원재료)에서 받은 원재료명으로 찾는다. 이름보다 정확하지만 그래도 한계가 있다 —
+ * '소스'·'기타가공품'·'혼합제제' 처럼 묶음으로 적힌 원재료는 속을 알 수 없다. 그래서 이름 판정을 버리지 않고 둘을 합친다.
+ * 원재료 목록에서는 간접 표현을 넓게 잡는다 — 백태·서리태(대두), 양조간장(대두·밀), 유청·탈지분유(우유), 난백·전란(알류).
+ */
+const ING_RX: Record<Allergen, { yes: RegExp; not?: RegExp }> = {
+  알류: { yes: /계란|달걀|난백|난황|전란|난분|메추리알|오리알|마요네즈|에그/ },
+  /* '락토' 한 낱말은 프락토올리고당에도 있어 뺐다 — 유당·락토페린으로 잡는다 */
+  우유: { yes: /우유|유청|유당|카제인|카세인|버터|치즈|크림|분유|연유|유크림|유단백|락토페린|락토스|요구르트|요거트|발효유|우유단백|밀크/,
+    not: /코코넛\s?(밀크|크림)|땅콩버터|아몬드\s?밀크|식물성\s?크림/ },
+  메밀: { yes: /메밀|모밀/ },
+  땅콩: { yes: /땅콩|피넛/ },
+  /* '콩' 은 땅콩·완두콩 속에도 있다 — 앞 글자를 보고 가른다 */
+  대두: { yes: /대두|두유|두부|유바|간장|된장|고추장|청국장|춘장|쌈장|백태|서리태|흑태|흑두|메주|낫토|유부|비지|레시틴|분리대두|탈지대두|(?<!땅|완두|강낭|병아리|렌틸|작두|녹|팥|커피|카카오)콩/ },
+  밀: { yes: /(?<!메)밀(?!감|크|납)|소맥|글루텐|맥분|간장|고추장|빵가루|부침가루|튀김가루|면류|국수|파스타/ },
+  고등어: { yes: /고등어/ },
+  게: { yes: /꽃게|게살|게추출|게엑기스|홍게|대게|크랩|키토산|글루코사민/ },
+  새우: { yes: /새우|크릴|쉬림프|키토산|글루코사민/ },
+  돼지고기: { yes: /돼지|돈육|돈지|라드|돈골|돈피|햄|베이컨|소시지/ },
+  복숭아: { yes: /복숭아|황도|백도/ },
+  토마토: { yes: /토마토|케첩|케찹/ },
+  아황산류: { yes: /아황산|메타중아황산|차아황산|무수아황산|이산화황|와인|포도주|건포도/ },
+  호두: { yes: /호두/ },
+  닭고기: { yes: /닭|계육|치킨|가금/ },
+  쇠고기: { yes: /쇠고기|소고기|우육|우지|소뼈|사골|우골|비프|한우/ },
+  오징어: { yes: /오징어|한치|꼴뚜기/ },
+  /* '굴' 은 덩굴월귤·굴비에도 있다 — 낱말 머리의 굴이나 굴소스·건조굴처럼 붙은 것만 */
+  조개류: { yes: /조개|(?<![가-힣])굴(?!비)|건조굴|생굴|굴소스|굴추출|굴농축|굴엑기스|전복|홍합|바지락|가리비|관자|키조개|재첩|꼬막|패류/ },
+  잣: { yes: /잣/ }
+}
+
+/** 원재료명 한 줄에서 알레르기 유발물질을 찾아 비트로 돌려준다(빌드 스크립트·검사가 쓴다) */
+export function allergenMaskOfIngredients(raw: string): number {
+  const parts = raw.split(/[,·()\[\]{}]/).map((x) => x.trim()).filter(Boolean)
+  let mask = 0
+  ALLERGENS.forEach((a, i) => {
+    const r = ING_RX[a]
+    if (parts.some((p) => r.yes.test(p) && !r.not?.test(p))) mask |= 1 << i
+  })
+  return mask
+}
+
+/* 품목보고번호 → 원재료로 찾은 비트. 앱이 public/data/allergens.json 을 받으면 채운다(없으면 이름으로만 찾는다) */
+let REPORT_INDEX: Map<string, number> | null = null
+export function setAllergenIndex(map: Map<string, number> | null): void { REPORT_INDEX = map }
+export function allergenIndexReady(): boolean { return REPORT_INDEX !== null }
+export function maskToAllergens(mask: number): Allergen[] {
+  return ALLERGENS.filter((_, i) => (mask & (1 << i)) !== 0)
+}
+
+/** 이 음식에 보이는 알레르기 유발물질 — 이름으로 찾은 것 + (품목보고번호가 있으면) 원재료로 찾은 것 */
+export function allergensIn(food: Pick<Food, 'name'> & { reportNo?: string }): Allergen[] {
   const n = food.name
-  return ALLERGENS.filter((a) => RX[a].yes.test(n) && !RX[a].not?.test(n))
+  const byName = ALLERGENS.filter((a) => RX[a].yes.test(n) && !RX[a].not?.test(n))
+  const mask = food.reportNo && REPORT_INDEX ? REPORT_INDEX.get(food.reportNo) : undefined
+  if (!mask) return byName
+  const byIng = maskToAllergens(mask)
+  return ALLERGENS.filter((a) => byName.includes(a) || byIng.includes(a))
+}
+
+/** 원재료 자료로 확인된 것만(화면에서 '원재료 표시로 확인' 을 밝힐 때) */
+export function allergensFromIngredients(food: { reportNo?: string }): Allergen[] {
+  const mask = food.reportNo && REPORT_INDEX ? REPORT_INDEX.get(food.reportNo) : undefined
+  return mask ? maskToAllergens(mask) : []
 }
 
 /** 이분이 고르신 알레르기 가운데 이 음식에 보이는 것 */
-export function allergenHits(food: Pick<Food, 'name'>, chosen: readonly string[] | undefined): Allergen[] {
+export function allergenHits(food: Pick<Food, 'name'> & { reportNo?: string }, chosen: readonly string[] | undefined): Allergen[] {
   if (!chosen || chosen.length === 0) return []
   return allergensIn(food).filter((a) => chosen.includes(a))
 }

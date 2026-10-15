@@ -22,7 +22,7 @@ import { CANCERS, CANCER_BY_ID } from '../../src/data/cancers'
 import { FOODS, swallowSafe } from '../../src/data/foods'
 import { MEAL_SLOTS, type Food, type PatientContext } from '../../src/data/types'
 import { DEFAULT_PATIENT, linkWarfarin, restorePatient } from '../../src/lib/store'
-import { allergensIn } from '../../src/data/allergens'
+import { allergenMaskOfIngredients, allergensIn, maskToAllergens, setAllergenIndex } from '../../src/data/allergens'
 import { emergencySigns } from '../../src/data/emergencySigns'
 
 const bad: string[] = []
@@ -272,6 +272,33 @@ if (same > 0) bad.push(`다시 구성: 담은 것이 없는데도 같은 상이 
   /* 2025 한국인 영양소 섭취기준 — 칼슘 하한(남 800, 여 50세 이상 750) */
   const ca = (o: Partial<PatientContext>) => microTargets(P({ cancer: 'breast', phase: 'survivorship', medications: [], ...o })).find((m) => m.key === 'ca' && m.min !== undefined && m.min < 1000)
   if (ca({ sex: 'M', age: 60, cancer: 'colorectal' })?.min !== undefined && ca({ sex: 'M', age: 60, cancer: 'colorectal' })?.min !== 800) bad.push('KDRI 2025: 남성 칼슘 하한이 800 이 아님')
+}
+
+/* 19. 알레르기 2단계 — 원재료(C002)로 찾기: 간접 표현은 잡고, 낱말 속 글자는 잡지 않는다. 색인이 있으면 이름에 없어도 잡는다 */
+{
+  const cases: [string, string[], string[]][] = [
+    ['밀가루, 정제수, 정제염', ['밀'], []],
+    ['양조간장, 설탕', ['대두', '밀'], []],
+    ['유청분말, 포도당', ['우유'], []],
+    ['난백분, 전분', ['알류'], []],
+    ['백태, 찹쌀', ['대두'], []],
+    ['메타중아황산칼륨, 효모', ['아황산류'], []],
+    ['건조덩굴월귤, 설탕', [], ['조개류']],
+    ['땅콩, 호두', ['땅콩', '호두'], ['대두']],
+    ['프락토올리고당, 포도당', [], ['우유']],
+    ['메밀, 정제수', ['메밀'], ['밀']],
+    ['식물성크림, 설탕', [], ['우유']]
+  ]
+  for (const [raw, must, mustNot] of cases) {
+    const got = maskToAllergens(allergenMaskOfIngredients(raw))
+    for (const a of must) if (!got.includes(a as never)) bad.push(`원재료 '${raw}' 에서 ${a} 를 못 찾음`)
+    for (const a of mustNot) if (got.includes(a as never)) bad.push(`원재료 '${raw}' 에서 ${a} 로 잘못 잡음`)
+  }
+  setAllergenIndex(new Map([['TEST-REPORT-1', allergenMaskOfIngredients('밀가루, 탈지분유')]]))
+  const fake = { name: '고소한 과자', reportNo: 'TEST-REPORT-1' }
+  const got = allergensIn(fake)
+  if (!got.includes('우유') || !got.includes('밀')) bad.push('알레르기 색인: 품목보고번호로 원재료를 찾지 못함')
+  setAllergenIndex(null)
 }
 
 /* 10. 응급 안내 */

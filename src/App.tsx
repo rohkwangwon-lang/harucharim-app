@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { loadAllergenIndex } from './lib/foodStore'
 import { DeleteAccount } from './components/DeleteAccount'
 import { REVIEW_MODE } from './config'
 import { useAppState } from './lib/store'
@@ -134,6 +135,18 @@ export default function App() {
    * 누를 때마다 보내면 시각까지 남아 그 자체가 사람을 따라다니는 기록이 된다.
    */
   useEffect(() => { track('open') }, [])
+  /*
+   * 알레르기를 고르셨으면 원재료 색인을 받는다(2026-10-15). 받은 뒤에는 화면을 한 번 새로 그려
+   * 이미 계산해 둔 판정·식단이 원재료 기준으로 다시 나오게 한다(allergyTick 을 화면의 key 로 쓴다).
+   */
+  const [allergyTick, setAllergyTick] = useState(0)
+  const hasAllergy = (state.patient.allergies ?? []).length > 0
+  useEffect(() => {
+    if (!hasAllergy) return
+    let alive = true
+    loadAllergenIndex().then((ok) => { if (alive && ok) setAllergyTick((t) => t + 1) })
+    return () => { alive = false }
+  }, [hasAllergy])
 
   /*
    * 처음 설정을 마치신 뒤 한 번 여쭙는다.
@@ -265,7 +278,7 @@ export default function App() {
       {REVIEW_MODE && <ReviewBanner />}
       <NoticeBanner />
 
-      <main className="flex-1 px-4 py-4 pb-24">
+      <main key={allergyTick} className="flex-1 px-4 py-4 pb-24">
         {tab === 'compose' && (
           <TodayMeals
             patient={state.patient}
