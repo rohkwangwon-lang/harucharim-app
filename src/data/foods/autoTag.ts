@@ -1,4 +1,5 @@
 import type { FoodTag } from '../types'
+import { isDrink } from '../types'
 
 /**
  * 받아 온 식품에 임상 태그를 붙인다.
@@ -91,7 +92,7 @@ const RAW_DESPITE_SMOKE = /그라브락스/
  * 살라미·초리조·코파 같은 건조 소시지, 훈제오리, 다른 훈제 생선은 넣지 않았다. 정해 주신 범위가 아니다.
  */
 const UNDERCOOKED = new RegExp(
-  '반숙|(?<![가-힣])수란|에그\\s*베네딕트|온센\\s*(타마고|다마고|란|계란|달걀)' +
+  '반숙|(?<![가-힣])수란|마약\\s*(계란|달걀)|(계란|달걀)\\s*장(?!조림)|에그\\s*베네딕트|온센\\s*(타마고|다마고|란|계란|달걀)' +
   '|훈제\\s*연어|연어\\s*훈제|스모크드?\\s*(연어|살몬|새먼)' +
   '|생햄|프로슈[토또]|하몽|하몬\\s+(디|데|드)' +
   '|전복장(?!어|아찌)'
@@ -387,4 +388,19 @@ export function sodiumTag(tags: FoodTag[], na100: number | undefined, servingG: 
   const has = tags.includes('고나트륨' as FoodTag)
   if (high === has) return tags
   return high ? [...tags, '고나트륨' as FoodTag] : tags.filter((t) => t !== ('고나트륨' as FoodTag))
+}
+
+/**
+ * 마시는 것에 '마시는것' 을 붙인다(2026-10-15).
+ * 연하곤란의 묽은 액체 안내가 물·보리차·오렌지주스 세 가지에만 걸려 있었다 — 우유·두유·커피·영양보충 음료도 같다.
+ * 걸쭉하게 만드는 것(점도증진제)·젤리·푸딩·죽·스무디볼은 마시는 것으로 치지 않는다.
+ */
+const THICK = /점도|젤리|푸딩|죽|요거트볼|스무디볼|그릭|떠먹는/
+const LIQUID_ONS = /균형영양식|영양음료|단백질\s?음료|뉴케어|그린비아|메디웰|하이뮨|엔커버|RTD/
+export function drinkTag(tags: FoodTag[], name: string, group: string): FoodTag[] {
+  if (tags.includes('마시는것' as FoodTag) || THICK.test(name)) return tags
+  const drink = isDrink({ group: group as never, name }) || (group === '경장영양·환자식' && LIQUID_ONS.test(name)) ||
+    /* 음료 군이 아니어도 마시는 것 — 두유는 두류, 미숫가루·식혜는 곡류로 분류되어 있다 */
+    /^두유|두유\s?\(|두유라떼|미숫가루\(탄|식혜|수정과/.test(name)
+  return drink ? [...tags, '마시는것' as FoodTag] : tags
 }

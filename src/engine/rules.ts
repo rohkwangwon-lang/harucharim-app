@@ -9,7 +9,7 @@ import { CANCER_BY_ID } from '../data/cancers'
 import { COMMON_RULES } from '../data/commonRules'
 import { CONDITION_RULES } from '../data/conditionRules'
 import { INTERACTIONS, MEDICATIONS } from '../data/interactions'
-import { foodContribution } from './nutrition'
+import { effectiveLossPct, foodContribution } from './nutrition'
 
 /** 규칙의 강도 — 여러 규칙이 같은 식품에 걸리면 강한 쪽을 대표로 쓴다 */
 const LEVEL_RANK: Record<RuleLevel, number> = { avoid: 3, caution: 2, prefer: 1, info: 0 }
@@ -165,8 +165,24 @@ export function activeRules(patient: PatientContext): RuleHit[] {
     }
   }
 
+  /* 체중이 뚜렷이 줄고 있으면 증상을 덜려는 '피하세요' 를 '주의' 로 낮추고, 그 사유를 이유 글 끝에 남긴다 */
+  if (effectiveLossPct(patient) >= LOSING_PCT) {
+    return hits.map((h) => h.rule.softenWhenLosing && h.rule.level === 'avoid'
+      ? { ...h, rule: { ...h.rule, level: 'caution' as const, reason: h.rule.reason + SOFTEN_NOTE } }
+      : h)
+  }
   return hits
 }
+
+/**
+ * '뚜렷한 체중 감소' 의 문턱 — 최근(6개월 안) 5 % 넘게.
+ * 앱의 악액질 안내(lung-cachexia, 국제 합의 기준)와 같은 잣대를 쓴다.
+ */
+const LOSING_PCT = 5
+const SOFTEN_NOTE =
+  ' [체중이 줄고 있어 낮춘 판정] 최근 체중이 5 % 넘게 줄어, 이 항목은 \'피하세요\' 대신 \'주의\' 로 낮췄습니다. ' +
+  '지금은 드실 수 있는 것을 드셔서 열량과 단백질을 채우는 것이 먼저이기 때문입니다. ' +
+  '드셔 보고 증상이 심해지면 그때 줄이시고, 증상이 계속되면 담당 의료진께 알려 주세요.'
 
 /** 환자가 복용 중인 약제에 해당하는 상호작용만 추린다 */
 /**
@@ -325,6 +341,9 @@ export function evaluateSupplement(
   const inter = cached?.interactions ?? activeInteractions(patient)
 
   const hits = rules.filter((h) => matchesSupplement(h.rule.match, s))
+  /* 알레르기 — 등록된 영양제도 이름으로 본다(2026-10-15 알레르기 2단계) */
+  const allergy = allergenHits(s, patient.allergies)
+  if (allergy.length) hits.push({ rule: allergyRule(allergy), source: '알레르기', sourceLabel: allergy.join('·') })
   const interactions = inter.filter((h) => matchesSupplement(h.interaction.match, s))
 
   const level = strongestLevel([

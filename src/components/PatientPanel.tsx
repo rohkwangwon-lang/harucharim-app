@@ -7,6 +7,9 @@ import { nutritionRisk, personalTarget } from '../engine/nutrition'
 import { CANCER_BY_ID } from '../data/cancers'
 import { NumberField, Section, Stat } from './ui'
 import { ALLERGENS, ALLERGEN_HINT } from '../data/allergens'
+import { DIALYSIS_CHOICES, LOW_INTAKE_CHOICES } from '../data/types'
+
+const todayKey = () => new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10)
 import { BODY_LIMITS } from '../lib/bodyInput'
 
 const PHASES: { id: Phase; label: string; desc: string }[] = [
@@ -218,6 +221,40 @@ export function PatientPanel({
         >
           {risk.message}
         </div>
+        {/*
+          * 재영양 위험(2026-10-15, NICE CG32). 마르셨거나 많이 빠지신 분께 최근 섭취를 여쭙는다 —
+          * 오래 거의 못 드셨으면 처음 일주일은 목표를 낮춰 시작해야 한다.
+          */}
+        {(risk.bmi < 18.5 || (patient.weightLossPct ?? 0) > 10 || patient.lowIntake) && (
+          <div className="mt-3 rounded-xl border border-stone-200 bg-white px-3.5 py-3">
+            <p className="text-xs font-semibold text-stone-800">최근 며칠 동안 거의 못 드셨나요?</p>
+            <p className="mt-0.5 text-[11px] leading-relaxed text-stone-500">
+              오래 거의 못 드신 뒤에 갑자기 많이 드시면 위험할 수 있어(재영양증후군), 처음 일주일은 목표를 낮춰 시작합니다.
+            </p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {LOW_INTAKE_CHOICES.map((c) => (
+                <button
+                  key={c}
+                  aria-pressed={patient.lowIntake === c}
+                  onClick={() => onChange(patient.lowIntake === c
+                    ? { lowIntake: undefined, lowIntakeSince: undefined }
+                    : { lowIntake: c, lowIntakeSince: c === '아니요' ? undefined : todayKey() })}
+                  className={`chip border transition-colors ${
+                    patient.lowIntake === c ? 'border-brand-500 bg-brand-500 text-white' : 'border-stone-300 bg-white text-stone-600 hover:bg-stone-50'
+                  }`}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        {/* 키·체중을 잘못 넣으면 목표가 엉뚱해진다 — 사람에게 드문 값이면 다시 여쭙는다(2026-10-15 안전 검토) */}
+        {(risk.bmi < 12 || risk.bmi > 60) && (
+          <p className="mt-2 rounded-xl bg-warn-50 px-3.5 py-2.5 text-xs leading-relaxed text-warn-800" role="alert">
+            BMI 가 {risk.bmi} 로 나옵니다. 키({patient.heightCm} cm)와 체중({patient.weightKg} kg)을 다시 확인해 주세요 — 목표 열량·단백질이 이 값으로 계산됩니다.
+          </p>
+        )}
       </Section>
 
       <Section title="지금 겪고 있는 증상" desc="증상 규칙이 암종 규칙보다 실제 식단을 더 크게 좌우하는 경우가 많습니다.">
@@ -236,6 +273,27 @@ export function PatientPanel({
             </button>
           ))}
         </div>
+        {/* 신기능저하를 고르셨으면 투석 여부를 여쭙는다 — 투석 중과 투석 전은 단백질 목표가 반대 방향이다(2026-10-15) */}
+        {patient.conditions.includes('신기능저하') && (
+          <div className="mt-3 rounded-xl border border-stone-200 bg-white px-3.5 py-3">
+            <p className="text-xs font-semibold text-stone-800">투석을 받고 계신가요?</p>
+            <p className="mt-0.5 text-[11px] leading-relaxed text-stone-500">투석 중이면 단백질이 더 필요하고, 투석 전이면 신장내과에서 정한 제한이 먼저입니다.</p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {DIALYSIS_CHOICES.map((d) => (
+                <button
+                  key={d}
+                  aria-pressed={patient.dialysis === d}
+                  onClick={() => onChange({ dialysis: patient.dialysis === d ? undefined : d })}
+                  className={`chip border transition-colors ${
+                    patient.dialysis === d ? 'border-brand-500 bg-brand-500 text-white' : 'border-stone-300 bg-white text-stone-600 hover:bg-stone-50'
+                  }`}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </Section>
 
       {/*

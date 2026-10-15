@@ -111,6 +111,8 @@ export type FoodTag =
   | '찬음식'
   /* 스타후르츠(오렴자·카람볼라) — 신장 기능이 떨어진 분께 신독성·신경독성(옥살산·카람복신). 신기능저하 규칙이 쓴다(2026-10-15) */
   | '스타후르츠'
+  /* 마시는 것 — 음료·마시는 유제품·액상 영양보충 음료. 연하곤란의 묽은 액체 안내가 쓴다(2026-10-15) */
+  | '마시는것'
   /*
    * 익히지 않은 새싹채소 — 숙주·알팔파·브로콜리 새싹·무순.
    *
@@ -539,6 +541,13 @@ export interface NutritionRule {
    */
   unlessTaking?: string[]
   /**
+   * 체중이 뚜렷이 줄고 있으면(최근 5 % 넘게) '피하세요' 를 '주의' 로 낮춘다(2026-10-15 전문의 결정).
+   * 증상을 덜기 위한 '피하세요'(설사·오심·점막염의 기름진·매운·거친 음식)에만 단다 —
+   * 날것·술·삼킴처럼 다치지 않게 하려는 규칙에는 달지 않는다.
+   * 악액질에서는 드실 수 있는 것을 드시는 것이 먼저라, 증상 규칙이 고열량 음식 대부분을 '피하세요' 로 덮으면 안 된다.
+   */
+  softenWhenLosing?: boolean
+  /**
    * 이 규칙이 한 음식에 걸리면, 여기 적은 규칙은 그 음식에서 보여 주지 않는다.
    *
    * 같은 말을 두 번 하지 않으려는 것이다. 증상에서 호중구감소증을 고르신 분께는
@@ -683,6 +692,18 @@ export interface PatientContext {
    * 고르시면 그 이름이 보이는 음식은 '피하세요' 가 되고 식단에서 빠진다(2026-10-15).
    */
   allergies?: string[]
+  /**
+   * 신기능저하일 때 투석 여부(2026-10-15). 투석 중이면 단백질이 오히려 더 필요하고(투석으로 빠져나간다),
+   * 투석 전이면 신장내과의 제한이 우선이다 — 같은 '신기능저하' 로 묶어 두면 둘 중 한쪽에는 틀린 목표가 된다.
+   */
+  dialysis?: Dialysis
+  /**
+   * 최근 거의 못 드신 기간(2026-10-15 재영양 위험). 재영양증후군은 굶다가 다시 먹기 시작할 때의 문제라,
+   * 잘 드시고 계신 분께 열량을 낮춰 잡으면 오히려 해가 된다 — 그래서 여쭙고, 해당될 때만 처음 며칠의 목표를 낮춘다.
+   */
+  lowIntake?: LowIntake
+  /** 위 답을 하신 날 — 처음 며칠의 단계적 목표를 이 날부터 센다 */
+  lowIntakeSince?: string
   /** 받은 치료 이력 — 영양제·운동 추천에 반영 */
   history?: TreatmentHistory[]
   /** 식단에 섞어도 되는 요리 계통. 비우면 한식만 */
@@ -697,6 +718,12 @@ export interface PatientContext {
    */
   useBarcode?: boolean
 }
+
+export const LOW_INTAKE_CHOICES = ['아니요', '5일 넘게', '10일 넘게', '15일 넘게'] as const
+export type LowIntake = (typeof LOW_INTAKE_CHOICES)[number]
+
+export const DIALYSIS_CHOICES = ['혈액투석', '복막투석', '투석 전', '모름'] as const
+export type Dialysis = (typeof DIALYSIS_CHOICES)[number]
 
 /** 치료 이력 — 영양 결핍과 운동 제약이 여기서 갈린다 */
 export type TreatmentHistory =

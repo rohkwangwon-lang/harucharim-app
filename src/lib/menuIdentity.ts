@@ -35,7 +35,9 @@ export function menuConditionKey(
     [...patient.medications].sort().join('·'),
     [...(patient.cuisines ?? [])].sort().join('·'),
     [...(patient.subtypes ?? [])].sort().join('·'),
-    [...(patient.allergies ?? [])].sort().join('·')
+    [...(patient.allergies ?? [])].sort().join('·'),
+    patient.dialysis ?? '',
+    patient.lowIntake ?? '', patient.lowIntakeSince ?? ''
   ].join('|')
 
   /* 담으신 것 — 순서가 달라진 것만으로 다른 식단이 되지는 않는다 */

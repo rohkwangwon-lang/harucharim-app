@@ -64,7 +64,7 @@ export const headneck: CancerProfile = {
       refIds: ['meliante2023-hnc-antiox', 'nguyen2018-hnc-integrative', 'meyer2008smoking', 'verro2025-hnc-cam']
     },
     {
-      id: 'hn-mucositis-avoid',
+      id: 'hn-mucositis-avoid', softenWhenLosing: true,
       level: 'avoid',
       match: { tags: ['매운맛', '산성강함', '거친질감'] },
       phases: ['during_rt', 'during_chemo'],

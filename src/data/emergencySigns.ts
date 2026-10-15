@@ -1,4 +1,5 @@
 import type { PatientContext } from './types'
+import { refeedingStage } from '../engine/nutrition'
 
 /**
  * 바로 병원에 연락하셔야 하는 신호.
@@ -57,6 +58,14 @@ export function emergencySigns(patient: PatientContext): EmergencySign[] {
       id: 'obstruction',
       when: '배가 아프면서 토하고, 가스·변이 나오지 않을 때',
       then: '드시는 것을 멈추고 바로 진료를 받으세요.'
+    })
+  }
+  /* 재영양 단계(처음 일주일) — 재영양증후군의 신호 */
+  if (refeedingStage(patient)) {
+    out.push({
+      id: 'refeeding',
+      when: '드시기 시작한 뒤 가슴이 두근거리거나, 숨이 차거나, 몸이 붓거나, 심하게 기운이 없을 때',
+      then: '재영양증후군의 신호일 수 있습니다. 바로 담당 의료진께 연락하세요.'
     })
   }
   return out

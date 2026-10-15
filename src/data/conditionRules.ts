@@ -34,10 +34,16 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
       evidence: 'G', refIds: ['iddsi']
     },
     {
-      id: 'cond-dys-thin', level: 'caution', match: { foodIds: ['water', 'barley-tea', 'orange-juice'] },
+      /*
+       * 2026-10-15 — 물·보리차·오렌지주스 세 가지에만 걸려 있었다. 마시는 것 전체('마시는것' 태그)로 넓혔다.
+       * advisory: 식단에서 빼지 않는다 — 영양보충 음료는 삼키기 어려운 분께 오히려 중요한 열량원이다. 대신 드시는 법을 붙인다.
+       */
+      id: 'cond-dys-thin', level: 'caution', advisory: true, match: { foodIds: ['water', 'barley-tea', 'orange-juice'], tags: ['마시는것'] },
       title: '물처럼 묽은 액체는 너무 빨리 흘러 조절하기 어렵습니다',
+      howTo: '연하 평가에서 정해 준 점도로 걸쭉하게(점도증진제) 해서 드세요',
       reason:
         '묽은 액체는 흐르는 속도가 빨라 안전하게 조절하기 어려운 경우가 있습니다. 걸쭉하게 하면 흐름이 느려집니다. ' +
+        '물·차·우유·두유·주스·커피, 그리고 영양보충 음료처럼 마시는 것은 모두 해당합니다. ' +
         '다만 어느 정도로 걸쭉하게 할지는 사람마다 달라, 연하 평가를 받고 담당 의료진이 정해 주는 단계를 따르셔야 합니다. ' +
         '임의로 되게 만들면 오히려 목에 남고 물을 적게 드시게 됩니다.',
       evidence: 'G', refIds: ['iddsi']
@@ -46,7 +52,7 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
 
   구강점막염: [
     {
-      id: 'cond-muc-avoid', level: 'avoid', match: { tags: ['매운맛', '산성강함', '거친질감', '고나트륨'] },
+      id: 'cond-muc-avoid', softenWhenLosing: true, level: 'avoid', match: { tags: ['매운맛', '산성강함', '거친질감', '고나트륨'] },
       title: '맵고 시고 짜고 거친 것 — 네 가지를 모두 빼세요',
       reason:
         /*
@@ -92,7 +98,7 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
       evidence: 'G', refIds: ['nci-pdq-nutrition']
     },
     {
-      id: 'cond-diar-avoid', level: 'avoid', match: { tags: ['유당함유', '고지방', '고식이섬유', '카페인', '매운맛', '가스유발'] },
+      id: 'cond-diar-avoid', softenWhenLosing: true, level: 'avoid', match: { tags: ['유당함유', '고지방', '고식이섬유', '카페인', '매운맛', '가스유발'] },
       title: '유당·기름진 음식·거친 섬유·카페인은 설사를 악화시킵니다',
       reason:
         /*
@@ -167,7 +173,7 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
        * 출처를 ESPEN 2021(지방·냄새 0건)에서 NCI PDQ 로 갈았다. '지방은 위 배출을 늦춰' 기전은 출처에 없어 뺐고,
        * '상온이나 찬 음식' 은 NCI 의 "너무 뜨겁거나 차지 않은 음식" 과 어긋나 원문대로 고쳤다.
        */
-      id: 'cond-nau-avoid', level: 'avoid',
+      id: 'cond-nau-avoid', softenWhenLosing: true, level: 'avoid',
       match: {
         restrictGroups: [
           '곡류·전분', '두류·대두가공', '채소', '해조·버섯', '과일', '육류', '가금류·난류', '어패류', '우유·유제품',
@@ -615,7 +621,11 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
 
   와파린복용: [
     {
-      id: 'cond-warf-vitk', level: 'caution', match: { tags: ['고비타민K'] },
+      /*
+       * advisory(2026-10-15) — 식단에서 빼지 않는다. 빼는 쪽으로 작동해 증상 칸으로 고르신 분의 식단에서 녹색 잎채소가 사라졌다.
+       * 하루 양은 식단 엔진이 비타민 K 폭(engine/nutrition.ts microTargets)으로 맞춘다.
+       */
+      id: 'cond-warf-vitk', level: 'caution', advisory: true, match: { tags: ['고비타민K'] },
       title: '비타민 K 는 끊는 것이 아니라 "일정하게" 드시는 것이 핵심입니다',
       reason:
         /*

@@ -12,9 +12,10 @@
  *  9. 떡 — 공공데이터 떡에 '점착성' 이 붙는가 / 나트륨 — 공공데이터 찌개에 '고나트륨' 이 붙는가
  * 10. 응급 안내 — 해당하는 분께 나오는가
  * 11. 알레르기 — 고른 것이 식단에 오르지 않는가, 판정·저장·오탐
+ * 12~17. 체중감소 완화 · 연하곤란 액체 · 당뇨 식단 · 와파린 비타민 K 폭 · 투석 · 재영양
  */
 import { buildDayMenu, fiberGoal } from '../../src/engine/menu'
-import { foodContribution, personalTarget } from '../../src/engine/nutrition'
+import { foodContribution, personalTarget, refeedingRisk, refeedingStage, renalProteinCap, targetNotes } from '../../src/engine/nutrition'
 import { activeInteractions, evaluateFood } from '../../src/engine/rules'
 import { CANCERS, CANCER_BY_ID } from '../../src/data/cancers'
 import { FOODS, swallowSafe } from '../../src/data/foods'
@@ -176,6 +177,88 @@ if (same > 0) bad.push(`다시 구성: 담은 것이 없는데도 같은 상이 
     if (f && allergensIn(f).includes(a)) bad.push(`알레르기 오탐: ${name} → ${a}`)
   }
   if (restorePatient({ ...DEFAULT_PATIENT, allergies: ['우유', '없는것', 3] }).allergies?.join() !== '우유') bad.push('알레르기: 저장 자료의 모르는 값을 걸러 내지 않음')
+}
+
+/* 12. 체중이 뚜렷이 줄면 증상 완화용 '피하세요' 가 '주의' 로, 사유가 남는가. 안전 규칙(날것·술)은 그대로인가 */
+{
+  const base = { cancer: 'colorectal', phase: 'during_chemo', conditions: ['설사', '구강점막염', '호중구감소증'] } as Partial<PatientContext>
+  const fried = FOODS.find((f) => f.name === '후라이드치킨')!
+  const raw = FOODS.find((f) => f.name === '연어회')!
+  const stable = evaluateFood(fried, P(base)), losing = evaluateFood(fried, P({ ...base, weightLossPct: 8 }))
+  if (stable.level !== 'avoid') bad.push('체중감소 완화: 기준 상태에서 후라이드치킨이 피하세요가 아님(검사 전제가 깨짐)')
+  if (losing.level !== 'caution') bad.push(`체중감소 완화: 8 % 감소인데 후라이드치킨이 ${losing.level}`)
+  if (!losing.hits.some((h) => /체중이 줄고 있어 낮춘 판정/.test(h.rule.reason))) bad.push('체중감소 완화: 사유 문구가 없음')
+  if (evaluateFood(raw, P({ ...base, weightLossPct: 8 })).level !== 'avoid') bad.push('체중감소 완화: 날것까지 낮아짐')
+  if (evaluateFood(fried, P({ ...base, weightLossPct: 4 })).level !== 'avoid') bad.push('체중감소 완화: 4 % 감소에서 낮아짐(문턱 5 %)')
+}
+
+/* 13. 연하곤란 — 마시는 것 전체에 묽은 액체 안내, 식단에서는 빼지 않음(영양보충 음료) */
+{
+  const p = P({ cancer: 'headneck', phase: 'during_rt', conditions: ['연하곤란'] })
+  for (const name of ['우유(일반)', '두유(무가당)', '커피(아메리카노)', '균형영양식(고열량형, 1.5 kcal/mL)']) {
+    const f = FOODS.find((x) => x.name === name)
+    if (!f) { bad.push(`액체 표본 없음: ${name}`); continue }
+    if (!evaluateFood(f, p).hits.some((h) => h.rule.id === 'cond-dys-thin')) bad.push(`연하곤란: '${name}' 에 묽은 액체 안내 없음`)
+  }
+  const thick = FOODS.find((x) => x.name === '점도증진제(연하보조)')
+  if (thick && evaluateFood(thick, p).hits.some((h) => h.rule.id === 'cond-dys-thin')) bad.push('연하곤란: 점도증진제에 묽은 액체 안내')
+}
+
+/* 14. 당뇨 식단 — 고당 음식이 오르지 않고, 과일은 1회 당 15 g 이하 */
+{
+  for (let d = 0; d < 15; d++) {
+    const p = P({ cancer: pick(CANCERS).id, phase: 'during_chemo', conditions: ['당뇨'], medications: ['steroid'], sex: 'M' })
+    const m = buildDayMenu([], p, { supplements: [], day: new Date(Date.UTC(2026, 9, 1 + d)).toISOString().slice(0, 10), nonce: 0, recent: new Map() })
+    for (const s of MEAL_SLOTS) for (const e of m.meals[s]) {
+      if (e.origin !== 'added') continue
+      if (e.food.tags.includes('고당')) bad.push(`당뇨 식단에 고당 음식: ${e.food.name}`)
+      const sugar = ((e.food.per100.sugar ?? 0) * e.food.serving.g) / 100
+      if (e.food.group === '과일' && sugar > 15) bad.push(`당뇨 식단에 1회 당 ${Math.round(sugar)} g 과일: ${e.food.name}`)
+    }
+  }
+}
+
+/* 15. 와파린 — 비타민 K 가 하한~상한(남 75~150, 여 65~130 µg) 안, 증상 칸·약 칸 같은 식단 */
+{
+  let out = 0, n = 0
+  for (const sex of ['M', 'F'] as const) for (let d = 0; d < 20; d++) {
+    const day = new Date(Date.UTC(2026, 9, 1 + d)).toISOString().slice(0, 10)
+    const cancer = pick(CANCERS).id
+    const a = buildDayMenu([], P({ cancer, phase: 'survivorship', sex, medications: ['warfarin'] }), { supplements: [], day, nonce: 0, recent: new Map() })
+    const b = buildDayMenu([], P({ cancer, phase: 'survivorship', sex, conditions: ['와파린복용'] }), { supplements: [], day, nonce: 0, recent: new Map() })
+    const ids = (m: typeof a) => MEAL_SLOTS.flatMap((s) => m.meals[s].map((e) => e.food.id)).join(',')
+    if (ids(a) !== ids(b)) bad.push(`와파린: 증상 칸과 약 칸의 식단이 다름 (${cancer} ${day})`)
+    const ai = sex === 'M' ? 75 : 65, v = a.totals.vitK ?? 0
+    n++
+    if (v < ai - 0.5) bad.push(`와파린: 비타민 K ${Math.round(v)} µg — 하한 ${ai} 아래 (${cancer} ${day})`)
+    if (v > ai * 2 * 1.35) bad.push(`와파린: 비타민 K ${Math.round(v)} µg — 상한 ${ai * 2} 을 크게 넘음 (${cancer} ${day})`)
+    if (v > ai * 2 + 0.5) out++
+  }
+  if (out / n > 0.05) bad.push(`와파린: 비타민 K 상한을 넘는 날 ${out}/${n} — 5 % 넘음`)
+}
+
+/* 16. 투석 — 투석 중이면 단백질 뚜껑을 벗기고, 투석 전·모름이면 1.2 g/kg 을 넘지 않는다 */
+{
+  const base = { cancer: 'lung', phase: 'during_chemo', conditions: ['신기능저하'], weightKg: 60 } as Partial<PatientContext>
+  const t = (o: Partial<PatientContext>) => personalTarget(P({ ...base, ...o }), CANCER_BY_ID.lung.target.kcalPerKg, CANCER_BY_ID.lung.target.proteinPerKg)
+  if (t({ dialysis: '투석 전' }).protein[1] > 72) bad.push('투석 전: 단백질 상한이 1.2 g/kg(72 g)을 넘음')
+  if (t({ dialysis: '혈액투석' }).protein[0] < 60) bad.push('혈액투석: 단백질 하한이 1.0 g/kg 아래')
+  if (!renalProteinCap(P({ ...base, dialysis: '모름' })) || renalProteinCap(P({ ...base, dialysis: '복막투석' }))) bad.push('투석: 단백질 뚜껑 판단이 틀림')
+  if (!targetNotes(P({ ...base })).some((n) => /투석 여부를 알려 주세요/.test(n.label))) bad.push('투석: 여부를 모를 때 묻는 안내가 없음')
+}
+
+/* 17. 재영양 — 고위험이고 거의 못 드셨으면 처음 일주일 단계적 목표, 아니면 그대로. 극단이면 식단 대신 병원 안내 */
+{
+  const t = CANCER_BY_ID.stomach.target
+  const p = (o: Partial<PatientContext>) => P({ cancer: 'stomach', phase: 'during_chemo', sex: 'F', weightKg: 40, heightCm: 158, weightLossPct: 12, lowIntakeSince: '2026-10-15', ...o })
+  const d1 = personalTarget(p({ lowIntake: '5일 넘게' }), t.kcalPerKg, t.proteinPerKg, '2026-10-15')
+  const d8 = personalTarget(p({ lowIntake: '5일 넘게' }), t.kcalPerKg, t.proteinPerKg, '2026-10-22')
+  const eating = personalTarget(p({ lowIntake: '아니요' }), t.kcalPerKg, t.proteinPerKg, '2026-10-15')
+  if (d1.kcal[0] !== 400) bad.push(`재영양: 1일째 하한 ${d1.kcal[0]} — 10 kcal/kg(400) 이어야 함`)
+  if (d8.kcal[0] !== eating.kcal[0]) bad.push('재영양: 8일째에 필요량으로 돌아오지 않음')
+  if (!refeedingRisk(p({ lowIntake: '5일 넘게' })).high) bad.push('재영양: BMI 16·12 % 감소·5일 넘게를 고위험으로 보지 않음')
+  if (!refeedingRisk(p({ weightKg: 34, lowIntake: '10일 넘게' })).extreme) bad.push('재영양: BMI 13.6 을 극단으로 보지 않음')
+  if (refeedingStage(p({ weightKg: 60, weightLossPct: 0, lowIntake: '5일 넘게' }), '2026-10-15')) bad.push('재영양: 위험이 낮은데 단계적 목표가 걸림')
 }
 
 /* 10. 응급 안내 */

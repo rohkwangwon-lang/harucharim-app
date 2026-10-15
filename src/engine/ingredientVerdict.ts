@@ -1,6 +1,7 @@
 import type { EvidenceLevel, PatientContext, RuleLevel } from '../data/types'
 import { findIngredients, findPrimaryIngredients, INGREDIENT_RULES, type IngredientRule } from '../data/ingredientRules'
 import { effectiveMedications } from './rules'
+import { allergenHits } from '../data/allergens'
 
 /**
  * 시판 건강기능식품 판정.
@@ -27,6 +28,8 @@ export interface IngredientVerdict {
   refIds: string[]
   /** 왜 이 판단이 나왔는지 (예: '전립선암', '와파린 복용 중') */
   because?: string
+  /** 근거 등급이 붙는 임상 판단이 아니라 이분이 고르신 알레르기 — 화면에 등급 대신 그렇게 적는다 */
+  allergy?: boolean
 }
 
 const RANK: Record<RuleLevel, number> = { avoid: 3, caution: 2, prefer: 1, info: 0 }
@@ -98,13 +101,30 @@ export function judgeProduct(
   functionText: string,
   patient: PatientContext
 ): ProductVerdict {
+  /*
+   * 알레르기 — 제품 이름에 보이면 원료 판정과 상관없이 '피하세요'(2026-10-15 알레르기 2단계).
+   * 원료를 하나도 알아보지 못한 제품이어도 알레르기는 말해야 한다.
+   */
+  const allergy = allergenHits({ name }, patient.allergies)
+  const allergyItem: IngredientVerdict | null = allergy.length ? {
+    ingredient: `알레르기 — ${allergy.join('·')}`, primary: true, level: 'avoid', allergy: true,
+    reason: `내 정보에서 ${allergy.join('·')} 알레르기를 고르셨고, 제품 이름에 그 원료가 보입니다. ` +
+      '제품 이름으로만 찾으므로 이름에 드러나지 않는 원료는 놓칠 수 있습니다 — 포장의 알레르기 표시를 꼭 확인하세요.',
+    evidence: 'G', refIds: [], because: '내가 고른 알레르기'
+  } : null
+
   const rules = findIngredients(`${name} ${functionText}`)
-  if (rules.length === 0) return { level: null, primaryLevel: null, items: [], unknown: true }
+  if (rules.length === 0) {
+    return allergyItem
+      ? { level: 'avoid', primaryLevel: 'avoid', items: [allergyItem], unknown: false }
+      : { level: null, primaryLevel: null, items: [], unknown: true }
+  }
 
   /* 제품 이름에 드러난 것이 주성분이다 */
   const primary = new Set(findPrimaryIngredients(name, functionText).map((r) => r.name))
   const inName = new Set(findIngredients(name).map((r) => r.name))
   const items = rules.map((r) => ({ ...judge(r, patient, inName.has(r.name)), primary: primary.has(r.name) }))
+  if (allergyItem) items.unshift(allergyItem)
   const level = items.reduce<RuleLevel>(
     (acc, v) => (RANK[v.level] > RANK[acc] ? v.level : acc),
     'info'

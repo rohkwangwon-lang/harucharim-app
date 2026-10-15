@@ -114,7 +114,7 @@ export const esophagus: CancerProfile = {
       refIds: ['iddsi']
     },
     {
-      id: 'eso-mucositis',
+      id: 'eso-mucositis', softenWhenLosing: true,
       level: 'avoid',
       match: { tags: ['매운맛', '산성강함'] },
       phases: ['during_rt', 'during_chemo'],

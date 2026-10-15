@@ -6,7 +6,7 @@ import { IconEvening, IconMorning, IconNoon, IconShuffle, IconSnack } from './ic
 import type { Cuisine, MealSlot, PatientContext, SelectedItem } from '../data/types'
 import { CUISINE_CHOICES, MEAL_SLOTS } from '../data/types'
 import { buildDayMenu, fiberGoal, recentFoods, type DayMenu } from '../engine/menu'
-import { foodContribution, personalTarget } from '../engine/nutrition'
+import { foodContribution, personalTarget, refeedingRisk, refeedingStage, renalProteinCap } from '../engine/nutrition'
 import { CANCER_BY_ID } from '../data/cancers'
 import { emergencySigns } from '../data/emergencySigns'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
@@ -63,8 +63,9 @@ export function RecommendedMenu({
   const profile = CANCER_BY_ID[patient.cancer]
   const naLimit = profile.target.naLimit ?? 2000
   // 신장 기능이 떨어진 분에게는 단백질 과다가 문제가 된다
-  const renalCare = patient.conditions.some((c) => c === '신기능저하' || c === '간성뇌증위험')
-  const target = personalTarget(patient, profile.target.kcalPerKg, profile.target.proteinPerKg)
+  /* 투석 중이면 단백질이 넘쳐도 문제 삼지 않는다(renalProteinCap) */
+  const renalCare = renalProteinCap(patient) || patient.conditions.includes('간성뇌증위험')
+  const target = personalTarget(patient, profile.target.kcalPerKg, profile.target.proteinPerKg, day)
   const supps = useMemo(
     () => supplements.map((id) => SUPPLEMENT_BY_ID[id]).filter(Boolean),
     [supplements]
@@ -232,6 +233,26 @@ export function RecommendedMenu({
    */
   const fiberState = nutrientState(fiber, fg.range[0], fg.range[1], { overOk: !fg.lowResidue })
   const naState = nutrientState(na, 0, naLimit, { limit: naLimit })
+
+  /*
+   * 재영양 위험이 극단적인 분(BMI 14 미만이거나 15일 넘게 거의 못 드심)의 처음 일주일.
+   * NICE 는 하루 5 kcal/kg 에서 시작하고 심전도를 계속 보라고 한다 — 집에서 앱 식단을 따를 단계가 아니다.
+   * 식단을 보여 드리지 않고 병원에 연락하시도록 한다(2026-10-15).
+   */
+  const stage = refeedingStage(patient, day)
+  if (stage && refeedingRisk(patient).extreme) {
+    return (
+      <div className="rounded-2xl border border-danger-200 bg-danger-50 px-4 py-4 text-sm leading-relaxed text-stone-800" role="alert">
+        <p className="font-bold text-danger-800">지금은 식단을 짜 드리지 않습니다 — 먼저 병원에 연락해 주세요</p>
+        <p className="mt-2">
+          체중이 매우 적거나 오래 거의 못 드신 상태에서는, 다시 드시기 시작할 때 혈중 칼륨·인·마그네슘이 떨어지는
+          재영양증후군 위험이 큽니다. 이런 경우 영국 국립보건임상연구원(NICE) 지침은 아주 적은 양(체중 1 kg 당 5 kcal)에서
+          시작해 심장 감시를 하며 올리도록 합니다 — 의료진이 함께 해야 하는 단계입니다.
+        </p>
+        <p className="mt-2">오늘이 {stage.day}일째입니다. 담당 의료진과 시작 열량·채혈·비타민 B1 보충을 정하신 뒤에는 내 정보에서 '거의 못 드셨나요' 답을 바꿔 주세요.</p>
+      </div>
+    )
+  }
 
   return (
     <div>

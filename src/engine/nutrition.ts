@@ -311,6 +311,28 @@ function cutText(cut: number): string {
 export function personalTarget(
   patient: PatientContext,
   kcalPerKg: [number, number],
+  proteinPerKg: [number, number],
+  /** 어느 날의 목표인가 — 재영양 위험의 단계적 목표가 날짜에 따라 다르다. 없으면 오늘 */
+  onDay?: string
+): { kcal: [number, number]; protein: [number, number]; fluid: number } {
+  const full = fullTarget(patient, kcalPerKg, proteinPerKg)
+  const st = refeedingStage(patient, onDay)
+  if (!st) return full
+  /* 1일째 시작값에서 7일째 필요량(하한)까지 고르게 올린다. 단백질도 같은 비율로 — 필요량을 앞질러 채우지 않게 */
+  const w = patient.weightKg
+  const start = Math.round(w * st.kcalPerKg)
+  const lo = Math.round(start + (full.kcal[0] - start) * (st.day - 1) / 6)
+  const ratio = full.kcal[0] > 0 ? lo / full.kcal[0] : 1
+  return {
+    kcal: [lo, Math.round(lo * 1.1)],
+    protein: [Math.round(full.protein[0] * ratio), Math.round(full.protein[1] * ratio)],
+    fluid: full.fluid
+  }
+}
+
+function fullTarget(
+  patient: PatientContext,
+  kcalPerKg: [number, number],
   proteinPerKg: [number, number]
 ): { kcal: [number, number]; protein: [number, number]; fluid: number } {
   const w = dosingWeight(patient)
@@ -371,8 +393,18 @@ export function personalTarget(
    * ESPEN 수술 지침은 1.5 g/kg(영양불량 시 2.0)을 권한다. 여기서는 한 단계만 올려
    * 하한을 1.2 로 둔다. 상한은 그대로여서 신장·간 제한이 걸리는 분께는 그쪽이 먼저 잡는다.
    */
-  const pk: [number, number] =
+  let pk: [number, number] =
     patient.phase === 'post_op' ? [Math.max(proteinPerKg[0], 1.2), proteinPerKg[1]] : proteinPerKg
+  /*
+   * 신장 기능이 떨어진 분(2026-10-15).
+   * 예전에는 암종 값(1.0~1.5, 수술 뒤 1.2~1.5 g/kg)을 그대로 썼다.
+   *  - 투석 전·모름: ESPEN 2017 암 지침 해설 — 만성 신부전에서는 1.2 g/kg 을 넘지 않는다. 그래서 1.0~1.2.
+   *    신장내과의 저단백식(KDOQI: 대사가 안정된 경우 0.55~0.6, 당뇨 0.6~0.8)은 치료 중 암 환자에게 그대로 옮기지 않는다 —
+   *    KDIGO 2024 도 대사가 불안정하면 저단백식을 하지 말라고 한다. 처방이 있으면 그쪽이 먼저라고 화면에 적는다.
+   *  - 투석 중: KDOQI 2020 유지 투석 1.0~1.2(2차 문헌으로 확인), ESPEN 2021 신장 지침은 입원 중 간헐 투석 1.2 이상.
+   *    하한을 1.0 으로 두고, 넘치는 것은 문제 삼지 않는다(renalProteinCap 이 꺼진다).
+   */
+  if (patient.conditions.includes('신기능저하')) pk = [1.0, 1.2]
 
   const lo = Math.round(w * kk[0] * scale)
   const hi = Math.round(w * kk[1] * scale)
@@ -394,6 +426,55 @@ export function personalTarget(
     protein: [Math.round(w * pk[0]), Math.round(w * pk[1])],
     fluid: Math.round(w * 30)
   }
+}
+
+/**
+ * 재영양증후군 위험(NICE CG32 Box 1)과 처음 며칠의 단계적 목표(2026-10-15).
+ *
+ * 고위험: 하나라도 — BMI <16, 3~6개월 비의도 감소 >15 %, 10일 넘게 거의 못 먹음
+ *        또는 둘 이상 — BMI <18.5, 감소 >10 %, 5일 넘게 거의 못 먹음
+ * (급식 전 칼륨·인·마그네슘이 낮은 것도 기준이지만 앱은 채혈 값을 모른다 — 화면에서 확인을 권한다.)
+ *
+ * 단계적 목표는 '거의 못 드셨다' 고 답하신 분께만 건다 — 재영양증후군은 굶다가 다시 먹기 시작할 때의 문제다.
+ * NICE 1.4.8: 최대 10 kcal/kg/일로 시작해 4~7일에 걸쳐 필요량까지. BMI <14 이거나 15일 넘게 거의 못 드셨으면 5 kcal/kg/일.
+ * 앱은 7일에 걸쳐 고르게 올린다(느린 쪽). ESPEN 2017 해설도 같은 숫자(5~10 kcal/kg, 4~7일)를 든다.
+ * 이 단계는 의료진 감독 아래에서 하는 것이다 — 화면에 그렇게 적는다.
+ */
+export function refeedingRisk(patient: PatientContext): { high: boolean; extreme: boolean; why: string[] } {
+  const h = patient.heightCm / 100
+  const bmi = h > 0 ? patient.weightKg / (h * h) : 22
+  const loss = effectiveLossPct(patient)
+  const li = patient.lowIntake
+  const days = li === '15일 넘게' ? 15 : li === '10일 넘게' ? 10 : li === '5일 넘게' ? 5 : 0
+  const one = [bmi < 16 && 'BMI 16 미만', loss > 15 && '최근 15 % 넘는 체중 감소', days >= 10 && '10일 넘게 거의 못 드심'].filter(Boolean) as string[]
+  const two = [bmi < 18.5 && 'BMI 18.5 미만', loss > 10 && '최근 10 % 넘는 체중 감소', days >= 5 && '5일 넘게 거의 못 드심'].filter(Boolean) as string[]
+  const high = one.length > 0 || two.length >= 2
+  return { high, extreme: high && (bmi < 14 || days >= 15), why: one.length ? one : two }
+}
+
+/** 단계적 목표가 걸리는 날이면 그 날의 열량 배율 정보, 아니면 null */
+export function refeedingStage(patient: PatientContext, onDay?: string): { day: number; kcalPerKg: number } | null {
+  const r = refeedingRisk(patient)
+  if (!r.high || !patient.lowIntake || patient.lowIntake === '아니요' || !patient.lowIntakeSince) return null
+  const today = onDay ?? new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10)
+  const day = Math.floor((Date.parse(today) - Date.parse(patient.lowIntakeSince)) / 86400000) + 1
+  if (day < 1 || day > 7) return null
+  return { day, kcalPerKg: r.extreme ? 5 : 10 }
+}
+
+/**
+ * 단백질에 뚜껑을 씌울 신장 상태인가(2026-10-15 투석 여부 추가).
+ * 투석 중이면 투석으로 단백질이 빠져나가 오히려 더 필요하다 — 뚜껑을 씌우지 않는다.
+ * 투석 전이거나 모르시면 씌운다.
+ */
+export function renalProteinCap(patient: PatientContext): boolean {
+  if (!patient.conditions.includes('신기능저하')) return false
+  return !(patient.dialysis === '혈액투석' || patient.dialysis === '복막투석')
+}
+
+/** 투석 중인가 */
+export function onDialysis(patient: PatientContext): boolean {
+  return patient.conditions.includes('신기능저하') && (patient.dialysis === '혈액투석' || patient.dialysis === '복막투석')
 }
 
 /** BMI 와 영양 위험 판정 */
@@ -471,6 +552,49 @@ export function targetNotes(patient: PatientContext): TargetNote[] {
   const h = patient.heightCm / 100
   const bmi = h > 0 ? patient.weightKg / (h * h) : 22
   const loss = effectiveLossPct(patient)
+
+  /* 재영양 위험 — 고위험이면 늘 말하고, 단계적 목표가 걸린 날에는 그 까닭을 말한다(NICE CG32) */
+  {
+    const r = refeedingRisk(patient)
+    const st = refeedingStage(patient)
+    if (st) {
+      out.push({
+        label: `재영양 위험 — 오늘(${st.day}일째)은 목표를 낮춰 잡았습니다`,
+        reason: `오래 거의 못 드신 뒤에는 갑자기 많이 드시면 혈중 칼륨·인·마그네슘이 떨어지는 재영양증후군이 생길 수 있습니다. ` +
+          `영국 국립보건임상연구원(NICE) 지침대로 체중 1 kg 당 ${st.kcalPerKg} kcal 에서 시작해 7일에 걸쳐 필요량까지 올립니다. ` +
+          '이 단계는 의료진과 함께 하셔야 합니다 — 시작 전과 처음 며칠 동안 채혈(칼륨·인·마그네슘)과 비타민 B1(티아민) 보충을 담당 의료진께 꼭 확인하세요.'
+      })
+    } else if (r.high) {
+      out.push({
+        label: '재영양증후군 위험이 높은 상태입니다',
+        reason: `${r.why.join(' · ')} — 영국 국립보건임상연구원(NICE) 기준으로 위험이 높습니다. ` +
+          (patient.lowIntake && patient.lowIntake !== '아니요'
+            ? '처음 일주일의 단계적 목표가 끝났습니다. '
+            : '최근 며칠 동안 거의 못 드셨다면 내 정보에서 알려 주세요 — 처음 며칠은 목표를 낮춰 시작해야 합니다. ') +
+          '먹는 양을 늘릴 때는 담당 의료진과 채혈 결과를 함께 보세요.'
+      })
+    }
+  }
+
+  /* 신장 기능 — 투석 여부에 따라 단백질의 방향이 다르다(2026-10-15) */
+  if (patient.conditions.includes('신기능저하')) {
+    if (onDialysis(patient)) {
+      out.push({
+        label: '투석 중이라 단백질을 체중 1 kg 당 1.0~1.2 g 으로 잡았습니다',
+        reason: '투석을 하면 단백질이 빠져나가 오히려 더 필요합니다. 미국 신장학회 영양 지침(KDOQI 2020)의 유지 투석 기준입니다. ' +
+          '수분·칼륨·인은 투석실에서 정해 주신 기준이 먼저입니다.'
+      })
+    } else {
+      out.push({
+        label: patient.dialysis === '투석 전'
+          ? '투석 전이라 단백질을 체중 1 kg 당 1.0~1.2 g 으로, 1.2 g 을 넘지 않게 잡았습니다'
+          : '신장 기능이 떨어져 단백질을 체중 1 kg 당 1.0~1.2 g 으로 잡았습니다 — 투석 여부를 알려 주세요',
+        reason: '유럽임상영양대사학회(ESPEN) 암 영양 지침은 만성 신부전이 있으면 단백질을 1.2 g 을 넘기지 않도록 합니다. ' +
+          '신장내과에서 저단백식을 따로 처방받으셨다면 그 양이 먼저입니다 — 다만 치료 중 체중이 줄고 있으면 단백질을 크게 줄이는 것도 위험하니 함께 상의하세요. ' +
+          (patient.dialysis ? '' : '투석을 받고 계시면 내 정보에서 알려 주세요 — 목표가 달라집니다.')
+      })
+    }
+  }
 
   const dosing = dosingWeight(patient)
   if (dosing !== patient.weightKg) {
@@ -570,8 +694,18 @@ export interface MicroTarget {
    * 않았다(3,078 → 3,108 mg). 엔진이 풀 수 있는 문제가 아니었다.
    */
   tensionWith?: 'protein' | 'kcal'
+  /**
+   * 상한을 식단 엔진이 넘기지 않는 값으로 볼지 — 지금은 와파린의 비타민 K 만 그렇다.
+   * 칼륨·인처럼 '비용' 으로만 다루면 시금치 한 접시가 하루를 몇 배로 흔들어 놓는다.
+   */
+  hard?: boolean
   evidence: EvidenceLevel
   refIds: string[]
+}
+
+/* 증상 칸의 '와파린복용' 도 와파린으로 친다 — engine/rules.ts effectiveMedications 와 같은 뜻(순환 import 를 피해 여기 둔다) */
+function effectiveMeds(p: PatientContext): string[] {
+  return p.conditions.includes('와파린복용') && !p.medications.includes('warfarin') ? [...p.medications, 'warfarin'] : p.medications
 }
 
 export function microTargets(patient: PatientContext): MicroTarget[] {
@@ -579,6 +713,30 @@ export function microTargets(patient: PatientContext): MicroTarget[] {
   const meds = patient.medications
   const subs = patient.subtypes ?? []
   const conds = patient.conditions
+
+  /*
+   * 비타민 K — 와파린(2026-10-15 엔진 다시 설계).
+   *
+   * 예전에는 고비타민K 음식에 '주의' 를 걸어 두기만 했다. 그런데 그 '주의' 가 식단에서 빼는 쪽으로 작동해,
+   * 증상 칸으로 와파린을 고르신 분의 식단은 하루 비타민 K 가 평균 1 µg(녹색 잎채소가 전부 빠짐),
+   * 약 칸으로 고르신 분은 날마다 0~544 µg 를 오갔다. 둘 다 허가사항이 말하는 '일정하게' 와 반대다.
+   *
+   * 이제는 끊지도 몰지도 않게 하루의 폭을 정해 그 안에서 짠다.
+   *  - 하한: 한국인 충분섭취량(남 75 µg · 여 65 µg) — 잎채소를 아예 빼지 않게
+   *  - 상한: 그 두 배 — 한 접시로 하루가 몇 배가 되지 않게(식단 엔진이 넘기지 않는다)
+   * 이 폭은 앱이 정한 운영 기준이다(얼마의 변동이 INR 을 흔드는지 정해진 숫자는 없다). 화면에도 그렇게 적는다.
+   */
+  if (effectiveMeds(patient).includes('warfarin')) {
+    const ai = patient.sex === 'M' ? 75 : 65
+    out.push({
+      key: 'vitK', label: '비타민 K', unit: 'µg', min: ai, max: ai * 2, hard: true,
+      why:
+        '와파린을 드시는 동안 비타민 K 는 끊는 것이 아니라 날마다 비슷하게 드시는 것이 원칙입니다(미국 허가사항). ' +
+        `그래서 이 앱은 하루 비타민 K 를 한국인 충분섭취량(${ai} µg)에서 그 두 배(${ai * 2} µg) 사이로 맞춰 식단을 짭니다 — ` +
+        '이 폭은 앱이 정한 운영 기준이고, 평소 드시던 양이 이보다 많거나 적었다면 갑자기 바꾸지 말고 담당 의료진과 INR 을 보며 정하세요.',
+      evidence: 'G', refIds: ['fda-label-warfarin', 'kdri2020']
+    })
+  }
 
   /*
    * 칼륨 — 신기능이 떨어진 분.

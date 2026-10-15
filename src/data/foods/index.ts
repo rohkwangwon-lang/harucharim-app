@@ -30,7 +30,7 @@ import { CALCIUM_FOODS } from './calcium'
 import { CHINESE_MORE, WORLD_FOODS } from './worldMore'
 import { CUISINE_MAP, SEASON_MAP } from './seasonCuisine'
 import { GENERATED_CORE } from './generated'
-import { isCold, isSticky, sodiumTag } from './autoTag'
+import { drinkTag, isCold, isSticky, sodiumTag } from './autoTag'
 
 /**
  * 날로 먹는 과일·채소에 '생채소과일' 을 붙인다.
@@ -84,7 +84,7 @@ export const CURATED_FOODS: Food[] = [
   // 제철·요리 계통은 seasonCuisine.ts 한 곳에서 관리하고 여기서 붙인다
   ...f,
   /* 떡·찹쌀은 손으로 등록한 것에도 '점착성' 을 이름으로 붙인다 — 찹쌀밥이 연하곤란 식단에 열나흘 올랐다(2026-10-15 안전 검토) */
-  tags: withSticky(withProduceTag({ ...f, tags: withSodiumTag(f) }), f.name),
+  tags: drinkTag(withSticky(withProduceTag({ ...f, tags: withSodiumTag(f) }), f.name), f.name, f.group),
   season: f.season ?? SEASON_MAP[f.id],
   cuisine: f.cuisine ?? CUISINE_MAP[f.id] ?? '한식'
 }))

@@ -1,6 +1,7 @@
 import { ALLERGENS } from '../data/allergens'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
+import { DIALYSIS_CHOICES, LOW_INTAKE_CHOICES } from '../data/types'
 import { normalizeSlot } from '../data/types'
 import { FOOD_BY_ID } from '../data/foods'
 import { observedWeightLoss } from '../engine/nutrition'
@@ -162,6 +163,12 @@ export function restorePatient(raw: unknown): PatientContext {
     conditions: asList(p.conditions).filter((c): c is PatientContext['conditions'][number] => typeof c === 'string' && KNOWN_CONDITIONS.has(c)),
     /* 모르는 약은 버리고, 윗칸 없이 남은 아랫칸(레트로졸만 있고 '아로마타제 억제제' 가 없는 경우)에는 윗칸을 채운다 */
     medications: normalizeMedications(asList(p.medications)),
+    /* 투석 여부 — 정해진 값만, 그리고 신기능저하를 고르셨을 때만 의미가 있다 */
+    dialysis: typeof p.dialysis === 'string' && (DIALYSIS_CHOICES as readonly string[]).includes(p.dialysis)
+      ? (p.dialysis as PatientContext['dialysis']) : undefined,
+    lowIntake: typeof p.lowIntake === 'string' && (LOW_INTAKE_CHOICES as readonly string[]).includes(p.lowIntake)
+      ? (p.lowIntake as PatientContext['lowIntake']) : undefined,
+    lowIntakeSince: typeof p.lowIntakeSince === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(p.lowIntakeSince) ? p.lowIntakeSince : undefined,
     /* 알레르기 — 표시대상 목록에 있는 이름만 남긴다 */
     allergies: asList(p.allergies).filter((x): x is string => typeof x === 'string' && (ALLERGENS as readonly string[]).includes(x)),
     subtypes: asList(p.subtypes).filter((t): t is NonNullable<PatientContext['subtypes']>[number] => typeof t === 'string' && validSubs.has(t)),

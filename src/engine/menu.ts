@@ -5,7 +5,7 @@ import { INGREDIENT_DISHES } from '../data/foods/ingredientDishes'
 import { CANCER_BY_ID } from '../data/cancers'
 import { activeInteractions, activeRules, evaluateFood, type RuleHit, type InteractionHit } from './rules'
 import { mealTimingFor } from '../data/interactions'
-import { addTotals, dosingWeight, effectiveLossPct, foodContribution, microTargets, personalTarget, type MicroTarget, type NutrientTotals } from './nutrition'
+import { addTotals, dosingWeight, effectiveLossPct, foodContribution, microTargets, personalTarget, refeedingStage, renalProteinCap, type MicroTarget, type NutrientTotals } from './nutrition'
 
 export type { MealSlot }
 export { MEAL_SLOTS }
@@ -530,7 +530,7 @@ export function buildDayMenu(
   /* 이분에게만 세는 미량영양소 — 해당 사항이 없으면 빈 배열이라 아래가 그대로 돈다 */
   const micros = microTargets(patient)
   /* 신장이 걸리는 분만 단백질에 뚜껑을 씌운다 */
-  const renalCap = patient.conditions.includes('신기능저하')
+  const renalCap = renalProteinCap(patient)
   /*
    * '다시 구성' 을 누르셨는가.
    *
@@ -555,7 +555,7 @@ export function buildDayMenu(
 
   const cached = { rules: activeRules(patient), interactions: activeInteractions(patient) }
   const profile = CANCER_BY_ID[patient.cancer]
-  const target = personalTarget(patient, profile.target.kcalPerKg, profile.target.proteinPerKg)
+  const target = personalTarget(patient, profile.target.kcalPerKg, profile.target.proteinPerKg, opts.day)
   /*
    * 신장이 걸리는 분께 한 품목이 하루 단백질의 3분의 1을 넘지 않게 한다.
    * 한 번에 몰아 쓰면 나머지 끼니에 남는 몫이 없어, 뒤에서 조금씩 새다 상한을 넘긴다.
@@ -1908,20 +1908,27 @@ export function buildDayMenu(
     /* 단백질은 넘쳐도 모자란 것보다 낫다 — 화면도 1.25배까지는 '적정' 으로 본다. 신장이 걸리면 상단이 곧 뚜껑이다 */
     const pCap = renalCap ? target.protein[1] : target.protein[1] * 1.25
     const fCap = fiber.range[1]
+    /* 넘기지 않기로 한 미량영양소 상한(와파린의 비타민 K) — 앞 단계가 넘겼으면 여기서 덜어 낸다 */
+    const hardMicros = micros.filter((m) => m.hard && m.max !== undefined)
     const excess = (t: NutrientTotals) =>
       Math.max(0, ((t.kcal ?? 0) - kCap) / kCap) * 3 +
       Math.max(0, ((t.protein ?? 0) - pCap) / pCap) * 2 +
-      Math.max(0, ((t.fiber ?? 0) - fCap) / fCap)
+      Math.max(0, ((t.fiber ?? 0) - fCap) / fCap) +
+      hardMicros.reduce((n, m) => n + Math.max(0, ((t[m.key] ?? 0) - m.max!) / m.max!) * 3, 0)
     const start = running()
     const floor = {
       kcal: Math.min(target.kcal[0], start.kcal ?? 0),
       protein: Math.min(target.protein[0], start.protein ?? 0),
-      fiber: fiber.lowResidue ? 0 : Math.min(fiber.range[0], start.fiber ?? 0)
+      /* 재영양 단계에는 섬유 목표를 지키느라 양을 못 줄이면 안 된다 */
+      fiber: fiber.lowResidue || refeedingStage(patient, opts.day) ? 0 : Math.min(fiber.range[0], start.fiber ?? 0)
     }
+    const microFloor = hardMicros.map((m) => ({ key: m.key, v: Math.min(m.min ?? 0, start[m.key] ?? 0) }))
     const floorOk = (t: NutrientTotals) =>
-      (t.kcal ?? 0) >= floor.kcal - 0.5 && (t.protein ?? 0) >= floor.protein - 0.05 && (t.fiber ?? 0) >= floor.fiber - 0.05
+      (t.kcal ?? 0) >= floor.kcal - 0.5 && (t.protein ?? 0) >= floor.protein - 0.05 && (t.fiber ?? 0) >= floor.fiber - 0.05 &&
+      microFloor.every((f) => (t[f.key] ?? 0) >= f.v - 0.5)
 
-    for (let step = 0; step < 16; step++) {
+    const refeeding = !!refeedingStage(patient, opts.day)
+    for (let step = 0; step < (refeeding ? 40 : 16); step++) {
       const cur = running()
       const now = excess(cur)
       if (now <= 0) break
@@ -1935,11 +1942,16 @@ export function buildDayMenu(
           if (entry.origin !== 'added') continue
           const staple = mealRole(entry.food) === 'staple' || mealRole(entry.food) === 'onedish'
           const to = entry.servings > 0.5 ? Math.round((entry.servings - 0.5) * 10) / 10 : 0
-          if (to === 0) {
+          /*
+           * 재영양 단계(처음 일주일)에는 양이 먼저다 — 상 모양을 지키느라 목표의 두 배를 내놓으면 안 된다.
+           * 그때는 밥도 빼고, 끼니가 한 가지만 남아도 된다(끼니를 거르는 것이 아니라 아주 조금씩 드시는 단계다).
+           */
+          if (to === 0 && !refeeding) {
             if (staple) continue
             if (SNACK_SLOTS.includes(slot) ? false : here.length <= 1) continue
             if (wasComplete && !mealIsComplete(here.filter((e) => e !== entry).map((e) => e.food))) continue
           }
+          if (to === 0 && refeeding && here.length <= 1 && !SNACK_SLOTS.includes(slot)) continue
           const delta = addTotals(foodContribution(entry.food, entry.servings), negate(foodContribution(entry.food, to)))
           const next = addTotals(cur, negate(delta))
           if (!floorOk(next)) continue
@@ -1950,8 +1962,8 @@ export function buildDayMenu(
            */
           const sk = (s: MealSlot) => meals[s].reduce((n, e) => n + (foodContribution(e.food, e.servings).kcal ?? 0), 0) -
             (s === slot ? (delta.kcal ?? 0) : 0)
-          if (slot === '저녁' && sk('아침') > sk('저녁') * 1.1 && !(kcal0('아침') > kcal0('저녁') * 1.1)) continue
-          if (!SNACK_SLOTS.includes(slot)) {
+          if (!refeeding && slot === '저녁' && sk('아침') > sk('저녁') * 1.1 && !(kcal0('아침') > kcal0('저녁') * 1.1)) continue
+          if (!refeeding && !SNACK_SLOTS.includes(slot)) {
             const dayK = MEAL_SLOTS.reduce((n, s) => n + sk(s), 0)
             if (sk('오전간식') + sk('오후간식') > dayK * 0.35) continue
           }
@@ -1986,6 +1998,109 @@ export function buildDayMenu(
         }
         entry.servings = to
         foodTotals = addTotals(foodTotals, foodContribution(entry.food, to))
+      }
+    }
+
+    /*
+     * 하한까지 채운다 — 와파린의 비타민 K.
+     *
+     * 상한은 덜어 내기로 지키지만, 하한은 아무도 채우지 않아 열 날 중 하루는 잎채소 없이 지나갔다(23 µg 이하).
+     * 날마다 비슷하게 드시는 것이 목표이므로, 모자란 날에는 잎채소 반찬을 반 접시나 한 접시 더하거나
+     * 곁들임 하나를 그것으로 바꾼다. 하루 열량은 상단의 3 % 안에서만 움직인다.
+     */
+    for (const m of hardMicros) {
+      if (m.min === undefined) continue
+      /*
+       * 덜어 내기로 상한 아래로 못 내린 날 — 덜면 열량 하한이나 상 모양이 깨질 때다.
+       * 시금치된장국과 브로콜리가 한 아침에 함께 올라 245 µg 이 된 날이 그랬다(여성 상한 130).
+       * 그때는 가장 많이 지고 있는 곁들임을 비슷한 열량의 다른 것으로 바꾼다.
+       */
+      for (let tries = 0; tries < 3 && (running()[m.key] ?? 0) > m.max! + 0.5; tries++) {
+        const cur0 = running()
+        let victim: { slot: MealSlot; e: MenuEntry; v: number } | undefined
+        for (const slot of MEAL_SLOTS) for (const e of meals[slot]) {
+          if (e.origin !== 'added' || mealRole(e.food) === 'staple' || mealRole(e.food) === 'onedish') continue
+          const v = foodContribution(e.food, e.servings)[m.key] ?? 0
+          if (!victim || v > victim.v) victim = { slot, e, v }
+        }
+        if (!victim || victim.v <= 0) break
+        const freed = foodContribution(victim.e.food, victim.e.servings)
+        const base = addTotals(cur0, negate(freed))
+        const role = mealRole(victim.e.food)
+        const swap = candidates
+          /* 반찬은 반찬으로 — 곁들임으로 바꾸면 밥만 놓인 상이 된다 */
+          .filter((c) => isAnchorDish(c.food) === isAnchorDish(victim!.e.food))
+          .filter((c) => !used.has(c.food.id) && mealRole(c.food) === role && slotsFor(c.food).includes(victim!.slot) &&
+            !sideClash(meals, victim!.slot, c.food, victim!.e) && !stapleClash(meals, victim!.slot, c.food))
+          .filter((c) => {
+            const v = (base[m.key] ?? 0) + (c.micro[m.key] ?? 0) * victim!.e.servings
+            const k = (base.kcal ?? 0) + c.kcal * victim!.e.servings
+            return v >= Math.min(m.min!, base[m.key] ?? 0) && v <= m.max! && k >= floor.kcal && k <= kCap * 1.03
+          })
+          .sort(byScore)[0]
+        if (!swap) break
+        const part = victim.e.servings
+        meals[victim.slot].splice(meals[victim.slot].indexOf(victim.e), 1, {
+          food: swap.food, servings: part, origin: 'added',
+          contribution: '비타민 K 를 날마다 비슷하게',
+          ruleTitle: '와파린을 드시는 동안 비타민 K 는 끊는 것이 아니라 날마다 비슷하게 드시는 것이 원칙입니다.',
+          refIds: [], seasonal: swap.seasonal
+        })
+        used.add(swap.food.id)
+        foodTotals = addTotals(addTotals(foodTotals, negate(freed)), foodContribution(swap.food, part))
+      }
+
+      const now = running()[m.key] ?? 0
+      if (now >= m.min) continue
+      const lack = m.min - now
+      const roomUp = m.max! - now
+      let done = false
+      for (const part of [1, 0.5]) {
+        const pick = candidates
+          .filter((c) => !used.has(c.food.id) && isAnchorDish(c.food) && mealRole(c.food) === 'side')
+          .map((c) => ({ c, v: (c.micro[m.key] ?? 0) * part, k: c.kcal * part }))
+          .filter((x) => x.v >= lack && x.v <= roomUp && (running().kcal ?? 0) + x.k <= kCap * 1.03)
+          .sort((a, b) => byScore(a.c, b.c))[0]
+        if (!pick) continue
+        const slot = (['저녁', '점심'] as MealSlot[]).find((s) => meals[s].length > 0 && slotsFor(pick.c.food).includes(s) &&
+          !sideClash(meals, s, pick.c.food))
+        if (!slot) continue
+        used.add(pick.c.food.id)
+        foodTotals = addTotals(foodTotals, foodContribution(pick.c.food, part))
+        meals[slot].push({
+          food: pick.c.food, servings: part, origin: 'added',
+          contribution: `비타민 K 를 날마다 비슷하게`,
+          ruleTitle: '와파린을 드시는 동안 비타민 K 는 끊는 것이 아니라 날마다 비슷하게 드시는 것이 원칙입니다.',
+          refIds: [], seasonal: pick.c.seasonal
+        })
+        done = true
+        break
+      }
+      if (done) continue
+      /* 더할 자리가 없으면 곁들임 하나를 바꾼다 */
+      for (const slot of ['저녁', '점심'] as MealSlot[]) {
+        const victim = meals[slot].find((e) => e.origin === 'added' && mealRole(e.food) === 'side')
+        if (!victim) continue
+        const freed = foodContribution(victim.food, victim.servings)
+        const base = addTotals(running(), negate(freed))
+        const swap = candidates
+          .filter((c) => !used.has(c.food.id) && isAnchorDish(c.food) && mealRole(c.food) === 'side' &&
+            slotsFor(c.food).includes(slot) && !sideClash(meals, slot, c.food, victim))
+          .filter((c) => {
+            const v = (base[m.key] ?? 0) + (c.micro[m.key] ?? 0)
+            return v >= m.min! && v <= m.max! && (base.kcal ?? 0) + c.kcal <= kCap * 1.03 && (base.kcal ?? 0) + c.kcal >= floor.kcal
+          })
+          .sort(byScore)[0]
+        if (!swap) continue
+        meals[slot].splice(meals[slot].indexOf(victim), 1, {
+          food: swap.food, servings: 1, origin: 'added',
+          contribution: '비타민 K 를 날마다 비슷하게',
+          ruleTitle: '와파린을 드시는 동안 비타민 K 는 끊는 것이 아니라 날마다 비슷하게 드시는 것이 원칙입니다.',
+          refIds: [], seasonal: swap.seasonal
+        })
+        used.add(swap.food.id)
+        foodTotals = addTotals(addTotals(foodTotals, negate(freed)), foodContribution(swap.food, 1))
+        break
       }
     }
 
@@ -2095,6 +2210,18 @@ export function planNotes(patient: PatientContext): { label: string; reason: str
       reason:
         '설사나 장루가 있는 동안에는 잔사를 줄이는 것이 목표입니다. ' +
         '거친 나물·통곡·생채소를 늘리는 시기가 아닙니다. 증상이 가라앉으면 원래 목표로 돌아갑니다.'
+    })
+  }
+
+  if (patient.conditions.includes('당뇨')) {
+    out.push({
+      label: '당이 몰린 음식은 빼고, 과일은 당이 적은 것으로 골랐습니다',
+      reason:
+        '단 간식·음료, 군고구마처럼 당이 많은 음식은 식단에 올리지 않았고, 생과일은 한 번에 드시는 양의 당이 적은 것만 골랐습니다. ' +
+        (patient.medications.includes('steroid')
+          ? '스테로이드를 쓰는 날에는 혈당이 더 오르기 쉬우니 혈당을 자주 확인하시고, '
+          : '') +
+        '혈당 목표와 식사 계획은 담당 의료진과 정하십시오.'
     })
   }
 
@@ -2697,7 +2824,8 @@ function microBudget(
     return {
       key: m.key,
       need: m.min !== undefined ? Math.max(0, m.min - got) : 0,
-      room: m.max !== undefined ? m.max - got : Infinity
+      room: m.max !== undefined ? m.max - got : Infinity,
+      hard: m.hard
     }
   })
 }
@@ -2727,6 +2855,9 @@ function collectCandidates(
     patient.conditions.some((c) =>
       c === '연하곤란' || c === '구강점막염' || c === '오심·구토' ||
       c === '위절제후' || c === '식욕부진' || c === '설사')
+  /* 당뇨에서 죽을 뒤로 미루되, 삼킴·점막염 때문에 죽이 필요한 분은 예외 */
+  const diabeticSoftOk = patient.conditions.includes('당뇨') &&
+    !patient.conditions.some((c) => c === '연하곤란' || c === '구강점막염')
   /*
    * 점착성(떡류)에 감점을 준다 — 연하곤란으로 진단되지 않은 분에게도.
    *
@@ -2788,9 +2919,13 @@ function collectCandidates(
       c === '구강점막염' || c === '오심·구토' || c === '위절제후')
 
   const dysphagia = patient.conditions.includes('연하곤란')
+  const diabetic = patient.conditions.includes('당뇨')
   const out: Cand[] = []
   for (const f of CURATED_FOODS) {
     if (f.group === '경장영양·환자식' && !needsONS && !forceONS) continue
+    /* 신장용·당뇨용 영양식은 그 상태인 분께만 — 신장용은 단백질·칼륨을 줄인 것이라 다른 분께는 맞지 않는다(2026-10-15 안전 검토) */
+    if (/신장용/.test(f.name) && !patient.conditions.includes('신기능저하')) continue
+    if (/당뇨용/.test(f.name) && !patient.conditions.includes('당뇨')) continue
     // 조미료·기름처럼 그 자체로 한 끼를 이루지 않는 것은 제안하지 않는다
     if (f.group === '유지·당류') continue
     if (f.tags.some((t) => NEVER_SUGGEST.has(t))) continue
@@ -2834,6 +2969,19 @@ function collectCandidates(
      * 기준은 data/foods 의 swallowSafe 한 곳에 둔다 — 음식 판정의 '권장' 막기와 같은 잣대다.
      */
     if (dysphagia && !swallowSafe(f)) continue
+    /*
+     * 당뇨가 있으면 당이 몰린 것은 앱이 먼저 올리지 않는다(2026-10-15 전문의 요청).
+     *
+     * 당뇨에 스테로이드를 쓰는 분의 21일 식단에 군고구마('고당', 1회 당 26 g)가 서른여덟 번,
+     * 배·단감(1회 당 23 g)이 거의 날마다 두 번 올라 하루 당류가 평균 63 g 이었다.
+     * 판정 규칙(cond-dm-sugar)은 범위를 좁게 잡아 두어 이것들을 막지 않는다 — 판정이 아니라 고르는 순서의 문제라 여기서 거른다.
+     * '고당' 은 빼고, 생과일은 1회 당류 15 g 이하인 것만 올린다(엔진의 운영 기준 — 직접 고르시는 것은 그대로 둔다).
+     */
+    if (diabetic) {
+      if (f.tags.includes('고당')) continue
+      const sugarPerServing = ((f.per100.sugar ?? 0) * f.serving.g) / 100
+      if (f.group === '과일' && sugarPerServing > 15) continue
+    }
 
     const v = evaluateFood(f, patient, 1, cached)
     /*
@@ -2884,7 +3032,8 @@ function collectCandidates(
      * 빼지는 않되 앞자리를 주지도 않는다. 점수 차이가 12점 안쪽이면 '엇비슷하다' 로
      * 보고 돌려 쓰므로, 그보다 크게 잡아야 실제로 뒤로 간다.
      */
-    penalty += advisories.length * 16
+    /* 와파린의 비타민 K 안내는 감점하지 않는다 — 하루 양은 미량영양소 폭(하한·상한)이 맞춘다. 감점하면 잎채소가 다시 사라진다 */
+    penalty += advisories.filter((h) => h.rule.id !== 'cond-warf-vitk').length * 16
 
     /*
      * 죽은 아플 때 먹는 것이다.
@@ -2898,6 +3047,8 @@ function collectCandidates(
      * 직접 고르시는 것은 그대로 두고, 다른 것이 없으면 여전히 나온다.
      */
     if (!needsSoft && f.group === '밥·면·죽 요리' && /죽$|미음/.test(f.name)) penalty += 22
+    /* 당뇨에는 흰죽·미음처럼 빨리 흡수되는 주식을 뒤로 미룬다 — 삼키기 어렵거나 입안이 헌 분은 예외(그때는 죽이 맞다) */
+    if (diabeticSoftOk && f.group === '밥·면·죽 요리' && /죽$|미음/.test(f.name)) penalty += 18
 
     /*
      * 잦은 소량으로 드셔야 하는 분께는 큰 접시 자체를 덜 권한다.
@@ -3003,7 +3154,7 @@ function bestFiller(
    * need = 채워야 남은 양(칼슘·철), room = 아직 쓸 수 있는 양(칼륨·인).
    * 해당 사항이 없으면 빈 배열이라 점수가 그대로다.
    */
-  micro: { key: NutrientKey; need: number; room: number }[] = [],
+  micro: { key: NutrientKey; need: number; room: number; hard?: boolean }[] = [],
   /**
    * 단백질에 뚜껑을 씌울지 — 신기능이 떨어진 분에게만 참이다.
    *
@@ -3116,9 +3267,12 @@ function bestFiller(
      */
     let microFill = 0
     let microCost = 0
+    let overHard = false
     for (const m of micro) {
       const got = c.micro[m.key] ?? 0
       if (got <= 0) continue
+      /* 넘기지 않기로 한 상한(와파린의 비타민 K) — 남은 몫보다 많이 지고 오는 것은 받지 않는다 */
+      if (m.hard && got > Math.max(0, m.room)) { overHard = true; break }
       if (m.need > 0) microFill += Math.min(got, m.need) / m.need
       /*
        * 상한이 있는 것(칼륨·인)은 남은 몫에 견주어 값을 매긴다.
@@ -3132,6 +3286,7 @@ function bestFiller(
      * 그때는 실제로 도움이 되는 것만 받는다 — 칼슘 13 mg 짜리 살구를
      * "칼슘을 채우러" 올리는 것은 채우는 시늉일 뿐이다.
      */
+    if (overHard) continue
     if (fill <= 0.01 ? microFill < 0.08 : fill + microFill <= 0.01) continue
 
     // 나트륨은 남은 예산에 견주어 값을 매긴다. 예산이 빠듯할수록 비싸진다.
@@ -3598,13 +3753,14 @@ export function dayNotes(
      * 모자란 것보다 훨씬 나은 쪽이다. 신장이 걸리는 분만 따로 짚는다.
      */
     const perKg = protein / Math.max(1, dosingWeight(patient))
-    const renal = patient.conditions.includes('신기능저하')
+    const renal = renalProteinCap(patient)
     notes.push({ tone: renal ? 'over' : 'info', topic: '단백질',
       text: `${Math.round(protein)} g — 목표(${target.protein[0]}~${target.protein[1]} g)보다 많습니다. ` +
         `체중 1 kg 당 ${perKg.toFixed(1)} g 입니다. ` +
         (renal
           ? '신장 기능이 떨어져 있으면 단백질이 많을수록 부담이 됩니다. ' +
-            '치료 중 단백질을 줄이는 것도 위험하므로, 얼마가 맞는지는 채혈 결과를 보고 담당 선생님과 정하셔야 합니다.'
+            '치료 중 단백질을 줄이는 것도 위험하므로, 얼마가 맞는지는 채혈 결과를 보고 담당 선생님과 정하셔야 합니다. ' +
+            '신장내과에서 단백질 양을 따로 정해 주셨다면 그 양이 먼저입니다.'
           : '암 환자에게는 모자란 것보다 나은 쪽이고 2.0 g/kg 까지는 대체로 안전하다고 봅니다. ' +
             '다만 신장 기능이 떨어져 있다면 이야기가 달라지니, 해당되시면 내 정보에 표시해 주세요.') })
   } else {

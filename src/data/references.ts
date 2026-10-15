@@ -51,7 +51,7 @@ export const REFERENCES: Reference[] = [
     citation: 'U.S. Food and Drug Administration. Drug Safety Communication: Low magnesium levels can be associated with long-term use of proton pump inhibitor drugs (PPIs). 2011.',
     url: 'https://www.fda.gov/drugs/drug-safety-and-availability/fda-drug-safety-communication-low-magnesium-levels-can-be-associated-long-term-use-proton-pump' },
   /* 'lam2013ppi-b12' — 원문이 구독제라 원문 공개 출처로 바꾸고 지웠다(2026-10-14 전수 대조) */
-  { id: 'nice-refeeding', kind: 'guideline', year: 2017, access: 'open',
+  { id: 'nice-refeeding', kind: 'guideline', year: 2017, access: 'open', fulltext: 'https://www.nice.org.uk/guidance/cg32/chapter/Recommendations', verified: '게시 2006-02-22·개정 2017-08-04 · Box 1 고위험(1개 이상): BMI <16, 3~6개월 비의도 감소 >15 %, 10일 넘게 거의 못 먹음, 급식 전 K·P·Mg 낮음 / (2개 이상): BMI <18.5, >10 %, >5일, 알코올·인슐린·항암제·제산제·이뇨제 · 1.4.8: 최대 10 kcal/kg/일 시작, 4~7일에 걸쳐 전량, 극단(BMI <14 또는 15일 넘게 거의 못 먹음) 5 kcal/kg/일·심전도 감시 · 티아민 200~300 mg 첫 10일 · 1.4.5: 5일 넘게 거의 못 먹으면 처음 2일 50 % 이하 (2026-10-15 원문 대조)',
     citation: 'National Institute for Health and Care Excellence. Nutrition support for adults (CG32) — refeeding problems. 2006, updated 2017.',
     url: 'https://www.nice.org.uk/guidance/cg32' },
   { id: 'nightingale2020stoma', kind: 'review', year: 2022, verified: '고배출 장루: 대개 하루 1.5~2.0 L 초과 · 저장성 음료(차·커피·물·주스)는 배출과 나트륨 손실을 늘림 → 제한 · 나트륨 90~120 mmol/L 포도당-식염 용액을 하루 동안 조금씩 · 알아차리지 못한 만성 탈수는 말기 신부전으로 (PMC 본문 대조)', access: 'pmc', fulltext: 'PMC8862462',
@@ -345,7 +345,7 @@ export const REFERENCES: Reference[] = [
   { id: 'fda-label-sorafenib-lenvatinib', kind: 'guideline', year: 2026, access: 'open', fulltext: 'NEXAVAR b50667e4-5ebc-4968-a646-d605058dbef0; LENVIMA f4bedd21-efde-44c6-9d9c-b48b78d7ed1e',
     citation: 'NEXAVAR (sorafenib) · LENVIMA (lenvatinib) 미국 허가사항. DailyMed. (넥사바: 케토코나졸(강한 CYP3A4·P-gp 억제제)이 소라페닙 AUC 를 바꾸지 않음 · 렌비마: 케토코나졸로 AUC 15 %·Cmax 19 % 증가 · 두 약 모두 자몽 언급 없음)',
     url: 'https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=b50667e4-5ebc-4968-a646-d605058dbef0' },
-  { id: 'fda-label-warfarin', kind: 'guideline', year: 2026, access: 'open', fulltext: 'https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=558b7a0d-5490-4c1b-802e-3ab3f1efe760',
+  { id: 'fda-label-warfarin', kind: 'guideline', year: 2026, access: 'open', verified: '7.5: 비타민 K 를 일정하게 유지하는 정상·균형 식사, 녹색 잎채소 다량 같은 큰 식습관 변화 회피 · 5.9: 비타민 K 섭취 증가 → INR 반응 감소 · 7.5: 코엔자임Q10·St. John\'s wort·인삼은 효과 감소 · 5.1: 허브 포함 약 시작·중단 시 INR 더 자주 (2026-10-15 원문 대조)', fulltext: 'https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=558b7a0d-5490-4c1b-802e-3ab3f1efe760',
     citation: 'Warfarin sodium tablets (Amneal) 미국 허가사항. DailyMed. (7.5: 비타민 K 를 일정한 양으로 유지하는 고른 식사, 녹색 잎채소를 많이 먹는 것 같은 큰 식사 변화를 피할 것 · 코엔자임Q10·세인트존스워트·인삼은 와파린 효과를 줄일 수 있음 · 허브 제품·다른 약을 시작·중단할 때 INR 을 더 자주 확인)',
     url: 'https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=558b7a0d-5490-4c1b-802e-3ab3f1efe760' },
   { id: 'javaid2024omega3', kind: 'meta', year: 2024, access: 'pmc', fulltext: 'PMC11179820',
@@ -686,7 +686,7 @@ export const REFERENCES: Reference[] = [
    * 전문 대조. 단백질(1 g 초과·1.5 까지·STRONG), 오메가-3(WEAK·근거 낮음),
    * EFSA 안전 용량(EPA+DHA 5 g/일, EPA 단독 1.8 g/일)이 모두 여기에 있다.
    */
-  { id: 'espen-cachexia', kind: 'guideline', year: 2017, verified: 'EFSA: EPA+DHA 하루 5 g, EPA 단독 1.8 g 까지 성인 안전 · 섭취 부족 정의 <60 % 가 1~2주 · 근육량이 기준 미만이면 사망·수술 합병증·전신치료의 용량 제한 독성과 강하게 연관 · C2-5 해설: 프로바이오틱스는 면역저하 환자에 권하기 전에 안전성이 확인되어야 함', access: 'open',
+  { id: 'espen-cachexia', kind: 'guideline', year: 2017, verified: '재급식(B3-4 해설): 최소 5일 거의 못 먹었으면 처음 2일 필요량 절반 이하 · 고갈이 심하면 5~10 kcal/kg/일 시작, 4~7일에 걸쳐 전량(NICE 인용) · 단백질 해설: 정상 신기능 2 g/kg/일까지 안전, 급성·만성 신부전은 각각 1.0·1.2 g/kg/일을 넘지 말 것 (2026-10-15 원문 대조) · EFSA: EPA+DHA 하루 5 g, EPA 단독 1.8 g 까지 성인 안전 · 섭취 부족 정의 <60 % 가 1~2주 · 근육량이 기준 미만이면 사망·수술 합병증·전신치료의 용량 제한 독성과 강하게 연관 · C2-5 해설: 프로바이오틱스는 면역저하 환자에 권하기 전에 안전성이 확인되어야 함', access: 'open',
     url: 'https://doi.org/10.1016/j.clnu.2016.07.015',
     citation: 'Arends J, et al. ESPEN guidelines on nutrition in cancer patients. Clin Nutr. 2017;36(1):11-48. — ESPEN 암 영양 지침 전체판(2021 은 축약본).' }
 ]

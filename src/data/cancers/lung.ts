@@ -125,7 +125,7 @@ export const lung: CancerProfile = {
       refIds: ['mascc-mucositis', 'espen2021']
     },
     {
-      id: 'lung-spicy-acid-rt',
+      id: 'lung-spicy-acid-rt', softenWhenLosing: true,
       level: 'avoid',
       match: { tags: ['매운맛', '산성강함', '거친질감'] },
       phases: ['during_rt'],

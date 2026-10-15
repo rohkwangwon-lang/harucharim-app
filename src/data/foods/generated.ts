@@ -1,5 +1,5 @@
 import type { Food, FoodGroup, FoodTag, NutrientKey, Nutrients } from '../types'
-import { displayName, sodiumTag, withAutoTags } from './autoTag'
+import { displayName, drinkTag, sodiumTag, withAutoTags } from './autoTag'
 import packed from './generated-core.json'
 
 /**
@@ -50,7 +50,7 @@ export function rowToFood(
     form: 'processed',
     serving: { g: servingG, label: `1회 제공량 ${servingG} g` },
     per100,
-    tags: sodiumTag(withAutoTags(name, tagIdx.map((t) => sc.tags[t] as FoodTag), group), per100.na, servingG),
+    tags: drinkTag(sodiumTag(withAutoTags(name, tagIdx.map((t) => sc.tags[t] as FoodTag), group), per100.na, servingG), name, group),
     src: 'kfda',
     auto: true
   }

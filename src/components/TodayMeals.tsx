@@ -8,7 +8,7 @@ import { SUPPLEMENT_BY_ID } from '../data/supplements'
 import { CANCER_BY_ID } from '../data/cancers'
 import { buildDayMenu, currentSeason, dayNotes, fiberGoal, ideasFromIngredients, intakeTrend, microUnknownNames, naUnknownNames, planNotes, recentFoods } from '../engine/menu'
 import { evaluateFood, evaluateSelection, howToLines } from '../engine/rules'
-import { foodContribution, observedWeightGain, personalTarget, sumIntake, targetNotes } from '../engine/nutrition'
+import { foodContribution, observedWeightGain, personalTarget, renalProteinCap, sumIntake, targetNotes } from '../engine/nutrition'
 import { BASE_EXERCISE, CONDITION_EXERCISE_NOTES, EXERCISE_BY_CANCER, INTAKE_EXERCISE_ADVICE } from '../data/exercise'
 import { REF_BY_ID } from '../data/references'
 import { ChipGroup, DayNoteList, EvidenceBadge, HowTo, LevelBadge, NutrientPanel, NutrientRow, nutrientState, Section, TodayStatus } from './ui'
@@ -92,7 +92,7 @@ export function TodayMeals({
   onSetWeight: (kg: number) => void
 }) {
   const profile = CANCER_BY_ID[patient.cancer]
-  const target = personalTarget(patient, profile.target.kcalPerKg, profile.target.proteinPerKg)
+  const target = personalTarget(patient, profile.target.kcalPerKg, profile.target.proteinPerKg, day)
   const supps = supplements.map((id) => SUPPLEMENT_BY_ID[id]).filter(Boolean)
 
   const totals = useMemo(() => sumIntake(selected, supps), [selected, supplements])
@@ -143,7 +143,8 @@ export function TodayMeals({
   const fiber = Math.round((totals.fiber ?? 0) * 10) / 10
   const naLimit = profile.target.naLimit ?? 2000
   // 신장 기능이 떨어진 분에게는 단백질 과다가 문제가 된다
-  const renalCare = patient.conditions.some((c) => c === '신기능저하' || c === '간성뇌증위험')
+  /* 투석 중이면 단백질이 넘쳐도 문제 삼지 않는다(renalProteinCap) */
+  const renalCare = renalProteinCap(patient) || patient.conditions.includes('간성뇌증위험')
   const fiber_ = fiberGoal(patient, profile)
   /** 기본값과 다르게 잡은 것들 — 목표를 왜 그 값으로 두었는지 */
   const adjustments = useMemo(

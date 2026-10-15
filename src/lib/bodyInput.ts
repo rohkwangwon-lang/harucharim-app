@@ -12,7 +12,8 @@
 export const BODY_LIMITS = {
   weightKg: { min: 20, max: 300 },
   heightCm: { min: 100, max: 230 },
-  age: { min: 1, max: 120 }
+  /* 만 14세 이상만 쓰도록 되어 있다(가입 확인 문) — 입력 범위도 같이 맞춘다(2026-10-15 안전 검토) */
+  age: { min: 14, max: 120 }
 } as const
 
 export type BodyField = keyof typeof BODY_LIMITS

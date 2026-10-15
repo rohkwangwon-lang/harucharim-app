@@ -61,7 +61,10 @@ export function CancerGuide({ patient }: { patient: PatientContext }) {
           {p.target.fiberTarget && (
             <Row label="식이섬유" value={`하루 ${p.target.fiberTarget[0]}~${p.target.fiberTarget[1]} g`} />
           )}
-          {p.target.fluidPerKg && <Row label="수분" value={`체중 1 kg 당 ${p.target.fluidPerKg} mL`} />}
+          {/* 복수·신기능저하에서는 수분을 제한하기도 해서, 암종 일반값을 그대로 보이면 거꾸로 된다(2026-10-15 안전 검토) */}
+          {p.target.fluidPerKg && (patient.conditions.includes('복수') || patient.conditions.includes('신기능저하')
+            ? <Row label="수분" value="담당 의료진이 정한 양을 따르세요 — 복수·신장 기능 저하에서는 제한하기도 합니다" />
+            : <Row label="수분" value={`체중 1 kg 당 ${p.target.fluidPerKg} mL`} />)}
         </div>
         {p.target.notes.length > 0 && (
           <ul className="mt-2 space-y-1 px-1">
