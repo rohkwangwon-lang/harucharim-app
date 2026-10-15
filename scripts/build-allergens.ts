@@ -1,7 +1,8 @@
 /**
  * 원재료로 찾은 알레르기 색인 만들기 — 알레르기 2단계(2026-10-15).
  *
- *   node scripts/fetch-rawmtrl.mjs                       # C002 원재료를 data/raw-rawmtrl/ 로
+ *   node scripts/fetch-rawmtrl.mjs                       # C002 원재료를 data/raw-rawmtrl/ 로(API — 시간당 100회 한도, 약 11시간)
+ *   또는 식품안전나라에서 C002 전체를 CSV 로 내려받아 data/raw-rawmtrl-csv/ 에 50,000행씩 JSON 으로 나눠 둔다(2026-10-15 이렇게 완성)
  *   node_modules/.bin/jiti scripts/build-allergens.ts    # → public/data/allergens.json
  *
  * 앱에 있는 가공식품(기본 + 내려받는 것)과 바코드 제품의 품목보고번호만 남긴다 — 108만 건을 다 실을 이유가 없다.
@@ -14,7 +15,7 @@ import { ALLERGENS, allergenMaskOfIngredients } from '../src/data/allergens'
 import { FOODS } from '../src/data/foods'
 
 const ROOT = path.resolve(__dirname, '..')
-const RAW = path.join(ROOT, 'data/raw-rawmtrl')
+const RAWS = [path.join(ROOT, 'data/raw-rawmtrl'), path.join(ROOT, 'data/raw-rawmtrl-csv')].filter((d) => fs.existsSync(d))
 const OUT = path.join(ROOT, 'public/data/allergens.json')
 
 /* 앱이 아는 품목보고번호 */
@@ -27,9 +28,9 @@ for (const c of codes) if (c.n) want.add(String(c.n))
 
 const map = new Map<string, number>()
 let rows = 0
-const pages = fs.readdirSync(RAW).filter((f) => f.endsWith('.json')).sort()
+const pages = RAWS.flatMap((d) => fs.readdirSync(d).filter((f) => f.endsWith('.json')).sort().map((f) => path.join(d, f)))
 for (const f of pages) {
-  for (const r of JSON.parse(fs.readFileSync(path.join(RAW, f), 'utf8')) as { n: string; m: string }[]) {
+  for (const r of JSON.parse(fs.readFileSync(f, 'utf8')) as { n: string; m: string }[]) {
     rows++
     if (!want.has(r.n)) continue
     map.set(r.n, (map.get(r.n) ?? 0) | allergenMaskOfIngredients(r.m))
