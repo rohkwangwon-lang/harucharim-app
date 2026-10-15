@@ -102,7 +102,6 @@ export function allergenMaskOfIngredients(raw: string): number {
 /* 품목보고번호 → 원재료로 찾은 비트. 앱이 public/data/allergens.json 을 받으면 채운다(없으면 이름으로만 찾는다) */
 let REPORT_INDEX: Map<string, number> | null = null
 export function setAllergenIndex(map: Map<string, number> | null): void { REPORT_INDEX = map }
-export function allergenIndexReady(): boolean { return REPORT_INDEX !== null }
 export function maskToAllergens(mask: number): Allergen[] {
   return ALLERGENS.filter((_, i) => (mask & (1 << i)) !== 0)
 }
