@@ -65,7 +65,7 @@ export const REFERENCES: Reference[] = [
     url: 'https://doi.org/10.1053/j.ajkd.2020.05.006' },
   /*
    * 골 소실 관리에 쓰는 1,000~1,200 mg·800 IU 는 KDRI 의 숫자가 아니다.
-   * KDRI 성인 기준은 칼슘 700~800 mg, 비타민 D 10~15 µg(400~600 IU) 이고,
+   * KDRI 성인 기준은 칼슘 650~800 mg(2025 판), 비타민 D 10~15 µg(400~600 IU) 이고,
    * 질병관리청도 "골다공증 치료를 위해서는 더 많은 양을" 이라고 따로 적는다.
    * 두 숫자를 섞어 쓰면 어느 쪽도 못 믿게 되므로 출처를 나눈다.
    */
@@ -79,6 +79,14 @@ export const REFERENCES: Reference[] = [
    *   인 권장 700 · 상한 3,500 / 칼륨 충분 3,500 / 비타민 D 충분 10 µg(65세 이상 15) · 상한 100 µg
    *   비타민 K 충분 남 75 µg · 여 65 µg
    */
+  /*
+   * 2025 한국인 영양소 섭취기준(2025-12-31 게시, 정오표 2025-12-29 반영) — 2026-10-15 요약표 원문(PDF)으로 대조.
+   * 앱의 기준값은 이것으로 옮겼다. 2018년 섭취 실태(3,255 mg)처럼 2020 판 본문에만 있는 것은 kdri2020 으로 남긴다.
+   */
+  { id: 'kdri2025', kind: 'guideline', year: 2025, access: 'open',
+    verified: '성인 요약표(2026-10-15 원문 대조): 비타민 K 충분섭취량 남 75 µg·여 65 µg · 비타민 D 충분섭취량 19~64세 10 µg·65세 이상 15 µg, 상한 100 µg(= 4,000 IU, 단위 환산) · 비타민 C 권장 100 mg, 상한 2,000 mg · 비타민 E 충분 12 mg, 상한 540 mg · 칼슘 권장 남 800 mg, 여 19~49세 650 mg·50세 이상 750 mg(65세 이상 750) · 칼슘 상한 남 19~29세 3,000 mg·30세 이상 2,500 mg, 여 19~29세 2,500 mg·30세 이상 2,000 mg · 인 권장 650 mg, 상한 3,500 mg(75세 이상 3,000 mg) · 나트륨 충분섭취량 1,500 mg(65~74세 1,300·75세 이상 1,200), 만성질환위험감소섭취량 2,300 mg(65~74세 1,900·75세 이상 1,800) · 칼륨 충분섭취량 3,500 mg · 철 권장 남 8 mg(75세 이상 7), 여 19~49세 12 mg·50~64세 7 mg·65세 이상 6 mg, 상한 45 mg · 아연 상한 35 mg · 마그네슘 상한(보충제) 350 mg · 엽산 권장 400 µg DFE, 상한 1,000 µg · 비타민 B12 권장 2.4 µg',
+    citation: '보건복지부·한국영양학회. 2025 한국인 영양소 섭취기준(KDRIs) 요약표. 2025(정오표 2025.12.29 반영).',
+    url: 'https://www.kns.or.kr/FileRoom/FileRoom_view.asp?idx=167&BoardID=Kdr' },
   { id: 'kdri2020', kind: 'guideline', year: 2020, verified: '비타민 K 충분섭취량 성인 남 75 µg·여 65 µg · 비타민 D 충분섭취량 19~64세 10 µg·65세 이상 15 µg, 상한섭취량 100 µg · 칼슘 권장섭취량 성인 700~800 mg · 칼슘 권장 성인 700~800 mg · 상한 50세 이상 2,000 mg · 비타민 D 충분섭취량 10~15 µg · 상한 100 µg (B-cancer1 갈래가 KNS 자료실 원문 표로 대조, B-fix 는 재확인 못 함) · (C-fix 가 KNS 자료실 ZIP \'03 무기질\' 원문 표로 재확인) 칼슘 권장섭취량 성인 남 700~800·여 700~800 mg · 상한 19~49세 2,500 mg, 50세 이상 2,000 mg · 비타민 D 충분섭취량 19~64세 10 µg, 65세 이상 15 µg · 상한 100 µg · 무기질 편 나트륨 장: 2018년 한국인 나트륨 일일 평균섭취량 3,255 mg · 요약표(다량무기질, 남녀 같음): 나트륨 충분섭취량 19-64세 1,500 · 만성질환위험감소섭취량 2,300(65-74세 2,100, 75세 이상 1,700) (3,255 ÷ 2,300 ≈ 1.4배) · 칼륨 충분섭취량 3,500 · 인 권장 700, 상한 3,500(75세 이상 3,000) · 인 장: 첨가물 무기 인산염은 흡수율이 일반 식품 속 인보다 상당히 높음 · 칼륨 장: 신기능 정상이면 소변으로 배설, 칼륨 대체 소금으로 고칼륨혈증(말기 신부전 사례). (KDRI 나트륨 개정 논문 PMC9127518 본문의 노인 남녀별 값 1,900/1,800·2,200/1,700 은 요약표와 다름 — 요약표를 따름) · 비타민 C 권장섭취량 성인 100 mg · 상한 2,000 mg · 2~3 g/일에서 위장 증상, 일부는 1 g/일에서도 · 비타민 D 상한 100 µg(4,000 IU) · 칼슘 권장 성인 700~800 mg, 상한 19~49세 2,500 mg·50세 이상 2,000 mg · 아연 상한 성인 35 mg(과량은 구리 흡수 저하) · 비타민 E 결핍 증세를 보이는 사람은 없는 실정', access: 'open',
     url: 'https://www.kns.or.kr/FileRoom/FileRoom_view.asp?idx=108&BoardID=Kdr',
     citation: '보건복지부·한국영양학회. 2020 한국인 영양소 섭취기준(KDRIs).' },
@@ -333,18 +341,30 @@ export const REFERENCES: Reference[] = [
     citation: 'Bălan A, et al. Royal jelly — a traditional and natural remedy for postmenopausal symptoms and aging-related pathologies. Molecules. 2020;25(14):3291. (2.4·3.1절: 지방산 성분이 에스트로겐 수용체 신호를 매개, ERα·ERβ 결합은 식물성 에스트로겐보다 약함 · 3절: 사람 임상시험은 적고 대부분 난소절제 동물 · 4절: MRJP 알레르기 — 천식·피부염·기관지경련·아나필락시스, 드물게 사망 · 와파린 병용 87세 혈뇨 증례)',
     url: 'https://doi.org/10.3390/molecules25143291' },
   /* 2026-10-14 전수 대조 — fix-D-fix.json 에서 더한 출처(원문 공개분만) */
-  { id: 'fda-label-egfr', kind: 'guideline', year: 2026, access: 'open', fulltext: 'erlotinib 2c4c7353-b81c-4651-8aac-6d15e88145af; IRESSA 827d60e8-7e07-41b7-c28b-49ef1c4a5a41; GILOTRIF fd638e5e-8032-e7ca-0179-95e96ab5d387; TAGRISSO 5e81b4a7-b971-45e1-9c31-29cea8c87ce7 (DailyMed setid)',
+  { id: 'fda-label-egfr', kind: 'guideline', year: 2026, verified: '세인트존스워트(2026-10-15 SPL 원문): 엘로티닙 2.4·7절 이름 — 50 mg 씩 증량, 가능하면 병용 피함, 리팜피신 AUC 58~80 % 감소 · 아파티닙 7절 이름(P-gp 유도제) — 하루 10 mg 증량, 리팜피신 AUC 34 % 감소 · 오시머티닙 7.1 강한 CYP3A 유도제 회피(불가피 시 160 mg), 리팜핀 AUC 78 % 감소 · 게피티닙 7.1 강한 유도제와 쓰면 500 mg, 리팜피신 AUC 83 % 감소', access: 'open', fulltext: 'erlotinib 2c4c7353-b81c-4651-8aac-6d15e88145af; IRESSA 827d60e8-7e07-41b7-c28b-49ef1c4a5a41; GILOTRIF fd638e5e-8032-e7ca-0179-95e96ab5d387; TAGRISSO 5e81b4a7-b971-45e1-9c31-29cea8c87ce7 (DailyMed setid)',
     citation: 'ERLOTINIB (Armas, 구 TARCEVA 판) · IRESSA (gefitinib) · GILOTRIF (afatinib) · TAGRISSO (osimertinib) 미국 허가사항. DailyMed. (엘로티닙: 강한 CYP3A4 억제제 — 자몽·자몽주스 포함 — 병용을 피할 것, 케토코나졸로 AUC 67 % 증가 · 게피티닙: 이트라코나졸로 AUC 80 % 증가, 자몽 언급 없음 · 오시머티닙: 이트라코나졸로 AUC 24 % 증가 — \'임상적으로 의미 없음\' · 아파티닙: CYP 대사 약 9 %, CYP3A4 탈메틸화 검출 안 됨)',
     url: 'https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=2c4c7353-b81c-4651-8aac-6d15e88145af' },
-  { id: 'fda-label-alk', kind: 'guideline', year: 2026, access: 'open', fulltext: 'XALKORI 2a51b0de-47d6-455e-a94c-d2c737b04ff7; ALECENSA 42c49deb-713b-427a-9670-08af08adcffb; LORBRENA 2b34d62d-e02a-4af3-bc0d-1571dd4ee76d',
+  { id: 'fda-label-alk', kind: 'guideline', year: 2026, verified: '세인트존스워트(2026-10-15 SPL 원문): 로라티닙 4절 강한 CYP3A 유도제와 함께 쓰지 말 것(contraindicated, 중증 간독성), 17절 허브 제품 예로 St. John\'s wort, 리팜핀 AUC 85 % 감소 · 크리조티닙 7.1 회피, AUC 84 % 감소 · 브리가티닙(ALUNBRIG 0fe9ff20-d402-41f3-bc1e-7002ea7007db) 7.1 강한·중간 유도제 회피, AUC 80 % 감소 · 알렉티닙 12.3 리팜핀으로 임상적 의미 있는 영향 없음', access: 'open', fulltext: 'XALKORI 2a51b0de-47d6-455e-a94c-d2c737b04ff7; ALECENSA 42c49deb-713b-427a-9670-08af08adcffb; LORBRENA 2b34d62d-e02a-4af3-bc0d-1571dd4ee76d',
     citation: 'XALKORI (crizotinib) · ALECENSA (alectinib) · LORBRENA (lorlatinib) 미국 허가사항. DailyMed. (크리조티닙: 자몽·자몽주스를 피할 것, 케토코나졸로 AUC 216 % 증가 · 알렉티닙: 강한 CYP3A 억제제(포사코나졸)로 알렉티닙+M4 노출에 의미 있는 변화 없음 · 로라티닙: 강한 CYP3A 억제제 병용을 피할 것, 자몽 언급 없음)',
     url: 'https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=2a51b0de-47d6-455e-a94c-d2c737b04ff7' },
-  { id: 'fda-label-cdk46', kind: 'guideline', year: 2026, access: 'open', fulltext: 'IBRANCE fecbdd7d-b729-41b5-9872-231b8fe104ce; VERZENIO be4bc0de-0fdc-4d46-8d25-be43c79e6a06; KISQALI aaeaef94-f3f5-4367-8ea2-b181d7be2da8',
+  { id: 'fda-label-cdk46', kind: 'guideline', year: 2026, verified: '세인트존스워트(2026-10-15 SPL 원문): 입랜스 7.2 강한 CYP3A 유도제(… St John\'s Wort) 회피, 리팜핀 AUC 85 % 감소 · 키스칼리 7.2 회피, AUC 89 % 감소 · 버제니오 7.1 강한·중간 유도제 회피, 약 70 % 감소', access: 'open', fulltext: 'IBRANCE fecbdd7d-b729-41b5-9872-231b8fe104ce; VERZENIO be4bc0de-0fdc-4d46-8d25-be43c79e6a06; KISQALI aaeaef94-f3f5-4367-8ea2-b181d7be2da8',
     citation: 'IBRANCE (palbociclib) · VERZENIO (abemaciclib) · KISQALI (ribociclib) 미국 허가사항. DailyMed. (입랜스: "Avoid grapefruit or grapefruit juice" · 버제니오: 자몽 제품을 피할 것 · 키스칼리: 주로 CYP3A4 대사, 리토나비르로 AUC 3.2배, 강한 CYP3A 억제제를 피할 것 — 미국 허가사항에 자몽 문장은 없음)',
     url: 'https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=fecbdd7d-b729-41b5-9872-231b8fe104ce' },
-  { id: 'fda-label-sorafenib-lenvatinib', kind: 'guideline', year: 2026, access: 'open', fulltext: 'NEXAVAR b50667e4-5ebc-4968-a646-d605058dbef0; LENVIMA f4bedd21-efde-44c6-9d9c-b48b78d7ed1e',
+  { id: 'fda-label-sorafenib-lenvatinib', kind: 'guideline', year: 2026, verified: '세인트존스워트(2026-10-15 SPL 원문): 넥사바 7.1 강한 CYP3A4 유도제는 가능하면(when possible) 피함, 리팜핀 AUC 37 % 감소 · 렌비마 유도제 권고 없음, 리팜피신 AUC 18 % 감소 · 둘 다 세인트존스워트 이름 없음', access: 'open', fulltext: 'NEXAVAR b50667e4-5ebc-4968-a646-d605058dbef0; LENVIMA f4bedd21-efde-44c6-9d9c-b48b78d7ed1e',
     citation: 'NEXAVAR (sorafenib) · LENVIMA (lenvatinib) 미국 허가사항. DailyMed. (넥사바: 케토코나졸(강한 CYP3A4·P-gp 억제제)이 소라페닙 AUC 를 바꾸지 않음 · 렌비마: 케토코나졸로 AUC 15 %·Cmax 19 % 증가 · 두 약 모두 자몽 언급 없음)',
     url: 'https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=b50667e4-5ebc-4968-a646-d605058dbef0' },
+  { id: 'fda-label-bortezomib', kind: 'guideline', year: 2025, access: 'open', fulltext: 'https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=1521d321-e724-4ffc-adad-34bf4f44fac7',
+    verified: '7.1: 강한 CYP3A4 유도제 병용 회피 · 12.3: 리팜핀으로 노출 약 45 % 감소 · 덱사메타손(약한 유도제)은 임상적 차이 없음 · 세인트존스워트 이름 없음 (2026-10-15 SPL 원문 대조)',
+    citation: 'VELCADE (bortezomib) 미국 허가사항(2025-08 개정). DailyMed.',
+    url: 'https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=1521d321-e724-4ffc-adad-34bf4f44fac7' },
+  { id: 'fda-label-doac', kind: 'guideline', year: 2026, access: 'open', fulltext: 'ELIQUIS e9481622-7cc6-418a-acb6-c5450daae9b0; XARELTO 10db92f9-2300-4a80-836b-673e1ae91610; PRADAXA ba74e3cd-b06f-4145-b284-5fd6b84ff3c9; SAVAYSA e77d3400-56ad-11e3-949a-0800200c9a66 (DailyMed setid)',
+    verified: '엘리퀴스 7.2: P-gp·강한 CYP3A4 동시 유도제(리팜핀·카바마제핀·페니토인·St. John\'s wort) 회피 — 뇌졸중·혈전 위험 증가 · 자렐토 7.3·5.6: 같은 취지, St. John\'s wort 이름 · 프라닥사 5.5: P-gp 유도제(예: 리팜핀) 대체로 회피 · 사바이사 7.2: 리팜핀 회피 · 노출 감소 크기는 그림으로만 (2026-10-15 SPL 원문 대조)',
+    citation: 'ELIQUIS (apixaban) · XARELTO (rivaroxaban) · PRADAXA (dabigatran) · SAVAYSA (edoxaban) 미국 허가사항. DailyMed.',
+    url: 'https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=e9481622-7cc6-418a-acb6-c5450daae9b0' },
+  { id: 'fda-ddi-table', kind: 'guideline', year: 2026, access: 'open', fulltext: 'https://www.fda.gov/drugs/drug-interactions-labeling/healthcare-professionals-fdas-examples-drugs-interact-cyp-enzymes-and-transporter-systems',
+    verified: 'Table 1: St. John\'s wort = CYP3A 강한 유도제(3A strong inducer) · 각주: 효과는 제품마다 크게 다름(preparation dependent) · 2026-05-29 기준 (2026-10-15 원문 대조)',
+    citation: 'U.S. FDA. Healthcare professionals: FDA\'s examples of drugs that interact with CYP enzymes and transporter systems (Table 1). 2026-05-29.',
+    url: 'https://www.fda.gov/drugs/drug-interactions-labeling/healthcare-professionals-fdas-examples-drugs-interact-cyp-enzymes-and-transporter-systems' },
   { id: 'fda-label-warfarin', kind: 'guideline', year: 2026, access: 'open', verified: '7.5: 비타민 K 를 일정하게 유지하는 정상·균형 식사, 녹색 잎채소 다량 같은 큰 식습관 변화 회피 · 5.9: 비타민 K 섭취 증가 → INR 반응 감소 · 7.5: 코엔자임Q10·St. John\'s wort·인삼은 효과 감소 · 5.1: 허브 포함 약 시작·중단 시 INR 더 자주 (2026-10-15 원문 대조)', fulltext: 'https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=558b7a0d-5490-4c1b-802e-3ab3f1efe760',
     citation: 'Warfarin sodium tablets (Amneal) 미국 허가사항. DailyMed. (7.5: 비타민 K 를 일정한 양으로 유지하는 고른 식사, 녹색 잎채소를 많이 먹는 것 같은 큰 식사 변화를 피할 것 · 코엔자임Q10·세인트존스워트·인삼은 와파린 효과를 줄일 수 있음 · 허브 제품·다른 약을 시작·중단할 때 INR 을 더 자주 확인)',
     url: 'https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=558b7a0d-5490-4c1b-802e-3ab3f1efe760' },

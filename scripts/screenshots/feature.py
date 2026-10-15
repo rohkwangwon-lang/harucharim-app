@@ -30,7 +30,7 @@ d.text((x0, 128), '하루차림', font=bold(78), fill=CREAM)
 d.text((x0, 232), '암 환자를 위한 식이·영양 도우미', font=med(38), fill=SOFT)
 d.line([(x0 + 3, 300), (x0 + 78, 300)], fill=SOFT, width=4)
 d.text((x0, 330), '오늘 무엇을 드실지, 왜 그런지까지', font=med(31), fill=(226, 233, 214))
-d.text((x0, 378), '참고 문헌 168종 · 임상 규칙 158개 · 전부 원문 대조', font=med(27), fill=(178, 197, 158))
+d.text((x0, 378), '참고 문헌 172종 · 임상 규칙 158개 · 전부 원문 대조', font=med(27), fill=(178, 197, 158))
 
 img.save('store/feature-1024x500.png')
 print('store/feature-1024x500.png')

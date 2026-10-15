@@ -148,7 +148,7 @@ export function adviseSupplements(patient: PatientContext): SupplementAdvice[] {
       reason:
         '비타민 D 가 없으면 칼슘을 먹어도 흡수되지 않습니다. 하루 800~1,000 IU 수준이 표준이며, ' +
         '아로마타제 억제제 관절통이 심한 경우 결핍 교정이 증상 완화에 도움이 된다는 보고가 있습니다.',
-      evidence: 'G', refIds: ['adt-bone', 'hadji2017aibl', 'kdri2020'],
+      evidence: 'G', refIds: ['adt-bone', 'hadji2017aibl', 'kdri2025'],
       trigger: '항호르몬 치료 중'
     })
   }
@@ -208,7 +208,7 @@ export function adviseSupplements(patient: PatientContext): SupplementAdvice[] {
       reason:
         '스테로이드는 장에서 칼슘을 흡수하는 것을 방해하고 소변으로 칼슘을 내보냅니다. ' +
         '하루 600~800 IU 가 기준이며, 골절 위험이 높으면 골다공증 약을 따로 시작할지 담당 선생님과 상의하세요.',
-      evidence: 'G', refIds: ['acr-giop', 'kdri2020'],
+      evidence: 'G', refIds: ['acr-giop', 'kdri2025'],
       trigger: '스테로이드 복용 중'
     })
   }
@@ -576,7 +576,7 @@ export function adviseSupplements(patient: PatientContext): SupplementAdvice[] {
         '실내 생활이 길어지면 모자라기 쉬워, 혈중 농도를 한 번 확인해 보시는 정도는 해 볼 만합니다. ' +
         '기록을 며칠 쌓으시면 기록 탭의 주간 보고에서 실제로 모자란 것을 짚어 드립니다.',
       evidence: 'G',
-      refIds: ['kdri2020'],
+      refIds: ['kdri2025'],
       products: productsIn('비타민D', patient)
     })
   }
@@ -666,7 +666,7 @@ const FILLS: Record<string, {
       '비타민 D 가 없으면 칼슘을 먹어도 흡수되지 않으므로 함께 보십시오.',
     byFood: '우유 한 잔 220 mg, 두부 반 모 150 mg, 뱅어포·멸치·요거트도 좋은 급원입니다.',
     evidence: 'G',
-    refIds: ['hadji2017aibl', 'kdri2020']
+    refIds: ['hadji2017aibl', 'kdri2025']
   },
   식이섬유: {
     category: '식이섬유',
@@ -687,7 +687,7 @@ const FILLS: Record<string, {
     byFood: '고기·간·조개류의 철은 곡물·채소의 철보다 훨씬 잘 흡수되고, 비타민 C 를 함께 드시면 더 올라갑니다.',
     evidence: 'G',
     /* 구독제 종설(gastrectomy-nutr) → PMC 원문 종설(Teixeira Farinha 2023)·철분제 부작용 메타분석(Tolkien 2015)(2026-10-14 전수 대조) */
-    refIds: ['teixeira2023micro', 'tolkien2015iron', 'kdri2020']
+    refIds: ['teixeira2023micro', 'tolkien2015iron', 'kdri2025']
   }
 }
 

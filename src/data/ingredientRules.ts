@@ -57,7 +57,7 @@ export const INGREDIENT_RULES: IngredientRule[] = [
      * 2026-10-14 전수 대조 — SELECT·두경부암 시험 숫자가 KDRI 하나에 붙어 있었다. 조건별 문장의 출처도 규칙 refIds 에 함께 단다.
      * 두경부암 시험(Meyer 2008)의 재발·사망 증가는 '치료 중 흡연자에서만' 이었다 — 문장을 그 크기로 줄였다.
      */
-    refIds: ['kdri2020', 'select2011', 'meyer2008smoking', 'espen2021'],
+    refIds: ['kdri2025', 'select2011', 'meyer2008smoking', 'espen2021'],
     duringTreatment: {
       level: 'avoid',
       reason:
@@ -129,10 +129,10 @@ export const INGREDIENT_RULES: IngredientRule[] = [
      * 치료 중 문장의 출처(ESPEN 권고 5, 두경부암 시험)를 단다.
      */
     reason:
-      '권장섭취량은 성인 하루 100 mg, 상한섭취량은 2,000 mg 입니다(2020 한국인 영양소 섭취기준). ' +
+      '권장섭취량은 성인 하루 100 mg, 상한섭취량은 2,000 mg 입니다(2025 한국인 영양소 섭취기준). ' +
       '하루 1 g 안팎에서도 일부는 설사·복통 같은 위장 증상을 겪습니다.',
     evidence: 'G',
-    refIds: ['kdri2020', 'espen2021', 'meyer2008smoking'],
+    refIds: ['kdri2025', 'espen2021', 'meyer2008smoking'],
     duringTreatment: {
       level: 'caution',
       reason:
@@ -448,10 +448,10 @@ export const INGREDIENT_RULES: IngredientRule[] = [
      * 전립선 '1,500 mg' 은 WCRF 2018 에 없는 숫자라 뺐다. 조건별 문장의 출처(WCRF·Hadji)도 단다.
      */
     reason:
-      '2020 한국인 영양소 섭취기준의 권장섭취량은 성인 하루 700~800 mg 입니다. 보충제를 포함한 상한은 49세 이하 2,500 mg, 50세 이상 2,000 mg 이니 ' +
+      '2025 한국인 영양소 섭취기준의 권장섭취량은 성인 남성 800 mg, 여성 650~750 mg(50세 이상 750 mg)입니다. 보충제를 포함한 상한은 30세 이상 남성 2,500 mg, 30세 이상 여성 2,000 mg 이니 ' +
       '식품과 합쳐 맞추세요.',
     evidence: 'G',
-    refIds: ['kdri2020', 'wcrf2018', 'wcrf-prostate', 'hadji2017aibl'],
+    refIds: ['kdri2025', 'wcrf2018', 'wcrf-prostate', 'hadji2017aibl'],
     byCancer: {
       colorectal: { level: 'prefer', reason: 'WCRF 는 유제품과 칼슘 보충제가 대장암 위험을 낮춘다는 근거를 강한 근거(probable 등급)로 판단했습니다.' },
       prostate: {
@@ -478,7 +478,7 @@ export const INGREDIENT_RULES: IngredientRule[] = [
       '고용량군의 무진행 생존이 좋아지는 신호가 있었지만 1차 분석에서는 유의하지 않았고, 일반인 25,871명 예방 연구(VITAL)에서는 암 발생이 줄지 않았습니다. ' +
       '상한은 하루 100 µg(4,000 IU)입니다.',
     evidence: 'G',
-    refIds: ['kdri2020', 'ng2019', 'manson2019']
+    refIds: ['kdri2025', 'ng2019', 'manson2019']
   },
   {
     name: '철분',
@@ -487,7 +487,7 @@ export const INGREDIENT_RULES: IngredientRule[] = [
     reason: '결핍이 확인되었을 때 교정하는 것이 원칙입니다. 결핍이 아닌데 넣을 이유는 없습니다.',
     evidence: 'G',
     /* 2026-10-14 — KDRI 는 위절제 후 철 결핍을 다루지 않는다. 국내 코호트(Lim 2012)·철분제 부작용 메타분석을 단다 */
-    refIds: ['kdri2020', 'lim2012gastrectomy', 'tolkien2015iron'],
+    refIds: ['kdri2025', 'lim2012gastrectomy', 'tolkien2015iron'],
     byCondition: {
       위절제후: {
         level: 'prefer',
@@ -507,7 +507,7 @@ export const INGREDIENT_RULES: IngredientRule[] = [
       '미각 변화에 흔히 쓰이지만 연구 결과가 엇갈립니다. 성인 상한섭취량은 하루 35 mg 이고, 과량을 오래 드시면 구리 흡수가 떨어져 ' +
       '구리 결핍이 생길 수 있습니다. 효과가 분명하지 않으니 오래 이어 드시기보다 의료진과 상의하세요.',
     evidence: 'C',
-    refIds: ['msk-zinc', 'kdri2020'],
+    refIds: ['msk-zinc', 'kdri2025'],
     byCondition: {
       /* 조건(오심·구토)과 문장(미각)이 어긋난다 — 수준·조건은 전문의 판단으로 남기고 문장만 근거만큼(2026-10-14) */
       '오심·구토': { level: 'prefer', reason: '미각 변화가 함께 있다면 시도해 볼 수는 있으나, 효과는 연구마다 엇갈립니다.' }
@@ -519,7 +519,7 @@ export const INGREDIENT_RULES: IngredientRule[] = [
     base: 'info',
     reason: '결핍이 있으면 교정합니다. 과량은 설사를 일으킵니다.',
     evidence: 'G',
-    refIds: ['kdri2020'],
+    refIds: ['kdri2025'],
     byMedication: {
       cisplatin: { level: 'prefer', reason: '시스플라틴은 신세뇨관을 손상시켜 저마그네슘혈증을 자주 일으킵니다. 수치를 확인하고 보충합니다.' }
     },
@@ -686,7 +686,7 @@ export const INGREDIENT_RULES: IngredientRule[] = [
       '간의 약물 대사 효소(CYP3A4)와 약을 내보내는 단백질(P-gp)을 늘려, 함께 드시는 여러 약의 농도를 떨어뜨립니다. ' +
       '우울·불면 목적의 수입 보충제와 일반의약품에 들어 있습니다. 드시는 약이 있으면 먼저 약사·의사에게 확인하십시오.',
     evidence: 'C',
-    refIds: ['sjw-interaction', 'cdi-liverpool', 'fda-label-tamoxifen', 'fda-label-ai', 'fda-label-arpi'],
+    refIds: ['sjw-interaction', 'cdi-liverpool', 'fda-label-tamoxifen', 'fda-label-ai', 'fda-label-arpi', 'fda-ddi-table', 'fda-label-egfr', 'fda-label-alk', 'fda-label-cdk46', 'fda-label-sorafenib-lenvatinib', 'fda-label-bortezomib', 'fda-label-warfarin', 'fda-label-doac'],
     byMedication: {
       irinotecan: { level: 'avoid', reason: '암 환자 5명의 교차설계 연구에서 이리노테칸의 활성 대사물(SN-38) 농도가 42 % 낮아졌습니다.' },
       tamoxifen: {
@@ -699,7 +699,42 @@ export const INGREDIENT_RULES: IngredientRule[] = [
       'adt-abiraterone': { level: 'avoid', reason: '자이티가 허가사항은 강한 CYP3A4 유도제를 피하라고 적고, 암 약물 상호작용 자료는 세인트존스워트를 함께 쓰지 말 것으로 분류합니다.' },
       'adt-enzalutamide': { level: 'avoid', reason: '엑스탄디 허가사항은 강한 CYP3A4 유도제를 피하라고 적고, 암 약물 상호작용 자료는 세인트존스워트를 함께 쓰지 말 것으로 분류합니다.' },
       'adt-apalutamide': { level: 'caution', reason: '얼리다의 농도를 낮출 수 있어 주의가 필요합니다(암 약물 상호작용 자료 — 함께 써 본 연구는 없음, 근거의 질 매우 낮음).' },
-      'adt-darolutamide': { level: 'avoid', reason: '뉴베카 허가사항은 P-gp 와 CYP3A4 를 함께 유도하는 약을 피하라고 적습니다. 세인트존스워트가 그런 작용을 합니다.' }
+      'adt-darolutamide': { level: 'avoid', reason: '뉴베카 허가사항은 P-gp 와 CYP3A4 를 함께 유도하는 약을 피하라고 적습니다. 세인트존스워트가 그런 작용을 합니다.' },
+      /*
+       * 2026-10-15 — 미국 허가사항 원문(DailyMed SPL 전문) 대조 뒤 전문의 결정으로 반영.
+       * 세인트존스워트는 미국 FDA 상호작용 표에서 '강한 CYP3A 유도제' 다 — 허가사항이 이름을 들지 않아도 '강한 CYP3A 유도제를 피하라' 에 해당한다.
+       * 대조표: docs/근거/2026-10-15-세인트존스워트-허가사항-대조.md
+       */
+      'tki-egfr': {
+        level: 'avoid',
+        reason: '엘로티닙·아파티닙 허가사항은 세인트존스워트를 이름으로 들고, 오시머티닙·게피티닙 허가사항은 강한 CYP3A 유도제(미국 FDA 표에서 세인트존스워트가 여기에 듭니다)와 함께 쓰지 말거나 용량을 올리라고 적습니다. ' +
+          '같은 계열의 유도제(리팜핀)로 약 농도가 34~83 % 줄었습니다.'
+      },
+      'tki-alk': {
+        level: 'avoid',
+        reason: '로라티닙 허가사항은 강한 CYP3A 유도제와 절대 함께 쓰지 말라고 적고(심한 간독성), 허가사항이 허브 제품의 예로 세인트존스워트를 듭니다. ' +
+          '크리조티닙·브리가티닙도 피하라고 적습니다(리팜핀으로 80~85 % 감소). 알렉티닙만은 영향이 미미하다고 적혀 있어 예외입니다.'
+      },
+      cdk46: {
+        level: 'avoid',
+        reason: '팔보시클립(입랜스) 허가사항이 세인트존스워트를 이름으로 들어 피하라고 하고, 리보시클립·아베마시클립 허가사항도 강한 CYP3A 유도제를 피하라고 적습니다(리팜핀으로 약 70~89 % 감소).'
+      },
+      sorafenib: {
+        level: 'caution',
+        reason: '소라페닙 허가사항은 강한 CYP3A4 유도제를 "가능하면" 피하라고 적습니다(리팜핀으로 37 % 감소). 렌바티닙 허가사항에는 권고가 없습니다(18 % 감소). 드시게 되면 담당 의료진께 알리세요.'
+      },
+      bortezomib: {
+        level: 'avoid',
+        reason: '보르테조밉(벨케이드) 허가사항은 강한 CYP3A4 유도제와 함께 쓰지 말라고 적습니다(리팜핀으로 약 45 % 감소).'
+      },
+      warfarin: {
+        level: 'caution',
+        reason: '와파린 허가사항은 세인트존스워트가 와파린 효과를 줄일 수 있다고 이름으로 들고, 약이나 허브를 시작하거나 끊을 때 INR 을 더 자주 재라고 적습니다. 드시게 되면 반드시 담당 의료진께 알리세요.'
+      },
+      doac: {
+        level: 'avoid',
+        reason: '엘리퀴스·자렐토 허가사항은 세인트존스워트를 이름으로 들어 함께 쓰지 말라고 적습니다 — 약효가 떨어져 뇌졸중·혈전 위험이 커집니다. 프라닥사·릭시아나 허가사항도 같은 계열의 유도제(리팜핀)를 피하라고 적습니다.'
+      }
     }
   },
   {

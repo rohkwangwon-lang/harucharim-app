@@ -86,7 +86,7 @@ export function sumIntake(items: SelectedItem[], supplements: Supplement[]): Nut
 
 /* ────────────────────────── 섭취기준 ────────────────────────── */
 
-/** 2020 한국인 영양소 섭취기준(KDRIs) 기반 1일 기준값 */
+/** 한국인 영양소 섭취기준(KDRIs) 기반 1일 기준값 — 2025 판으로 맞춤(아래 값마다 확인) */
 export interface DailyReference {
   /** 권장섭취량 또는 충분섭취량 */
   recommended: NutrientTotals
@@ -101,28 +101,32 @@ export interface DailyReference {
  * 값은 2020 KDRIs 성인 기준을 사용하며, 65세 이상은 해당 연령군 값으로 조정한다.
  */
 export function getDailyReference(sex: 'M' | 'F', age: number): DailyReference {
+  /* 2025 한국인 영양소 섭취기준 요약표(성인, 2026-10-15 원문 대조). 단백질은 2025 판이 체중당으로 바뀌어 2020 판 값을 둔다 */
   const elderly = age >= 65
+  const old75 = age >= 75
   const male = sex === 'M'
+  const band = <T,>(a19: T, a30: T, a50: T, a65: T, a75: T): T =>
+    age >= 75 ? a75 : age >= 65 ? a65 : age >= 50 ? a50 : age >= 30 ? a30 : a19
 
   const recommended: NutrientTotals = {
-    kcal: male ? (elderly ? 2000 : 2500) : elderly ? 1600 : 1900,
+    kcal: male ? band(2600, 2500, 2200, 2000, 1900) : band(2000, 1900, 1700, 1600, 1500),
     protein: male ? 65 : 55,
-    fiber: male ? 30 : 20,
-    ca: male ? (elderly ? 700 : 800) : 700,
-    p: 700,
-    mg: male ? 370 : 280,
-    fe: male ? 10 : age >= 50 ? 8 : 14,
-    zn: male ? 10 : 8,
+    fiber: male ? 30 : age >= 50 ? 25 : 20,
+    ca: male ? 800 : age >= 50 ? 750 : 650,
+    p: 650,
+    mg: male ? (age >= 30 ? 380 : 360) : 280,
+    fe: male ? (old75 ? 7 : 8) : band(12, 12, 7, 6, 6),
+    zn: male ? (elderly ? 9 : 10) : (elderly ? 7 : 8),
     se: 60,
     k: 3500,
-    vitA: male ? 800 : 650,
+    vitA: male ? band(800, 800, 750, 700, 700) : band(650, 650, 600, 600, 600),
     vitD: elderly ? 15 : 10,
     vitE: 12,
     vitK: male ? 75 : 65,
     vitC: 100,
-    b1: male ? 1.2 : 1.1,
-    b2: male ? 1.5 : 1.2,
-    b3: male ? 16 : 14,
+    b1: male ? (elderly ? 1.1 : 1.2) : band(1.1, 1.1, 1.1, 1.0, 0.8),
+    b2: male ? (elderly ? 1.4 : 1.5) : band(1.2, 1.2, 1.2, 1.1, 1.0),
+    b3: male ? band(14, 14, 14, 13, 12) : band(13, 13, 13, 12, 11),
     b6: male ? 1.5 : 1.4,
     folate: 400,
     b12: 2.4
@@ -130,12 +134,13 @@ export function getDailyReference(sex: 'M' | 'F', age: number): DailyReference {
 
   const upper: NutrientTotals = {
     vitA: 3000, vitD: 100, vitE: 540, vitC: 2000,
-    b3: 35, b6: 100, folate: 1000,
-    ca: 2500, p: 3500, fe: 45, zn: 35, se: 400, mg: 350
+    b3: 35, b6: 50, folate: 1000,
+    ca: male ? (age < 30 ? 3000 : 2500) : (age < 30 ? 2500 : 2000),
+    p: old75 ? 3000 : 3500, fe: 45, zn: 35, se: 400, mg: 350
   }
 
   const goal: NutrientTotals = {
-    na: 2000,        // 만성질환위험감소섭취량
+    na: old75 ? 1800 : elderly ? 1900 : 2300,        // 만성질환위험감소섭취량
     satFat: male ? 22 : 17,  // 총열량의 7 % 내외
     sugar: male ? 62 : 47    // 총열량의 10 % 내외
   }
@@ -734,7 +739,7 @@ export function microTargets(patient: PatientContext): MicroTarget[] {
         '와파린을 드시는 동안 비타민 K 는 끊는 것이 아니라 날마다 비슷하게 드시는 것이 원칙입니다(미국 허가사항). ' +
         `그래서 이 앱은 하루 비타민 K 를 한국인 충분섭취량(${ai} µg)에서 그 두 배(${ai * 2} µg) 사이로 맞춰 식단을 짭니다 — ` +
         '이 폭은 앱이 정한 운영 기준이고, 평소 드시던 양이 이보다 많거나 적었다면 갑자기 바꾸지 말고 담당 의료진과 INR 을 보며 정하세요.',
-      evidence: 'G', refIds: ['fda-label-warfarin', 'kdri2020']
+      evidence: 'G', refIds: ['fda-label-warfarin', 'kdri2025']
     })
   }
 
@@ -785,7 +790,7 @@ export function microTargets(patient: PatientContext): MicroTarget[] {
    * 칼슘 — 모든 분께.
    *
    * 여태 항호르몬 치료나 안드로겐 차단요법을 받는 분께만 보았다. 그런데 실제로 만들어지는
-   * 식단의 하위 10 % 가 하루 383 mg 이었다 — 권장섭취량(700~800 mg)의 절반이다.
+   * 식단의 하위 10 % 가 하루 383 mg 이었다 — 권장섭취량(2020 판 700~800 mg)의 절반이다.
    * 그런 날이 조용히 지나가고 있었다.
    *
    * 칼슘은 성분 자료가 93 % 채워져 있어 합계를 믿을 만하다. 골 소실이 걸리는 분께는
@@ -793,12 +798,13 @@ export function microTargets(patient: PatientContext): MicroTarget[] {
    */
   if (!boneLoss) {
     out.push({
-      key: 'ca', label: '칼슘', unit: 'mg', min: 700,
-      why: '한국인 영양소섭취기준의 권장섭취량은 하루 700~800 mg 입니다. ' +
+      /* 2025 한국인 영양소 섭취기준 — 남 800, 여 19~49세 650·50세 이상 750 mg */
+      key: 'ca', label: '칼슘', unit: 'mg', min: patient.sex === 'M' ? 800 : patient.age < 50 ? 650 : 750,
+      why: `2025 한국인 영양소 섭취기준의 권장섭취량은 하루 ${patient.sex === 'M' ? 800 : patient.age < 50 ? 650 : 750} mg 입니다. ` +
         '치료 중에는 유제품을 멀리하게 되는 일이 잦아 모르는 사이에 모자라기 쉽습니다. ' +
         '우유·요구르트·두부·뼈째 먹는 생선·진한 녹색 채소로 채우시는 쪽이 먼저입니다.',
       evidence: 'G',
-      refIds: ['kdri2020']
+      refIds: ['kdri2025']
     })
   }
 
@@ -820,7 +826,7 @@ export function microTargets(patient: PatientContext): MicroTarget[] {
           '하루 1,000~1,200 mg 을 식품과 보충제로 맞추는 것이 표준적 관리입니다. ' +
           '우유 1잔에 약 220 mg, 두부 반 모에 약 150 mg 들어 있습니다.',
       evidence: 'G',
-      refIds: ceiling ? ['adt-bone', 'wcrf-prostate'] : ['hadji2017aibl', 'kdri2020']
+      refIds: ceiling ? ['adt-bone', 'wcrf-prostate'] : ['hadji2017aibl', 'kdri2025']
     })
   }
 
@@ -832,7 +838,9 @@ export function microTargets(patient: PatientContext): MicroTarget[] {
    */
   if (conds.includes('위절제후') || subs.includes('위전절제') || subs.includes('위부분절제')) {
     out.push({
-      key: 'fe', label: '철', unit: 'mg', min: patient.sex === 'F' && patient.age < 50 ? 14 : 10,
+      /* 2025 한국인 영양소 섭취기준 권장섭취량 — 남 8(75세 이상 7), 여 19~49세 12·50~64세 7·65세 이상 6 mg */
+      key: 'fe', label: '철', unit: 'mg',
+      min: patient.sex === 'M' ? (patient.age >= 75 ? 7 : 8) : patient.age < 50 ? 12 : patient.age < 65 ? 7 : 6,
       why:
         '철은 주로 십이지장에서 흡수되고 위산이 그 흡수를 돕는데, 위를 잘라 낸 뒤에는 대개 십이지장을 음식이 지나지 않고 위산도 줄어듭니다. ' +
         '수술 2년 뒤 철 결핍이 40~70 % 에서 보고될 만큼 흔해, 식사에서 미리 챙겨 두시는 편이 좋습니다. ' +
@@ -841,7 +849,7 @@ export function microTargets(patient: PatientContext): MicroTarget[] {
        * 2026-10-14 전수 대조 — 구독제 종설(gastrectomy-nutr)을 떼고 PMC 원문 종설(Teixeira Farinha 2023)로.
        * '몇 해가 지나 서서히' 는 원문에 없어 원문의 숫자(2년 시점 철 결핍 40~70 %)로 바꿨다.
        */
-      evidence: 'G', refIds: ['teixeira2023micro', 'kdri2020']
+      evidence: 'G', refIds: ['teixeira2023micro', 'kdri2025']
     })
   }
 

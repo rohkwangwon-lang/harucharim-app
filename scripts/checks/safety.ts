@@ -15,8 +15,9 @@
  * 12~17. 체중감소 완화 · 연하곤란 액체 · 당뇨 식단 · 와파린 비타민 K 폭 · 투석 · 재영양
  */
 import { buildDayMenu, fiberGoal } from '../../src/engine/menu'
-import { foodContribution, personalTarget, refeedingRisk, refeedingStage, renalProteinCap, targetNotes } from '../../src/engine/nutrition'
+import { foodContribution, personalTarget, microTargets, refeedingRisk, refeedingStage, renalProteinCap, targetNotes } from '../../src/engine/nutrition'
 import { activeInteractions, evaluateFood } from '../../src/engine/rules'
+import { judgeProduct } from '../../src/engine/ingredientVerdict'
 import { CANCERS, CANCER_BY_ID } from '../../src/data/cancers'
 import { FOODS, swallowSafe } from '../../src/data/foods'
 import { MEAL_SLOTS, type Food, type PatientContext } from '../../src/data/types'
@@ -259,6 +260,18 @@ if (same > 0) bad.push(`다시 구성: 담은 것이 없는데도 같은 상이 
   if (!refeedingRisk(p({ lowIntake: '5일 넘게' })).high) bad.push('재영양: BMI 16·12 % 감소·5일 넘게를 고위험으로 보지 않음')
   if (!refeedingRisk(p({ weightKg: 34, lowIntake: '10일 넘게' })).extreme) bad.push('재영양: BMI 13.6 을 극단으로 보지 않음')
   if (refeedingStage(p({ weightKg: 60, weightLossPct: 0, lowIntake: '5일 넘게' }), '2026-10-15')) bad.push('재영양: 위험이 낮은데 단계적 목표가 걸림')
+}
+
+/* 18. 세인트존스워트 — 허가사항 대조대로(2026-10-15): EGFR·ALK·CDK4/6·보르테조밉·DOAC 피하세요, 소라페닙·와파린 주의 */
+{
+  const want: Record<string, string> = { 'tki-egfr': 'avoid', 'tki-alk': 'avoid', cdk46: 'avoid', bortezomib: 'avoid', doac: 'avoid', sorafenib: 'caution', warfarin: 'caution' }
+  for (const [med, lv] of Object.entries(want)) {
+    const v = judgeProduct('세인트존스워트 추출물', '', P({ cancer: 'lung', phase: 'during_chemo', medications: [med] }))
+    if (v.level !== lv) bad.push(`세인트존스워트 + ${med}: ${v.level} (기대 ${lv})`)
+  }
+  /* 2025 한국인 영양소 섭취기준 — 칼슘 하한(남 800, 여 50세 이상 750) */
+  const ca = (o: Partial<PatientContext>) => microTargets(P({ cancer: 'breast', phase: 'survivorship', medications: [], ...o })).find((m) => m.key === 'ca' && m.min !== undefined && m.min < 1000)
+  if (ca({ sex: 'M', age: 60, cancer: 'colorectal' })?.min !== undefined && ca({ sex: 'M', age: 60, cancer: 'colorectal' })?.min !== 800) bad.push('KDRI 2025: 남성 칼슘 하한이 800 이 아님')
 }
 
 /* 10. 응급 안내 */

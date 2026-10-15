@@ -556,7 +556,7 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
         '얼마까지 드실지는 검사 수치를 보고 담당 의료진이 정합니다. ' +
         '바나나·감자·토마토·건과일, 그리고 칼륨이 든 대체 소금(저염소금)이 대표적인 급원입니다. ' +
         '조리법으로 칼륨을 줄이는 방법도 있으니 담당 의료진·영양사께 여쭤 보십시오.',
-      evidence: 'G', refIds: ['kdri2020']
+      evidence: 'G', refIds: ['kdri2025']
     },
     {
       id: 'cond-ckd-p', level: 'caution',
@@ -569,9 +569,9 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
          */
         '가공식품에 첨가된 무기 인산염은 일반 식품 속의 인보다 흡수율이 상당히 높습니다. ' +
         '콜라·가공치즈·햄류가 대표적입니다. ' +
-        '건강한 성인의 인 권장섭취량은 하루 700 mg, 상한은 3,500 mg(75세 이상 3,000 mg)입니다 — ' +
-        '같은 700 mg 이라도 첨가물로 들어온 쪽이 몸에 더 많이 남는다는 것이 요점입니다.',
-      evidence: 'G', refIds: ['kdri2020']
+        '건강한 성인의 인 권장섭취량은 하루 650 mg(2025 한국인 영양소 섭취기준), 상한은 3,500 mg(75세 이상 3,000 mg)입니다 — ' +
+        '같은 양이라도 첨가물로 들어온 쪽이 몸에 더 많이 남는다는 것이 요점입니다.',
+      evidence: 'G', refIds: ['kdri2025']
     }
   ],
 
@@ -606,8 +606,8 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
        */
       title: '나트륨은 지금보다 줄이는 것이 목표입니다 — 기준은 하루 2,300 mg',
       reason:
-        '2020 한국인 영양소 섭취기준은 나트륨 만성질환위험감소섭취량을 하루 2,300 mg 으로 정했습니다. ' +
-        '65~74세는 2,100 mg, 75세 이상은 1,700 mg 으로 더 낮습니다. ' +
+        '2025 한국인 영양소 섭취기준은 나트륨 만성질환위험감소섭취량을 하루 2,300 mg 으로 정했습니다. ' +
+        '65~74세는 1,900 mg, 75세 이상은 1,800 mg 으로 더 낮습니다. ' +
         '이 값은 그 아래로 반드시 내려가라는 뜻이 아니라, 그보다 많이 드시고 계시면 줄이는 만큼 ' +
         /*
          * 2026-10-14 전수 대조. 2,300·2,100·1,700 은 KDRI 2020 요약표(남녀 같음)에서, 3,255 mg(2018년)은 같은 책 나트륨 장에서 확인했다
@@ -615,7 +615,7 @@ export const CONDITION_RULES: Record<PatientCondition, NutritionRule[]> = {
          */
         '만성질환 위험이 낮아진다는 뜻입니다. 2018년 한국인 평균이 3,255 mg 이었으니 대부분 줄일 여지가 있습니다. ' +
         '국·찌개 국물을 남기고, 김치·젓갈·장아찌를 줄이며, 라면 국물을 마시지 않는 것부터 시작해 보십시오.',
-      evidence: 'G', refIds: ['kdri2020']
+      evidence: 'G', refIds: ['kdri2025', 'kdri2020']
     }
   ],
 

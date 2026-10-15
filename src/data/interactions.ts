@@ -36,11 +36,11 @@ export const MEDICATIONS: Medication[] = [
   { id: 'adt-darolutamide', name: '다롤루타미드 (뉴베카)', aliases: ['뉴베카', 'darolutamide', 'nubeqa'], cls: '항호르몬', parent: 'adt' },
   { id: 'capecitabine', name: '카페시타빈', aliases: ['젤로다', 'xeloda'], cls: '경구 항암제' },
   { id: 'tki-egfr', name: 'EGFR 표적치료제', aliases: ['이레사', '타쎄바', '지오트립', '타그리소', '오시머티닙', '게피티닙'], cls: '표적치료제' },
-  { id: 'tki-alk', name: 'ALK 표적치료제', aliases: ['잴코리', '알레센자', '로비큐아'], cls: '표적치료제' },
+  { id: 'tki-alk', name: 'ALK 표적치료제', aliases: ['잴코리', '알레센자', '로비큐아', '알룬브릭', '브리가티닙'], cls: '표적치료제' },
   { id: 'cdk46', name: 'CDK4/6 억제제', aliases: ['입랜스', '키스칼리', '버제니오', '팔보시클립'], cls: '표적치료제' },
   { id: 'sorafenib', name: '소라페닙 / 렌바티닙', aliases: ['넥사바', '렌비마'], cls: '표적치료제' },
   { id: 'warfarin', name: '와파린', aliases: ['쿠마딘', 'warfarin'], cls: '항응고제' },
-  { id: 'doac', name: 'DOAC (아픽사반·리바록사반 등)', aliases: ['엘리퀴스', '자렐토', '릭시아나'], cls: '항응고제' },
+  { id: 'doac', name: 'DOAC (아픽사반·리바록사반 등)', aliases: ['엘리퀴스', '자렐토', '릭시아나', '프라닥사', '다비가트란'], cls: '항응고제' },
   { id: 'bortezomib', name: '보르테조밉', aliases: ['벨케이드'], cls: '항암제' },
   { id: 'cisplatin', name: '시스플라틴', aliases: ['백금계'], cls: '항암제' },
   { id: 'oxaliplatin', name: '옥살리플라틴', aliases: ['엘록사틴', 'FOLFOX'], cls: '항암제' },
@@ -355,7 +355,7 @@ evidence: 'C',
      * 2026-10-14 전수 대조 — ACCP 2012 는 '매일 비슷한 양' 을 직접 권하지 않는다(식사 변화를 INR 검사 빈도 요인으로 든다).
      * 그 말을 그대로 하는 와파린 허가사항을 붙였다. KDRI 의 75·65 µg 은 '권장량' 이 아니라 충분섭취량이다.
      */
-    refIds: ['fda-label-warfarin', 'warfarin-vitk', 'kdri2020']
+    refIds: ['fda-label-warfarin', 'warfarin-vitk', 'kdri2025']
   },
   {
     id: 'int-warfarin-omega3',
@@ -661,10 +661,10 @@ evidence: 'C',
     reason:
       '안드로겐 차단은 골밀도를 빠르게 떨어뜨립니다. 미국임상종양학회가 승인한 지침은 ' +
       'ADT 를 시작하기 전 골밀도 검사를 받도록 권합니다. ' +
-      '칼슘과 비타민 D 는 먼저 식품으로 채우시고(한국 성인 칼슘 권장섭취량 700~800 mg, 비타민 D 충분섭취량 10~15 µg), ' +
+      '칼슘과 비타민 D 는 먼저 식품으로 채우시고(2025 한국인 영양소 섭취기준 성인 남성 칼슘 권장섭취량 800 mg, 비타민 D 충분섭취량 10~15 µg), ' +
       '보충이 필요한지와 얼마나 할지는 골밀도 결과를 보고 정하는 것이 순서입니다.',
     evidence: 'G',
-    refIds: ['adt-bone', 'kdri2020']
+    refIds: ['adt-bone', 'kdri2025']
   },
   {
     id: 'int-ai-calcium',
