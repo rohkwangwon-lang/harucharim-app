@@ -18,8 +18,10 @@ const ROOT = path.resolve(__dirname, '..')
 /*
  * 읽는 차례가 곧 우선순위다 — 뒤에 읽은 것이 앞의 것을 덮는다(원재료가 바뀌어 알레르기가 빠진 제품도 따라가게).
  * API 일부(raw-rawmtrl) → 전체 CSV(raw-rawmtrl-csv) → 매주 증분(raw-rawmtrl-inc, 날짜 차례).
+ * HACCP 표지정보(raw-haccp)는 마지막에 '더하기' 로만 읽는다 — 그 알레르기 칸은 제조사가 적는 것이라 빠뜨린 경우가 있어,
+ * 덮어쓰면 원재료로 찾은 것을 지우게 된다.
  */
-const RAWS = [path.join(ROOT, 'data/raw-rawmtrl'), path.join(ROOT, 'data/raw-rawmtrl-csv'), path.join(ROOT, 'data/raw-rawmtrl-inc')].filter((d) => fs.existsSync(d))
+const RAWS = [path.join(ROOT, 'data/raw-rawmtrl'), path.join(ROOT, 'data/raw-rawmtrl-csv'), path.join(ROOT, 'data/raw-rawmtrl-inc'), path.join(ROOT, 'data/raw-haccp')].filter((d) => fs.existsSync(d))
 const OUT = path.join(ROOT, 'public/data/allergens.json')
 
 /* 앱이 아는 품목보고번호 */
@@ -41,7 +43,8 @@ for (const f of pages) {
     if (!want.has(r.n)) continue
     here.set(r.n, (here.get(r.n) ?? 0) | allergenMaskOfIngredients(r.m))
   }
-  for (const [n, m] of here) map.set(n, m)
+  const additive = path.basename(path.dirname(f)) === 'raw-haccp'
+  for (const [n, m] of here) map.set(n, additive ? (map.get(n) ?? 0) | m : m)
 }
 
 const hit = [...map.values()]
