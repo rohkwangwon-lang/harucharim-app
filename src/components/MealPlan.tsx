@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import type { PatientContext, SelectedItem, Supplement, MealSlot } from '../data/types'
 import { MEAL_SLOTS } from '../data/types'
 import { buildPlan, shoppingList, shoppingText, planItems, fmtQty, type PlanDay } from '../engine/plan'
@@ -10,6 +11,7 @@ import { track } from '../lib/stats'
 import { IconShuffle } from './icons'
 import { Section } from './ui'
 import { drawPlanImage } from '../lib/planImage'
+import { sheetRows, sheetTitle, SHEET_COLS } from '../lib/planSheet'
 
 /**
  * 여러 날 식단과 장보기 목록(2026-10-23).
@@ -36,7 +38,8 @@ export function MealPlan({
   shown?: Record<string, string[]>
   onShown?: (day: string, foodIds: string[]) => void
   onApplyDays: (byDay: { day: string; items: { foodId: string; servings: number; meal: MealSlot }[] }[]) => void
-  onOpenDay: (day: DayKey) => void
+  /** 한 날을 하루치 화면으로 — 계획에서 짠 식단을 그대로 넘겨 같은 상이 보이게 한다 */
+  onOpenDay: (day: DayKey, menu: PlanDay['menu'], index: number) => void
 }) {
   const [nonce, setNonce] = useState(0)
   /* 집에 있는 재료 — 이 기기에만. 계획을 바꿔도 남는다(냉장고는 그대로니까) */
@@ -108,7 +111,7 @@ export function MealPlan({
     track('plan_image')
     const canvas = canvasRef.current ?? document.createElement('canvas')
     canvasRef.current = canvas
-    drawPlanImage(canvas, plan, (d) => dayLabel(d))
+    drawPlanImage(canvas, plan)
     const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, 'image/png'))
     if (!blob) { say('그림을 만들지 못했습니다'); return }
     const file = new File([blob], `하루차림-식단표-${startDay}.png`, { type: 'image/png' })
@@ -121,6 +124,7 @@ export function MealPlan({
   }
   const print = () => { track('plan_print'); document.body.classList.add('print-plan'); setTimeout(() => { window.print(); document.body.classList.remove('print-plan') }, 50) }
 
+  const rows = useMemo(() => sheetRows(plan), [plan])
   const kcalOf = (p: PlanDay) => Math.round(p.menu.totals.kcal ?? 0)
   const protOf = (p: PlanDay) => Math.round(p.menu.totals.protein ?? 0)
   const totalAdded = plan.reduce((n, p) => n + planItems(p).length, 0)
@@ -201,7 +205,7 @@ export function MealPlan({
               ))}
             </ul>
             <div className="mt-2 flex justify-end print:hidden">
-              <button className="text-[11.5px] font-semibold text-brand-700 underline-offset-2 hover:underline" onClick={() => onOpenDay(p.day)}>
+              <button className="text-[11.5px] font-semibold text-brand-700 underline-offset-2 hover:underline" onClick={() => onOpenDay(p.day, p.menu, i)}>
                 이 날 자세히(이유·영양) ›
               </button>
             </div>
@@ -269,6 +273,57 @@ export function MealPlan({
           </p>
         </Section>
       </div>
+
+      {/*
+        * 인쇄 판(2026-10-23 사용자 요청: 화면을 그대로 찍지 말고 한눈에 들어오게).
+        * 화면에는 보이지 않고(.plan-sheet 는 display:none), 인쇄 단추가 body.print-plan 을 붙인 동안만 종이에 나온다.
+        * body 에 바로 붙여(portal) 앱 화면의 틀·여백에 끌려가지 않게 한다. 날짜 × 끼니 표 + 장보기 세 단, A4 한 장을 겨냥한다.
+        */}
+      {createPortal(
+        <div className="plan-sheet" aria-hidden>
+          <div className="plan-sheet-head">
+            <span className="brand">하루차림 식단표</span>
+            <h1>{sheetTitle(rows)}</h1>
+            <span className="sub">1인분 기준</span>
+          </div>
+          <table>
+            <thead><tr><th>날짜</th>{SHEET_COLS.map((c) => <th key={c}>{c}</th>)}</tr></thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.day}>
+                  <th><b>{r.weekday}</b>{r.date}<small>{r.index + 1}일째 · {r.kcal.toLocaleString()} kcal · 단백질 {r.protein} g</small></th>
+                  {SHEET_COLS.map((c) => (
+                    <td key={c}>
+                      {r.cells[c].length === 0 && <div className="none">—</div>}
+                      {r.cells[c].map((l, i) => (
+                        <div key={i}>
+                          {l.when && <em>{l.when} </em>}{l.name}{l.portion && <span> {l.portion}</span>}
+                          {l.tag && <i className={l.tag === '어제 것' ? 'carry' : undefined}>{l.tag === '2인분' ? '2인분 끓여 두기' : '어제 끓인 것'}</i>}
+                        </div>
+                      ))}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <h2>장보기 · {list.itemCount}가지{pantry.size ? ` (집에 있는 ${pantry.size}가지 제외)` : ''}</h2>
+          <div className="plan-sheet-shop">
+            {list.groups.map((g) => (
+              <section key={g.cat}>
+                <h3>{g.cat}{g.cat === '양념·기본 재료' ? ' (집에 있으면 건너뛰기)' : ''}</h3>
+                {g.items.map((it) => {
+                  const pk = it.self ? null : packHint(it.name, it.qty, it.unit)
+                  const keep = storageHint(it.name)
+                  return <div key={`${it.name}|${it.unit}`}>□ {it.name} {fmtQty(it)}{pk ? ` (${pk})` : ''}{keep && <small> {keep}</small>}</div>
+                })}
+              </section>
+            ))}
+          </div>
+          <p className="plan-sheet-foot">양은 1인분 조리 가늠 · 국·조림은 2인분을 끓여 이틀에 · 냉장 보관 기간은 {STORAGE_SOURCE.label} 기준, 표에 없는 것은 포장 표시 · 치료를 대신하지 않습니다 · harucharim.com</p>
+        </div>,
+        document.body
+      )}
     </div>
   )
 }

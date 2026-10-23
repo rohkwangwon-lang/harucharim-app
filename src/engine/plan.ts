@@ -89,13 +89,21 @@ export function buildPlan(patient: PatientContext, opts: PlanOptions): PlanDay[]
     const prefer = new Set<string>()
     if (opts.linkIngredients !== false) for (const b of bought) prefer.add(b)
     if (opts.pantry) for (const b of opts.pantry) prefer.add(b)
-    for (let t = 0; t < (d === 0 ? 1 : 3); t++) {
+    /*
+     * 공통 재료(2026-10-23 사용자 요청, 억지로 맞추지는 말 것) — 안을 고를 때 '앞날에 산 재료로 못 만드는 새 재료' 의 수도 함께 센다.
+     * 요리 고르기의 가산점(menu.ts preferIngredients)은 재어 보니 효과가 없었고(80명 5일: 32.3 → 32.0가지),
+     * 여기서 안 여섯 가운데 고르는 쪽이 들었다: 재료 32.3 → 28.0가지(-13 %), 장보기 67.6 → 63.7줄, 연속 되풀이 0.31 → 0.26/경계,
+     * 열량 미달 1.8 % 그대로, 서로 다른 요리 30.2 → 28.3(-6 %). 안을 더 늘리면(8) 조금 더 줄지만 시간이 그만큼 든다.
+     */
+    const TRIES = 6, ING_W = 0.3
+    for (let t = 0; t < (d === 0 ? 1 : TRIES); t++) {
       const m = buildDayMenu(chosenToday, patient, {
         supplements: opts.supplements ?? [], day, nonce: (opts.nonce ?? 0) + t, recent,
         preferIngredients: prefer.size ? prefer : undefined
       })
       const ids = countable(m).filter((id) => id !== carry?.food.id)
-      const overlap = ids.filter((id) => prev1.includes(id)).length + 0.5 * ids.filter((id) => prev2.includes(id)).length
+      let overlap = ids.filter((id) => prev1.includes(id)).length + 0.5 * ids.filter((id) => prev2.includes(id)).length
+      if (opts.linkIngredients !== false) { let fresh = 0; for (const s of MEAL_SLOTS) for (const e of m.meals[s]) for (const ing of ingredientsOf(e.food)) if (!ing.self && ing.cat !== '양념·기본 재료' && !bought.has(ing.name) && !opts.pantry?.has(ing.name)) fresh++; overlap += ING_W * fresh }
       if (overlap < best) { best = overlap; menu = m }
       if (overlap === 0) break
     }

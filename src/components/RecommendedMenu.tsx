@@ -10,6 +10,7 @@ import { foodContribution, personalTarget, refeedingRisk, refeedingStage, renalP
 import { CANCER_BY_ID } from '../data/cancers'
 import { emergencySigns } from '../data/emergencySigns'
 import { MealPlan } from './MealPlan'
+import { label as dayLabel } from '../lib/day'
 import { PLAN_MAX_DAYS } from '../engine/plan'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
 import { REF_BY_ID } from '../data/references'
@@ -123,6 +124,13 @@ export function RecommendedMenu({
     recentFoods(diary, day, undefined, shown))
   const kept = DRAFT_MEMORY.key === conditionKeyEarly ? DRAFT_MEMORY : null
   const [drafts, setDrafts] = useState<DayMenu[]>(kept?.drafts ?? [])
+  /*
+   * 며칠치 가운데 한 날을 '자세히' 볼 때(2026-10-23 사용자 보고: 돌아가는 길이 없었다).
+   * 예전에는 1일로 바꿔 버려 며칠치 화면이 사라졌다. 이제는 며칠치 설정은 그대로 두고,
+   * 그 날의 식단(계획에서 짠 그대로)을 하루치 화면으로 보여 드리며 '돌아가기' 단추를 둔다.
+   */
+  const [peek, setPeek] = useState<{ day: string; from: string; index: number; menu: DayMenu } | null>(null)
+  const backToPlan = () => { const f = peek?.from; setPeek(null); if (f) onOpenDay?.(f) }
   const [cursor, setCursor] = useState(kept?.cursor ?? 0)
   /*
    * 눌렀는데 바꿀 것이 없었는가.
@@ -159,7 +167,7 @@ export function RecommendedMenu({
   useEffect(() => { DRAFT_MEMORY = { key: conditionKey, drafts, cursor } }, [conditionKey, drafts, cursor])
   useEffect(() => { track('menu_build') }, [])
 
-  const menu = cursor === 0 ? first : (drafts[cursor - 1] ?? first)
+  const menu = peek ? peek.menu : cursor === 0 ? first : (drafts[cursor - 1] ?? first)
   const signs = useMemo(() => emergencySigns(patient), [patient])
   const seed = cursor
 
@@ -254,7 +262,7 @@ export function RecommendedMenu({
   const [days, setDays] = useState<number>(() => {
     try { const v = Number(localStorage.getItem('harucharim.plan.days')); return v >= 1 && v <= PLAN_MAX_DAYS ? v : 1 } catch { return 1 }
   })
-  const pickDays = (n: number) => { setDays(n); try { localStorage.setItem('harucharim.plan.days', String(n)) } catch { /* 없어도 된다 */ } }
+  const pickDays = (n: number) => { setDays(n); setPeek(null); try { localStorage.setItem('harucharim.plan.days', String(n)) } catch { /* 없어도 된다 */ } }
   const daysPicker = (
     <div className="mb-3 flex items-center gap-2">
       <span className="text-xs font-semibold text-stone-600">며칠치</span>
@@ -290,23 +298,34 @@ export function RecommendedMenu({
     )
   }
 
-  if (days > 1) {
-    return (
-      <div>
-        {daysPicker}
-        <MealPlan
-          patient={patient} selected={selected} supps={supps} startDay={day} days={days}
-          diary={diary} shown={shown} onShown={onShown}
-          onApplyDays={(byDay) => onApplyDays?.(byDay)}
-          onOpenDay={(d) => { pickDays(1); onOpenDay?.(d) }}
-        />
-      </div>
-    )
-  }
+  /*
+   * 며칠치 화면은 한 날을 자세히 보는 동안에도 내리지 않고 숨겨 둔다(hidden) —
+   * 내리면 '다시 구성' 으로 고른 안과 산 것 표시가 날아가, 돌아왔을 때 다른 계획이 보인다.
+   */
+  const planView = days > 1 ? (
+    <div className={peek ? 'hidden' : undefined}>
+      {daysPicker}
+      <MealPlan
+        patient={patient} selected={selected} supps={supps} startDay={peek ? peek.from : day} days={days}
+        diary={diary} shown={shown} onShown={onShown}
+        onApplyDays={(byDay) => onApplyDays?.(byDay)}
+        onOpenDay={(d, m, i) => { setPeek({ day: d, from: day, index: i, menu: m }); onOpenDay?.(d) }}
+      />
+    </div>
+  ) : null
 
   return (
     <div>
-      {daysPicker}
+      {planView}
+      {(days === 1 || peek) && <div>
+      {peek ? (
+        <div className="mb-3 flex items-center gap-2">
+          <button className="rounded-xl border-2 border-stone-300 bg-white px-3 py-1.5 text-sm font-bold text-stone-700 hover:bg-stone-50" onClick={backToPlan}>
+            ‹ {days}일치로 돌아가기
+          </button>
+          <span className="text-xs text-stone-500">{peek.index + 1}일째 · {dayLabel(peek.day)}</span>
+        </div>
+      ) : daysPicker}
       <div className="mb-4 rounded-2xl border border-brand-200 bg-brand-50/60 px-4 py-3.5">
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -329,7 +348,7 @@ export function RecommendedMenu({
             * 설명 딱지처럼 보였다. 실제로 이 단추는 거의 눌리지 않았다.
             * 누를 수 있는 것처럼 보이게 하고, 무엇을 하는 단추인지 아래에 한 줄 적는다.
             */}
-          <div className="flex shrink-0 items-center gap-1.5">
+          {!peek && <div className="flex shrink-0 items-center gap-1.5">
             {/*
               * 앞의 안으로 돌아가는 단추.
               *
@@ -354,7 +373,7 @@ export function RecommendedMenu({
                 다시 구성
               </span>
             </button>
-          </div>
+          </div>}
         </div>
         {/*
           * 오늘을 정한 까닭을 한 번 말한다.
@@ -383,7 +402,11 @@ export function RecommendedMenu({
           </div>
         )}
 
-        <p className="mt-2.5 text-[11px] leading-relaxed text-brand-800/70">
+        {peek ? (
+          <p className="mt-2.5 text-[11px] leading-relaxed text-brand-800/70">
+            {days}일치 계획에서 짠 그대로입니다. 바꾸시려면 돌아가서 <strong>다시 구성</strong>을 누르세요.
+          </p>
+        ) : <p className="mt-2.5 text-[11px] leading-relaxed text-brand-800/70">
           {seed === 0 ? (
             <>마음에 드는 것이 없으면 <strong>다시 구성</strong>을 눌러 보세요. 같은 영양 목표로 다른 조합을 짜 드립니다.
               {selected.length > 0 && <> 담으신 {selected.length}가지는 그대로 두고 나머지만 바꿉니다.</>}</>
@@ -398,7 +421,7 @@ export function RecommendedMenu({
             <><strong>{cursor + 1}번째 안</strong>입니다{drafts.length > cursor ? ` (지금까지 ${drafts.length + 1}가지)` : ''}.
               {' '}계속 누르시면 다른 조합을 더 보여 드리고, <strong>이전 안</strong>으로 돌아가실 수도 있습니다.</>
           )}
-        </p>
+        </p>}
       </div>
 
       {/*
@@ -628,6 +651,7 @@ export function RecommendedMenu({
         추천 항목마다 어떤 권고에 따른 것인지와 근거를 함께 표시했습니다.
         실제 처방·영양 상담을 대체하지 않습니다.
       </p>
+      </div>}
     </div>
   )
 }
