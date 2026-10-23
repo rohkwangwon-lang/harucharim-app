@@ -35,9 +35,15 @@ if (!ENGINE) {
   process.exit(0)
 }
 mkdirSync(OUT, { recursive: true })
-const old: Record<string, string> = existsSync(MANIFEST) ? JSON.parse(readFileSync(MANIFEST, 'utf-8')) : {}
+/* 지난 목록은 clips 칸 안에 있다 — 뿌리에서 찾으면 매번 전부 다시 만든다(첫 실행에서 그랬다) */
+const old: Record<string, string> = existsSync(MANIFEST) ? (JSON.parse(readFileSync(MANIFEST, 'utf-8')).clips ?? {}) : {}
 const next: Record<string, string> = {}
+const secs: Record<string, number> = {}
 let made = 0
+function seconds(file: string): number {
+  try { const m = execFileSync('afinfo', [file]).toString().match(/estimated duration: ([\d.]+)/); if (m) return Math.round(Number(m[1]) * 10) / 10 } catch { /* afinfo 없음 */ }
+  return Math.round(readFileSync(file).length / 15500 * 10) / 10
+}
 
 async function google(text: string): Promise<Buffer> {
   const r = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${encodeURIComponent(process.env.GOOGLE_TTS_KEY!)}`, {
@@ -61,15 +67,16 @@ for (const line of lines) {
   const ext = ENGINE === 'say' ? 'm4a' : 'mp3'
   const name = `${h}.${ext}`
   next[h] = name
-  if (old[h] === name && existsSync(join(OUT, name))) continue
+  if (old[h] === name && existsSync(join(OUT, name))) { secs[h] = seconds(join(OUT, name)); continue }
   const spoken = toSpeech(line)
   if (ENGINE === 'say') say(spoken, join(OUT, name))
   else writeFileSync(join(OUT, name), await google(spoken))
+  secs[h] = seconds(join(OUT, name))
   made++
   process.stdout.write(`\r만든 것 ${made}`)
 }
 for (const f of readdirSync(OUT)) if (f !== 'audio.json' && !Object.values(next).includes(f)) unlinkSync(join(OUT, f))
-writeFileSync(MANIFEST, JSON.stringify({ engine: ENGINE, voice: ENGINE === 'say' ? 'Yuna' : VOICE, made: new Date().toISOString().slice(0, 10), clips: next }, null, 0))
+writeFileSync(MANIFEST, JSON.stringify({ engine: ENGINE, voice: ENGINE === 'say' ? 'Yuna' : VOICE, made: new Date().toISOString().slice(0, 10), clips: next, secs }, null, 0))
 console.log(`\n끝 — 자막 ${lines.size}개, 새로 만든 것 ${made}개, ${ENGINE === 'say' ? '유나(맥)' : VOICE}. public/tour/audio.json`)
 }
 main().catch((e) => { console.error(String(e)); process.exit(1) })

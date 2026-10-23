@@ -41,7 +41,7 @@ const isApple = typeof navigator !== 'undefined' && /iPhone|iPad|Macintosh/.test
  * 파일이 있으면 그것을 틀고(기기와 상관없이 같은 자연스러운 목소리), 없거나 못 받으면 기기 음성으로 읽는다.
  */
 const AUDIO_BASE = `${import.meta.env.BASE_URL}tour/`
-interface Clips { voice?: string; clips: Record<string, string> }
+interface Clips { voice?: string; clips: Record<string, string>; secs?: Record<string, number> }
 
 type TabId = '내 식단' | '추천' | '찾기' | '기록' | '영양제' | '가이드' | '내 정보'
 type View = 'compose' | 'days' | 'plan' | 'peek' | 'shop' | 'diary' | 'supp' | 'image' | 'search' | 'detail' | 'suggest1' | 'me' | 'care'
@@ -267,7 +267,9 @@ const DEFAULT_MS = 2600
 interface Flat { ch: number; sc: number; beat: Beat; sceneStart: boolean; chapterStart: boolean }
 const FLAT: Flat[] = CHAPTERS.flatMap((c, ch) => c.scenes.flatMap((s, sc) => s.beats.map((beat, b) => ({ ch, sc, beat, sceneStart: b === 0, chapterStart: b === 0 && sc === 0 }))))
 const CH_START = CHAPTERS.map((_, ch) => FLAT.findIndex((f) => f.ch === ch))
-const chapterSeconds = (ch: number) => Math.round(FLAT.filter((f) => f.ch === ch).reduce((n, f) => n + (f.beat.ms ?? DEFAULT_MS), 0) / 1000)
+/* 박자 길이 — 녹음이 있으면 녹음 길이 + 쉼, 없으면 적어 둔 시간 */
+const beatSecs = (b: Beat, clips: Clips | null) => { const s = clips?.secs?.[hashText(b.say)]; return s ? s + 0.6 : (b.ms ?? DEFAULT_MS) / 1000 }
+const chapterSeconds = (ch: number, clips: Clips | null) => Math.round(FLAT.filter((f) => f.ch === ch).reduce((n, f) => n + beatSecs(f.beat, clips), 0))
 
 export function Tour({ onClose }: { onClose: () => void }) {
   const [menu, setMenu] = useState(true)
@@ -410,7 +412,7 @@ export function Tour({ onClose }: { onClose: () => void }) {
                 더 자연스러운 목소리: 설정 → 손쉬운 사용 → 음성 콘텐츠(맥은 말하기) → 음성 → 한국어에서 <b>유나(고급)</b>을 내려받으면 이 안내도 그 목소리로 읽습니다.
               </p>
             )}
-            <button className="btn-primary mt-3 w-full py-2.5 text-sm" onClick={() => start(0)}>▶ 처음부터 전부 보기 <span className="text-[11px] font-normal opacity-80">· 약 {Math.round(FLAT.reduce((n, f) => n + (f.beat.ms ?? DEFAULT_MS), 0) / 60000)}분</span></button>
+            <button className="btn-primary mt-3 w-full py-2.5 text-sm" onClick={() => start(0)}>▶ 처음부터 전부 보기 <span className="text-[11px] font-normal opacity-80">· 약 {Math.round(FLAT.reduce((n, f) => n + beatSecs(f.beat, voice ? clips : null), 0) / 60)}분</span></button>
             <ul className="mt-2.5 divide-y divide-stone-100">
               {CHAPTERS.map((c, i) => (
                 <li key={c.title}>
@@ -420,7 +422,7 @@ export function Tour({ onClose }: { onClose: () => void }) {
                       <span className="block text-[13px] font-bold text-stone-900">{c.title}</span>
                       <span className="block text-[11px] text-stone-500">{c.lead}</span>
                     </span>
-                    <span className="shrink-0 text-[11px] text-stone-400">{c.scenes.length}장면 · {Math.max(1, Math.round(chapterSeconds(i) / 10) * 10)}초</span>
+                    <span className="shrink-0 text-[11px] text-stone-400">{c.scenes.length}장면 · {Math.max(1, Math.round(chapterSeconds(i, voice ? clips : null) / 10) * 10)}초</span>
                   </button>
                 </li>
               ))}
