@@ -2,6 +2,7 @@ import type { Cuisine, EvidenceLevel, Food, FoodGroup, MealSlot, NutrientKey, Pa
 import { MEAL_SLOTS, SNACK_SLOTS, isSnack } from '../data/types'
 import { CURATED_FOODS, FOOD_BY_ID, isAnchorDish, isIngredientOnly, mealIsComplete, mealRole, swallowSafe, type MealRole } from '../data/foods'
 import { INGREDIENT_DISHES } from '../data/foods/ingredientDishes'
+import { ingredientsOf } from '../data/foods/recipes'
 import { CANCER_BY_ID } from '../data/cancers'
 import { activeInteractions, activeRules, evaluateFood, type RuleHit, type InteractionHit } from './rules'
 import { mealTimingFor } from '../data/interactions'
@@ -335,7 +336,7 @@ export function ideasFromIngredients(
  *
  * 모르는 열쇠가 들어오면 알아채도록 남겨 둔다.
  */
-export const MENU_OPTION_KEYS = ['supplements', 'day', 'nonce', 'recent'] as const
+export const MENU_OPTION_KEYS = ['supplements', 'day', 'nonce', 'recent', 'preferIngredients'] as const
 
 export interface MenuOptions {
   /** 복용 중인 영양제 */
@@ -352,6 +353,12 @@ export interface MenuOptions {
    * 어제 먹은 것이 오늘 또 올라오면 추천으로 읽히지 않는다.
    */
   recent?: Map<string, number>
+  /**
+   * 이미 사 둘 재료(여러 날 식단에서 앞날에 쓰는 재료 이름).
+   * 같은 재료를 쓰는 요리에 작은 가산점을 주어 장보기 가짓수를 줄인다(2026-10-23) — 같은 요리를 되풀이하는 것이 아니라
+   * 같은 재료를 다른 요리로 쓰게 한다. 되풀이는 recent 가 따로 막는다.
+   */
+  preferIngredients?: Set<string>
   /**
    * 며칠 전까지 거슬러 보고 겹치지 않게 할지.
    *
@@ -636,12 +643,12 @@ export function buildDayMenu(
   const running = (): NutrientTotals => addTotals(foodTotals, suppTotals)
 
   const used = new Set(keep.map((k) => k.food.id))
-  const candidates = collectCandidates(patient, cached, cuisines, season)
+  const candidates = collectCandidates(patient, cached, cuisines, season, false, opts.preferIngredients)
   /*
    * 보충 단계에서 쓸 후보. 여기서는 영양보충 음료도 넣는다 —
    * 하루를 다 짜고도 열량이 모자란다면 그것이 곧 경구영양보충의 적응증이다.
    */
-  const topUpPool = collectCandidates(patient, cached, cuisines, season, true)
+  const topUpPool = collectCandidates(patient, cached, cuisines, season, true, opts.preferIngredients)
     .filter((c) => c.na <= 120 && (c.kcal >= 60 || c.protein >= 5))
 
   // 3) 부족분 채우기
@@ -2830,13 +2837,18 @@ function microBudget(
   })
 }
 
+/* 어느 요리에나 드는 것 — 이것이 겹친다고 장보기가 줄지는 않는다 */
+const UBIQUITOUS = new Set(['대파', '양파', '당근', '달걀', '두부', '애호박', '쪽파', '부추'])
+
 function collectCandidates(
   patient: PatientContext,
   cached: { rules: RuleHit[]; interactions: InteractionHit[] },
   cuisines: Cuisine[],
   season: Season,
   /** 경구영양보충을 후보에 넣을지 — 보충 단계에서는 열량 미달 자체가 적응증이다 */
-  forceONS = false
+  forceONS = false,
+  /** 이미 사 둘 재료 — 같은 재료를 쓰는 요리에 가산점(MenuOptions.preferIngredients) */
+  prefer?: Set<string>
 ): Cand[] {
   /* 이분에게 세는 미량영양소 — 없으면 아래 루프가 빈 객체만 만든다 */
   const micros = microTargets(patient)
@@ -3013,6 +3025,15 @@ function collectCandidates(
      */
     let bonus = 0
     for (const h of prefers) bonus += h.source === '공통' ? 6 : 14
+    /*
+     * 장보기 가짓수를 줄인다(2026-10-23). 앞날 식단에 이미 든 재료(양념 말고)를 쓰는 요리에 재료 하나마다 4점, 최대 8점.
+     * 권장 규칙 하나(6~14점)보다 작게 두어, 근거가 있는 추천을 밀어내지 않게 한다.
+     */
+    if (prefer && prefer.size > 0) {
+      let shared = 0
+      for (const ing of ingredientsOf(f)) if (!ing.self && ing.cat !== '양념·기본 재료' && !UBIQUITOUS.has(ing.name) && prefer.has(ing.name)) shared++
+      bonus += Math.min(12, shared * 6)
+    }
     /*
      * 고르신 요리 계통에 가산점.
      *

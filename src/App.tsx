@@ -85,7 +85,7 @@ const CARE_VIEWS: { id: CareView; label: string }[] = [
 
 export default function App() {
   const {
-    state, day, setDay, selected, setWeight,
+    state, day, setDay, addFoodOn, selected, setWeight,
     setPatient, adoptName, addFood, setServings, setMeal, removeFood, clearFoods,
     toggleSupplement, completeOnboarding, resetOnboarding, setTextSize,
     rememberShown
@@ -333,6 +333,14 @@ export default function App() {
             }}
             onPatch={setPatient}
             onGoCompose={() => setTab('compose')}
+            onApplyDays={(byDay) => {
+              for (const d of byDay) addFoodOn(d.day, d.items)
+              const n = byDay.reduce((k, d) => k + d.items.length, 0)
+              setToast(`${byDay.length}일치 ${n}가지를 날짜별로 담았습니다`)
+              setTimeout(() => setToast(null), 2000)
+              setTab('diary')
+            }}
+            onOpenDay={(d) => setDay(d)}
           />
         )}
 

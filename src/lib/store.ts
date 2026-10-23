@@ -327,7 +327,8 @@ function pruneShown(shown: Record<string, string[]>): Record<DayKey, string[]> {
   for (const [key, ids] of Object.entries(shown)) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue
     const ago = today - Math.round(Date.parse(key) / 86400000)
-    if (ago < 0 || ago > SHOWN_KEEP_DAYS) continue
+    /* 며칠치 식단은 앞날 것도 적어 둔다(2026-10-23) — 그 날이 되어 하루치를 열어도 같은 상에서 이어 가게 */
+    if (ago < -7 || ago > SHOWN_KEEP_DAYS) continue
     if (Array.isArray(ids)) out[key] = ids.filter((x) => typeof x === 'string')
   }
   return out as Record<DayKey, string[]>
@@ -411,6 +412,21 @@ export function useAppState() {
       return { ...s, diary: { ...s.diary, [day]: next } }
     })
   }, [day])
+
+  /** 특정 날짜에 담는다 — 여러 날 식단을 한꺼번에 가져올 때(2026-10-23). 같은 음식·끼니면 인분을 더한다 */
+  const addFoodOn = useCallback((forDay: DayKey, items: { foodId: string; servings: number; meal?: MealSlot }[]) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(forDay) || items.length === 0) return
+    setState((s) => {
+      let list = s.diary[forDay] ?? []
+      for (const it of items) {
+        const idx = list.findIndex((i) => i.foodId === it.foodId && i.meal === it.meal)
+        list = idx === -1
+          ? [...list, { foodId: it.foodId, servings: it.servings, meal: it.meal }]
+          : list.map((x, k) => (k === idx ? { ...x, servings: Math.round((x.servings + it.servings) * 10) / 10 } : x))
+      }
+      return { ...s, diary: { ...s.diary, [forDay]: list } }
+    })
+  }, [])
 
   const setServings = useCallback((foodId: string, servings: number, meal?: MealSlot) => {
     setState((s) => {
@@ -519,6 +535,7 @@ export function useAppState() {
     /** 지금 보고 있는 날짜 */
     day,
     setDay,
+    addFoodOn,
     /** 그날의 식단 */
     selected,
     setWeight,

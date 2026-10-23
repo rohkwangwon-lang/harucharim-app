@@ -33,6 +33,7 @@ export const EVENTS = [
   'onboard_done',    // 처음 설정을 마치심
   'menu_build',      // 하루치 추천을 받으심
   'menu_retry',      // 다시 구성
+  'plan_days', 'plan_build', 'plan_retry', 'plan_take', 'plan_copy', 'plan_share',  // 며칠치 식단·장보기(2026-10-23)
   'menu_take',       // 추천을 식단에 담으심
   'food_add',        // 음식을 담으심
   'food_search',     // 찾기를 쓰심

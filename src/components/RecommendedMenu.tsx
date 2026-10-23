@@ -9,6 +9,8 @@ import { buildDayMenu, fiberGoal, recentFoods, type DayMenu } from '../engine/me
 import { foodContribution, personalTarget, refeedingRisk, refeedingStage, renalProteinCap } from '../engine/nutrition'
 import { CANCER_BY_ID } from '../data/cancers'
 import { emergencySigns } from '../data/emergencySigns'
+import { MealPlan } from './MealPlan'
+import { PLAN_MAX_DAYS } from '../engine/plan'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
 import { REF_BY_ID } from '../data/references'
 import { DayNoteList, EvidenceBadge, HowTo, NutrientPanel, NutrientRow, nutrientState, Section } from './ui'
@@ -39,7 +41,9 @@ export function RecommendedMenu({
   onApply,
   onApplyAll,
   onGoCompose,
-  onPatch
+  onPatch,
+  onApplyDays,
+  onOpenDay
 }: {
   patient: PatientContext
   selected: SelectedItem[]
@@ -57,6 +61,10 @@ export function RecommendedMenu({
   onApply: (foodId: string, meal: MealSlot, servings?: number) => void
   onApplyAll: (items: { foodId: string; meal: MealSlot; servings: number }[]) => void
   onGoCompose: () => void
+  /** 여러 날 식단을 날짜별로 담는다(2026-10-23) */
+  onApplyDays?: (byDay: { day: string; items: { foodId: string; servings: number; meal: MealSlot }[] }[]) => void
+  /** 여러 날 가운데 한 날을 하루치 화면으로 본다 — 그 날로 옮긴다 */
+  onOpenDay?: (day: string) => void
   /** 요리 계통을 이 화면에서 바로 고치실 수 있게 한다 */
   onPatch?: (patch: { cuisines: Cuisine[] }) => void
 }) {
@@ -239,6 +247,34 @@ export function RecommendedMenu({
    * NICE 는 하루 5 kcal/kg 에서 시작하고 심전도를 계속 보라고 한다 — 집에서 앱 식단을 따를 단계가 아니다.
    * 식단을 보여 드리지 않고 병원에 연락하시도록 한다(2026-10-15).
    */
+  /*
+   * 며칠치를 한꺼번에(2026-10-23). 1일이면 지금까지의 하루치 화면, 2~5일이면 여러 날 화면(MealPlan).
+   * 5일까지인 까닭은 engine/plan.ts 에 적었다. 고른 값은 이 기기에만 남는다.
+   */
+  const [days, setDays] = useState<number>(() => {
+    try { const v = Number(localStorage.getItem('harucharim.plan.days')); return v >= 1 && v <= PLAN_MAX_DAYS ? v : 1 } catch { return 1 }
+  })
+  const pickDays = (n: number) => { setDays(n); try { localStorage.setItem('harucharim.plan.days', String(n)) } catch { /* 없어도 된다 */ } }
+  const daysPicker = (
+    <div className="mb-3 flex items-center gap-2">
+      <span className="text-xs font-semibold text-stone-600">며칠치</span>
+      <div className="flex gap-1" role="radiogroup" aria-label="며칠치 식단을 받을지">
+        {Array.from({ length: PLAN_MAX_DAYS }, (_, i) => i + 1).map((n) => (
+          <button
+            key={n}
+            role="radio"
+            aria-checked={days === n}
+            onClick={() => { track('plan_days'); pickDays(n) }}
+            className={`chip border transition-colors ${days === n ? 'border-brand-500 bg-brand-500 text-white' : 'border-stone-300 bg-white text-stone-600 hover:bg-stone-50'}`}
+          >
+            {n}일
+          </button>
+        ))}
+      </div>
+      <span className="ml-auto text-[10.5px] text-stone-400">장보기 목록은 2일부터</span>
+    </div>
+  )
+
   const stage = refeedingStage(patient, day)
   if (stage && refeedingRisk(patient).extreme) {
     return (
@@ -254,8 +290,23 @@ export function RecommendedMenu({
     )
   }
 
+  if (days > 1) {
+    return (
+      <div>
+        {daysPicker}
+        <MealPlan
+          patient={patient} selected={selected} supps={supps} startDay={day} days={days}
+          diary={diary} shown={shown} onShown={onShown}
+          onApplyDays={(byDay) => onApplyDays?.(byDay)}
+          onOpenDay={(d) => { pickDays(1); onOpenDay?.(d) }}
+        />
+      </div>
+    )
+  }
+
   return (
     <div>
+      {daysPicker}
       <div className="mb-4 rounded-2xl border border-brand-200 bg-brand-50/60 px-4 py-3.5">
         <div className="flex items-start justify-between gap-3">
           <div>
