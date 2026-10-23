@@ -34,7 +34,7 @@ export const EVENTS = [
   'menu_build',      // 하루치 추천을 받으심
   'menu_retry',      // 다시 구성
   'plan_days', 'plan_build', 'plan_retry', 'plan_take', 'plan_copy', 'plan_share', 'plan_image', 'plan_print',  // 며칠치 식단·장보기(2026-10-23)
-  'tour_open', 'tour_done',  // 움직이는 사용법(2026-10-23)
+  'tour_open', 'tour_done', 'tour_voice',  // 움직이는 사용법(2026-10-23) · 음성 켜심
   'menu_take',       // 추천을 식단에 담으심
   'food_add',        // 음식을 담으심
   'food_search',     // 찾기를 쓰심

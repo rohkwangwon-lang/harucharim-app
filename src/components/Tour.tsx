@@ -14,6 +14,24 @@ import { track } from '../lib/stats'
  * 움직임을 줄여 달라고 한 기기(prefers-reduced-motion)에서는 손가락이 미끄러지지 않고 바로 옮겨 간다.
  */
 export const TOUR_SEEN_KEY = 'harucharim.tour.seen'
+const VOICE_KEY = 'harucharim.tour.voice'
+
+/*
+ * 음성 안내(2026-10-23 사용자 요청) — 기기에 든 한국어 음성(Web Speech API)으로 자막을 읽어 준다.
+ * 녹음 파일을 두지 않는 까닭: 장면 글을 고칠 때마다 다시 녹음할 수 없고, 파일이 무거우며, 기기 음성은 오프라인에서도 된다.
+ * 대신 목소리는 기기마다 다르다(아이폰 유나, 안드로이드 구글 TTS). 한국어 음성이 없는 기기에서는 켜도 소리가 나지 않으므로 그 사실을 적어 둔다.
+ * 읽는 동안에는 박자를 넘기지 않는다 — 읽기가 끝난 뒤 잠깐 쉬고 넘어간다.
+ */
+const canSpeak = typeof window !== 'undefined' && 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined'
+function koVoice(): SpeechSynthesisVoice | null {
+  if (!canSpeak) return null
+  const vs = window.speechSynthesis.getVoices()
+  return vs.find((v) => /^ko/i.test(v.lang) && /yuna|유나|google|premium|enhanced/i.test(v.name)) ?? vs.find((v) => /^ko/i.test(v.lang)) ?? null
+}
+/** 기호를 읽기 좋은 말로 — '날짜 × 끼니' 를 '곱하기' 라고 읽지 않게 */
+function toSpeech(t: string): string {
+  return t.replace(/×/g, ' 그리고 ').replace(/→/g, ', ').replace(/·/g, ', ').replace(/—/g, ', ').replace(/＋/g, '플러스 ').replace(/−/g, '빼기').replace(/\s+/g, ' ').trim()
+}
 
 type TabId = '내 식단' | '추천' | '찾기' | '기록' | '영양제' | '가이드' | '내 정보'
 type View = 'compose' | 'days' | 'plan' | 'peek' | 'shop' | 'diary' | 'supp' | 'image' | 'search' | 'detail' | 'suggest1' | 'me' | 'care'
@@ -247,6 +265,10 @@ export function Tour({ onClose }: { onClose: () => void }) {
   const [playing, setPlaying] = useState(false)
   const [ended, setEnded] = useState(false)
   const timer = useRef<number | null>(null)
+  const [voice, setVoice] = useState<boolean>(() => { try { return canSpeak && localStorage.getItem(VOICE_KEY) === '1' } catch { return false } })
+  const [noKo, setNoKo] = useState(false)
+  /* 읽기가 끝나야 넘어간다 — 박자 번호를 적어 두고, 그 번호의 읽기가 끝났을 때만 다음으로 */
+  const [spoken, setSpoken] = useState(-1)
   const reduce = useMemo(() => typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches, [])
 
   const cur = FLAT[pos]
@@ -254,6 +276,22 @@ export function Tour({ onClose }: { onClose: () => void }) {
   const scene = chapter.scenes[cur.sc]
 
   const start = (at: number) => { setMenu(false); setEnded(false); setPos(at); setPlaying(true) }
+  const hush = () => { if (canSpeak) window.speechSynthesis.cancel() }
+  const toggleVoice = () => {
+    const on = !voice
+    setVoice(on); try { localStorage.setItem(VOICE_KEY, on ? '1' : '0') } catch { /* 없어도 된다 */ }
+    if (on) { track('tour_voice'); if (!menu && !ended) say(cur.beat.say, pos) } else hush()
+  }
+  const say = (text: string, at: number) => {
+    if (!canSpeak) return
+    window.speechSynthesis.cancel()
+    const u = new SpeechSynthesisUtterance(toSpeech(text))
+    const v = koVoice(); if (v) u.voice = v
+    u.lang = 'ko-KR'; u.rate = 1; u.pitch = 1
+    u.onend = () => setSpoken(at)
+    u.onerror = () => setSpoken(at)
+    window.speechSynthesis.speak(u)
+  }
   const next = () => { if (pos + 1 < FLAT.length) setPos(pos + 1); else { setEnded(true); setPlaying(false); track('tour_done') } }
   const prevScene = () => {
     setEnded(false); setPlaying(false)
@@ -267,16 +305,34 @@ export function Tour({ onClose }: { onClose: () => void }) {
     if (i < 0) { setEnded(true); track('tour_done') } else setPos(i)
   }
 
-  useEffect(() => { track('tour_open') }, [])
+  useEffect(() => { track('tour_open'); return () => { if (canSpeak) window.speechSynthesis.cancel() } }, [])
+  useEffect(() => {
+    if (!canSpeak) return
+    const check = () => { const vs = window.speechSynthesis.getVoices(); if (vs.length) setNoKo(!vs.some((v) => /^ko/i.test(v.lang))) }
+    check(); window.speechSynthesis.addEventListener?.('voiceschanged', check)
+    return () => window.speechSynthesis.removeEventListener?.('voiceschanged', check)
+  }, [])
+  /* 박자가 바뀌면 읽는다(음성이 켜졌고 재생 중일 때) */
+  useEffect(() => {
+    if (menu || ended) { hush(); return }
+    if (voice && playing) say(cur.beat.say, pos)
+    else if (!playing) hush()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pos, playing, menu, ended])
   useEffect(() => {
     if (!playing || ended || menu) return
-    timer.current = window.setTimeout(next, cur.beat.ms ?? DEFAULT_MS)
+    const ms = cur.beat.ms ?? DEFAULT_MS
+    if (voice && canSpeak && !noKo) {
+      /* 읽기가 끝난 뒤 600 ms 쉬고 넘어간다. 읽기가 끝났다는 신호가 안 오면(일부 기기) 넉넉히 기다렸다가 넘어간다 */
+      if (spoken === pos) { timer.current = window.setTimeout(next, 600) }
+      else timer.current = window.setTimeout(next, ms + 9000)
+    } else timer.current = window.setTimeout(next, ms)
     return () => { if (timer.current) window.clearTimeout(timer.current) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pos, playing, ended, menu])
+  }, [pos, playing, ended, menu, voice, spoken, noKo])
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') { hush(); onClose() }
       else if (menu) return
       else if (e.key === 'ArrowRight') { setPlaying(false); next() }
       else if (e.key === 'ArrowLeft') prevScene()
@@ -293,8 +349,13 @@ export function Tour({ onClose }: { onClose: () => void }) {
         <div className="mb-2 flex w-full items-center justify-between gap-2 text-white">
           <p className="min-w-0 truncate text-sm font-bold">{menu ? '움직이는 사용법' : ended ? '사용법 끝' : `${cur.ch + 1}. ${chapter.title} › ${scene.title}`}</p>
           <div className="flex shrink-0 gap-1.5">
+            {canSpeak && (
+              <button className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${voice ? 'bg-white text-stone-900' : 'bg-white/15 hover:bg-white/25'}`} onClick={toggleVoice} aria-pressed={voice} title={noKo ? '이 기기에는 한국어 음성이 없습니다' : '자막을 읽어 줍니다'}>
+                {voice ? '🔊 음성 켜짐' : '🔈 음성'}
+              </button>
+            )}
             {!menu && <button className="rounded-lg bg-white/15 px-2.5 py-1 text-xs font-semibold hover:bg-white/25" onClick={() => { setPlaying(false); setMenu(true) }}>목차</button>}
-            <button className="rounded-lg bg-white/15 px-2.5 py-1 text-xs font-semibold hover:bg-white/25" onClick={onClose}>닫기 ✕</button>
+            <button className="rounded-lg bg-white/15 px-2.5 py-1 text-xs font-semibold hover:bg-white/25" onClick={() => { hush(); onClose() }}>닫기 ✕</button>
           </div>
         </div>
 
@@ -302,6 +363,14 @@ export function Tour({ onClose }: { onClose: () => void }) {
           <div className="w-full rounded-2xl bg-white p-3.5">
             <p className="text-sm font-bold text-stone-900">무엇을 보시겠어요?</p>
             <p className="mt-0.5 text-[11.5px] text-stone-500">손가락이 눌러 가며 보여 드립니다. 보는 중에 멈추거나 건너뛸 수 있습니다.</p>
+            {canSpeak && (
+              <button className={`mt-2 flex w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-[12px] ${voice ? 'border-brand-500 bg-brand-50 text-brand-900' : 'border-stone-300 text-stone-700'}`} onClick={toggleVoice} aria-pressed={voice}>
+                <span aria-hidden>{voice ? '🔊' : '🔈'}</span>
+                <span className="flex-1"><b>음성 안내</b> {voice ? '켜짐 — 자막을 소리로 읽어 드립니다' : '끔 — 켜면 자막을 소리로 읽어 드립니다'}</span>
+                <span className="text-[10px] text-stone-500">{noKo ? '한국어 음성 없음' : '기기 음성'}</span>
+              </button>
+            )}
+            {canSpeak && voice && noKo && <p className="mt-1 text-[10.5px] text-warn-700">이 기기에는 한국어 음성이 없어 소리가 나지 않을 수 있습니다. 설정에서 한국어 음성을 내려받으면 됩니다.</p>}
             <button className="btn-primary mt-3 w-full py-2.5 text-sm" onClick={() => start(0)}>▶ 처음부터 전부 보기 <span className="text-[11px] font-normal opacity-80">· 약 {Math.round(FLAT.reduce((n, f) => n + (f.beat.ms ?? DEFAULT_MS), 0) / 60000)}분</span></button>
             <ul className="mt-2.5 divide-y divide-stone-100">
               {CHAPTERS.map((c, i) => (
