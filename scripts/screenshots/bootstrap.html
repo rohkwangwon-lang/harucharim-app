@@ -35,7 +35,8 @@
     localStorage.setItem('harucharim.migrated', '1');
     localStorage.setItem('harucharim.stats.firstSeen', iso(today));
     localStorage.setItem('harucharim.stats.consent', 'no');
-    localStorage.setItem('harucharim.notice.read', '["terms-2026-09"]');
+    localStorage.setItem('harucharim.notices.read', '["privacy-2026-09-18","terms-2026-09-08"]');   /* lib/notice.ts READ_KEY · data/notices.ts 의 id */
+    localStorage.setItem('harucharim.tour.seen', '1');   /* 움직이는 사용법 권하는 띠는 촬영에서 뺀다 */
   } catch (e) {}
 
   /* 리액트가 쥐고 있는 입력칸은 값을 직접 넣어도 모른다. 네이티브 세터로 넣고 알린다 */
@@ -93,6 +94,29 @@
             });
             if (m.length) { m[0].scrollIntoView({ block: 'start' }); window.scrollBy(0, -110) }
           }
+          /* 며칠치(2026-10-23): 추천 화면의 'N일' 을 누른다 */
+          var days = q.get('days');
+          if (days) hit(days + '일');
+          /* 움직이는 사용법(2026-10-23): 가이드 → 사용법에서 열고, 장(tour)과 박자(beat)까지 옮긴 뒤 멈춘다 */
+          var tour = q.get('tour');
+          if (tour !== null) {
+            /* 단추 글에 '· 6장 · …' 이 더 붙어 있어 앞부분으로 찾는다 */
+            var tb = [].slice.call(document.querySelectorAll('button')).filter(function (b) { return b.textContent.indexOf('움직이는 사용법 보기') >= 0 });
+            if (tb.length) tb[0].click();
+            setTimeout(function () {
+              var dlg = document.querySelector('[role="dialog"]');
+              if (dlg) {
+                var items = [].slice.call(dlg.querySelectorAll('li button'));
+                if (items[+tour]) items[+tour].click();
+                setTimeout(function () {
+                  var stop = [].slice.call(dlg.querySelectorAll('button')).filter(function (b) { return /멈춤/.test(b.textContent) })[0];
+                  if (stop) stop.click();
+                  var n = +(q.get('beat') || 0);
+                  for (var k = 0; k < n; k++) window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+                }, 300);
+              }
+            }, 400);
+          }
           var pick = q.get('pick');
           if (pick) {
             var row = [].slice.call(document.querySelectorAll('li > button')).filter(function (b) {
@@ -102,8 +126,14 @@
             if (row.length) row[0].click();
           }
           setTimeout(function () {
+            if (scrollTo && (days || tour !== null)) {
+              var m2 = [].slice.call(document.querySelectorAll('*')).filter(function (e) {
+                return e.childElementCount === 0 && e.textContent.trim().indexOf(scrollTo) === 0
+              });
+              if (m2.length) { m2[0].scrollIntoView({ block: 'start' }); window.scrollBy(0, -110) }
+            }
             document.documentElement.setAttribute('data-shot-ready', '1');
-          }, 400);
+          }, (days || tour !== null) ? 2200 : 400);
         }, 500);
       }, 900);
     }, 1200);

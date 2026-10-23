@@ -23,8 +23,13 @@ const SHOTS = [
   ['3-search', 'shot=찾기&q=' + encodeURIComponent('자몽') + '&pick=' + encodeURIComponent('자몽')],
   ['4-supp', 'shot=영양제&to=' + encodeURIComponent('피하시는 편이 좋습니다')],
   ['5-diary', 'shot=기록'],
-  ['6-guide', 'shot=가이드&sub=암종 가이드']
+  ['6-guide', 'shot=가이드&sub=암종 가이드'],
+  /* 발표 자료용(2026-10-23) — 며칠치 식단 · 장보기 목록 · 움직이는 사용법. ONLY=7-plan,8-shop 처럼 골라 찍을 수 있다 */
+  ['7-plan', 'shot=추천&days=3'],
+  ['8-shop', 'shot=추천&days=3&to=' + encodeURIComponent('3일 · 1인분 기준')],
+  ['9-tour', 'shot=가이드&sub=사용법&tour=1&beat=6']
 ]
+const ONLY = process.env.ONLY ? process.env.ONLY.split(',') : null
 
 mkdirSync(OUT, { recursive: true })
 /* 서비스 워커가 지난번 index.html 을 붙들고 있으면 고쳐도 그대로 나온다. 프로필째 지운다 */
@@ -64,6 +69,7 @@ async function open(url) {
 await waitChrome()
 const ok = []
 for (const [name, query] of SHOTS) {
+  if (ONLY && !ONLY.includes(name)) continue
   const { cdp, id } = await open('about:blank')
   await cdp.send('Page.enable')
   await cdp.send('Emulation.setDeviceMetricsOverride', {

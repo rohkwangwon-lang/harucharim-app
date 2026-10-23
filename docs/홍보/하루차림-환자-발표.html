@@ -49,7 +49,7 @@
 html,body{height:100%}
 body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);display:grid;place-items:center;min-height:100dvh;overflow:hidden;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:break-word}
 .stage{position:relative;width:min(100vw,calc(100dvh * 16 / 9));aspect-ratio:16/9;background:var(--paper);container-type:inline-size;overflow:hidden;user-select:none}
-.progress{position:absolute;left:0;top:0;height:.32cqw;width:100%;background:var(--rice);transform-origin:left;transform:scaleX(calc(1/10));transition:transform .5s cubic-bezier(.2,.7,.2,1),background .3s;z-index:3}
+.progress{position:absolute;left:0;top:0;height:.32cqw;width:100%;background:var(--rice);transform-origin:left;transform:scaleX(calc(1/11));transition:transform .5s cubic-bezier(.2,.7,.2,1),background .3s;z-index:3}
 .slide{position:absolute;inset:0;padding:4.6cqw 6.2cqw 6.6cqw;display:none}
 .slide.is-active{display:block}
 
@@ -169,7 +169,7 @@ body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);
   <div class="progress" id="progress"></div>
   <nav class="hud" aria-label="넘기기">
     <button type="button" id="prev" aria-label="앞 장">←</button>
-    <span class="count" id="count">01 / 10</span>
+    <span class="count" id="count">01 / 11</span>
     <button type="button" id="next" aria-label="다음 장">→</button>
     <button type="button" id="full" aria-label="전체 화면">전체 화면</button>
   </nav>
@@ -290,6 +290,31 @@ body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);
     </div>
     <footer class="sf"><span><b>하루차림</b></span><span>가상 환자로 돌린 검사입니다 · 실제 환자의 결과가 아닙니다</span></footer>
   </section>
+  <section class="slide g-ok" aria-label="이렇게 쓰실 수 있습니다">
+    <div class="fill">
+      <div class="head"><p class="tag rise" style="--d:0"><i></i>이렇게 쓰실 수 있습니다</p></div>
+      <div class="cols n3">
+        <div class="col rise" style="--d:2">
+          <p class="name">먹고 싶은 것 먼저</p><p class="pre blank">.</p>
+          <p class="bigtext" style="--bs:5.4cqw">내가 고르고</p>
+          <p class="answer">나머지는 추천받습니다</p>
+          <p class="line">된장찌개를 담으면 그 자리는 두고 빈자리만 채웁니다</p>
+        </div>
+        <div class="col rise" style="--d:3">
+          <p class="name">장보기까지</p><p class="pre">최대</p>
+          <p class="big" style="--bs:5.4cqw"><span class="n" data-to="5" data-dec="0">5</span><span class="unit">일치</span></p>
+          <p class="answer">1인분 장보기 목록이 따라옵니다</p>
+          <p class="line">식단표는 냉장고에 붙이는 그림으로, 인쇄는 A4 한 장</p>
+        </div>
+        <div class="col rise" style="--d:4">
+          <p class="name">처음이라도</p><p class="pre blank">.</p>
+          <p class="bigtext" style="--bs:5.4cqw">움직이는 사용법</p>
+          <p class="answer">손가락이 눌러 가며 보여 드립니다</p>
+          <p class="line">음성 안내를 켜면 읽어 드립니다 · 글자도 키울 수 있습니다</p>
+        </div></div>
+    </div>
+    <footer class="sf"><span><b>이렇게 쓰실 수 있습니다</b></span><span>가이드 → 사용법에서 언제든 다시 보실 수 있습니다 · 집에 있는 재료는 장보기에서 빠집니다</span></footer>
+  </section>
   <section class="slide" aria-label="꼭 말씀드릴 것">
     <div class="fill">
       <p class="eyebrow rise" style="--d:0">꼭 말씀드릴 것</p>
@@ -302,7 +327,7 @@ body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);
       <div>
         <p class="eyebrow rise" style="--d:0">휴대폰 카메라로 찍으시면 바로 열립니다</p>
         <p class="url rise" style="--d:1">harucharim.com</p>
-        <p class="lead rise" style="--d:2">암종·치료 단계·드시는 약에 맞춰<br>하루 세 끼 한식 상차림을 추천합니다</p>
+        <p class="lead rise" style="--d:2">암종·치료 단계·드시는 약에 맞춰<br>하루 세 끼, 닷새까지 한식 상차림과 장보기 목록을</p>
         <p class="note rise" style="--d:3">이 자료는 일반 정보입니다. 개인의 치료와 식사는 담당 의료진과 정하십시오.</p>
       </div>
       <div class="qr pop" style="--d:3"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAdAAAAHQCAIAAACeP6xXAAAIYklEQVR4nO3csW1jORhG0dHCrWziBrb/cBpQsm0osaPtYAECw+uf4jkFSM/U8wWj7/H99foFwH5/Bd8BgOACdAQXICK4ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEiH7u/4POfv3d/xVWev/89+vfa/fy7/97Tn5+f/X3dcAEiggsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4ABHBBXiXPdxV0/ZGT98zPX3f9ra92t3PP+18btsLdsMFiAguQERwASKCCxARXICI4AJEBBcgIrgAEcEFiAguQERwASKCCxARXICI4AJEBBfg1j3c0/cu7Y3+2fOZdp7T9m138//1Z7nhAkQEFyAiuAARwQWICC5ARHABIoILEBFcgIjgAkQEFyAiuAARwQWICC5ARHABIoILEDl+D5f33iedtse66rb9XP6fGy5ARHABIoILEBFcgIjgAkQEFyAiuAARwQWICC5ARHABIoILEBFcgIjgAkQEFyAiuAARe7hvbnVfdXW/9fS9V3u+lNxwASKCCxARXICI4AJEBBcgIrgAEcEFiAguQERwASKCCxARXICI4AJEBBcgIrgAEcEFiBy/hzttX5Wf3c+dtud7+vt5+vNP44YLEBFcgIjgAkQEFyAiuAARwQWICC5ARHABIoILEBFcgIjgAkQEFyAiuAARwQWICC7ArXu4q/uknLU/e/rnr9r9/Kv8f/0sN1yAiOACRAQXICK4ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEij++vV/Vd/IDd+6fT9men7cnufh7O4oYLEBFcgIjgAkQEFyAiuAARwQWICC5ARHABIoILEBFcgIjgAkQEFyAiuAARwQWICC5A5GP3F9gPPet8pp3/tL3dVdOeZ9pe8G7T3mc3XICI4AJEBBcgIrgAEcEFiAguQERwASKCCxARXICI4AJEBBcgIrgAEcEFiAguQERwASKP76/XVfuY05y+9zptb3TV7vOcdj7T3p/dpp2/Gy5ARHABIoILEBFcgIjgAkQEFyAiuAARwQWICC5ARHABIoILEBFcgIjgAkQEFyAiuAC37uHu3oe97fNv25Od9nud/veuuu38V7nhAkQEFyAiuAARwQWICC5ARHABIoILEBFcgIjgAkQEFyAiuAARwQWICC5ARHABIoILEPnY/QXT9ltP3yed9vnT3odp57lq9/mf/jzPYe/zKjdcgIjgAkQEFyAiuAARwQWICC5ARHABIoILEBFcgIjgAkQEFyAiuAARwQWICC5ARHAB3mUP93S79zSn7bGevl98+r7q7ueZ9r7dxg0XICK4ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEiggsQEVyAd9nD3b0fumranumq3Xum085n2vPsdvrvu9vn4Xu+brgAEcEFiAguQERwASKCCxARXICI4AJEBBcgIrgAEcEFiAguQERwASKCCxARXICI4AJEHt9fr61fcPp+5bT90N37p9M+/7bf6/S/d9Vz2J7v7t/LDRcgIrgAEcEFiAguQERwASKCCxARXICI4AJEBBcgIrgAEcEFiAguQERwASKCCxARXIDIx6/LTNtvvW1v9Lbfa/fzT9svXv38z2HPs5sbLkBEcAEiggsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4AJHj93Cn7Wmevtd5+vPvfp7de7unn+e09+c5bB/ZDRcgIrgAEcEFiAguQERwASKCCxARXICI4AJEBBcgIrgAEcEFiAguQERwASKCCxARXIDI4/vrVX0XP2Davuq0Pdnbnue255/GDRcgIrgAEcEFiAguQERwASKCCxARXICI4AJEBBcgIrgAEcEFiAguQERwASKCCxARXIDIx217rKdb3Rudtvc67fNPZ6/2rPNxwwWICC5ARHABIoILEBFcgIjgAkQEFyAiuAARwQWICC5ARHABIoILEBFcgIjgAkQEF+Bd9nBX2es8y+rvNW2f9Lbzv81z2Pm44QJEBBcgIrgAEcEFiAguQERwASKCCxARXICI4AJEBBcgIrgAEcEFiAguQERwASKCC3DrHu7pe6bT9jdXTdurPX3P9/T3ebfPYX/v7vfZDRcgIrgAEcEFiAguQERwASKCCxARXICI4AJEBBcgIrgAEcEFiAguQERwASKCCxARXIDI8Xu4nLUHOm1/drdpf++0/eLnsPPZzQ0XICK4ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEiggsQEVyAiD1cRu+x3raXevq+7bT353PY++CGCxARXICI4AJEBBcgIrgAEcEFiAguQERwASKCCxARXICI4AJEBBcgIrgAEcEFiAguQOT4Pdxpe6Cnm3ae0/ZVpz3/tL3Xae/PNG64ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEiggsQEVyAiOAC3LqHO23f83TO8yyre7Krv++0/d/nZfu5brgAEcEFiAguQERwASKCCxARXICI4AJEBBcgIrgAEcEFiAguQERwASKCCxARXICI4AJEHt9fr+q7AK7mhgsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4ABHBBYgILkBEcAEiggsQEVyAiOACRAQXICK4ABHBBYgILsCvxn8oJImotItV1gAAAABJRU5ErkJggg==" alt="harucharim.com 으로 가는 QR 코드"><p>harucharim.com</p></div>
