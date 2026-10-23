@@ -288,7 +288,7 @@ export default function App() {
       {tour && <Tour onClose={() => { setTour(false); dismissTour() }} />}
       {tourOffer && (
         <div className="mx-4 mt-3 flex items-center gap-2 rounded-xl border border-brand-200 bg-brand-50 px-3 py-2" role="status">
-          <p className="min-w-0 flex-1 text-xs leading-relaxed text-stone-700">처음이세요? <strong>움직이는 사용법</strong>으로 1분 안에 흐름을 보실 수 있습니다.</p>
+          <p className="min-w-0 flex-1 text-xs leading-relaxed text-stone-700">처음이세요? <strong>움직이는 사용법</strong>이 등록부터 추천·장보기·기록까지 눌러 가며 보여 드립니다.</p>
           <button className="btn-primary shrink-0 px-3 py-1.5 text-xs" onClick={() => setTour(true)}>▶ 보기</button>
           <button className="shrink-0 rounded-lg px-2 py-1.5 text-xs text-stone-500 hover:bg-stone-100" onClick={dismissTour} aria-label="닫기">✕</button>
         </div>

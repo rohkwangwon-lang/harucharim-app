@@ -188,7 +188,7 @@ export function Onboarding({
                   처음이시면 카카오·구글 단추로 바로 가입됩니다. 두 가지가 없으시면 이메일로 하실 수 있습니다.
                 </p>
                 <p className="mt-2 text-center">
-                  <button className="text-xs font-bold text-brand-700 underline underline-offset-2" onClick={() => setTour(true)}>▶ 움직이는 사용법 보기 (1분)</button>
+                  <button className="text-xs font-bold text-brand-700 underline underline-offset-2" onClick={() => setTour(true)}>▶ 움직이는 사용법 보기</button>
                 </p>
                 <p className="mt-2 text-center text-[11px] text-stone-400">
                   {adult ? '로그인하시면 다음 단계로 넘어갑니다.' : '위 항목을 확인해 주시면 로그인할 수 있습니다.'}

@@ -309,7 +309,7 @@ export function HowTo() {
       >
         {/* 글보다 먼저 — 손가락이 눌러 가며 보여 주는 1분짜리 안내(2026-10-23) */}
         <button className="btn-primary mb-3 w-full py-3" onClick={() => setTour(true)}>
-          <span className="flex items-center justify-center gap-2"><span aria-hidden>▶</span> 움직이는 사용법 보기 <span className="text-[11px] font-normal opacity-80">· 1분 · 처음 등록부터 식단표까지</span></span>
+          <span className="flex items-center justify-center gap-2"><span aria-hidden>▶</span> 움직이는 사용법 보기 <span className="text-[11px] font-normal opacity-80">· 6장 · 보고 싶은 장만 골라서</span></span>
         </button>
         <div className="card border-brand-200 bg-brand-50/50 p-4">
           <p className="text-sm leading-relaxed text-stone-700">
