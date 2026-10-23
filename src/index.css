@@ -140,7 +140,10 @@ html[data-text='xlarge'] .stat-value { font-size: 0.9rem; }
 .tour-tap { animation: tour-tap 700ms ease-out forwards; }
 @keyframes tour-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .tour-in { animation: tour-in 350ms ease-out both; }
+/* 손이 누르는 동작 — 손끝(왼쪽 위)을 축으로 살짝 내려앉았다가 올라온다 */
+@keyframes tour-press { 0% { transform: translateY(0) scale(1); } 35% { transform: translateY(3px) scale(0.93); } 70% { transform: translateY(0) scale(1); } 100% { transform: translateY(0) scale(1); } }
+.tour-press { animation: tour-press 600ms ease-out 120ms both; transform-origin: 36% 4%; }
 @media (prefers-reduced-motion: reduce) {
   .tour-finger { transition: none !important; }
-  .tour-tap, .tour-in { animation: none; }
+  .tour-tap, .tour-in, .tour-press { animation: none; }
 }

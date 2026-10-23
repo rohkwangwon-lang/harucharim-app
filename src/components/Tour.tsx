@@ -434,12 +434,19 @@ export function Tour({ onClose }: { onClose: () => void }) {
             <div className="relative w-[270px] overflow-hidden rounded-[26px] border-[6px] border-stone-800 bg-stone-50 shadow-2xl" style={{ height: 'min(500px, 58vh)' }}>
               {ended ? <Ending onMenu={() => { setEnded(false); setMenu(true) }} /> : <Phone screen={cur.beat.screen} />}
               {!ended && cur.beat.at && (
+                /* 손 모양(2026-10-23 사용자 요청: 반투명 원 대신). 손끝이 목표 자리에 오도록 그림을 옮겨 놓고, 누를 때 손이 살짝 눌리며 손끝에 파문이 퍼진다 */
                 <div
-                  className={`tour-finger pointer-events-none absolute z-20 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-brand-700/50 shadow-lg ${reduce ? '' : 'transition-all duration-500 ease-in-out'}`}
+                  className={`tour-finger pointer-events-none absolute z-20 ${reduce ? '' : 'transition-all duration-500 ease-in-out'}`}
                   style={{ left: `${cur.beat.at[0]}%`, top: `${cur.beat.at[1]}%` }}
                   aria-hidden
                 >
-                  {cur.beat.tap && <span key={pos} className="tour-tap absolute inset-0 rounded-full border-2 border-brand-500" />}
+                  {cur.beat.tap && <span key={pos} className="tour-tap absolute left-0 top-0 h-7 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-brand-500 bg-brand-500/25" />}
+                  <span className="absolute left-0 top-0 block" style={{ transform: 'translate(-36%, -4%)' }}>
+                    <svg key={cur.beat.tap ? `p${pos}` : 'hand'} viewBox="0 0 44 56" className={`h-14 w-11 ${cur.beat.tap && !reduce ? 'tour-press' : ''}`} style={{ filter: 'drop-shadow(0 2px 3px rgba(40,38,33,.35))' }}>
+                      <path d="M16 2c-2.2 0-4 1.8-4 4v24c-3-1.5-6-1-7 1.5-1 2 0 4 2 6l9 10c2 2 4 3 7 3h8c6 0 10-4 10-10V28c0-2.2-1.8-4-4-4-1 0-2 .4-2.6 1-.5-1.8-2-3-4-3-1 0-2 .4-2.6 1-.6-1.8-2.1-3-4-3-1.3 0-2.4.5-3 1.3V6c0-2.2-1.8-4-4-4z" fill="#fdf8ec" stroke="#282621" strokeWidth="2" strokeLinejoin="round" />
+                      <path d="M24 29v6M31 29v6M38 31v4" stroke="#282621" strokeWidth="1.6" strokeLinecap="round" opacity=".55" />
+                    </svg>
+                  </span>
                 </div>
               )}
             </div>
