@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ALLERGENS } from '../data/allergens'
 import { SOURCES, setSource } from '../lib/stats'
 import { track } from '../lib/stats'
+import { Tour } from './Tour'
 import { isSupabaseConfigured } from '../lib/supabase'
 import {
   checkSignUp, displayName, EMAIL_OPENS, emailOpen, lastProvider, MIN_PASSWORD, PROVIDER_LABEL,
@@ -61,6 +62,8 @@ export function Onboarding({
   loginOnly?: boolean
 }) {
   const [step, setStep] = useState(0)
+  /* 로그인 전에 앱이 무엇을 하는지 미리 보여 준다(2026-10-23) */
+  const [tour, setTour] = useState(false)
   const { user } = useSession()
   /* 지난번에 쓰신 로그인 방법 — 아이디·비밀번호는 이 앱이 받지 않는다 */
   const last = lastProvider()
@@ -93,6 +96,7 @@ export function Onboarding({
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-stone-50">
+      {tour && <Tour onClose={() => setTour(false)} />}
       {/* 진행 표시 */}
       <div className="safe-top shrink-0 border-b border-stone-200 bg-white px-5 pb-3 pt-4">
         <div className="flex items-center justify-between">
@@ -182,6 +186,9 @@ export function Onboarding({
                 </div>
                 <p className="mt-4 text-center text-xs text-stone-400">
                   처음이시면 카카오·구글 단추로 바로 가입됩니다. 두 가지가 없으시면 이메일로 하실 수 있습니다.
+                </p>
+                <p className="mt-2 text-center">
+                  <button className="text-xs font-bold text-brand-700 underline underline-offset-2" onClick={() => setTour(true)}>▶ 움직이는 사용법 보기 (1분)</button>
                 </p>
                 <p className="mt-2 text-center text-[11px] text-stone-400">
                   {adult ? '로그인하시면 다음 단계로 넘어갑니다.' : '위 항목을 확인해 주시면 로그인할 수 있습니다.'}

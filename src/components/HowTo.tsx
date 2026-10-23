@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { track } from '../lib/stats'
 import { Section } from './ui'
+import { Tour } from './Tour'
 
 /**
  * 사용하는 법.
@@ -297,13 +298,19 @@ const CAUTIONS: { q: string; a: string }[] = [
 export function HowTo() {
   useEffect(() => { track('howto_view') }, [])
   const [open, setOpen] = useState<string | null>('내 식단')
+  const [tour, setTour] = useState(false)
 
   return (
     <div>
+      {tour && <Tour onClose={() => setTour(false)} />}
       <Section
         title="하루차림 사용하는 법"
         desc="하루를 쓰는 순서대로 적었습니다. 필요하신 곳만 펴서 보셔도 됩니다."
       >
+        {/* 글보다 먼저 — 손가락이 눌러 가며 보여 주는 1분짜리 안내(2026-10-23) */}
+        <button className="btn-primary mb-3 w-full py-3" onClick={() => setTour(true)}>
+          <span className="flex items-center justify-center gap-2"><span aria-hidden>▶</span> 움직이는 사용법 보기 <span className="text-[11px] font-normal opacity-80">· 1분 · 처음 등록부터 식단표까지</span></span>
+        </button>
         <div className="card border-brand-200 bg-brand-50/50 p-4">
           <p className="text-sm leading-relaxed text-stone-700">
             이 앱이 하는 일은 하나입니다 — <strong>지금 드시려는 것이 이 암종·이 시기·이 몸 상태에
