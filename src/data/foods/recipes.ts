@@ -315,3 +315,39 @@ export function ingredientsOf(food: Food, servings = 1): Ingredient[] {
 }
 
 export function hasRecipe(food: Food): boolean { return !!RECIPES[food.id] }
+
+/* ─────────────────────────────── 포장 단위 ───────────────────────────────
+ * 마트에서 파는 흔한 단위로 올려 적는다 — '두부 180 g' 은 '1모', '달걀 3개' 는 '1판(10개)' 이 아니라 '3개' 그대로.
+ * 시판 규격은 제품마다 달라 여기 적은 g 은 가늠이다. 화면에는 '→ 1모' 처럼 덧붙이기만 하고 원래 양은 그대로 둔다.
+ */
+export interface Pack { label: string; g?: number; count?: number }
+export const PACKS: Record<string, Pack> = {
+  두부: { label: '모', g: 300 }, 순두부: { label: '봉', g: 350 }, 연두부: { label: '개', g: 150 },
+  우유: { label: '팩(900 mL)', g: 900 }, 생크림: { label: '팩(200 mL)', g: 200 }, 플레인요거트: { label: '개', count: 1 },
+  달걀: { label: '개', count: 1 }, 메추리알: { label: '개', count: 1 },
+  시금치: { label: '단', g: 300 }, 청경채: { label: '봉', g: 200 }, 숙주: { label: '봉', g: 300 }, 콩나물: { label: '봉', g: 300 },
+  대파: { label: '단', g: 500 }, 쪽파: { label: '단', g: 200 }, 부추: { label: '단', g: 200 }, 양파: { label: '개', g: 200 }, 당근: { label: '개', g: 200 },
+  애호박: { label: '개', g: 250 }, 가지: { label: '개', g: 150 }, 오이: { label: '개', g: 200 }, 무: { label: '개', g: 1000 }, 배추: { label: '포기', g: 2000 },
+  감자: { label: '개', g: 150 }, 고구마: { label: '개', g: 150 }, 단호박: { label: '개', g: 800 }, 브로콜리: { label: '송이', g: 300 }, 파프리카: { label: '개', g: 150 },
+  양배추: { label: '통', g: 1000 }, 상추: { label: '봉', g: 150 }, 깻잎: { label: '봉', g: 50 }, 케일: { label: '봉', g: 150 }, 토마토: { label: '개', g: 150 }, 방울토마토: { label: '팩', g: 500 },
+  표고버섯: { label: '팩', g: 150 }, 새송이버섯: { label: '팩', g: 300 }, 양송이버섯: { label: '팩', g: 200 }, '버섯(팽이)': { label: '봉', g: 150 }, '버섯(느타리)': { label: '팩', g: 200 },
+  건미역: { label: '봉', g: 50 }, 김: { label: '장', count: 1 },
+  닭가슴살: { label: '팩(2쪽)', g: 200 }, 닭안심: { label: '팩', g: 300 }, 닭다리살: { label: '팩', g: 300 }, '닭(백숙용)': { label: '마리', g: 600 }, 영계: { label: '마리', count: 1 },
+  '소고기(양지)': { label: '팩', g: 300 }, '소고기(다짐육)': { label: '팩', g: 200 }, '소고기(불고기용)': { label: '팩', g: 300 }, '소고기(등심)': { label: '팩', g: 200 },
+  '돼지고기(앞다리)': { label: '팩', g: 300 }, '돼지고기(다짐육)': { label: '팩', g: 200 }, 삼겹살: { label: '팩', g: 300 }, 오리고기: { label: '팩', g: 300 },
+  고등어: { label: '손(2토막)', count: 2 }, 연어: { label: '팩', g: 200 }, 갈치: { label: '토막', count: 1 }, '대구(살)': { label: '팩', g: 200 }, 새우: { label: '팩(20마리)', count: 20 }, 오징어: { label: '마리', count: 1 },
+  바지락: { label: '봉', g: 200 }, 북어채: { label: '봉', g: 50 }, 잔멸치: { label: '봉', g: 100 },
+  쌀: { label: 'kg', g: 1000 }, 현미: { label: 'kg', g: 1000 }, 소면: { label: '봉(500 g)', g: 500 }, 당면: { label: '봉(300 g)', g: 300 }, 두유: { label: '팩(190 mL)', g: 190 }
+}
+
+/** 포장 단위로 올린 표기 — '두부 180 g' → '1모'. 모르는 재료면 null */
+export function packHint(name: string, qty: number, unit: string): string | null {
+  const p = PACKS[name]
+  if (!p) return null
+  if (p.count) {
+    if (unit === 'g' || unit === 'mL') return null
+    return `${Math.ceil(qty / p.count)}${p.label}`
+  }
+  if (p.g && (unit === 'g' || unit === 'mL')) return `${Math.ceil(qty / p.g)}${p.label}`
+  return null
+}
