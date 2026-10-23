@@ -320,8 +320,9 @@ export function RecommendedMenu({
       {(days === 1 || peek) && <div>
       {peek ? (
         <div className="mb-3 flex items-center gap-2">
-          <button className="rounded-xl border-2 border-stone-300 bg-white px-3 py-1.5 text-sm font-bold text-stone-700 hover:bg-stone-50" onClick={backToPlan}>
-            ‹ {days}일치로 돌아가기
+          {/* 돌아가는 길은 눈에 띄어야 한다(2026-10-23 사용자 요청) — 회색 테두리는 설명 딱지처럼 보였다. 주 단추 색으로 */}
+          <button className="btn-primary px-4 py-2 text-sm" onClick={backToPlan}>
+            <span aria-hidden>←</span> {days}일치로 돌아가기
           </button>
           <span className="text-xs text-stone-500">{peek.index + 1}일째 · {dayLabel(peek.day)}</span>
         </div>
