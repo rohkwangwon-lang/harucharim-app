@@ -24,3 +24,10 @@ data/raw-rawmtrl/
 data/raw-rawmtrl-csv/
 data/raw-rawmtrl-inc/
 data/raw-haccp/
+
+# 안드로이드 포장(TWA) — 생성 프로젝트와 결과물은 커밋하지 않는다(원본은 android-twa/twa-manifest.json)
+android-twa/*
+!android-twa/twa-manifest.json
+!android-twa/README.md
+*.keystore
+*.aab

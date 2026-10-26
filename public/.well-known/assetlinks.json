@@ -1,11 +1,13 @@
 [
   {
-    "relation": ["delegate_permission/common.handle_all_urls"],
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
     "target": {
       "namespace": "android_app",
       "package_name": "com.harucharim.app",
       "sha256_cert_fingerprints": [
-        "REPLACE_WITH_PLAY_APP_SIGNING_SHA256"
+        "8B:D1:53:58:94:88:88:13:1B:E6:CC:DC:91:C2:C4:60:F2:4D:42:D7:25:62:8F:B0:1C:8F:20:22:62:C8:9E:31"
       ]
     }
   }

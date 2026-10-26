@@ -14,3 +14,9 @@ assetlinks.json — 구글 플레이 TWA 검증 파일
 확인 방법
     https://도메인/.well-known/assetlinks.json 을 브라우저로 열어 JSON 이 보이면 됩니다.
     구글 도구: https://developers.google.com/digital-asset-links/tools/generator
+
+2026-10-26 현재 들어 있는 지문
+    8B:D1:…:9E:31 — 이 맥에서 만든 업로드 키(~/.config/harucharim/android-upload.keystore)의 지문.
+    이 키로 서명한 APK(내부 테스트·직접 설치)는 이 지문으로 검증된다.
+    플레이 스토어로 나가는 앱은 구글이 '앱 서명 키' 로 다시 서명하므로, 콘솔의 앱 서명 키 SHA-256 을 두 번째 항목으로 더해야 한다
+    (sha256_cert_fingerprints 배열에 추가 — 두 지문이 함께 있어야 둘 다 열린다).
