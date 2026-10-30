@@ -30,7 +30,7 @@ const PHASES: { id: Phase; label: string; desc: string }[] = [
   { id: 'during_chemo', label: '항암치료 중', desc: '오심·미각변화·골수억제 시기' },
   { id: 'neutropenia', label: '호중구감소증', desc: '식품 안전 규칙이 강화됩니다' },
   { id: 'post_op', label: '수술 후 회복기', desc: '식이 단계를 올려가는 시기' },
-  { id: 'survivorship', label: '치료를 마쳤습니다', desc: '재발 예방과 체중 관리 중심' }
+  { id: 'survivorship', label: '치료를 마쳤습니다', desc: '체중 관리와 꾸준한 식생활 중심' }
 ]
 
 const HISTORIES: TreatmentHistory[] = [
@@ -410,7 +410,7 @@ export function Onboarding({
               </div>
               {(patient.weightLossPct ?? 0) >= 5 && (
                 <p className="mt-2 rounded-lg bg-warn-50 px-2.5 py-2 text-[11px] leading-relaxed text-warn-800">
-                  6개월간 5 % 이상 줄었습니다. 영양 개입 기준에 해당하며, 이 시점부터 손대는 것이 효과가 좋습니다.
+                  6개월간 5 % 이상 줄었습니다. 영양 개입 기준에 해당합니다. 영양 지침은 이 시점부터 챙기기를 권합니다.
                 </p>
               )}
             </div>

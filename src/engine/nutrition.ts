@@ -508,7 +508,7 @@ export function nutritionRisk(patient: PatientContext): {
   } else if (loss >= 5) {
     risk = 'moderate'
     message =
-      '6개월간 5 % 이상 체중이 줄었습니다. 이 시점부터 개입하는 것이 효과가 좋습니다. ' +
+      '6개월간 5 % 이상 체중이 줄었습니다. 영양 지침은 이 시점부터 챙기기를 권합니다. ' +
       '열량보다 단백질을 먼저 채우고, 체중을 매주 같은 조건에서 기록해 두세요.'
   } else if (bmi >= 25) {
     risk = 'moderate'
@@ -648,7 +648,7 @@ export function targetNotes(patient: PatientContext): TargetNote[] {
       label: `기록에서 체중 ${patient.observedLossPct} % 감소가 보입니다`,
       reason:
         `${patient.observedLossNote ?? ''} 아직 위험 기준(6개월 5 %)에는 못 미치지만 방향은 감소 쪽입니다. ` +
-        '이 시점부터 챙기는 것이 효과가 좋습니다. 같은 조건(아침 공복, 같은 옷차림)에서 계속 재 주세요.'
+        '일찍 챙겨 두시면 좋습니다. 같은 조건(아침 공복, 같은 옷차림)에서 계속 재 주세요.'
     })
   }
 

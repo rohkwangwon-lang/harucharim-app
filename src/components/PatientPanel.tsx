@@ -17,7 +17,7 @@ const PHASES: { id: Phase; label: string; desc: string }[] = [
   { id: 'during_chemo', label: '항암치료 중', desc: '오심·미각변화·골수억제 시기' },
   { id: 'neutropenia', label: '호중구감소증', desc: '식품 안전 규칙이 강화됩니다' },
   { id: 'post_op', label: '수술 후 회복기', desc: '식이 단계 상향, 소량 분할식' },
-  { id: 'survivorship', label: '치료 종료 후', desc: '재발 예방과 체중 관리 중심' }
+  { id: 'survivorship', label: '치료 종료 후', desc: '체중 관리와 꾸준한 식생활 중심' }
 ]
 
 const CONDITIONS: PatientCondition[] = [

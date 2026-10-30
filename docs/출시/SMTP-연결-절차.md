@@ -2,9 +2,12 @@
 
 작성 2026년 9월 11일 · 대상 Supabase 프로젝트 `oncofood` · 보내는 곳 **Resend**
 
-> 이 순서는 **두 날로 나뉩니다.**
-> 메일이 실제로 나가지 않는 준비는 지금 하셔도 되고,
-> Supabase 를 Resend 에 잇는 일은 **9월 18일(새 처리방침 시행일) 이후**에 하셔야 합니다.
+> **2026-10-30 현재:** 9월 18일 날짜 문은 지났으므로 아래를 한 번에 하셔도 됩니다.
+> 가비아에는 Resend 용 DNS 넷(`resend._domainkey`·`send`·`rsend`·`_dmarc`)이 **이미 들어가 있습니다**(10월 30일 조회).
+> 남은 것은 **1-4 확인 → 2-1 키 → 2-2 SMTP → 2-3 한도 → 2-4 편지 → 3 확인** 입니다.
+>
+> ⚠️ Supabase 기본 발송기는 **Supabase 팀원 주소로만** 편지를 보냅니다(공식 문서, 2026-10-30 확인).
+> 그래서 이 연결 전에는 심사용 계정(`rohkwangwon+review@gmail.com`)도, 환자분들의 이메일 가입도 확인 편지를 받지 못합니다.
 
 ---
 
@@ -117,6 +120,10 @@ Supabase → `oncofood` → **Authentication → Emails → SMTP Settings → En
 | Password | 2-1 의 `re_…` 키 |
 
 **Save**.
+
+### 2-2-1. 링크 추적은 끄기
+Resend → **Domains → harucharim.com → Configuration** 에서 **Click Tracking · Open Tracking 이 꺼져 있는지**.
+켜져 있으면 확인 단추의 주소가 바뀌어 눌러도 가입이 안 될 수 있습니다(Supabase 권고). 기본값은 꺼짐입니다.
 
 ### 2-3. 보내는 양 한도
 같은 화면 또는 **Authentication → Rate Limits** 에서
