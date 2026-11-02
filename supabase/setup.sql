@@ -656,15 +656,35 @@ select 항목,
 -- 처음에는 그 요청이 권한 없이 거절당해서라고 짐작했는데, 되살린 뒤 같은 요청을
 -- 다시 보내 보니 200 이었다. 거절당한 적이 없었다 — 짐작이 틀렸고, 왜 멈췄는지는 모른다.
 --
--- 그래서 이 함수는 '막아 준다' 고 믿고 두는 것이 아니다. anon 이 반드시 성공시키는
--- 가장 작은 질의를 두어 조건을 하나 줄여 둘 뿐이다. 개인정보는 읽지 않고 시각만 돌려준다.
+-- 2026-11 에 다시 휴면 경고가 왔다. 하루 한 번 `select now()` 로는 표를 건드리지 않고,
+-- Supabase 문서의 기준은 '데이터베이스 사용자 요청이 매일 몇 건' 이다.
+-- 그래서 실제 표를 읽고 쓰게 바꾸고, 횟수는 .github/workflows/keepalive.yml 이 늘린다.
+--
+-- 그래도 '막아 준다' 고 믿지는 않는다 — 무엇을 활동으로 치는지는 공개 규칙이 아니다.
 -- 실제 방패는 매일 확인하고 곧바로 되살리는 쪽이다.
+-- 표에는 시각과 횟수 한 줄뿐이고 개인정보는 없다. 정책이 없어 표를 직접 읽거나 쓸 수 없다.
+-- 누가 함수를 마구 불러도 쓰기는 1분에 한 번으로 묶인다.
 -- ═══════════════════════════════════════════════════════════
+
+create table if not exists public.of_heartbeat (
+  id      int primary key default 1 check (id = 1),
+  beat_at timestamptz not null default now(),
+  beats   bigint not null default 0
+);
+alter table public.of_heartbeat enable row level security;
+insert into public.of_heartbeat (id) values (1) on conflict (id) do nothing;
 
 create or replace function public.of_ping()
 returns timestamptz
 language sql
-stable
-as $$ select now() $$;
+volatile
+security definer
+set search_path = ''
+as $$
+  update public.of_heartbeat
+     set beat_at = now(), beats = beats + 1
+   where id = 1 and beat_at < now() - interval '1 minute';
+  select beat_at from public.of_heartbeat where id = 1;
+$$;
 
 grant execute on function public.of_ping() to anon, authenticated;

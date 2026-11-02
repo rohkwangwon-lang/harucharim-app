@@ -120,6 +120,25 @@ no(daysBetween('2028-02-28', '2028-03-01') !== 2, '윤년 셈이 틀림 — 2028
   no(!/function public\.of_ping/.test(sql), '설치 SQL 에 of_ping 이 없음 — 깨우기가 404 를 받는다')
   no(!/grant execute on function public\.of_ping\(\) to anon/.test(sql), 'of_ping 을 anon 이 부를 수 없음')
   no(!/process\.exitCode = 1/.test(w), '멈춰 있어도 실행이 성공으로 끝남 — 실패 메일이 가지 않는다')
+
+  /*
+   * 2026-11 휴면 경고. 매일 성공하는데도 경고가 왔다 — 하루 한 번 select now() 는 표를 건드리지 않고,
+   * Supabase 문서의 기준은 '데이터베이스 사용자 요청이 매일 몇 건' 이다.
+   */
+  const ping = sql.slice(sql.indexOf('function public.of_ping'))
+  no(!/update public\.of_heartbeat/.test(ping), 'of_ping 이 표를 건드리지 않음 — 활동으로 안 칠 수 있다')
+  no(!/security definer/.test(ping) || !/set search_path = ''/.test(ping), 'of_ping 이 표에 쓸 권한 또는 고정 검색 경로가 없음')
+  const KA = '.github/workflows/keepalive.yml'
+  const ka = existsSync(KA) ? readFileSync(KA, 'utf-8').split('\n').filter((l) => !l.trim().startsWith('#')).join('\n') : ''
+  no(!ka, `${KA} 이 없음 — 하루 한 번으로는 활동이 모자란다`)
+  if (ka) {
+    const hour = ka.match(/cron:\s*'([^']+)'/)?.[1]?.split(/\s+/)[1] ?? ''
+    const gap = Number(hour.match(/^\*\/(\d+)$/)?.[1] ?? NaN)
+    no(!(gap <= 8), `깨우기 간격이 ${hour} — 하루 세 번 이상이어야 한다`)
+    no(!/rpc\/of_ping/.test(ka), '깨우기 워크플로가 of_ping 을 부르지 않음')
+    no(!/secrets\.VITE_SUPABASE_ANON_KEY/.test(ka), '깨우기 워크플로가 연결값을 받지 않음')
+    no(/service_role|SERVICE_ROLE/.test(ka), '깨우기 워크플로에 service_role 키가 있음 — 절대 쓰지 말 것')
+  }
 }
 
 /* ── 6. 연결값을 찍지 않는가 ───────────────────────────── */

@@ -4,7 +4,7 @@
  *
  * 하루차림은 기한이 있는 것들에 기대고 있다 — 도메인(3년), 공공데이터 인증키(대략 1년),
  * 그리고 7일 동안 요청이 없으면 잠드는 Supabase 무료 요금제.
- * 기한은 사람이 기억하면 반드시 한 번은 놓친다. 그래서 사흘마다 기계가 센다.
+ * 기한은 사람이 기억하면 반드시 한 번은 놓친다. 그래서 매일 기계가 센다.
  *
  *   node scripts/expiry-watch.mjs            점검하고 ops/expiry-status.md 를 쓴다
  *   node scripts/expiry-watch.mjs --issues   알릴 것이 있으면 GitHub 이슈를 연다(gh 필요)
@@ -72,6 +72,7 @@ async function pingSupabase() {
      * 짐작했지만, 되살린 뒤 같은 요청을 다시 보내 보니 200 이었다 — 짐작이 틀렸다.
      * 성공하는 요청을 보내고도 멈췄으므로, 이 두드림이 휴면을 막아 준다고 믿어서는 안 된다.
      * of_ping() 은 조건을 하나 줄여 둘 뿐이고, 진짜 방패는 매일 확인하고 곧 되살리는 것이다.
+     * 2026-11 부터 of_ping() 은 실제 표를 읽고 쓰고, keepalive.yml 이 하루 네 번 부른다.
      */
     const db = await fetch(`${url}/rest/v1/rpc/of_ping`, {
       method: 'POST',
@@ -142,7 +143,7 @@ async function main() {
           title: `[휴면 알림] ${it.name} — 응답하지 않습니다`,
           body: `@${list.owner} ${today} 점검에서 Supabase 가 제대로 응답하지 않았습니다 (${p.note}).\n\n` +
             `**영향** ${it.impact}\n\n**할 일** ${it.renew}\n\n` +
-            `복구하신 뒤 이 이슈를 닫아 주십시오. 사흘 뒤 다시 점검합니다.`
+            `복구하시면 다음 날 점검에서 이 이슈가 저절로 닫힙니다.`
         })
       }
       continue
@@ -178,14 +179,14 @@ async function main() {
   }
 
   /*
-   * 기록은 달 단위로만 바뀌게 쓴다 — 사흘마다 고치면 커밋이 쌓인다.
+   * 기록은 달 단위로만 바뀌게 쓴다 — 매일 고치면 커밋이 쌓인다.
    * 그래도 한 달에 한 번은 반드시 바뀌므로, 공개 저장소에서 60일 동안 활동이 없으면
    * GitHub 가 예약 작업을 멈추는 규칙에 걸리지 않는다.
    */
   const md = [
     '# 만료·휴면 점검 기록',
     '',
-    '`.github/workflows/expiry-watch.yml` 이 사흘마다 점검하고, 달이 바뀌거나 상태가 바뀔 때만 이 파일을 고쳐 씁니다.',
+    '`.github/workflows/expiry-watch.yml` 이 매일 점검하고, 달이 바뀌거나 상태가 바뀔 때만 이 파일을 고쳐 씁니다.',
     '알릴 것이 생기면 `만료알림` 이슈가 열리고 GitHub 가 메일로 알립니다. 기한과 할 일은 `ops/expiry.json` 에 있습니다.',
     '',
     `점검한 달: ${month}`,
