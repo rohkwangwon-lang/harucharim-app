@@ -1,6 +1,6 @@
 # 만료·휴면 점검 기록
 
-`.github/workflows/expiry-watch.yml` 이 사흘마다 점검하고, 달이 바뀌거나 상태가 바뀔 때만 이 파일을 고쳐 씁니다.
+`.github/workflows/expiry-watch.yml` 이 매일 점검하고, 달이 바뀌거나 상태가 바뀔 때만 이 파일을 고쳐 씁니다.
 알릴 것이 생기면 `만료알림` 이슈가 열리고 GitHub 가 메일로 알립니다. 기한과 할 일은 `ops/expiry.json` 에 있습니다.
 
 점검한 달: 2026-11
