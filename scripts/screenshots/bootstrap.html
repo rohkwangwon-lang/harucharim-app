@@ -63,15 +63,9 @@
       hit(want);
       setTimeout(function () {
         if (sub) hit(sub);
-        /* 검수 배너와 공지 띠는 출시 화면에 없을 것들이라 촬영에서 뺀다 */
+        /* 공지 띠는 출시 화면에 없을 것이라 촬영에서 뺀다 */
         [].slice.call(document.querySelectorAll('button, a')).forEach(function (b) {
           if (b.textContent.trim() === '닫기') b.click();
-        });
-        [].slice.call(document.querySelectorAll('*')).forEach(function (el) {
-          if (el.children.length === 0 && /검수용 시험 버전입니다/.test(el.textContent || '')) {
-            var box = el.closest('div');
-            if (box) box.style.display = 'none';
-          }
         });
         setTimeout(function () {
           var q2 = q.get('q');

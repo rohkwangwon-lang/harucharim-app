@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { loadAllergenIndex } from './lib/foodStore'
 import { DeleteAccount } from './components/DeleteAccount'
-import { REVIEW_MODE } from './config'
 import { useAppState } from './lib/store'
 import { CANCER_BY_ID } from './data/cancers'
 import type { MealSlot } from './data/types'
@@ -283,7 +282,7 @@ export default function App() {
         </div>
       </header>
 
-      {REVIEW_MODE && <ReviewBanner />}
+      <CareNote />
       <NoticeBanner />
       {tour && <Tour onClose={() => { setTour(false); dismissTour() }} />}
       {tourOffer && (
@@ -589,12 +588,11 @@ export default function App() {
   )
 }
 
-/** 검수 단계임을 방문자에게 알린다. 정식 공개 시 config 의 REVIEW_MODE 를 끄면 사라진다. */
-function ReviewBanner() {
+/** 모든 화면에 뜨는 안내. 플레이 '건강 앱' 답변이 이 줄을 근거로 삼으므로 store 검사가 지킨다. */
+function CareNote() {
   return (
-    <div className="border-b border-warn-200 bg-warn-50 px-4 py-2">
-      <p className="text-[11px] leading-relaxed text-warn-700">
-        <strong className="font-bold">검수용 시험 버전입니다.</strong> 아직 공개 배포 전이며 내용을 검토하는 중입니다.
+    <div className="border-b border-stone-200 bg-stone-50 px-4 py-1.5">
+      <p className="text-[11px] leading-relaxed text-stone-600">
         치료 관련 결정은 반드시 담당 의료진과 상의하세요.
       </p>
     </div>

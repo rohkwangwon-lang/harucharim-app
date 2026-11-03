@@ -93,6 +93,18 @@ if (existsSync('src/components/Guard.tsx')) {
 const pkg = JSON.parse(readFileSync('package.json', 'utf-8')) as { version?: string }
 no(!pkg.version || pkg.version === '0.0.0', `앱 판 번호가 ${pkg.version} — 문의·통계에 그대로 찍힌다`)
 
+/* ── 공개 상태 ───────────────
+ *
+ * 검수 기간의 차단을 2026-11 에 풀었다. 되살아나면 스토어에서 받은 앱이 검색에서 빠진다.
+ * 시험 버전 띠에 들어 있던 "담당 의료진과 상의" 는 CareNote 로 남겼다.
+ * 플레이 '건강 앱' 답변의 "모든 화면에" 가 이 줄이 있어야 참이다.
+ */
+no(/noindex/.test(index), '첫 화면에 검색 차단(noindex)이 남아 있음')
+no(existsSync('public/robots.txt') && /Disallow:\s*\/\s*$/m.test(readFileSync('public/robots.txt', 'utf-8')),
+   'robots.txt 가 모든 크롤러를 막고 있음')
+no(!/<CareNote \/>/.test(app) || !/담당 의료진과 상의/.test(app),
+   "모든 화면의 '담당 의료진과 상의' 안내가 빠짐 — 플레이 건강 앱 답변과 어긋난다")
+
 /* ── 2. 개인정보 — 애플 5.1.1, 구글 데이터 안전 ──────────── */
 no(!existsSync('public/privacy.html'), '개인정보처리방침 문서가 없음 — 두 스토어 모두 필수')
 no(!/개인정보처리방침/.test(app), '앱 안에서 개인정보처리방침으로 가는 길이 없음')
