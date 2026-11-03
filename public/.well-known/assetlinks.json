@@ -7,7 +7,8 @@
       "namespace": "android_app",
       "package_name": "com.harucharim.app",
       "sha256_cert_fingerprints": [
-        "8B:D1:53:58:94:88:88:13:1B:E6:CC:DC:91:C2:C4:60:F2:4D:42:D7:25:62:8F:B0:1C:8F:20:22:62:C8:9E:31"
+        "8B:D1:53:58:94:88:88:13:1B:E6:CC:DC:91:C2:C4:60:F2:4D:42:D7:25:62:8F:B0:1C:8F:20:22:62:C8:9E:31",
+        "3C:3F:07:FC:90:09:AC:4C:79:EF:7C:A9:93:3E:FD:19:50:3E:67:2E:CB:10:1D:70:E4:0C:1D:59:84:FE:C9:49"
       ]
     }
   }
