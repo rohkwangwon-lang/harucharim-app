@@ -272,6 +272,13 @@ for (const must of ['무작위 식별자', '5명 미만']) {
   no(!policy.includes(must), `처리방침에 "${must}" 가 없음`)
 }
 
+/* 스토어 신고가 실제 전송과 같은가 — of_track 이 암종·치료 시기를 보내므로 "건강 정보 수집 안 함" 은 거짓 신고다 */
+const listing = existsSync('docs/출시/스토어-등록-자료.md') ? readFileSync('docs/출시/스토어-등록-자료.md', 'utf-8') : ''
+const playDocs = listing.slice(listing.indexOf('### 구글 플레이 데이터 보안'), listing.indexOf('## 6.'))
+no(/p_cancer/.test(src) && !/건강 정보 \| 선택 \| 분석/.test(playDocs),
+   '플레이 데이터 보안 표에 건강 정보(선택·분석)가 없음 — 통계가 암종·치료 시기를 보낸다')
+no(/암종[^\n]*서버로 보내지 않습니다/.test(listing), '스토어 설명이 암종을 서버로 보내지 않는다고 적음 — 통계 동의 시 보낸다')
+
 /* ── 9. 유입 경로가 신원 단서가 되지 않는가 ──────────────
  *
  * 카페마다 링크 뒤에 ?from=... 을 붙여 어디서 오셨는지 본다.
