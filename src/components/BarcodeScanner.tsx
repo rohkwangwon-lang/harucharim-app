@@ -151,7 +151,7 @@ export function BarcodeScanner({
           * 찍고 나서 "영양성분이 없습니다" 를 만나면 앱이 고장 난 줄 아신다.
           */}
         <p className="mb-2.5 text-center text-[11px] leading-relaxed text-white/55 [text-wrap:balance]">
-          시험 중인 기능입니다. 제품명은 대부분 확인되지만, 영양성분까지 나오는 제품은 약 30 % 입니다.
+          시험 중인 기능입니다. 제품명은 대부분 확인되지만, 영양성분까지 바로 나오는 제품은 약 20 % 입니다.
         </p>
 
         <form

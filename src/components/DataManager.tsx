@@ -84,8 +84,8 @@ export function DataManager() {
               바코드 <strong>23만 건</strong>(베타)을 더하면 편의점·마트 상품과 시판 영양제를 찾을 수 있습니다.
             </p>
             <p className="mt-2 rounded-lg bg-stone-50 px-3 py-2 text-[11px] leading-relaxed text-stone-500">
-              바코드를 찍으면 제품은 대부분 확인되지만, <strong>영양성분까지 나오는 것은 약 30 %</strong> 입니다.
-              성분 분석이 된 제품이 그만큼이기 때문입니다. 나머지는 제품명만 알려 드리니
+              바코드를 찍으면 제품은 대부분 확인되지만, <strong>영양성분까지 바로 나오는 것은 약 20 %</strong> 입니다.
+              그 제품의 자료로 확인된 것만 바로 보여 드리기 때문입니다. 나머지는 제품명만 알려 드리니
               이름으로 다시 찾아 주세요.
             </p>
             <ul className="mt-3 space-y-1 text-xs text-stone-500">

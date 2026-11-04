@@ -9,6 +9,7 @@ import { FoodDetail } from './FoodDetail'
 import { BetaChip, HowTo, LevelDot } from './ui'
 import { BarcodeScanner } from './BarcodeScanner'
 import { getStatus, linkBarcode, lookupBarcode, searchExtended } from '../lib/foodStore'
+import { productSearchTerm, scanOutcome } from '../lib/barcodeOutcome'
 import { InquiryDialog } from './InquiryDialog'
 
 const GROUPS: (FoodGroup | '전체')[] = [
@@ -77,11 +78,13 @@ export function FoodSearch({
   /** 스캔했지만 못 찾아서, 사용자가 직접 이어 주기를 기다리는 바코드 */
   const [linking, setLinking] = useState<string | null>(null)
   const [scanResult, setScanResult] = useState<{
-    kind: 'no-data' | 'not-found' | 'no-nutrition' | 'stale'
+    kind: 'no-data' | 'not-found' | 'no-nutrition' | 'stale' | 'similar'
     code: string
     productName?: string
-    /** 끝난 등록이라도 성분을 찾았으면 확인 후 담을 수 있게 들고 있는다 */
+    /** 끝난 등록이나 비슷한 이름의 제품이라도 성분을 찾았으면 확인 후 담을 수 있게 들고 있는다 */
     food?: Food
+    /** 들고 있는 성분이 이 제품의 것이 아니라 같은 회사의 비슷한 이름 제품의 것인지 */
+    similar?: boolean
     message: string
   } | null>(null)
   const [asking, setAsking] = useState(false)
@@ -170,17 +173,19 @@ export function FoodSearch({
     }
     // 앱에 든 결과가 적으면 기기에 받아 둔 확장 데이터에서 더 채운다.
     // 지금 검색어의 결과일 때만 쓴다.
-    if (needle && extra.q === needle && extra.items.length > 0) {
-      const have = new Set(scored.map((x) => x.food.name))
+    if (needle && extra.q.toLowerCase() === needle && extra.items.length > 0) {
+      /* 이름이 같아도 회사가 다르면 값이 다르다. 바코드로 못 찾은 분이 회사를 보고 고르시도록 둘 다 남긴다 */
+      const sameKey = (f: Food) => `${f.name}|${f.maker ?? ''}`
+      const have = new Set(scored.map((x) => sameKey(x.food)))
       for (const f of extra.items) {
         if (scored.length >= limit) break
-        if (have.has(f.name)) continue
+        if (have.has(sameKey(f))) continue
         if (onlyIngredient) continue
         if (group !== '전체' && f.group !== group) continue
         // 앱에 든 결과와 같은 조건을 적용한다.
         // 요리 계통만 빠져 있어서, 중식으로 걸러 놓아도 확장분은 그대로 나왔다.
         if (!cuisineOk(f.cuisine)) continue
-        have.add(f.name)
+        have.add(sameKey(f))
         scored.push({ food: f, verdict: evaluateFood(f, patient, 1, cached) })
       }
     }
@@ -281,11 +286,12 @@ export function FoodSearch({
               {scanResult.kind === 'no-nutrition' && (
                 <>
                   <span className="w-full text-[11px] leading-relaxed text-stone-600">
-                    제품명으로 비슷한 것을 찾아 두었습니다. 아래에서 고르신 뒤 이 바코드에 연결해 두시면
+                    제품명으로 찾아 두었습니다. 같은 이름이라도 회사가 다르면 영양성분이 다를 수 있으니,
+                    아래 목록의 회사 이름과 통의 영양성분표를 보고 고르신 뒤 이 바코드에 연결해 두시면
                     다음부터는 스캔만으로 바로 담기실 수 있습니다.
                   </span>
                   {/*
-                    * 공공 바코드 자료에는 제품명만 있고 성분이 없는 것이 70 % 다.
+                    * 공공 바코드 자료에는 제 제품의 성분을 확인할 수 없는 것이 약 80 % 다.
                     * 예전에는 이 경우에 연결 버튼이 없어서, 매번 다시 검색해야 했다.
                     * 성분을 지어낼 수는 없으니, 사용자가 직접 이어 두게 하는 것이 답이다.
                     */}
@@ -297,6 +303,36 @@ export function FoodSearch({
                   </button>
                 </>
               )}
+              {scanResult.kind === 'similar' && scanResult.food && (
+                <>
+                  <span className="w-full text-[11px] leading-relaxed text-stone-600">
+                    찾은 자료의 값: 100 g 당 {Math.round(scanResult.food.per100.kcal ?? 0)} kcal · 나트륨{' '}
+                    {scanResult.food.per100.na === undefined ? '정보 없음' : `${Math.round(scanResult.food.per100.na)} mg`}
+                  </span>
+                  <button
+                    className="btn-outline py-1.5 text-xs"
+                    onClick={async () => {
+                      const f = scanResult.food!
+                      // 한 번 확인해 주셨으니 다음부터는 묻지 않는다
+                      await linkBarcode(scanResult.code, f.id, f.name)
+                      setScanResult(null)
+                      setDetail(f)
+                    }}
+                  >
+                    맞습니다 — 이 값으로 보기
+                  </button>
+                  <button
+                    className="btn-primary py-1.5 text-xs"
+                    onClick={() => {
+                      setLinking(scanResult.code)
+                      if (scanResult.productName) setQ(productSearchTerm(scanResult.productName))
+                      setScanResult(null)
+                    }}
+                  >
+                    아닙니다 — 직접 찾아 연결하기
+                  </button>
+                </>
+              )}
               {scanResult.kind === 'stale' && (
                 <>
                   {scanResult.food && (
@@ -304,7 +340,7 @@ export function FoodSearch({
                       className="btn-outline py-1.5 text-xs"
                       onClick={() => { const f = scanResult.food!; setScanResult(null); setDetail(f) }}
                     >
-                      맞습니다 — {scanResult.productName} 담기
+                      맞습니다 — {scanResult.similar ? scanResult.food.name : scanResult.productName} 담기
                     </button>
                   )}
                   <button
@@ -441,7 +477,7 @@ export function FoodSearch({
         <>
         <div className="mb-2 flex items-baseline justify-between px-1">
           <span className="text-xs text-stone-500">
-            {totalMatched.toLocaleString()}가지 중 {Math.min(results.length, totalMatched).toLocaleString()}가지 표시
+            {Math.max(results.length, totalMatched).toLocaleString()}가지 중 {results.length.toLocaleString()}가지 표시
           </span>
           {hasExt && <span className="text-[11px] text-stone-400">기기 저장 데이터 포함</span>}
         </div>
@@ -548,21 +584,41 @@ export function FoodSearch({
              * 확인 없이 담게 두면, 펩시 제로를 찍었는데 헤이루사과사이다가
              * 조용히 식단에 들어간다.
              */
-            if (hit.stale) {
+            const outcome = scanOutcome({ hasFood: !!hit.food, similar: hit.similar, stale: hit.stale, linkedByUser: hit.linkedByUser })
+            const similarNote = hit.similar && hit.food
+              ? `이 제품의 자료는 없고, 같은 회사${hit.maker ? `(${hit.maker})` : ''}의 이름이 비슷한 제품 ‘${hit.food.name}’ 자료를 찾았습니다. ` +
+                '맛이나 종류가 다르면 영양성분도 다르니 통의 영양성분표와 맞는지 봐 주세요.'
+              : ''
+
+            if (outcome === 'stale') {
               setScanResult({
                 kind: 'stale',
                 code,
                 productName: hit.productName,
                 food: hit.food,
+                similar: hit.similar,
                 message:
                   '이 바코드로 등록된 제품은 판매가 끝난 것으로 나옵니다. ' +
-                  '바코드는 단종되면 다른 제품에 다시 쓰이기 때문에, 지금 손에 드신 것과 다를 수 있습니다.'
+                  '바코드는 단종되면 다른 제품에 다시 쓰이기 때문에, 지금 손에 드신 것과 다를 수 있습니다.' +
+                  (similarNote ? ` ${similarNote}` : '')
               })
-              setQ(hit.productName)
+              setQ(productSearchTerm(hit.productName))
               return
             }
 
-            if (hit.food) {
+            if (outcome === 'similar') {
+              setScanResult({
+                kind: 'similar',
+                code,
+                productName: hit.productName,
+                food: hit.food,
+                similar: true,
+                message: similarNote
+              })
+              return
+            }
+
+            if (outcome === 'detail' && hit.food) {
               setDetail(hit.food)
               if (hit.linkedByUser) {
                 setScanMsg(`직접 연결해 두신 제품입니다 — ${hit.productName}`)
@@ -576,9 +632,9 @@ export function FoodSearch({
               kind: 'no-nutrition',
               code,
               productName: hit.productName,
-              message: '제품은 확인했지만 영양성분 자료가 등록되어 있지 않습니다.'
+              message: '제품은 확인했지만 이 제품의 영양성분 자료가 없습니다.'
             })
-            setQ(hit.productName)
+            setQ(productSearchTerm(hit.productName))
           }}
         />
       )}

@@ -7,9 +7,11 @@
 import fs from 'node:fs'
 import { envSeed } from './_seed'
 import path from 'node:path'
+import { productSearchTerm, scanOutcome, squeezedName } from '../../src/lib/barcodeOutcome'
+import { foodTokens } from '../../src/lib/foodStore'
 
 const ROOT = path.resolve(process.cwd())
-const bar: { b: string; n: string; p: string; old?: number }[] =
+const bar: { b: string; n: string; p: string; old?: number; lk?: string; o?: string; c?: string }[] =
   JSON.parse(fs.readFileSync(path.join(ROOT, 'public/data/barcodes.json'), 'utf8'))
 const core = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/data/foods/generated-core.json'), 'utf8'))
 const ext = JSON.parse(fs.readFileSync(path.join(ROOT, 'public/data/foods-extended.json'), 'utf8'))
@@ -117,9 +119,18 @@ for (let i = 0; i < 500; i++) {
 {
   const rn = new Set(ext.items.map((r: unknown[]) => String(r[6] ?? '')))
   const live = bar.filter((r) => r.old !== 1)
-  const linked = live.filter((r) => rn.has(String(r.n))).length
+  // 먼저 물어보는 'similar' 는 세지 않는다 — 제 제품의 값이라고 말할 수 있는 것만 비율에 넣는다
+  const linked = live.filter((r) => rn.has(String(r.n)) && r.lk !== 'similar').length
   const rate = live.length ? linked / live.length : 0
-  console.log(`  살아 있는 등록 중 영양성분까지 이어지는 것 ${(rate * 100).toFixed(1)}% (${linked.toLocaleString()} / ${live.length.toLocaleString()})`)
+  console.log(`  살아 있는 등록 중 값을 바로 보여 주는 것 ${(rate * 100).toFixed(1)}% (${linked.toLocaleString()} / ${live.length.toLocaleString()})`)
+  /* 화면에 적은 비율이 자료와 어긋나지 않게 — 2026-11-04 에 31 → 19 % 로 바뀌었다 */
+  for (const f of ['src/components/BarcodeScanner.tsx', 'src/components/DataManager.tsx', 'src/components/HowTo.tsx', 'src/components/ui.tsx']) {
+    const src = fs.readFileSync(path.join(ROOT, f), 'utf8')
+    const said = [...src.matchAll(/나오는[^\n]{0,20}약 (\d+) %/g)].map((m) => Number(m[1]))
+    if (!said.length) bad('비율 문구를 찾지 못함', f)
+    for (const v of said) if (Math.abs(v - rate * 100) > 5) bad('화면의 비율이 자료와 다름', `${f} 약 ${v} % / 실제 ${(rate * 100).toFixed(1)} %`)
+  }
+  if (rate < 0.15) bad('값을 보여 주는 비율이 지나치게 낮음', `${(rate * 100).toFixed(1)}% — 잇기가 고장 났을 수 있다`)
   const BETA_BELOW = 0.8
   if (rate < BETA_BELOW) {
     for (const [f, what] of [
@@ -139,6 +150,84 @@ for (let i = 0; i < 500; i++) {
   } else {
     console.log(`  영양까지 이어지는 비율이 ${BETA_BELOW * 100}% 를 넘었다 — 베타 표시를 떼도 된다`)
   }
+}
+
+/* ── 7. 이름으로 잇되 다른 회사 값을 보여 주지 않는다 (2026-11-04) ─────
+ *
+ * 이름만 같으면 잇던 시절 82 % 가 다른 회사 값이었다. 위 3번은 이름만 견주므로 이름으로 이은 것은
+ * 무조건 통과한다 — 이 문제를 못 잡은 까닭이다. 회사 비교는 빌드와 일부러 다른 방식으로 적는다
+ * (빌드는 표기를 고쳐 포함 여부를 본다. 여기서는 공통으로 든 글자 조각을 찾는다).
+ */
+{
+  const firstRow = new Map<string, unknown[]>()
+  for (const row of ext.items as unknown[][]) { const k = String(row[6] ?? ''); if (k && !firstRow.has(k)) firstRow.set(k, row) }
+  const LEGAL = /주식회사|유한회사|농업회사법인|어업회사법인|영농조합법인|영어조합법인|협동조합|\([^)]*\)|㈜|공장|지점/g
+  const bare = (s: unknown) => String(s ?? '').normalize('NFKC').toLowerCase().replace(LEGAL, '').replace(/[^0-9a-z가-힣]/g, '')
+  const shareThree = (a: string, b: string) => { for (let i = 0; i + 3 <= a.length; i++) if (b.includes(a.slice(i, i + 3))) return true; return false }
+  const sameFirm = (r: (typeof bar)[number], row: unknown[]) => {
+    const nos = String(row[6]).split('/').map((x) => x.trim().slice(0, 11))
+    if (r.o && r.o.length >= 12 && nos.includes(r.o.slice(0, 11))) return true
+    const a = bare(r.c), b = bare(row[5])
+    return a === b || shareThree(a, b)
+  }
+  const named = bar.filter((r) => r.lk === 'maker' || r.lk === 'similar')
+  const strangers = named.filter((r) => { const row = firstRow.get(r.n); return !row || !sameFirm(r, row) })
+  const share = named.length ? strangers.length / named.length : 0
+  console.log(`  이름으로 이은 ${named.length.toLocaleString()}건 중 회사가 안 겹치는 것 ${strangers.length}건 (${(share * 100).toFixed(2)}%)`)
+  if (share > 0.02) strangers.slice(0, 8).forEach((r) => bad('이름으로 이었는데 다른 회사', `${r.p} [${r.c}] → ${String(firstRow.get(r.n)?.[5])}`))
+  if (named.some((r) => !r.c && !(r.o && r.o.length >= 12))) bad('이름으로 이었는데 회사도 번호도 없음', '근거 없이 이었다')
+
+  /* 표시 없이 값이 이어진 것은 원본 등록의 번호 그대로여야 한다 — 몰래 번호를 바꾸는 길이 되살아나면 여기서 걸린다 */
+  const dirs = ['data/raw-barcode', 'data/raw-barcode-i2570'].map((d) => path.join(ROOT, d)).filter((d) => fs.existsSync(d))
+  if (dirs.length) {
+    const pairs = new Set<string>()
+    for (const d of dirs) for (const f of fs.readdirSync(d).filter((x) => x.endsWith('.json'))) {
+      for (const r of JSON.parse(fs.readFileSync(path.join(d, f), 'utf8')) as { b: string; n: string }[]) {
+        for (const code of String(r.b).split(/[\n\r,;]+/)) pairs.add(`${code.replace(/\D/g, '')}|${r.n}`)
+      }
+    }
+    const sneaked = bar.filter((r) => !r.lk && firstRow.has(r.n) && !pairs.has(`${r.b}|${r.n}`))
+    console.log(`  표시 없이 번호가 바뀐 것 ${sneaked.length}건`)
+    sneaked.slice(0, 5).forEach((r) => bad('표시 없이 번호가 바뀜', `${r.b} ${r.p} → ${r.n}`))
+  } else console.log('  (원본 바코드 자료가 없어 번호 대조는 건너뜀)')
+
+  /* 실제로 틀렸던 것 — 고쳐진 채로 있는가. 값이 나와야 할 것이 사라지는 쪽도 함께 본다 */
+  const byCode = new Map(bar.map((r) => [r.b, r]))
+  const makerOf = (b: string) => { const r = byCode.get(b); return r ? firstRow.get(r.n)?.[5] : undefined }
+  for (const [b, firm, was] of [
+    ['8806371301195', '푸르밀', '명품디저트 403 kcal'],
+    ['8801045082592', '오뚜기', '뜨레봄 438 kcal'],
+    ['8809288521083', '스위트코리아', '영동식품 466 kcal'],
+    ['8801062629497', '롯데', '빼빼로 — 같은 회사라 값이 나와야 한다']
+  ] as const) {
+    if (!String(makerOf(b) ?? '').includes(firm)) bad('다른 회사 값이 되살아남', `${b} → ${String(makerOf(b))} (예전: ${was})`)
+  }
+  if (makerOf('8809051050147') !== undefined) bad('다른 회사 값이 되살아남', '까나리액젓(곰소항식품) → 나트륨 0 인 기림 값')
+
+  /* 무엇을 보여 줄지의 판단 — 양쪽 방향 */
+  const cases: [Parameters<typeof scanOutcome>[0], ReturnType<typeof scanOutcome>][] = [
+    [{ hasFood: true }, 'detail'],
+    [{ hasFood: true, similar: true }, 'similar'],
+    [{ hasFood: true, stale: true }, 'stale'],
+    [{ hasFood: true, similar: true, stale: true }, 'stale'],
+    [{ hasFood: false }, 'no-nutrition'],
+    [{ hasFood: true, linkedByUser: true }, 'detail'],
+    [{ hasFood: false, stale: true }, 'stale']
+  ]
+  for (const [hit, want] of cases) if (scanOutcome(hit) !== want) bad('스캔 판단', `${JSON.stringify(hit)} → ${scanOutcome(hit)} (기대 ${want})`)
+  const fs2 = fs.readFileSync(path.join(ROOT, 'src/components/FoodSearch.tsx'), 'utf8')
+  if (!/scanOutcome\(/.test(fs2)) bad('화면이 스캔 판단을 쓰지 않음', 'FoodSearch')
+  if (/have\.has\(f\.name\)/.test(fs2)) bad('같은 이름 다른 회사가 한 줄로 합쳐짐', '회사를 보고 고를 수 없다')
+
+  /* 값을 끊은 제품은 이름으로 찾아져야 한다. 찾기 칸에 넣는 말로 실제 색인을 훑어 본다 */
+  const oldNorm = (s: string) => s.toLowerCase().replace(/\([^)]*\)/g, ' ').replace(/\d+\s*(g|kg|ml|mL|L|개입|입|매|팩|봉|캔|병)\b/gi, ' ').replace(/[^0-9a-z가-힣]/g, '')
+  const names = new Set((ext.items as unknown[][]).map((row) => oldNorm(String(row[0]))).filter((k) => k.length >= 3))
+  const toks = [...new Set((ext.items as unknown[][]).flatMap((row) => foodTokens(String(row[0]))))].sort()
+  const hasPrefix = (q: string) => { let lo = 0, hi = toks.length; while (lo < hi) { const m = (lo + hi) >> 1; if (toks[m] < q) lo = m + 1; else hi = m } return lo < toks.length && toks[lo].startsWith(q) }
+  const cut = bar.filter((r) => !r.lk && !firstRow.has(r.n) && !r.old && names.has(oldNorm(r.p)))
+  const lost = cut.filter((r) => { const q = productSearchTerm(r.p).toLowerCase(); return !hasPrefix(q) && !hasPrefix(squeezedName(q)) })
+  console.log(`  값을 끊은 현행 ${cut.length.toLocaleString()}건 중 이름으로 못 찾는 것 ${lost.length}건`)
+  if (lost.length > cut.length * 0.01) lost.slice(0, 6).forEach((r) => bad('값을 끊었는데 이름으로도 못 찾음', `${r.p} → ‘${productSearchTerm(r.p)}’`))
 }
 
 console.log(`\n바코드 검사 완료 — 문제 ${bugs.length}종`)

@@ -8,7 +8,7 @@
 node_modules/.bin/jiti scripts/checks/engine.ts   # 추천 엔진 — 빈 끼니·금기 추천·합계
 node_modules/.bin/jiti scripts/checks/data.ts     # 식품/영양제 데이터·날짜 계산·성분 판정
 node_modules/.bin/jiti scripts/checks/diary.ts    # 기록 정규화·주월 집계·체중 추이
-node_modules/.bin/jiti scripts/checks/barcode.ts  # 바코드 표 무결성·스캐너 표기 흔들림
+node_modules/.bin/jiti scripts/checks/barcode.ts  # 바코드 표 무결성·스캐너 표기 흔들림·다른 회사 값이 되살아나는가
 node_modules/.bin/jiti scripts/checks/season.ts   # 계절이 실제로 추천을 바꾸는가
 node_modules/.bin/jiti scripts/checks/targets.ts  # 열량·단백질 목표와 조정 사유
 node_modules/.bin/jiti scripts/checks/rules.ts    # 임상 규칙·출처·상호작용 무결성

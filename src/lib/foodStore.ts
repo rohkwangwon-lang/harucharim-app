@@ -2,6 +2,7 @@ import { matchSupplements, soldAsByReportNo, squeeze, suppWords, type SuppIndexR
 import type { Food } from '../data/types'
 import { setAllergenIndex } from '../data/allergens'
 import { rowToFood, type PackedFoods, type PackedRow } from '../data/foods/generated'
+import { squeezedName } from './barcodeOutcome'
 
 /**
  * 확장 식품 데이터 저장소.
@@ -26,7 +27,7 @@ const STORE_MYCODE = 'myBarcodes'
 const STORE_SUPP = 'extSupps'
 
 /** 데이터 판을 올릴 때 이 값을 바꾸면 사용자 기기에서 다시 받는다 */
-export const DATA_VERSION = '2026-11-04a'
+export const DATA_VERSION = '2026-11-04b'
 
 export interface InstallProgress {
   phase: '식품 데이터' | '바코드 데이터' | '영양제 데이터' | '마무리'
@@ -114,6 +115,12 @@ function tokens(name: string): string[] {
   return [...new Set([lower, ...parts.slice(0, 4)])]
 }
 
+/** 식품 이름 토막 — 띄어쓰기·용량을 지운 꼴도 넣어 '등심돈까스' 로 '등심 돈까스' 를 찾게 한다 */
+export function foodTokens(name: string): string[] {
+  const sq = squeezedName(name)
+  return [...new Set([...tokens(name), ...(sq.length >= 2 ? [sq] : [])])]
+}
+
 /** 내려받아 기기에 저장한다. 이미 있으면 건너뛴다. */
 export async function install(onProgress?: (p: InstallProgress) => void): Promise<StoreStatus> {
   const base = import.meta.env.BASE_URL || '/'
@@ -131,7 +138,7 @@ export async function install(onProgress?: (p: InstallProgress) => void): Promis
       const store = t.objectStore(STORE_FOOD)
       slice.forEach((row, k) => {
         const i = start + k
-        store.put({ i, nm: tokens(row[0]), rn: row[6] || '', r: row })
+        store.put({ i, nm: foodTokens(row[0]), rn: row[6] || '', r: row })
       })
       t.oncomplete = () => resolve()
       t.onerror = () => reject(t.error)
@@ -147,7 +154,7 @@ export async function install(onProgress?: (p: InstallProgress) => void): Promis
   onProgress?.({ phase: '바코드 데이터', loaded: 0, total: 1 })
   try {
     const codes = (await (await fetch(`${base}data/barcodes.json`)).json()) as {
-      b: string; n: string; p: string
+      b: string; n: string; p: string; old?: number; lk?: string; o?: string; c?: string
     }[]
     for (let start = 0; start < codes.length; start += CHUNK) {
       const slice = codes.slice(start, start + CHUNK)
@@ -258,25 +265,34 @@ export async function searchExtended(query: string, limit = 40): Promise<Food[]>
   if (!sc) return []
 
   const db = await openDB()
-  return new Promise((resolve, reject) => {
-    const out: Food[] = []
-    const seen = new Set<number>()
-    const t = db.transaction(STORE_FOOD, 'readonly')
-    const idx = t.objectStore(STORE_FOOD).index('nm')
-    const range = IDBKeyRange.bound(q, q + '￿')
-    const cur = idx.openCursor(range)
-    cur.onsuccess = () => {
-      const c = cur.result
-      if (!c || out.length >= limit) return resolve(out)
-      const rec = c.value as { i: number; r: Row }
-      if (!seen.has(rec.i)) {
-        seen.add(rec.i)
-        out.push(toFood(rec.i, rec.r, sc))
+  /*
+   * '참기름' 은 '참기름 감자칩' 의 토막이기도 해서 차례대로 끊으면 정작 '참기름' 이 잘려 나간다.
+   * 넉넉히 모아 이름이 꼭 같은 것을 앞세운 뒤 자른다.
+   */
+  const cap = limit * 5
+  const found = new Map<number, Row>()
+  // 적힌 그대로 먼저 찾고, 모자라면 띄어쓰기·용량을 지운 꼴로 한 번 더 찾는다
+  const whole = squeezedName(q)
+  for (const word of new Set([q, whole])) {
+    if (word.length < 2 || found.size >= cap) continue
+    await new Promise<void>((resolve, reject) => {
+      const t = db.transaction(STORE_FOOD, 'readonly')
+      const cur = t.objectStore(STORE_FOOD).index('nm').openCursor(IDBKeyRange.bound(word, word + '￿'))
+      cur.onsuccess = () => {
+        const c = cur.result
+        if (!c || found.size >= cap) return resolve()
+        const rec = c.value as { i: number; r: Row }
+        if (!found.has(rec.i)) found.set(rec.i, rec.r)
+        c.continue()
       }
-      c.continue()
-    }
-    cur.onerror = () => reject(cur.error)
-  })
+      cur.onerror = () => reject(cur.error)
+    })
+  }
+  const exact = (r: Row) => (squeezedName(String(r[0])) === whole ? 0 : 1)
+  return [...found]
+    .sort((a, b) => exact(a[1]) - exact(b[1]))
+    .slice(0, limit)
+    .map(([i, r]) => toFood(i, r, sc))
 }
 
 /** 공공데이터에서 들여온 건강기능식품 한 건 */
@@ -401,6 +417,10 @@ export interface BarcodeHit {
    * 그래서 끝난 등록이 걸렸다면 지금 손에 든 물건과 다를 수 있다.
    */
   stale?: boolean
+  /** 제 제품 자료가 없어, 같은 회사의 이름이 비슷한 제품 자료를 찾았다. 화면이 먼저 묻는다 */
+  similar?: boolean
+  /** 바코드 등록에 적힌 회사(이름으로 이은 것에만 있다) */
+  maker?: string
 }
 
 /** 바코드로 제품을 찾는다. 영양성분은 품목보고번호로 이어붙인다. */
@@ -442,7 +462,7 @@ export async function lookupBarcode(code: string): Promise<BarcodeHit | null> {
     return { barcode: code, productName: mine.name, reportNo: '', food, linkedByUser: true }
   }
 
-  let rec: { b: string; n: string; p: string; old?: number } | undefined
+  let rec: { b: string; n: string; p: string; old?: number; lk?: string; c?: string } | undefined
   for (const v of barcodeVariants(code)) {
     rec = await tx<typeof rec>(STORE_BARCODE, 'readonly', (s) => s.get(v))
     if (rec) break
@@ -457,7 +477,7 @@ export async function lookupBarcode(code: string): Promise<BarcodeHit | null> {
     )
     if (hit) food = toFood(hit.i, hit.r, sc)
   }
-  return { barcode: code, productName: rec.p, reportNo: rec.n, food, stale: rec.old === 1 }
+  return { barcode: code, productName: rec.p, reportNo: rec.n, food, stale: rec.old === 1, similar: rec.lk === 'similar', maker: rec.c }
 }
 
 /**
