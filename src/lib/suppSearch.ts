@@ -25,6 +25,85 @@ export const VERIFIED_SOLD_AS: { brand: string; word: string; sold: string; repo
 
 const BRANDS = new Set(VERIFIED_SOLD_AS.map((v) => v.brand))
 
+/**
+ * 같은 것을 다르게 적는 말. 어느 쪽으로 쳐도 찾는다('로열젤리' 0건, '로얄젤리' 1건이었다).
+ * 다른 원료를 묶지 말 것 — 홍삼·인삼, 강황·울금은 별개다. 표기표는 찾기 전용이고 판정은 ingredientRules.ts 의 match 가 한다.
+ */
+const SAME_THING: string[][] = [
+  ['로열젤리', '로얄젤리', '로얄제리', '로열제리'],
+  ['밀크씨슬', '밀크시슬', '밀크티슬', '밀크씨틀', 'milkthistle'],
+  ['쏘팔메토', '소팔메토', '쏘팔매토', '쏘우팔메토', 'sawpalmetto'],
+  ['코큐텐', '코엔자임', '코엔자임큐텐', '코엔자임q10', 'coq10', '코큐10'],
+  ['비타민c', '비타민씨'],
+  ['비타민d', '비타민디'],
+  ['오메가3', '오메가쓰리', '오메가삼', 'omega3'],
+  ['피쉬오일', '피시오일', 'fishoil'],
+  ['글루코사민', '글루코자민'],
+  ['콘드로이친', '콘드로이틴'],
+  ['엠에스엠', 'msm', '식이유황', '디메틸설폰', '메틸설포닐메탄'],
+  ['스피루리나', '스피룰리나'],
+  ['아스타잔틴', '아스타크산틴', '아스타산틴'],
+  ['셀레늄', '셀렌', '셀레니움', 'selenium'],
+  ['베타카로틴', '베타카로텐'],
+  ['커큐민', '쿠르쿠민'],
+  ['엽산', '폴산', '폴릭산', 'folate'],
+  ['아연', '징크'],
+  ['칼슘', '칼시움'],
+  ['마그네슘', '마그네시움'],
+  ['콜라겐', '콜라젠'],
+  ['히알루론산', '히아루론산'],
+  ['지아잔틴', '제아잔틴'],
+  ['은행잎', '은행엽', '징코'],
+  ['레시틴', '레시친'],
+  ['멀티비타민', '종합비타민'],
+  ['나이아신', '니아신'],
+  ['크롬', '크로뮴', '크로미움'],
+  ['망간', '망가니즈'],
+  ['요오드', '아이오딘'],
+  ['칼륨', '포타슘'],
+  ['라이코펜', '리코펜'],
+  ['글루타치온', '글루타티온'],
+  ['크랜베리', '크렌베리'],
+  ['치커리', '치코리'],
+  ['에키네시아', '에키나시아'],
+  ['프로바이오틱스', '유산균'],
+  ['단백질', '프로틴'],
+  ['나토키나제', '나토키나아제', '낫토키나제', '낫토키나아제'],
+  ['펩타이드', '펩티드'],
+  ['프로폴리스', '프로폴리즈'],
+  ['알로에', '알로애'],
+  ['가르시니아', '가르니시아'],
+  ['폴리코사놀', '폴리코사올']
+]
+
+/**
+ * 한쪽으로만 찾는 말. 거꾸로 찾으면 다른 낱말에 걸린다:
+ * '비타민e' → '비타민이' 는 '멀티비타민이뮨', '비타민a' → '비타민에이' 는 '비타민에이스',
+ * '비타민b' → '비타민비' 는 '멀티비타민비오틴', '비오틴' → '바이오틴' 은 '프로바이오틴'.
+ */
+const ONE_WAY: [string, string][] = [
+  ['비타민이', '비타민e'], ['비타민에이', '비타민a'], ['비타민비', '비타민b'], ['비타민케이', '비타민k'],
+  ['바이오틴', '비오틴']
+]
+
+const OTHER_SPELLINGS = new Map<string, string[]>()
+for (const group of SAME_THING)
+  for (const w of group) OTHER_SPELLINGS.set(w, group.filter((x) => x !== w))
+for (const [from, to] of ONE_WAY) OTHER_SPELLINGS.set(from, [to])
+
+/** 이 낱말과 같은 뜻의 표기들. 맨 앞은 친 그대로다. '세노비스밀크시슬' 처럼 낱말 속에 든 것도 바꾼다 */
+export function spellings(word: string): string[] {
+  const out = [word]
+  for (const [key, others] of OTHER_SPELLINGS) {
+    if (!word.includes(key)) continue
+    for (const other of others) {
+      const v = word.replace(key, other)
+      if (!out.includes(v)) out.push(v)
+    }
+  }
+  return out
+}
+
 /** 띄어쓰기·문장부호 표기가 제각각이라 글자와 숫자만 남겨 견준다 */
 export const squeeze = (s: string) => s.toLowerCase().replace(/[^0-9a-z가-힣]/g, '')
 
@@ -33,14 +112,22 @@ export function suppWords(query: string): string[] {
   const out: string[] = []
   for (const raw of query.toLowerCase().split(/[\s,·/+&()[\]]+/)) {
     const w = squeeze(ALIAS[raw] ?? raw)
-    if (w && !out.includes(w)) out.push(w)
+    if (!w || out.includes(w)) continue
+    /* '비타민 씨', '밀크 시슬' — 띄어 쳐도 한 낱말로 본다 */
+    if (out.length && OTHER_SPELLINGS.has(out[out.length - 1] + w)) out[out.length - 1] += w
+    else out.push(w)
   }
   return out
 }
 
 /** 낱말이 모두 들어 있으면 그 가운데서의 순서를, 아니면 null */
-function rank(words: string[], name: string, hay: string): number | null {
-  if (!words.every((w) => hay.includes(w))) return null
+function rank(wanted: string[][], name: string, hay: string): number | null {
+  const words: string[] = []
+  for (const alts of wanted) {
+    const w = alts.find((a) => hay.includes(a))
+    if (w === undefined) return null
+    words.push(w)
+  }
   const joined = words.join('')
   if (name === joined) return 0
   if (name.startsWith(joined)) return 1
@@ -87,15 +174,16 @@ export function matchSupplements(rows: SuppIndexRow[], words: string[], limit: n
   for (const v of VERIFIED_SOLD_AS) {
     if (!brandInQuery.includes(v.brand)) continue
     const rest = words.filter((w) => w !== v.brand)
-    if (rest.length && !rest.every((w) => v.word.includes(w))) continue
+    if (rest.length && !rest.every((w) => spellings(w).some((a) => v.word.includes(a)))) continue
     const row = rows.find((r) => r.reportNo === v.reportNo)
     if (row) { verified.push(row.i); soldAs.set(row.i, v.sold) }
   }
 
   const found = (ws: string[]) => {
+    const wanted = ws.map(spellings)
     const hits: { i: number; r: number; len: number }[] = []
     for (const row of rows) {
-      const r = rank(ws, row.name, row.hay)
+      const r = rank(wanted, row.name, row.hay)
       if (r !== null) hits.push({ i: row.i, r, len: row.name.length })
     }
     return hits.sort((a, b) => a.r - b.r || a.len - b.len || a.i - b.i).map((h) => h.i)
@@ -104,7 +192,10 @@ export function matchSupplements(rows: SuppIndexRow[], words: string[], limit: n
   let ids = found(words)
   let dropped: string[] = []
   if (ids.length === 0 && verified.length === 0) {
-    dropped = words.filter((w) => !rows.some((r) => r.hay.includes(w)))
+    dropped = words.filter((w) => {
+      const alts = spellings(w)
+      return !rows.some((r) => alts.some((a) => r.hay.includes(a)))
+    })
     const kept = words.filter((w) => !dropped.includes(w))
     /* 남은 낱말끼리 함께 드는 제품이 없으면 지어내지 않는다 */
     ids = dropped.length && kept.length ? found(kept) : []

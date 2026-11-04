@@ -48,7 +48,7 @@ export const INGREDIENT_RULES: IngredientRule[] = [
   {
     name: '비타민 E',
     highDoseOnly: true,
-    match: ['비타민E', '비타민 E', '토코페롤'],
+    match: ['비타민E', '비타민 E', '토코페롤', '비타민e'],
     base: 'info',
     reason:
       '결핍이 드물어 따로 챙길 이유가 크지 않은 성분입니다. 식품으로 충분히 섭취됩니다.',
@@ -122,7 +122,7 @@ export const INGREDIENT_RULES: IngredientRule[] = [
   {
     name: '고용량 비타민 C',
     highDoseOnly: true,
-    match: ['비타민C', '비타민 C', '아스코르브'],
+    match: ['비타민C', '비타민 C', '아스코르브', '비타민씨', '비타민c'],
     base: 'info',
     /*
      * 2026-10-14 — '500 mg 안팎은 문제없다' 는 KDRI 에 없는 기준이었다. KDRI 가 실제로 정한 숫자로 바꾸고,
@@ -143,7 +143,7 @@ export const INGREDIENT_RULES: IngredientRule[] = [
   },
   {
     name: '코엔자임 Q10',
-    match: ['코엔자임', '코큐텐', 'CoQ10', '코엔자임Q10'],
+    match: ['코엔자임', '코큐텐', 'CoQ10', '코엔자임Q10', 'COQ10', 'coq10'],
     base: 'caution',
     /* 2026-10-14 — ACCP 와파린 지침은 코엔자임 Q10 을 다루지 않는다. 원문 공개 기관 자료·종설로 바꿨다 */
     reason:
@@ -185,7 +185,7 @@ export const INGREDIENT_RULES: IngredientRule[] = [
   },
   {
     name: '오메가-3 (EPA·DHA)',
-    match: ['오메가3', '오메가-3', 'EPA', 'DHA', '알티지', 'rTG'],
+    match: ['오메가3', '오메가-3', 'EPA', 'DHA', '알티지', 'rTG', '오메가쓰리', '피쉬오일', '피시오일'],
     base: 'prefer',
     reason:
       '항암치료 중이며 체중이 줄 위험이 있는 진행암 환자에게, ESPEN 은 식욕·체중·제지방량 유지를 위해 오메가-3 를 ' +
@@ -414,7 +414,7 @@ export const INGREDIENT_RULES: IngredientRule[] = [
   },
   {
     name: '밀크씨슬(실리마린)',
-    match: ['밀크씨슬', '실리마린', '카르두스'],
+    match: ['밀크씨슬', '실리마린', '카르두스', '밀크시슬'],
     base: 'info',
     /* 2026-10-14 — EASL 지침에 밀크씨슬 0건. '병용 위험 낮다' 는 자료가 엇갈려 그대로 적는다 */
     reason:
@@ -467,7 +467,7 @@ export const INGREDIENT_RULES: IngredientRule[] = [
   },
   {
     name: '비타민 D',
-    match: ['비타민D', '비타민 D', '콜레칼시페롤'],
+    match: ['비타민D', '비타민 D', '콜레칼시페롤', '비타민디', '비타민d'],
     base: 'prefer',
     /*
      * 2026-10-14 — '암 환자에서 결핍이 매우 흔하다' 는 인용한 출처에 없었다. 그리고 SUNSHINE 의 양성 신호를 빼면 근거를 낮추게 되어
@@ -580,7 +580,7 @@ export const INGREDIENT_RULES: IngredientRule[] = [
   },
   {
     name: '글루코사민·MSM',
-    match: ['글루코사민', 'MSM', '콘드로이친', '보스웰리아'],
+    match: ['글루코사민', 'MSM', '콘드로이친', '보스웰리아', '엠에스엠', 'msm', '디메틸설폰', '식이유황', '콘드로이틴'],
     base: 'info',
     /* 2026-10-14 — KDRI 에 글루코사민 0건. 빠져 있던 와파린 출혈 보고를 기관 자료 그대로 적는다(판정 신설은 전문의 판단) */
     reason:
@@ -594,7 +594,7 @@ export const INGREDIENT_RULES: IngredientRule[] = [
   },
   {
     name: '콜라겐',
-    match: ['콜라겐'],
+    match: ['콜라겐', '콜라젠'],
     base: 'info',
     /* 2026-10-14 — ESPEN 에 콜라겐 0건. '그대로 가지 않는다' 는 절반만 맞아(펩타이드 일부 흡수) 원문대로 */
     reason:
@@ -631,7 +631,7 @@ export const INGREDIENT_RULES: IngredientRule[] = [
   },
   {
     name: '쏘팔메토',
-    match: ['쏘팔메토', '소팔메토'],
+    match: ['쏘팔메토', '소팔메토', '쏘팔매토'],
     base: 'caution',
     /*
      * 2026-10-14 — 출처(WCRF 전립선 보고서)가 쏘팔메토를 다루지 않았다. 그리고 'PSA 를 낮춘다' 는
@@ -799,7 +799,10 @@ export const INGREDIENT_RULES: IngredientRule[] = [
  *
  * 원료를 찾기 전에 이 문구들을 먼저 걷어낸다. 걷어내고도 남는 '칼슘' 은 진짜 칼슘이다.
  */
+/* 표기를 넓힌 뒤 '비타민씨트롱'(시트론)·'멀티비타민디오니소스'(브랜드)가 비타민으로 읽히지 않게 지운다 */
 const CLAIM_PHRASES = [
+  '씨트롱',
+  '디오니소스',
   '칼슘과인이흡수되고이용되는데필요',
   '단백질및아미노산이용에필요',
   '지방,탄수화물,단백질대사와에너지생성에필요',

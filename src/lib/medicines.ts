@@ -6,7 +6,7 @@
  *
  * 여기서는 이름만 알려 드린다. 판정은 하지 않는다 — 식약처 회신의 '식생활·영양관리 목적' 범위를 넘지 않기 위해서다.
  */
-import { squeeze, suppWords } from './suppSearch'
+import { spellings, squeeze, suppWords } from './suppSearch'
 
 export const MEDICINE_NOTICE =
   '건강기능식품이 아니라 의약품입니다. 이 앱은 의약품을 판정하지 않으니, 드시고 있거나 드실 계획이면 담당 의사와 상의하세요.'
@@ -33,19 +33,22 @@ const brandOf = (name: string) => key(name.split(/[([{]/)[0])
 const inBrand = (brand: string, w: string) => (w.length <= 2 ? brand.startsWith(w) : brand.includes(w))
 
 export function matchMedicines(rows: [string, string][], query: string, limit = 6): MedicineMatch {
-  const words = suppWords(query).map(key)
-  const joined = words.join('')
+  const words = suppWords(query)
+  const joined = key(words.join(''))
   if (joined.length < 2) return { items: [], total: 0, named: false }
+  /* 표기가 달라도 찾는다 — '비타민c' 로 유한비타민씨정을 */
+  const wanted = words.map((w) => spellings(w).map(key))
+  const whole = spellings(words.join('')).map(key)
   const hits: { m: Medicine; starts: boolean }[] = []
   for (const [name, company] of rows) {
     const brand = brandOf(name)
     const maker = key(company)
     /* 이름과 회사를 이어 붙여 찾지 않는다 — '리도카인'+'삼진제약' 이 '인삼' 에 걸렸다 */
-    const rest = words.filter((w) => !maker.includes(w))
+    const rest = wanted.filter((alts) => !alts.some((w) => maker.includes(w)))
     /* 회사 이름만 친 것은 제품을 찾는 말이 아니다 — '종근당' 에 구충제가 나왔다 */
     if (!rest.length) continue
-    if (inBrand(brand, joined) || rest.every((w) => inBrand(brand, w)))
-      hits.push({ m: { name, company }, starts: brand.startsWith(joined) })
+    if (whole.some((w) => inBrand(brand, w)) || rest.every((alts) => alts.some((w) => inBrand(brand, w))))
+      hits.push({ m: { name, company }, starts: whole.some((w) => brand.startsWith(w)) })
   }
   hits.sort((a, b) => Number(b.starts) - Number(a.starts) || a.m.name.length - b.m.name.length)
   return { items: hits.slice(0, limit).map((h) => h.m), total: hits.length, named: hits.some((h) => h.starts) }

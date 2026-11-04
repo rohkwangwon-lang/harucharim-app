@@ -12,6 +12,7 @@
  * 화면의 판단을 순수 함수(menuConditionKey)로 꺼내 두고 여기서 따진다.
  */
 import { matchMedicines, medicineFirst, MEDICINE_NOTICE } from '../../src/lib/medicines'
+import { findIngredients } from '../../src/data/ingredientRules'
 import { buildDayMenu, recentFoods } from '../../src/engine/menu'
 import { readFileSync } from 'node:fs'
 import { matchSupplements, squeeze, suppWords, VERIFIED_SOLD_AS, type SuppIndexRow } from '../../src/lib/suppSearch'
@@ -196,6 +197,33 @@ const key = (
   if (raw.items[top.ids[0]]?.[3] !== sold.reportNo) bad('세노비스 마그네슘', '확인한 제품이 맨 앞에 없음')
   if (!top.soldAs.get(top.ids[0])) bad('세노비스 마그네슘', '통에 적힌 이름을 알리지 않음')
 
+  /* 표기 차이 — 어느 쪽으로 쳐도 같은 제품에 닿아야 한다(2026-11-05 사용자 요청) */
+  /* 건수만 보면 안 된다 — 낱말이 비어 전 제품이 나온 적이 있다. 나온 것이 그 원료인지 본다 */
+  const named = (q: string, ...any: string[]) => {
+    const { ids } = find(q)
+    if (!suppWords(q).length) bad('표기 차이', `'${q}' 의 낱말이 사라짐`)
+    if (!ids.length) bad('표기 차이', `'${q}' 를 찾지 못함`)
+    const off = ids.filter((i) => !any.some((w) => squeeze(nameOf(i) + raw.items[i][1]).includes(w)))
+    if (off.length) bad('표기 차이', `'${q}' 에 엉뚱한 제품: ${nameOf(off[0])}`)
+    return ids.length
+  }
+  named('로열젤리', '로얄젤리', '로열젤리')
+  for (const [q, ...any] of [['밀크시슬', '밀크씨슬', '밀크시슬'], ['밀크씨슬', '밀크씨슬', '밀크시슬'], ['비타민씨', '비타민c', '비타민씨'], ['비타민 씨', '비타민c', '비타민씨'], ['비타민디', '비타민d', '비타민디'], ['오메가쓰리', '오메가3', '오메가쓰리', 'omega3'], ['콘드로이틴', '콘드로이친'], ['엠에스엠', '엠에스엠', 'msm', '식이유황', '디메틸설폰'], ['스피룰리나', '스피루리나'], ['크렌베리', '크랜베리']])
+    if (named(q, ...any) < 5) bad('표기 차이', `'${q}' 가 너무 적음`)
+  if (find('없는제품이름').ids.length) bad('표기 차이', '없는 이름에 무언가 나옴')
+  if (raw.items[find('세노비스 마그네시움').ids[0]]?.[3] !== VERIFIED_SOLD_AS[0].reportNo) bad('표기 차이', "'세노비스 마그네시움' 으로 확인한 제품에 닿지 않음")
+  /* 거꾸로 찾으면 다른 낱말에 걸리는 것 */
+  for (const [q, wrong] of [['비타민e', '이뮨'], ['비타민a', '에이스'], ['비타민b', '비오틴'], ['비오틴', '프로바이오틴']] as const) {
+    const all = matchSupplements(rows, suppWords(q), 60000).ids
+    if (all.some((i) => squeeze(nameOf(i)).includes(wrong) && !squeeze(nameOf(i)).includes(q)))
+      bad('표기 차이', `'${q}' 에 '${wrong}' 제품이 걸림`)
+  }
+  /* 판정도 같은 표기를 읽어야 한다 — 찾히는데 판정이 비면 안 된다 */
+  for (const [name, rule] of [['밀크시슬', '밀크씨슬'], ['125건강 엠에스엠', 'MSM'], ['광동 비타민씨 1000', '비타민 C'], ['에이치케이 비타민디 4000', '비타민 D'], ['오메가쓰리', '오메가-3'], ['피쉬오일', '오메가-3'], ['우먼스 콜라젠', '콜라겐']] as const)
+    if (!findIngredients(name).some((r) => r.name.includes(rule))) bad('표기 차이', `'${name}' 을 ${rule} 로 판정하지 않음`)
+  for (const [name, rule] of [['멀티비타민 디오니소스 포 맨', '비타민 D'], ['비타민씨트롱구미', '비타민 C']] as const)
+    if (findIngredients(name).some((r) => r.name.includes(rule))) bad('표기 차이', `'${name}' 을 ${rule} 로 잘못 읽음`)
+
   /* 자료에 없는 브랜드 — 다른 제품을 그 제품처럼 내놓지 않고, 뺀 낱말을 밝힌다 */
   const other = find('네이처메이드 마그네슘')
   if (!other.dropped.includes('네이처메이드')) bad('영양제 찾기', '없는 브랜드를 빼고 찾았다고 알리지 않음')
@@ -214,11 +242,14 @@ const key = (
   if (m('없는제품이름').total) bad('의약품 안내', '없는 이름에 무언가 나옴')
   if (items.length < 4000) bad('의약품 안내', `전체 목록이 아님: ${items.length}건`)
   /* 낱말이 다른 말 속에 우연히 든 것 — 아연질캡슐, 리도카인+삼진제약, (은행엽건조엑스) */
-  for (const q of ['아연', '칼슘', '인삼', '은행', '철분', '크릴', '크롬'])
+  for (const q of ['인삼', '은행', '철분', '크릴', '크롬'])
     if (m(q).total) bad('의약품 안내', `'${q}' 에 엉뚱한 의약품이 걸림: ${m(q).items[0].name}`)
+  /* '아연' 은 징크셀처럼 진짜 아연 제품만, 연질캡슐·연고가 아니라 */
+  if (m('아연').items.some((x) => /아연질|아연고/.test(x.name))) bad('의약품 안내', "'아연' 에 연질캡슐·연고가 걸림")
   /* 회사 이름만 친 것 */
   for (const q of ['종근당', '대웅', '유한', '일양'])
     if (m(q).total) bad('의약품 안내', `회사 이름 '${q}' 에 의약품이 나옴: ${m(q).items[0].name}`)
+  if (!m('유한 비타민c').total) bad('의약품 안내', '표기가 달라도 찾아야 함')
   if (!m('유한 비타민씨').total) bad('의약품 안내', '회사와 제품을 함께 쳐도 찾아야 함')
   if (!m('타이레놀').named) bad('의약품 안내', '타이레놀을 알리지 않음')
   if (medicineFirst(m('코큐텐'), 30)) bad('의약품 안내', '원료 이름에서 찾던 영양제를 밀어냄')
