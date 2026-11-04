@@ -196,8 +196,8 @@ const key = (
   if (!top.soldAs.get(top.ids[0])) bad('세노비스 마그네슘', '통에 적힌 이름을 알리지 않음')
 
   /* 자료에 없는 브랜드 — 다른 제품을 그 제품처럼 내놓지 않고, 뺀 낱말을 밝힌다 */
-  const other = find('블랙모어스 마그네슘')
-  if (!other.dropped.includes('블랙모어스')) bad('영양제 찾기', '없는 브랜드를 빼고 찾았다고 알리지 않음')
+  const other = find('네이처메이드 마그네슘')
+  if (!other.dropped.includes('네이처메이드')) bad('영양제 찾기', '없는 브랜드를 빼고 찾았다고 알리지 않음')
   if (find('없는제품이름').ids.length) bad('영양제 찾기', '아무 낱말도 맞지 않는데 무언가 나옴')
   console.log(`  영양제 찾기 — '마그네슘 칼슘' ${order.length}건 이상, 세노비스 마그네슘 → ${raw.items[top.ids[0]][1]} '${nameOf(top.ids[0])}'`)
 }

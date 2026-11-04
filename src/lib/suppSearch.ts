@@ -67,6 +67,18 @@ export interface SuppMatch {
   soldAs: Map<number, string>
 }
 
+/**
+ * 저장소 한 줄: 제품명, 업체, 기능성, 신고번호, 섭취법 — 수입품은 뒤에 제조국과 찾기용 영문 이름이 붙는다.
+ * 수입품은 신고번호 칸이 비어 있고, 자료에 바코드가 없어 바코드로는 닿지 않는다.
+ */
+export type SuppRow = [string, string, string, string, string, string?, string?]
+
+/** 통에 영문으로만 적힌 수입품도 찾도록 영문 이름·해외 제조사를 낱말표에 넣는다 */
+export function toSuppIndexRow(i: number, r: SuppRow): SuppIndexRow {
+  const name = squeeze(r[0])
+  return { i, name, hay: name + squeeze(r[1]) + squeeze(r[6] ?? ''), reportNo: r[3] || '' }
+}
+
 /** 낱말을 모두 품은 제품을 찾고, 없는 낱말은 빼고 다시 찾아 무엇을 뺐는지 함께 돌려준다 */
 export function matchSupplements(rows: SuppIndexRow[], words: string[], limit: number): SuppMatch {
   const soldAs = new Map<number, string>()

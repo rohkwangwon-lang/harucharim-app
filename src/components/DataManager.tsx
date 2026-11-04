@@ -80,7 +80,7 @@ export function DataManager() {
             )}
             <p className="text-sm leading-relaxed text-stone-700">
               지금은 자주 먹는 식품 <strong>1만 8천 종</strong>이 앱에 들어 있습니다.
-              여기에 시중 가공식품 <strong>27만 종</strong>, 식약처 신고 영양제 <strong>4만 5천 종</strong>,
+              여기에 시중 가공식품 <strong>27만 종</strong>, 식약처 자료의 영양제 <strong>약 5만 종</strong>,
               바코드 <strong>23만 건</strong>(베타)을 더하면 편의점·마트 상품과 시판 영양제를 찾을 수 있습니다.
             </p>
             <p className="mt-2 rounded-lg bg-stone-50 px-3 py-2 text-[11px] leading-relaxed text-stone-500">
@@ -89,7 +89,7 @@ export function DataManager() {
               이름으로 다시 찾아 주세요.
             </p>
             <ul className="mt-3 space-y-1 text-xs text-stone-500">
-              <li>· 내려받는 용량 약 <strong>16 MB</strong> — Wi-Fi 를 권합니다</li>
+              <li>· 내려받는 용량 약 <strong>18 MB</strong> — Wi-Fi 를 권합니다</li>
               <li>· 저장하는 데 1~2분 걸립니다. 화면을 켜 둔 채로 기다려 주세요</li>
               <li>· 저장 후에는 인터넷 없이 검색과 바코드 조회가 됩니다</li>
               <li>· 기기 저장 공간을 약 150 MB 씁니다</li>

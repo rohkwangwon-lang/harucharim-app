@@ -1,4 +1,4 @@
-import { matchSupplements, soldAsByReportNo, squeeze, suppWords, type SuppIndexRow } from './suppSearch'
+import { matchSupplements, soldAsByReportNo, suppWords, toSuppIndexRow, type SuppIndexRow, type SuppRow } from './suppSearch'
 import type { Food } from '../data/types'
 import { setAllergenIndex } from '../data/allergens'
 import { rowToFood, type PackedFoods, type PackedRow } from '../data/foods/generated'
@@ -27,7 +27,7 @@ const STORE_MYCODE = 'myBarcodes'
 const STORE_SUPP = 'extSupps'
 
 /** 데이터 판을 올릴 때 이 값을 바꾸면 사용자 기기에서 다시 받는다 */
-export const DATA_VERSION = '2026-11-04b'
+export const DATA_VERSION = '2026-11-04c'
 
 export interface InstallProgress {
   phase: '식품 데이터' | '바코드 데이터' | '영양제 데이터' | '마무리'
@@ -174,26 +174,29 @@ export async function install(onProgress?: (p: InstallProgress) => void): Promis
   // ── 건강기능식품 ──────────────────────────────────────────
   suppIndex = null
   onProgress?.({ phase: '영양제 데이터', loaded: 0, total: 1 })
-  try {
-    const sp = (await (await fetch(`${base}data/supplements-extended.json`)).json()) as {
-      cols: string[]; items: [string, string, string, string, string][]
-    }
-    for (let start = 0; start < sp.items.length; start += CHUNK) {
-      const slice = sp.items.slice(start, start + CHUNK)
-      await new Promise<void>((resolve, reject) => {
-        const t = db.transaction(STORE_SUPP, 'readwrite')
-        const store = t.objectStore(STORE_SUPP)
-        slice.forEach((row, k) => {
-          const i = start + k
-          store.put({ i, nm: tokens(row[0]), no: row[3] || '', r: row })
+  /* 국내 신고 뒤에 수입품을 잇는다. 어느 쪽 파일이 없어도 나머지는 쓸 수 있어야 한다 */
+  let suppOffset = 0
+  for (const file of ['supplements-extended.json', 'supplements-imported.json']) {
+    try {
+      const sp = (await (await fetch(`${base}data/${file}`)).json()) as { cols: string[]; items: SuppRow[] }
+      for (let start = 0; start < sp.items.length; start += CHUNK) {
+        const slice = sp.items.slice(start, start + CHUNK)
+        await new Promise<void>((resolve, reject) => {
+          const t = db.transaction(STORE_SUPP, 'readwrite')
+          const store = t.objectStore(STORE_SUPP)
+          slice.forEach((row, k) => {
+            const i = suppOffset + start + k
+            store.put({ i, nm: tokens(row[0]), no: row[3] || '', r: row })
+          })
+          t.oncomplete = () => resolve()
+          t.onerror = () => reject(t.error)
         })
-        t.oncomplete = () => resolve()
-        t.onerror = () => reject(t.error)
-      })
-      onProgress?.({ phase: '영양제 데이터', loaded: Math.min(start + CHUNK, sp.items.length), total: sp.items.length })
+        onProgress?.({ phase: '영양제 데이터', loaded: Math.min(start + CHUNK, sp.items.length), total: sp.items.length })
+      }
+      suppOffset += sp.items.length
+    } catch {
+      // 받지 못한 파일은 건너뛴다
     }
-  } catch {
-    // 영양제 파일이 없어도 나머지는 쓸 수 있어야 한다
   }
 
   onProgress?.({ phase: '마무리', loaded: 1, total: 1 })
@@ -306,7 +309,13 @@ export interface ExtSupplement {
   use: string
   /** 통에 적힌 판매 이름 — 짝이 확인된 것만(suppSearch.ts) */
   soldAs?: string
+  /** 수입 제품이면 제조국. 기능성은 판정에만 쓰고 화면에 띄우지 않는다(표시 문구 그대로라 표현을 거르지 못했다) */
+  importedFrom?: string
 }
+
+const toSupp = (i: number, r: SuppRow, soldAs?: string): ExtSupplement => ({
+  id: `sx-${i}`, name: r[0], maker: r[1], fn: r[2], reportNo: r[3], use: r[4], soldAs, importedFrom: r[5]
+})
 
 /** 시판 건강기능식품을 이름으로 찾는다 */
 /**
@@ -331,11 +340,10 @@ export async function searchSupplements(query: string, limit = 40): Promise<ExtS
     cur.onsuccess = () => {
       const c = cur.result
       if (!c || out.length >= limit) return resolve(out)
-      const rec = c.value as { i: number; r: [string, string, string, string, string] }
+      const rec = c.value as { i: number; r: SuppRow }
       if (!seen.has(rec.i)) {
         seen.add(rec.i)
-        const [name, maker, fn, no, use] = rec.r
-        out.push({ id: `sx-${rec.i}`, name, maker, fn, reportNo: no, use })
+        out.push(toSupp(rec.i, rec.r))
       }
       c.continue()
     }
@@ -348,13 +356,8 @@ let suppIndex: SuppIndexRow[] | null = null
 
 async function loadSuppIndex(): Promise<SuppIndexRow[]> {
   if (suppIndex) return suppIndex
-  const all = await tx<{ i: number; r: [string, string, string, string, string] }[]>(
-    STORE_SUPP, 'readonly', (s) => s.getAll()
-  )
-  suppIndex = all.map(({ i, r }) => {
-    const name = squeeze(r[0])
-    return { i, name, hay: name + squeeze(r[1]), reportNo: r[3] || '' }
-  })
+  const all = await tx<{ i: number; r: SuppRow }[]>(STORE_SUPP, 'readonly', (s) => s.getAll())
+  suppIndex = all.map(({ i, r }) => toSuppIndexRow(i, r))
   return suppIndex
 }
 
@@ -371,12 +374,8 @@ export async function findSupplements(query: string, limit = 30): Promise<SuppSe
   const { ids, dropped, soldAs } = matchSupplements(await loadSuppIndex(), words, limit)
   const items: ExtSupplement[] = []
   for (const i of ids) {
-    const rec = await tx<{ i: number; r: [string, string, string, string, string] } | undefined>(
-      STORE_SUPP, 'readonly', (s) => s.get(i)
-    )
-    if (!rec) continue
-    const [name, maker, fn, no, use] = rec.r
-    items.push({ id: `sx-${i}`, name, maker, fn, reportNo: no, use, soldAs: soldAs.get(i) })
+    const rec = await tx<{ i: number; r: SuppRow } | undefined>(STORE_SUPP, 'readonly', (s) => s.get(i))
+    if (rec) items.push(toSupp(i, rec.r, soldAs.get(i)))
   }
   return { items, dropped }
 }
@@ -395,12 +394,11 @@ export async function lookupSupplementByBarcode(code: string): Promise<ExtSupple
   }
   if (!rec?.n) return null
   const no = rec.n
-  const hit = await tx<{ i: number; r: [string, string, string, string, string] } | undefined>(
+  const hit = await tx<{ i: number; r: SuppRow } | undefined>(
     STORE_SUPP, 'readonly', (s) => s.index('no').get(no)
   )
   if (!hit) return null
-  const [name, maker, fn, reportNo, use] = hit.r
-  return { id: `sx-${hit.i}`, name, maker, fn, reportNo, use, soldAs: soldAsByReportNo(reportNo) }
+  return toSupp(hit.i, hit.r, soldAsByReportNo(hit.r[3]))
 }
 
 export interface BarcodeHit {
@@ -506,14 +504,11 @@ export async function scanSupplements(
     cur.onsuccess = () => {
       const c = cur.result
       if (!c || out.length >= limit) return resolve(out)
-      const rec = c.value as { i: number; r: [string, string, string, string, string] }
+      const rec = c.value as { i: number; r: SuppRow }
       if (!seen.has(rec.i)) {
         seen.add(rec.i)
-        const [name, maker, fn, no, use] = rec.r
-        const hay = `${name}${fn}`.replace(/\s+/g, '')
-        if (keywords.some((k) => hay.includes(k))) {
-          out.push({ id: `sx-${rec.i}`, name, maker, fn, reportNo: no, use })
-        }
+        const hay = `${rec.r[0]}${rec.r[2]}`.replace(/\s+/g, '')
+        if (keywords.some((k) => hay.includes(k))) out.push(toSupp(rec.i, rec.r))
       }
       c.continue()
     }

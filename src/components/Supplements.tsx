@@ -172,8 +172,8 @@ export function Supplements({
         title="시판 영양제 찾기"
         desc={
           hasExt
-            ? '식약처에 신고된 건강기능식품 45,618종에서 찾습니다. 성분을 보고 이 환자에게 맞는지 판단해 드립니다.'
-            : '내 정보에서 상품 데이터를 받으시면 시판 제품 45,618종을 검색할 수 있습니다.'
+            ? '식약처 자료의 건강기능식품 약 5만 종(수입 약 5천 종 포함)에서 찾습니다. 성분을 보고 이 환자에게 맞는지 판단해 드립니다.'
+            : '내 정보에서 상품 데이터를 받으시면 시판 제품 약 5만 종을 검색할 수 있습니다.'
         }
       >
         {/*
@@ -284,7 +284,7 @@ export function Supplements({
               } else {
                 setScanMsg(
                   `바코드 ${code} 로 등록된 건강기능식품을 찾지 못했습니다. ` +
-                  '제품 통에 적힌 이름으로 검색해 보세요.'
+                  '수입 제품은 자료에 바코드가 없습니다. 제품 통에 적힌 이름으로 검색해 보세요.'
                 )
               }
             }}
@@ -292,7 +292,7 @@ export function Supplements({
         )}
 
         {picking && (
-          <p className="card px-4 py-6 text-center text-sm text-stone-400">4만 5천 종에서 고르는 중입니다…</p>
+          <p className="card px-4 py-6 text-center text-sm text-stone-400">약 5만 종에서 고르는 중입니다…</p>
         )}
 
         {!picking && pick === 'none' && q.trim().length >= 2 && (dropped.length > 0 || market.length === 0) && (
@@ -305,7 +305,7 @@ export function Supplements({
                 ? <>{pick === 'good' ? '권장' : '주의·피하세요'} 원료가 든 제품 {market.length}건{market.length >= 60 && ' 이상'}</>
                 : q.trim()
                   ? <>&lsquo;{q.trim()}&rsquo; 검색 결과 {market.length}건{market.length >= 30 && ' 이상'}</>
-                  : <>45,618종 가운데 처음 {market.length}건입니다. 위 단추나 검색으로 좁혀 보세요.</>}
+                  : <>약 5만 종 가운데 처음 {market.length}건입니다. 위 단추나 검색으로 좁혀 보세요.</>}
               {market.some((m) => m.soldAs) && <> 통의 표시로 확인한 제품입니다. 같은 브랜드의 다른 제품은 신고 이름이 달라, 제품명이나 원료로 찾아보세요.</>}
             </p>
             <div className="space-y-2">
@@ -536,7 +536,8 @@ function NotFoundNote({ query, dropped, hasAlternatives, patient }: {
       <p className="text-sm font-semibold text-stone-900">&lsquo;{query}&rsquo;(이)라는 제품은 자료에서 찾지 못했습니다</p>
       <p className="mt-1 text-[11px] leading-relaxed text-stone-600">
         식약처 신고 자료는 제조사가 신고한 이름이라 판매 브랜드가 빠져 있는 일이 많고, 자료에 없는 제품도 있습니다.
-        통의 <strong>바코드</strong>를 찍거나 <strong>원료 이름</strong>으로 찾아보세요.
+        정식 수입품은 들어 있지만 <strong>해외 직구 제품은 거의 없습니다.</strong>{' '}
+        통의 <strong>바코드</strong>를 찍거나(국내 제품만) <strong>원료 이름</strong>으로 찾아보세요.
         {hasAlternatives && dropped.length > 0 && <> 아래는 &lsquo;{dropped.join(' ')}&rsquo;을(를) 빼고 찾은 것이라 <strong>그 제품이 아닙니다.</strong></>}
       </p>
       {!verdict.unknown && (
@@ -580,7 +581,9 @@ function MarketProduct({ product, patient }: { product: ExtSupplement; patient: 
       <button className="w-full text-left" onClick={() => setOpen((v) => !v)}>
         <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
           {verdict.level && verdict.level !== 'info' && <LevelBadge level={verdict.level} />}
-          <span className="chip bg-stone-100 text-stone-500">식약처 신고</span>
+          <span className="chip bg-stone-100 text-stone-500">
+            {product.importedFrom ? `수입 · ${product.importedFrom}` : '식약처 신고'}
+          </span>
           {verdict.items.slice(0, 2).map((v) => (
             <span key={v.ingredient} className="chip bg-white text-stone-600 ring-1 ring-stone-200">
               {v.ingredient}
@@ -591,8 +594,8 @@ function MarketProduct({ product, patient }: { product: ExtSupplement; patient: 
         {product.soldAs && (
           <p className="mt-0.5 text-[11px] font-medium text-brand-700">통에는 &lsquo;{product.soldAs}&rsquo;(으)로 적힌 제품입니다</p>
         )}
-        <p className="mt-0.5 text-[11px] text-stone-400">{product.maker}</p>
-        {product.fn && (
+        <p className="mt-0.5 text-[11px] text-stone-400">{product.importedFrom ? `수입사 ${product.maker}` : product.maker}</p>
+        {product.fn && !product.importedFrom && (
           <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-stone-500">{product.fn}</p>
         )}
       </button>
@@ -624,7 +627,9 @@ function MarketProduct({ product, patient }: { product: ExtSupplement; patient: 
             <p className="mt-2 text-[11px] text-stone-400">섭취 방법: {product.use}</p>
           )}
           <p className="mt-2 text-[11px] leading-relaxed text-stone-400">
-            제품에 표시된 이름과 기능성으로 판단한 것입니다. 실제 성분표와 함량은 제품 포장을 확인하세요.
+            제품에 표시된 이름과 기능성으로 판단한 것입니다.
+            {product.importedFrom && ' 수입 제품은 원료 목록을 아직 판정에 쓰지 않아, 그 안에만 적힌 원료는 걸러지지 않습니다.'}
+            {' '}실제 성분표와 함량은 제품 포장을 확인하세요.
           </p>
         </div>
       )}
