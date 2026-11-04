@@ -7,7 +7,7 @@
  * (식약처 회신의 '식생활·영양관리 목적' 범위. docs/법무/회신/).
  *
  * 식약처_의약품개요정보(e약은요, data.go.kr 15075057): 공급실적이 있는 일반의약품.
- * 활용신청 전에는 '등록되지 않은 서비스키' 로 거절되므로, 그때는 손으로 확인한 목록만으로 만든다.
+ * 2026-11-05 전체 받기 확인. 여기에 없는 품목은 의약품안전나라에서 손으로 확인한 목록(medicines-checked.json)으로 메운다.
  */
 import fs from 'node:fs'
 import path from 'node:path'
@@ -19,8 +19,20 @@ const SIZE = 100
 const KEY = serviceKey(loadEnv(ROOT).DATA_GO_KR_KEY)
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
-/** '(수출명:…)' 은 통에 없는 말이다. 수출 전용 품목은 살 수 없다 */
-const cleanName = (s) => String(s ?? '').replace(/[(<]\s*수출명[^)>]*[)>]/g, '').trim()
+/**
+ * 통에 없는 말을 덜어 낸다. 수출명은 표기가 제각각이다:
+ * '(수출명:…)', '[수출명: …]', '{수출명:…}', '(수출, 군납명:…)', '(성분, 수출명:…)', 괄호 없는 ' 수출명: …',
+ * '(싱가폴수출명 : …)', '(군납용 : …)', 수출명 글자 없이 ',다른이름(Name),…' 이 이어지는 것.
+ */
+function cleanName(raw) {
+  let s = String(raw ?? '').replace(/\s+/g, ' ').trim()
+  const cut = s.search(/[가-힣]*(수출|군납)/)
+  if (cut >= 0) s = s.slice(0, cut)
+  s = s.replace(/\),.*$/, ')').replace(/[\s,([{]+$/, '').replace(/>+$/, '').trim()
+  const open = (s.match(/\(/g) ?? []).length
+  const close = (s.match(/\)/g) ?? []).length
+  return open > close ? s + ')' : s
+}
 
 async function page(no) {
   const q = new URLSearchParams({ pageNo: String(no), numOfRows: String(SIZE), type: 'json' })
@@ -50,10 +62,15 @@ try {
   complete = true
   console.log(`일반의약품 ${total.toLocaleString()}건을 받았습니다.`)
 } catch (e) {
-  console.log(`전체 목록을 받지 못해 손으로 확인한 목록만 씁니다: ${e.message}`)
+  console.log(`전체 목록을 받지 못했습니다: ${e.message}`)
 }
 
 const items = [...seen.values()].sort((a, b) => a[0].localeCompare(b[0], 'ko'))
 const dest = path.join(ROOT, 'public/data/medicines.json')
+/* 받다 끊겼을 때 이미 있는 전체 목록을 일부로 덮어쓰지 않는다 */
+if (!complete && fs.existsSync(dest) && JSON.parse(fs.readFileSync(dest, 'utf8')).complete) {
+  console.log('있던 전체 목록을 그대로 둡니다.')
+  process.exit(1)
+}
 fs.writeFileSync(dest, JSON.stringify({ cols: ['name', 'company'], complete, items }))
 console.log(`medicines.json ${items.length.toLocaleString()}건 (${complete ? '전체' : '일부'}) · ${(fs.statSync(dest).size / 1024).toFixed(0)} KB`)

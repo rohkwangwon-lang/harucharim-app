@@ -11,7 +11,7 @@
  *
  * 화면의 판단을 순수 함수(menuConditionKey)로 꺼내 두고 여기서 따진다.
  */
-import { matchMedicines, MEDICINE_NOTICE } from '../../src/lib/medicines'
+import { matchMedicines, medicineFirst, MEDICINE_NOTICE } from '../../src/lib/medicines'
 import { buildDayMenu, recentFoods } from '../../src/engine/menu'
 import { readFileSync } from 'node:fs'
 import { matchSupplements, squeeze, suppWords, VERIFIED_SOLD_AS, type SuppIndexRow } from '../../src/lib/suppSearch'
@@ -212,6 +212,19 @@ const key = (
   if (!m('비콤씨').items.some((x) => x.name.includes('삐콤씨'))) bad('의약품 안내', "'비콤씨' 로 삐콤씨를 찾지 못함")
   if (m('센트룸').total) bad('의약품 안내', '건강기능식품인 센트룸이 의약품으로 나옴')
   if (m('없는제품이름').total) bad('의약품 안내', '없는 이름에 무언가 나옴')
+  if (items.length < 4000) bad('의약품 안내', `전체 목록이 아님: ${items.length}건`)
+  /* 낱말이 다른 말 속에 우연히 든 것 — 아연질캡슐, 리도카인+삼진제약, (은행엽건조엑스) */
+  for (const q of ['아연', '칼슘', '인삼', '은행', '철분', '크릴', '크롬'])
+    if (m(q).total) bad('의약품 안내', `'${q}' 에 엉뚱한 의약품이 걸림: ${m(q).items[0].name}`)
+  /* 회사 이름만 친 것 */
+  for (const q of ['종근당', '대웅', '유한', '일양'])
+    if (m(q).total) bad('의약품 안내', `회사 이름 '${q}' 에 의약품이 나옴: ${m(q).items[0].name}`)
+  if (!m('유한 비타민씨').total) bad('의약품 안내', '회사와 제품을 함께 쳐도 찾아야 함')
+  if (!m('타이레놀').named) bad('의약품 안내', '타이레놀을 알리지 않음')
+  if (medicineFirst(m('코큐텐'), 30)) bad('의약품 안내', '원료 이름에서 찾던 영양제를 밀어냄')
+  if (!medicineFirst(m('마그비'), 9)) bad('의약품 안내', '제품 이름을 쳤는데 영양제 뒤로 밀림')
+  if (!medicineFirst(m('비콤씨'), 3)) bad('의약품 안내', '비슷한 이름의 제품 위에 알리지 않음')
+  if (items.some(([n]) => /[<>{}\n]|\s{2}/.test(n) || n.length > 60)) bad('의약품 안내', '이름에 지저분한 표기가 남음')
   if (items.some(([n]) => /수출용|수출명|\(원료\)/.test(n))) bad('의약품 안내', '살 수 없는 품목이 섞임')
   if (!MEDICINE_NOTICE.includes('담당 의사와 상의')) bad('의약품 안내', '상의 안내가 빠짐')
   if (/피하세요|드셔도|권장|좋습니다/.test(MEDICINE_NOTICE)) bad('의약품 안내', '판정처럼 읽힘')

@@ -26,19 +26,36 @@ export interface MedicineMatch {
 /** '비콤씨' 로 쳐도 삐콤씨를 찾는다 */
 const key = (s: string) => squeeze(s).replace(/삐/g, '비')
 
+/** 통에 크게 적힌 이름. 괄호 속은 성분이라, '은행' 으로 징카민(은행엽건조엑스)을 찾으면 안 된다 */
+const brandOf = (name: string) => key(name.split(/[([{]/)[0])
+
+/** 두 글자 낱말은 이름 첫머리만 본다 — '아연' 이 눈모아연질캡슐·소프티아연고에 걸렸다 */
+const inBrand = (brand: string, w: string) => (w.length <= 2 ? brand.startsWith(w) : brand.includes(w))
+
 export function matchMedicines(rows: [string, string][], query: string, limit = 6): MedicineMatch {
   const words = suppWords(query).map(key)
-  if (words.join('').length < 2) return { items: [], total: 0, named: false }
   const joined = words.join('')
+  if (joined.length < 2) return { items: [], total: 0, named: false }
   const hits: { m: Medicine; starts: boolean }[] = []
   for (const [name, company] of rows) {
-    const n = key(name)
-    const hay = n + key(company)
-    if (words.every((w) => hay.includes(w))) hits.push({ m: { name, company }, starts: n.startsWith(joined) })
+    const brand = brandOf(name)
+    const maker = key(company)
+    /* 이름과 회사를 이어 붙여 찾지 않는다 — '리도카인'+'삼진제약' 이 '인삼' 에 걸렸다 */
+    const rest = words.filter((w) => !maker.includes(w))
+    /* 회사 이름만 친 것은 제품을 찾는 말이 아니다 — '종근당' 에 구충제가 나왔다 */
+    if (!rest.length) continue
+    if (inBrand(brand, joined) || rest.every((w) => inBrand(brand, w)))
+      hits.push({ m: { name, company }, starts: brand.startsWith(joined) })
   }
   hits.sort((a, b) => Number(b.starts) - Number(a.starts) || a.m.name.length - b.m.name.length)
   return { items: hits.slice(0, limit).map((h) => h.m), total: hits.length, named: hits.some((h) => h.starts) }
 }
+
+/**
+ * 안내를 결과 위에 둘 것인가. '비콤씨' 처럼 비슷한 이름이 몇 개 걸릴 때는 위에 두어 그 제품으로 오해하지 않게 한다.
+ * '코큐텐' 처럼 건강기능식품이 많이 나오는 원료 이름에서는 찾던 것을 밀어내므로 아래에 둔다.
+ */
+export const medicineFirst = (match: MedicineMatch, resultCount: number) => match.named && resultCount <= 15
 
 let load: Promise<[string, string][]> | null = null
 

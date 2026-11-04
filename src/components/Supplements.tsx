@@ -10,7 +10,7 @@ import { EvidenceBadge, LevelBadge, LevelDot, Section, BetaChip } from './ui'
 import { adviseSupplements, type AdviceLevel } from '../engine/supplementAdvice'
 import { nutritionRisk } from '../engine/nutrition'
 import { suppWords } from '../lib/suppSearch'
-import { findMedicines, MEDICINE_NOTICE, type MedicineMatch } from '../lib/medicines'
+import { findMedicines, medicineFirst, MEDICINE_NOTICE, type MedicineMatch } from '../lib/medicines'
 import { findSupplements, getStatus, lookupSupplementByBarcode, scanSupplements, searchSupplements, type ExtSupplement } from '../lib/foodStore'
 import { BarcodeScanner } from './BarcodeScanner'
 import { ingredientKeywords, judgeProduct } from '../engine/ingredientVerdict'
@@ -302,7 +302,7 @@ export function Supplements({
           <p className="card px-4 py-6 text-center text-sm text-stone-400">약 5만 종에서 고르는 중입니다…</p>
         )}
 
-        {!picking && pick === 'none' && medicines?.named && (
+        {!picking && pick === 'none' && medicines && medicineFirst(medicines, market.length) && (
           <MedicineNote match={medicines} hasOthers={market.length > 0} />
         )}
         {!picking && pick === 'none' && q.trim().length >= 2 && !medicines && (dropped.length > 0 || market.length === 0) && (
@@ -325,7 +325,7 @@ export function Supplements({
             </div>
           </>
         )}
-        {!picking && pick === 'none' && medicines && !medicines.named && (
+        {!picking && pick === 'none' && medicines && !medicineFirst(medicines, market.length) && (
           <div className="mt-3"><MedicineNote match={medicines} hasOthers={false} /></div>
         )}
         {!picking && pick !== 'none' && market.length === 0 && (
@@ -552,7 +552,7 @@ function NotFoundNote({ query, dropped, hasAlternatives, patient }: {
         정식 수입품은 들어 있지만 <strong>해외 직구 제품은 거의 없습니다.</strong>{' '}
         통의 <strong>바코드</strong>를 찍거나(국내 제품만) <strong>원료 이름</strong>으로 찾아보세요.
         비타민제 가운데는 건강기능식품이 아니라 <strong>의약품</strong>인 것도 있고, 의약품은 여기 이름이 없을 수 있습니다.
-        통에 &lsquo;일반의약품&rsquo;이라 적혀 있으면 담당 의사와 상의하세요.
+        통에 &lsquo;일반의약품&rsquo;이나 &lsquo;전문의약품&rsquo;이라 적혀 있으면 담당 의사와 상의하세요.
         {hasAlternatives && dropped.length > 0 && <> 아래는 &lsquo;{dropped.join(' ')}&rsquo;을(를) 빼고 찾은 것이라 <strong>그 제품이 아닙니다.</strong></>}
       </p>
       {!verdict.unknown && (
