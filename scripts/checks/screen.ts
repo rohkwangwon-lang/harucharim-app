@@ -13,6 +13,7 @@
  */
 import { buildDayMenu, recentFoods } from '../../src/engine/menu'
 import { readFileSync } from 'node:fs'
+import { matchSupplements, squeeze, suppWords, VERIFIED_SOLD_AS, type SuppIndexRow } from '../../src/lib/suppSearch'
 import { menuConditionKey } from '../../src/lib/menuIdentity'
 import { buildPlan, type PlanDay } from '../../src/engine/plan'
 import { openBook, planConditionKey, planPlate, stepBack, stepNext } from '../../src/lib/planBook'
@@ -167,6 +168,38 @@ const key = (
   if ((picker.match(/whitespace-nowrap/g) ?? []).length < 3) bad('며칠치 단추 줄바꿈', '이름표·단추·안내 중 꺾일 수 있는 것이 있다')
   for (const [name, code] of [['며칠치', mealPlan], ['하루치', menuSrc]] as const)
     if (!code.includes('flex flex-col gap-2.5 sm:flex-row')) bad(`${name} 머리글`, '폰 폭에서 단추가 글 옆에 있으면 글 칸이 좁아 제목까지 꺾인다')
+}
+
+/* ── 6. 영양제 찾기 — 통에 적힌 이름과 자료의 신고 이름이 다르다 ── */
+{
+  const raw = JSON.parse(readFileSync(new URL('../../public/data/supplements-extended.json', import.meta.url), 'utf8')) as { items: string[][] }
+  const rows: SuppIndexRow[] = raw.items.map((r, i) => {
+    const name = squeeze(r[0])
+    return { i, name, hay: name + squeeze(r[1]), reportNo: r[3] || '' }
+  })
+  const find = (q: string) => matchSupplements(rows, suppWords(q), 30)
+  const nameOf = (i: number) => raw.items[i][0]
+
+  for (const q of ['마그네슘 칼슘', '칼슘 마그네슘', '종근당 마그네슘', 'CENOVIS 마그네슘', '오메가 3'])
+    if (find(q).ids.length === 0) bad('영양제 찾기', `'${q}' 를 찾지 못함`)
+  const order = find('마그네슘 칼슘').ids
+  if (!order.every((i) => nameOf(i).includes('칼슘') || raw.items[i][1].includes('칼슘')))
+    bad('영양제 찾기', '칼슘 없는 제품이 칼슘 검색에 나옴')
+
+  /* 통 사진으로 확인한 짝 — 바코드 → 신고번호 → 함량까지 한 줄로 이어져야 한다 */
+  const sold = VERIFIED_SOLD_AS[0]
+  const bars = JSON.parse(readFileSync(new URL('../../public/data/barcodes.json', import.meta.url), 'utf8')) as { b: string; n: string }[]
+  const bar = bars.find((x) => x.b === '8806107513502')
+  if (bar?.n !== sold.reportNo) bad('세노비스 마그네슘 바코드', `신고번호가 ${bar?.n} — 영양제에서 찾지 못한다`)
+  const top = find('세노비스 마그네슘')
+  if (raw.items[top.ids[0]]?.[3] !== sold.reportNo) bad('세노비스 마그네슘', '확인한 제품이 맨 앞에 없음')
+  if (!top.soldAs.get(top.ids[0])) bad('세노비스 마그네슘', '통에 적힌 이름을 알리지 않음')
+
+  /* 자료에 없는 브랜드 — 다른 제품을 그 제품처럼 내놓지 않고, 뺀 낱말을 밝힌다 */
+  const other = find('블랙모어스 마그네슘')
+  if (!other.dropped.includes('블랙모어스')) bad('영양제 찾기', '없는 브랜드를 빼고 찾았다고 알리지 않음')
+  if (find('없는제품이름').ids.length) bad('영양제 찾기', '아무 낱말도 맞지 않는데 무언가 나옴')
+  console.log(`  영양제 찾기 — '마그네슘 칼슘' ${order.length}건 이상, 세노비스 마그네슘 → ${raw.items[top.ids[0]][1]} '${nameOf(top.ids[0])}'`)
 }
 
 console.log(`\n화면 검사 완료 — 문제 ${bugs.length}종`)

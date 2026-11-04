@@ -9,7 +9,8 @@ import { REF_BY_ID } from '../data/references'
 import { EvidenceBadge, LevelBadge, LevelDot, Section, BetaChip } from './ui'
 import { adviseSupplements, type AdviceLevel } from '../engine/supplementAdvice'
 import { nutritionRisk } from '../engine/nutrition'
-import { getStatus, lookupSupplementByBarcode, scanSupplements, searchSupplements, type ExtSupplement } from '../lib/foodStore'
+import { suppWords } from '../lib/suppSearch'
+import { findSupplements, getStatus, lookupSupplementByBarcode, scanSupplements, searchSupplements, type ExtSupplement } from '../lib/foodStore'
 import { BarcodeScanner } from './BarcodeScanner'
 import { ingredientKeywords, judgeProduct } from '../engine/ingredientVerdict'
 
@@ -33,6 +34,10 @@ export function Supplements({
   /** 시판 제품(공공데이터) 검색 */
   const [q, setQ] = useState('')
   const [market, setMarket] = useState<ExtSupplement[]>([])
+  /** 어떤 제품 이름에도 없어 빼고 찾은 낱말 */
+  const [dropped, setDropped] = useState<string[]>([])
+  /** 바코드로 찾은 제품. 검색어 칸에 이름이 들어가도 목록으로 되돌리지 않는다 */
+  const [scanned, setScanned] = useState<ExtSupplement | null>(null)
   const [hasExt, setHasExt] = useState(false)
 
   const [scanning, setScanning] = useState(false)
@@ -60,6 +65,8 @@ export function Supplements({
   useEffect(() => {
     const t = setTimeout(() => {
       if (!hasExt) { setMarket([]); return }
+      setDropped([])
+      if (scanned && q === scanned.name) { setMarket([scanned]); return }
       if (pick !== 'none') {
         /*
          * 이름 앞부분 색인으로는 안 된다 — '비타민D' 는 이름 한가운데 있기도 하고
@@ -110,10 +117,11 @@ export function Supplements({
         return
       }
       if (q.trim().length === 1) { setMarket([]); return }
-      searchSupplements(q.trim(), 30).then(setMarket)
+      if (!q.trim()) { searchSupplements('', 30).then(setMarket); return }
+      findSupplements(q, 30).then((res) => { setMarket(res.items); setDropped(res.dropped) })
     }, 250)
     return () => clearTimeout(t)
-  }, [q, hasExt, pick, goodIng, badIng, patient])
+  }, [q, hasExt, pick, goodIng, badIng, patient, scanned])
 
   const cached = useMemo(
     () => ({ rules: activeRules(patient), interactions: activeInteractions(patient) }),
@@ -220,7 +228,7 @@ export function Supplements({
           <input
             aria-label="영양제 검색"
             className="input flex-1"
-            placeholder={hasExt ? '제품명으로 검색 — 예: 락토핏, 오메가3, 홍삼' : '먼저 상품 데이터를 받아 주세요'}
+            placeholder={hasExt ? '제품명·원료·제조사 — 예: 마그네슘, 종근당 오메가3' : '먼저 상품 데이터를 받아 주세요'}
             value={q}
             onChange={(e) => { setQ(e.target.value); if (e.target.value) setPick('none') }}
             disabled={!hasExt}
@@ -268,6 +276,8 @@ export function Supplements({
               setScanning(false)
               const hit = await lookupSupplementByBarcode(code)
               if (hit) {
+                setPick('none')
+                setScanned(hit)
                 setMarket([hit])
                 setQ(hit.name)
                 setScanMsg(null)
@@ -285,6 +295,9 @@ export function Supplements({
           <p className="card px-4 py-6 text-center text-sm text-stone-400">4만 5천 종에서 고르는 중입니다…</p>
         )}
 
+        {!picking && pick === 'none' && q.trim().length >= 2 && (dropped.length > 0 || market.length === 0) && (
+          <NotFoundNote query={q.trim()} dropped={dropped} hasAlternatives={market.length > 0} patient={patient} />
+        )}
         {!picking && market.length > 0 && (
           <>
             <p className="mb-2 text-[11px] text-stone-400">
@@ -293,6 +306,7 @@ export function Supplements({
                 : q.trim()
                   ? <>&lsquo;{q.trim()}&rsquo; 검색 결과 {market.length}건{market.length >= 30 && ' 이상'}</>
                   : <>45,618종 가운데 처음 {market.length}건입니다. 위 단추나 검색으로 좁혀 보세요.</>}
+              {market.some((m) => m.soldAs) && <> 통의 표시로 확인한 제품입니다. 같은 브랜드의 다른 제품은 신고 이름이 달라, 제품명이나 원료로 찾아보세요.</>}
             </p>
             <div className="space-y-2">
               {market.map((m) => (
@@ -300,11 +314,6 @@ export function Supplements({
               ))}
             </div>
           </>
-        )}
-        {!picking && hasExt && pick === 'none' && q.trim().length >= 2 && market.length === 0 && (
-          <p className="card px-4 py-6 text-center text-sm text-stone-400">
-            찾는 제품이 없습니다. 다른 이름으로 검색해 보세요.
-          </p>
         )}
         {!picking && pick !== 'none' && market.length === 0 && (
           <p className="card px-4 py-6 text-center text-sm leading-relaxed text-stone-500">
@@ -511,6 +520,48 @@ function AdviceGroup({
  * 제품 자체를 검토한 것이 아니라, 표시된 제품명·기능성에서 원료를 알아보고
  * 그 원료의 근거로 판단한다. 그래서 판단 근거를 원료 단위로 밝힌다.
  */
+/**
+ * 찾는 제품이 없을 때.
+ *
+ * "없습니다" 로 끝내면 약과 맞는지 볼 길이 막힌 것처럼 보인다. 이름에 원료가 보이면 그 원료로 판단을 말한다.
+ * 다만 비슷한 제품을 그 제품인 양 보여 드리면 안 되므로, 빼고 찾은 낱말을 밝힌다.
+ */
+function NotFoundNote({ query, dropped, hasAlternatives, patient }: {
+  query: string; dropped: string[]; hasAlternatives: boolean; patient: PatientContext
+}) {
+  const words = suppWords(query).join(' ')
+  const verdict = useMemo(() => judgeProduct(words, '', patient), [words, patient])
+  return (
+    <div className="card mb-3 border-warn-200 bg-warn-50/40 p-3.5" role="status">
+      <p className="text-sm font-semibold text-stone-900">&lsquo;{query}&rsquo;(이)라는 제품은 자료에서 찾지 못했습니다</p>
+      <p className="mt-1 text-[11px] leading-relaxed text-stone-600">
+        식약처 신고 자료는 제조사가 신고한 이름이라 판매 브랜드가 빠져 있는 일이 많고, 자료에 없는 제품도 있습니다.
+        통의 <strong>바코드</strong>를 찍거나 <strong>원료 이름</strong>으로 찾아보세요.
+        {hasAlternatives && dropped.length > 0 && <> 아래는 &lsquo;{dropped.join(' ')}&rsquo;을(를) 빼고 찾은 것이라 <strong>그 제품이 아닙니다.</strong></>}
+      </p>
+      {!verdict.unknown && (
+        <div className="mt-2.5 space-y-2">
+          <p className="text-[11px] font-semibold text-stone-700">이름에 보이는 원료로 판단하면</p>
+          {verdict.items.map((v) => (
+            <div key={v.ingredient} className="rounded-lg bg-white p-2.5 ring-1 ring-stone-200">
+              <div className="mb-1 flex flex-wrap items-center gap-1.5">
+                <LevelBadge level={v.level} />
+                {v.allergy ? <span className="chip bg-danger-100 text-danger-800">내가 고른 알레르기</span> : <EvidenceBadge level={v.evidence} />}
+                <span className="chip bg-stone-100 text-stone-600">{v.ingredient}</span>
+              </div>
+              <p className="text-[11px] leading-relaxed text-stone-600">{v.reason}</p>
+              <Cites ids={v.refIds} />
+            </div>
+          ))}
+          <p className="text-[11px] leading-relaxed text-stone-500">
+            원료만 본 판단입니다. 다른 성분이 함께 들어 있으면 달라질 수 있으니 통의 성분표를 확인하고 담당 선생님과 상의하세요.
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function MarketProduct({ product, patient }: { product: ExtSupplement; patient: PatientContext }) {
   const [open, setOpen] = useState(false)
   const verdict = useMemo(
@@ -537,6 +588,9 @@ function MarketProduct({ product, patient }: { product: ExtSupplement; patient: 
           ))}
         </div>
         <p className="text-sm font-semibold text-stone-900">{product.name}</p>
+        {product.soldAs && (
+          <p className="mt-0.5 text-[11px] font-medium text-brand-700">통에는 &lsquo;{product.soldAs}&rsquo;(으)로 적힌 제품입니다</p>
+        )}
         <p className="mt-0.5 text-[11px] text-stone-400">{product.maker}</p>
         {product.fn && (
           <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-stone-500">{product.fn}</p>

@@ -1,3 +1,4 @@
+import { matchSupplements, soldAsByReportNo, squeeze, suppWords, type SuppIndexRow } from './suppSearch'
 import type { Food } from '../data/types'
 import { setAllergenIndex } from '../data/allergens'
 import { rowToFood, type PackedFoods, type PackedRow } from '../data/foods/generated'
@@ -25,7 +26,7 @@ const STORE_MYCODE = 'myBarcodes'
 const STORE_SUPP = 'extSupps'
 
 /** 데이터 판을 올릴 때 이 값을 바꾸면 사용자 기기에서 다시 받는다 */
-export const DATA_VERSION = '2026-08-21g'
+export const DATA_VERSION = '2026-11-04a'
 
 export interface InstallProgress {
   phase: '식품 데이터' | '바코드 데이터' | '영양제 데이터' | '마무리'
@@ -164,6 +165,7 @@ export async function install(onProgress?: (p: InstallProgress) => void): Promis
   }
 
   // ── 건강기능식품 ──────────────────────────────────────────
+  suppIndex = null
   onProgress?.({ phase: '영양제 데이터', loaded: 0, total: 1 })
   try {
     const sp = (await (await fetch(`${base}data/supplements-extended.json`)).json()) as {
@@ -194,6 +196,7 @@ export async function install(onProgress?: (p: InstallProgress) => void): Promis
 
 /** 저장한 데이터를 지운다 */
 export async function clearStore(): Promise<void> {
+  suppIndex = null
   const db = await openDB()
   await Promise.all(
     [STORE_FOOD, STORE_BARCODE, STORE_SUPP, STORE_META].map(
@@ -285,6 +288,8 @@ export interface ExtSupplement {
   fn: string
   reportNo: string
   use: string
+  /** 통에 적힌 판매 이름 — 짝이 확인된 것만(suppSearch.ts) */
+  soldAs?: string
 }
 
 /** 시판 건강기능식품을 이름으로 찾는다 */
@@ -322,6 +327,44 @@ export async function searchSupplements(query: string, limit = 40): Promise<ExtS
   })
 }
 
+/** 이름·제조사 낱말표. 4만 5천 건의 본문을 들고 있지 않도록 낱말표만 한 번 만들어 둔다 */
+let suppIndex: SuppIndexRow[] | null = null
+
+async function loadSuppIndex(): Promise<SuppIndexRow[]> {
+  if (suppIndex) return suppIndex
+  const all = await tx<{ i: number; r: [string, string, string, string, string] }[]>(
+    STORE_SUPP, 'readonly', (s) => s.getAll()
+  )
+  suppIndex = all.map(({ i, r }) => {
+    const name = squeeze(r[0])
+    return { i, name, hay: name + squeeze(r[1]), reportNo: r[3] || '' }
+  })
+  return suppIndex
+}
+
+export interface SuppSearchResult {
+  items: ExtSupplement[]
+  /** 어떤 제품 이름에도 없어 빼고 찾은 낱말 */
+  dropped: string[]
+}
+
+/** 낱말 순서와 상관없이, 이름 가운데 있어도, 제조사 이름으로도 찾는다 */
+export async function findSupplements(query: string, limit = 30): Promise<SuppSearchResult> {
+  const words = suppWords(query)
+  if (words.length === 0) return { items: [], dropped: [] }
+  const { ids, dropped, soldAs } = matchSupplements(await loadSuppIndex(), words, limit)
+  const items: ExtSupplement[] = []
+  for (const i of ids) {
+    const rec = await tx<{ i: number; r: [string, string, string, string, string] } | undefined>(
+      STORE_SUPP, 'readonly', (s) => s.get(i)
+    )
+    if (!rec) continue
+    const [name, maker, fn, no, use] = rec.r
+    items.push({ id: `sx-${i}`, name, maker, fn, reportNo: no, use, soldAs: soldAs.get(i) })
+  }
+  return { items, dropped }
+}
+
 /**
  * 바코드로 건강기능식품을 찾는다.
  *
@@ -329,16 +372,19 @@ export async function searchSupplements(query: string, limit = 40): Promise<ExtS
  * 같은 번호로 영양제 쪽을 한 번 더 뒤진다.
  */
 export async function lookupSupplementByBarcode(code: string): Promise<ExtSupplement | null> {
-  const rec = await tx<{ b: string; n: string; p: string } | undefined>(STORE_BARCODE, 'readonly', (s) =>
-    s.get(code.trim())
-  )
+  let rec: { b: string; n: string; p: string } | undefined
+  for (const v of barcodeVariants(code)) {
+    rec = await tx<typeof rec>(STORE_BARCODE, 'readonly', (s) => s.get(v))
+    if (rec) break
+  }
   if (!rec?.n) return null
+  const no = rec.n
   const hit = await tx<{ i: number; r: [string, string, string, string, string] } | undefined>(
-    STORE_SUPP, 'readonly', (s) => s.index('no').get(rec.n)
+    STORE_SUPP, 'readonly', (s) => s.index('no').get(no)
   )
   if (!hit) return null
-  const [name, maker, fn, no, use] = hit.r
-  return { id: `sx-${hit.i}`, name, maker, fn, reportNo: no, use }
+  const [name, maker, fn, reportNo, use] = hit.r
+  return { id: `sx-${hit.i}`, name, maker, fn, reportNo, use, soldAs: soldAsByReportNo(reportNo) }
 }
 
 export interface BarcodeHit {

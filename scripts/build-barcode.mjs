@@ -42,6 +42,16 @@ for (const f of [EXT, CORE]) {
 }
 console.log(`영양 데이터: 품목보고번호 ${reportNos.size.toLocaleString()}개 · 제품명 ${byName.size.toLocaleString()}개`)
 
+/*
+ * 건강기능식품 신고번호. 이 번호가 있으면 이미 제 제품을 가리키므로 이름으로 다시 잇지 않는다.
+ * 예전에는 세노비스 마그네슘(서흥)의 바코드가 이름이 같은 다른 '마그네슘' 식품 번호로 바뀌어,
+ * 찍어도 영양제에서 찾지 못했다(2026-11-04 사용자 보고).
+ */
+const suppNos = new Set(
+  JSON.parse(fs.readFileSync(path.join(ROOT, 'public/data/supplements-extended.json'), 'utf8')).items.map((x) => String(x[3]))
+)
+let suppKept = 0
+
 /** C005 와 I2570 두 표를 함께 읽는다. 서로 겹치지 않는 제품이 있다. */
 const sources = []
 for (const dir of [RAW, RAW2]) {
@@ -115,6 +125,7 @@ for (const f of sources) {
     }
     let n = String(r.n)
     let linked = reportNos.has(n)
+    if (!linked && suppNos.has(n)) { linked = true; suppKept++ }
     if (!linked) {
       // 보고번호가 어긋나면 제품명으로 한 번 더 맞춰 본다
       const alt = byName.get(normName(r.p))
@@ -143,4 +154,5 @@ const size = fs.statSync(dest).size
 console.log(`바코드 ${out.length.toLocaleString()}건`)
 console.log(`  그중 등록이 끝난 것 ${expiredDropped.toLocaleString()}건 — 표시는 하되 '옛 등록'으로 알린다`)
 console.log(`  영양성분까지 이어짐 ${matched.toLocaleString()}건 (그중 제품명으로 이은 것 ${nameMatched.toLocaleString()}건)`)
+console.log(`  건강기능식품 번호를 그대로 둔 것 ${suppKept.toLocaleString()}건`)
 console.log(`barcodes.json ${(size / 1024 / 1024).toFixed(1)} MB`)
