@@ -7,7 +7,8 @@ import type { DayKey } from '../lib/day'
 import {
   addDays, addMonths, calendarGrid, fromKey, label, monthLabel, today, weekOf
 } from '../lib/day'
-import { FOOD_BY_ID } from '../data/foods'
+import { FOOD_BY_ID, MISSING_FOOD_NAME } from '../data/foods'
+import { missingFoodNote } from '../lib/extFoods'
 import { GRADE_STYLE, reportNutrients, summarizeDay, summarizePeriod } from '../engine/dayScore'
 import { sumIntake } from '../engine/nutrition'
 import { DayNoteList, NutrientReportList, Section, ShortfallAdviceList, Stat } from './ui'
@@ -244,7 +245,14 @@ function DayView({
                 <ul className="divide-y divide-stone-100">
                   {b.list.map((i) => {
                     const f = FOOD_BY_ID[i.foodId]
-                    if (!f) return null
+                    if (!f) {
+                      return (
+                        <li key={i.foodId + b.meal} className="px-3.5 py-2 text-sm text-stone-700">
+                          {MISSING_FOOD_NAME}
+                          <p className="mt-0.5 text-[11px] leading-relaxed text-stone-500">{missingFoodNote(i.foodId)}</p>
+                        </li>
+                      )
+                    }
                     return (
                       <li key={i.foodId + b.meal} className="px-3.5 py-2 text-sm text-stone-700">
                         {f.name}

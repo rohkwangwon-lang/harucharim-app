@@ -3,7 +3,8 @@ import { portionLabel } from '../lib/portion'
 import { IconEvening, IconMorning, IconNoon, IconSnack, IconSuggest } from './icons'
 import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
 import { CUISINE_CHOICES, MEAL_SLOTS } from '../data/types'
-import { FOOD_BY_ID } from '../data/foods'
+import { FOOD_BY_ID, MISSING_FOOD_NAME } from '../data/foods'
+import { missingFoodNote } from '../lib/extFoods'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
 import { CANCER_BY_ID } from '../data/cancers'
 import { buildDayMenu, currentSeason, dayNotes, fiberGoal, ideasFromIngredients, intakeTrend, microUnknownNames, naUnknownNames, planNotes, recentFoods } from '../engine/menu'
@@ -453,7 +454,22 @@ export function TodayMeals({
                   <ul className="divide-y divide-stone-100">
                     {items.map((item) => {
                       const food = FOOD_BY_ID[item.foodId]
-                      if (!food) return null
+                      /* 화면에 안 보이는 기록은 없어야 한다 — 찾지 못했으면 찾지 못했다고 적고 뺄 수 있게 한다 */
+                      if (!food) {
+                        return (
+                          <li key={item.foodId + slot} className="flex items-center gap-2 px-3.5 py-2.5">
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium text-stone-900">{MISSING_FOOD_NAME}</p>
+                              <p className="mt-0.5 text-[11px] leading-relaxed text-stone-500">{missingFoodNote(item.foodId)}</p>
+                            </div>
+                            <button
+                              className="h-7 w-7 shrink-0 rounded-lg text-stone-300 hover:bg-danger-50 hover:text-danger-600"
+                              aria-label={`${MISSING_FOOD_NAME} 빼기`}
+                              onClick={() => onRemove(item.foodId, slot)}
+                            >✕</button>
+                          </li>
+                        )
+                      }
                       const v = evalResult.verdicts.find((x) => x.food.id === food.id)
                       const per = foodContribution(food, item.servings)
                       return (

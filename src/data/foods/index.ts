@@ -95,7 +95,13 @@ export const CURATED_FOODS: Food[] = [
  */
 export const FOODS: Food[] = [...CURATED_FOODS, ...GENERATED_CORE]
 
-/** id → Food 조회용 인덱스 */
+/** 자료에서 찾지 못한 음식을 화면에서 부르는 말 */
+export const MISSING_FOOD_NAME = '찾지 못한 식품'
+
+/**
+ * id → Food 조회용 인덱스.
+ * 내려받은 시판 식품(kx-)은 담을 때와 앱을 열 때 lib/extFoods.ts 가 여기에 더한다.
+ */
 export const FOOD_BY_ID: Record<string, Food> = Object.fromEntries(
   FOODS.map((f) => [f.id, f])
 )

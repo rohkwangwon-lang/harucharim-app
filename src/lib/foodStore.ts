@@ -27,7 +27,7 @@ const STORE_MYCODE = 'myBarcodes'
 const STORE_SUPP = 'extSupps'
 
 /** 데이터 판을 올릴 때 이 값을 바꾸면 사용자 기기에서 다시 받는다 */
-export const DATA_VERSION = '2026-11-04c'
+export const DATA_VERSION = '2026-11-04d'
 
 export interface InstallProgress {
   phase: '식품 데이터' | '바코드 데이터' | '영양제 데이터' | '마무리'
@@ -258,6 +258,26 @@ type Row = PackedFoods['items'][number]
 /* 한 줄을 음식으로 푸는 일은 data/foods/generated.ts 의 rowToFood 한 곳에서 한다 */
 function toFood(i: number, row: Row, sc: { cols: string[]; groups: string[]; tags: string[] }): Food {
   return rowToFood(row as PackedRow, sc, `kx-${i}`)
+}
+
+/**
+ * 기록에 적힌 kx-번호로 음식을 읽는다. 받아 둔 자료가 없거나 읽지 못하면 빈 표를 돌려준다.
+ * 판 번호가 올라가 '다시 받으세요' 상태인 자료도 읽는다 — 새 판을 받기 전까지는 그 자료가 담을 때의 자료다.
+ */
+export async function readExtFoods(ids: string[]): Promise<Map<string, Food>> {
+  const out = new Map<string, Food>()
+  try {
+    const sc = await schema()
+    if (!sc) return out
+    for (const id of ids) {
+      const i = Number(id.slice(3))
+      const rec = await tx<{ i: number; r: Row } | undefined>(STORE_FOOD, 'readonly', (s) => s.get(i))
+      if (rec) out.set(id, toFood(rec.i, rec.r, sc))
+    }
+  } catch {
+    /* 저장소를 못 열어도 앱은 적어 둔 사본으로 돈다 */
+  }
+  return out
 }
 
 /** 이름 앞글자로 확장 데이터를 찾는다 */

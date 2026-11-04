@@ -12,6 +12,7 @@ import { normalizeMedications } from '../data/interactions'
 import { BODY_LIMITS } from './bodyInput'
 import { SUBTYPE_OPTIONS } from '../data/types'
 import { today as todayKey, type DayKey } from './day'
+import { loadSavedExtFoods, pruneExtFoods, refreshExtFoods } from './extFoods'
 
 const STORAGE_KEY = 'harucharim.state.v1'
 
@@ -308,7 +309,10 @@ function load(): AppState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return DEFAULT_STATE
-    return restoreState(JSON.parse(raw))
+    loadSavedExtFoods()
+    const restored = restoreState(JSON.parse(raw))
+    pruneExtFoods(restored.diary)
+    return restored
   } catch {
     return DEFAULT_STATE
   }
@@ -361,6 +365,23 @@ export function useAppState() {
       // 저장 실패는 기능을 막지 않는다 (사파리 프라이빗 모드 등)
     }
   }, [state])
+
+  /*
+   * 기록에 있는 시판 식품을 저장소의 최신 값과 맞춘다(lib/extFoods.ts).
+   * 합계는 그날 목록이 바뀔 때만 다시 세므로, 값이 달라진 음식이 든 날의 목록을 새로 만들어 알린다.
+   */
+  useEffect(() => {
+    void refreshExtFoods(state.diary).then((changed) => {
+      if (changed.length === 0) return
+      setState((s) => ({
+        ...s,
+        diary: Object.fromEntries(Object.entries(s.diary).map(([d, list]) => [
+          d, list.some((i) => changed.includes(i.foodId)) ? [...list] : list
+        ]))
+      }))
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 앱을 열 때 한 번만
+  }, [])
 
   /**
    * 오늘 보여 드린 추천을 적어 둔다.

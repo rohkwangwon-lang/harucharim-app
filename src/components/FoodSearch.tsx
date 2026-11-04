@@ -9,6 +9,7 @@ import { FoodDetail } from './FoodDetail'
 import { BetaChip, HowTo, LevelDot } from './ui'
 import { BarcodeScanner } from './BarcodeScanner'
 import { getStatus, linkBarcode, lookupBarcode, searchExtended } from '../lib/foodStore'
+import { rememberExtFood } from '../lib/extFoods'
 import { productSearchTerm, scanOutcome } from '../lib/barcodeOutcome'
 import { InquiryDialog } from './InquiryDialog'
 
@@ -510,7 +511,7 @@ export function FoodSearch({
                       {food.auto && (
                         <span
                           className="chip shrink-0 bg-stone-100 text-stone-500"
-                          title="식약처 공공데이터에서 자동으로 들여온 항목입니다. 성분값은 정확하지만, 임상 판정은 성분과 이름으로 알 수 있는 것까지만 붙어 있습니다."
+                          title="식약처 공공데이터에서 자동으로 들여온 항목입니다. 성분값에는 원자료의 오류가 섞여 있을 수 있고(믿기 어려운 나트륨은 '정보 없음'으로 둡니다), 임상 판정은 성분과 이름으로 알 수 있는 것까지만 붙어 있습니다."
                         >
                           식약처
                         </span>
@@ -646,6 +647,8 @@ export function FoodSearch({
           onClose={() => setDetail(null)}
           defaultMeal={meal}
           onAdd={(s, m) => {
+            /* 시판 식품은 FOOD_BY_ID 에 없다. 올려 두지 않으면 담아도 목록과 합계에 나오지 않는다 */
+            rememberExtFood(detail)
             onAdd(detail.id, s, m)
             setDetail(null)
           }}

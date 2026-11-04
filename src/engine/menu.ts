@@ -1,6 +1,6 @@
 import type { Cuisine, EvidenceLevel, Food, FoodGroup, MealSlot, NutrientKey, PatientContext, Season, SelectedItem, Supplement } from '../data/types'
 import { MEAL_SLOTS, SNACK_SLOTS, isSnack } from '../data/types'
-import { CURATED_FOODS, FOOD_BY_ID, isAnchorDish, isIngredientOnly, mealIsComplete, mealRole, swallowSafe, type MealRole } from '../data/foods'
+import { CURATED_FOODS, FOOD_BY_ID, MISSING_FOOD_NAME, isAnchorDish, isIngredientOnly, mealIsComplete, mealRole, swallowSafe, type MealRole } from '../data/foods'
 import { INGREDIENT_DISHES } from '../data/foods/ingredientDishes'
 import { ingredientsOf } from '../data/foods/recipes'
 import { CANCER_BY_ID } from '../data/cancers'
@@ -3901,14 +3901,15 @@ export function dayNotes(
   }
 
   /*
-   * 나트륨을 신고하지 않은 가공식품이 섞여 있으면 합계가 실제보다 적게 나온다.
+   * 나트륨 값이 비어 있는 가공식품이 섞여 있으면 합계가 실제보다 적게 나온다.
    * "상한 안에 들어옵니다" 라고 안심시켜 놓고 실제로는 넘겼을 수 있으므로 밝힌다.
+   * 원자료에 없는 것만이 아니다. 액젓 0 mg 처럼 믿기 어려운 값도 빌드에서 비운다(build-food-db.mjs).
    */
   if (naUnknown.length > 0) {
     const head = naUnknown.slice(0, 3).join('·')
     const subject = naUnknown.length > 3 ? `${head} 외 ${naUnknown.length - 3}가지` : head
     notes.push({ tone: 'info', topic: '빠진 값',
-      text: `${subject}${topicParticle(subject)} 원본 자료에 나트륨 값이 없어 위 합계에 잡히지 않았습니다. ` +
+      text: `${subject}${topicParticle(subject)} 나트륨 값이 없거나 믿기 어려워 위 합계에 잡히지 않았습니다. ` +
         '실제 섭취량은 이보다 많습니다.' })
   }
 
@@ -3932,7 +3933,9 @@ export function naUnknownNames(items: SelectedItem[]): string[] {
   const out: string[] = []
   for (const it of items) {
     const f = FOOD_BY_ID[it.foodId]
-    if (f && f.per100.na === undefined && !out.includes(f.name)) out.push(f.name)
+    /* 찾지 못한 음식도 합계에서 빠져 있기는 마찬가지다 — "상한 안" 이라는 말이 사실이 아닐 수 있다 */
+    const name = !f ? MISSING_FOOD_NAME : f.per100.na === undefined ? f.name : null
+    if (name && !out.includes(name)) out.push(name)
   }
   return out
 }
@@ -3952,7 +3955,8 @@ export function microUnknownNames(
     const names: string[] = []
     for (const it of items) {
       const f = FOOD_BY_ID[it.foodId]
-      if (f && f.per100[m.key] === undefined && !names.includes(f.name)) names.push(f.name)
+      const name = !f ? MISSING_FOOD_NAME : f.per100[m.key] === undefined ? f.name : null
+      if (name && !names.includes(name)) names.push(name)
     }
     if (names.length > 0) out[m.key] = names
   }

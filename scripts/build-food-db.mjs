@@ -18,11 +18,72 @@ import { AMT_MAP, EXTRA_MAP, GROUP_MAP } from './nutrient-map.mjs'
 const ROOT = path.resolve(import.meta.dirname, '..')
 const RAW = path.join(ROOT, 'data/raw')
 
+/*
+ * 원자료의 숫자 칸은 문자열이고 천 단위에 쉼표가 든다('1,315.000').
+ * 쉼표를 떼지 않으면 숫자가 아닌 값이 되어 '값 없음' 으로 빠진다. 그래서 2026-11-04 까지 나트륨 1,000 mg/100 g
+ * 이상이 전부 사라져 소금·간장·액젓의 나트륨이 '정보 없음' 이었고 고나트륨 경고도 함께 빠졌다(확장 20,030행·핵심 372행).
+ * 가장 짠 식품일수록 값이 없어지는 오류였다.
+ */
 const num = (v) => {
   if (v === null || v === undefined || v === '') return undefined
-  const n = Number(v)
+  const n = Number(String(v).replace(/,/g, ''))
   return Number.isFinite(n) ? n : undefined
 }
+
+/*
+ * 믿기 어려운 나트륨 값 — 값을 추정해 고치지 않고 '모름' 으로 둔다(2026-11-04).
+ *
+ * '주식회사 기림' 멸치액젓은 원자료부터 0.00 이고, 같은 분류의 중앙값은 수천 mg 이다. 0 으로 두면 하루 합계에
+ * 아무 말 없이 0 으로 더해지지만, 비워 두면 '합계에 잡히지 않았습니다' 라고 밝힌다.
+ * 원 제품의 표시를 보지 못했으니 참값은 모른다. g 으로 잘못 적었으리라는 짐작(새우젓 8)으로 고쳐 쓰지 않는다.
+ *
+ * 문턱은 임상 기준이 아니라 **이 자료에서 뽑은 값**이다 — 쉼표를 뗀 뒤 그 분류 중앙값의 10 %.
+ * 분류는 이름이 아니라 원자료의 FOOD_REF_NM 으로 본다. 이름으로 보면 '간장제외' 밀키트·깨소금·소금빵이 걸린다.
+ *
+ *   SALT_FLOOR_SURE — 소금 없이 만들 수 없는 것. 비우고 고나트륨도 붙인다
+ *   SALT_FLOOR_SOFT — 덜 짜게 담근 것이 실제로 있을 수 있는 것. 비우기만 한다(틀려도 '정보 없음' 으로 보일 뿐이다)
+ *
+ * 모든 짠 분류로 넓히면 쌀밥·곤약밥·발사믹까지 걸려 약 70 % 가 헛경보였다. 그래서 이 표 밖으로 넓히지 않는다.
+ */
+const SALT_FLOOR_SURE = {
+  '장류/간장': 601, '장류/된장': 410, '장류/고추장': 240, '장류/혼합장': 264, '장류/춘장': 389,
+  '수산가공식품류/젓갈/액젓': 164, '조미식품/소금': 1650
+}
+const SALT_FLOOR_SOFT = {
+  '절임류 또는 조림류/배추김치': 59, '절임류 또는 조림류/기타김치': 60, '절임류 또는 조림류/물김치': 47,
+  '절임류 또는 조림류/김칫속': 94, '절임류 또는 조림류/단무지/피클': 56, '절임류 또는 조림류/장아찌': 82
+}
+/* 분류는 그렇게 적혀 있어도 그 음식이 아닌 것, 설탕에 절여 실제로 낮을 법한 것 — 값을 그대로 둔다 */
+const NOT_SALTED_FOOD = /매실|낫또|숙성회|고명|된장국|육수|올리브절임|메주가루|키트|전복내장/
+/* 다른 분류에 든 액젓 — 행님아 까나리액젓은 '기타 소스류' 에 있고 336 mg 이다. 액젓 중앙값은 8,000 mg 이다 */
+const FISH_SAUCE_NAME = /(액젓|어간장)$/
+
+/** @returns {'ok'|'unknown'|'unknown-salty'} */
+function judgeSodium(na, cat1, ref, name) {
+  if (na === undefined) return 'ok'
+  if (FISH_SAUCE_NAME.test(name) && na < 500) return 'unknown-salty'
+  const key = `${cat1}/${ref}`
+  if (na < (SALT_FLOOR_SURE[key] ?? 0) && !NOT_SALTED_FOOD.test(name)) return 'unknown-salty'
+  if (na < (SALT_FLOOR_SOFT[key] ?? 0) && !NOT_SALTED_FOOD.test(name)) return 'unknown'
+  return 'ok'
+}
+
+/*
+ * 쉼표를 뗀 뒤 나트륨 외 칸에서 드러난 믿을 수 없는 값 — 칸만 비운다(2026-11-04).
+ *
+ * 쉼표로 되살아난 약 1,400 칸을 한 줄씩 보니 대부분 진짜 값이었다. 말린 고춧잎 비타민 K 8,702 µg,
+ * 말린 다시마 칼륨 7,500 mg, 달걀노른자 가루 콜레스테롤 2,295 mg, 영양제형 제품의 비타민 D·B12 같은 것이다.
+ * 그래서 칼륨·칼슘·인·콜레스테롤·비타민 K 는 자르지 않는다. 제한식을 하는 분께 빠뜨리는 쪽이 더 위험하다.
+ * 아래 15 칸만 있을 수 없거나 단위 착각이 분명하다.
+ *   vitC, omega3 — 100 g 안에 100 g 을 넘는다(비타민C3000 커큐민 117,453 mg, 정어리통조림 오메가3 1,150 g,
+ *                  락토소이 두유 오메가3 225~273 g — 이 3 행은 쉼표와 상관없이 전부터 들어 있던 값이다)
+ *   b1 — 아기 쌀과자에 100 g 당 15~18 g(아이배냇 4 행)
+ *   b2, b3 — 쉐이크의 B2 2,205 mg, 효소 제품의 니아신 19,822 mg
+ *   vitA — 100 g 당 레티놀 100 mg 을 넘는 4 행. 다이어트 식품 346,231 µg 처럼 원료 수준이다
+ * 참값을 모르므로 고쳐 쓰지 않고 '정보 없음' 으로 둔다.
+ */
+const MICRO_LIMIT = { vitC: 100000, omega3: 100, b1: 5000, b2: 1000, b3: 10000, vitA: 100000 }
+let microBlanked = 0
 
 /**
  * "900.000g" → 900
@@ -33,6 +94,11 @@ const num = (v) => {
  */
 function parseServing(z) {
   if (!z || z === 'null') return undefined
+  /*
+   * '5,000.000g' 을 쉼표 앞에서 잘라 5 g 으로 읽고 있었다(9,948행). 5 kg 포장이 '1회 5 g' 이 되어 나트륨이 적게 잡혔다.
+   * 이 칸은 명세상 1회 제공량이 아니라 '식품중량' — 포장 무게다. 1 kg 을 넘는 포장은 한 번 먹는 양일 수 없다.
+   */
+  if (String(z).includes(',')) return undefined
   const m = String(z).match(/([\d.]+)\s*(g|ml|mL|㎖|㎎)?/)
   if (!m) return undefined
   const n = Number(m[1])
@@ -92,6 +158,7 @@ const seen = new Set()
 let skippedNoKcal = 0
 let skippedDup = 0
 let skippedBadValue = 0
+const naUnreliable = { over: 0, sure: 0, soft: 0, capped: 0 }
 
 for (const f of files) {
   const items = JSON.parse(fs.readFileSync(path.join(RAW, f), 'utf8'))
@@ -111,6 +178,18 @@ for (const f of files) {
     }
 
     /*
+     * 나트륨이 순수 소금(약 39,340 mg/100 g)을 넘는 행 — 쉼표를 고치자 둘이 드러났다(사천짜차이 47,300 · 소금꽃 40,626).
+     * 행을 빼면 안 된다. 앱은 '몇 번째 행' 으로 음식을 찾으므로(kx-·kf-) 빼면 뒤 번호가 모두 밀려,
+     * 저장된 기록과 이어 둔 바코드가 엉뚱한 음식을 가리킨다. 나트륨만 비우고 짠 식품으로 표시한다.
+     */
+    const naOver = (n.na ?? 0) > 40000
+    if (naOver) delete n.na
+
+    for (const [key, limit] of Object.entries(MICRO_LIMIT)) {
+      if ((n[key] ?? 0) > limit) { delete n[key]; microBlanked++ }
+    }
+
+    /*
      * 물리적으로 불가능한 값은 원본 오류다. 100 g 안에 100 g 넘는 성분이 있을 수 없고,
      * 가장 열량이 높은 순수 지방도 900 kcal 을 넘지 못한다.
      * 이런 자료가 섞이면 "단백질 374 g 보충" 같은 엉뚱한 계산이 나온다.
@@ -118,7 +197,7 @@ for (const f of files) {
     const has = (v) => typeof v === 'number'
     const impossible =
       (n.protein ?? 0) > 100 || (n.fat ?? 0) > 100 || (n.carb ?? 0) > 100 ||
-      (n.kcal ?? 0) > 900 || (n.na ?? 0) > 40000 ||
+      (n.kcal ?? 0) > 900 ||
       (n.protein ?? 0) < 0 || (n.fat ?? 0) < 0 || (n.carb ?? 0) < 0 ||
       /*
        * 성분끼리 앞뒤가 안 맞는 자료도 버린다.
@@ -177,8 +256,24 @@ for (const f of files) {
     if (seen.has(dupKey)) { skippedDup++; continue }
     seen.add(dupKey)
 
-    const servingG = parseServing(it.Z10500) ?? 100
+    /*
+     * 장류·조미료·젓갈은 포장 무게를 1회량으로 삼지 않는다. 간장 900 mL 가 '1회' 면 나트륨이 수만 mg 으로 찍힌다.
+     * 100 g 으로 묶을 뿐 실제 한 번 드시는 양은 아니다 — 식약처 1회 섭취참고량(간장 5 mL 등)을 쓰면
+     * 간장·고추장이 1회 400 mg 아래로 내려가 고나트륨 경고가 꺼지므로, 그 판단은 따로 정한다.
+     */
+    let servingG = parseServing(it.Z10500) ?? 100
+    const isSeasoning = ['장류', '조미식품', '조미료류', '젓갈류'].includes(cat1) || (it.FOOD_REF_NM || '') === '젓갈/액젓' ||
+      /(액젓|어간장|새우젓)$/.test(name) // 분류가 '절임식품' 으로 적힌 새우젓 500 g 이 1회 40,000 mg 으로 찍혔다
+    if (isSeasoning && servingG > 100) { servingG = 100; naUnreliable.capped++ }
+
+    const naVerdict = naOver ? 'unknown-salty' : judgeSodium(n.na, cat1, it.FOOD_REF_NM || '', name)
+    if (naOver) naUnreliable.over++
+    else if (naVerdict === 'unknown-salty') naUnreliable.sure++
+    else if (naVerdict === 'unknown') naUnreliable.soft++
+    if (naVerdict !== 'ok') delete n.na
+
     const tags = [...new Set([...nutrientTags(n, extra), ...categoryTags(cat1, name)])]
+    if (naVerdict === 'unknown-salty') tags.push('고나트륨')
     if (it.DB_GRP_NM === '가공식품') tags.push('초가공식품')
 
     const rec = {
@@ -203,6 +298,8 @@ console.log('')
 console.log(`핵심(음식·품목대표) : ${core.length.toLocaleString()}건`)
 console.log(`확장(상용 가공식품) : ${extended.length.toLocaleString()}건`)
 console.log(`제외 — 에너지 없음 ${skippedNoKcal.toLocaleString()} · 중복 ${skippedDup.toLocaleString()} · 불가능한 값 ${skippedBadValue.toLocaleString()}`)
+console.log(`믿을 수 없어 비운 나트륨 외 칸 ${microBlanked}`)
+console.log(`나트륨 비움 — 소금보다 짬 ${naUnreliable.over} · 짠 식품인데 믿기 어려움 ${naUnreliable.sure} · 김치·절임 ${naUnreliable.soft} / 조미료 1회량 묶음 ${naUnreliable.capped.toLocaleString()}`)
 console.log('')
 console.log('식품 대분류 상위 25 (매핑 확인용):')
 for (const [k, v] of Object.entries(catCount).sort((a, b) => b[1] - a[1]).slice(0, 25)) {
