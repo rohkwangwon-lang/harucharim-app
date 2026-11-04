@@ -39,7 +39,7 @@ export function FoodDetail({
             <div>
               <h3 className="text-lg font-bold text-stone-900">{food.name}</h3>
               <p className="mt-0.5 text-xs text-stone-500">
-                {food.group} · 1회 제공량 {food.serving.label} ({food.serving.g} g)
+                {food.group} · {food.auto ? food.serving.label : `1회 제공량 ${food.serving.label} (${food.serving.g} g)`}
               </p>
               <div className="mt-1.5 flex flex-wrap gap-1">
                 {food.cuisine && food.cuisine !== '무관' && (

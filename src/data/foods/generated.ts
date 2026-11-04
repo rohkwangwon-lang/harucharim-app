@@ -42,15 +42,25 @@ export function rowToFood(
   if (per100.kcal === undefined) per100.kcal = 0
 
   const group = sc.groups[gi] as FoodGroup
+  /*
+   * 간장 5 mL 는 300 mg 이라 1회 400 mg 기준에 못 미친다. 빌드가 '농도로 지킬 식품' 이라 표시해 둔 것은
+   * 1회량과 상관없이 '고나트륨' 을 둔다. 표시 자체는 규칙에 없는 낱말이므로 여기서 없앤다.
+   */
+  const rawTags = tagIdx.map((t) => sc.tags[t] as FoodTag)
+  const dense = rawTags.includes('나트륨농도높음' as FoodTag)
+  const baseTags = dense ? rawTags.filter((t) => t !== ('나트륨농도높음' as FoodTag)) : rawTags
+  const judged = sodiumTag(withAutoTags(name, baseTags, group), per100.na, servingG)
+  const salted = dense && !judged.includes('고나트륨' as FoodTag) ? [...judged, '고나트륨' as FoodTag] : judged
   const food: Food = {
     id,
     /* 보이는 이름은 다듬고, 태그는 원본 이름으로 판정한다 */
     name: displayName(name),
     group,
     form: 'processed',
-    serving: { g: servingG, label: `1회 제공량 ${servingG} g` },
+    /* 1회 섭취참고량인 것과 포장 무게인 것이 섞여 있어 '제공량' 이라 하지 않는다 */
+    serving: { g: servingG, label: `1회 기준 ${servingG} g` },
     per100,
-    tags: drinkTag(sodiumTag(withAutoTags(name, tagIdx.map((t) => sc.tags[t] as FoodTag), group), per100.na, servingG), name, group),
+    tags: drinkTag(salted, name, group),
     src: 'kfda',
     auto: true
   }

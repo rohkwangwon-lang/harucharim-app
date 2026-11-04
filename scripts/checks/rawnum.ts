@@ -102,7 +102,9 @@ if (fs.existsSync(RAW)) {
       const z = it.Z10500
       if (typeof z === 'string' && z.includes(',')) {
         servingSeen++
-        if (r[2] !== 100) { servingWrong++; if (wrong.length < 6) wrong.push(`${r[0]} 제공량 원자료 ${z} / 앱 ${r[2]} g`) }
+        /* 쉼표 앞만 읽은 값이 아니어야 한다 — 1 kg 이 넘는 포장은 1회 섭취참고량을 쓰고, 그것이 없으면 100 g 이다 */
+        const refs = (String(it.NUTRI_AMOUNT_SERVING ?? '').match(/[\d.]+/g) ?? []).map(Number)
+        if (r[2] !== 100 && !refs.includes(r[2])) { servingWrong++; if (wrong.length < 6) wrong.push(`${r[0]} 제공량 원자료 ${z} / 앱 ${r[2]} g`) }
       }
     }
   }

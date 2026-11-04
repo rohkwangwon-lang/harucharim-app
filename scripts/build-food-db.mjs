@@ -107,6 +107,51 @@ function parseServing(z) {
   return Math.round(n)
 }
 
+/**
+ * 원자료의 1회 섭취참고량(NUTRI_AMOUNT_SERVING)을 g 으로 읽는다. 정할 수 없으면 undefined.
+ *
+ * 「식품등의 표시기준」 [별표 3] 의 값이 식품유형별로 들어 있다(간장 5 mL, 된장·고추장 10 g, 김치 40 g, 물김치 80 g).
+ * 제품별 값이 아니고, 만 3세 이상이 통상 먹는 양과 시장조사로 정한 참고값이다.
+ * 자료가 100 mL 당인 제품은 mL 를 g 처럼 곱해도 값이 맞는다. '1식'(도시락)은 양을 알 수 없어 쓰지 않는다.
+ * 칸에 값이 여럿이면 이름으로 고른다 — 어림이다. 소스 대부분은 드레싱 15 g 쪽으로 간다.
+ */
+function referenceServing(raw, name) {
+  const v = String(raw ?? '').trim()
+  if (!v) return undefined
+  const one = /^([\d.]+)\s*(?:g|ml|mL)(?:\((?:g|ml)\))?$/.exec(v)
+  if (one) return Number(one[1]) > 0 ? Number(one[1]) : undefined
+  if (v.startsWith('드레싱')) return /덮밥|카레|짜장|레토르트/.test(name) ? 165 : 15
+  if (v.startsWith('생·숙면')) {
+    if (/컵|용기|사발|왕뚜껑/.test(name)) return 80
+    if (/라면|비빔면|짜장|짬뽕/.test(name)) return 120
+    if (/당면/.test(name)) return 30
+    if (/생면|숙면|냉장/.test(name)) return 200
+    return 100
+  }
+  if (v.startsWith('액상')) return /떠먹는|호상/.test(name) ? 100 : 150
+  if (v.startsWith('레토르트')) return /레토르트|3분|즉석/.test(name) ? 200 : 25
+  return undefined
+}
+
+/*
+ * 참고량으로 줄여도 '고나트륨' 을 지킬 식품 — 100 g 당 이 값 이상이면 1회량과 상관없이 붙인다(2026-11-04 전문의 결정).
+ *
+ * 간장 5 mL 는 300 mg 이라 1회 400 mg 기준에 못 미친다. 그대로 두면 복수·점막염 환자에게 간장·고추장이 아무 말 없이 지나간다.
+ * 조미료의 1,333 은 '30 g 에 400 mg' 에서 잡은 어림이다. 임상 기준이 아니다.
+ * 햄·어묵은 참고량 30 g 이 손으로 등록한 양(40·60 g)보다 작아 대부분 꺼지므로 400 으로 지킨다.
+ * 소시지·베이컨·어육가공품은 같은 이유로 함께 넣었다.
+ * 표시는 빌드에서만 쓰고 rowToFood 가 '고나트륨' 으로 바꾸면서 없앤다.
+ */
+const DENSE_SODIUM = '나트륨농도높음'
+const SALT_BY_DENSITY = {
+  '장류/간장': 1333, '장류/된장': 1333, '장류/고추장': 1333, '장류/혼합장': 1333, '장류/춘장': 1333,
+  '수산가공식품류/젓갈/액젓': 1333, '조미식품/소금': 1333, '조미식품/복합조미식품': 1333, '조미식품/분말스프': 1333,
+  '조미식품/기타 소스류': 1333, '조미식품/향신료': 1333,
+  '식육가공품 및 포장육/햄': 400, '식육가공품 및 포장육/소시지': 400, '식육가공품 및 포장육/베이컨': 400,
+  '수산가공식품류/어묵': 400, '수산가공식품류/어육가공품': 400
+}
+const KIMCHI_REF = new Set(['절임류 또는 조림류/배추김치', '절임류 또는 조림류/기타김치', '절임류 또는 조림류/물김치'])
+
 /** 성분값으로만 판정하는 태그 — 이름 추측이 없어 안전하다 */
 function nutrientTags(n, extra) {
   const t = []
@@ -158,7 +203,7 @@ const seen = new Set()
 let skippedNoKcal = 0
 let skippedDup = 0
 let skippedBadValue = 0
-const naUnreliable = { over: 0, sure: 0, soft: 0, capped: 0 }
+const naUnreliable = { over: 0, sure: 0, soft: 0, capped: 0, reference: 0 }
 
 for (const f of files) {
   const items = JSON.parse(fs.readFileSync(path.join(RAW, f), 'utf8'))
@@ -258,13 +303,24 @@ for (const f of files) {
 
     /*
      * 장류·조미료·젓갈은 포장 무게를 1회량으로 삼지 않는다. 간장 900 mL 가 '1회' 면 나트륨이 수만 mg 으로 찍힌다.
-     * 100 g 으로 묶을 뿐 실제 한 번 드시는 양은 아니다 — 식약처 1회 섭취참고량(간장 5 mL 등)을 쓰면
-     * 간장·고추장이 1회 400 mg 아래로 내려가 고나트륨 경고가 꺼지므로, 그 판단은 따로 정한다.
+     * 참고량이 비어 있는 젓갈·소금·복합조미식품은 100 g 으로 묶을 뿐이고, 실제 한 번 드시는 양은 아니다.
      */
     let servingG = parseServing(it.Z10500) ?? 100
-    const isSeasoning = ['장류', '조미식품', '조미료류', '젓갈류'].includes(cat1) || (it.FOOD_REF_NM || '') === '젓갈/액젓' ||
+    const refName = it.FOOD_REF_NM || ''
+    const isSeasoning = ['장류', '조미식품', '조미료류', '젓갈류'].includes(cat1) || refName === '젓갈/액젓' ||
       /(액젓|어간장|새우젓)$/.test(name) // 분류가 '절임식품' 으로 적힌 새우젓 500 g 이 1회 40,000 mg 으로 찍혔다
     if (isSeasoning && servingG > 100) { servingG = 100; naUnreliable.capped++ }
+
+    /*
+     * 1회 섭취참고량을 쓴다(2026-11-04 전문의 결정). 포장 무게 때문에 치즈 200 g·햄 1 kg 이 '1회' 였다.
+     * 포장이 참고량보다 작으면 포장 무게를 지킨다 — 콤부차 분말 50 g 에 음료 참고량 200 mL 를 곱하면 값이 부푼다.
+     * 100 g 은 빈 값을 메운 것과 자리 채움이 많아 포장 무게로 치지 않는다.
+     */
+    const refServing = it.DB_GRP_NM === '가공식품' ? referenceServing(it.NUTRI_AMOUNT_SERVING, name) : undefined
+    if (refServing !== undefined) {
+      servingG = servingG === 100 ? refServing : Math.min(refServing, servingG)
+      naUnreliable.reference++
+    }
 
     const naVerdict = naOver ? 'unknown-salty' : judgeSodium(n.na, cat1, it.FOOD_REF_NM || '', name)
     if (naOver) naUnreliable.over++
@@ -275,6 +331,9 @@ for (const f of files) {
     const tags = [...new Set([...nutrientTags(n, extra), ...categoryTags(cat1, name)])]
     if (naVerdict === 'unknown-salty') tags.push('고나트륨')
     if (it.DB_GRP_NM === '가공식품') tags.push('초가공식품')
+    if ((n.na ?? 0) >= (SALT_BY_DENSITY[`${cat1}/${refName}`] ?? Infinity)) tags.push(DENSE_SODIUM)
+    /* 손으로 등록한 배추김치·깍두기에는 '염장' 이 있다. 시판 김치도 같아야 복수·위암의 경고가 어긋나지 않는다 */
+    if (KIMCHI_REF.has(`${cat1}/${refName}`) && !/없는|저염/.test(name)) tags.push('염장')
 
     const rec = {
       id: `kfda-${it.FOOD_CD}`,
@@ -299,7 +358,7 @@ console.log(`핵심(음식·품목대표) : ${core.length.toLocaleString()}건`)
 console.log(`확장(상용 가공식품) : ${extended.length.toLocaleString()}건`)
 console.log(`제외 — 에너지 없음 ${skippedNoKcal.toLocaleString()} · 중복 ${skippedDup.toLocaleString()} · 불가능한 값 ${skippedBadValue.toLocaleString()}`)
 console.log(`믿을 수 없어 비운 나트륨 외 칸 ${microBlanked}`)
-console.log(`나트륨 비움 — 소금보다 짬 ${naUnreliable.over} · 짠 식품인데 믿기 어려움 ${naUnreliable.sure} · 김치·절임 ${naUnreliable.soft} / 조미료 1회량 묶음 ${naUnreliable.capped.toLocaleString()}`)
+console.log(`나트륨 비움 — 소금보다 짬 ${naUnreliable.over} · 짠 식품인데 믿기 어려움 ${naUnreliable.sure} · 김치·절임 ${naUnreliable.soft} / 조미료 1회량 묶음 ${naUnreliable.capped.toLocaleString()} · 1회 섭취참고량 적용 ${naUnreliable.reference.toLocaleString()}`)
 console.log('')
 console.log('식품 대분류 상위 25 (매핑 확인용):')
 for (const [k, v] of Object.entries(catCount).sort((a, b) => b[1] - a[1]).slice(0, 25)) {

@@ -102,6 +102,38 @@ no(dodo !== undefined && dodo.serving.g > 100, `해심선 까나리액젓: 800 m
 const hugeSeasoning = EXT.filter((f) => /(양조간장|진간장|액젓|새우젓)$/.test(f.name) && f.serving.g > 100)
 no(hugeSeasoning.length > 0, `조미료 1회량이 100 g 을 넘는다 ${hugeSeasoning.length}행 — 예: ${hugeSeasoning[0]?.name}`)
 
+/* ── 5-2. 1회 섭취참고량(2026-11-04 전문의 결정) ─────────────
+ * 값은 「식품등의 표시기준」 [별표 3] 원문과 대조했다.
+ * 1회량이 줄어도 짠 조미료·햄·어묵의 고나트륨은 지키고, 김치는 '염장' 으로 복수·위암 경고를 지킨다.
+ */
+const SERVING: [string, string, number, boolean, string][] = [
+  // 이름, 회사, 1회량, 고나트륨, 왜
+  ['몽고진간장 양조', '몽고장유', 5, true, '간장 5 mL — 300 mg 이지만 농도로 지킨다'],
+  ['태양초고추장', '샘표', 10, true, '고추장 10 g — 260 mg 이지만 농도로 지킨다'],
+  ['부산어묵', '남부식품', 30, true, '어묵 30 g — 208 mg 이지만 지킨다(전문의 결정)'],
+  ['체다슬라이스치즈', '조흥', 20, false, '치즈 20 g — 136 mg. 손으로 등록한 슬라이스치즈(18 g)와 같이 꺼진다'],
+  ['종가집 알찬 포기김치', '횡성', 40, false, '배추김치 40 g — 236 mg. 손으로 등록한 배추김치와 같다'],
+  ['그린몬스터 디톡 콤부차', '한미양행', 50, true, '포장 50 g 이 참고량 200 mL 보다 작으면 포장 무게를 지킨다'],
+  ['신라면건면사발', '농심', 77, true, '컵면 참고량 80 g 보다 포장 77 g 이 작다']
+]
+for (const [n, m, g, salty, why] of SERVING) {
+  const f = find(n, m)
+  if (!f) { bads.push(`자료에 없음: ${n} (${m})`); continue }
+  no(f.serving.g !== g, `${n}: 1회 ${f.serving.g} g — ${g} g 이어야 한다(${why})`)
+  no(isSalty(f) !== salty, `${n}: 고나트륨 ${isSalty(f)} — ${salty} 이어야 한다(${why})`)
+}
+const kimchi = find('종가집 알찬 포기김치', '횡성')
+no(kimchi !== undefined && !kimchi.tags.includes('염장' as never), '종가집 포기김치: 염장이 없어 복수·위암 경고가 빠진다')
+if (kimchi) no(evaluateFood(kimchi, P({ conditions: ['복수'] as never })).level !== 'avoid', '시판 김치: 복수에 피하세요가 아니다')
+const leaked = EXT.filter((f) => f.tags.includes('나트륨농도높음' as never)).length
+no(leaked > 0, `빌드 표시 '나트륨농도높음' 이 음식에 남았다 ${leaked}행`)
+const hams = EXT.filter((f) => /(로스|프레스|슬라이스|샌드위치)\s?햄$/.test(f.name) && (f.per100.na ?? 0) >= 400)
+no(hams.length < 20, `햄 표본이 ${hams.length}행뿐이다`)
+const hamsOff = hams.filter((f) => !isSalty(f))
+no(hamsOff.length > hams.length * 0.1, `햄 ${hams.length}행 중 ${hamsOff.length}행에 고나트륨이 없다 — 예: ${hamsOff[0]?.name}`)
+const per5000 = EXT.filter((f) => ((f.per100.na ?? 0) * f.serving.g) / 100 > 5000).length
+no(per5000 > 2000, `1회 나트륨 5,000 mg 초과가 ${per5000}행 — 참고량 적용 뒤 2,000 이하여야 한다`)
+
 /* ── 6. 경고까지 실제로 이어진다 ───────────────────────── */
 const hits = (f: Food, p: PatientContext) => evaluateFood(f, p).hits.map((h) => h.rule.id)
 const htn = P({ conditions: ['고혈압'] as never })
