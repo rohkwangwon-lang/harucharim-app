@@ -10,6 +10,7 @@ import { EvidenceBadge, LevelBadge, LevelDot, Section, BetaChip } from './ui'
 import { adviseSupplements, type AdviceLevel } from '../engine/supplementAdvice'
 import { nutritionRisk } from '../engine/nutrition'
 import { suppWords } from '../lib/suppSearch'
+import { findMedicines, MEDICINE_NOTICE, type MedicineMatch } from '../lib/medicines'
 import { findSupplements, getStatus, lookupSupplementByBarcode, scanSupplements, searchSupplements, type ExtSupplement } from '../lib/foodStore'
 import { BarcodeScanner } from './BarcodeScanner'
 import { ingredientKeywords, judgeProduct } from '../engine/ingredientVerdict'
@@ -38,6 +39,7 @@ export function Supplements({
   const [dropped, setDropped] = useState<string[]>([])
   /** 바코드로 찾은 제품. 검색어 칸에 이름이 들어가도 목록으로 되돌리지 않는다 */
   const [scanned, setScanned] = useState<ExtSupplement | null>(null)
+  const [medicines, setMedicines] = useState<MedicineMatch | null>(null)
   const [hasExt, setHasExt] = useState(false)
 
   const [scanning, setScanning] = useState(false)
@@ -66,6 +68,7 @@ export function Supplements({
     const t = setTimeout(() => {
       if (!hasExt) { setMarket([]); return }
       setDropped([])
+      setMedicines(null)
       if (scanned && q === scanned.name) { setMarket([scanned]); return }
       if (pick !== 'none') {
         /*
@@ -118,7 +121,11 @@ export function Supplements({
       }
       if (q.trim().length === 1) { setMarket([]); return }
       if (!q.trim()) { searchSupplements('', 30).then(setMarket); return }
-      findSupplements(q, 30).then((res) => { setMarket(res.items); setDropped(res.dropped) })
+      Promise.all([findSupplements(q, 30), findMedicines(q)]).then(([res, med]) => {
+        setMarket(res.items)
+        setDropped(res.dropped)
+        setMedicines(med.total > 0 ? med : null)
+      })
     }, 250)
     return () => clearTimeout(t)
   }, [q, hasExt, pick, goodIng, badIng, patient, scanned])
@@ -284,7 +291,7 @@ export function Supplements({
               } else {
                 setScanMsg(
                   `바코드 ${code} 로 등록된 건강기능식품을 찾지 못했습니다. ` +
-                  '수입 제품은 자료에 바코드가 없습니다. 제품 통에 적힌 이름으로 검색해 보세요.'
+                  '수입 제품과 의약품은 바코드로 찾지 못합니다. 제품 통에 적힌 이름으로 검색해 보세요.'
                 )
               }
             }}
@@ -295,7 +302,10 @@ export function Supplements({
           <p className="card px-4 py-6 text-center text-sm text-stone-400">약 5만 종에서 고르는 중입니다…</p>
         )}
 
-        {!picking && pick === 'none' && q.trim().length >= 2 && (dropped.length > 0 || market.length === 0) && (
+        {!picking && pick === 'none' && medicines?.named && (
+          <MedicineNote match={medicines} hasOthers={market.length > 0} />
+        )}
+        {!picking && pick === 'none' && q.trim().length >= 2 && !medicines && (dropped.length > 0 || market.length === 0) && (
           <NotFoundNote query={q.trim()} dropped={dropped} hasAlternatives={market.length > 0} patient={patient} />
         )}
         {!picking && market.length > 0 && (
@@ -314,6 +324,9 @@ export function Supplements({
               ))}
             </div>
           </>
+        )}
+        {!picking && pick === 'none' && medicines && !medicines.named && (
+          <div className="mt-3"><MedicineNote match={medicines} hasOthers={false} /></div>
         )}
         {!picking && pick !== 'none' && market.length === 0 && (
           <p className="card px-4 py-6 text-center text-sm leading-relaxed text-stone-500">
@@ -538,6 +551,8 @@ function NotFoundNote({ query, dropped, hasAlternatives, patient }: {
         식약처 신고 자료는 제조사가 신고한 이름이라 판매 브랜드가 빠져 있는 일이 많고, 자료에 없는 제품도 있습니다.
         정식 수입품은 들어 있지만 <strong>해외 직구 제품은 거의 없습니다.</strong>{' '}
         통의 <strong>바코드</strong>를 찍거나(국내 제품만) <strong>원료 이름</strong>으로 찾아보세요.
+        비타민제 가운데는 건강기능식품이 아니라 <strong>의약품</strong>인 것도 있고, 의약품은 여기 이름이 없을 수 있습니다.
+        통에 &lsquo;일반의약품&rsquo;이라 적혀 있으면 담당 의사와 상의하세요.
         {hasAlternatives && dropped.length > 0 && <> 아래는 &lsquo;{dropped.join(' ')}&rsquo;을(를) 빼고 찾은 것이라 <strong>그 제품이 아닙니다.</strong></>}
       </p>
       {!verdict.unknown && (
@@ -559,6 +574,28 @@ function NotFoundNote({ query, dropped, hasAlternatives, patient }: {
           </p>
         </div>
       )}
+    </div>
+  )
+}
+
+/** 의약품은 이름만 알려 드린다. 판정(judgeProduct)을 부르지 않는다 */
+function MedicineNote({ match, hasOthers }: { match: MedicineMatch; hasOthers: boolean }) {
+  return (
+    <div className="card mb-3 border-stone-300 bg-stone-50 p-3.5" role="status">
+      <div className="mb-1.5"><span className="chip bg-stone-200 text-stone-700">의약품</span></div>
+      <ul className="space-y-1">
+        {match.items.map((m) => (
+          <li key={`${m.name}|${m.company}`} className="text-sm leading-snug">
+            <span className="font-semibold text-stone-900">{m.name}</span>
+            <span className="ml-1.5 text-[11px] text-stone-400">{m.company}</span>
+          </li>
+        ))}
+      </ul>
+      {match.total > match.items.length && (
+        <p className="mt-1 text-[11px] text-stone-400">외 {match.total - match.items.length}건</p>
+      )}
+      <p className="mt-2 text-xs font-medium leading-relaxed text-stone-700">{MEDICINE_NOTICE}</p>
+      {hasOthers && <p className="mt-1 text-[11px] leading-relaxed text-stone-500">아래 건강기능식품과는 다른 제품입니다.</p>}
     </div>
   )
 }

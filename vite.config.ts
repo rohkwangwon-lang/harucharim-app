@@ -21,7 +21,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       // 앱에서 갱신을 직접 다루기 위해 자동 주입 대신 수동 등록을 쓴다
       injectRegister: null,
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'data/medicines.json'],
       manifest: {
         name: '하루차림 — 암 환자 식이·영양 도우미',
         short_name: '하루차림',

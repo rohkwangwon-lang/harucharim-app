@@ -11,6 +11,7 @@
  *
  * 화면의 판단을 순수 함수(menuConditionKey)로 꺼내 두고 여기서 따진다.
  */
+import { matchMedicines, MEDICINE_NOTICE } from '../../src/lib/medicines'
 import { buildDayMenu, recentFoods } from '../../src/engine/menu'
 import { readFileSync } from 'node:fs'
 import { matchSupplements, squeeze, suppWords, VERIFIED_SOLD_AS, type SuppIndexRow } from '../../src/lib/suppSearch'
@@ -200,6 +201,24 @@ const key = (
   if (!other.dropped.includes('네이처메이드')) bad('영양제 찾기', '없는 브랜드를 빼고 찾았다고 알리지 않음')
   if (find('없는제품이름').ids.length) bad('영양제 찾기', '아무 낱말도 맞지 않는데 무언가 나옴')
   console.log(`  영양제 찾기 — '마그네슘 칼슘' ${order.length}건 이상, 세노비스 마그네슘 → ${raw.items[top.ids[0]][1]} '${nameOf(top.ids[0])}'`)
+}
+
+/* ── 7. 의약품 — 이름만 알리고, 판정하지 않는다 ── */
+{
+  const { items } = JSON.parse(readFileSync(new URL('../../public/data/medicines.json', import.meta.url), 'utf8')) as { items: [string, string][] }
+  const m = (q: string) => matchMedicines(items, q)
+  for (const q of ['삐콤씨', '아로나민', '임팩타민', '훼라민큐'])
+    if (!m(q).named) bad('의약품 안내', `'${q}' 를 의약품으로 알리지 않음`)
+  if (!m('비콤씨').items.some((x) => x.name.includes('삐콤씨'))) bad('의약품 안내', "'비콤씨' 로 삐콤씨를 찾지 못함")
+  if (m('센트룸').total) bad('의약품 안내', '건강기능식품인 센트룸이 의약품으로 나옴')
+  if (m('없는제품이름').total) bad('의약품 안내', '없는 이름에 무언가 나옴')
+  if (items.some(([n]) => /수출용|수출명|\(원료\)/.test(n))) bad('의약품 안내', '살 수 없는 품목이 섞임')
+  if (!MEDICINE_NOTICE.includes('담당 의사와 상의')) bad('의약품 안내', '상의 안내가 빠짐')
+  if (/피하세요|드셔도|권장|좋습니다/.test(MEDICINE_NOTICE)) bad('의약품 안내', '판정처럼 읽힘')
+  const src = readFileSync(new URL('../../src/components/Supplements.tsx', import.meta.url), 'utf8')
+  const note = src.slice(src.indexOf('function MedicineNote'), src.indexOf('function MarketProduct'))
+  if (!note || /judgeProduct|LevelBadge|EvidenceBadge/.test(note)) bad('의약품 안내', '의약품에 판정이 붙음')
+  console.log(`  의약품 안내 — ${items.length}건, 삐콤씨 → ${m('삐콤씨').items[0]?.name}`)
 }
 
 console.log(`\n화면 검사 완료 — 문제 ${bugs.length}종`)
