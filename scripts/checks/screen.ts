@@ -12,7 +12,10 @@
  * 화면의 판단을 순수 함수(menuConditionKey)로 꺼내 두고 여기서 따진다.
  */
 import { buildDayMenu, recentFoods } from '../../src/engine/menu'
+import { readFileSync } from 'node:fs'
 import { menuConditionKey } from '../../src/lib/menuIdentity'
+import { buildPlan, type PlanDay } from '../../src/engine/plan'
+import { openBook, planConditionKey, planPlate, stepBack, stepNext } from '../../src/lib/planBook'
 import { DEFAULT_PATIENT } from '../../src/lib/store'
 import { MEAL_SLOTS } from '../../src/data/types'
 import type { PatientContext, SelectedItem } from '../../src/data/types'
@@ -97,6 +100,65 @@ const key = (
   const ratio = same / Math.max(1, a.length)
   console.log(`  다시 구성 — ${a.length}가지 중 ${same}가지가 그대로 (${Math.round(ratio * 100)}%)`)
   if (ratio > 0.7) bad('다시 구성해도 거의 그대로', `${Math.round(ratio * 100)}% 가 같다`)
+}
+
+/* ── 5. 며칠치 '이전 안' — 보여 드린 것이 쌓여도 앞의 계획이 그대로 돌아오는가 ── */
+{
+  const startDay = DAY, days = 3
+  const shown: Record<string, string[]> = {}
+  let builds = 0
+  const make = (nonce: number) => {
+    builds++
+    const p = buildPlan(patient, { startDay, days, shown, nonce })
+    /* 화면처럼, 만든 계획을 보여 드린 것으로 적는다 — 이것 때문에 번호를 되돌려도 같은 계획이 안 나온다 */
+    for (const d of p) shown[d.day] = MEAL_SLOTS.flatMap((s) => d.menu.meals[s].map((e) => e.food.id))
+    return p
+  }
+  const same = (a: PlanDay[], b: PlanDay[]) => planPlate(a) === planPlate(b)
+  let book = openBook('조건', make)
+  const firstPlate = planPlate(book.plans[0])
+  book = stepNext(book, make, same).book
+  const secondPlate = planPlate(book.plans[1] ?? [])
+  book = stepNext(book, make, same).book
+  if (book.cursor !== 2) bad('며칠치 다시 구성', `안이 쌓이지 않음(cursor ${book.cursor})`)
+  if (firstPlate === secondPlate) bad('며칠치 다시 구성', '다음 안이 앞의 안과 같다')
+
+  book = stepBack(book)
+  if (planPlate(book.plans[book.cursor]) !== secondPlate) bad('며칠치 이전 안', '두 번째 안이 그대로 돌아오지 않음')
+  book = stepBack(book)
+  if (planPlate(book.plans[book.cursor]) !== firstPlate) bad('며칠치 이전 안', '첫 안이 그대로 돌아오지 않음')
+  if (stepBack(book) !== book) bad('며칠치 이전 안', '첫 안에서 더 뒤로 갔다')
+
+  const before = builds
+  book = stepNext(book, make, same).book
+  if (builds !== before || planPlate(book.plans[book.cursor]) !== secondPlate) bad('며칠치 다시 구성', '본 적 있는 안을 다시 만들었다')
+
+  /* 바꿀 것이 없으면 안을 늘리지 않고 그렇다고 말한다 */
+  const fixed = openBook('고정', () => [] as PlanDay[])
+  const r = stepNext(fixed, () => [] as PlanDay[], same)
+  if (!r.stuck || r.book.plans.length !== 1) bad('며칠치 다시 구성', '같은 계획을 새 안으로 세었다')
+
+  /* 잣대 — 내용이 같으면 같고, 조건이 달라지면 다르다 */
+  const key = (p: PatientContext, sel: SelectedItem[] = [], d = days, pantry = '') => planConditionKey(p, sel, [], startDay, d, pantry)
+  const base = key(patient)
+  if (key({ ...patient }, []) !== base) bad('며칠치 조건', '내용이 같은데 달라진 것으로 읽힘 — 안이 버려진다')
+  const changed: [string, string][] = [
+    ['일수', key(patient, [], 4)],
+    ['집에 있는 재료', key(patient, [], days, '달걀')],
+    ['담은 음식', key(patient, [{ foodId: 'gg', servings: 1, meal: '점심' }])],
+    ['체중', key({ ...patient, weightKg: 60 })],
+    ['치료 이력', key({ ...patient, history: ['수술'] })]
+  ]
+  for (const [what, k] of changed) if (k === base) bad('며칠치 조건', `${what} 이 달라졌는데 같은 계획을 쓴다`)
+
+  /* 화면이 이 잣대를 실제로 쓰는가 */
+  const src = (f: string) => readFileSync(new URL(`../../src/components/${f}`, import.meta.url), 'utf8')
+  const mealPlan = src('MealPlan.tsx')
+  if (!mealPlan.includes('이전 안') || !mealPlan.includes('onClick={prevPlan}')) bad('며칠치 이전 안', '화면에 단추가 없다')
+  if (!mealPlan.includes('stepNext(book')) bad('며칠치 다시 구성', '화면이 만든 안을 들고 있지 않다')
+  if (!src('RecommendedMenu.tsx').includes('peek ? peek.selected : selected'))
+    bad('며칠치 이전 안', '한 날을 자세히 보고 오면 그 날의 담은 음식 때문에 안들이 버려진다')
+  console.log('  며칠치 — 다시 구성 2번 뒤 이전 안 2번: 같은 계획으로 돌아옴')
 }
 
 console.log(`\n화면 검사 완료 — 문제 ${bugs.length}종`)

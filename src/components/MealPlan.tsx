@@ -12,6 +12,7 @@ import { IconShuffle } from './icons'
 import { Section } from './ui'
 import { drawPlanImage } from '../lib/planImage'
 import { sheetRows, sheetTitle, SHEET_COLS } from '../lib/planSheet'
+import { openBook, planConditionKey, planPlate, stepBack, stepNext, type PlanBook } from '../lib/planBook'
 
 /**
  * 여러 날 식단과 장보기 목록(2026-10-23).
@@ -24,6 +25,20 @@ const COMMON_AT_HOME = ['달걀', '우유', '두부', '양파', '대파', '당�
 
 function loadPantry(): Set<string> {
   try { const raw = localStorage.getItem(PANTRY_KEY); return new Set(raw ? (JSON.parse(raw) as string[]) : []) } catch { return new Set() }
+}
+
+/** 탭을 옮겨도 보던 안을 이어 보이기 위한 기억 — 조건이 같을 때만 쓴다(하루치의 DRAFT_MEMORY 와 같다) */
+let PLAN_MEMORY: PlanBook<PlanDay[]> | null = null
+
+/* 산 것 표시는 계획마다 따로 둔다 — 이전 안으로 돌아가면 그 안에서 표시한 것이 그대로 보여야 한다 */
+const BOUGHT_KEY = 'harucharim.plan.bought'
+const BOUGHT_KEEP = 8
+function loadBought(): Record<string, string[]> {
+  try {
+    const j = JSON.parse(localStorage.getItem(BOUGHT_KEY) ?? '{}') as Record<string, unknown>
+    /* 예전 꼴({ key, items })은 번호로 적혀 있어 이제 어느 계획인지 알 수 없다 */
+    return j && typeof j === 'object' && !('key' in j) ? j as Record<string, string[]> : {}
+  } catch { return {} }
 }
 
 export function MealPlan({
@@ -41,7 +56,6 @@ export function MealPlan({
   /** 한 날을 하루치 화면으로 — 계획에서 짠 식단을 그대로 넘겨 같은 상이 보이게 한다 */
   onOpenDay: (day: DayKey, menu: PlanDay['menu'], index: number) => void
 }) {
-  const [nonce, setNonce] = useState(0)
   /* 집에 있는 재료 — 이 기기에만. 계획을 바꿔도 남는다(냉장고는 그대로니까) */
   const [pantry, setPantry] = useState<Set<string>>(loadPantry)
   const [pantryOpen, setPantryOpen] = useState(false)
@@ -52,11 +66,28 @@ export function MealPlan({
     return next
   })
 
-  const plan = useMemo<PlanDay[]>(
-    () => buildPlan(patient, { startDay, days, selected, supplements: supps, diary, shown, nonce, pantry: pantry.size ? pantry : undefined }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [patient, startDay, days, selected, supps, nonce, pantryKey]
-  )
+  const conditionKey = planConditionKey(patient, selected, supps.map((s) => s.id), startDay, days, pantryKey)
+  const makePlan = (nonce: number) =>
+    buildPlan(patient, { startDay, days, selected, supplements: supps, diary, shown, nonce, pantry: pantry.size ? pantry : undefined })
+  const [savedBook, setBook] = useState<PlanBook<PlanDay[]>>(() =>
+    PLAN_MEMORY?.key === conditionKey ? PLAN_MEMORY : openBook(conditionKey, makePlan))
+  /* 눌렀는데 바꿀 것이 없었는가 — 눌러도 그대로이면 고장처럼 보인다 */
+  const [stuck, setStuck] = useState(false)
+  /* 조건이 달라지면 지금까지 만든 안은 버린다 — 다른 사람의 식단이 되기 때문이다 */
+  let book = savedBook
+  if (book.key !== conditionKey) {
+    book = openBook(conditionKey, makePlan)
+    setBook(book)
+    setStuck(false)
+  }
+  useEffect(() => { PLAN_MEMORY = book }, [book])
+  const plan = book.plans[book.cursor]
+  const nextPlan = () => {
+    const r = stepNext(book, makePlan, (a, b) => planPlate(a) === planPlate(b))
+    setBook(r.book)
+    setStuck(r.stuck)
+  }
+  const prevPlan = () => { setStuck(false); setBook(stepBack(book)) }
   const list = useMemo(() => shoppingList(plan, pantry), [plan, pantry])
   /* 고를 수 있는 재료 — 이 계획에 드는 것(양념 말고) + 흔히 집에 있는 것 */
   const candidates = useMemo(() => {
@@ -74,19 +105,20 @@ export function MealPlan({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onShown, shownKey])
 
-  /* 산 것 표시 — 이 기기에서만, 이 계획에서만 */
-  const planKey = `${startDay}:${days}:${nonce}:${pantryKey}`
+  /* 산 것 표시 — 이 기기에서만, 계획마다. 번호가 아니라 계획의 내용으로 알아본다 */
+  const planKey = `${pantryKey}#${shownKey}`
   const [bought, setBought] = useState<Set<string>>(() => new Set())
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem('harucharim.plan.bought')
-      const j = raw ? JSON.parse(raw) as { key: string; items: string[] } : null
-      setBought(new Set(j && j.key === planKey ? j.items : []))
-    } catch { setBought(new Set()) }
-  }, [planKey])
+  useEffect(() => { setBought(new Set(loadBought()[planKey] ?? [])) }, [planKey])
   const toggleBought = (k: string) => setBought((prev) => {
     const next = new Set(prev); if (next.has(k)) next.delete(k); else next.add(k)
-    try { localStorage.setItem('harucharim.plan.bought', JSON.stringify({ key: planKey, items: [...next] })) } catch { /* 저장 못 해도 화면은 된다 */ }
+    try {
+      const all = loadBought()
+      /* 지웠다 다시 넣어 맨 뒤로 보낸다 — 오래된 계획부터 덜어 낸다 */
+      delete all[planKey]
+      all[planKey] = [...next]
+      for (const old of Object.keys(all).slice(0, -BOUGHT_KEEP)) delete all[old]
+      localStorage.setItem(BOUGHT_KEY, JSON.stringify(all))
+    } catch { /* 저장 못 해도 화면은 된다 */ }
     return next
   })
 
@@ -142,13 +174,36 @@ export function MealPlan({
               {selected.length > 0 && <> 첫날에는 담으신 <strong>{selected.length}가지</strong>가 들어 있습니다.</>}
             </p>
           </div>
-          <button
-            className="shrink-0 rounded-xl border-2 border-brand-600 bg-white px-3.5 py-2 text-sm font-bold text-brand-700 shadow-sm transition-colors hover:bg-brand-50 active:bg-brand-100 print:hidden"
-            onClick={() => { track('plan_retry'); setNonce((n) => n + 1) }}
-          >
-            <span className="flex items-center gap-1.5"><IconShuffle className="h-4 w-4" />다시 구성</span>
-          </button>
+          <div className="flex shrink-0 items-center gap-1.5 print:hidden">
+            {/* 처음 안을 보고 계실 때는 나오지 않는다 — 눌러도 아무 일이 없는 단추는 없느니만 못하다 */}
+            {book.cursor > 0 && (
+              <button
+                className="rounded-xl border-2 border-stone-300 bg-white px-3 py-2 text-sm font-bold text-stone-600 transition-colors hover:bg-stone-50"
+                onClick={prevPlan}
+              >
+                ‹ 이전 안
+              </button>
+            )}
+            <button
+              className="rounded-xl border-2 border-brand-600 bg-white px-3.5 py-2 text-sm font-bold text-brand-700 shadow-sm transition-colors hover:bg-brand-50 active:bg-brand-100"
+              onClick={() => { track('plan_retry'); nextPlan() }}
+            >
+              <span className="flex items-center gap-1.5"><IconShuffle className="h-4 w-4" />다시 구성</span>
+            </button>
+          </div>
         </div>
+        {stuck && (
+          <p className="mt-2.5 rounded-lg border border-warn-200 bg-warn-50 px-3 py-2 text-[12px] leading-relaxed text-stone-700 print:hidden" role="status">
+            <strong>다른 조합을 찾지 못했습니다.</strong> 지금 안을 그대로 둡니다.
+          </p>
+        )}
+        {book.plans.length > 1 && (
+          <p className="mt-2.5 text-[11px] leading-relaxed text-brand-800/70 print:hidden">
+            <strong>{book.cursor + 1}번째 안</strong>입니다(지금까지 {book.plans.length}가지).
+            {book.cursor > 0 && <> <strong>이전 안</strong>으로 돌아가실 수 있습니다.</>}
+            {book.cursor < book.plans.length - 1 && <> <strong>다시 구성</strong>을 누르시면 다음 안이 다시 나옵니다.</>}
+          </p>
+        )}
         <div className="mt-2.5 flex flex-wrap gap-1.5 print:hidden">
           <button className={`chip border ${pantry.size ? 'border-brand-500 bg-brand-500 text-white' : 'border-stone-300 bg-white text-stone-700'}`} onClick={() => setPantryOpen((v) => !v)} aria-expanded={pantryOpen}>
             집에 있는 재료{pantry.size ? ` ${pantry.size}` : ''}

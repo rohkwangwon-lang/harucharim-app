@@ -129,7 +129,7 @@ export function RecommendedMenu({
    * 예전에는 1일로 바꿔 버려 며칠치 화면이 사라졌다. 이제는 며칠치 설정은 그대로 두고,
    * 그 날의 식단(계획에서 짠 그대로)을 하루치 화면으로 보여 드리며 '돌아가기' 단추를 둔다.
    */
-  const [peek, setPeek] = useState<{ day: string; from: string; index: number; menu: DayMenu } | null>(null)
+  const [peek, setPeek] = useState<{ day: string; from: string; index: number; menu: DayMenu; selected: SelectedItem[] } | null>(null)
   const backToPlan = () => { const f = peek?.from; setPeek(null); if (f) onOpenDay?.(f) }
   const [cursor, setCursor] = useState(kept?.cursor ?? 0)
   /*
@@ -306,10 +306,11 @@ export function RecommendedMenu({
     <div className={peek ? 'hidden' : undefined}>
       {daysPicker}
       <MealPlan
-        patient={patient} selected={selected} supps={supps} startDay={peek ? peek.from : day} days={days}
+        /* 한 날을 보는 동안 selected 는 그 날의 것으로 바뀐다 — 며칠치에는 출발한 날의 것을 넘겨야 안들이 버려지지 않는다 */
+        patient={patient} selected={peek ? peek.selected : selected} supps={supps} startDay={peek ? peek.from : day} days={days}
         diary={diary} shown={shown} onShown={onShown}
         onApplyDays={(byDay) => onApplyDays?.(byDay)}
-        onOpenDay={(d, m, i) => { setPeek({ day: d, from: day, index: i, menu: m }); onOpenDay?.(d) }}
+        onOpenDay={(d, m, i) => { setPeek({ day: d, from: day, index: i, menu: m, selected }); onOpenDay?.(d) }}
       />
     </div>
   ) : null
