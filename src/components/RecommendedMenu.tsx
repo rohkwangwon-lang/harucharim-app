@@ -264,22 +264,23 @@ export function RecommendedMenu({
   })
   const pickDays = (n: number) => { setDays(n); setPeek(null); try { localStorage.setItem('harucharim.plan.days', String(n)) } catch { /* 없어도 된다 */ } }
   const daysPicker = (
-    <div className="mb-3 flex items-center gap-2">
-      <span className="text-xs font-semibold text-stone-600">며칠치</span>
-      <div className="flex gap-1" role="radiogroup" aria-label="며칠치 식단을 받을지">
+    /* 폰 폭에서는 한 줄에 다 들어가지 않는다 — 글자를 꺾지 말고 안내 문구를 다음 줄로 내린다(2026-11-04 사용자 보고: "1/일") */
+    <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1">
+      <span className="shrink-0 whitespace-nowrap text-xs font-semibold text-stone-600">며칠치</span>
+      <div className="flex shrink-0 gap-1" role="radiogroup" aria-label="며칠치 식단을 받을지">
         {Array.from({ length: PLAN_MAX_DAYS }, (_, i) => i + 1).map((n) => (
           <button
             key={n}
             role="radio"
             aria-checked={days === n}
             onClick={() => { track('plan_days'); pickDays(n) }}
-            className={`chip border transition-colors ${days === n ? 'border-brand-500 bg-brand-500 text-white' : 'border-stone-300 bg-white text-stone-600 hover:bg-stone-50'}`}
+            className={`chip whitespace-nowrap border transition-colors ${days === n ? 'border-brand-500 bg-brand-500 text-white' : 'border-stone-300 bg-white text-stone-600 hover:bg-stone-50'}`}
           >
             {n}일
           </button>
         ))}
       </div>
-      <span className="ml-auto text-[10.5px] text-stone-400">장보기 목록은 2일부터</span>
+      <span className="whitespace-nowrap text-[10.5px] text-stone-400 sm:ml-auto">장보기 목록은 2일부터</span>
     </div>
   )
 
@@ -329,8 +330,9 @@ export function RecommendedMenu({
         </div>
       ) : daysPicker}
       <div className="mb-4 rounded-2xl border border-brand-200 bg-brand-50/60 px-4 py-3.5">
-        <div className="flex items-start justify-between gap-3">
-          <div>
+        {/* 며칠치 머리글과 같은 까닭으로, 폰 폭에서는 단추를 글 아래 줄에 둔다 */}
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+          <div className="min-w-0">
             <p className="text-xs font-bold uppercase tracking-wide text-brand-700">하루(24시간) 전체</p>
             <p className="mt-1 text-sm font-semibold text-stone-900">
               {profile.name} · {menu.season}철 추천 식단
@@ -350,7 +352,7 @@ export function RecommendedMenu({
             * 설명 딱지처럼 보였다. 실제로 이 단추는 거의 눌리지 않았다.
             * 누를 수 있는 것처럼 보이게 하고, 무엇을 하는 단추인지 아래에 한 줄 적는다.
             */}
-          {!peek && <div className="flex shrink-0 items-center gap-1.5">
+          {!peek && <div className="flex shrink-0 items-center justify-end gap-1.5">
             {/*
               * 앞의 안으로 돌아가는 단추.
               *
@@ -360,14 +362,14 @@ export function RecommendedMenu({
               */}
             {cursor > 0 && (
               <button
-                className="rounded-xl border-2 border-stone-300 bg-white px-3 py-2 text-sm font-bold text-stone-600 transition-colors hover:bg-stone-50"
+                className="whitespace-nowrap rounded-xl border-2 border-stone-300 bg-white px-3 py-2 text-sm font-bold text-stone-600 transition-colors hover:bg-stone-50"
                 onClick={() => { setStuck(false); setCursor((c) => Math.max(0, c - 1)) }}
               >
                 ‹ 이전 안
               </button>
             )}
             <button
-              className="rounded-xl border-2 border-brand-600 bg-white px-3.5 py-2 text-sm font-bold text-brand-700 shadow-sm transition-colors hover:bg-brand-50 active:bg-brand-100"
+              className="whitespace-nowrap rounded-xl border-2 border-brand-600 bg-white px-3.5 py-2 text-sm font-bold text-brand-700 shadow-sm transition-colors hover:bg-brand-50 active:bg-brand-100"
               onClick={() => { track('menu_retry'); rebuild() }}
             >
               <span className="flex items-center gap-1.5">

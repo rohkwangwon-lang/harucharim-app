@@ -165,8 +165,10 @@ export function MealPlan({
   return (
     <div id="plan-print">
       <div className="mb-3 rounded-2xl border border-brand-200 bg-brand-50/60 px-4 py-3.5">
-        <div className="flex items-start justify-between gap-3">
-          <div>
+        {/* 폰 폭에서는 단추를 글 아래 줄에 둔다 — 옆에 두면 단추 두 개가 글 칸을 110px 로 줄여 날짜까지 꺾인다.
+            '다시 구성' 은 어느 안에서든 같은 자리(오른쪽 끝)에 남아 거듭 누르기 좋다 */}
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+          <div className="min-w-0">
             <p className="text-xs font-bold uppercase tracking-wide text-brand-700">{days}일치 식단 · 1인분</p>
             <p className="mt-1 text-sm font-semibold text-stone-900">{dayLabel(plan[0].day)} ~ {dayLabel(plan[plan.length - 1].day)}</p>
             <p className="mt-1 text-xs leading-relaxed text-stone-600">
@@ -174,18 +176,18 @@ export function MealPlan({
               {selected.length > 0 && <> 첫날에는 담으신 <strong>{selected.length}가지</strong>가 들어 있습니다.</>}
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-1.5 print:hidden">
+          <div className="flex shrink-0 items-center justify-end gap-1.5 print:hidden">
             {/* 처음 안을 보고 계실 때는 나오지 않는다 — 눌러도 아무 일이 없는 단추는 없느니만 못하다 */}
             {book.cursor > 0 && (
               <button
-                className="rounded-xl border-2 border-stone-300 bg-white px-3 py-2 text-sm font-bold text-stone-600 transition-colors hover:bg-stone-50"
+                className="whitespace-nowrap rounded-xl border-2 border-stone-300 bg-white px-3 py-2 text-sm font-bold text-stone-600 transition-colors hover:bg-stone-50"
                 onClick={prevPlan}
               >
                 ‹ 이전 안
               </button>
             )}
             <button
-              className="rounded-xl border-2 border-brand-600 bg-white px-3.5 py-2 text-sm font-bold text-brand-700 shadow-sm transition-colors hover:bg-brand-50 active:bg-brand-100"
+              className="whitespace-nowrap rounded-xl border-2 border-brand-600 bg-white px-3.5 py-2 text-sm font-bold text-brand-700 shadow-sm transition-colors hover:bg-brand-50 active:bg-brand-100"
               onClick={() => { track('plan_retry'); nextPlan() }}
             >
               <span className="flex items-center gap-1.5"><IconShuffle className="h-4 w-4" />다시 구성</span>

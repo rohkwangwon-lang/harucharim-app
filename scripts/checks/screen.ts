@@ -159,6 +159,14 @@ const key = (
   if (!src('RecommendedMenu.tsx').includes('peek ? peek.selected : selected'))
     bad('며칠치 이전 안', '한 날을 자세히 보고 오면 그 날의 담은 음식 때문에 안들이 버려진다')
   console.log('  며칠치 — 다시 구성 2번 뒤 이전 안 2번: 같은 계획으로 돌아옴')
+
+  /* 폰 폭 — '1/일' 로 꺾이던 며칠치 단추, 단추 둘에 밀려 날짜까지 꺾이던 머리글(2026-11-04 사용자 보고) */
+  const menuSrc = src('RecommendedMenu.tsx')
+  const picker = menuSrc.slice(menuSrc.indexOf('const daysPicker'), menuSrc.indexOf('const stage = refeedingStage'))
+  if (!picker.includes('flex-wrap')) bad('며칠치 단추 줄바꿈', '폰 폭에서 줄을 나누지 못하면 글자가 꺾인다')
+  if ((picker.match(/whitespace-nowrap/g) ?? []).length < 3) bad('며칠치 단추 줄바꿈', '이름표·단추·안내 중 꺾일 수 있는 것이 있다')
+  for (const [name, code] of [['며칠치', mealPlan], ['하루치', menuSrc]] as const)
+    if (!code.includes('flex flex-col gap-2.5 sm:flex-row')) bad(`${name} 머리글`, '폰 폭에서 단추가 글 옆에 있으면 글 칸이 좁아 제목까지 꺾인다')
 }
 
 console.log(`\n화면 검사 완료 — 문제 ${bugs.length}종`)
