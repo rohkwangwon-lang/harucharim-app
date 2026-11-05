@@ -110,6 +110,18 @@ no(!/<CareNote \/>/.test(app) || !/담당 의료진과 상의/.test(app),
 if (existsSync('public/tester')) {
   const viteCfg = readFileSync('vite.config.ts', 'utf-8')
   no(!/navigateFallbackDenylist:[^\n]*tester/.test(viteCfg), '/tester/ 가 앱 화면 돌려보내기에서 빠져 있지 않음 — 앱을 연 기기에서 모집 페이지 대신 앱이 뜬다')
+  /* 테스터에게 드리는 약속: 평점·후기와 엮이면 구글 정책(보상 대가 평점) 위반, 지금 기능까지 걸면 약관 7항과 어긋난다 */
+  for (const f of ['public/tester/index.html', 'public/tester/video.html']) {
+    if (!existsSync(f)) continue
+    const t = readFileSync(f, 'utf-8').replace(/<[^>]+>/g, ' ')
+    no(/사례도 없/.test(t), `${f}: "사례도 없습니다" 가 남아 있음 — 테스터 약속과 어긋난다`)
+    no(/영원히|평생|면역력|재발을 막|치료 효과/.test(t), `${f}: 쓰지 않기로 한 표현이 있음`)
+    if (/약속/.test(t)) {
+      no(!/평점·후기와 관계없/.test(t), `${f}: 테스터 약속에 "평점·후기와 관계없습니다" 가 빠짐`)
+      no(!/지금 있는 기능은 모든 분께 계속 무료/.test(t), `${f}: 테스터 약속에 "지금 있는 기능은 계속 무료" 가 빠짐 — 약관 7항`)
+      no(/별점|평점|후기/.test(t.replace(/평점·후기와 관계없[^.]*\.|평점·후기는 부탁드리지 않습니다|별점이나 후기를 남기실 필요는 없습니다/g, '')), `${f}: 평점·후기를 부탁하는 문구가 있음`)
+    }
+  }
 }
 no(!existsSync('public/privacy.html'), '개인정보처리방침 문서가 없음 — 두 스토어 모두 필수')
 no(!/개인정보처리방침/.test(app), '앱 안에서 개인정보처리방침으로 가는 길이 없음')
