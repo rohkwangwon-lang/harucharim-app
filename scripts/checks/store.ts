@@ -106,6 +106,11 @@ no(!/<CareNote \/>/.test(app) || !/담당 의료진과 상의/.test(app),
    "모든 화면의 '담당 의료진과 상의' 안내가 빠짐 — 플레이 건강 앱 답변과 어긋난다")
 
 /* ── 2. 개인정보 — 애플 5.1.1, 구글 데이터 안전 ──────────── */
+/* 오프라인 저장에서 뺀 페이지는 앱 화면으로 넘어가지 않게 따로 막아야 한다 — 모집 페이지 대신 앱이 뜬 적이 있다 */
+if (existsSync('public/tester')) {
+  const viteCfg = readFileSync('vite.config.ts', 'utf-8')
+  no(!/navigateFallbackDenylist:[^\n]*tester/.test(viteCfg), '/tester/ 가 앱 화면 돌려보내기에서 빠져 있지 않음 — 앱을 연 기기에서 모집 페이지 대신 앱이 뜬다')
+}
 no(!existsSync('public/privacy.html'), '개인정보처리방침 문서가 없음 — 두 스토어 모두 필수')
 no(!/개인정보처리방침/.test(app), '앱 안에서 개인정보처리방침으로 가는 길이 없음')
 for (const must of ['수집하는 항목', '보유 기간', '이용자의 권리']) {
