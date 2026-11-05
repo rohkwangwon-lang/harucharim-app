@@ -8,7 +8,7 @@ import { foodContribution } from '../engine/nutrition'
 import { FoodDetail } from './FoodDetail'
 import { BetaChip, HowTo, LevelDot } from './ui'
 import { BarcodeScanner } from './BarcodeScanner'
-import { getStatus, linkBarcode, lookupBarcode, searchExtended } from '../lib/foodStore'
+import { getStatus, linkBarcode, lookupBarcode, lookupSupplementByBarcode, searchExtended } from '../lib/foodStore'
 import { rememberExtFood } from '../lib/extFoods'
 import { productSearchTerm, scanOutcome } from '../lib/barcodeOutcome'
 import { InquiryDialog } from './InquiryDialog'
@@ -79,7 +79,7 @@ export function FoodSearch({
   /** 스캔했지만 못 찾아서, 사용자가 직접 이어 주기를 기다리는 바코드 */
   const [linking, setLinking] = useState<string | null>(null)
   const [scanResult, setScanResult] = useState<{
-    kind: 'no-data' | 'not-found' | 'no-nutrition' | 'stale' | 'similar'
+    kind: 'no-data' | 'not-found' | 'no-nutrition' | 'stale' | 'similar' | 'supplement'
     code: string
     productName?: string
     /** 끝난 등록이나 비슷한 이름의 제품이라도 성분을 찾았으면 확인 후 담을 수 있게 들고 있는다 */
@@ -366,7 +366,7 @@ export function FoodSearch({
                 * 우리가 긁어와 담아 두지 않는다. 공개된 조회 페이지로 보내 드릴 뿐이다.
                 * 거기서 제품명을 확인하시고 돌아와 연결하시면 된다.
                 */}
-              {scanResult.kind !== 'no-data' && (
+              {scanResult.kind !== 'no-data' && scanResult.kind !== 'supplement' && (
                 <a
                   className="btn-outline py-1.5 text-xs"
                   href={`https://gs1.koreannet.or.kr/pr/${scanResult.code.replace(/\D/g, '')}`}
@@ -376,12 +376,14 @@ export function FoodSearch({
                   코리안넷에서 확인하기
                 </a>
               )}
-              <button
-                className="btn-outline py-1.5 text-xs"
-                onClick={() => { setAsking(true) }}
-              >
-                이 제품 추가 요청하기
-              </button>
+              {scanResult.kind !== 'supplement' && (
+                <button
+                  className="btn-outline py-1.5 text-xs"
+                  onClick={() => { setAsking(true) }}
+                >
+                  이 제품 추가 요청하기
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -624,6 +626,21 @@ export function FoodSearch({
               if (hit.linkedByUser) {
                 setScanMsg(`직접 연결해 두신 제품입니다 — ${hit.productName}`)
               }
+              return
+            }
+
+            /*
+             * 건강기능식품 통을 음식 찾기에서 찍으신 경우. 영양제 자료에는 있는데
+             * '영양성분 자료가 없습니다' 로 끝나 있었다(2026-11-05 세노비스 마그네슘 재점검).
+             */
+            const supp = await lookupSupplementByBarcode(code).catch(() => null)
+            if (supp) {
+              setScanResult({
+                kind: 'supplement',
+                code,
+                productName: supp.soldAs ?? supp.name,
+                message: '건강기능식품입니다. 아래 영양제 탭의 바코드로 찍으시면 이 제품에 대한 판정을 보실 수 있습니다.'
+              })
               return
             }
 

@@ -31,6 +31,10 @@ node_modules/.bin/jiti scripts/checks/safety.ts   # 2026-10-15 안전 검토 —
 node_modules/.bin/jiti scripts/checks/plan.ts     # 며칠치 식단·장보기(2026-10-23) — 재료표 무결성, 5일 계획의 피하세요·되풀이·열량, 장보기 목록
 PEOPLE=3000 node_modules/.bin/jiti scripts/checks/patient.ts  # 환자 입장 — 읽을 수 있는가, 이유가 오는가, 앱이 스스로 어긋나지 않는가
 
+# 모든 입력을 한꺼번에 — 환자 칸 전부·기록·검색어·바코드·망가진 값. 안 밟힌 값·짝도 적는다(2026-11-05, 출시 전)
+PEOPLE=3000 SEED=1 node_modules/.bin/jiti scripts/checks/fuzzall.ts
+SWEEP=1 node_modules/.bin/jiti scripts/checks/fuzzall.ts   # 시판 식품 273,080행 전부도 훑는다
+
 # 대규모 실행 — 위 규칙들을 한자리에 모아 훨씬 큰 표본으로 돌린다.
 # 돌면서 무엇이 얼마나 자주 추천되는지 세어 docs/추천-식단-top100.md 에 적는다.
 PEOPLE=2000 DAYS=90 node_modules/.bin/jiti scripts/checks/bigrun.ts
@@ -97,6 +101,8 @@ ONLY=3,7 node scripts/selftest/ui-fuzz.mjs … (같은 판 수·횟수·씨앗) 
 ```
 
 처음 돌린 날(2026-10-13) 찾은 것 — 체중·키·나이 칸이 친 값을 그대로 저장해 키 0 에 BMI 가 Infinity 로 떴다.
+
+`INSTALL=1` 을 주면 화면의 '상품 데이터 받기' 를 실제로 눌러 받고 시작한다 — 안 받으면 시판 식품·영양제 찾기와 바코드 길은 한 번도 밟히지 않는다. `WORKERS=` 로 일꾼 수를 정한다.
 
 **두 시험 모두 크롬을 `--disable-background-timer-throttling` 으로 띄운다.** 안 그러면 뒤에 있는 탭의 타이머가
 1초에 한 번으로 묶여, 0.1초 쉬려던 것이 1초가 되고 "응답 없음" 이 쏟아진다(앱이 느린 것이 아니었다).

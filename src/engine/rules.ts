@@ -249,7 +249,17 @@ function allergyRule(list: string[], fromIngredients: string[] = []): NutritionR
     refIds: []
   }
 }
+/**
+ * 한 번에 이만큼 나트륨이 들면 '권장' 으로 내세우지 않는다 — 하루 상한(2,000 mg)의 3할이다.
+ * 병어구이 1회 780 mg, 소금빵 731 mg 이 단백질·열량 규칙으로 권장이 되었다(2026-11-05 무작위 시험).
+ * 드시지 말라는 뜻은 아니다. 주의·피하세요는 그대로 둔다.
+ */
+const PRAISE_NA_PER_SERVING = 600
+const tooSaltyToPraise = (food: Food) =>
+  typeof food.per100.na === 'number' && food.per100.na * food.serving.g / 100 >= PRAISE_NA_PER_SERVING
 function praiseBlockedFor(food: Food, patient: PatientContext): boolean {
+  /* '도루묵, 소금에 절여 말린것' — 태그 없이 들어온 절임도 권장으로 내세우지 않는다 */
+  if (/소금에\s?절|소금\s?절임/.test(food.name)) return true
   if (patient.conditions.includes('연하곤란') && !swallowSafe(food)) return true
   const neutropenic = patient.phase === 'neutropenia' || patient.conditions.includes('호중구감소증')
   if (neutropenic && ANIMAL.has(food.group) && /생것/.test(food.name)) return true
@@ -278,10 +288,17 @@ export function evaluateFood(
    * 드시지 말라는 뜻이 아니다 — 권할 음식으로 내세우지 않을 뿐이고, 주의·피하세요는 그대로 간다.
    */
   const noPraise = food.tags.some((t) => NO_PRAISE_TAGS.has(t)) || praiseBlockedFor(food, patient)
+  /*
+   * 짠 음식의 권장 막기는 규칙이 그 음식을 콕 집어 권한 경우에는 쓰지 않는다 —
+   * 회장루 환자의 경구수액은 나트륨을 채우려고 드시는 것이다(scope 검사가 잡았다).
+   */
+  const salty = tooSaltyToPraise(food)
+  const blockPraise = (level: string, match: { foodIds?: string[] }) =>
+    level === 'prefer' && (noPraise || (salty && !match.foodIds?.includes(food.id)))
   const all = rules.filter((h) =>
-    !(noPraise && h.rule.level === 'prefer') && matchesFood(h.rule.match, food, servings))
+    !blockPraise(h.rule.level, h.rule.match) && matchesFood(h.rule.match, food, servings))
   const interactions = inter.filter((h) =>
-    !(noPraise && h.interaction.level === 'prefer') && matchesFood(h.interaction.match, food, servings))
+    !blockPraise(h.interaction.level, h.interaction.match) && matchesFood(h.interaction.match, food, servings))
 
   /*
    * 알레르기 — 근거 등급을 다는 임상 권고가 아니라 이분이 알려 주신 사실이다. 그래서 규칙 목록에 두지 않고 여기서 붙인다.

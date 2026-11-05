@@ -463,7 +463,7 @@ export function refeedingStage(patient: PatientContext, onDay?: string): { day: 
   if (!r.high || !patient.lowIntake || patient.lowIntake === '아니요' || !patient.lowIntakeSince) return null
   const today = onDay ?? new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10)
   const day = Math.floor((Date.parse(today) - Date.parse(patient.lowIntakeSince)) / 86400000) + 1
-  if (day < 1 || day > 7) return null
+  if (!(day >= 1 && day <= 7)) return null
   return { day, kcalPerKg: r.extreme ? 5 : 10 }
 }
 

@@ -240,7 +240,7 @@ export const SUPPLEMENTS: Supplement[] = [
     id: 'ahcc-mushroom', name: '버섯균사체 추출물(AHCC 등)', brand: '-', category: '항산화·기타', otc: true,
     dosageLabel: '1일 1~3 g', perDay: {},
     actives: [{ name: '베타글루칸', amount: '제품별 상이' }],
-    note: '국내에서 "면역력" 목적으로 흔히 구매되나, 생존율 개선을 보인 대규모 임상시험은 없다'
+    note: '국내에서 흔히 구매되나, 생존율 개선을 보인 대규모 임상시험은 없다'
   },
 
   // ── 식이섬유 ─────────────────────────────────────────────────

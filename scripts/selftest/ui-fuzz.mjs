@@ -30,7 +30,11 @@ const SEED0 = Number(SEED_RAW ?? Date.now() % 2147483647)
 if (![RUNS, STEPS, SEED0].every(Number.isInteger)) { console.error('판 수·횟수·씨앗은 정수여야 합니다'); process.exit(2) }
 
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-const PORT = 8825, CDP = 9350, WORKERS = 4, CHUNK = 60
+const PORT = 8825, CDP = 9350, WORKERS = Number(process.env.WORKERS ?? 4), CHUNK = 60
+/* INSTALL=1 — 시판 식품·영양제·바코드 자료까지 받고 시험한다. 안 받으면 찾기·바코드 길은 한 번도 밟히지 않는다(2026-11-05) */
+const INSTALL = process.env.INSTALL === '1'
+const barcodesAll = existsSync(`${SITE}/data/barcodes.json`) ? JSON.parse(readFileSync(`${SITE}/data/barcodes.json`, 'utf8')) : []
+const SAMPLE_CODES = [...new Set(['8806107513502', '8801043050494', ...Array.from({ length: 400 }, (_x, i) => barcodesAll[(i * 7919 + 13) % Math.max(1, barcodesAll.length)]?.b).filter(Boolean), ...barcodesAll.filter((b) => b.lk === 'similar').slice(0, 60).map((b) => b.b), ...barcodesAll.filter((b) => b.lk === 'maker').slice(0, 60).map((b) => b.b), ...barcodesAll.filter((b) => b.old).slice(0, 60).map((b) => b.b), '12345678', '00000000', '8809999999999', '880104305049', '088010430504'])]
 const ids = JSON.parse(readFileSync(IDS_FILE, 'utf8'))
 mkdirSync(OUT, { recursive: true })
 for (const f of ['sw.js', 'registerSW.js']) if (existsSync(`${SITE}/${f}`)) unlinkSync(`${SITE}/${f}`)
@@ -46,7 +50,9 @@ const IN_PAGE = (seed, steps, widthPx) => `(async () => {
   const text = () => (document.body ? document.body.innerText : '')
   /* 숫자 칸에 넣어 볼 것 — 멀쩡한 값과 사람이 실제로 치는 엉뚱한 값을 섞는다 */
   const NUMS = ['60', '54.5', '170', '45', '', '0', '-5', '999', '1000000', '0.1', '3', '250', 'abc', '６０', '60kg', ' 72 ', '1e3', '.', '--', '007', '12.345678']
-  const WORDS = ['김', '밥', '사과', '자몽', '훈제', '회', '샐러드', '두부', '', ' ', 'ㄱ', 'zzzz', '😀', '<b>', '%', "'", '김치찌개와 된장찌개 그리고 아주 긴 검색어를 넣어 보면 어떻게 되는지', '0', '12345']
+  const WORDS = ['김', '밥', '사과', '자몽', '훈제', '회', '샐러드', '두부', '', ' ', 'ㄱ', 'zzzz', '😀', '<b>', '%', "'", '김치찌개와 된장찌개 그리고 아주 긴 검색어를 넣어 보면 어떻게 되는지', '0', '12345',
+    '간장', '김치', '액젓', '소금', '햄', '라면', '삐콤씨', '비콤씨', '타이레놀', '로열젤리', '비타민씨', '비타민 C', '콘드로이틴', '세노비스 마그네슘', '블랙모어스', '칼슘 마그네슘', '오메가쓰리', '쏘팔메토', '가르시니아', '종근당', 'Milk Thistle', '  ', '.*', '(', '[', '\\\\']
+  const CODES = ${JSON.stringify(SAMPLE_CODES)}
   const setValue = (el, v) => {
     const proto = el.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype
     Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, v)
@@ -54,7 +60,7 @@ const IN_PAGE = (seed, steps, widthPx) => `(async () => {
   }
   const visible = (el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== 'hidden' }
   /* 누르면 안 되는 것 — 바깥으로 나가는 고리, 파일 고르기, 계정·자료를 지우는 단추(지우면 시험할 것이 없어진다) */
-  const SKIP = /계정\\s*삭제|탈퇴|모두\\s*지우|전부\\s*지우|초기화|내보내기|가져오기|로그아웃|카카오|구글|이메일로|문의\\s*보내|바코드\\s*스캔|스캔\\s*시작|사진/
+  const SKIP = /계정\\s*삭제|탈퇴|모두\\s*지우|전부\\s*지우|초기화|내보내기|가져오기|로그아웃|카카오|구글|이메일로|문의\\s*보내|사진|상품 데이터 받기|다시 받기/
   const candidates = () => {
     const els = [...document.querySelectorAll('button, input, textarea, select, [role="button"]')].filter(visible)
     return els.filter((el) => {
@@ -65,8 +71,13 @@ const IN_PAGE = (seed, steps, widthPx) => `(async () => {
     })
   }
   const label = (el) => (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' ? '[' + (el.placeholder || el.type || '칸') + ']' : (el.textContent || '').trim().replace(/\\s+/g, ' ').slice(0, 18))
+  /* 어느 화면까지 닿았는지 — 안 닿은 화면은 시험하지 않은 화면이다 */
+  const REACH = { 시판식품결과: /식약처|상품 데이터|제조/, 영양제결과: /검색 결과 \\d/, 의약품안내: /의약품입니다/, 영양제못찾음: /비타민제 가운데는/, 바코드결과: /바코드 \\d{8,}/, 바코드비슷: /이름이 비슷한 제품/, 바코드끝남: /판매가 끝난/, 바코드영양제: /건강기능식품입니다/, 담음: /담았습니다/, 며칠치: /장보기/, 재영양: /재영양/, 투석: /투석/, 알레르기: /알레르기/, 찾지못한식품: /찾지 못한 식품/ }
+  const reached = {}
   const look = (after) => {
     const t = text()
+    for (const k in REACH) if (REACH[k].test(t)) reached[k] = (reached[k] || 0) + 1
+    if (document.querySelector('input[aria-label="바코드 번호 직접 입력"]')) reached.바코드칸 = (reached.바코드칸 || 0) + 1
     if (t.includes('화면을 여는 중에 멈췄습니다')) {
       const m = document.querySelector('.font-mono')
       out.push({ kind: '멈춤', detail: (m ? m.innerText : '').slice(0, 160), after }); return false
@@ -98,6 +109,7 @@ const IN_PAGE = (seed, steps, widthPx) => `(async () => {
     for (const k of ['weightKg', 'heightCm', 'age']) if (typeof p[k] !== 'number' || !isFinite(p[k]) || p[k] <= 0) out.push({ kind: '몸 수치가 저장에서 깨짐', detail: k + '=' + JSON.stringify(p[k]), after })
     if (p.weightKg > 300 || p.weightKg < 20 || p.heightCm > 230 || p.heightCm < 100 || p.age > 120) out.push({ kind: '말이 안 되는 몸 수치가 저장됨', detail: p.weightKg + 'kg ' + p.heightCm + 'cm ' + p.age + '세', after })
     for (const [d, list] of Object.entries(st.diary || {})) for (const it of list || []) if (!(it && typeof it.servings === 'number' && it.servings > 0 && it.servings <= 50)) out.push({ kind: '분량이 저장에서 깨짐', detail: d + ' ' + JSON.stringify(it).slice(0, 60), after })
+    if (p.lowIntakeSince && Number.isNaN(Date.parse(p.lowIntakeSince))) out.push({ kind: '못 드신 날짜가 저장에서 깨짐', detail: String(p.lowIntakeSince), after })
     for (const [d, kg] of Object.entries(st.weights || {})) if (!(typeof kg === 'number' && kg >= 20 && kg <= 300)) out.push({ kind: '체중 기록이 저장에서 깨짐', detail: d + '=' + JSON.stringify(kg), after })
   }
   /* 호중구가 낮은 분의 식단에 날과일이 보이면 "씻어서" 가 그 화면에 있어야 한다 */
@@ -110,6 +122,8 @@ const IN_PAGE = (seed, steps, widthPx) => `(async () => {
     for (const li of document.querySelectorAll('li')) {
       const name = (li.querySelector('span.truncate') || {}).textContent || ''
       if (!/^(사과|배|귤|딸기|포도|바나나|키위|복숭아|참외|수박|오렌지|상추|오이|토마토|방울토마토|깻잎)$/.test(name.trim())) continue
+      /* 장보기 줄은 재료 목록이다 — '복숭아 1개 냉장 3~5일'. 식단 칸만 본다 */
+      if (/냉장\\s*\\d|실온|냉동\\s*\\d/.test(li.textContent || '')) continue
       /* '피하세요' 인 음식에는 피하라는 안내만 남긴다 — 씻는 방법이 없는 것이 맞다 */
       if (/피하세요/.test(li.textContent || '')) continue
       const has = !!li.querySelector('[data-howto]') && /씻/.test(li.textContent || '')
@@ -120,6 +134,34 @@ const IN_PAGE = (seed, steps, widthPx) => `(async () => {
   await wait(250)
   if (!look('처음')) return { out, trail }
   for (let i = 0; i < ${steps}; i++) {
+    /*
+     * 일곱에 하나는 목적을 가지고 움직인다. 아무 데나 누르면 찾기·바코드에 닿는 일이 드물다 —
+     * 2만 4천 번을 눌러 영양제 결과 화면을 130번 보았고 바코드 칸은 세지도 못했다.
+     */
+    if (rnd() < 0.14) {
+      const tab = pick(['찾기', '영양제'])
+      const navBtn = [...document.querySelectorAll('nav button, nav a')].find((b) => (b.textContent || '').includes(tab))
+      if (navBtn) {
+        navBtn.click(); await wait(200)
+        const scan = document.querySelector('button[title*="바코드"]')
+        let what
+        if (scan && rnd() < 0.5) {
+          scan.click(); await wait(200)
+          const inp = document.querySelector('input[aria-label="바코드 번호 직접 입력"]')
+          if (inp) {
+            const code = pick(CODES); what = tab + ' 바코드←' + code
+            try { sessionStorage.setItem('fz-doing', what) } catch (e) {}
+            setValue(inp, code); await wait(60)
+            const form = inp.closest('form'); if (form) form.requestSubmit(); else [...inp.parentElement.querySelectorAll('button')].pop()?.click()
+            await wait(300)
+          }
+        } else {
+          const inp = [...document.querySelectorAll('main input, input')].find((x) => visible(x) && /음식 이름|제품명/.test(x.placeholder || ''))
+          if (inp) { const w = pick(WORDS); what = tab + ' 찾기←' + JSON.stringify(w); try { sessionStorage.setItem('fz-doing', what) } catch (e) {}; setValue(inp, w); await wait(350) }
+        }
+        if (what) { trail.push(what); if (!look(what)) break; continue }
+      }
+    }
     const c = candidates()
     if (!c.length) { out.push({ kind: '누를 것이 하나도 없음', detail: text().slice(0, 60), after: trail.slice(-1)[0] || '' }); break }
     /* 아래 탭줄만 누르다 끝나지 않게 — 탭 이동은 다섯 번에 한 번쯤 */
@@ -128,7 +170,8 @@ const IN_PAGE = (seed, steps, widthPx) => `(async () => {
     const el = pick(pool)
     let what, t0 = 0
     if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-      const v = (el.type === 'number' || el.inputMode === 'decimal' || el.inputMode === 'numeric') ? pick(NUMS) : pick(WORDS)
+      const isCode = /바코드/.test((el.getAttribute('aria-label') || '') + (el.placeholder || ''))
+      const v = isCode ? pick(CODES) : (el.type === 'number' || el.inputMode === 'decimal' || el.inputMode === 'numeric') ? pick(NUMS) : pick(WORDS)
       what = label(el) + '←' + JSON.stringify(v)
       try { sessionStorage.setItem('fz-doing', what) } catch (e) {}
       t0 = performance.now()
@@ -158,7 +201,7 @@ const IN_PAGE = (seed, steps, widthPx) => `(async () => {
   }
   await wait(400)
   stateCheck('묶음 끝'); washCheck('묶음 끝')
-  return { out, trail, slowest }
+  return { out, trail, slowest, reached }
 })()`
 
 /* ── 시작 상태 — 멀쩡한 환자 하나. 여기서부터 손으로 망가뜨려 본다 ─── */
@@ -166,13 +209,28 @@ let seed = SEED0
 const rnd = () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296 }
 const pick = (a) => a[Math.floor(rnd() * a.length) % a.length]
 const PHASES = ['during_rt', 'during_chemo', 'neutropenia', 'post_op', 'survivorship']
+const ALLERGENS = ['알류', '우유', '메밀', '땅콩', '대두', '밀', '고등어', '게', '새우', '돼지고기', '복숭아', '토마토', '아황산류', '호두', '닭고기', '쇠고기', '오징어', '조개류', '잣']
+const some = (a, p) => a.filter(() => rnd() < p)
 function startState() {
   const cancer = pick(ids.cancers)
-  const sex = cancer === 'prostate' ? 'M' : cancer === 'gyn' ? 'F' : pick(['M', 'F'])
+  const sex = pick(['M', 'F'])
+  const today = new Date()
+  const key = (n) => { const d = new Date(today); d.setDate(d.getDate() - n); return d.toISOString().slice(0, 10) }
+  const diary = {}, weights = {}
+  for (let n = 0, k = pick([0, 0, 1, 7, 20]); n < k; n++) {
+    const d = key(Math.floor(rnd() * 40))
+    diary[d] = Array.from({ length: pick([0, 1, 3, 6]) }, () => ({ foodId: rnd() < 0.08 ? pick(['kx-999999999', 'kx-1', 'kx-200000', '없는음식']) : pick(ids.foods), servings: pick([0.5, 1, 1, 2]), meal: pick(['아침', '점심', '저녁']) }))
+    if (rnd() < 0.5) weights[d] = 40 + Math.floor(rnd() * 50)
+  }
+  const meds = some(ids.medications, pick([0, 0, 0.05, 0.2]))
+  const parent = new Map(ids.medParents ?? [])
+  const withParents = [...new Set(meds.flatMap((m) => (parent.has(m) ? [m, parent.get(m)] : [m])))]
   return {
-    patient: { ...ids.defaultPatient, cancer, sex, phase: pick(PHASES), weightKg: 45 + Math.floor(rnd() * 50), heightCm: 150 + Math.floor(rnd() * 35), age: 30 + Math.floor(rnd() * 55),
-      conditions: rnd() < 0.3 ? ['호중구감소증'] : [], medications: [], subtypes: [], history: [], cuisines: ['한식'], onboarded: true },
-    diary: {}, shown: {}, weights: {}, supplements: [], textSize: pick(['normal', 'normal', 'large', 'xlarge'])
+    patient: { ...ids.defaultPatient, cancer, sex, phase: pick(PHASES), weightKg: pick([20, 300, 45 + Math.floor(rnd() * 50)]), heightCm: pick([100, 230, 150 + Math.floor(rnd() * 35)]), age: pick([14, 120, 30 + Math.floor(rnd() * 60)]),
+      conditions: some(ids.conditions, pick([0, 0.08, 0.3])), medications: withParents, subtypes: some(ids.subtypes?.[cancer] ?? [], 0.4), allergies: some(ALLERGENS, pick([0, 0, 0.1, 0.5])),
+      dialysis: pick([undefined, undefined, '혈액투석', '복막투석', '투석 전', '모름']), lowIntake: pick([undefined, '아니요', '5일 넘게', '10일 넘게', '15일 넘게']), lowIntakeSince: key(pick([0, 1, 3, 9])),
+      history: some(['수술', '방사선치료', '항암화학요법', '항호르몬치료', '표적치료', '면역항암제', '조혈모세포이식'], 0.3), cuisines: rnd() < 0.5 ? ['한식'] : some(['한식', '양식', '중식', '일식', '동남아', '무관'], 0.5), weightLossPct: pick([0, 0, 5, 12]), onboarded: rnd() > 0.12 },
+    diary, shown: {}, weights, supplements: some(ids.supplements, pick([0, 0.05])), textSize: pick(['normal', 'normal', 'large', 'xlarge'])
   }
 }
 const ALL_RUNS = Array.from({ length: RUNS }, (_x, i) => ({ i, seed: (SEED0 + i * 7919) | 0, state: startState() }))
@@ -221,11 +279,42 @@ class Tab {
   send(method, params = {}) { const id = ++this.id; return new Promise((res) => { this.wait.set(id, res); this.ws.send(JSON.stringify({ id, method, params })) }) }
 }
 
+/* 화면의 '상품 데이터 받기' 단추를 눌러 실제로 받는다 — 일꾼마다 주소가 달라 저장소도 따로다 */
+async function installData(tab, w) {
+  const boot = `try { localStorage.setItem('harucharim.state.v1', ${JSON.stringify(JSON.stringify(startState()))}); localStorage.setItem('harucharim.migrated', '1'); localStorage.setItem('harucharim.stats.consent', 'no'); localStorage.setItem('harucharim.notices.read', ${JSON.stringify(JSON.stringify(ids.notices))}) } catch (e) {}`
+  const sc = await tab.send('Page.addScriptToEvaluateOnNewDocument', { source: boot })
+  await tab.send('Page.navigate', { url: `http://localhost:${PORT + w}/?install` })
+  await sleep(2500)
+  const press = `(async () => {
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms))
+    const find = () => [...document.querySelectorAll('button')].find((b) => /상품 데이터 받기|다시 받기/.test(b.textContent || ''))
+    for (const tabEl of [...document.querySelectorAll('nav button, nav a')]) {
+      tabEl.click(); await wait(400)
+      for (const b of [...document.querySelectorAll('button')].filter((x) => /데이터|설정/.test(x.textContent || ''))) { if (!find()) { b.click(); await wait(200) } }
+      if (find()) break
+    }
+    const b = find(); if (!b) return 'no-button'
+    b.click(); return 'started'
+  })()`
+  const r = await tab.send('Runtime.evaluate', { expression: press, awaitPromise: true, returnByValue: true })
+  if (r.result?.result?.value !== 'started') throw new Error(`자료 받기 단추를 못 찾음: ${JSON.stringify(r.result?.result)}`)
+  for (let t = 0; t < 400; t++) {
+    await sleep(1500)
+    const v = await tab.send('Runtime.evaluate', { expression: `new Promise((res) => { const q = indexedDB.open('harucharim'); q.onerror = () => res('no'); q.onsuccess = () => { const db = q.result; try { const g = db.transaction('meta').objectStore('meta').get('version'); g.onsuccess = () => res(JSON.stringify(g.result ?? null)); g.onerror = () => res('no') } catch (e) { res('wait') } } })`, awaitPromise: true, returnByValue: true })
+    const txt = await tab.send('Runtime.evaluate', { expression: `document.body.innerText.includes('받지 못했습니다') ? 'fail' : (document.body.innerText.match(/\\d[\\d,]*\\s*종/) || [''])[0]`, returnByValue: true })
+    if (txt.result?.result?.value === 'fail') throw new Error('자료를 받지 못함')
+    if (v.result?.result?.value && !['no', 'wait', 'null'].includes(v.result.result.value)) break
+  }
+  await tab.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: sc.result.identifier })
+}
+
 const results = []
+const reachedAll = {}
 let done = 0
 async function worker(w) {
   const tab = await Tab.open()
   await tab.send('Page.enable'); await tab.send('Runtime.enable')
+  if (INSTALL) { const t0 = Date.now(); await installData(tab, w); console.log(`  일꾼 ${w} 자료 받음 ${Math.round((Date.now() - t0) / 1000)}초`) }
   for (let k = w; k < runs.length; k += WORKERS) {
     const run = runs[k]
     const width = k % 2 ? 430 : 360
@@ -265,6 +354,7 @@ async function worker(w) {
       const v = r.result?.result?.value
       if (!v) { found.push({ kind: '시험이 끊김', detail: (r.result?.exceptionDetails?.exception?.description ?? r.crashed ?? '화면이 바뀌어 끊김').slice(0, 140), after: trail.slice(-1)[0] ?? '' }); continue }
       run.slowest = Math.max(run.slowest ?? 0, v.slowest ?? 0)
+      for (const k in v.reached || {}) reachedAll[k] = (reachedAll[k] || 0) + v.reached[k]
       for (const f of v.out) found.push({ ...f, chunk: c, trail: [...trail, ...v.trail].slice(-12) })
       trail.push(...v.trail)
       if (v.out.some((f) => f.kind === '멈춤')) break
@@ -288,6 +378,7 @@ writeFileSync(`${OUT}/results.json`, JSON.stringify({ seed: SEED0, runs: RUNS, s
 const total = results.reduce((n, r) => n + r.steps, 0)
 const clean = results.filter((r) => !r.found.length).length
 console.log(`\n화면 무작위 입력 시험 — ${RUNS}판 · 손댄 횟수 ${total.toLocaleString()}번 · 씨앗 ${SEED0}`)
+console.log(`  닿은 화면(횟수) ${JSON.stringify(reachedAll)}`)
 console.log(`  가장 오래 굳은 누름 ${Math.max(0, ...results.map((r) => r.slowest ?? 0))} ms`)
 console.log(`  아무 문제 없이 끝난 판 ${clean}판 (${Math.round(clean / Math.max(1, results.length) * 100)}%)`)
 const byKind = new Map()

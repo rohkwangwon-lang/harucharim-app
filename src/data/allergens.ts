@@ -29,14 +29,18 @@ export const ALLERGEN_HINT: Partial<Record<Allergen, string>> = {
 const SEAFOOD_MIX = '해물|해산물|짬뽕|씨푸드|모둠\\s?해'
 const BAKERY = '빵|케이크|쿠키|머핀|와플|팬케이크|핫케이크|카스텔라|도넛|도너츠|마카롱|타르트|파이|크루아상|크로와상|스콘|브라우니'
 
-const RX: Record<Allergen, { yes: RegExp; not?: RegExp }> = {
+const RX: Record<Allergen, { yes: RegExp; not?: RegExp; sure?: RegExp }> = {
   알류: { yes: new RegExp(`달걀|계란|난황|난백|메추리알|훈제란|구운란|맥반석|오믈렛|마요|에그|지단|머랭|커스터드|푸딩|차완무시|${BAKERY}|튀김|돈까스|돈가스|커틀릿|전$|전\\(|부침개|동그랑땡`) },
   우유: { yes: new RegExp(`우유|밀크|유단백|초유|락토페린|치즈|요거트|요구르트|버터|크림|라떼|아이스크림|분유|유청|카제인|연유|그라탕|리조또|스프|피자|티라미수|파르페|균형영양식|단백질\\s?음료|단백분말|WPI|프로틴|모카|${BAKERY}`),
-    not: /두유(?!라떼)|코코넛\s?밀크|아몬드\s?밀크|귀리\s?밀크|오트\s?밀크|땅콩버터/ },
+    not: /두유(?!라떼)|코코넛\s?밀크|아몬드\s?밀크|귀리\s?밀크|오트\s?밀크|땅콩버터/,
+    /* '그릭요거트 땅콩버터애플' — 땅콩버터 때문에 요거트까지 빠졌다. 두유로 만든 요거트는 아니다(2026-11-05 무작위 시험) */
+    sure: /치즈|(?<!두유\s?(그릭\s?)?)(요거트|요구르트)/ },
   메밀: { yes: /메밀|모밀|소바|막국수|냉면/ },
   땅콩: { yes: /땅콩|피넛|피너츠|사테/ },
   대두: { yes: /두부|두유|콩|레시틴|이소플라본|된장|간장|청국장|낫토|유부|비지|고추장|대두|에다마메|템페|미소|쌈장|춘장|짜장|마파|불고기|(?<!통)조림|두반장/,
-    not: /^(완두|강낭|녹두|팥|병아리|렌틸|작두|땅)콩/ },
+    not: /^(완두|강낭|녹두|팥|병아리|렌틸|작두|땅)콩/,
+    /* '땅콩두부전병'·'작두콩두부과자' */
+    sure: /두부|된장|간장|두유/ },
   밀: { yes: new RegExp(`밀가루|통밀|소맥|국수|면$|면\\(|라면|우동|짜장|짬뽕|수제비|칼국수|만두|교자|딤섬|완탕|부침개|전병|전$|전\\(|튀김|돈까스|돈가스|커틀릿|피자|파스타|스파게티|라자냐|과자|크래커|시리얼|떡볶이|어묵|간장|토스트|샌드위치|버거|또띠아|누들|빵가루|${BAKERY}`),
     not: /쌀국수|쌀면|당면|메밀면/ },
   고등어: { yes: /고등어|고갈비|시메사바/ },
@@ -49,7 +53,9 @@ const RX: Record<Allergen, { yes: RegExp; not?: RegExp }> = {
   호두: { yes: /호두|월넛/ },
   닭고기: { yes: /닭|치킨|삼계탕|백숙|너겟|너깃|가라아게|탄두리|오야코동/ },
   쇠고기: { yes: /소고기|쇠고기|한우|우육|불고기|갈비|등심|안심|차돌|양지|사태|우둔|설렁탕|곰탕|육회|육개장|스테이크|버거|패티|장조림|우삼겹|사골|도가니|꼬리곰탕|소머리|비프|샤브|규동/,
-    not: /돼지|닭|연어|칠면조|오리|참치|양고기/ },
+    not: /돼지|닭|연어|칠면조|오리(?!지|엔탈|진|온)|참치|양고기/,
+    /* '한우닭죽'·'쇠고기 육포 오리지널' — 이름에 또렷이 적혔으면 다른 고기와 함께 있어도 든 것이다(2026-11-05 무작위 시험) */
+    sure: /소고기|쇠고기|한우|우육/ },
   오징어: { yes: new RegExp(`오징어|한치|꼴뚜기|진미채|${SEAFOOD_MIX}`) },
   조개류: { yes: new RegExp(`조개|굴(?!비|림|뚝|레)|전복|홍합|바지락|가리비|키조개|관자|재첩|꼬막|소라|백합|대합|맛조개|${SEAFOOD_MIX}`) },
   잣: { yes: /잣/ }
@@ -110,7 +116,7 @@ export function maskToAllergens(mask: number): Allergen[] {
 /** 이 음식에 보이는 알레르기 유발물질 — 이름으로 찾은 것 + (품목보고번호가 있으면) 원재료로 찾은 것 */
 export function allergensIn(food: Pick<Food, 'name'> & { reportNo?: string }): Allergen[] {
   const n = food.name
-  const byName = ALLERGENS.filter((a) => RX[a].yes.test(n) && !RX[a].not?.test(n))
+  const byName = ALLERGENS.filter((a) => RX[a].yes.test(n) && (!RX[a].not?.test(n) || RX[a].sure?.test(n)))
   const mask = food.reportNo && REPORT_INDEX ? REPORT_INDEX.get(food.reportNo) : undefined
   if (!mask) return byName
   const byIng = maskToAllergens(mask)

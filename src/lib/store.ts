@@ -135,6 +135,9 @@ const KNOWN_CONDITIONS = new Set(Object.keys(CONDITION_RULES))
 const TEXT_SIZES: readonly string[] = ['normal', 'large', 'xlarge']
 
 /** 환자 설정. 바탕이 되는 값이 어긋났으면 onboarded 를 내려 다시 여쭙게 한다 */
+/** 모양만 맞는 '2026-13-45' 를 걸러 낸다 — 날짜로 읽히지 않으면 재영양 목표가 NaN 이 되어 식단이 멈췄다 */
+const realDay = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(s)) && new Date(`${s}T00:00:00Z`).toISOString().slice(0, 10) === s
+
 export function restorePatient(raw: unknown): PatientContext {
   const p = isObj(raw) ? raw : {}
   let sound = isObj(raw)
@@ -169,7 +172,7 @@ export function restorePatient(raw: unknown): PatientContext {
       ? (p.dialysis as PatientContext['dialysis']) : undefined,
     lowIntake: typeof p.lowIntake === 'string' && (LOW_INTAKE_CHOICES as readonly string[]).includes(p.lowIntake)
       ? (p.lowIntake as PatientContext['lowIntake']) : undefined,
-    lowIntakeSince: typeof p.lowIntakeSince === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(p.lowIntakeSince) ? p.lowIntakeSince : undefined,
+    lowIntakeSince: typeof p.lowIntakeSince === 'string' && realDay(p.lowIntakeSince) ? p.lowIntakeSince : undefined,
     /* 알레르기 — 표시대상 목록에 있는 이름만 남긴다 */
     allergies: asList(p.allergies).filter((x): x is string => typeof x === 'string' && (ALLERGENS as readonly string[]).includes(x)),
     subtypes: asList(p.subtypes).filter((t): t is NonNullable<PatientContext['subtypes']>[number] => typeof t === 'string' && validSubs.has(t)),
@@ -217,7 +220,8 @@ function restoreDay(raw: unknown): SelectedItem[] {
     const servings = n === undefined || n <= 0 ? 1 : Math.min(n, 50)
     items.push({ ...(x as unknown as SelectedItem), foodId: x.foodId, servings })
   }
-  return normalizeDay(items)
+  /* 같은 음식을 합치면 50을 넘을 수 있다 — 합친 뒤에도 한도를 지킨다 */
+  return normalizeDay(items).map((it) => (it.servings > 50 ? { ...it, servings: 50 } : it))
 }
 
 /** 체중. 목록 모양([{date, kg}])으로 적힌 것도 날짜별 표로 살린다 */

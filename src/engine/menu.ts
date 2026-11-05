@@ -2932,12 +2932,24 @@ function collectCandidates(
 
   const dysphagia = patient.conditions.includes('연하곤란')
   const diabetic = patient.conditions.includes('당뇨')
+  const onWarfarin = patient.medications.includes('warfarin') || patient.conditions.includes('와파린복용')
   const out: Cand[] = []
   for (const f of CURATED_FOODS) {
     if (f.group === '경장영양·환자식' && !needsONS && !forceONS) continue
     /* 신장용·당뇨용 영양식은 그 상태인 분께만 — 신장용은 단백질·칼륨을 줄인 것이라 다른 분께는 맞지 않는다(2026-10-15 안전 검토) */
     if (/신장용/.test(f.name) && !patient.conditions.includes('신기능저하')) continue
     if (/당뇨용/.test(f.name) && !patient.conditions.includes('당뇨')) continue
+    /*
+     * 신장 때문에 단백질을 제한하는 분께 단백질을 채우는 보충제를 권하지 않는다.
+     * 삼킴곤란이 겹친 분의 식단에 유청단백분말 26 g 이 올라 단백질이 상한의 1.7배가 되었다(2026-11-05 무작위 시험).
+     */
+    if (f.group === '경장영양·환자식' && renalProteinCap(patient) && (f.per100.protein ?? 0) * f.serving.g / 100 > 15) continue
+    /*
+     * 와파린 — 비타민 K 는 끊을 것이 아니라 일정하게 드실 것이라 하한도 있다. 다만 한 번에 하루 한도를 통째로
+     * 채우는 음식을 앱이 고르면 그 일정함을 앱이 깬다. 청국장 1회 160 µg 과 취나물이 겹쳐 하루 331 µg(한도 130)인 날이 있었다.
+     * 직접 담으시는 것은 막지 않는다 — 판정은 규칙이 따로 한다(2026-11-05 무작위 시험).
+     */
+    if (onWarfarin && (f.per100.vitK ?? 0) * f.serving.g / 100 >= 130) continue
     // 조미료·기름처럼 그 자체로 한 끼를 이루지 않는 것은 제안하지 않는다
     if (f.group === '유지·당류') continue
     if (f.tags.some((t) => NEVER_SUGGEST.has(t))) continue
@@ -3846,8 +3858,18 @@ export function dayNotes(
     /*
      * 값이 하나도 없으면 "0 mg 이라 부족합니다" 가 되어 버린다.
      * 담으신 것이 없는 것과 자료에 값이 없는 것은 다른 이야기다.
+     * 다만 드신 음식 모두에 값이 없으면 그 사실은 말해야 한다 — 와파린 하한을 못 잰 날에 아무 말이 없었다.
      */
-    if (got === undefined) continue
+    const noValue = (microUnknown[m.key] ?? [])
+    if (got === undefined) {
+      if (noValue.length > 0) {
+        const head = noValue.slice(0, 3).join('·')
+        const subject = noValue.length > 3 ? `${head} 외 ${noValue.length - 3}가지` : head
+        notes.push({ tone: 'info', topic: `${m.label} 빠진 값`,
+          text: `${subject}${topicParticle(subject)} 자료에 ${m.label} 값이 없어 오늘 ${m.label} 은 재지 못했습니다.` })
+      }
+      continue
+    }
     const v = Math.round(got)
 
     if (m.max !== undefined && got > m.max) {

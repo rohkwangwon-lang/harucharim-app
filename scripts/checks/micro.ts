@@ -213,7 +213,7 @@ for (let i = 0; i < N; i++) {
     const blind = microUnknownNames(chosen, p)
     for (const m of targets) {
       if ((blind[m.key] ?? []).length === 0) continue
-      const told = day.notes.some((n) => n.topic.startsWith(m.label) && /빠진 값|잡히지 않았/.test(n.text + n.topic))
+      const told = day.notes.some((n) => n.topic.startsWith(m.label) && /빠진 값|잡히지 않았|재지 못했/.test(n.text + n.topic))
       if (!told) bad('값이 빠진 것을 밝히지 않음', `${m.label} — ${(blind[m.key] ?? []).slice(0, 2).join('·')}`)
     }
 
