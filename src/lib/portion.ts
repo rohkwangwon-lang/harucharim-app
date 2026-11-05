@@ -21,3 +21,27 @@ export function portionLabel(label: string, servings: number): string {
   }
   return `${label} × ${servings}`
 }
+
+/**
+ * 시판 식품의 '1회 기준' 이 한 번에 드시는 양이 아니라 제품 한 통 전체일 수 있는가.
+ *
+ * 식약처 자료의 1회 섭취참고량이 없는 제품은 제품 전체 무게가 '1회' 로 들어와 있다. 볶음참깨 200 g(1,120 kcal),
+ * 액젓 100 g(나트륨 8,783 mg) 같은 값이 그대로 합계에 더해진다. 값을 지어낼 수는 없으니 그렇게 알려 드린다.
+ * 어느 행이 그런지 자료에 표시가 없어, 한 끼로 보기에 많은 양만 고른다 — 열량 500 kcal, 나트륨 2,000 mg(하루 상한).
+ */
+export function mayBeWholePack(food: { id: string; serving: { g: number }; per100: { kcal?: number; na?: number } }): boolean {
+  const per = food.serving.g / 100
+  /* 공공자료의 액젓·소스는 양을 몰라 100 g 으로 적혀 있다. 국밥 한 그릇처럼 정말 짠 한 끼와 가르려 100 g 만 본다 */
+  if (food.id.startsWith('kf-')) return food.serving.g === 100 && (food.per100.na ?? 0) >= 2000
+  if (!food.id.startsWith('kx-')) return false
+  return (food.per100.kcal ?? 0) * per >= 500 || (food.per100.na ?? 0) * per >= 2000
+}
+
+/** 목록에 짧게 붙이는 말 */
+export const WHOLE_PACK_SHORT = '제품 한 통 전체의 양일 수 있습니다'
+
+/** 음식 상세에 적는 말 */
+export const WHOLE_PACK_NOTE =
+  '이 양은 한 번에 드시는 양이 아니라 제품 한 통(한 봉지) 전체의 양일 수 있습니다. ' +
+  '조금만 드셨다면 실제 열량과 나트륨은 여기 적힌 것보다 훨씬 적습니다.'
+

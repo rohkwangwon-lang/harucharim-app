@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { portionLabel } from '../lib/portion'
+import { portionLabel, mayBeWholePack, WHOLE_PACK_SHORT } from '../lib/portion'
 import { IconEvening, IconMorning, IconNoon, IconSnack, IconSuggest } from './icons'
 import type { MealSlot, PatientContext, SelectedItem } from '../data/types'
 import { CUISINE_CHOICES, MEAL_SLOTS } from '../data/types'
@@ -484,6 +484,7 @@ export function TodayMeals({
                               {portionLabel(food.serving.label, item.servings)} · {Math.round(per.kcal ?? 0)} kcal ·
                               나트륨 {per.na === undefined ? '정보 없음' : `${Math.round(per.na)} mg`}
                             </div>
+                            {mayBeWholePack(food) && <p className="mt-0.5 text-[11px] text-warn-700">{WHOLE_PACK_SHORT}</p>}
                             {v && <HowTo lines={howToLines(v)} />}
                           </div>
                           <div className="flex shrink-0 items-center gap-1">

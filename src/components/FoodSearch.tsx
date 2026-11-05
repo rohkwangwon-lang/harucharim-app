@@ -1,3 +1,4 @@
+import { mayBeWholePack, WHOLE_PACK_SHORT } from '../lib/portion'
 import { useEffect, useMemo, useState } from 'react'
 import { IconBarcode } from './icons'
 import type { Cuisine, Food, FoodGroup, MealSlot, PatientContext } from '../data/types'
@@ -524,6 +525,7 @@ export function FoodSearch({
                       {food.serving.label} · {Math.round(per.kcal ?? 0)} kcal · 단백질{' '}
                       {(per.protein ?? 0).toFixed(1)} g · 나트륨 {per.na === undefined ? '정보 없음' : `${Math.round(per.na)} mg`}
                     </div>
+                    {mayBeWholePack(food) && <p className="mt-0.5 text-[11px] text-warn-700">{WHOLE_PACK_SHORT}</p>}
                     <HowTo lines={howToLines(verdict)} />
                   </div>
                   <span className="shrink-0 text-stone-300">›</span>

@@ -1,3 +1,4 @@
+import { mayBeWholePack, WHOLE_PACK_NOTE } from '../lib/portion'
 import { useState } from 'react'
 import type { Food, MealSlot, PatientContext } from '../data/types'
 import { MEAL_SLOTS } from '../data/types'
@@ -62,6 +63,11 @@ export function FoodDetail({
               <p className="text-[11px] font-bold text-brand-800">드시는 방법</p>
               <HowTo lines={howToLines(verdict)} />
             </div>
+          )}
+          {mayBeWholePack(food) && (
+            <p className="mt-2.5 rounded-lg bg-warn-50 px-3 py-2 text-xs leading-relaxed text-warn-800">
+              {WHOLE_PACK_NOTE}
+            </p>
           )}
           {food.auto && (
             <p className="mt-2.5 rounded-lg bg-stone-50 px-3 py-2 text-[11px] leading-relaxed text-stone-500">

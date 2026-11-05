@@ -12,6 +12,7 @@
  * 화면의 판단을 순수 함수(menuConditionKey)로 꺼내 두고 여기서 따진다.
  */
 import { matchMedicines, medicineFirst, MEDICINE_NOTICE } from '../../src/lib/medicines'
+import { mayBeWholePack, WHOLE_PACK_NOTE, WHOLE_PACK_SHORT } from '../../src/lib/portion'
 import { findIngredients } from '../../src/data/ingredientRules'
 import { buildDayMenu, recentFoods } from '../../src/engine/menu'
 import { readFileSync } from 'node:fs'
@@ -229,6 +230,27 @@ const key = (
   if (!other.dropped.includes('네이처메이드')) bad('영양제 찾기', '없는 브랜드를 빼고 찾았다고 알리지 않음')
   if (find('없는제품이름').ids.length) bad('영양제 찾기', '아무 낱말도 맞지 않는데 무언가 나옴')
   console.log(`  영양제 찾기 — '마그네슘 칼슘' ${order.length}건 이상, 세노비스 마그네슘 → ${raw.items[top.ids[0]][1]} '${nameOf(top.ids[0])}'`)
+}
+
+/* ── 6-2. 1회량이 제품 한 통 전체일 수 있는 시판 식품 — 어려운 말 없이 알린다(2026-11-05 전문의 요청) ── */
+{
+  const F = (id: string, g: number, kcal: number, na?: number) => ({ id, serving: { g }, per100: { kcal, na } })
+  const CASES: [string, ReturnType<typeof F>, boolean][] = [
+    ['볶음참깨 200 g', F('kx-1', 200, 560, 10), true],
+    ['액젓 100 g', F('kx-2', 100, 30, 8783), true],
+    ['양조간장 5 g', F('kx-3', 5, 60, 5890), false],
+    ['펩시 200 g', F('kx-4', 200, 45, 5), false],
+    ['공공자료 비빔밥 400 g', F('kf-5', 400, 200, 900), false],
+    ['공공자료 까나리액젓 100 g', F('kf-6', 100, 30, 8783), true],
+    ['공공자료 짬뽕 한 그릇 600 g', F('kf-7', 600, 90, 450), false],
+    ['손으로 등록한 소금', F('salt', 100, 0, 39000), false]
+  ]
+  for (const [name, food, want] of CASES)
+    if (mayBeWholePack(food) !== want) bad('제품 전체 양 안내', `${name} — ${want ? '알려야 함' : '알리면 안 됨'}`)
+  for (const file of ['FoodDetail.tsx', 'FoodSearch.tsx', 'TodayMeals.tsx', 'Diary.tsx'])
+    if (!readFileSync(new URL(`../../src/components/${file}`, import.meta.url), 'utf8').includes('mayBeWholePack')) bad('제품 전체 양 안내', `${file} 에서 알리지 않음`)
+  for (const text of [WHOLE_PACK_NOTE, WHOLE_PACK_SHORT])
+    if (/포장\s*무게|식품\s*중량|참고량|내용량/.test(text)) bad('제품 전체 양 안내', `어려운 말: ${text}`)
 }
 
 /* ── 7. 의약품 — 이름만 알리고, 판정하지 않는다 ── */

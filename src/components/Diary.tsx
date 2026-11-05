@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { portionLabel } from '../lib/portion'
+import { portionLabel, mayBeWholePack, WHOLE_PACK_SHORT } from '../lib/portion'
 import { track, trackDemand } from '../lib/stats'
 import type { PatientContext, SelectedItem, Supplement } from '../data/types'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
@@ -259,6 +259,7 @@ function DayView({
                         <span className="ml-1.5 text-[11px] text-stone-400">
                           {portionLabel(f.serving.label, i.servings)}
                         </span>
+                        {mayBeWholePack(f) && <p className="mt-0.5 text-[11px] text-warn-700">{WHOLE_PACK_SHORT}</p>}
                       </li>
                     )
                   })}
