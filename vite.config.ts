@@ -66,7 +66,7 @@ export default defineConfig({
         // 데이터가 전부 번들에 들어 있으므로 앱 셸 전체를 캐시해 완전한 오프라인 사용을 지원한다
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
         // 설치 창에만 쓰는 미리보기 사진 — 오프라인 캐시에 넣으면 설치할 때마다 1 MB 가 더 내려간다
-        globIgnores: ['**/screenshots/**'],
+        globIgnores: ['**/screenshots/**', 'tester/**'],
         // 식품 데이터가 들어간 번들이 3 MB 를 넘으므로 넉넉히 잡는다
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
         // 새 서비스워커가 대기하지 않고 바로 넘겨받게 한다.
