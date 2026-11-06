@@ -566,7 +566,7 @@ export function Credentials({ compact = false }: { compact?: boolean }) {
   if (compact) {
     return (
       <p className="text-[11px] leading-relaxed text-stone-500">
-        암 환자를 25년간 치료해 온 <strong className="text-stone-700">방사선종양학과 전문의</strong>가
+        20년 넘게 암 환자를 치료해 온 <strong className="text-stone-700">방사선종양학과 전문의</strong>가
         내용을 감수하고 검토했습니다.
       </p>
     )
@@ -575,7 +575,7 @@ export function Credentials({ compact = false }: { compact?: boolean }) {
     <div className="card border-brand-200 bg-brand-50/50 p-4">
       <h3 className="text-sm font-bold text-brand-900">누가 만들고 누가 보았나</h3>
       <p className="mt-1.5 text-xs leading-relaxed text-stone-700">
-        암 환자를 <strong>25년간 치료해 온 방사선종양학과 전문의</strong>가 이 앱의 모든 권고를
+        <strong>20년 넘게 암 환자를 치료해 온 방사선종양학과 전문의</strong>가 이 앱의 모든 권고를
         직접 감수하고 검토했습니다. 어떤 문헌을 근거로 삼을지, 그 근거가 이 암종·이 시기·이 증상에
         해당하는지는 진료 경험을 바탕으로 판단했습니다.
       </p>

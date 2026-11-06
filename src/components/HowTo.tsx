@@ -327,7 +327,7 @@ export function HowTo() {
             맞는지 알려 드리는 것.</strong> 그 판단마다 근거와 출처를 함께 붙였습니다.
           </p>
           <p className="mt-2 text-[11px] leading-relaxed text-stone-500">
-            암 환자를 25년간 치료해 온 방사선종양학과 전문의가 내용을 감수하고 검토했습니다.
+            20년 넘게 암 환자를 치료해 온 방사선종양학과 전문의가 내용을 감수하고 검토했습니다.
           </p>
         </div>
       </Section>

@@ -110,6 +110,10 @@ no(!/<CareNote \/>/.test(app) || !/담당 의료진과 상의/.test(app),
 if (existsSync('public/tester')) {
   const viteCfg = readFileSync('vite.config.ts', 'utf-8')
   no(!/navigateFallbackDenylist:[^\n]*tester/.test(viteCfg), '/tester/ 가 앱 화면 돌려보내기에서 빠져 있지 않음 — 앱을 연 기기에서 모집 페이지 대신 앱이 뜬다')
+  /* 감수자 경력: 방사선종양학 수련 2004년 시작 → '25년'은 사실보다 많다(2026-11-06 정정) */
+  for (const f of ['src/components/ui.tsx', 'src/components/HowTo.tsx', 'public/tester/index.html', 'public/tester/video.html', 'docs/출시/스토어-등록-자료.md']) {
+    if (existsSync(f)) no(/25년간 치료|임상 25년/.test(readFileSync(f, 'utf-8')), `${f}: 감수자 경력이 '25년' — 암 환자 진료는 2004년부터(20년 넘게)`)
+  }
   /* 테스터에게 드리는 약속: 평점·후기와 엮이면 구글 정책(보상 대가 평점) 위반, 지금 기능까지 걸면 약관 7항과 어긋난다 */
   for (const f of ['public/tester/index.html', 'public/tester/video.html']) {
     if (!existsSync(f)) continue
