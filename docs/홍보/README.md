@@ -47,7 +47,7 @@
 | 판단 엔진 | 7개 | `src/engine/` (plan 포함) |
 | 임상 규칙 | 158개 (영양 130 + 상호작용 28) · 근거 A10 B15 C40 G65 | `src/data/*Rules.ts` · `interactions.ts` |
 | 검사한 추천 | 3,531,402건 (3,000명 × 90일) · 피해야 할 것 추천 0건 · 검사 32종 | `scripts/checks/bigrun.ts` (2026-09) · `scripts/checks/*.ts` |
-| 새 기능 숫자 | 닷새치 · 재료 가짓수 13 % 절감(80명 표본) · 사용법 6장 17장면 · 음성 녹음 65개 · 알레르기 원재료 174,048건 | `src/engine/plan.ts` 주석 · `src/components/Tour.tsx` · `public/tour/audio.json` · 현재-상태.md 10/15 |
+| 새 기능 숫자 | 닷새치 · 재료 가짓수 13 % 절감(80명 표본) · 사용법 6장 17장면 · 음성 녹음 67개(2026-11-09 다시 녹음) · 알레르기 원재료 174,048건 | `src/engine/plan.ts` 주석 · `src/components/Tour.tsx` · `public/tour/audio.json` · 현재-상태.md 10/15 |
 
 숫자를 바꿀 일이 생기면(자료를 새로 받거나 규칙을 더하면) 위 자리에서 다시 세어 고치십시오.
 기본 식품과 가공식품은 출처가 다른 별개 기록이라 더했고, 이름이 같은 1,985건도 서로 다른 기록입니다.

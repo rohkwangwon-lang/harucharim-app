@@ -74,187 +74,189 @@ const tabTap = (say: string, to: TabId, from: Screen): Beat => ({ say, at: [TAB_
 
 const CHAPTERS: Chapter[] = [
   {
-    title: '처음 등록',
-    lead: '로그인과 내 정보 — 한 번만 하면 됩니다',
+    title: '처음 시작하기',
+    lead: '로그인하고 내 정보를 적습니다. 한 번만 하시면 됩니다',
     scenes: [
       {
         title: '시작하기',
         beats: [
-          { say: '카카오나 구글 단추를 누르면 로그인됩니다. 처음이면 그 자리에서 가입됩니다.', at: [50, 24], screen: { kind: 'login' } },
-          { say: '아이디를 따로 만들지 않습니다.', at: [50, 24], tap: true, screen: { kind: 'login' } },
-          { say: '로그인되었습니다. 다음을 누릅니다.', at: [66, 93], tap: true, screen: { kind: 'login', done: true } }
+          { say: '천천히 보셔도 됩니다. 아래 멈춤을 누르면 멈추고, 이전을 누르면 다시 보여 드립니다.', screen: { kind: 'login' }, ms: 4200 },
+          { say: '카카오나 구글 계정으로 들어갑니다. 계정이 없으시면 이메일로도 됩니다.', at: [50, 24], screen: { kind: 'login' } },
+          { say: '처음이시면 그 자리에서 가입까지 됩니다. 아이디를 따로 만들지 않으셔도 됩니다.', at: [50, 24], tap: true, screen: { kind: 'login' } },
+          { say: '들어오셨습니다. 다음을 누르세요.', at: [66, 93], tap: true, screen: { kind: 'login', done: true } }
         ]
       },
       {
         title: '내 정보 등록',
         beats: [
-          { say: '어떤 암으로 치료받고 계신지 고릅니다. 여기서 고른 것에 따라 모든 추천이 달라집니다.', at: [28, 20], screen: { kind: 'onb', step: 1 } },
-          { say: '유방암을 골랐습니다.', at: [28, 20], tap: true, screen: { kind: 'onb', step: 1, picked: '유방암' } },
-          { say: '지금 어느 단계인지 고릅니다. 같은 음식도 시기에 따라 권고가 반대로 바뀝니다.', at: [50, 21], tap: true, screen: { kind: 'onb', step: 2, picked: '방사선치료 중' } },
-          { say: '체중·키·나이를 넣으면 BMI 와 하루 목표 열량이 바로 보입니다.', at: [28, 24], tap: true, screen: { kind: 'onb', step: 3 } },
-          { say: '숫자를 잘못 넣었는지도 여기서 알 수 있습니다.', screen: { kind: 'onb', step: 3, typed: true } },
-          { say: '드시고 싶은 요리 계통을 고르고 시작하기를 누르면 준비가 끝납니다.', at: [66, 93], tap: true, screen: { kind: 'onb', step: 4, picked: '한식' } }
+          { say: '어떤 암인지 고르세요. 여기에 맞춰 모든 추천이 달라집니다.', at: [28, 20], screen: { kind: 'onb', step: 1 } },
+          { say: '여기서는 유방암을 골라 보았습니다.', at: [28, 20], tap: true, screen: { kind: 'onb', step: 1, picked: '유방암' } },
+          { say: '지금 치료 중이신지, 치료를 마치셨는지 고르세요. 같은 음식도 시기에 따라 답이 달라집니다.', at: [50, 21], tap: true, screen: { kind: 'onb', step: 2, picked: '방사선치료 중' } },
+          { say: '키와 체중, 나이를 적으시면 하루에 드실 열량과 단백질 목표가 바로 나옵니다.', at: [28, 24], tap: true, screen: { kind: 'onb', step: 3 } },
+          { say: '숫자가 이상하면 여기서 알려 드립니다. 한 번 더 보시고 고치시면 됩니다.', screen: { kind: 'onb', step: 3, typed: true } },
+          { say: '좋아하시는 음식 종류를 고르고 시작하기를 누르면 준비가 끝납니다.', at: [66, 93], tap: true, screen: { kind: 'onb', step: 4, picked: '한식' } }
         ]
       }
     ]
   },
   {
     title: '내가 고르고, 나머지는 추천받기',
-    lead: '먹고 싶은 것을 먼저 담고 빈자리만 채우는 법',
+    lead: '드시고 싶은 것을 먼저 담고, 모자란 것만 채우는 법',
     scenes: [
       {
         title: '음식 찾기',
         beats: [
-          tabTap('먹고 싶은 음식이 있으면 찾기 탭에서 시작합니다.', '찾기', app('내 식단', 'compose')),
-          { say: '음식 이름으로 검색합니다. 된장찌개를 찾아 봅니다.', at: [50, 11], tap: true, screen: app('찾기', 'search') },
-          { say: '결과마다 이분께 어떤지 판정이 붙어 있습니다 — 권장, 주의, 피하세요.', screen: app('찾기', 'search', { results: true }) },
-          { say: '된장찌개를 누르면 자세히 볼 수 있습니다.', at: [50, 26], tap: true, screen: app('찾기', 'search', { results: true }) }
+          tabTap('드시고 싶은 음식이 있으면 아래 찾기를 누르세요.', '찾기', app('내 식단', 'compose')),
+          { say: '음식 이름을 적습니다. 된장찌개를 찾아 보겠습니다.', at: [50, 11], tap: true, screen: app('찾기', 'search') },
+          { say: '음식마다 나에게 맞는지 표시가 붙습니다. 권장, 주의, 피하세요, 세 가지입니다.', screen: app('찾기', 'search', { results: true }) },
+          { say: '된장찌개를 누르면 자세히 나옵니다.', at: [50, 26], tap: true, screen: app('찾기', 'search', { results: true }) }
         ]
       },
       {
         title: '판정과 드시는 방법',
         beats: [
-          { say: '왜 주의인지(나트륨), 어떻게 드시면 되는지(건더기 위주로, 국물은 반만)가 바로 보입니다.', screen: app('찾기', 'detail') },
-          { say: '이유 아래에는 어떤 권고와 근거에 따른 것인지 적혀 있습니다.', at: [50, 62], screen: app('찾기', 'detail') },
-          { say: '끼니와 양을 고르고 담기를 누릅니다.', at: [50, 46], tap: true, screen: app('찾기', 'detail') }
+          { say: '왜 주의인지, 어떻게 드시면 되는지 나옵니다. 된장찌개는 짜니까 건더기 위주로, 국물은 반만 드시라고 합니다.', screen: app('찾기', 'detail') },
+          { say: '그 아래에는 어떤 연구와 지침을 보고 판단했는지 적혀 있습니다.', at: [50, 62], screen: app('찾기', 'detail') },
+          { say: '언제 드실지와 양을 고르고 담기를 누르세요.', at: [50, 46], tap: true, screen: app('찾기', 'detail') }
         ]
       },
       {
         title: '빈자리만 추천받기',
         beats: [
-          { say: '내 식단에 된장찌개가 점심으로 담겼습니다. 위의 막대는 아직 열량·단백질이 모자란다고 말합니다.', screen: app('내 식단', 'compose', { jjigae: true, bars: true }) },
-          { say: '하루치를 한 번에 추천받기를 누릅니다.', at: [50, 60], tap: true, screen: app('내 식단', 'compose', { jjigae: true, bars: true }) },
-          { say: '담으신 1가지에 부족한 부분을 채웠습니다 — 된장찌개는 "내가 담음" 으로 그대로 두고 나머지만 앱이 골랐습니다.', screen: app('추천', 'suggest1', { jjigae: true }) },
-          { say: '다시 구성을 누르면 담으신 것은 그대로 두고 나머지만 바꿉니다.', at: [84, 13], tap: true, screen: app('추천', 'suggest1', { jjigae: true, alt: true }) },
-          { say: '앞의 안이 나았다면 이전 안으로 돌아갈 수 있습니다.', at: [60, 13], tap: true, screen: app('추천', 'suggest1', { jjigae: true, prev: true }) },
-          { say: '음식마다 이유 보기를 펴면 왜 올렸는지 보입니다. 마음에 드는 것만 하나씩 담아도 되고,', at: [84, 48], screen: app('추천', 'suggest1', { jjigae: true }) },
-          { say: '추천 12가지를 내 식단에 담기로 한 번에 담아도 됩니다.', at: [50, 34], tap: true, screen: app('추천', 'suggest1', { jjigae: true }) }
+          { say: '점심에 된장찌개가 담겼습니다. 위의 막대를 보면 아직 열량과 단백질이 모자랍니다.', screen: app('내 식단', 'compose', { jjigae: true, bars: true }) },
+          { say: '모자란 것은 앱에 맡기세요. 하루치를 한 번에 추천받기를 누릅니다.', at: [50, 60], tap: true, screen: app('내 식단', 'compose', { jjigae: true, bars: true }) },
+          { say: '고르신 된장찌개는 그대로 두고, 모자란 만큼만 앱이 채웠습니다.', screen: app('추천', 'suggest1', { jjigae: true }) },
+          { say: '마음에 안 드시면 다시 구성을 누르세요. 고르신 것은 그대로 두고 나머지만 바꿉니다.', at: [84, 13], tap: true, screen: app('추천', 'suggest1', { jjigae: true, alt: true }) },
+          { say: '앞의 것이 나았다면 이전 안을 누르면 돌아갑니다.', at: [60, 13], tap: true, screen: app('추천', 'suggest1', { jjigae: true, prev: true }) },
+          { say: '이유 보기를 누르면 왜 이 음식을 골랐는지 나옵니다. 마음에 드는 것만 하나씩 담으셔도 되고,', at: [84, 48], screen: app('추천', 'suggest1', { jjigae: true }) },
+          { say: '위의 단추로 한꺼번에 담으셔도 됩니다.', at: [50, 34], tap: true, screen: app('추천', 'suggest1', { jjigae: true }) }
         ]
       },
       {
         title: '끼니마다 채우기·바꾸기',
         beats: [
-          { say: '내 식단의 끼니별 구성에서는 끼니마다 이렇게 채워 보세요 제안이 붙습니다. 하나씩 담을 수 있습니다.', at: [84, 66], tap: true, screen: app('내 식단', 'compose', { jjigae: true, filled: true, hint: true }) },
-          { say: '＋ 점심에 음식 추가를 누르면 찾기로 가서 그 끼니에 바로 담깁니다.', at: [50, 70], tap: true, screen: app('내 식단', 'compose', { jjigae: true, filled: true }) },
-          { say: '양은 − + 로 바꿉니다. 밥을 반 공기로 줄였습니다. 하루 합계가 바로 다시 계산됩니다.', at: [84, 41], tap: true, screen: app('내 식단', 'compose', { jjigae: true, filled: true, half: true }) },
-          { say: '제품은 찾기의 바코드로 카메라에 찍어 담을 수도 있습니다(시험 중인 기능).', at: [86, 11], screen: app('찾기', 'search'), ms: 2800 }
+          { say: '내 식단에서는 끼니마다, 이렇게 채워 보세요, 하고 몇 가지를 권합니다. 하나씩 담을 수 있습니다.', at: [84, 66], tap: true, screen: app('내 식단', 'compose', { jjigae: true, filled: true, hint: true }) },
+          { say: '점심에 음식 추가를 누르면, 찾아서 바로 점심에 담을 수 있습니다.', at: [50, 70], tap: true, screen: app('내 식단', 'compose', { jjigae: true, filled: true }) },
+          { say: '양은 빼기, 더하기 단추로 바꿉니다. 밥을 반 공기로 줄이면 하루 합계도 바로 바뀝니다.', at: [84, 41], tap: true, screen: app('내 식단', 'compose', { jjigae: true, filled: true, half: true }) },
+          { say: '포장 식품은 바코드를 찍어 찾을 수도 있습니다. 아직 시험 중이라 못 찾는 제품이 많으니, 그때는 이름으로 찾아 주세요.', at: [86, 11], screen: app('찾기', 'search'), ms: 2800 }
         ]
       }
     ]
   },
   {
     title: '며칠치 식단과 장보기',
-    lead: '1~5일 한 번에 받고, 장 보고, 냉장고에 붙이기',
+    lead: '며칠치를 한 번에 받아 장을 보고, 식단표를 냉장고에 붙이기',
     scenes: [
       {
         title: '며칠치 받기',
         beats: [
-          tabTap('추천 탭에서 며칠치를 고를 수 있습니다.', '추천', app('내 식단', 'compose', { jjigae: true, filled: true })),
-          { say: '1일부터 5일까지. 3일을 골라 봅니다.', at: [43, 11], tap: true, screen: app('추천', 'plan', { days3: true }) },
-          { say: '날마다 다른 상이 나오고, 생선·고기가 든 날은 앞에 옵니다. 국·조림은 2인분을 끓여 이틀에 나눕니다.', screen: app('추천', 'plan', { days3: true }) },
-          { say: '다시 구성을 누르면 다른 조합을 짭니다.', at: [84, 33], tap: true, screen: app('추천', 'plan', { days3: true, alt: true }) }
+          tabTap('장 보기 전에는 추천에서 며칠치를 한꺼번에 받으세요.', '추천', app('내 식단', 'compose', { jjigae: true, filled: true })),
+          { say: '하루부터 닷새까지 고를 수 있습니다. 사흘을 골라 보겠습니다.', at: [43, 11], tap: true, screen: app('추천', 'plan', { days3: true }) },
+          { say: '날마다 다른 상이 나옵니다. 생선과 고기는 신선할 때 드시도록 앞쪽 날에 놓고, 국과 조림은 한 번 끓여 이틀에 나눠 드시게 짭니다.', screen: app('추천', 'plan', { days3: true }) },
+          { say: '다른 상을 보고 싶으시면 다시 구성을 누르세요.', at: [84, 33], tap: true, screen: app('추천', 'plan', { days3: true, alt: true }) }
         ]
       },
       {
         title: '이 날 자세히',
         beats: [
-          { say: '한 날의 이유와 영양이 궁금하면 이 날 자세히를 누릅니다.', at: [72, 62], tap: true, screen: app('추천', 'plan', { days3: true, alt: true }) },
-          { say: '끼니마다 왜 이 음식인지, 어떤 권고와 근거에 따른 것인지 보입니다.', screen: app('추천', 'peek') },
-          { say: '돌아가기를 누르면 며칠치 화면으로 돌아오고, 고른 안은 그대로 남아 있습니다.', at: [26, 10], tap: true, screen: app('추천', 'peek'), ms: 2200 }
+          { say: '하루치가 궁금하시면 이 날 자세히를 누르세요.', at: [72, 62], tap: true, screen: app('추천', 'plan', { days3: true, alt: true }) },
+          { say: '끼니마다 왜 이 음식을 골랐는지, 무엇을 보고 판단했는지 나옵니다.', screen: app('추천', 'peek') },
+          { say: '돌아가기를 누르면 앞 화면으로 갑니다. 받아 두신 식단은 그대로 있습니다.', at: [26, 10], tap: true, screen: app('추천', 'peek'), ms: 2200 }
         ]
       },
       {
         title: '장보기 목록',
         beats: [
-          { say: '아래 장보기 목록에는 1인분 기준 양, 흔한 포장 단위, 냉장 보관 기간이 적힙니다.', screen: app('추천', 'shop') },
-          { say: '집에 있는 재료를 누르고 냉장고에 있는 것을 고르세요.', at: [20, 11], tap: true, screen: app('추천', 'shop', { pantryOpen: true }) },
-          { say: '두부가 집에 있다고 하면 목록에서 빠지고, 두부를 쓰는 요리를 먼저 짭니다.', at: [28, 24], tap: true, screen: app('추천', 'shop', { pantryOpen: true, tofuHome: true }) },
+          { say: '아래에는 장보기 목록이 있습니다. 얼마나 사면 되는지, 냉장고에 며칠 두어도 되는지 적혀 있습니다.', screen: app('추천', 'shop') },
+          { say: '집에 있는 재료를 누르고, 냉장고에 있는 것을 골라 주세요.', at: [20, 11], tap: true, screen: app('추천', 'shop', { pantryOpen: true }) },
+          { say: '두부가 있다고 하시면 목록에서 빠지고, 두부 요리를 먼저 넣어 드립니다.', at: [28, 24], tap: true, screen: app('추천', 'shop', { pantryOpen: true, tofuHome: true }) },
           { say: '장을 보면서 산 것을 누르면 줄이 그어집니다.', at: [16, 25], tap: true, screen: app('추천', 'shop', { tofuHome: true, bought: true }) },
-          { say: '복사나 보내기로 메모·카톡에 옮길 수 있습니다.', at: [76, 17], tap: true, screen: app('추천', 'shop', { tofuHome: true, bought: true, copied: true }) }
+          { say: '복사나 보내기를 누르면 메모나 카카오톡으로 옮길 수 있습니다. 장은 가족이 대신 봐 주셔도 됩니다.', at: [76, 17], tap: true, screen: app('추천', 'shop', { tofuHome: true, bought: true, copied: true }) }
         ]
       },
       {
         title: '담기·식단표',
         beats: [
-          { say: '날짜별로 내 식단에 담기를 누르면 3일치가 날짜마다 기록에 들어갑니다.', at: [50, 85], tap: true, screen: app('추천', 'plan', { days3: true, alt: true }) },
-          { say: '식단표 저장은 날짜 × 끼니 표를 큰 글씨 그림으로 만듭니다. 냉장고에 붙이거나 가족에게 보내세요.', at: [30, 22], tap: true, screen: app('추천', 'plan', { days3: true, alt: true }) },
-          { say: '인쇄는 그 표와 장보기 목록을 A4 한 장에 맞춰 뽑습니다.', screen: app('추천', 'image', { saved: true }), ms: 3000 }
+          { say: '날짜별로 내 식단에 담기를 누르면, 사흘치가 날짜마다 들어갑니다.', at: [50, 85], tap: true, screen: app('추천', 'plan', { days3: true, alt: true }) },
+          { say: '식단표 저장을 누르면 큰 글씨 식단표가 그림으로 만들어집니다. 냉장고에 붙이거나 가족에게 보내 보세요.', at: [30, 22], tap: true, screen: app('추천', 'plan', { days3: true, alt: true }) },
+          { say: '인쇄하시면 식단표와 장보기 목록이 종이 한 장에 나옵니다.', screen: app('추천', 'image', { saved: true }), ms: 3000 }
         ]
       }
     ]
   },
   {
     title: '기록과 체중',
-    lead: '날짜별 식단, 체중 흐름, 이 주의 영양 보고',
+    lead: '드신 것과 체중을 적어 두면 모자란 것을 짚어 드립니다',
     scenes: [
       {
         title: '기록 탭',
         beats: [
-          tabTap('기록 탭에는 날짜별 식단이 쌓입니다.', '기록', app('내 식단', 'compose', { jjigae: true, filled: true })),
-          { say: '날짜를 누르면 그날 식단이 보이고 고칠 수 있습니다. 점이 찍힌 날이 기록이 있는 날입니다.', at: [79, 20], tap: true, screen: app('기록', 'diary', { taken: true }) },
-          { say: '그날 체중을 적어 두면 — ', at: [40, 37], tap: true, screen: app('기록', 'diary', { taken: true, weight: true }) },
-          { say: '이틀 이상 쌓이면 체중 흐름이 그려지고, 6개월간 5 % 넘게 줄면 경고가 붙습니다.', screen: app('기록', 'diary', { taken: true, weight: true, graph: true }) }
+          tabTap('기록에는 날마다 드신 것이 쌓입니다.', '기록', app('내 식단', 'compose', { jjigae: true, filled: true })),
+          { say: '날짜를 누르면 그날 식단을 보고 고칠 수 있습니다. 점이 찍힌 날이 적어 두신 날입니다.', at: [79, 20], tap: true, screen: app('기록', 'diary', { taken: true }) },
+          { say: '체중도 함께 적어 두세요.', at: [40, 37], tap: true, screen: app('기록', 'diary', { taken: true, weight: true }) },
+          { say: '체중이 어떻게 변하는지 그림으로 보여 드립니다. 반년 사이에 5 % 넘게 줄면, 담당 의료진께 알리시라고 말씀드립니다.', screen: app('기록', 'diary', { taken: true, weight: true, graph: true }) },
+          { say: '치료를 마치신 뒤에도 체중은 중요합니다. 많이 줄거나 많이 늘면 다음 진료 때 알려 주세요.', screen: app('기록', 'diary', { taken: true, weight: true, graph: true }) }
         ]
       },
       {
         title: '영양 보고',
         beats: [
-          { say: '이 주의 영양 보고는 평균만이 아니라 며칠이나 모자랐고 며칠이나 넘었는지 셉니다.', screen: app('기록', 'diary', { taken: true, report: true }) },
-          { say: '모자랐던 것을 채우려면 아래에 그 영양소가 많은 음식을 권합니다.', at: [50, 70], screen: app('기록', 'diary', { taken: true, report: true }) },
-          { say: '지난달을 뒤적이다가 오늘로를 누르면 오늘로 돌아옵니다.', at: [86, 11], tap: true, screen: app('기록', 'diary', { taken: true, report: true }), ms: 2200 }
+          { say: '이 주의 영양 보고에는 한 주 동안 며칠이나 모자랐는지가 나옵니다. 하루쯤 적게 드신 것은 괜찮지만, 며칠씩 이어지면 알려 드립니다.', screen: app('기록', 'diary', { taken: true, report: true }) },
+          { say: '모자란 것이 있으면, 그것을 채울 음식을 아래에 권해 드립니다.', at: [50, 70], screen: app('기록', 'diary', { taken: true, report: true }) },
+          { say: '지난 기록을 보다가 오늘로를 누르면 오늘로 돌아옵니다.', at: [86, 11], tap: true, screen: app('기록', 'diary', { taken: true, report: true }), ms: 2200 }
         ]
       }
     ]
   },
   {
     title: '영양제',
-    lead: '제품으로 등록하고, 나에게 맞는지 거르기',
+    lead: '드시는 영양제가 치료와 맞는지 확인하기',
     scenes: [
       {
         title: '영양제 등록',
         beats: [
-          tabTap('드시는 영양제는 영양제 탭에서 등록합니다.', '영양제', app('내 식단', 'compose', { jjigae: true, filled: true })),
-          { say: '제품명으로 찾습니다. 오메가3 를 찾아 봅니다.', at: [50, 13], tap: true, screen: app('영양제', 'supp', { typed: true }) },
-          { say: '등록하면 치료·약과 겹치는 것이 있는지 바로 알려 줍니다. 양은 하루 합계에도 들어갑니다.', at: [84, 27], tap: true, screen: app('영양제', 'supp', { typed: true, added: true }) }
+          tabTap('드시는 영양제가 있으면 영양제에 적어 두세요.', '영양제', app('내 식단', 'compose', { jjigae: true, filled: true })),
+          { say: '제품 이름으로 찾습니다. 오메가3를 찾아 보겠습니다.', at: [50, 13], tap: true, screen: app('영양제', 'supp', { typed: true }) },
+          { say: '등록하시면 지금 받는 치료나 드시는 약과 부딪히는 것이 있는지 바로 알려 드립니다.', at: [84, 27], tap: true, screen: app('영양제', 'supp', { typed: true, added: true }) }
         ]
       },
       {
         title: '나에게 맞는 것만',
         beats: [
-          { say: '손으로 검토한 영양제 목록은 나에게 권장되는 것만, 주의·피해야 할 것만으로 거를 수 있습니다.', at: [30, 44], tap: true, screen: app('영양제', 'supp', { added: true, filterGood: true }) },
-          { say: '주의·피해야 할 것만을 누르면 지금 치료·약과 부딪히는 것이 모입니다.', at: [70, 44], tap: true, screen: app('영양제', 'supp', { added: true, filterBad: true }), ms: 3000 }
+          { say: '아래 영양제 목록에서는 나에게 괜찮은 것만 따로 모아 볼 수 있습니다.', at: [30, 44], tap: true, screen: app('영양제', 'supp', { added: true, filterGood: true }) },
+          { say: '주의할 것만 누르면 지금은 조심하시는 게 좋은 것들이 모입니다. 새 영양제는 드시기 전에 담당 의료진과 먼저 상의하세요.', at: [70, 44], tap: true, screen: app('영양제', 'supp', { added: true, filterBad: true }), ms: 3000 }
         ]
       }
     ]
   },
   {
     title: '몸 상태가 달라지면',
-    lead: '증상·약·알레르기를 고치면 추천이 그 자리에서 바뀝니다',
+    lead: '증상이나 약이 바뀌면 알려 주세요. 추천이 바로 바뀝니다',
     scenes: [
       {
         title: '증상 고치기',
         beats: [
-          tabTap('설사가 시작됐다면 내 정보에서 알려 주세요.', '내 정보', app('내 식단', 'compose', { jjigae: true, filled: true })),
-          { say: '지금 겪고 있는 증상에서 설사를 누릅니다. 증상 규칙이 암종 규칙보다 식단을 더 크게 좌우합니다.', at: [52, 33], tap: true, screen: app('내 정보', 'me', { symptom: true }) },
-          { say: '추천이 그 자리에서 바뀝니다 — 잔사가 적고 부드러운 것으로.', screen: app('추천', 'suggest1', { soft: true }) },
-          { say: '내 식단 맨 위의 달라졌나요? 를 펴도 같은 것을 고칠 수 있습니다.', at: [50, 11], tap: true, screen: app('내 식단', 'compose', { jjigae: true, filled: true, changed: true }), ms: 2800 }
+          tabTap('예를 들어 설사가 시작되셨다면, 내 정보에서 알려 주세요.', '내 정보', app('내 식단', 'compose', { jjigae: true, filled: true })),
+          { say: '지금 겪고 있는 증상에서 설사를 누릅니다. 지금 불편한 증상을 가장 먼저 생각해서 식단을 짭니다.', at: [52, 33], tap: true, screen: app('내 정보', 'me', { symptom: true }) },
+          { say: '추천이 바로 바뀝니다. 장에 부담이 적고 부드러운 음식으로 바꿔 드립니다.', screen: app('추천', 'suggest1', { soft: true }) },
+          { say: '내 식단 맨 위의 달라졌나요를 눌러도 같은 것을 고칠 수 있습니다.', at: [50, 11], tap: true, screen: app('내 식단', 'compose', { jjigae: true, filled: true, changed: true }), ms: 2800 }
         ]
       },
       {
         title: '약·알레르기·치료 마침',
         beats: [
-          { say: '복용 중인 약에 와파린을 넣으면 비타민 K 가 많은 음식과 영양제에 주의가 붙습니다.', at: [52, 52], tap: true, screen: app('내 정보', 'me', { symptom: true, med: true }) },
-          { say: '알레르기를 고르면 그 이름이 보이는 음식은 피하세요로 표시하고 추천에서 뺍니다.', at: [30, 68], tap: true, screen: app('내 정보', 'me', { symptom: true, med: true, allergy: true }) },
-          { say: '치료가 끝나면 치료 시기를 치료를 마쳤습니다로 바꾸세요. 목표 열량이 유지 수준으로 내려갑니다.', at: [70, 20], tap: true, screen: app('내 정보', 'me', { done: true }) },
-          { say: '글씨가 작으면 더 크게를 누르세요.', at: [84, 83], tap: true, screen: app('내 정보', 'me', { done: true, big: true }), ms: 2200 }
+          { say: '드시는 약도 적어 주세요. 예를 들어 와파린을 드시면, 함께 조심하실 음식과 영양제에 표시가 붙습니다.', at: [52, 52], tap: true, screen: app('내 정보', 'me', { symptom: true, med: true }) },
+          { say: '알레르기가 있으시면 고르세요. 그 재료가 든 음식은 추천에서 빼 드립니다.', at: [30, 68], tap: true, screen: app('내 정보', 'me', { symptom: true, med: true, allergy: true }) },
+          { say: '치료가 끝나시면 치료 시기를 치료를 마쳤습니다로 바꿔 주세요. 체중이 잘 지켜지고 있으면 목표를 유지 수준으로 맞추고, 체중이 줄면 다시 올려 드립니다.', at: [70, 20], tap: true, screen: app('내 정보', 'me', { done: true }) },
+          { say: '글씨가 작으시면 더 크게를 누르세요.', at: [84, 83], tap: true, screen: app('내 정보', 'me', { done: true, big: true }), ms: 2200 }
         ]
       },
       {
         title: '가이드 탭',
         beats: [
-          tabTap('가이드 탭에는 이 사용법과 운동, 암종 가이드, 근거 등급 설명이 있습니다.', '가이드', app('내 정보', 'me', { done: true })),
-          { say: '운동은 식단과 함께 봐야 하는 것이라 같은 자리에 두었습니다.', at: [37, 11], tap: true, screen: app('가이드', 'care', { exercise: true }), ms: 2600 },
-          { say: '여기까지입니다. 이 안내는 언제든 가이드 → 사용법에서 다시 보실 수 있습니다.', screen: app('가이드', 'care'), ms: 3000 }
+          tabTap('가이드에는 이 사용법과 운동, 암 종류별 안내가 있습니다.', '가이드', app('내 정보', 'me', { done: true })),
+          { say: '잘 드시는 것과 몸을 움직이는 것은 함께 가야 해서, 운동 안내를 같은 곳에 두었습니다.', at: [37, 11], tap: true, screen: app('가이드', 'care', { exercise: true }), ms: 2600 },
+          { say: '여기까지입니다. 이 안내는 가이드의 사용법에서 언제든 다시 보실 수 있습니다. 앱은 치료를 대신하지 않으니, 궁금한 점은 담당 의료진과 상의하세요.', screen: app('가이드', 'care'), ms: 3000 }
         ]
       }
     ]
@@ -263,12 +265,14 @@ const CHAPTERS: Chapter[] = [
 
 const TABS: TabId[] = ['내 식단', '추천', '찾기', '기록', '영양제', '가이드', '내 정보']
 const DEFAULT_MS = 2600
+/* 소리 없이 볼 때 한 박자의 길이 — 천천히 읽으시는 분 기준(글자당 0.12초 + 1.5초). 적어 둔 ms 보다 짧아지지 않는다 */
+const readMs = (b: Beat) => Math.max(b.ms ?? DEFAULT_MS, 1500 + [...b.say].length * 120)
 
 interface Flat { ch: number; sc: number; beat: Beat; sceneStart: boolean; chapterStart: boolean }
 const FLAT: Flat[] = CHAPTERS.flatMap((c, ch) => c.scenes.flatMap((s, sc) => s.beats.map((beat, b) => ({ ch, sc, beat, sceneStart: b === 0, chapterStart: b === 0 && sc === 0 }))))
 const CH_START = CHAPTERS.map((_, ch) => FLAT.findIndex((f) => f.ch === ch))
 /* 박자 길이 — 녹음이 있으면 녹음 길이 + 쉼, 없으면 적어 둔 시간 */
-const beatSecs = (b: Beat, clips: Clips | null) => { const s = clips?.secs?.[hashText(b.say)]; return s ? s + 0.6 : (b.ms ?? DEFAULT_MS) / 1000 }
+const beatSecs = (b: Beat, clips: Clips | null) => { const s = clips?.secs?.[hashText(b.say)]; return s ? s + 0.9 : readMs(b) / 1000 }
 const chapterSeconds = (ch: number, clips: Clips | null) => Math.round(FLAT.filter((f) => f.ch === ch).reduce((n, f) => n + beatSecs(f.beat, clips), 0))
 
 export function Tour({ onClose }: { onClose: () => void }) {
@@ -357,10 +361,10 @@ export function Tour({ onClose }: { onClose: () => void }) {
   }, [pos, playing, menu, ended])
   useEffect(() => {
     if (!playing || ended || menu) return
-    const ms = cur.beat.ms ?? DEFAULT_MS
+    const ms = readMs(cur.beat)
     if (voice && (clips || (canSpeak && !noKo))) {
       /* 읽기가 끝난 뒤 600 ms 쉬고 넘어간다. 읽기가 끝났다는 신호가 안 오면(일부 기기) 넉넉히 기다렸다가 넘어간다 */
-      if (spoken === pos) { timer.current = window.setTimeout(next, 600) }
+      if (spoken === pos) { timer.current = window.setTimeout(next, 900) }
       else timer.current = window.setTimeout(next, ms + 9000)
     } else timer.current = window.setTimeout(next, ms)
     return () => { if (timer.current) window.clearTimeout(timer.current) }
@@ -398,9 +402,9 @@ export function Tour({ onClose }: { onClose: () => void }) {
         {menu ? (
           <div className="w-full rounded-2xl bg-white p-3.5">
             <p className="text-sm font-bold text-stone-900">무엇을 보시겠어요?</p>
-            <p className="mt-0.5 text-[11.5px] text-stone-500">손가락이 눌러 가며 보여 드립니다. 보는 중에 멈추거나 건너뛸 수 있습니다.</p>
+            <p className="mt-0.5 text-[13px] leading-relaxed text-stone-600">손가락이 눌러 가며 천천히 보여 드립니다. 보시다가 언제든 멈추거나 다시 보실 수 있습니다.</p>
             {(canSpeak || clips) && (
-              <button className={`mt-2 flex w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-[12px] ${voice ? 'border-brand-500 bg-brand-50 text-brand-900' : 'border-stone-300 text-stone-700'}`} onClick={toggleVoice} aria-pressed={voice}>
+              <button className={`mt-2 flex w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-[13.5px] ${voice ? 'border-brand-500 bg-brand-50 text-brand-900' : 'border-stone-300 text-stone-700'}`} onClick={toggleVoice} aria-pressed={voice}>
                 <span aria-hidden>{voice ? '🔊' : '🔈'}</span>
                 <span className="flex-1"><b>음성 안내</b> {voice ? '켜짐 — 자막을 소리로 읽어 드립니다' : '끔 — 켜면 자막을 소리로 읽어 드립니다'}</span>
                 <span className="text-[10px] text-stone-500">{clips ? '녹음 음성' : noKo ? '한국어 음성 없음' : '기기 음성'}</span>
@@ -419,10 +423,10 @@ export function Tour({ onClose }: { onClose: () => void }) {
                   <button className="flex w-full items-center gap-3 py-2.5 text-left hover:bg-stone-50" onClick={() => start(CH_START[i])}>
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-bold text-brand-800">{i + 1}</span>
                     <span className="min-w-0 flex-1">
-                      <span className="block text-[13px] font-bold text-stone-900">{c.title}</span>
-                      <span className="block text-[11px] text-stone-500">{c.lead}</span>
+                      <span className="block text-[15px] font-bold text-stone-900">{c.title}</span>
+                      <span className="block text-[12.5px] leading-snug text-stone-600">{c.lead}</span>
                     </span>
-                    <span className="shrink-0 text-[11px] text-stone-400">{c.scenes.length}장면 · {Math.max(1, Math.round(chapterSeconds(i, voice ? clips : null) / 10) * 10)}초</span>
+                    <span className="shrink-0 text-[12px] text-stone-500">{c.scenes.length}장면 · {Math.max(1, Math.round(chapterSeconds(i, voice ? clips : null) / 10) * 10)}초</span>
                   </button>
                 </li>
               ))}
@@ -452,7 +456,7 @@ export function Tour({ onClose }: { onClose: () => void }) {
             </div>
 
             {/* 자막 */}
-            <p key={pos} className="tour-in mt-3 min-h-[3.5rem] w-full rounded-xl bg-white px-3.5 py-2.5 text-center text-[13.5px] font-semibold leading-relaxed text-stone-800" aria-live="polite">
+            <p key={pos} className="tour-in mt-3 min-h-[4.5rem] w-full rounded-xl bg-white px-3.5 py-2.5 text-center text-[16px] font-semibold leading-relaxed text-stone-800" aria-live="polite">
               {ended ? '가이드 탭 → 사용법에서 언제든 다시 보실 수 있습니다.' : cur.beat.say}
             </p>
 
@@ -469,7 +473,7 @@ export function Tour({ onClose }: { onClose: () => void }) {
                 <button key={c.title} className={`h-1.5 rounded-full transition-all ${i === cur.ch && !ended ? 'w-7 bg-white' : 'w-3 bg-white/40'}`} onClick={() => start(CH_START[i])} title={c.title} />
               ))}
             </div>
-            <p className="mt-1.5 text-[11px] text-white/60">{ended ? `${FLAT.length}박자` : `${pos + 1} / ${FLAT.length}`} · 화면을 본뜬 그림입니다</p>
+            <p className="mt-1.5 text-[11px] text-white/60">{ended ? '끝까지 보셨습니다' : `${pos + 1} / ${FLAT.length}`} · 실제 화면을 본떠 그린 그림입니다</p>
           </>
         )}
       </div>
@@ -870,7 +874,7 @@ function Ending({ onMenu }: { onMenu: () => void }) {
     <div className="flex h-full flex-col items-center justify-center bg-brand-50 px-5 text-center">
       <span className="h-12 w-12 rounded-full bg-brand-600" />
       <p className="mt-3 text-base font-bold text-stone-900">여기까지입니다</p>
-      <p className="mt-1.5 text-[11px] leading-relaxed text-stone-600">처음 등록 → 내가 고르고 추천받기 → 며칠치·장보기 → 기록·체중 → 영양제 → 몸 상태가 달라지면.</p>
+      <p className="mt-1.5 text-[12.5px] leading-relaxed text-stone-600">처음 시작하기 → 내가 고르고 추천받기 → 며칠치·장보기 → 기록·체중 → 영양제 → 몸 상태가 달라지면.<br />궁금한 점은 담당 의료진과 상의하세요.</p>
       <button className="mt-4 rounded-xl bg-brand-600 px-4 py-2 text-sm font-bold text-white" onClick={onMenu}>목차로</button>
     </div>
   )
