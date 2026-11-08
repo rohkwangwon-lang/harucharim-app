@@ -56,11 +56,28 @@ REFS = [
     ('Martin L, et al. Diagnostic criteria for the classification of cancer-associated weight loss. J Clin Oncol. 2015;33:90-9.', '25422490', '10.1200/JCO.2014.56.1894'),
     ('Shachar SS, et al. Prognostic value of sarcopenia in adults with solid tumours: a meta-analysis. Eur J Cancer. 2016;57:58-67.', '26882087', '10.1016/j.ejca.2015.12.030'),
     ('Baldwin C, et al. Oral nutritional interventions in malnourished patients with cancer: a systematic review and meta-analysis. J Natl Cancer Inst. 2012;104:371-85.', '22345712', '10.1093/jnci/djr556'),
+    # ── 회복기(치료를 마친 뒤) — 2026-11-09 추가 ──
+    ('Lee SY, et al. Nutritional care needs of breast and gynecologic cancer survivors in Korea. PLoS One. 2016;11:e0163281.', '27695041', '10.1371/journal.pone.0163281'),
+    ('Tan SY, et al. Dietary changes and supplement use among cancer survivors after curative treatment. Support Care Cancer. 2021;29:6979-87.', '34031752', '10.1007/s00520-021-06276-9'),
+    ('Hoang T, et al. Food intake behavior in cancer survivors in comparison with healthy general population (Health Examinees cohort). J Cancer Prev. 2019;24:208-16.', '31950020', '10.15430/JCP.2019.24.4.208'),
+    ('Park YS, et al. Prognostic roles of perioperative body mass index and weight loss in the long-term survival of gastric cancer patients. Cancer Epidemiol Biomarkers Prev. 2018;27:955-62.', '29784729', '10.1158/1055-9965.EPI-18-0122'),
+    ('Kim KW, et al. Preoperative nutritional risk index and postoperative one-year skeletal muscle loss can predict the prognosis of gastric adenocarcinoma. BMC Cancer. 2021;21:157.', '33579228', '10.1186/s12885-021-07885-7'),
+    ("D'Journo XB, et al. Prognostic impact of weight loss in 1-year survivors after transthoracic esophagectomy for cancer. Dis Esophagus. 2012;25:527-34.", '22121887', '10.1111/j.1442-2050.2011.01282.x'),
+    ('Caan BJ, et al. Weight change and survival after breast cancer in the After Breast Cancer Pooling Project. Cancer Epidemiol Biomarkers Prev. 2012;21:1260-71.', '22695738', '10.1158/1055-9965.EPI-12-0306'),
+    ('Playdon MC, et al. Weight gain after breast cancer diagnosis and all-cause mortality: systematic review and meta-analysis. J Natl Cancer Inst. 2015;107:djv275.', '26424778', '10.1093/jnci/djv275'),
+    ('Schwedhelm C, et al. Effect of diet on mortality and cancer recurrence among cancer survivors: a meta-analysis of cohort studies. Nutr Rev. 2016;74:737-48.', '27864535', '10.1093/nutrit/nuw045'),
+    ('Brown JC, et al. A randomized trial of exercise and diet on body composition in survivors of breast cancer with overweight or obesity. Breast Cancer Res Treat. 2021;189:145-54.', '34089422', '10.1007/s10549-021-06284-7'),
+    ('Pierce JP, et al. Influence of a diet very high in vegetables, fruit, and fiber and low in fat on prognosis following treatment for breast cancer (WHEL). JAMA. 2007;298:289-98.', '17635889', '10.1001/jama.298.3.289'),
 ]
 
 
 def r(*ns):
     return '<sup class="ref">' + ','.join(str(n) for n in ns) + '</sup>'
+
+
+def after(title, body):
+    """각 이야기 끝의 '치료를 마치신 뒤에는' 단 — 회복기 환자에게 같은 질문을 다시 던진 결과(2026-11-09)"""
+    return f'<aside class="after"><p class="tag">치료를 마치신 뒤에는</p><h3>{title}</h3>{body}</aside>'
 
 
 def stat(num, unit, body, refs):
@@ -99,6 +116,7 @@ data = ''.join(f'<li><b>{a}</b><h3>{b}</h3><p>{c}</p></li>' for a, b, c in DATA)
 FEATURES = [
     ('체중에 맞춘 하루 목표', '키·체중·치료 시기로 하루 열량과 단백질 목표를 셈합니다. 단백질은 체중 1 kg당 1~1.5 g을 기준으로 잡습니다.', (4,)),
     ('체중이 줄면, 먼저 채웁니다', '6개월 안에 5 % 넘게 줄면 알려 드립니다. 입안이 헐거나 설사·메스꺼움 때문에 \'피하세요\'로 두었던 음식 일부는 \'주의\'로 낮춥니다. 지금은 드실 수 있는 것을 드셔서 열량과 단백질을 채우는 것이 먼저이기 때문입니다.', (3, 4)),
+    ('치료를 마치신 뒤에는 유지 수준으로', '치료가 끝나고 체중이 지켜지면 열량 목표를 유지 수준으로 잡고, 체중이 다시 줄기 시작하면 원래 목표로 되돌립니다. 위를 수술하신 분께는 비타민 B12·철·칼슘을, 대장암을 회복하신 분께는 식이섬유를, 유방암 치료를 마치신 분께는 체중이 늘지 않게 지키기를 따로 안내합니다.', ()),
     ('모자란 날을 짚어 드립니다', '하루치 평균만 보지 않고, 일주일 가운데 며칠이나 열량·단백질이 모자랐는지 함께 보여 드립니다.', ()),
     ('왜 권하는지까지', '반찬마다 근거 등급(A·B·C·G)과 출처가 붙습니다. 근거가 없는 것은 "아직 모릅니다"라고 적습니다.', ()),
 ]
@@ -109,7 +127,9 @@ refs = ''.join(
     for c, p, d in REFS)
 
 TITLE = '가려 드시기 전에'
-DESC = '암 치료 중 음식을 가리다 생기는 영양 부족과 그 근거, 하루차림이 근거로 차리는 한 상을 정리했습니다.'
+A1, A2, A3 = ('<p>치료가 끝나면 진료는 몇 달에 한 번이 됩니다. 국내 유방암·부인암 생존자 186명 가운데 진단 2~5년째 분의 43 %가 식사 문제를 겪었고, 약 90 %가 피해야 할 음식과 재발에 관한 식사 상담을 원했습니다.{r20} 같은 시기에 부인암 생존자의 34.5 %는 체중이 줄었고, 유방암 생존자의 27.1 %는 늘었습니다. 회복기의 체중은 어느 쪽으로든 움직입니다.</p><p><b>그래서 치료를 마친 뒤에도 체중을 재 주세요.</b> 의도하지 않게 줄거나 크게 늘면 다음 진료 때 알려 주세요.</p>', '<p>호주에서 근치 치료를 마친 생존자 520명 가운데 55 %가 진단 뒤 식사를 바꾸었습니다. 붉은 고기를 줄이거나 끊은 분이 25 %, 유제품을 일부러 피한 분이 7 %였고, 61 %가 영양제를 드셨습니다. 그런데 채소 권장량을 채운 분은 20 %뿐이었습니다.{r21}</p><p>국내 건강검진 코호트에서도 암 생존자 5,269명은 같은 나이·성별의 건강한 분들보다 고기·가금류에서 얻는 열량의 비중이 낮았습니다.{r22} 위 다섯 번째 이야기의 단식·감량 식이 숫자도 치료를 마친 생존자에게서 나온 것입니다.{r12}</p>', '<ul><li><b>위암 수술 뒤</b> — 국내 2,063명에서 수술 뒤 저체중(BMI 18.5 미만)이면 사망 위험이 1.74배, BMI가 4.5 넘게 빠지면 1.79배였습니다.{r23} 수술과 항암을 마치고 1년 넘게 지낸 958명에서는 첫 1년 동안 근육이 덜 빠진 분의 5년 생존율이 75.7 %, 많이 빠진 분은 66.2 %였습니다.{r24}</li><li><b>식도암 수술 뒤</b> — 재발 없이 1년을 넘긴 205명 가운데 그 1년 동안 체중이 10 % 넘게 줄었던 분의 5년 무병생존율은 48 %, 그렇지 않은 분은 66 %였습니다.{r25}</li><li><b>유방암 진단 뒤</b> — 12,915명을 모은 분석에서 10 % 넘게 줄었던 분의 사망 위험이 미국 1.41배, 상하이 3.25배였습니다. 다만 일부러 뺀 것인지는 가리지 못했습니다.{r26}</li></ul><p><b>반대쪽도 있습니다.</b> 회복기에는 빠지는 것만큼 느는 것도 봐야 합니다.</p><div class="two"><div><h4>빠지기 쉬운 분 — 위·식도 수술 뒤, 두경부 방사선치료 뒤</h4><p>줄지 않게 지키는 것이 먼저입니다. 드실 수 있는 것을 자주, 단백질을 챙겨서 드세요.</p></div><div><h4>늘기 쉬운 분 — 유방암 치료 뒤 등</h4><p>유방암 12편·23,832명 분석에서 10 % 넘게 늘면 사망 위험이 1.23배였습니다.{r27} 이때도 굶기가 아니라 식사의 질과 운동입니다. 과체중 유방암 생존자 시험에서 식사만으로 뺀 분은 근육(제지방)도 0.82 kg 함께 줄었고, 운동만 한 분은 근육이 줄지 않았습니다.{r29}</p></div></div><p>117편·209,597명을 모은 분석에서 진단 뒤 질 좋은 식사를 한 분의 사망 위험은 0.79배, 서구식 식사는 1.51배였습니다.{r28} 무엇을 끊느냐보다 무엇으로 채우느냐가 남습니다.</p>')
+A1, A2, A3 = [a.format(**{f'r{i}': r(i) for i in range(1, 31)}) for a in (A1, A2, A3)]
+DESC = '암 치료 중에도, 치료를 마친 뒤에도 음식을 가리다 생기는 영양 부족과 그 근거, 하루차림이 근거로 차리는 한 상을 정리했습니다.'
 SEAL = '20년 넘게 암 환자를 치료해 온 방사선종양학과 전문의가 내용을 감수했습니다.'
 LEGAL = ('하루차림은 의료기기가 아니며 진단·치료를 목적으로 하지 않습니다. 이 페이지는 일반 정보이며, '
          '개인의 치료와 식사는 담당 의료진과 정하십시오. 만 14세 이상 이용할 수 있습니다.')
@@ -118,7 +138,7 @@ CSS = r"""
 :root{
   --paper:#f2f0e8; --sheet:#faf9f4; --ink:#282621; --soft:#4f4b40; --line:#e2dfd3;
   --rice:#4b6936; --rice-tint:#e6ecdb; --soy:#875326; --soy-tint:#f4e5d2;
-  --plum:#7a3b45; --plum-tint:#f3e3e3; --mist:#5e6b78; --bar:#c9d5b8;
+  --plum:#7a3b45; --plum-tint:#f3e3e3; --mist:#5e6b78; --mist-tint:#e5e9ec; --bar:#c9d5b8;
   --display:"Gowun Batang","AppleMyungjo","Nanum Myeongjo",serif;
   --body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   color-scheme:light;
@@ -126,11 +146,11 @@ CSS = r"""
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --paper:#1e1d19; --sheet:#282621; --ink:#ece9df; --soft:#c4bfb1; --line:#3d3a33;
   --rice:#a8bf90; --rice-tint:#2f3a27; --soy:#d5a875; --soy-tint:#3e3021;
-  --plum:#e0a3ab; --plum-tint:#3e2a2d; --mist:#a9b6c2; --bar:#56693f; color-scheme:dark}}
+  --plum:#e0a3ab; --plum-tint:#3e2a2d; --mist:#a9b6c2; --mist-tint:#2c3238; --bar:#56693f; color-scheme:dark}}
 :root[data-theme="dark"]{
   --paper:#1e1d19; --sheet:#282621; --ink:#ece9df; --soft:#c4bfb1; --line:#3d3a33;
   --rice:#a8bf90; --rice-tint:#2f3a27; --soy:#d5a875; --soy-tint:#3e3021;
-  --plum:#e0a3ab; --plum-tint:#3e2a2d; --mist:#a9b6c2; --bar:#56693f; color-scheme:dark}
+  --plum:#e0a3ab; --plum-tint:#3e2a2d; --mist:#a9b6c2; --mist-tint:#2c3238; --bar:#56693f; color-scheme:dark}
 *{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:19px;line-height:1.75;
   letter-spacing:-.01em;word-break:keep-all;overflow-wrap:break-word}
@@ -183,6 +203,15 @@ p{margin:0}
 .axis{display:grid;grid-template-columns:92px 1fr 48px;gap:12px;font-size:12px;color:var(--mist);margin-top:4px}
 .axis span:nth-child(2){display:flex;justify-content:space-between}
 .chart .cn{font-size:15px;color:var(--soft);margin-top:14px}
+.after{background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:20px 22px;display:grid;gap:10px}
+.after .tag{justify-self:start;font-size:14px;font-weight:700;color:var(--mist);background:var(--mist-tint);padding:4px 12px;border-radius:99px}
+.after h3{font-size:22px}
+.after p,.after li{font-size:17px}
+.after ul{margin:0;padding-left:1.1em;display:grid;gap:8px}
+.after .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.after .two div{display:grid;gap:4px;align-content:start;border-top:2px solid var(--line);padding-top:8px}
+.after .two h4{margin:0;font-size:17px}
+.after .two p{font-size:16px;color:var(--soft)}
 .honest{background:var(--plum-tint);border-radius:14px;padding:22px 24px;display:grid;gap:10px}
 .honest h3{color:var(--plum);font-size:22px}
 .honest ul{margin:0;padding-left:1.1em;display:grid;gap:8px;font-size:17px}
@@ -221,7 +250,7 @@ p{margin:0}
   body{font-size:18px}.wrap{padding:36px 16px 56px}.lede{font-size:19px}
   .sn b{font-size:40px}.chart li,.axis{grid-template-columns:78px 1fr 42px}
   .same li{grid-template-columns:1fr auto;}.same .ef{grid-column:1/-1}.same .ew{text-align:left}
-  .shots{grid-template-columns:1fr}
+  .shots{grid-template-columns:1fr}.after .two{grid-template-columns:1fr}
 }
 @media print{
   @page{size:A4;margin:14mm 15mm 16mm}
@@ -254,6 +283,15 @@ p{margin:0}
   .feats{gap:8px}.shots img{max-height:72mm}.shots figcaption{font-size:8.5pt}
   .cta{padding:12px 16px;gap:6px}.cta h2{font-size:15pt}.cta p{font-size:9.5pt}
   .legal{font-size:8.5pt;margin-top:10px}
+  .after{padding:10px 14px;gap:6px;break-inside:avoid}.after h3{font-size:12.5pt}.after p,.after li,.after .two p{font-size:9pt;line-height:1.55}
+  .after .two h4{font-size:9.5pt}.after .tag{font-size:8.5pt}.after ul{gap:3px}
+  /* 회복기 단을 더한 뒤 한 이야기가 넘치지 않게 한 번 더 조인다(2026-11-09) */
+  body{font-size:10pt;line-height:1.55}
+  .detail,.sb,.keys p,.after p,.after li,.after .two p,.feats p,.honest ul{font-size:8.7pt;line-height:1.5}
+  .myth{padding:7px 12px;gap:2px}.myths{gap:6px}.answer{font-size:11pt}.heard{font-size:10pt}
+  .stats .sn b{font-size:20pt}.ch{gap:9px}
+  .shots img{max-height:60mm}
+  .refs ol{columns:2;column-gap:8mm;display:block;font-size:7.3pt}.refs li{break-inside:avoid;margin-bottom:3px}
 }
 @media (prefers-reduced-motion:no-preference){.bf{animation:grow .9s ease-out both}@keyframes grow{from{transform:scaleX(.001);transform-origin:left}}}
 """
@@ -279,9 +317,10 @@ html = f'''<!doctype html>
   <p class="brand">하루차림</p>
   <p class="kick">암 치료 중 식사 이야기</p>
   <h1>{TITLE}</h1>
-  <p class="lede">치료가 시작되면 식탁에서 하나둘 빠지는 음식이 생깁니다. 대부분 걱정과 정성에서 나온 일입니다.
-  그런데 그렇게 줄어든 한 숟가락이 쌓이면, <strong>치료를 견딜 힘도 함께 줄어듭니다.</strong>
-  연구가 말하는 것과 아직 말하지 않는 것을 나누어 정리했습니다.</p>
+  <p class="lede">치료가 시작되면 식탁에서 하나둘 빠지는 음식이 생깁니다. 대부분 걱정과 정성에서 나온 일이고,
+  치료를 마친 뒤에도 쉽게 풀리지 않습니다. 그런데 그렇게 줄어든 한 숟가락이 쌓이면
+  <strong>치료를 견딜 힘도, 치료 뒤 회복할 힘도 함께 줄어듭니다.</strong>
+  치료 중인 분과 치료를 마치신 분으로 나누어, 연구가 말하는 것과 아직 말하지 않는 것을 정리했습니다.</p>
   <p class="seal">{SEAL}</p>
   <ol class="flow">{flow}</ol>
 </header>
@@ -305,6 +344,7 @@ html = f'''<!doctype html>
     <li><h3>단백질은 오히려 더 필요합니다</h3><p>치료 중에는 체중 1 kg당 하루 1~1.5 g을 권합니다. 60 kg이면 60~90 g입니다.{r(4)}</p></li>
     <li><h3>따로 정해 받은 제한이 없다면, 가리기보다 드시는 것이 먼저입니다</h3><p>담당 의료진이 정해 준 식사 제한(저요오드식, 수술 뒤 식사 단계 등)은 꼭 지키시고, 그 밖의 음식은 스스로 끊기 전에 한 번 더 확인해 주세요.</p></li>
   </ul>
+  {after('진료 간격이 벌어지면, 식사를 여쭤볼 기회도 줄어듭니다', A1)}
 </section>
 
 <section class="ch" id="c2">
@@ -330,6 +370,7 @@ html = f'''<!doctype html>
     {myth('"굶으면 암도 굶는대요."', '혼자 시작하는 단식은 권하지 않습니다.',
           '프랑스 생존자 2,741명 가운데 6.0 %가 단식을 해 보았고, 예후가 좋아질 거라는 믿음과 관련이 있었습니다. 의료진에게 영양 정보를 받은 분은 단식을 덜 했습니다. 단식은 지금 의료진이 관리하는 시험 안에서 연구되는 단계이고, 그 시험도 마른 분과 당뇨가 있는 분은 받지 않았습니다.', (12, 13))}
   </div>
+  {after('치료를 마친 뒤에 오히려 더 가리게 됩니다', A2)}
 </section>
 
 <section class="ch" id="c3">
@@ -349,12 +390,14 @@ html = f'''<!doctype html>
     <li><h3>많이 줄고 마를수록, 생존 기간이 짧았습니다</h3><p>캐나다·유럽 8,160명에서 체중 감소와 마른 정도를 함께 본 등급에 따라 생존 기간 중앙값이 20.9개월부터 4.3개월까지 벌어졌습니다.{r(17)}</p></li>
     <li><h3>근육은 체중계에 바로 드러나지 않습니다</h3><p>38편·7,843명을 모은 분석에서 CT로 잰 근육량이 적은 분은 사망 위험이 1.44배였습니다.{r(18)} 단백질을 챙기는 이유입니다.</p></li>
   </ul>
+  {after('치료가 끝난 뒤의 체중도 같은 이야기를 합니다', A3)}
   <div class="honest">
     <h3>연구가 아직 말하지 않는 것</h3>
     <ul>
       <li>위 연구는 모두 <strong>관찰 연구</strong>입니다. 체중이 줄어서 결과가 나빴는지, 병이 깊어서 체중이 줄었는지를 완전히 가를 수는 없습니다.</li>
       <li>영양 상담과 보충은 식사량·체중·삶의 질을 지키는 데 도움이 되었습니다. 그러나 13개 시험·1,414명을 모은 분석에서 <strong>생존을 늘렸다는 결과는 나오지 않았습니다</strong>(사망 위험 1.06배, 차이 없음).{r(19)}</li>
-      <li>그래서 하루차림은 "잘 드시면 오래 사신다"고 말하지 않습니다. 치료를 끝까지 받으실 수 있도록 몸을 지키는 일로 봅니다.</li>
+      <li>치료를 마친 유방암 환자 3,088명에게 채소·과일·섬유를 크게 늘리고 지방을 줄인 식단을 권한 무작위 시험에서도, 7년여 동안 <strong>재발과 사망은 줄지 않았습니다</strong>.{r(30)} 특정 식단 하나로 예후를 바꿀 수 있다는 근거는 아직 없습니다.</li>
+      <li>그래서 하루차림은 "잘 드시면 오래 사신다"고 말하지 않습니다. 치료를 끝까지 받으시고, 마친 뒤에는 일상으로 돌아오실 수 있도록 몸을 지키는 일로 봅니다.</li>
     </ul>
   </div>
 </section>
@@ -363,7 +406,8 @@ html = f'''<!doctype html>
   {head(4)}
   <h2>같은 음식도, 누가 드시느냐에 따라 답이 다릅니다</h2>
   <p>'좋은 음식·나쁜 음식' 목록은 편하지만, 한 가지 답으로는 모든 분께 맞출 수 없습니다.
-  그래서 음식마다 성분을 따로 쌓고, 암 종류·치료 시기·증상·드시는 약에 따라 판단을 나누었습니다.</p>
+  그래서 음식마다 성분을 따로 쌓고, 암 종류·치료 시기·증상·드시는 약에 따라 판단을 나누었습니다.
+  치료 시기는 방사선치료 중·항암치료 중·호중구가 낮은 시기·수술 뒤 회복기·치료를 마친 뒤로 나눕니다.</p>
   <ul class="same">{examples}</ul>
   <ul class="data">{data}</ul>
   <p style="font-size:16px;color:var(--soft)">영양 목표는 2025 한국인 영양소 섭취기준과 유럽임상영양대사학회(ESPEN) 암 영양 지침을 따릅니다. 판단의 근거가 된 문헌은 앱 안에서 항목마다 열어 보실 수 있습니다.</p>
