@@ -441,4 +441,10 @@ html = f'''<!doctype html>
 '''
 
 open(f'{OUT}/{TITLE.replace(" ", "-")}.html', 'w', encoding='utf8').write(html)
+# 공개 주소(harucharim.com/tester/story.html) — 모집 페이지의 '근거와 출처 자세히 보기'. 검색 제외, 오프라인 저장 제외(/tester/)
+PUB = ('<meta name="robots" content="noindex"><meta property="og:type" content="article">'
+       f'<meta property="og:title" content="{TITLE} — 하루차림"><meta property="og:description" content="{DESC}">'
+       '<meta property="og:image" content="https://harucharim.com/tester/og.png"><meta property="og:url" content="https://harucharim.com/tester/story.html"></head>')
+os.makedirs('public/tester', exist_ok=True)
+open('public/tester/story.html', 'w', encoding='utf8').write(html.replace('</head>', PUB, 1))
 print('ok', f'{OUT}/{TITLE.replace(" ", "-")}.html', len(html) // 1024, 'KB')
