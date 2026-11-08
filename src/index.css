@@ -143,7 +143,10 @@ html[data-text='xlarge'] .stat-value { font-size: 0.9rem; }
 /* 손이 누르는 동작 — 손끝(왼쪽 위)을 축으로 살짝 내려앉았다가 올라온다 */
 @keyframes tour-press { 0% { transform: translateY(0) scale(1); } 35% { transform: translateY(3px) scale(0.93); } 70% { transform: translateY(0) scale(1); } 100% { transform: translateY(0) scale(1); } }
 .tour-press { animation: tour-press 600ms ease-out 120ms both; transform-origin: 36% 4%; }
+/* 음성 안내를 켜 보시라는 표시(2026-11-09 사용자 요청) — 테두리에 은은한 물결이 번진다 */
+@keyframes tour-nudge { 0%, 100% { box-shadow: 0 0 0 0 rgba(98, 133, 72, 0.55); } 50% { box-shadow: 0 0 0 7px rgba(98, 133, 72, 0); } }
+.tour-nudge { animation: tour-nudge 1.8s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) {
   .tour-finger { transition: none !important; }
-  .tour-tap, .tour-in, .tour-press { animation: none; }
+  .tour-tap, .tour-in, .tour-press, .tour-nudge { animation: none; }
 }

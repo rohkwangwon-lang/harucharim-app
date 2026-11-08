@@ -404,10 +404,14 @@ export function Tour({ onClose }: { onClose: () => void }) {
             <p className="text-sm font-bold text-stone-900">무엇을 보시겠어요?</p>
             <p className="mt-0.5 text-[13px] leading-relaxed text-stone-600">손가락이 눌러 가며 천천히 보여 드립니다. 보시다가 언제든 멈추거나 다시 보실 수 있습니다.</p>
             {(canSpeak || clips) && (
-              <button className={`mt-2 flex w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-[13.5px] ${voice ? 'border-brand-500 bg-brand-50 text-brand-900' : 'border-stone-300 text-stone-700'}`} onClick={toggleVoice} aria-pressed={voice}>
-                <span aria-hidden>{voice ? '🔊' : '🔈'}</span>
-                <span className="flex-1"><b>음성 안내</b> {voice ? '켜짐 — 자막을 소리로 읽어 드립니다' : '끔 — 켜면 자막을 소리로 읽어 드립니다'}</span>
-                <span className="text-[10px] text-stone-500">{clips ? '녹음 음성' : noKo ? '한국어 음성 없음' : '기기 음성'}</span>
+              /* 꺼져 있을 때는 눈에 띄게 — 켜 보시라는 말과 '켜기' 표시, 은은한 물결(2026-11-09 사용자 요청) */
+              <button className={`mt-2.5 flex w-full items-center gap-2 rounded-xl border-2 px-3 py-2.5 text-left text-[13.5px] ${voice ? 'border-brand-500 bg-brand-50 text-brand-900' : 'tour-nudge border-brand-500 bg-white text-stone-800'}`} onClick={toggleVoice} aria-pressed={voice}>
+                <span aria-hidden className="text-lg">{voice ? '🔊' : '🔈'}</span>
+                <span className="flex-1">{voice
+                  ? <><b>음성 안내 켜짐</b> — 자막을 소리로 읽어 드립니다</>
+                  : <><b>소리로 들으시려면 여기를 눌러 주세요</b><span className="block text-[12px] text-stone-600">음성 안내가 꺼져 있습니다. 켜시면 자막을 읽어 드립니다.</span></>}</span>
+                {!voice && <span className="shrink-0 rounded-lg bg-brand-600 px-2.5 py-1 text-[12.5px] font-bold text-white">켜기</span>}
+                {voice && <span className="text-[10px] text-stone-500">{clips ? '녹음 음성' : noKo ? '한국어 음성 없음' : '기기 음성'}</span>}
               </button>
             )}
             {canSpeak && voice && !clips && noKo && <p className="mt-1 text-[10.5px] text-warn-700">이 기기에는 한국어 음성이 없어 소리가 나지 않을 수 있습니다. 설정에서 한국어 음성을 내려받으면 됩니다.</p>}
@@ -455,6 +459,12 @@ export function Tour({ onClose }: { onClose: () => void }) {
               )}
             </div>
 
+            {/* 보는 중에도 소리가 꺼져 있으면 켜는 단추를 자막 바로 위에 — 누르는 순간 지금 자막부터 읽는다 */}
+            {(canSpeak || clips) && !voice && !ended && (
+              <button className="tour-nudge mt-3 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-brand-500 bg-brand-50 px-3 py-2 text-[14px] font-bold text-brand-900" onClick={toggleVoice} aria-pressed={false}>
+                <span aria-hidden>🔈</span> 소리로 들으시려면 눌러서 음성 안내를 켜세요
+              </button>
+            )}
             {/* 자막 */}
             <p key={pos} className="tour-in mt-3 min-h-[4.5rem] w-full rounded-xl bg-white px-3.5 py-2.5 text-center text-[16px] font-semibold leading-relaxed text-stone-800" aria-live="polite">
               {ended ? '가이드 탭 → 사용법에서 언제든 다시 보실 수 있습니다.' : cur.beat.say}
