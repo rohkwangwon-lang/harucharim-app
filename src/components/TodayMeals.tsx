@@ -251,7 +251,7 @@ export function TodayMeals({
           {profile.name} · {currentSeason()}철 · {patient.weightKg} kg 기준
         </p>
         <p className="mt-1 text-xs leading-relaxed text-stone-600">
-          아침·오전간식·점심·오후간식·저녁을 <strong>모두 합한 것이 하루치</strong>입니다. 한 끼 분량이 아닙니다.
+          아침·오전간식·점심·오후간식·저녁을 <strong>모두 합한 것이 하루 치</strong>입니다. 한 끼 분량이 아닙니다.
         </p>
 
         {/*
@@ -344,7 +344,7 @@ export function TodayMeals({
               <>
                 <strong className="text-stone-800">{emptySlots.join('·')}이 비어 있습니다.</strong> 채우지 않으셔도
                 괜찮습니다. 아래 각 끼니의 <strong>이렇게 채워 보세요</strong>에서 하나씩 담으시거나,
-                <strong> 추천 식단</strong> 탭에서 하루치를 한 번에 받아보실 수 있습니다.
+                <strong> 추천 식단</strong> 탭에서 하루 치를 한 번에 받아보실 수 있습니다.
               </>
             )}
           </p>
@@ -407,7 +407,7 @@ export function TodayMeals({
       >
         <IconSuggest className="h-6 w-6 shrink-0 text-white/90" strokeWidth={1.8} />
         <span className="min-w-0 flex-1">
-          <span className="block text-base font-bold">하루치를 한 번에 추천받기</span>
+          <span className="block text-base font-bold">하루 치를 한 번에 추천받기</span>
           <span className="mt-0.5 block text-xs leading-relaxed text-white/85">
             {filledSlots.length > 0
               ? '담으신 것에 맞춰 나머지 끼니를 채워 드립니다'
@@ -643,7 +643,7 @@ export function TodayMeals({
  * 운동을 권할 근거가 없다는 뜻이 아니다. 오히려 매우 강하다 —
  * CHALLENGE 무작위배정 시험에서 대장암 보조항암 후 3 년 운동 프로그램이
  * 5 년 무병생존을 73.9 % 에서 80.3 % 로 올렸다. 다만 그 개입은 3 년짜리 프로그램이었지
- * 하루치 상쇄가 아니었다. 운동은 그 자체의 이익으로 권해야 한다.
+ * 하루 치 상쇄가 아니었다. 운동은 그 자체의 이익으로 권해야 한다.
  *
  * 그래서 하루가 아니라 흐름을 본다. 몇 주째 넘치고 체중도 오르고 있다면
  * 그때는 섭취를 조정하면서 활동량도 함께 올리시라고 말씀드린다.

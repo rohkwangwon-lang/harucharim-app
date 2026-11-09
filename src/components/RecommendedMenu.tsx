@@ -64,7 +64,7 @@ export function RecommendedMenu({
   onGoCompose: () => void
   /** 여러 날 식단을 날짜별로 담는다(2026-10-23) */
   onApplyDays?: (byDay: { day: string; items: { foodId: string; servings: number; meal: MealSlot }[] }[]) => void
-  /** 여러 날 가운데 한 날을 하루치 화면으로 본다 — 그 날로 옮긴다 */
+  /** 여러 날 가운데 한 날을 하루 치 화면으로 본다 — 그 날로 옮긴다 */
   onOpenDay?: (day: string) => void
   /** 요리 계통을 이 화면에서 바로 고치실 수 있게 한다 */
   onPatch?: (patch: { cuisines: Cuisine[] }) => void
@@ -125,9 +125,9 @@ export function RecommendedMenu({
   const kept = DRAFT_MEMORY.key === conditionKeyEarly ? DRAFT_MEMORY : null
   const [drafts, setDrafts] = useState<DayMenu[]>(kept?.drafts ?? [])
   /*
-   * 며칠치 가운데 한 날을 '자세히' 볼 때(2026-10-23 사용자 보고: 돌아가는 길이 없었다).
-   * 예전에는 1일로 바꿔 버려 며칠치 화면이 사라졌다. 이제는 며칠치 설정은 그대로 두고,
-   * 그 날의 식단(계획에서 짠 그대로)을 하루치 화면으로 보여 드리며 '돌아가기' 단추를 둔다.
+   * 며칠 치 가운데 한 날을 '자세히' 볼 때(2026-10-23 사용자 보고: 돌아가는 길이 없었다).
+   * 예전에는 1일로 바꿔 버려 며칠 치 화면이 사라졌다. 이제는 며칠 치 설정은 그대로 두고,
+   * 그 날의 식단(계획에서 짠 그대로)을 하루 치 화면으로 보여 드리며 '돌아가기' 단추를 둔다.
    */
   const [peek, setPeek] = useState<{ day: string; from: string; index: number; menu: DayMenu; selected: SelectedItem[] } | null>(null)
   const backToPlan = () => { const f = peek?.from; setPeek(null); if (f) onOpenDay?.(f) }
@@ -256,7 +256,7 @@ export function RecommendedMenu({
    * 식단을 보여 드리지 않고 병원에 연락하시도록 한다(2026-10-15).
    */
   /*
-   * 며칠치를 한꺼번에(2026-10-23). 1일이면 지금까지의 하루치 화면, 2~5일이면 여러 날 화면(MealPlan).
+   * 며칠 치를 한꺼번에(2026-10-23). 1일이면 지금까지의 하루 치 화면, 2~5일이면 여러 날 화면(MealPlan).
    * 5일까지인 까닭은 engine/plan.ts 에 적었다. 고른 값은 이 기기에만 남는다.
    */
   const [days, setDays] = useState<number>(() => {
@@ -266,8 +266,8 @@ export function RecommendedMenu({
   const daysPicker = (
     /* 폰 폭에서는 한 줄에 다 들어가지 않는다 — 글자를 꺾지 말고 안내 문구를 다음 줄로 내린다(2026-11-04 사용자 보고: "1/일") */
     <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1">
-      <span className="shrink-0 whitespace-nowrap text-xs font-semibold text-stone-600">며칠치</span>
-      <div className="flex shrink-0 gap-1" role="radiogroup" aria-label="며칠치 식단을 받을지">
+      <span className="shrink-0 whitespace-nowrap text-xs font-semibold text-stone-600">며칠 치</span>
+      <div className="flex shrink-0 gap-1" role="radiogroup" aria-label="며칠 치 식단을 받을지">
         {Array.from({ length: PLAN_MAX_DAYS }, (_, i) => i + 1).map((n) => (
           <button
             key={n}
@@ -300,14 +300,14 @@ export function RecommendedMenu({
   }
 
   /*
-   * 며칠치 화면은 한 날을 자세히 보는 동안에도 내리지 않고 숨겨 둔다(hidden) —
+   * 며칠 치 화면은 한 날을 자세히 보는 동안에도 내리지 않고 숨겨 둔다(hidden) —
    * 내리면 '다시 구성' 으로 고른 안과 산 것 표시가 날아가, 돌아왔을 때 다른 계획이 보인다.
    */
   const planView = days > 1 ? (
     <div className={peek ? 'hidden' : undefined}>
       {daysPicker}
       <MealPlan
-        /* 한 날을 보는 동안 selected 는 그 날의 것으로 바뀐다 — 며칠치에는 출발한 날의 것을 넘겨야 안들이 버려지지 않는다 */
+        /* 한 날을 보는 동안 selected 는 그 날의 것으로 바뀐다 — 며칠 치에는 출발한 날의 것을 넘겨야 안들이 버려지지 않는다 */
         patient={patient} selected={peek ? peek.selected : selected} supps={supps} startDay={peek ? peek.from : day} days={days}
         diary={diary} shown={shown} onShown={onShown}
         onApplyDays={(byDay) => onApplyDays?.(byDay)}
@@ -330,7 +330,7 @@ export function RecommendedMenu({
         </div>
       ) : daysPicker}
       <div className="mb-4 rounded-2xl border border-brand-200 bg-brand-50/60 px-4 py-3.5">
-        {/* 며칠치 머리글과 같은 까닭으로, 폰 폭에서는 단추를 글 아래 줄에 둔다 */}
+        {/* 며칠 치 머리글과 같은 까닭으로, 폰 폭에서는 단추를 글 아래 줄에 둔다 */}
         <div className="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
           <div className="min-w-0">
             <p className="text-xs font-bold uppercase tracking-wide text-brand-700">하루(24시간) 전체</p>

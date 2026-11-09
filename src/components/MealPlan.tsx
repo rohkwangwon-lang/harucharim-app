@@ -17,8 +17,8 @@ import { openBook, planConditionKey, planPlate, stepBack, stepNext, type PlanBoo
 /**
  * 여러 날 식단과 장보기 목록(2026-10-23).
  *
- * 하루치 화면(RecommendedMenu)은 '왜' 를 자세히 적는 곳이고, 여기는 '며칠치를 한눈에' 와 '무엇을 살지' 를 답하는 곳이다.
- * 그래서 날마다 상을 짧게 보여 주고, 자세한 까닭은 그 날을 눌러 하루치 화면으로 가서 보게 한다.
+ * 하루 치 화면(RecommendedMenu)은 '왜' 를 자세히 적는 곳이고, 여기는 '며칠 치를 한눈에' 와 '무엇을 살지' 를 답하는 곳이다.
+ * 그래서 날마다 상을 짧게 보여 주고, 자세한 까닭은 그 날을 눌러 하루 치 화면으로 가서 보게 한다.
  */
 const PANTRY_KEY = 'harucharim.pantry'
 const COMMON_AT_HOME = ['달걀', '우유', '두부', '양파', '대파', '당근', '감자', '고구마', '배추김치', '사과', '쌀']
@@ -27,7 +27,7 @@ function loadPantry(): Set<string> {
   try { const raw = localStorage.getItem(PANTRY_KEY); return new Set(raw ? (JSON.parse(raw) as string[]) : []) } catch { return new Set() }
 }
 
-/** 탭을 옮겨도 보던 안을 이어 보이기 위한 기억 — 조건이 같을 때만 쓴다(하루치의 DRAFT_MEMORY 와 같다) */
+/** 탭을 옮겨도 보던 안을 이어 보이기 위한 기억 — 조건이 같을 때만 쓴다(하루 치의 DRAFT_MEMORY 와 같다) */
 let PLAN_MEMORY: PlanBook<PlanDay[]> | null = null
 
 /* 산 것 표시는 계획마다 따로 둔다 — 이전 안으로 돌아가면 그 안에서 표시한 것이 그대로 보여야 한다 */
@@ -53,7 +53,7 @@ export function MealPlan({
   shown?: Record<string, string[]>
   onShown?: (day: string, foodIds: string[]) => void
   onApplyDays: (byDay: { day: string; items: { foodId: string; servings: number; meal: MealSlot }[] }[]) => void
-  /** 한 날을 하루치 화면으로 — 계획에서 짠 식단을 그대로 넘겨 같은 상이 보이게 한다 */
+  /** 한 날을 하루 치 화면으로 — 계획에서 짠 식단을 그대로 넘겨 같은 상이 보이게 한다 */
   onOpenDay: (day: DayKey, menu: PlanDay['menu'], index: number) => void
 }) {
   /* 집에 있는 재료 — 이 기기에만. 계획을 바꿔도 남는다(냉장고는 그대로니까) */
@@ -263,7 +263,7 @@ export function MealPlan({
             </ul>
             <div className="mt-2 flex justify-end print:hidden">
               <button className="text-[11.5px] font-semibold text-brand-700 underline-offset-2 hover:underline" onClick={() => onOpenDay(p.day, p.menu, i)}>
-                이 날 자세히(이유·영양) ›
+                이날 자세히(이유·영양) ›
               </button>
             </div>
           </div>

@@ -6,7 +6,7 @@ import type { NutrientKey } from '../data/types'
 import type { NutrientTotals } from './nutrition'
 
 /**
- * 하루치 식사를 한눈에 보이는 등급으로 요약한다.
+ * 하루 치 식사를 한눈에 보이는 등급으로 요약한다.
  *
  * 기록 화면에서는 날짜가 수십 개씩 늘어선다. 숫자를 다 읽게 하면 아무도 안 본다.
  * 그래서 "충분했나 모자랐나"를 색 하나로 먼저 보여 주고, 숫자는 눌렀을 때 보이게 한다.
@@ -184,7 +184,7 @@ export function summarizePeriod(
   if (avgNa > naLimit) {
     notes.push({ tone: 'over', topic: '나트륨',
       text: `평균 ${avgNa.toLocaleString()} mg 으로 상한(${naLimit.toLocaleString()} mg)을 넘습니다. ` +
-        '하루치를 고치는 것보다 국물을 남기는 습관 하나가 이 평균을 가장 크게 낮춥니다.' })
+        '하루 치를 고치는 것보다 국물을 남기는 습관 하나가 이 평균을 가장 크게 낮춥니다.' })
   } else if (avgNa > naLimit * 0.85) {
     notes.push({ tone: 'info', topic: '나트륨', text: `평균 ${avgNa.toLocaleString()} mg — 상한 언저리가 이어집니다.` })
   }

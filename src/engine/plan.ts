@@ -72,7 +72,7 @@ export function buildPlan(patient: PatientContext, opts: PlanOptions): PlanDay[]
       for (const id of b.ids) if (!recent.has(id) || recent.get(id)! > ago) recent.set(id, ago)
     }
     /*
-     * 어제와 같은 요리가 또 오르지 않게 — 하루치 엔진의 되풀이 방지는 '눈에 띄는 것' 에만 걸려,
+     * 어제와 같은 요리가 또 오르지 않게 — 하루 치 엔진의 되풀이 방지는 '눈에 띄는 것' 에만 걸려,
      * 청경채 두부덮밥·들깨 두부죽 같은 한 그릇 요리는 닷새 중 사흘 오르기도 했다(2026-10-23 측정: 날 경계마다 0.6개).
      * 그래서 안을 셋 만들어 보고 어제·그제와 요리가 가장 덜 겹치는 것을 고른다. 과일·우유·밥은 겹쳐도 된다(사 두고 먹는 것이다).
      */
@@ -235,7 +235,7 @@ export function shoppingText(plan: PlanDay[], list: ShoppingList, label: (d: str
   return lines.join('\n')
 }
 
-/** 하루치를 담을 때 넘길 항목 */
+/** 하루 치를 담을 때 넘길 항목 */
 export function planItems(p: PlanDay): { foodId: string; servings: number; meal: MealSlot }[] {
   return MEAL_SLOTS.flatMap((slot) => p.menu.meals[slot].filter((e) => e.origin === 'added').map((e) => ({ foodId: e.food.id, servings: e.servings, meal: slot })))
 }

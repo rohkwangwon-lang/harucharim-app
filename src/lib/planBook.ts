@@ -4,13 +4,13 @@ import type { PlanDay } from '../engine/plan'
 import { menuConditionKey } from './menuIdentity'
 
 /**
- * 며칠치 식단의 '다시 구성' 과 '이전 안'(2026-11-04 사용자 보고: 되돌아갈 수 없었다).
+ * 며칠 치 식단의 '다시 구성' 과 '이전 안'(2026-11-04 사용자 보고: 되돌아갈 수 없었다).
  *
  * 번호(nonce)를 하나 빼는 것으로는 앞의 안이 돌아오지 않는다. 계획을 보여 드릴 때마다 앞날의 상이
  * '보여 드린 것'(shown)에 적히고 buildPlan 이 그것을 피하므로, 같은 번호로 다시 짜면 다른 계획이 나온다.
  * 장을 이미 본 계획이 바뀌면 안 되니, 만든 계획을 그대로 들고 앞뒤로 오간다.
  *
- * 하루치(RecommendedMenu 의 drafts)와 뜻이 같다. 화면 판단을 검사에서 따질 수 있게 순수 함수로 둔다(checks/screen.ts).
+ * 하루 치(RecommendedMenu 의 drafts)와 뜻이 같다. 화면 판단을 검사에서 따질 수 있게 순수 함수로 둔다(checks/screen.ts).
  */
 export type PlanBook<T> = {
   /** 이 안들을 만든 조건 — 달라지면 다른 계획이므로 버린다 */
@@ -30,7 +30,7 @@ export function stepBack<T>(book: PlanBook<T>): PlanBook<T> {
   return book.cursor > 0 ? { ...book, cursor: book.cursor - 1 } : book
 }
 
-/** 같은 계획만 나오면 몇 번까지 더 짜 볼지 — 며칠치는 한 번에 안을 여럿 만들어 무겁다 */
+/** 같은 계획만 나오면 몇 번까지 더 짜 볼지 — 며칠 치는 한 번에 안을 여럿 만들어 무겁다 */
 const NEXT_TRIES = 3
 
 export function stepNext<T>(
@@ -58,7 +58,7 @@ export function planPlate(plan: PlanDay[]): string {
 }
 
 /**
- * 며칠치 계획의 조건. 보여 드린 것(shown)과 기록(diary)은 넣지 않는다 — 넣으면 계획을 보여 드리는 것만으로 안이 버려진다.
+ * 며칠 치 계획의 조건. 보여 드린 것(shown)과 기록(diary)은 넣지 않는다 — 넣으면 계획을 보여 드리는 것만으로 안이 버려진다.
  * 환자 정보는 칸을 고르지 않고 통째로 본다. 여기서는 첫 안까지 들고 있어서, 빠진 칸이 있으면 바뀌기 전 계획이 그대로 남는다.
  */
 export function planConditionKey(

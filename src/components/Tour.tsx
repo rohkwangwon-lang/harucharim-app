@@ -4,7 +4,7 @@ import { sentences, hashText } from '../lib/tourSpeech'
 
 /**
  * 움직이는 사용법(2026-10-23 사용자 요청, 같은 날 "더 자세히" 요청으로 장(章)을 나눔) —
- * 처음 등록부터, 내가 고른 음식에 나머지를 추천받는 법, 며칠치·장보기, 기록·체중, 영양제, 몸 상태가 달라졌을 때까지
+ * 처음 등록부터, 내가 고른 음식에 나머지를 추천받는 법, 며칠 치·장보기, 기록·체중, 영양제, 몸 상태가 달라졌을 때까지
  * 손가락이 눌러 가며 보여 준다.
  *
  * 실제 화면을 녹화하지 않고, 화면을 본뜬 작은 그림을 React 로 그린다.
@@ -37,7 +37,7 @@ function koVoice(): SpeechSynthesisVoice | null {
 }
 const isApple = typeof navigator !== 'undefined' && /iPhone|iPad|Macintosh/.test(navigator.userAgent)
 /*
- * 미리 녹음해 둔 소리 파일(public/tour/audio.json → <해시>.mp3). scripts/build-tour-audio.ts 가 신경망 음성으로 만든다.
+ * 미리 녹음해 둔 소리 파일(public/tour/audio.json → <해시>.m4a, 2026-11-09부터 대화체 음성). scripts/build-tour-audio.ts 가 신경망 음성으로 만든다.
  * 파일이 있으면 그것을 틀고(기기와 상관없이 같은 자연스러운 목소리), 없거나 못 받으면 기기 음성으로 읽는다.
  */
 const AUDIO_BASE = `${import.meta.env.BASE_URL}tour/`
@@ -80,21 +80,21 @@ const CHAPTERS: Chapter[] = [
       {
         title: '시작하기',
         beats: [
-          { say: '천천히 보셔도 됩니다. 아래 멈춤을 누르면 멈추고, 이전을 누르면 다시 보여 드립니다.', screen: { kind: 'login' }, ms: 4200 },
-          { say: '카카오나 구글 계정으로 들어갑니다. 계정이 없으시면 이메일로도 됩니다.', at: [50, 24], screen: { kind: 'login' } },
-          { say: '처음이시면 그 자리에서 가입까지 됩니다. 아이디를 따로 만들지 않으셔도 됩니다.', at: [50, 24], tap: true, screen: { kind: 'login' } },
-          { say: '들어오셨습니다. 다음을 누르세요.', at: [66, 93], tap: true, screen: { kind: 'login', done: true } }
+          { say: '천천히 보셔도 돼요. 아래 멈춤을 누르면 멈추고, 이전을 누르면 다시 보여 드려요.', screen: { kind: 'login' }, ms: 4200 },
+          { say: '카카오나 구글 계정으로 들어가요. 계정이 없으시면 이메일로도 돼요.', at: [50, 24], screen: { kind: 'login' } },
+          { say: '처음이시면 그 자리에서 가입까지 돼요. 아이디를 따로 만드실 필요는 없어요.', at: [50, 24], tap: true, screen: { kind: 'login' } },
+          { say: '들어오셨어요. 다음을 눌러 주세요.', at: [66, 93], tap: true, screen: { kind: 'login', done: true } }
         ]
       },
       {
         title: '내 정보 등록',
         beats: [
-          { say: '어떤 암인지 고르세요. 여기에 맞춰 모든 추천이 달라집니다.', at: [28, 20], screen: { kind: 'onb', step: 1 } },
-          { say: '여기서는 유방암을 골라 보았습니다.', at: [28, 20], tap: true, screen: { kind: 'onb', step: 1, picked: '유방암' } },
-          { say: '지금 치료 중이신지, 치료를 마치셨는지 고르세요. 같은 음식도 시기에 따라 답이 달라집니다.', at: [50, 21], tap: true, screen: { kind: 'onb', step: 2, picked: '방사선치료 중' } },
-          { say: '키와 체중, 나이를 적으시면 하루에 드실 열량과 단백질 목표가 바로 나옵니다.', at: [28, 24], tap: true, screen: { kind: 'onb', step: 3 } },
-          { say: '숫자가 이상하면 여기서 알려 드립니다. 한 번 더 보시고 고치시면 됩니다.', screen: { kind: 'onb', step: 3, typed: true } },
-          { say: '좋아하시는 음식 종류를 고르고 시작하기를 누르면 준비가 끝납니다.', at: [66, 93], tap: true, screen: { kind: 'onb', step: 4, picked: '한식' } }
+          { say: '어떤 암인지 골라 주세요. 여기에 맞춰서 추천이 모두 달라져요.', at: [28, 20], screen: { kind: 'onb', step: 1 } },
+          { say: '여기서는 유방암을 골라 볼게요.', at: [28, 20], tap: true, screen: { kind: 'onb', step: 1, picked: '유방암' } },
+          { say: '지금 치료 중이신지, 치료를 마치셨는지 골라 주세요. 같은 음식도 시기에 따라 답이 달라지거든요.', at: [50, 21], tap: true, screen: { kind: 'onb', step: 2, picked: '방사선치료 중' } },
+          { say: '키와 체중, 나이를 적으시면 하루에 드실 열량과 단백질 목표가 바로 나와요.', at: [28, 24], tap: true, screen: { kind: 'onb', step: 3 } },
+          { say: '숫자가 이상하면 여기서 알려 드려요. 한 번 더 보시고 고치시면 돼요.', screen: { kind: 'onb', step: 3, typed: true } },
+          { say: '좋아하시는 음식 종류를 고르고 시작하기를 누르면 준비가 끝나요.', at: [66, 93], tap: true, screen: { kind: 'onb', step: 4, picked: '한식' } }
         ]
       }
     ]
@@ -106,80 +106,80 @@ const CHAPTERS: Chapter[] = [
       {
         title: '음식 찾기',
         beats: [
-          tabTap('드시고 싶은 음식이 있으면 아래 찾기를 누르세요.', '찾기', app('내 식단', 'compose')),
-          { say: '음식 이름을 적습니다. 된장찌개를 찾아 보겠습니다.', at: [50, 11], tap: true, screen: app('찾기', 'search') },
-          { say: '음식마다 나에게 맞는지 표시가 붙습니다. 권장, 주의, 피하세요, 세 가지입니다.', screen: app('찾기', 'search', { results: true }) },
-          { say: '된장찌개를 누르면 자세히 나옵니다.', at: [50, 26], tap: true, screen: app('찾기', 'search', { results: true }) }
+          tabTap('드시고 싶은 음식이 있으면 아래 찾기를 눌러 주세요.', '찾기', app('내 식단', 'compose')),
+          { say: '음식 이름을 적어요. 된장찌개를 찾아볼게요.', at: [50, 11], tap: true, screen: app('찾기', 'search') },
+          { say: '음식마다 나한테 맞는지 표시가 붙어요. 권장, 주의, 피하세요, 이렇게 세 가지예요.', screen: app('찾기', 'search', { results: true }) },
+          { say: '된장찌개를 누르면 자세히 나와요.', at: [50, 26], tap: true, screen: app('찾기', 'search', { results: true }) }
         ]
       },
       {
         title: '판정과 드시는 방법',
         beats: [
-          { say: '왜 주의인지, 어떻게 드시면 되는지 나옵니다. 된장찌개는 짜니까 건더기 위주로, 국물은 반만 드시라고 합니다.', screen: app('찾기', 'detail') },
-          { say: '그 아래에는 어떤 연구와 지침을 보고 판단했는지 적혀 있습니다.', at: [50, 62], screen: app('찾기', 'detail') },
-          { say: '언제 드실지와 양을 고르고 담기를 누르세요.', at: [50, 46], tap: true, screen: app('찾기', 'detail') }
+          { say: '왜 주의인지, 어떻게 드시면 되는지 나와요. 된장찌개는 짜니까 건더기 위주로 드시고, 국물은 반만 드시라고 해요.', screen: app('찾기', 'detail') },
+          { say: '그 아래에는 어떤 연구와 지침을 보고 판단했는지 적혀 있어요.', at: [50, 62], screen: app('찾기', 'detail') },
+          { say: '언제 드실지와 양을 고르고 담기를 눌러 주세요.', at: [50, 46], tap: true, screen: app('찾기', 'detail') }
         ]
       },
       {
         title: '빈자리만 추천받기',
         beats: [
-          { say: '점심에 된장찌개가 담겼습니다. 위의 막대를 보면 아직 열량과 단백질이 모자랍니다.', screen: app('내 식단', 'compose', { jjigae: true, bars: true }) },
-          { say: '모자란 것은 앱에 맡기세요. 하루치를 한 번에 추천받기를 누릅니다.', at: [50, 60], tap: true, screen: app('내 식단', 'compose', { jjigae: true, bars: true }) },
-          { say: '고르신 된장찌개는 그대로 두고, 모자란 만큼만 앱이 채웠습니다.', screen: app('추천', 'suggest1', { jjigae: true }) },
-          { say: '마음에 안 드시면 다시 구성을 누르세요. 고르신 것은 그대로 두고 나머지만 바꿉니다.', at: [84, 13], tap: true, screen: app('추천', 'suggest1', { jjigae: true, alt: true }) },
-          { say: '앞의 것이 나았다면 이전 안을 누르면 돌아갑니다.', at: [60, 13], tap: true, screen: app('추천', 'suggest1', { jjigae: true, prev: true }) },
-          { say: '이유 보기를 누르면 왜 이 음식을 골랐는지 나옵니다. 마음에 드는 것만 하나씩 담으셔도 되고,', at: [84, 48], screen: app('추천', 'suggest1', { jjigae: true }) },
-          { say: '위의 단추로 한꺼번에 담으셔도 됩니다.', at: [50, 34], tap: true, screen: app('추천', 'suggest1', { jjigae: true }) }
+          { say: '점심에 된장찌개가 담겼어요. 위의 막대를 보면 아직 열량과 단백질이 모자라요.', screen: app('내 식단', 'compose', { jjigae: true, bars: true }) },
+          { say: '모자란 건 앱에 맡기세요. 하루 치를 한 번에 추천받기를 눌러 볼게요.', at: [50, 60], tap: true, screen: app('내 식단', 'compose', { jjigae: true, bars: true }) },
+          { say: '고르신 된장찌개는 그대로 두고, 모자란 만큼만 앱이 채웠어요.', screen: app('추천', 'suggest1', { jjigae: true }) },
+          { say: '마음에 안 드시면 다시 구성을 눌러 주세요. 고르신 건 그대로 두고 나머지만 바꿔 드려요.', at: [84, 13], tap: true, screen: app('추천', 'suggest1', { jjigae: true, alt: true }) },
+          { say: '앞의 것이 더 나았다면, 이전 안을 누르면 돌아가요.', at: [60, 13], tap: true, screen: app('추천', 'suggest1', { jjigae: true, prev: true }) },
+          { say: '이유 보기를 누르면 왜 이 음식을 골랐는지 나와요. 마음에 드는 것만 하나씩 담으셔도 되고,', at: [84, 48], screen: app('추천', 'suggest1', { jjigae: true }) },
+          { say: '위의 단추로 한꺼번에 담으셔도 돼요.', at: [50, 34], tap: true, screen: app('추천', 'suggest1', { jjigae: true }) }
         ]
       },
       {
         title: '끼니마다 채우기·바꾸기',
         beats: [
-          { say: '내 식단에서는 끼니마다, 이렇게 채워 보세요, 하고 몇 가지를 권합니다. 하나씩 담을 수 있습니다.', at: [84, 66], tap: true, screen: app('내 식단', 'compose', { jjigae: true, filled: true, hint: true }) },
-          { say: '점심에 음식 추가를 누르면, 찾아서 바로 점심에 담을 수 있습니다.', at: [50, 70], tap: true, screen: app('내 식단', 'compose', { jjigae: true, filled: true }) },
-          { say: '양은 빼기, 더하기 단추로 바꿉니다. 밥을 반 공기로 줄이면 하루 합계도 바로 바뀝니다.', at: [84, 41], tap: true, screen: app('내 식단', 'compose', { jjigae: true, filled: true, half: true }) },
-          { say: '포장 식품은 바코드를 찍어 찾을 수도 있습니다. 아직 시험 중이라 못 찾는 제품이 많으니, 그때는 이름으로 찾아 주세요.', at: [86, 11], screen: app('찾기', 'search'), ms: 2800 }
+          { say: '내 식단에서는 끼니마다 이렇게 채워 보세요, 하고 몇 가지를 권해 드려요. 하나씩 담으실 수 있어요.', at: [84, 66], tap: true, screen: app('내 식단', 'compose', { jjigae: true, filled: true, hint: true }) },
+          { say: '점심에 음식 추가를 누르면, 찾아서 바로 점심에 담을 수 있어요.', at: [50, 70], tap: true, screen: app('내 식단', 'compose', { jjigae: true, filled: true }) },
+          { say: '양은 빼기, 더하기 단추로 바꿔요. 밥을 반 공기로 줄이면 하루 합계도 바로 바뀌어요.', at: [84, 41], tap: true, screen: app('내 식단', 'compose', { jjigae: true, filled: true, half: true }) },
+          { say: '포장 식품은 바코드를 찍어서 찾을 수도 있어요. 아직 시험 중이라 못 찾는 제품이 많아요. 그럴 때는 이름으로 찾아 주세요.', at: [86, 11], screen: app('찾기', 'search'), ms: 2800 }
         ]
       }
     ]
   },
   {
-    title: '며칠치 식단과 장보기',
-    lead: '며칠치를 한 번에 받아 장을 보고, 식단표를 냉장고에 붙이기',
+    title: '며칠 치 식단과 장보기',
+    lead: '며칠 치를 한 번에 받아 장을 보고, 식단표를 냉장고에 붙이기',
     scenes: [
       {
-        title: '며칠치 받기',
+        title: '며칠 치 받기',
         beats: [
-          tabTap('장 보기 전에는 추천에서 며칠치를 한꺼번에 받으세요.', '추천', app('내 식단', 'compose', { jjigae: true, filled: true })),
-          { say: '하루부터 닷새까지 고를 수 있습니다. 사흘을 골라 보겠습니다.', at: [43, 11], tap: true, screen: app('추천', 'plan', { days3: true }) },
-          { say: '날마다 다른 상이 나옵니다. 생선과 고기는 신선할 때 드시도록 앞쪽 날에 놓고, 국과 조림은 한 번 끓여 이틀에 나눠 드시게 짭니다.', screen: app('추천', 'plan', { days3: true }) },
-          { say: '다른 상을 보고 싶으시면 다시 구성을 누르세요.', at: [84, 33], tap: true, screen: app('추천', 'plan', { days3: true, alt: true }) }
+          tabTap('장 보기 전에는 추천에서 며칠 치를 한꺼번에 받아 보세요.', '추천', app('내 식단', 'compose', { jjigae: true, filled: true })),
+          { say: '하루부터 닷새까지 고를 수 있어요. 사흘을 골라 볼게요.', at: [43, 11], tap: true, screen: app('추천', 'plan', { days3: true }) },
+          { say: '날마다 다른 상이 나와요. 생선과 고기는 신선할 때 드시도록 앞쪽 날에 놓고요, 국과 조림은 한 번 끓여서 이틀에 나눠 드시게 짜 드려요.', screen: app('추천', 'plan', { days3: true }) },
+          { say: '다른 상을 보고 싶으시면 다시 구성을 눌러 주세요.', at: [84, 33], tap: true, screen: app('추천', 'plan', { days3: true, alt: true }) }
         ]
       },
       {
-        title: '이 날 자세히',
+        title: '이날 자세히',
         beats: [
-          { say: '하루치가 궁금하시면 이 날 자세히를 누르세요.', at: [72, 62], tap: true, screen: app('추천', 'plan', { days3: true, alt: true }) },
-          { say: '끼니마다 왜 이 음식을 골랐는지, 무엇을 보고 판단했는지 나옵니다.', screen: app('추천', 'peek') },
-          { say: '돌아가기를 누르면 앞 화면으로 갑니다. 받아 두신 식단은 그대로 있습니다.', at: [26, 10], tap: true, screen: app('추천', 'peek'), ms: 2200 }
+          { say: '하루 치가 궁금하시면 이날 자세히를 눌러 주세요.', at: [72, 62], tap: true, screen: app('추천', 'plan', { days3: true, alt: true }) },
+          { say: '끼니마다 왜 이 음식을 골랐는지, 무엇을 보고 판단했는지 나와요.', screen: app('추천', 'peek') },
+          { say: '돌아가기를 누르면 앞 화면으로 가요. 받아 두신 식단은 그대로 있어요.', at: [26, 10], tap: true, screen: app('추천', 'peek'), ms: 2200 }
         ]
       },
       {
         title: '장보기 목록',
         beats: [
-          { say: '아래에는 장보기 목록이 있습니다. 얼마나 사면 되는지, 냉장고에 며칠 두어도 되는지 적혀 있습니다.', screen: app('추천', 'shop') },
-          { say: '집에 있는 재료를 누르고, 냉장고에 있는 것을 골라 주세요.', at: [20, 11], tap: true, screen: app('추천', 'shop', { pantryOpen: true }) },
-          { say: '두부가 있다고 하시면 목록에서 빠지고, 두부 요리를 먼저 넣어 드립니다.', at: [28, 24], tap: true, screen: app('추천', 'shop', { pantryOpen: true, tofuHome: true }) },
-          { say: '장을 보면서 산 것을 누르면 줄이 그어집니다.', at: [16, 25], tap: true, screen: app('추천', 'shop', { tofuHome: true, bought: true }) },
-          { say: '복사나 보내기를 누르면 메모나 카카오톡으로 옮길 수 있습니다. 장은 가족이 대신 봐 주셔도 됩니다.', at: [76, 17], tap: true, screen: app('추천', 'shop', { tofuHome: true, bought: true, copied: true }) }
+          { say: '아래에는 장보기 목록이 있어요. 얼마나 사면 되는지, 냉장고에 며칠 두어도 되는지 적혀 있어요.', screen: app('추천', 'shop') },
+          { say: '집에 있는 재료를 누르고, 냉장고에 있는 걸 골라 주세요.', at: [20, 11], tap: true, screen: app('추천', 'shop', { pantryOpen: true }) },
+          { say: '두부가 있다고 하시면 목록에서 빠지고, 두부 요리를 먼저 넣어 드려요.', at: [28, 24], tap: true, screen: app('추천', 'shop', { pantryOpen: true, tofuHome: true }) },
+          { say: '장을 보면서 산 것을 누르면 줄이 그어져요.', at: [16, 25], tap: true, screen: app('추천', 'shop', { tofuHome: true, bought: true }) },
+          { say: '복사나 보내기를 누르면 메모나 카카오톡으로 옮길 수 있어요. 장은 가족분이 대신 봐 주셔도 돼요.', at: [76, 17], tap: true, screen: app('추천', 'shop', { tofuHome: true, bought: true, copied: true }) }
         ]
       },
       {
         title: '담기·식단표',
         beats: [
-          { say: '날짜별로 내 식단에 담기를 누르면, 사흘치가 날짜마다 들어갑니다.', at: [50, 85], tap: true, screen: app('추천', 'plan', { days3: true, alt: true }) },
-          { say: '식단표 저장을 누르면 큰 글씨 식단표가 그림으로 만들어집니다. 냉장고에 붙이거나 가족에게 보내 보세요.', at: [30, 22], tap: true, screen: app('추천', 'plan', { days3: true, alt: true }) },
-          { say: '인쇄하시면 식단표와 장보기 목록이 종이 한 장에 나옵니다.', screen: app('추천', 'image', { saved: true }), ms: 3000 }
+          { say: '날짜별로 내 식단에 담기를 누르면, 사흘 치가 날짜마다 들어가요.', at: [50, 85], tap: true, screen: app('추천', 'plan', { days3: true, alt: true }) },
+          { say: '식단표 저장을 누르면 큰 글씨 식단표가 그림으로 만들어져요. 냉장고에 붙이거나 가족에게 보내 보세요.', at: [30, 22], tap: true, screen: app('추천', 'plan', { days3: true, alt: true }) },
+          { say: '인쇄하시면 식단표와 장보기 목록이 종이 한 장에 나와요.', screen: app('추천', 'image', { saved: true }), ms: 3000 }
         ]
       }
     ]
@@ -191,19 +191,19 @@ const CHAPTERS: Chapter[] = [
       {
         title: '기록 탭',
         beats: [
-          tabTap('기록에는 날마다 드신 것이 쌓입니다.', '기록', app('내 식단', 'compose', { jjigae: true, filled: true })),
-          { say: '날짜를 누르면 그날 식단을 보고 고칠 수 있습니다. 점이 찍힌 날이 적어 두신 날입니다.', at: [79, 20], tap: true, screen: app('기록', 'diary', { taken: true }) },
+          tabTap('기록에는 날마다 드신 게 쌓여요.', '기록', app('내 식단', 'compose', { jjigae: true, filled: true })),
+          { say: '날짜를 누르면 그날 식단을 보고 고칠 수 있어요. 점이 찍힌 날이 적어 두신 날이에요.', at: [79, 20], tap: true, screen: app('기록', 'diary', { taken: true }) },
           { say: '체중도 함께 적어 두세요.', at: [40, 37], tap: true, screen: app('기록', 'diary', { taken: true, weight: true }) },
-          { say: '체중이 어떻게 변하는지 그림으로 보여 드립니다. 반년 사이에 5 % 넘게 줄면, 담당 의료진께 알리시라고 말씀드립니다.', screen: app('기록', 'diary', { taken: true, weight: true, graph: true }) },
-          { say: '치료를 마치신 뒤에도 체중은 중요합니다. 많이 줄거나 많이 늘면 다음 진료 때 알려 주세요.', screen: app('기록', 'diary', { taken: true, weight: true, graph: true }) }
+          { say: '체중이 어떻게 변하는지 그림으로 보여 드려요. 반년 사이에 5 % 넘게 줄면, 담당 의료진께 알리시라고 말씀드려요.', screen: app('기록', 'diary', { taken: true, weight: true, graph: true }) },
+          { say: '치료를 마치신 뒤에도 체중은 중요해요. 많이 줄거나 많이 늘면 다음 진료 때 알려 주세요.', screen: app('기록', 'diary', { taken: true, weight: true, graph: true }) }
         ]
       },
       {
         title: '영양 보고',
         beats: [
-          { say: '이 주의 영양 보고에는 한 주 동안 며칠이나 모자랐는지가 나옵니다. 하루쯤 적게 드신 것은 괜찮지만, 며칠씩 이어지면 알려 드립니다.', screen: app('기록', 'diary', { taken: true, report: true }) },
-          { say: '모자란 것이 있으면, 그것을 채울 음식을 아래에 권해 드립니다.', at: [50, 70], screen: app('기록', 'diary', { taken: true, report: true }) },
-          { say: '지난 기록을 보다가 오늘로를 누르면 오늘로 돌아옵니다.', at: [86, 11], tap: true, screen: app('기록', 'diary', { taken: true, report: true }), ms: 2200 }
+          { say: '이 주의 영양 보고에는 한 주 동안 며칠이나 모자랐는지 나와요. 하루쯤 적게 드신 건 괜찮지만, 며칠씩 이어지면 알려 드려요.', screen: app('기록', 'diary', { taken: true, report: true }) },
+          { say: '모자란 게 있으면, 그걸 채울 음식을 아래에 권해 드려요.', at: [50, 70], screen: app('기록', 'diary', { taken: true, report: true }) },
+          { say: '지난 기록을 보다가 오늘로를 누르면 오늘로 돌아와요.', at: [86, 11], tap: true, screen: app('기록', 'diary', { taken: true, report: true }), ms: 2200 }
         ]
       }
     ]
@@ -216,15 +216,15 @@ const CHAPTERS: Chapter[] = [
         title: '영양제 등록',
         beats: [
           tabTap('드시는 영양제가 있으면 영양제에 적어 두세요.', '영양제', app('내 식단', 'compose', { jjigae: true, filled: true })),
-          { say: '제품 이름으로 찾습니다. 오메가3를 찾아 보겠습니다.', at: [50, 13], tap: true, screen: app('영양제', 'supp', { typed: true }) },
-          { say: '등록하시면 지금 받는 치료나 드시는 약과 부딪히는 것이 있는지 바로 알려 드립니다.', at: [84, 27], tap: true, screen: app('영양제', 'supp', { typed: true, added: true }) }
+          { say: '제품 이름으로 찾아요. 오메가3를 찾아볼게요.', at: [50, 13], tap: true, screen: app('영양제', 'supp', { typed: true }) },
+          { say: '등록하시면 지금 받는 치료나 드시는 약과 부딪히는 게 있는지 바로 알려 드려요.', at: [84, 27], tap: true, screen: app('영양제', 'supp', { typed: true, added: true }) }
         ]
       },
       {
         title: '나에게 맞는 것만',
         beats: [
-          { say: '아래 영양제 목록에서는 나에게 괜찮은 것만 따로 모아 볼 수 있습니다.', at: [30, 44], tap: true, screen: app('영양제', 'supp', { added: true, filterGood: true }) },
-          { say: '주의할 것만 누르면 지금은 조심하시는 게 좋은 것들이 모입니다. 새 영양제는 드시기 전에 담당 의료진과 먼저 상의하세요.', at: [70, 44], tap: true, screen: app('영양제', 'supp', { added: true, filterBad: true }), ms: 3000 }
+          { say: '아래 영양제 목록에서는 나한테 괜찮은 것만 따로 모아 볼 수 있어요.', at: [30, 44], tap: true, screen: app('영양제', 'supp', { added: true, filterGood: true }) },
+          { say: '주의할 것만 누르면 지금은 조심하시는 게 좋은 것들이 모여요. 새 영양제는 드시기 전에 담당 의료진과 먼저 상의하세요.', at: [70, 44], tap: true, screen: app('영양제', 'supp', { added: true, filterBad: true }), ms: 3000 }
         ]
       }
     ]
@@ -237,26 +237,26 @@ const CHAPTERS: Chapter[] = [
         title: '증상 고치기',
         beats: [
           tabTap('예를 들어 설사가 시작되셨다면, 내 정보에서 알려 주세요.', '내 정보', app('내 식단', 'compose', { jjigae: true, filled: true })),
-          { say: '지금 겪고 있는 증상에서 설사를 누릅니다. 지금 불편한 증상을 가장 먼저 생각해서 식단을 짭니다.', at: [52, 33], tap: true, screen: app('내 정보', 'me', { symptom: true }) },
-          { say: '추천이 바로 바뀝니다. 장에 부담이 적고 부드러운 음식으로 바꿔 드립니다.', screen: app('추천', 'suggest1', { soft: true }) },
-          { say: '내 식단 맨 위의 달라졌나요를 눌러도 같은 것을 고칠 수 있습니다.', at: [50, 11], tap: true, screen: app('내 식단', 'compose', { jjigae: true, filled: true, changed: true }), ms: 2800 }
+          { say: '지금 겪고 있는 증상에서 설사를 눌러요. 지금 불편한 증상을 제일 먼저 생각해서 식단을 짜 드려요.', at: [52, 33], tap: true, screen: app('내 정보', 'me', { symptom: true }) },
+          { say: '추천이 바로 바뀌어요. 장에 부담이 적고 부드러운 음식으로 바꿔 드려요.', screen: app('추천', 'suggest1', { soft: true }) },
+          { say: '내 식단 맨 위의 달라졌나요를 눌러도 같은 걸 고칠 수 있어요.', at: [50, 11], tap: true, screen: app('내 식단', 'compose', { jjigae: true, filled: true, changed: true }), ms: 2800 }
         ]
       },
       {
         title: '약·알레르기·치료 마침',
         beats: [
-          { say: '드시는 약도 적어 주세요. 예를 들어 와파린을 드시면, 함께 조심하실 음식과 영양제에 표시가 붙습니다.', at: [52, 52], tap: true, screen: app('내 정보', 'me', { symptom: true, med: true }) },
-          { say: '알레르기가 있으시면 고르세요. 그 재료가 든 음식은 추천에서 빼 드립니다.', at: [30, 68], tap: true, screen: app('내 정보', 'me', { symptom: true, med: true, allergy: true }) },
-          { say: '치료가 끝나시면 치료 시기를 치료를 마쳤습니다로 바꿔 주세요. 체중이 잘 지켜지고 있으면 목표를 유지 수준으로 맞추고, 체중이 줄면 다시 올려 드립니다.', at: [70, 20], tap: true, screen: app('내 정보', 'me', { done: true }) },
-          { say: '글씨가 작으시면 더 크게를 누르세요.', at: [84, 83], tap: true, screen: app('내 정보', 'me', { done: true, big: true }), ms: 2200 }
+          { say: '드시는 약도 적어 주세요. 예를 들어 와파린을 드시면, 함께 조심하실 음식과 영양제에 표시가 붙어요.', at: [52, 52], tap: true, screen: app('내 정보', 'me', { symptom: true, med: true }) },
+          { say: '알레르기가 있으시면 골라 주세요. 그 재료가 든 음식은 추천에서 빼 드려요.', at: [30, 68], tap: true, screen: app('내 정보', 'me', { symptom: true, med: true, allergy: true }) },
+          { say: '치료가 끝나시면 치료 시기를 치료를 마쳤습니다로 바꿔 주세요. 체중이 잘 지켜지고 있으면 목표를 유지 수준으로 맞추고, 체중이 줄면 다시 올려 드려요.', at: [70, 20], tap: true, screen: app('내 정보', 'me', { done: true }) },
+          { say: '글씨가 작으시면 더 크게를 눌러 주세요.', at: [84, 83], tap: true, screen: app('내 정보', 'me', { done: true, big: true }), ms: 2200 }
         ]
       },
       {
         title: '가이드 탭',
         beats: [
-          tabTap('가이드에는 이 사용법과 운동, 암 종류별 안내가 있습니다.', '가이드', app('내 정보', 'me', { done: true })),
-          { say: '잘 드시는 것과 몸을 움직이는 것은 함께 가야 해서, 운동 안내를 같은 곳에 두었습니다.', at: [37, 11], tap: true, screen: app('가이드', 'care', { exercise: true }), ms: 2600 },
-          { say: '여기까지입니다. 이 안내는 가이드의 사용법에서 언제든 다시 보실 수 있습니다. 앱은 치료를 대신하지 않으니, 궁금한 점은 담당 의료진과 상의하세요.', screen: app('가이드', 'care'), ms: 3000 }
+          tabTap('가이드에는 이 사용법이랑 운동, 암 종류별 안내가 있어요.', '가이드', app('내 정보', 'me', { done: true })),
+          { say: '잘 드시는 것과 몸을 움직이는 건 함께 가야 해서, 운동 안내를 같은 곳에 두었어요.', at: [37, 11], tap: true, screen: app('가이드', 'care', { exercise: true }), ms: 2600 },
+          { say: '여기까지예요. 이 안내는 가이드의 사용법에서 언제든 다시 보실 수 있어요. 앱은 치료를 대신하지 않아요. 궁금한 점은 담당 의료진과 상의하세요.', screen: app('가이드', 'care'), ms: 3000 }
         ]
       }
     ]
@@ -648,11 +648,11 @@ function Compose({ f }: { f: F }) {
         <Card className="mb-1.5 border-brand-200 bg-brand-50"><p className="font-bold">달라졌나요? <span className="font-normal text-stone-500">▾</span></p><div className="mt-1 flex flex-wrap gap-1"><Chip t="방사선치료 중" on /><Chip t="설사" on /><Chip t="오심·구토" /><Chip t="식욕부진" /></div></Card>
       ) : <p className="mb-1.5 flex items-center justify-between text-[11px] font-bold">오늘 <span className="rounded border border-stone-300 px-1.5 text-[8px] font-normal text-stone-500">달라졌나요? ▾</span></p>}
       {(f.jjigae || f.taken) && <Bars kcal={f.filled ? (f.half ? 1690 : 1760) : f.jjigae ? 410 : 1760} prot={f.filled ? 84 : f.jjigae ? 14 : 86} over={!!f.bars} />}
-      {!f.jjigae && !f.taken && <Card className="border-dashed py-4 text-center text-stone-500">아직 담으신 것이 없습니다.<br />찾기에서 먹고 싶은 것을 담거나, 추천에서 하루치를 받아 보세요.</Card>}
+      {!f.jjigae && !f.taken && <Card className="border-dashed py-4 text-center text-stone-500">아직 담으신 것이 없습니다.<br />찾기에서 먹고 싶은 것을 담거나, 추천에서 하루 치를 받아 보세요.</Card>}
       {f.jjigae && !f.filled && (
         <>
           <Card className="mt-1.5"><p className="font-bold text-stone-500">점심</p><div className="flex items-center justify-between py-0.5"><span>된장찌개 <Level l="주의" /> <span className="rounded bg-stone-100 px-1 text-[7.5px]">내가 담음</span></span><span className="rounded border border-stone-300 px-1.5 text-[8px]">− 1 그릇 +</span></div></Card>
-          <div className="mt-2 rounded-lg bg-brand-600 py-2 text-center"><p className="text-[11px] font-bold text-white">하루치를 한 번에 추천받기</p><p className="text-[8px] text-brand-100">담으신 것은 그대로 두고 빈자리만 채웁니다</p></div>
+          <div className="mt-2 rounded-lg bg-brand-600 py-2 text-center"><p className="text-[11px] font-bold text-white">하루 치를 한 번에 추천받기</p><p className="text-[8px] text-brand-100">담으신 것은 그대로 두고 빈자리만 채웁니다</p></div>
         </>
       )}
       {(f.filled || f.taken) && (
@@ -703,7 +703,7 @@ function Suggest1({ f }: { f: F }) {
   const seedText = f.alt ? '2번째 안입니다. 담으신 1가지는 그대로 두고 나머지만 바꿨습니다.' : f.prev ? '1번째 안으로 돌아왔습니다.' : null
   return (
     <div>
-      <div className="mb-1 flex items-center gap-1"><span className="text-[8.5px] font-bold text-stone-600">며칠치</span>{[1, 2, 3, 4, 5].map((n) => <Chip key={n} t={`${n}일`} on={n === 1} />)}</div>
+      <div className="mb-1 flex items-center gap-1"><span className="text-[8.5px] font-bold text-stone-600">며칠 치</span>{[1, 2, 3, 4, 5].map((n) => <Chip key={n} t={`${n}일`} on={n === 1} />)}</div>
       <div className="rounded-lg border border-brand-200 bg-brand-50 px-2 py-1.5">
         <div className="flex items-start justify-between"><div><p className="text-[8px] font-bold uppercase text-brand-700">하루(24시간) 전체</p><p className="font-bold">유방암 · 가을철 추천 식단</p><p className="text-[8px] text-stone-600">{f.soft ? '오늘은 설사를 가장 크게 반영했습니다' : f.jjigae ? <>담으신 <b>1가지</b>에 부족한 부분을 채웠습니다.</> : '아직 담으신 것이 없어 처음부터 구성했습니다.'}</p></div>
           <div className="flex gap-1">{(f.alt || f.prev) && <span className="rounded border border-stone-300 bg-white px-1.5 py-1 text-[8px] font-bold text-stone-600">‹ 이전 안</span>}<span className="rounded border border-brand-600 bg-white px-1.5 py-1 text-[8px] font-bold text-brand-700">⟳ 다시 구성</span></div></div>
@@ -720,7 +720,7 @@ function Suggest1({ f }: { f: F }) {
 
 function Plan({ f, days }: { f: F; days: boolean }) {
   const plan = f.alt ? PLAN_B : PLAN_A
-  const Days = () => <div className="mb-2 flex items-center gap-1"><span className="text-[8.5px] font-bold text-stone-600">며칠치</span>{[1, 2, 3, 4, 5].map((n) => <Chip key={n} t={`${n}일`} on={f.days3 ? n === 3 : n === 1} />)}</div>
+  const Days = () => <div className="mb-2 flex items-center gap-1"><span className="text-[8.5px] font-bold text-stone-600">며칠 치</span>{[1, 2, 3, 4, 5].map((n) => <Chip key={n} t={`${n}일`} on={f.days3 ? n === 3 : n === 1} />)}</div>
   if (!days) return <div><Days /><div className="rounded-lg border border-brand-200 bg-brand-50 px-2 py-2"><p className="text-[8px] font-bold uppercase text-brand-700">하루(24시간) 전체</p><p className="font-bold">유방암 · 가을철 추천 식단</p></div></div>
   return (
     <div>
@@ -734,7 +734,7 @@ function Plan({ f, days }: { f: F; days: boolean }) {
           <Card key={d}>
             <p className="font-bold"><span className="mr-1 rounded bg-brand-100 px-1 text-[7.5px] text-brand-800">{i + 1}일째</span>{d}</p>
             {(['아침', '점심', '저녁'] as const).map((s, k) => <p key={s} className="truncate text-[8.5px]"><span className="mr-1 font-semibold text-stone-400">{s}</span>{meals[k]}</p>)}
-            <p className="text-right text-[8px] font-semibold text-brand-700">이 날 자세히(이유·영양) ›</p>
+            <p className="text-right text-[8px] font-semibold text-brand-700">이날 자세히(이유·영양) ›</p>
           </Card>
         ))}
       </div>
@@ -884,7 +884,7 @@ function Ending({ onMenu }: { onMenu: () => void }) {
     <div className="flex h-full flex-col items-center justify-center bg-brand-50 px-5 text-center">
       <span className="h-12 w-12 rounded-full bg-brand-600" />
       <p className="mt-3 text-base font-bold text-stone-900">여기까지입니다</p>
-      <p className="mt-1.5 text-[12.5px] leading-relaxed text-stone-600">처음 시작하기 → 내가 고르고 추천받기 → 며칠치·장보기 → 기록·체중 → 영양제 → 몸 상태가 달라지면.<br />궁금한 점은 담당 의료진과 상의하세요.</p>
+      <p className="mt-1.5 text-[12.5px] leading-relaxed text-stone-600">처음 시작하기 → 내가 고르고 추천받기 → 며칠 치·장보기 → 기록·체중 → 영양제 → 몸 상태가 달라지면.<br />궁금한 점은 담당 의료진과 상의하세요.</p>
       <button className="mt-4 rounded-xl bg-brand-600 px-4 py-2 text-sm font-bold text-white" onClick={onMenu}>목차로</button>
     </div>
   )

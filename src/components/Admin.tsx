@@ -21,7 +21,7 @@ import {
 const EVENT_LABEL: Record<string, string> = {
   open: '앱 열기',
   onboard_done: '처음 설정 마침',
-  menu_build: '하루치 추천',
+  menu_build: '하루 치 추천',
   menu_retry: '다시 구성',
   menu_take: '추천 담기',
   food_add: '음식 담기',

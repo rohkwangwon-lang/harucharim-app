@@ -2,7 +2,7 @@ import type { PlanDay } from '../engine/plan'
 import { sheetRows, sheetTitle, SHEET_COLS, type SheetLine } from './planSheet'
 
 /**
- * 며칠치 식단표를 그림 한 장으로(2026-10-23) — 냉장고에 붙이는 용도.
+ * 며칠 치 식단표를 그림 한 장으로(2026-10-23) — 냉장고에 붙이는 용도.
  *
  * 사용자 요청(2026-10-23 둘째): 냉장고에 붙이기 좋은 크기와 시인성으로.
  * A4 세로 비율(1240 × 가변, 2배 해상도)에 날짜는 줄, 끼니는 칸인 표로 그린다 — 멀리서도 '오늘 저녁' 칸을 바로 찾게.

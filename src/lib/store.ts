@@ -20,7 +20,7 @@ export interface AppState {
   patient: PatientContext
   /**
    * 날짜별 식단 기록. 열쇠는 'YYYY-MM-DD'.
-   * 하루치만 두면 어제 무엇을 먹었는지 알 수 없어, 처음부터 날짜별로 쌓는다.
+   * 하루 치만 두면 어제 무엇을 먹었는지 알 수 없어, 처음부터 날짜별로 쌓는다.
    */
   diary: Record<DayKey, SelectedItem[]>
   /**
@@ -248,7 +248,7 @@ export function restoreState(parsed: unknown, today: DayKey = todayKey()): AppSt
       if (day.length) diary[k as DayKey] = day
     }
   }
-  // 예전 판은 하루치만 담고 있었다. 그 내용을 오늘 기록으로 옮긴다.
+  // 예전 판은 하루 치만 담고 있었다. 그 내용을 오늘 기록으로 옮긴다.
   if (!diary[today]) {
     const legacy = restoreDay(src.selected)
     if (legacy.length) diary[today] = legacy
@@ -335,7 +335,7 @@ function pruneShown(shown: Record<string, string[]>): Record<DayKey, string[]> {
   for (const [key, ids] of Object.entries(shown)) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue
     const ago = today - Math.round(Date.parse(key) / 86400000)
-    /* 며칠치 식단은 앞날 것도 적어 둔다(2026-10-23) — 그 날이 되어 하루치를 열어도 같은 상에서 이어 가게 */
+    /* 며칠 치 식단은 앞날 것도 적어 둔다(2026-10-23) — 그 날이 되어 하루 치를 열어도 같은 상에서 이어 가게 */
     if (ago < -7 || ago > SHOWN_KEEP_DAYS) continue
     if (Array.isArray(ids)) out[key] = ids.filter((x) => typeof x === 'string')
   }
