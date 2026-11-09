@@ -11,3 +11,6 @@ capacitor-cordova-ios-plugins
 # Generated Config files
 App/App/capacitor.config.json
 App/App/config.xml
+
+# 시뮬레이터 빌드 결과(xcodebuild -derivedDataPath ios/build)
+build

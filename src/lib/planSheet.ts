@@ -58,8 +58,8 @@ export function sheetRows(plan: PlanDay[]): SheetRow[] {
   })
 }
 
-/** 그림·인쇄 제목 — '10/27(월) ~ 10/31(금) · 5일치' */
+/** 그림·인쇄 제목 — '10/27(월) ~ 10/31(금) · 5일 치' */
 export function sheetTitle(rows: SheetRow[]): string {
   const a = rows[0], b = rows[rows.length - 1]
-  return rows.length === 1 ? `${a.date}(${a.weekday})` : `${a.date}(${a.weekday}) ~ ${b.date}(${b.weekday}) · ${rows.length}일치`
+  return rows.length === 1 ? `${a.date}(${a.weekday})` : `${a.date}(${a.weekday}) ~ ${b.date}(${b.weekday}) · ${rows.length}일 치`
 }

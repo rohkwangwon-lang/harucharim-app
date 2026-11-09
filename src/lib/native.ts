@@ -50,11 +50,13 @@ export async function shareImage(blob: Blob, fileName: string, title: string): P
 /* ───────────── 바코드 ───────────── */
 
 /**
- * 아이폰 자체 바코드 인식으로 한 번 찍는다. 찍은 숫자를 돌려주고, 취소하면 null.
+ * 아이폰 자체 바코드 인식으로 한 번 찍는다.
+ * 돌려주는 값: 찍은 숫자 / 'cancel'(사용자가 닫음) / 'error'(카메라가 없거나 막혀 있음 — 손으로 번호를 넣는 화면으로 넘긴다).
  * 웹에서는 부르지 않는다(components/BarcodeScanner.tsx 의 카메라 화면을 그대로 쓴다).
  */
-export async function scanBarcodeNative(): Promise<string | null> {
+export async function scanBarcodeNative(): Promise<string | 'cancel' | 'error'> {
   const { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner')
+  const t0 = Date.now()
   try {
     const r = await CapacitorBarcodeScanner.scanBarcode({
       hint: CapacitorBarcodeScannerTypeHint.ALL,
@@ -62,9 +64,13 @@ export async function scanBarcodeNative(): Promise<string | null> {
       scanButton: false
     })
     const v = (r?.ScanResult ?? '').trim()
-    return v || null
-  } catch {
-    return null
+    return v || 'cancel'
+  } catch (e) {
+    /* 사용자가 닫은 것과 카메라 문제를 가른다 — 닫았으면 그대로 닫고, 문제면 번호 입력 화면을 보여 드린다 */
+    // 카메라가 없을 때도 플러그인은 '취소됨'(OS-PLUG-BARC-0006)으로 돌려준다(시뮬레이터에서 확인).
+    // 1초 안에 돌아온 '취소'는 사람이 누른 것일 수 없으니 카메라 문제로 본다.
+    const cancelled = /cancel/i.test(String((e as { message?: string })?.message ?? e))
+    return cancelled && Date.now() - t0 > 1000 ? 'cancel' : 'error'
   }
 }
 

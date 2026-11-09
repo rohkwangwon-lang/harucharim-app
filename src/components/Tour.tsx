@@ -726,7 +726,7 @@ function Plan({ f, days }: { f: F; days: boolean }) {
     <div>
       <Days />
       <div className="mb-1.5 flex items-start justify-between rounded-lg border border-brand-200 bg-brand-50 px-2 py-1.5">
-        <div><p className="text-[8px] font-bold uppercase text-brand-700">3일치 식단 · 1인분</p><div className="mt-1 flex gap-1"><Chip t="집에 있는 재료" /><Chip t="식단표 저장" /><Chip t="인쇄" /></div></div>
+        <div><p className="text-[8px] font-bold uppercase text-brand-700">3일 치 식단 · 1인분</p><div className="mt-1 flex gap-1"><Chip t="집에 있는 재료" /><Chip t="식단표 저장" /><Chip t="인쇄" /></div></div>
         <span className="rounded-md border border-brand-600 bg-white px-1.5 py-1 text-[8px] font-bold text-brand-700">⟳ 다시 구성</span>
       </div>
       <div className="space-y-1.5">
@@ -738,7 +738,7 @@ function Plan({ f, days }: { f: F; days: boolean }) {
           </Card>
         ))}
       </div>
-      <div className="mt-1.5 rounded-lg bg-brand-600 py-1.5 text-center font-bold text-white">3일치 27가지를 날짜별로 내 식단에 담기</div>
+      <div className="mt-1.5 rounded-lg bg-brand-600 py-1.5 text-center font-bold text-white">3일 치 27가지를 날짜별로 내 식단에 담기</div>
     </div>
   )
 }
@@ -746,7 +746,7 @@ function Plan({ f, days }: { f: F; days: boolean }) {
 function Peek() {
   return (
     <div>
-      <div className="mb-1.5 flex items-center gap-1.5"><span className="rounded-lg bg-brand-600 px-2 py-1 font-bold text-white">← 3일치로 돌아가기</span><span className="text-[8px] text-stone-500">2일째 · 토 10/25</span></div>
+      <div className="mb-1.5 flex items-center gap-1.5"><span className="rounded-lg bg-brand-600 px-2 py-1 font-bold text-white">← 3일 치로 돌아가기</span><span className="text-[8px] text-stone-500">2일째 · 토 10/25</span></div>
       <div className="rounded-lg border border-brand-200 bg-brand-50 px-2 py-1.5"><p className="text-[8px] font-bold uppercase text-brand-700">하루(24시간) 전체</p><p className="font-bold">유방암 · 가을철 추천 식단</p><p className="text-[8px] text-stone-600">오늘은 <b>단백질을 채우는 것</b>을 가장 크게 반영했습니다</p></div>
       <Card className="mt-1.5">
         <p className="font-bold text-stone-500">아침 <span className="font-normal">420 kcal</span></p>
@@ -867,7 +867,7 @@ function Image({ f }: { f: F }) {
       {f.saved && <p className="mb-1.5 rounded bg-brand-50 px-1.5 py-1 text-[8.5px] text-brand-800">식단표 그림을 저장했습니다</p>}
       <div className="rounded-md border border-stone-300 bg-white p-1.5">
         <p className="text-[7px] font-bold text-brand-700">하루차림 식단표</p>
-        <p className="text-[9px] font-bold">10/24(금) ~ 10/26(일) · 3일치</p>
+        <p className="text-[9px] font-bold">10/24(금) ~ 10/26(일) · 3일 치</p>
         <table className="mt-1 w-full border-collapse text-[6.5px]">
           <thead><tr>{['날짜', '아침', '점심', '저녁'].map((h) => <th key={h} className="border border-stone-300 bg-brand-600 px-0.5 py-0.5 text-white">{h}</th>)}</tr></thead>
           <tbody>{PLAN_B.map(([d, m]) => <tr key={d}><th className="border border-stone-300 bg-brand-50 px-0.5 text-left text-[8px]">{d.slice(0, 1)}</th>{m.map((x) => <td key={x} className="border border-stone-300 px-0.5 align-top leading-tight">{x.replace(/ · /g, '\n')}</td>)}</tr>)}</tbody>

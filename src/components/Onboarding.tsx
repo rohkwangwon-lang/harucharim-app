@@ -98,7 +98,7 @@ export function Onboarding({
     <div className="fixed inset-0 z-50 flex flex-col bg-stone-50">
       {tour && <Tour onClose={() => setTour(false)} />}
       {/* 진행 표시 */}
-      <div className="safe-top shrink-0 border-b border-stone-200 bg-white px-5 pb-3 pt-4">
+      <div className="shrink-0 border-b border-stone-200 bg-white px-5 pb-3 pt-[calc(1rem+env(safe-area-inset-top))]">
         <div className="flex items-center justify-between">
           <h1 className="text-base font-bold text-stone-900">하루차림 시작하기</h1>
           <span className="text-xs tabular-nums text-stone-400">{step + 1} / {steps.length}</span>
@@ -533,7 +533,7 @@ export function Onboarding({
       </div>
 
       {/* 하단 버튼 */}
-      <div className="safe-bottom shrink-0 border-t border-stone-200 bg-white px-5 py-3">
+      <div className="shrink-0 border-t border-stone-200 bg-white px-5 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3">
         <div className="flex gap-2">
           {step > 0 && (
             <button className="btn-ghost flex-1" onClick={() => setStep(step - 1)}>이전</button>

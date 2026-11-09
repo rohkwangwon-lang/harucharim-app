@@ -19,13 +19,21 @@ const FORMATS = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128'] as const
  * 웹·안드로이드는 아래 카메라 화면을 그대로 쓴다.
  */
 export function BarcodeScanner(props: { onDetect: (code: string) => void; onClose: () => void }) {
-  return isNative() ? <NativeBarcodeScanner {...props} /> : <WebBarcodeScanner {...props} />
+  /* 아이폰 앱에서 카메라를 못 쓰면(없음·권한 거절) 아래 웹 화면으로 넘긴다 — 거기서 번호를 손으로 넣을 수 있다 */
+  const [fallback, setFallback] = useState(false)
+  if (isNative() && !fallback) return <NativeBarcodeScanner {...props} onError={() => setFallback(true)} />
+  return <WebBarcodeScanner {...props} />
 }
 
-function NativeBarcodeScanner({ onDetect, onClose }: { onDetect: (code: string) => void; onClose: () => void }) {
+function NativeBarcodeScanner({ onDetect, onClose, onError }: { onDetect: (code: string) => void; onClose: () => void; onError: () => void }) {
   useEffect(() => {
     let alive = true
-    scanBarcodeNative().then((code) => { if (!alive) return; if (code) onDetect(code); else onClose() })
+    scanBarcodeNative().then((r) => {
+      if (!alive) return
+      if (r === 'cancel') onClose()
+      else if (r === 'error') onError()
+      else onDetect(r)
+    })
     return () => { alive = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -125,7 +133,7 @@ function WebBarcodeScanner({
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-stone-900">
-      <div className="safe-top flex items-center justify-between px-4 py-3">
+      <div className="flex items-center justify-between px-4 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))]">
         <span className="flex items-center gap-1.5 text-sm font-semibold text-white">바코드 스캔 <BetaChip /></span>
         <button className="rounded-lg px-3 py-1.5 text-sm text-white/80 hover:bg-white/10" onClick={onClose}>
           닫기
@@ -157,7 +165,7 @@ function WebBarcodeScanner({
         * 그때 아무 길도 없으면 여기서 끝난다. 바코드 아래 숫자는 눈으로 읽을 수 있으니
         * 그대로 넣으실 수 있게 둔다.
         */}
-      <div className="safe-bottom px-5 pb-4 pt-3">
+      <div className="px-5 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3">
         <p className="mb-2.5 text-center text-xs text-white/70">
           {status === '스캔 중'
             ? '제품 뒷면의 바코드를 틀 안에 맞춰 주세요'

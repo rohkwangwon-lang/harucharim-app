@@ -173,7 +173,7 @@ export function MealPlan({
             '다시 구성' 은 어느 안에서든 같은 자리(오른쪽 끝)에 남아 거듭 누르기 좋다 */}
         <div className="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
           <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-wide text-brand-700">{days}일치 식단 · 1인분</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-brand-700">{days}일 치 식단 · 1인분</p>
             <p className="mt-1 text-sm font-semibold text-stone-900">{dayLabel(plan[0].day)} ~ {dayLabel(plan[plan.length - 1].day)}</p>
             <p className="mt-1 text-xs leading-relaxed text-stone-600">
               날마다 다른 상, 생선·고기 든 날은 앞에. 국·조림은 2인분을 끓여 이틀에 나눕니다.
@@ -276,7 +276,7 @@ export function MealPlan({
 
       {totalAdded > 0 && (
         <button className="btn-primary mt-3 w-full print:hidden" onClick={() => { track('plan_take'); onApplyDays(plan.map((p) => ({ day: p.day, items: planItems(p) }))) }}>
-          {days}일치 {totalAdded}가지를 날짜별로 내 식단에 담기
+          {days}일 치 {totalAdded}가지를 날짜별로 내 식단에 담기
         </button>
       )}
 

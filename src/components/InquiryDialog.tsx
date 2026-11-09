@@ -223,7 +223,7 @@ export function InquiryDialog({
           )}
         </div>
 
-        <div className="safe-bottom shrink-0 border-t border-stone-100 bg-white px-5 py-3">
+        <div className="shrink-0 border-t border-stone-100 bg-white px-5 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3">
           <div className="flex gap-2">
             <button className="btn-ghost flex-1" onClick={onClose}>닫기</button>
             {isSupabaseConfigured && tab === 'write' && !done && (

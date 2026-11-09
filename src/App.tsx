@@ -352,7 +352,7 @@ export default function App() {
             onApplyDays={(byDay) => {
               for (const d of byDay) addFoodOn(d.day, d.items)
               const n = byDay.reduce((k, d) => k + d.items.length, 0)
-              setToast(`${byDay.length}일치 ${n}가지를 날짜별로 담았습니다`)
+              setToast(`${byDay.length}일 치 ${n}가지를 날짜별로 담았습니다`)
               setTimeout(() => setToast(null), 2000)
               setTab('diary')
             }}
