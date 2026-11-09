@@ -1,15 +1,16 @@
 // 문장마다 따로 만들고, 앞뒤 빈소리를 다듬어 문장 사이에 일정한 쉼을 둔다.
-// 사용: node tts-paced.mjs <작업폴더> [목소리] [출력폴더] [쉼 초]
+// 사용: node tts-paced.mjs <작업폴더> [목소리] [출력폴더] [쉼 초] [빠르기] [장면 번호들]
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
-const [S, VOICE = 'ko-KR-Chirp3-HD-Achird', OUTD = 'voice', GAP = '0.6'] = process.argv.slice(2)
+const [S, VOICE = 'ko-KR-Chirp3-HD-Sulafat', OUTD = 'voice', GAP = '0.6', RATE = '0.95', ONLY] = process.argv.slice(2)
 const SR = 24000, gap = Math.round(Number(GAP) * SR)
 const key = readFileSync(process.env.HOME + '/.config/harucharim/google-tts.key', 'utf8').trim()
-const lines = JSON.parse(readFileSync(S + '/narration.json', 'utf8'))
+let lines = JSON.parse(readFileSync(S + '/narration.json', 'utf8'))
+if (ONLY) lines = ONLY.split(',').map(Number).map((i) => lines[i])
 mkdirSync(`${S}/${OUTD}`, { recursive: true })
 const synth = async (text) => {
   const r = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${encodeURIComponent(key)}`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ input: { text }, voice: { languageCode: 'ko-KR', name: VOICE }, audioConfig: { audioEncoding: 'LINEAR16', sampleRateHertz: SR, ...(VOICE.includes('Chirp3') ? {} : { speakingRate: 0.96 }) } })
+    body: JSON.stringify({ input: { text }, voice: { languageCode: 'ko-KR', name: VOICE }, audioConfig: { audioEncoding: 'LINEAR16', sampleRateHertz: SR, speakingRate: Number(RATE) } })
   })
   if (!r.ok) { console.error('TTS 실패', r.status, (await r.text()).slice(0, 200)); process.exit(1) }
   const b = Buffer.from((await r.json()).audioContent, 'base64')
