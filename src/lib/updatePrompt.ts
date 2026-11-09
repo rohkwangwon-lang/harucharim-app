@@ -1,4 +1,5 @@
 import { registerSW } from 'virtual:pwa-register'
+import { isNative } from './native'
 
 /**
  * 새 버전 안내.
@@ -8,6 +9,8 @@ import { registerSW } from 'virtual:pwa-register'
  * 자동으로 새로고침하면 입력 중이던 내용이 날아갈 수 있으니, 알리고 선택하게 한다.
  */
 export function setupUpdatePrompt() {
+  /* 아이폰 앱(Capacitor)은 화면 파일을 앱 안에 들고 있어 서비스워커가 필요 없고, 그 안에서는 돌지도 않는다 */
+  if (isNative()) return
   const updateSW = registerSW({
     immediate: true,
     onNeedRefresh() {

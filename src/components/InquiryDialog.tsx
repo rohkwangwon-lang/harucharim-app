@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { isSupabaseConfigured } from '../lib/supabase'
-import { displayName, PROVIDER_LABEL, signIn, signOut, useSession, type Provider } from '../lib/auth'
+import { displayName, PROVIDER_LABEL, signIn, signOut, useSession, type Provider, socialProviders } from '../lib/auth'
 import {
   KIND_HINT, KIND_LABEL, listMyInquiries, submitInquiry,
   type Inquiry, type InquiryKind
 } from '../lib/inquiry'
 
 const KINDS: InquiryKind[] = ['food', 'supplement', 'error', 'etc']
-const PROVIDERS: Provider[] = ['kakao', 'google']
+/* 아이폰 앱 1단계는 이메일만 — lib/auth.ts socialProviders() */
+const PROVIDERS: Provider[] = socialProviders()
 
 /**
  * 1:1 문의.
@@ -177,7 +178,7 @@ export function InquiryDialog({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
-                  <div className="mb-4 rounded-xl border border-stone-200 px-3.5 py-3">
+                  {PROVIDERS.length > 0 && <div className="mb-4 rounded-xl border border-stone-200 px-3.5 py-3">
                     <p className="mb-2 text-xs text-stone-500">
                       로그인하시면 이메일을 적지 않아도 되고, 답변을 앱에서 바로 보실 수 있습니다.
                     </p>
@@ -196,7 +197,7 @@ export function InquiryDialog({
                         </button>
                       ))}
                     </div>
-                  </div>
+                  </div>}
                 </>
               )}
 

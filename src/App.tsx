@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { loadAllergenIndex } from './lib/foodStore'
+import { ReminderCard } from './components/ReminderCard'
 import { DeleteAccount } from './components/DeleteAccount'
 import { useAppState } from './lib/store'
 import { CANCER_BY_ID } from './data/cancers'
@@ -527,6 +528,9 @@ export default function App() {
                 })}
               </div>
             </div>
+
+            {/* 기록 알림 — 아이폰 앱에서만 보인다 */}
+            <ReminderCard />
 
             <button className="btn-outline mb-4 w-full" onClick={resetOnboarding}>
               처음부터 다시 설정하기

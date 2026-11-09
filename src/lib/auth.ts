@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from './supabase'
 import { friendlyAuth } from './authMessages'
+import { isNative } from './native'
 
 /* 화면이 쓰는 문구는 서버를 붙들지 않는 자리에 따로 둔다 — 검사가 불러 볼 수 있게 */
 export { EMAIL_OPENS, MIN_PASSWORD, checkSignUp, emailOpen, friendlyAuth } from './authMessages'
@@ -99,6 +100,17 @@ export function lastProvider(): LoginWay | null {
   }
 }
 
+/**
+ * 화면에 내놓을 소셜 로그인.
+ * 아이폰 앱(1단계)에서는 비워 이메일만 둔다(2026-11-09):
+ *  - 구글은 앱 안에 띄운 로그인 창을 막는다(disallowed_useragent) — 사파리 창으로 돌려 받는 장치가 따로 필요
+ *  - 소셜 로그인을 두면 애플이 'Apple 로 로그인'도 요구한다(심사 지침 4.8) — 그러면 계정 삭제 때 애플 토큰 철회까지 붙여야 한다
+ * 2단계에서 Apple 로그인과 함께 카카오·구글을 다시 연다(docs/출시/앱스토어-등록-절차.md).
+ */
+export function socialProviders(): Provider[] {
+  return isNative() ? [] : ['kakao', 'google']
+}
+
 export async function signIn(provider: Provider) {
   if (!supabase) throw new Error('로그인이 아직 준비되지 않았습니다.')
   try {
@@ -188,6 +200,8 @@ export async function updatePassword(password: string) {
 
 /** 로그인 후 이 앱으로 정확히 돌아오게 한다 (하위 경로 배포 대응) */
 function redirectTo(): string {
+  /* 아이폰 앱 안의 주소(capacitor://localhost)는 메일에서 열 수 없다 — 메일 속 주소는 웹으로 보낸다 */
+  if (isNative()) return 'https://harucharim.com/'
   return new URL(import.meta.env.BASE_URL || '/', window.location.origin).toString()
 }
 

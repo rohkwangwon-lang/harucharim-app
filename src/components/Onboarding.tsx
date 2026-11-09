@@ -6,8 +6,8 @@ import { Tour } from './Tour'
 import { isSupabaseConfigured } from '../lib/supabase'
 import {
   checkSignUp, displayName, EMAIL_OPENS, emailOpen, lastProvider, MIN_PASSWORD, PROVIDER_LABEL,
-  sendPasswordReset, signIn, signInWithEmail, signUpWithEmail, useSession, type Provider
-} from '../lib/auth'
+  sendPasswordReset, signIn, signInWithEmail, signUpWithEmail, useSession, socialProviders } from '../lib/auth'
+import { isNative } from '../lib/native'
 import { today } from '../lib/day'
 import { confirmAdult, isAdultConfirmed } from '../lib/ageGate'
 import type { CancerId, Cuisine, PatientCondition, PatientContext, Phase, TreatmentHistory } from '../data/types'
@@ -153,8 +153,8 @@ export function Onboarding({
                   </span>
                 </label>
 
-                <div className={`flex flex-col gap-2 ${adult ? '' : 'pointer-events-none opacity-40'}`}>
-                  {([...(['kakao', 'google'] as Provider[])]
+                {socialProviders().length > 0 && <div className={`flex flex-col gap-2 ${adult ? '' : 'pointer-events-none opacity-40'}`}>
+                  {([...socialProviders()]
                     .sort((a, b) => (a === last ? -1 : b === last ? 1 : 0))
                   ).map((p) => (
                     <button
@@ -174,8 +174,8 @@ export function Onboarding({
                       )}
                     </button>
                   ))}
-                </div>
-                {last && (
+                </div>}
+                {last && socialProviders().length > 0 && (
                   <p className="mt-2 text-center text-[11px] leading-relaxed text-stone-500">
                     같은 방법으로 들어오셔야 적어 두신 기록과 문의 내역이 그대로 이어집니다.
                   </p>
@@ -185,7 +185,9 @@ export function Onboarding({
                   <EmailWay enabled={adult} seenBefore={last !== null} />
                 </div>
                 <p className="mt-4 text-center text-xs text-stone-400">
-                  처음이시면 카카오·구글 단추로 바로 가입됩니다. 두 가지가 없으시면 이메일로 하실 수 있습니다.
+                  {socialProviders().length > 0
+                    ? '처음이시면 카카오·구글 단추로 바로 가입됩니다. 두 가지가 없으시면 이메일로 하실 수 있습니다.'
+                    : '처음이시면 이메일로 가입하신 뒤 들어오시면 됩니다.'}
                 </p>
                 <p className="mt-2 text-center">
                   <button className="text-xs font-bold text-brand-700 underline underline-offset-2" onClick={() => setTour(true)}>▶ 움직이는 사용법 보기</button>
@@ -573,7 +575,8 @@ export function Onboarding({
  * 틀리게 고르셔도 오류 문구가 맞은편으로 안내한다.
  */
 function EmailWay({ enabled, seenBefore }: { enabled: boolean; seenBefore: boolean }) {
-  const [open, setOpen] = useState(false)
+  /* 아이폰 앱(1단계)은 이메일이 유일한 길이라 처음부터 펼쳐 둔다 */
+  const [open, setOpen] = useState(isNative())
   /*
    * 처음이신지 아닌지를 기기가 알고 있다.
    *

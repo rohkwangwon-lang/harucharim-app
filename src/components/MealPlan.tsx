@@ -13,6 +13,7 @@ import { Section } from './ui'
 import { drawPlanImage } from '../lib/planImage'
 import { sheetRows, sheetTitle, SHEET_COLS } from '../lib/planSheet'
 import { openBook, planConditionKey, planPlate, stepBack, stepNext, type PlanBook } from '../lib/planBook'
+import { isNative, shareImage, shareText } from '../lib/native'
 
 /**
  * 여러 날 식단과 장보기 목록(2026-10-23).
@@ -133,6 +134,7 @@ export function MealPlan({
   const nav = navigator as Navigator & { share?: (d: { title?: string; text?: string; files?: File[] }) => Promise<void>; canShare?: (d: { files?: File[] }) => boolean }
   const share = async () => {
     track('plan_share')
+    if (await shareText('하루차림 장보기', text())) return  // 아이폰 앱 — 공유 창
     if (nav.share) { try { await nav.share({ title: '하루차림 장보기', text: text() }) } catch { /* 취소 */ } }
     else copy()
   }
@@ -147,6 +149,8 @@ export function MealPlan({
     const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, 'image/png'))
     if (!blob) { say('그림을 만들지 못했습니다'); return }
     const file = new File([blob], `하루차림-식단표-${startDay}.png`, { type: 'image/png' })
+    /* 아이폰 앱 — 내려받기가 막혀 있어 공유 창으로(사진 저장·카카오톡·프린트가 함께 있다) */
+    if (await shareImage(blob, file.name, '하루차림 식단표')) return
     if (nav.share && nav.canShare?.({ files: [file] })) {
       try { await nav.share({ files: [file], title: '하루차림 식단표' }); return } catch { /* 취소 → 내려받기 */ }
     }
@@ -154,7 +158,7 @@ export function MealPlan({
     setTimeout(() => URL.revokeObjectURL(a.href), 5000)
     say('식단표 그림을 저장했습니다')
   }
-  const print = () => { track('plan_print'); document.body.classList.add('print-plan'); setTimeout(() => { window.print(); document.body.classList.remove('print-plan') }, 50) }
+  const print = () => { track('plan_print'); if (isNative()) { say('공유 창에서 프린트를 누르시면 인쇄됩니다'); void saveImage(); return }; document.body.classList.add('print-plan'); setTimeout(() => { window.print(); document.body.classList.remove('print-plan') }, 50) }
 
   const rows = useMemo(() => sheetRows(plan), [plan])
   const kcalOf = (p: PlanDay) => Math.round(p.menu.totals.kcal ?? 0)

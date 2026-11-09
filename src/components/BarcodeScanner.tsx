@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { isNative, scanBarcodeNative } from '../lib/native'
 import { BetaChip } from './ui'
 
 /**
@@ -13,7 +14,25 @@ type Status = '준비 중' | '카메라 권한 요청' | '스캔 중' | '오류'
 
 const FORMATS = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128'] as const
 
-export function BarcodeScanner({
+/**
+ * 아이폰 앱(Capacitor)에서는 아이폰 자체 바코드 인식 화면을 띄운다(2026-11-09 앱스토어 준비, 심사 지침 4.2).
+ * 웹·안드로이드는 아래 카메라 화면을 그대로 쓴다.
+ */
+export function BarcodeScanner(props: { onDetect: (code: string) => void; onClose: () => void }) {
+  return isNative() ? <NativeBarcodeScanner {...props} /> : <WebBarcodeScanner {...props} />
+}
+
+function NativeBarcodeScanner({ onDetect, onClose }: { onDetect: (code: string) => void; onClose: () => void }) {
+  useEffect(() => {
+    let alive = true
+    scanBarcodeNative().then((code) => { if (!alive) return; if (code) onDetect(code); else onClose() })
+    return () => { alive = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  return null
+}
+
+function WebBarcodeScanner({
   onDetect,
   onClose
 }: {
