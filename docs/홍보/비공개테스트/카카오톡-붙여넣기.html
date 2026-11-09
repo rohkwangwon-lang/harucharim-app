@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>하루차림 카카오톡 문구함</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -57,6 +62,8 @@ button.copy.done{background:var(--rice-tint);color:var(--rice)}
 .fine{font-size:13px;color:var(--soft)}
 @media (max-width:480px){.bubble{font-size:14.5px}button.copy{width:100%}}
 </style>
+</head>
+<body>
 
 <div class="wrap">
   <header class="intro">
@@ -234,3 +241,6 @@ RECRUIT.forEach((m, i) => document.getElementById('recruit').appendChild(card(m,
 REPLIES.forEach((m, i) => document.getElementById('replies').appendChild(card(m, i, 'p')))
 input.addEventListener('input', () => { try { localStorage.setItem('harucharim.optin', input.value) } catch (e) {} })
 </script>
+
+</body>
+</html>
