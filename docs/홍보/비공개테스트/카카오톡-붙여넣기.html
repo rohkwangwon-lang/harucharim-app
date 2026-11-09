@@ -1,0 +1,236 @@
+<title>하루차림 카카오톡 문구함</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* 한 줄 목록: 위에 지킬 것·참여 링크 칸, 아래로 '어디에 → 말풍선 → 복사' 카드가 순서대로. 모집 글과 참여 과정 답장 두 묶음 */
+:root{
+  --paper:#f2f0e8; --sheet:#fbfaf6; --ink:#272520; --soft:#5b574b; --line:#e2ded2;
+  --rice:#3f5c2e; --rice-2:#5f8447; --rice-tint:#e5ecda; --bubble:#fff6cf; --bubble-line:#efe0a0;
+  --soy:#875326; --soy-tint:#f4e5d2;
+  --display:"Gowun Batang","AppleMyungjo",serif;
+  --body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#1d1c18; --sheet:#272521; --ink:#ece8dd; --soft:#c2bcad; --line:#3b3831;
+  --rice:#a9c290; --rice-2:#8fae74; --rice-tint:#2e3926; --bubble:#3a3420; --bubble-line:#574d2c;
+  --soy:#d8ab79; --soy-tint:#3d2f21; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#1d1c18; --sheet:#272521; --ink:#ece8dd; --soft:#c2bcad; --line:#3b3831;
+  --rice:#a9c290; --rice-2:#8fae74; --rice-tint:#2e3926; --bubble:#3a3420; --bubble-line:#574d2c;
+  --soy:#d8ab79; --soy-tint:#3d2f21; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.65;word-break:keep-all;overflow-wrap:break-word}
+.wrap{max-width:720px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:28px}
+h1,h2{font-family:var(--display);margin:0;line-height:1.3;text-wrap:balance}
+h1{font-size:clamp(26px,6vw,34px)}
+h2{font-size:22px}
+p{margin:0}
+.brand{font-size:13px;font-weight:700;color:var(--rice);letter-spacing:.06em}
+.intro{display:grid;gap:10px}
+.intro .lead{color:var(--soft)}
+.rules{list-style:none;margin:0;padding:14px 16px;display:grid;gap:6px;background:var(--soy-tint);border-radius:12px;font-size:14.5px}
+.rules li{padding-left:18px;position:relative}
+.rules li::before{content:"";position:absolute;left:2px;top:.62em;width:7px;height:7px;border-radius:50%;background:var(--soy)}
+.rules b{color:var(--soy)}
+.link{display:grid;gap:6px}
+.link label{font-weight:700;font-size:15px}
+.link input{width:100%;font:inherit;font-size:15px;padding:11px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--sheet);color:var(--ink)}
+.link input:focus-visible{outline:3px solid var(--rice-2);outline-offset:1px;border-color:var(--rice-2)}
+.link small{color:var(--soft);font-size:13px}
+.group{display:grid;gap:14px}
+.group>p{color:var(--soft);font-size:14.5px;margin-top:-8px}
+#recruit,#replies{display:grid;gap:14px}
+.msg{background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:10px}
+.top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.top h3{margin:0;font-size:17px}
+.top .where{font-size:13px;color:var(--soft)}
+.bubble{margin:0;white-space:pre-wrap;background:var(--bubble);border:1px solid var(--bubble-line);border-radius:4px 16px 16px 16px;padding:12px 14px;font-family:var(--body);font-size:15px;line-height:1.7;color:var(--ink);max-height:340px;overflow:auto;min-width:0}
+.bubble mark{background:var(--soy-tint);color:var(--soy);font-weight:700;border-radius:4px;padding:0 3px}
+.foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.count{font-size:13px;color:var(--soft);font-variant-numeric:tabular-nums}
+button.copy{font:inherit;font-weight:700;font-size:15px;border:0;border-radius:10px;padding:10px 18px;background:var(--rice);color:var(--sheet);cursor:pointer;min-width:120px}
+button.copy:hover{background:var(--rice-2)}
+button.copy:focus-visible{outline:3px solid var(--soy);outline-offset:2px}
+button.copy.done{background:var(--rice-tint);color:var(--rice)}
+.note{font-size:13.5px;color:var(--soft);border-left:3px solid var(--line);padding-left:10px}
+.fine{font-size:13px;color:var(--soft)}
+@media (max-width:480px){.bubble{font-size:14.5px}button.copy{width:100%}}
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <p class="brand">하루차림 · 비공개 테스트</p>
+    <h1>카카오톡 문구함</h1>
+    <p class="lead">쓰실 곳에 맞는 글의 <b>복사</b>를 누르고, 카카오톡 입력창에 길게 눌러 붙여 넣으시면 됩니다. 굵은 글씨 같은 표시는 넣지 않아 그대로 깔끔하게 붙습니다.</p>
+    <ul class="rules">
+      <li><b>구글 계정 주소는 1:1로만</b> 받으세요. 단체방에 올리게 하지 않습니다.</li>
+      <li><b>평점·후기는 부탁하지 않습니다.</b> 구글 정책 때문입니다.</li>
+      <li><b>"평생 무료"라고 쓰지 않습니다.</b> 약속은 아래 문구 그대로만.</li>
+      <li>진료받는 환자분께는 <b>"진료에 아무 영향이 없다"</b>는 말을 꼭 넣습니다.</li>
+    </ul>
+  </header>
+
+  <div class="link">
+    <label for="optin">비공개 테스트 참여 링크 (플레이 콘솔에서 복사)</label>
+    <input id="optin" type="url" inputmode="url" autocomplete="off" placeholder="https://play.google.com/apps/testing/…">
+    <small>넣어 두시면 아래 '② 링크 보내기' 답장에 자동으로 채워집니다. 이 기기에만 기억됩니다.</small>
+  </div>
+
+  <section class="group" aria-labelledby="g1">
+    <h2 id="g1">모집 글</h2>
+    <p>처음 알릴 때 쓰는 글입니다. 상대와 자리에 맞게 고르세요.</p>
+    <div id="recruit"></div>
+  </section>
+
+  <section class="group" aria-labelledby="g2">
+    <h2 id="g2">참여 과정 답장</h2>
+    <p>참여하겠다는 분께 차례대로 보내는 글입니다.</p>
+    <div id="replies"></div>
+  </section>
+
+  <p class="fine">링크 세 개: 모집 안내 harucharim.com/tester · 1분 영상 harucharim.com/tester/video.html · 근거 이야기 harucharim.com/tester/story.html</p>
+</div>
+
+<script>
+const LINK = '{링크}'
+const RECRUIT = [
+  { t: '① 지인·가족에게 1:1로', where: '개인 대화창 · 짧게', text:
+`안녕하세요, 부탁 하나 드리려고 연락드렸어요.
+
+제가 암 환자분들 식사를 돕는 앱 '하루차림'을 만들었는데, 구글 플레이에 정식으로 올리려면 12명 이상이 14일 동안 미리 써 봐야 한대요.
+
+안드로이드 폰이면 되고, 환자가 아니셔도 괜찮아요. 이틀에 한 번쯤 1~2분 열어 봐 주시면 충분해요.
+
+함께해 주실 수 있으면 구글 계정 주소(gmail)만 이 대화창으로 알려 주세요. 설치 링크를 보내 드릴게요.
+
+자세한 안내 ▶ https://harucharim.com/tester/
+
+부담 갖지 마시고, 어려우시면 편하게 말씀해 주세요 🙏` },
+  { t: '② 단체 대화방·환우 모임 공지', where: '단체방 · 중간 길이', text:
+`[함께해 주실 분을 찾습니다]
+암 환자 식사 도우미 '하루차림' 비공개 테스트
+
+"치료 중에 뭘 먹어야 하나요?"
+"치료 끝났는데 이제 뭘 조심해야 하죠?"
+가장 자주 듣는 이 질문에 답하려고 만든 앱입니다.
+
+✔ 암 종류·치료 시기·증상·드시는 약에 맞춰 오늘 한 상을 차려 드립니다
+✔ 음식마다 왜 권하는지, 어떤 근거인지 함께 보여 드립니다
+✔ 20년 넘게 암 환자를 치료해 온 방사선종양학과 전문의가 감수했습니다
+
+정식 출시 전에 14일 동안 함께 써 주실 분 12명 이상이 필요합니다.
+· 안드로이드 폰이면 누구나 (가족·친구도 환영, 아이폰은 아직 안 됩니다)
+· 참여비 없음, 중간에 그만두셔도 괜찮습니다
+· 평점·후기는 부탁드리지 않습니다
+
+🙋 참여하실 분은 이 글을 올린 사람에게 1:1 메시지로 구글 계정 주소를 보내 주세요.
+(주소는 이 방에 올리지 마세요)
+
+자세한 안내 ▶ https://harucharim.com/tester/
+1분 영상 ▶ https://harucharim.com/tester/video.html` },
+  { t: '③ 카카오톡 채널 소식 — 제목', where: '채널 소식 쓰기의 제목 칸', text:
+`가려 드시다 놓치는 것 — 하루차림 비공개 테스트에 함께해 주세요` },
+  { t: '③ 카카오톡 채널 소식 — 본문', where: '채널 소식 쓰기의 본문 칸 · 근거 포함', text:
+`암 치료가 시작되면 식탁에서 음식이 하나둘 빠집니다.
+고기는 안 된다더라, 단 건 끊어야 한다더라… 대부분 걱정과 정성에서 나온 말입니다.
+치료를 마친 뒤에도 그 습관은 쉽게 풀리지 않습니다.
+
+그런데 연구는 이렇게 말합니다.
+
+· 처음 항암 진료를 받으러 온 환자 1,952명 가운데 51%가 이미 영양 상태에 문제가 있거나 그 위험이 있었습니다.
+· 음식을 많이 가리는 환자일수록 단백질·아연·철을 적게 드셨습니다.
+· 국내 위암 수술 환자 2,063명에서, 수술 뒤 저체중이 된 분의 사망 위험은 1.74배였습니다. 치료를 마친 뒤에도 체중은 중요합니다.
+
+모두 관찰 연구라 원인을 단정할 수는 없고, 영양 관리가 생존을 늘린다는 근거도 아직 없습니다.
+그래서 하루차림은 무엇을 끊을지보다 무엇으로 채울지를 함께 찾습니다.
+
+암 종류·치료 시기·증상·드시는 약을 넣으시면 오늘 드실 한식 한 상을 차리고, 음식마다 이유와 근거를 보여 드립니다. 20년 넘게 암 환자를 치료해 온 방사선종양학과 전문의가 내용을 감수했습니다.
+
+━━━━━━━━━━━━━━
+비공개 테스트 참여 안내
+━━━━━━━━━━━━━━
+· 누가: 안드로이드 폰을 쓰시는 분 누구나 (치료를 마치신 분, 가족, 친구도 환영)
+· 얼마나: 14일 동안 설치해 두고, 이틀에 한 번쯤 열어 보기
+· 비용: 없습니다. 중간에 그만두셔도 불이익이 없습니다.
+· 방법: 이 채널 1:1 채팅으로 구글 계정 주소를 보내 주시면 설치 링크를 답장으로 드립니다.
+
+끝까지 함께해 주신 분께 드리는 약속
+앞으로 하루차림에 유료 기능이 생기더라도, 14일 시험을 마치신 분은 서비스가 이어지는 동안 그 기능을 무료로 쓰실 수 있습니다.
+(유료화가 정해진 것은 없습니다. 지금 있는 기능은 모든 분께 계속 무료입니다. 이 약속은 평점·후기와 관계없습니다.)
+
+자세한 안내 ▶ https://harucharim.com/tester/
+근거와 출처 ▶ https://harucharim.com/tester/story.html
+
+하루차림은 의료기기가 아니며 진단·치료를 목적으로 하지 않습니다. 치료에 관한 결정은 담당 의료진과 상의해 주세요. 만 14세 이상 이용할 수 있습니다.` },
+  { t: '④ 진료받는 환자분께', where: '개인 대화창 · 부담을 덜어 드리는 말', text:
+`혹시 도와주실 수 있을까 해서 여쭙니다. 제가 감수한 식사 도우미 앱 '하루차림'을 정식으로 내기 전에, 14일 동안 써 봐 주실 분을 찾고 있습니다.
+
+참여하지 않으셔도, 중간에 그만두셔도 진료에는 아무 영향이 없습니다. 편하게 생각해 주세요.
+
+안드로이드 폰을 쓰시고 해 보실 마음이 있으시면, 구글 계정 주소를 이 대화창으로 알려 주세요. 가족분이 대신 해 주셔도 됩니다.
+
+안내 ▶ https://harucharim.com/tester/` },
+  { t: '⑤ 오픈채팅·SNS 한 줄', where: '오픈채팅 · 프로필 · SNS', text:
+`암 환자 식사 도우미 '하루차림' 정식 출시 전 14일 시험에 함께해 주실 분을 찾습니다. 안드로이드 폰이면 누구나, 참여비 없음. 참여는 1:1 메시지로 → https://harucharim.com/tester/` },
+]
+const REPLIES = [
+  { t: '① 참여하겠다는 분께 — 주소 받기', where: '첫 답장', text:
+`감사합니다! 플레이 스토어 앱을 열고 오른쪽 위 동그란 프로필을 누르시면 구글 계정 주소(○○@gmail.com)가 보입니다. 그 주소를 이 대화창에 보내 주세요.
+
+보내 주신 주소는 테스트 진행과, 끝까지 함께하신 분께 드린 약속을 지키는 데에만 쓰고, 서비스를 마치거나 지워 달라고 하시면 바로 지웁니다.` },
+  { t: '② 명단에 넣은 뒤 — 링크 보내기', where: '플레이 콘솔 테스터 명단에 주소를 넣은 뒤에', link: true, text:
+`명단에 넣어 두었습니다. 아래 링크를 열어 '테스터 되기'를 누르신 뒤, 이어 나오는 링크로 설치해 주세요.
+▶ ${LINK}
+
+설치 후 가입하시고, 14일 동안 지우지만 말아 주세요. 끝나는 날은 따로 알려 드립니다.
+앱 안 '가이드 → 사용법'에 움직이는 사용법이 있습니다. '음성 안내'를 켜시면 소리로도 들으실 수 있습니다.` },
+  { t: '③ 7일째쯤 — 안부', where: '중간 점검', text:
+`하루차림 써 보시기 어떠세요? 불편했던 점이나 "이건 왜 이렇게 판정하지?" 싶은 것이 있으면 편하게 알려 주세요. 출시 전에 고치겠습니다. 앱은 지우지 말고 그대로 두어 주세요 🙏` },
+  { t: '④ 마지막 날 — 감사와 확인 방법', where: '14일째', text:
+`14일 동안 함께해 주셔서 정말 감사합니다. 덕분에 정식 출시를 신청할 수 있게 되었습니다.
+
+약속드린 대로, 앞으로 유료 기능이 생기더라도 서비스가 이어지는 동안 그 기능을 무료로 쓰실 수 있습니다.
+
+확인 방법: 보내 주신 구글 계정 주소를 '끝까지 함께하신 분' 명단에 적어 두었습니다. 유료 기능이 생기면 그 주소로 확인해 드리니 따로 하실 일은 없습니다. 다만 앱에 카카오나 다른 계정으로 로그인하셨다면, 어떤 계정으로 들어가셨는지 한 번만 알려 주세요.
+
+명단은 이 약속을 지키는 데에만 쓰고, 지워 달라고 하시면 언제든 지웁니다. 앱은 계속 쓰셔도 되고, 지우셔도 됩니다.` },
+]
+
+const input = document.getElementById('optin')
+try { input.value = localStorage.getItem('harucharim.optin') || '' } catch (e) {}
+const linkText = () => input.value.trim()
+const finalText = (m) => m.link ? m.text.replace(LINK, linkText() || '[참여 링크 — 위 칸에 넣어 주세요]') : m.text
+const esc = (s) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))
+
+function card(m, i, box) {
+  const el = document.createElement('article')
+  el.className = 'msg'
+  el.innerHTML = `<div class="top"><h3>${esc(m.t)}</h3><span class="where">${esc(m.where)}</span></div>
+    <pre class="bubble" tabindex="0"></pre>
+    <div class="foot"><span class="count"></span><button class="copy" type="button" id="copy-${box}-${i}">복사</button></div>`
+  const pre = el.querySelector('.bubble'), count = el.querySelector('.count'), btn = el.querySelector('.copy')
+  const paint = () => {
+    const t = finalText(m)
+    pre.innerHTML = m.link && !linkText() ? esc(m.text).replace(LINK, '<mark>[참여 링크 — 위 칸에 넣어 주세요]</mark>') : esc(t)
+    count.textContent = `${[...t].length.toLocaleString('ko-KR')}자`
+  }
+  paint(); if (m.link) input.addEventListener('input', paint)
+  btn.addEventListener('click', () => {
+    const t = finalText(m)
+    const ok = () => { btn.textContent = '복사했습니다 ✓'; btn.classList.add('done'); setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('done') }, 1800) }
+    const fallback = () => {
+      const sel = window.getSelection(), r = document.createRange()
+      r.selectNodeContents(pre); sel.removeAllRanges(); sel.addRange(r)
+      let done = false; try { done = document.execCommand('copy') } catch (e) {}
+      if (done) ok(); else btn.textContent = '선택됨 — 길게 눌러 복사'
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok, fallback)
+    else fallback()
+  })
+  return el
+}
+RECRUIT.forEach((m, i) => document.getElementById('recruit').appendChild(card(m, i, 'r')))
+REPLIES.forEach((m, i) => document.getElementById('replies').appendChild(card(m, i, 'p')))
+input.addEventListener('input', () => { try { localStorage.setItem('harucharim.optin', input.value) } catch (e) {} })
+</script>
