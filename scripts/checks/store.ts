@@ -110,6 +110,14 @@ no(!/<CareNote \/>/.test(app) || !/담당 의료진과 상의/.test(app),
 if (existsSync('public/tester')) {
   const viteCfg = readFileSync('vite.config.ts', 'utf-8')
   no(!/navigateFallbackDenylist:[^\n]*tester/.test(viteCfg), '/tester/ 가 앱 화면 돌려보내기에서 빠져 있지 않음 — 앱을 연 기기에서 모집 페이지 대신 앱이 뜬다')
+{
+  // 끝 빗금 없는 harucharim.com/tester 도 막혀야 한다(2026-11-09 사용자 보고 — 규칙이 /tester/ 만 막아 앱이 떴다)
+  const m = viteCfg.match(/navigateFallbackDenylist:\s*\[\s*\/(.+?)\/\s*\]/)
+  const re = m ? new RegExp(m[1]) : null
+  for (const path of ['/tester', '/tester/', '/tester/video.html', '/tester/story.html'])
+    no(!re || !re.test(path), `${path} 가 앱 화면 돌려보내기 예외에 걸리지 않음 — 그 주소로 들어오면 모집 페이지 대신 앱이 뜬다`)
+  no(!!re && re.test('/'), '앱 첫 화면(/)까지 예외에 걸림 — 오프라인에서 앱이 안 열린다')
+}
   /* 감수자 경력: 방사선종양학 수련 2004년 시작 → '25년'은 사실보다 많다(2026-11-06 정정) */
   for (const f of ['src/components/ui.tsx', 'src/components/HowTo.tsx', 'public/tester/index.html', 'public/tester/video.html', 'docs/출시/스토어-등록-자료.md']) {
     if (existsSync(f)) no(/25년간 치료|임상 25년/.test(readFileSync(f, 'utf-8')), `${f}: 감수자 경력이 '25년' — 암 환자 진료는 2004년부터(20년 넘게)`)
