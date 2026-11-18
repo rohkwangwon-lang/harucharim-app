@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useBackHandler } from '../lib/backGesture'
 import { portionLabel } from '../lib/portion'
 import { menuConditionKey } from '../lib/menuIdentity'
 import { track } from '../lib/stats'
@@ -131,6 +132,7 @@ export function RecommendedMenu({
    */
   const [peek, setPeek] = useState<{ day: string; from: string; index: number; menu: DayMenu; selected: SelectedItem[] } | null>(null)
   const backToPlan = () => { const f = peek?.from; setPeek(null); if (f) onOpenDay?.(f) }
+  useBackHandler(peek !== null, 1, backToPlan)
   const [cursor, setCursor] = useState(kept?.cursor ?? 0)
   /*
    * 눌렀는데 바꿀 것이 없었는가.

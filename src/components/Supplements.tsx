@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useBackHandler } from '../lib/backGesture'
 import { track } from '../lib/stats'
 import { IconBarcode } from './icons'
 import type { PatientContext, SupplementCategory } from '../data/types'
@@ -43,6 +44,7 @@ export function Supplements({
   const [hasExt, setHasExt] = useState(false)
 
   const [scanning, setScanning] = useState(false)
+  useBackHandler(scanning, 2, () => setScanning(false))
   const [scanMsg, setScanMsg] = useState<string | null>(null)
   /*
    * 판정으로 걸러 보기.

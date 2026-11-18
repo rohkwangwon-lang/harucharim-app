@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useBackHandler } from '../lib/backGesture'
 import { track } from '../lib/stats'
 import { Section } from './ui'
 import { Tour } from './Tour'
@@ -309,6 +310,7 @@ export function HowTo() {
   useEffect(() => { track('howto_view') }, [])
   const [open, setOpen] = useState<string | null>('내 식단')
   const [tour, setTour] = useState(false)
+  useBackHandler(tour, 2, () => setTour(false))
 
   return (
     <div>

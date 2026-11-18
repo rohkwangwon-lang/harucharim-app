@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useBackHandler } from './lib/backGesture'
 import { loadAllergenIndex } from './lib/foodStore'
 import { ReminderCard } from './components/ReminderCard'
 import { DeleteAccount } from './components/DeleteAccount'
@@ -193,13 +194,33 @@ export default function App() {
   }, [state.patient, user])
 
   // 탭을 바꿨는데 이전 화면의 스크롤 위치가 남아 있으면 빈 화면처럼 보인다
-  const setTab = (next: Tab) => {
+  /*
+   * 탭을 옮긴 순서 — 왼쪽 끝에서 밀면 앞 탭으로 돌아간다(lib/backGesture.ts, 2026-11-18).
+   * 되돌아갈 때는 순서에 다시 쌓지 않는다. 그러지 않으면 두 탭 사이를 오가기만 한다.
+   */
+  const tabTrail = useRef<Tab[]>([])
+  const [trailLen, setTrailLen] = useState(0)
+  const showTab = (next: Tab) => {
     setTabState(next)
     if (next === 'care') track('guide_view')
     if (next === 'search') track('food_search')
     if (next === 'diary') track('diary_write')
     window.scrollTo({ top: 0 })
   }
+  const setTab = (next: Tab) => {
+    if (next !== tab) {
+      tabTrail.current = [...tabTrail.current, tab].slice(-20)
+      setTrailLen(tabTrail.current.length)
+    }
+    showTab(next)
+  }
+  useBackHandler(trailLen > 0, 0, () => {
+    const prev = tabTrail.current.pop()
+    setTrailLen(tabTrail.current.length)
+    if (prev) showTab(prev)
+  })
+  useBackHandler(adminOpen && isAdmin, 3, () => closeAdmin())
+  useBackHandler(tour, 2, () => { setTour(false); dismissTour() })
 
   const profile = CANCER_BY_ID[state.patient.cancer]
   const selectedIds = new Set<string>(selected.map((x) => x.foodId))

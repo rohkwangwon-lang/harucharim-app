@@ -1,5 +1,6 @@
 import { mayBeWholePack, WHOLE_PACK_SHORT } from '../lib/portion'
 import { useEffect, useMemo, useState } from 'react'
+import { useBackHandler } from '../lib/backGesture'
 import { IconBarcode } from './icons'
 import type { Cuisine, Food, FoodGroup, MealSlot, PatientContext } from '../data/types'
 import { MEAL_SLOTS } from '../data/types'
@@ -90,6 +91,9 @@ export function FoodSearch({
     message: string
   } | null>(null)
   const [asking, setAsking] = useState(false)
+  /* 왼쪽 끝에서 밀면 덮개 창부터 닫는다(lib/backGesture.ts). 문의 쓰기(asking)는 적던 글이 날아가므로 넣지 않는다 */
+  useBackHandler(detail !== null, 2, () => setDetail(null))
+  useBackHandler(scanning, 2, () => setScanning(false))
   /** 한 번에 그리는 개수. 1만 8천 건을 통째로 그리면 화면이 멈춘다. */
   const [limit, setLimit] = useState(60)
 

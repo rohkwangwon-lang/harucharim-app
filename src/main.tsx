@@ -5,6 +5,7 @@ import './index.css'
 import { setupUpdatePrompt } from './lib/updatePrompt'
 import { migrateStorage } from './lib/migrate'
 import { Guard } from './components/Guard'
+import { BackSwipe } from './components/BackSwipe'
 
 /*
  * 예전 이름으로 저장된 것을 지금 이름으로 옮긴다.
@@ -22,6 +23,7 @@ createRoot(document.getElementById('root')!).render(
       */}
     <Guard>
       <App />
+      <BackSwipe />
     </Guard>
   </StrictMode>
 )

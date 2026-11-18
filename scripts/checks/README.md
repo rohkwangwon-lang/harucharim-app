@@ -28,6 +28,7 @@ node_modules/.bin/jiti scripts/checks/restore.ts  # 저장된 자료가 낡았�
 node_modules/.bin/jiti scripts/checks/docs.ts     # 문서(질의서·스토어 원고·발표 자료)에 적은 숫자가 앱과 같은가
 node_modules/.bin/jiti scripts/checks/sodium.ts   # 나트륨 값이 살아 있는가 — 쉼표·믿기 어려운 저값·행 번호·1회량, 헛경보 쪽까지
 node_modules/.bin/jiti scripts/checks/safety.ts   # 2026-10-15 안전 검토 — 식단 균형·다시 구성·연하곤란 질감·날것·와파린 두 길·옥살리플라틴·스타후르츠·응급 안내
+node_modules/.bin/jiti scripts/checks/swipe.ts    # 왼쪽 끝에서 밀어 뒤로(2026-11-18) — 가장자리·세로 스크롤 구분, 덮개 창 > 하위 화면 > 앞 탭 순서
 node_modules/.bin/jiti scripts/checks/plan.ts     # 며칠치 식단·장보기(2026-10-23) — 재료표 무결성, 5일 계획의 피하세요·되풀이·열량, 장보기 목록
 PEOPLE=3000 node_modules/.bin/jiti scripts/checks/patient.ts  # 환자 입장 — 읽을 수 있는가, 이유가 오는가, 앱이 스스로 어긋나지 않는가
 
