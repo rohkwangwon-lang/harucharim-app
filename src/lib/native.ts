@@ -12,7 +12,10 @@
  *
  * 플러그인은 필요할 때만 불러와(동적 import) 웹 번들이 무거워지지 않게 한다.
  */
-import { Capacitor } from '@capacitor/core'
+import { Capacitor, registerPlugin } from '@capacitor/core'
+
+/** 앱 안에 직접 넣은 바코드 인식기(ios/App/App/HaruScanner.swift) */
+const HaruScanner = registerPlugin<{ scan(o: { instructions: string }): Promise<{ code: string }> }>('HaruScanner')
 
 /** 아이폰·안드로이드 네이티브 앱 안인가 (웹·TWA 는 false) */
 export const isNative = (): boolean => Capacitor.isNativePlatform()
@@ -55,6 +58,21 @@ export async function shareImage(blob: Blob, fileName: string, title: string): P
  * 웹에서는 부르지 않는다(components/BarcodeScanner.tsx 의 카메라 화면을 그대로 쓴다).
  */
 export async function scanBarcodeNative(): Promise<string | 'cancel' | 'error'> {
+  /*
+   * 1순위: 아이폰 자체 인식기(VisionKit, iOS 16 이상) — ios/App/App/HaruScanner.swift.
+   * 2026-11-18 실제 아이폰(17 Pro Max, iOS 27.2)에서 아래 @capacitor/barcode-scanner 는 카메라가 켜져도
+   * 화면이 까맣게 나와 애플 인식기로 바꿨다. 지원하지 않는 기기(UNSUPPORTED)만 예전 플러그인으로 간다.
+   */
+  try {
+    const r = await HaruScanner.scan({ instructions: '포장의 바코드를 화면에 비춰 주세요' })
+    const v = (r?.code ?? '').trim()
+    return v || 'cancel'
+  } catch (e) {
+    const code = String((e as { code?: string })?.code ?? '')
+    if (code === 'CANCELLED') return 'cancel'
+    if (code !== 'UNSUPPORTED' && code !== 'UNIMPLEMENTED') return 'error'
+  }
+
   const { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner')
   const t0 = Date.now()
   try {
