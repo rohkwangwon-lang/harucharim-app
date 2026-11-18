@@ -40,6 +40,16 @@ no(!/EmailWay/.test(onboard),
  */
 no(!/<EmailWay enabled=\{adult\}/.test(onboard),
    '만 14세 확인이 이메일 갈래에는 걸리지 않음 — 소셜 단추만 잠그고 옆문을 열어 둔 셈이다')
+/*
+ * 2026-11-18 — 그 문은 '보내기 전'에 선다. 칸을 잠가 두면 흐린 칸을 눌러도 아무 일이 없어
+ * "키보드가 안 뜬다"로 읽혔다. 칸은 열어 두고, 보내기·재설정 앞에서 막는다.
+ */
+no(!/async function go\(\) \{\s*\/\*[^*]*\*\/\s*if \(!enabled\)/.test(onboard),
+   '만 14세 확인을 보내기 앞에서 막지 않음 — 칸을 열어 둔 채 문까지 없애면 확인 없이 가입된다')
+no(!/async function forgot\(\) \{\s*if \(!enabled\)/.test(onboard),
+   '비밀번호 재설정이 만 14세 확인을 건너뜀')
+no(/pointer-events-none opacity-40'\}>\s*<EmailWay/.test(onboard),
+   '이메일 칸을 다시 잠가 둠 — 흐린 칸은 눌러도 반응이 없어 고장으로 읽힌다')
 
 /*
  * 처음 오신 분에게 로그인 칸을 먼저 펴 두면, 가입한 적이 없으니 반드시 실패한다.

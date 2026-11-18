@@ -83,6 +83,16 @@ export function Onboarding({
    * 나이를 받아 적지는 않는다 — 확인하자고 새 개인정보를 만들 일이 아니다.
    */
   const [adult, setAdult] = useState(isAdultConfirmed)
+  /*
+   * 2026-11-18 — 예전에는 체크 전에 입력칸을 잠가 두었다. 흐려진 칸을 눌러도 아무 일이 없어
+   * "키보드가 안 뜬다", "앱이 멈췄다" 로 읽혔다(전문의 실기기 시험). 칸은 늘 열어 두고,
+   * 체크 없이 로그인·가입을 누르면 그때 체크 칸을 붉게 짚어 드린다. 문은 그대로 '보내기 전'에 선다.
+   */
+  const [nudge, setNudge] = useState(false)
+  const needAdult = () => {
+    setNudge(true)
+    document.getElementById('of-adult')?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+  }
   const [pickedSource, setPickedSource] = useState<string | null>(null)
   const canNext = step === 0 ? !needsLogin : step === 1 ? !!patient.cancer : true
 
@@ -140,12 +150,12 @@ export function Onboarding({
                   * 사용자 몫으로 둘 것이 아니다 — 다른 쪽으로 들어가면 아예 다른 계정이 되어
                   * 적어 두신 것과 문의 내역이 사라진 것처럼 보인다.
                   */}
-                <label className="mb-3 flex items-start gap-2.5 rounded-xl border border-stone-200 bg-white px-3.5 py-3">
+                <label id="of-adult" className={`mb-3 flex items-start gap-2.5 rounded-xl border bg-white px-3.5 py-3 transition-colors ${nudge && !adult ? 'border-warn-500 ring-2 ring-warn-200' : 'border-stone-200'}`}>
                   <input
                     type="checkbox"
                     className="mt-0.5 h-4 w-4 shrink-0 accent-brand-600"
                     checked={adult}
-                    onChange={(e) => { setAdult(e.target.checked); confirmAdult(e.target.checked) }}
+                    onChange={(e) => { setAdult(e.target.checked); confirmAdult(e.target.checked); setNudge(false) }}
                   />
                   <span className="text-[12px] leading-relaxed text-stone-600">
                     <strong className="text-stone-800">만 14세 이상입니다.</strong>{' '}
@@ -153,7 +163,7 @@ export function Onboarding({
                   </span>
                 </label>
 
-                {socialProviders().length > 0 && <div className={`flex flex-col gap-2 ${adult ? '' : 'pointer-events-none opacity-40'}`}>
+                {socialProviders().length > 0 && <div className="flex flex-col gap-2">
                   {([...socialProviders()]
                     .sort((a, b) => (a === last ? -1 : b === last ? 1 : 0))
                   ).map((p) => (
@@ -164,7 +174,7 @@ export function Onboarding({
                           ? 'bg-[#FEE500] text-[#191600] hover:bg-[#f5dc00]'
                           : 'border border-stone-300 bg-white text-stone-700 hover:bg-stone-50'
                       } ${p === last ? 'ring-2 ring-brand-500 ring-offset-2' : ''}`}
-                      onClick={() => signIn(p).catch(() => undefined)}
+                      onClick={() => { if (!adult) { needAdult(); return } signIn(p).catch(() => undefined) }}
                     >
                       {PROVIDER_LABEL[p]}
                       {p === last && (
@@ -181,9 +191,7 @@ export function Onboarding({
                   </p>
                 )}
 
-                <div className={adult ? '' : 'pointer-events-none opacity-40'}>
-                  <EmailWay enabled={adult} seenBefore={last !== null} />
-                </div>
+                <EmailWay enabled={adult} onNeedAdult={needAdult} seenBefore={last !== null} />
                 <p className="mt-4 text-center text-xs text-stone-400">
                   {socialProviders().length > 0
                     ? '처음이시면 카카오·구글 단추로 바로 가입됩니다. 두 가지가 없으시면 이메일로 하실 수 있습니다.'
@@ -193,7 +201,7 @@ export function Onboarding({
                   <button className="text-xs font-bold text-brand-700 underline underline-offset-2" onClick={() => setTour(true)}>▶ 움직이는 사용법 보기</button>
                 </p>
                 <p className="mt-2 text-center text-[11px] text-stone-400">
-                  {adult ? '로그인하시면 다음 단계로 넘어갑니다.' : '위 항목을 확인해 주시면 로그인할 수 있습니다.'}
+                  {adult ? '로그인하시면 다음 단계로 넘어갑니다.' : '로그인 전에 맨 위 \'만 14세 이상입니다\'에 체크해 주세요.'}
                 </p>
               </>
             ) : (
@@ -574,7 +582,7 @@ export function Onboarding({
  * "가입한 적이 있던가" 를 떠올려 고르셔야 하는데, 그건 사용자 몫이 아니다 —
  * 틀리게 고르셔도 오류 문구가 맞은편으로 안내한다.
  */
-function EmailWay({ enabled, seenBefore }: { enabled: boolean; seenBefore: boolean }) {
+function EmailWay({ enabled, onNeedAdult, seenBefore }: { enabled: boolean; onNeedAdult: () => void; seenBefore: boolean }) {
   /* 아이폰 앱(1단계)은 이메일이 유일한 길이라 처음부터 펼쳐 둔다 */
   const [open, setOpen] = useState(isNative())
   /*
@@ -602,6 +610,8 @@ function EmailWay({ enabled, seenBefore }: { enabled: boolean; seenBefore: boole
   const good = (m: string) => { setNote(m); setMsg(null) }
 
   async function go() {
+    /* 만 14세 확인 문 — 계정 식별자를 받기 전(보내기 전)에 선다 */
+    if (!enabled) { say('맨 위의 \'만 14세 이상입니다\'에 먼저 체크해 주세요.'); onNeedAdult(); return }
     setBusy(true); setMsg(null); setNote(null)
     try {
       if (mode === 'up') {
@@ -622,6 +632,7 @@ function EmailWay({ enabled, seenBefore }: { enabled: boolean; seenBefore: boole
   }
 
   async function forgot() {
+    if (!enabled) { say('맨 위의 \'만 14세 이상입니다\'에 먼저 체크해 주세요.'); onNeedAdult(); return }
     if (!email.trim()) { say('비밀번호를 다시 정하시려면 위에 이메일 주소를 먼저 적어 주세요.'); return }
     setBusy(true); setMsg(null); setNote(null)
     try {
@@ -648,7 +659,6 @@ function EmailWay({ enabled, seenBefore }: { enabled: boolean; seenBefore: boole
     return (
       <button
         className="mt-3 w-full rounded-xl border border-dashed border-stone-300 py-2.5 text-xs text-stone-500 hover:bg-stone-50"
-        disabled={!enabled}
         onClick={() => setOpen(true)}
       >
         카카오·구글 계정이 없으신가요? <strong className="text-stone-700">이메일로 하기</strong>
@@ -671,6 +681,11 @@ function EmailWay({ enabled, seenBefore }: { enabled: boolean; seenBefore: boole
           </button>
         ))}
       </div>
+      {mode === 'up' && (
+        <p className="-mt-1 mb-2.5 text-[11px] leading-relaxed text-stone-500">
+          이미 가입하셨으면 위의 <button className="font-semibold text-brand-700 underline underline-offset-2" onClick={() => { setMode('in'); setMsg(null); setNote(null) }}>로그인</button>을 눌러 주세요.
+        </p>
+      )}
 
       <label className="block text-[11px] font-medium text-stone-500" htmlFor="of-email">이메일</label>
       <input
@@ -699,7 +714,7 @@ function EmailWay({ enabled, seenBefore }: { enabled: boolean; seenBefore: boole
       {msg && <p className="mt-2 rounded-lg bg-warn-50 px-2.5 py-2 text-[11px] leading-relaxed text-warn-700">{msg}</p>}
       {note && <p className="mt-2 rounded-lg bg-brand-50 px-2.5 py-2 text-[11px] leading-relaxed text-brand-800">{note}</p>}
 
-      <button className="btn-primary mt-2.5 w-full py-2.5 text-sm" disabled={busy || !enabled} onClick={() => void go()}>
+      <button className="btn-primary mt-2.5 w-full py-2.5 text-sm" disabled={busy} onClick={() => void go()}>
         {busy ? '잠시만요…' : mode === 'up' ? '가입하고 시작하기' : '로그인'}
       </button>
 
