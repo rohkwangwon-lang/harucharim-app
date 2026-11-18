@@ -292,14 +292,14 @@ export function Admin() {
 export function AdminPage({ onClose, children }: { onClose: () => void; children?: React.ReactNode }) {
   return (
     <div className="fixed inset-0 z-40 overflow-y-auto bg-stone-50">
-      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-stone-200 bg-white/95 px-4 py-3 backdrop-blur">
+      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-stone-200 bg-white/95 px-4 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))] backdrop-blur">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">관리자</p>
           <h1 className="text-base font-bold text-stone-900">이용 현황</h1>
         </div>
         <button className="btn-outline text-xs" onClick={onClose}>앱으로 돌아가기</button>
       </div>
-      <div className="mx-auto max-w-3xl px-4 pb-16 pt-2">
+      <div className="mx-auto max-w-3xl px-4 pb-[calc(4rem+env(safe-area-inset-bottom))] pt-2">
         <Admin />
         {children}
       </div>

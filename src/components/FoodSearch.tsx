@@ -198,7 +198,7 @@ export function FoodSearch({
     <div>
       {onDone && (
         <button
-          className="sticky top-0 z-20 -mx-4 mb-2 flex w-[calc(100%+2rem)] items-center justify-between gap-2 bg-brand-600 px-4 py-3 text-left text-white shadow-md transition-colors hover:bg-brand-700"
+          className="sticky top-[env(safe-area-inset-top)] z-20 -mx-4 mb-2 flex w-[calc(100%+2rem)] items-center justify-between gap-2 bg-brand-600 px-4 py-3 text-left text-white shadow-md transition-colors hover:bg-brand-700"
           onClick={onDone}
         >
           <span className="flex items-center gap-1.5">
@@ -211,7 +211,7 @@ export function FoodSearch({
         </button>
       )}
 
-      <div className={`sticky ${onDone ? 'top-[52px]' : 'top-0'} z-10 -mx-4 mb-3 bg-stone-50/95 px-4 pb-2 pt-1 backdrop-blur`}>
+      <div className={`sticky ${onDone ? 'top-[calc(48px+env(safe-area-inset-top))] z-20' : 'top-[env(safe-area-inset-top)] z-10'} -mx-4 mb-3 bg-stone-50/95 px-4 pb-2 pt-1 backdrop-blur`}>
         <div className="flex gap-1.5">
           <input
             aria-label="음식 이름으로 검색"
