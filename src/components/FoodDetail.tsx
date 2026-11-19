@@ -5,6 +5,7 @@ import { MEAL_SLOTS } from '../data/types'
 import { evaluateFood, howToLines } from '../engine/rules'
 import { foodContribution, missingMacros, NUTRIENT_META, fmt } from '../engine/nutrition'
 import { REF_BY_ID } from '../data/references'
+import { CiteList, RefLink } from './Sources'
 import { EvidenceBadge, HowTo, LevelBadge } from './ui'
 
 /** 식품 상세 — 하단 시트 형태 */
@@ -191,10 +192,12 @@ export function FoodDetail({
             * 성분값 출처를 참고문헌 목록에 넣어 두고도 화면 어디에서도 쓰지 않아,
             * 환자분은 이 값이 어느 자료의 것인지 알 길이 없었다.
             */}
-          <p className="mt-2 text-[10px] leading-relaxed text-stone-400">
-            {food.auto
-              ? REF_BY_ID['kfda-db']?.citation
-              : `${REF_BY_ID['rda-table']?.citation} · ${REF_BY_ID['kfda-db']?.citation}`}
+          <p className="mt-2 text-[11px] leading-relaxed text-stone-500">
+            <span className="font-semibold text-stone-600">영양성분 출처 </span>
+            {(food.auto ? ['kfda-db'] : ['rda-table', 'kfda-db']).map((id, i) => {
+              const r = REF_BY_ID[id]
+              return r ? <span key={id}>{i > 0 && ' · '}<RefLink r={r} /></span> : null
+            })}
           </p>
 
           {missingMacros(food).length > 0 && (
@@ -235,26 +238,5 @@ export function FoodDetail({
 }
 
 function RefList({ ids }: { ids: string[] }) {
-  const refs = ids.map((id) => REF_BY_ID[id]).filter(Boolean)
-  if (refs.length === 0) return null
-  return (
-    <details className="mt-2">
-      <summary className="cursor-pointer text-[11px] font-medium text-stone-400 hover:text-stone-600">
-        근거 {refs.length}건 보기
-      </summary>
-      <ul className="mt-1.5 space-y-1">
-        {refs.map((r) => (
-          <li key={r.id} className="text-[11px] leading-relaxed text-stone-500">
-            {r.url ? (
-              <a href={r.url} target="_blank" rel="noreferrer" className="underline decoration-stone-300 hover:text-brand-600">
-                {r.citation}
-              </a>
-            ) : (
-              r.citation
-            )}
-          </li>
-        ))}
-      </ul>
-    </details>
-  )
+  return <CiteList ids={ids} />
 }

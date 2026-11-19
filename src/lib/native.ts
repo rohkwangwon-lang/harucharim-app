@@ -21,6 +21,18 @@ const HaruScanner = registerPlugin<{ scan(o: { instructions: string }): Promise<
 export const isNative = (): boolean => Capacitor.isNativePlatform()
 export const isIOSApp = (): boolean => Capacitor.getPlatform() === 'ios'
 
+/**
+ * 처리방침·약관처럼 앱에 함께 든 문서 페이지의 주소.
+ *
+ * 2026-11-19 — 아이폰 앱 안에서 '개인정보처리방침' 을 눌러도 아무 일이 없었다.
+ * 새 창(target=_blank)으로 여는 주소를 Capacitor 가 사파리로 넘기는데,
+ * 앱 안 주소(harucharim://localhost/privacy.html)는 사파리가 열 수 없다.
+ * 아이폰 앱에서는 같은 문서가 올라가 있는 누리집 주소로 연다(앱스토어에 적은 처리방침 주소와 같다).
+ */
+export const SITE = 'https://harucharim.com/'
+export const pageUrl = (path: string): string =>
+  isNative() ? `${SITE}${path}` : `${import.meta.env.BASE_URL}${path}`
+
 /* ───────────── 공유 ───────────── */
 
 /** 글 보내기 — 아이폰 공유 창 */

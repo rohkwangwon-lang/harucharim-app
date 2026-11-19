@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { CiteList, MealSourcesCard } from './Sources'
 import { portionLabel, mayBeWholePack, WHOLE_PACK_SHORT } from '../lib/portion'
 import { track, trackDemand } from '../lib/stats'
 import type { PatientContext, SelectedItem, Supplement } from '../data/types'
@@ -205,6 +206,7 @@ function DayView({
           <Stat label="나트륨" value={String(s.na)} unit="mg" />
         </div>
       )}
+      {!s.empty && <CiteList ids={['espen2021', 'kdri2025', 'rda-table', 'kfda-db']} className="-mt-2 mb-4" />}
 
       <Section title="그날 체중">
         <div className="card flex items-center gap-2 p-3.5">
@@ -304,6 +306,8 @@ function WeekView({
         <Stat label="하루 평균 열량" value={String(sum.avgKcal)} unit="kcal" hint={`목표 ${t.kcal[0]}~${t.kcal[1]}`} />
         <Stat label="하루 평균 단백질" value={String(sum.avgProtein)} unit="g" hint={`목표 ${t.protein[0]} 이상`} />
       </div>
+      {/* 목표·평가의 출처(2026-11-19 애플 1.4.1) */}
+      <MealSourcesCard className="mb-3" />
 
       {/*
         * 숫자만으로는 그게 좋은 건지 알 수 없다.

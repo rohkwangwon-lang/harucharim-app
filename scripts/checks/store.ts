@@ -30,7 +30,9 @@ const hasLogin = /signInWithOAuth|signIn\(/.test(readFileSync('src/lib/auth.ts',
 if (hasLogin) {
   no(!existsSync('src/components/DeleteAccount.tsx'),
      '로그인이 있는데 계정 삭제 화면이 없음 — 애플 5.1.1(v) 로 반려된다')
-  no(!/<DeleteAccount/.test(app),
+  /* 2026-11-19 계정 삭제는 내 정보 맨 위 계정 카드(AccountCard) 안으로 옮겼다 — 자리는 checks/account.ts 가 본다 */
+  const accountCard = existsSync('src/components/AccountCard.tsx') ? readFileSync('src/components/AccountCard.tsx', 'utf-8') : ''
+  no(!(/<DeleteAccount/.test(app) || (/<AccountCard\b/.test(app) && /<DeleteAccount/.test(accountCard))),
      '계정 삭제 화면을 만들어 놓고 App 에 걸지 않음 — 이용자가 열 길이 없다')
   no(!existsSync('supabase/setup.sql'), '설치 SQL(supabase/setup.sql)이 없음')
 

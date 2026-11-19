@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { pageUrl } from '../lib/native'
 import { NOTICE_LEAD_DAYS, type Notice } from '../data/notices'
 import { markRead, posted, unread } from '../lib/notice'
 
@@ -27,7 +28,7 @@ function Body({ n }: { n: Notice }) {
       )}
       {n.link && (
         <a
-          href={`${import.meta.env.BASE_URL}${n.link}`}
+          href={pageUrl(n.link)}
           target="_blank"
           rel="noreferrer"
           className="mt-2.5 inline-block text-[12px] font-semibold text-brand-700 underline underline-offset-2"

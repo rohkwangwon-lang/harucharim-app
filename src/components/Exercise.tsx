@@ -3,7 +3,7 @@ import {
   BASE_EXERCISE, BONE_METS_NOTE, CONDITION_EXERCISE_NOTES, EXERCISE_BY_CANCER,
   HISTORY_EXERCISE_NOTES, STOP_SIGNS, type ExerciseItem
 } from '../data/exercise'
-import { REF_BY_ID } from '../data/references'
+import { CiteList } from './Sources'
 import { EvidenceBadge, Section } from './ui'
 
 const KIND_STYLE: Record<ExerciseItem['kind'], string> = {
@@ -103,20 +103,7 @@ export function Exercise({ patient }: { patient: PatientContext }) {
               </li>
             ))}
           </ul>
-          <details className="mt-2">
-            <summary className="cursor-pointer text-[10px] font-medium text-brand-700/70">
-              근거 {BONE_METS_NOTE.refIds.length}건
-            </summary>
-            <ul className="mt-1 space-y-0.5">
-              {BONE_METS_NOTE.refIds.map((id) => REF_BY_ID[id]).filter(Boolean).map((r) => (
-                <li key={r.id} className="text-[10px] leading-relaxed text-stone-500">
-                  {r.url
-                    ? <a href={r.url} target="_blank" rel="noreferrer" className="underline decoration-stone-300">{r.citation}</a>
-                    : r.citation}
-                </li>
-              ))}
-            </ul>
-          </details>
+          <CiteList ids={BONE_METS_NOTE.refIds} />
         </div>
       </Section>
 
@@ -140,7 +127,6 @@ export function Exercise({ patient }: { patient: PatientContext }) {
 }
 
 function ExerciseCard({ item, highlight }: { item: ExerciseItem; highlight?: boolean }) {
-  const refs = item.refIds.map((id) => REF_BY_ID[id]).filter(Boolean)
   return (
     <div className={`card p-3.5 ${highlight ? 'border-brand-200' : ''}`}>
       <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
@@ -152,22 +138,7 @@ function ExerciseCard({ item, highlight }: { item: ExerciseItem; highlight?: boo
         {item.dose}
       </p>
       <p className="mt-2 text-xs leading-relaxed text-stone-600">{item.why}</p>
-      {refs.length > 0 && (
-        <details className="mt-2">
-          <summary className="cursor-pointer text-[11px] font-medium text-stone-400 hover:text-stone-600">
-            근거 {refs.length}건
-          </summary>
-          <ul className="mt-1.5 space-y-1">
-            {refs.map((r) => (
-              <li key={r.id} className="text-[11px] leading-relaxed text-stone-500">
-                {r.url ? (
-                  <a href={r.url} target="_blank" rel="noreferrer" className="underline decoration-stone-300">{r.citation}</a>
-                ) : r.citation}
-              </li>
-            ))}
-          </ul>
-        </details>
-      )}
+      <CiteList ids={item.refIds} />
     </div>
   )
 }

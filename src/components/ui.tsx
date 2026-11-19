@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { parseInRange, rangeHint } from '../lib/bodyInput'
 import type { ReactNode } from 'react'
 import type { EvidenceLevel, RuleLevel } from '../data/types'
-import { REF_BY_ID } from '../data/references'
+import { CiteList } from './Sources'
 
 /* ── 권고 수준 배지 ─────────────────────────────────────────── */
 
@@ -726,29 +726,9 @@ export function ShortfallAdviceList({
   )
 }
 
-/** 근거 목록 — 접어 두었다가 눌러서 본다 */
+/** 출처 목록 — components/Sources.tsx 하나로 모았다(2026-11-19 애플 1.4.1) */
 function Cites({ ids }: { ids: string[] }) {
-  if (ids.length === 0) return null
-  return (
-    <details className="mt-2">
-      <summary className="cursor-pointer text-[11px] font-medium text-stone-400">근거 {ids.length}건</summary>
-      <ul className="mt-1.5 space-y-1">
-        {ids.map((id) => {
-          const ref = REF_BY_ID[id]
-          if (!ref) return null
-          return (
-            <li key={id} className="text-[11px] leading-relaxed text-stone-500">
-              {ref.url ? (
-                <a href={ref.url} target="_blank" rel="noreferrer" className="underline decoration-stone-300">
-                  {ref.citation}
-                </a>
-              ) : ref.citation}
-            </li>
-          )
-        })}
-      </ul>
-    </details>
-  )
+  return <CiteList ids={ids} />
 }
 
 /**

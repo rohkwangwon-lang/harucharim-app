@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { CiteList } from './Sources'
 import type { PatientContext, PatientCondition, Phase, CancerSubtype } from '../data/types'
 import { SUBTYPE_OPTIONS } from '../data/types'
 import { CANCERS } from '../data/cancers'
@@ -209,6 +210,8 @@ export function PatientPanel({
           <Stat label="하루 열량 목표" value={`${target.kcal[0]}~${target.kcal[1]}`} unit="kcal" />
           <Stat label="하루 단백질 목표" value={`${target.protein[0]}~${target.protein[1]}`} unit="g" />
         </div>
+        {/* 목표 숫자의 출처(2026-11-19 애플 1.4.1) */}
+        <CiteList ids={['espen2021', 'kdri2025']} />
 
         <div
           className={`mt-3 rounded-xl px-3.5 py-3 text-xs leading-relaxed ${

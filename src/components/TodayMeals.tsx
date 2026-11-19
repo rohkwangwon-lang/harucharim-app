@@ -11,7 +11,7 @@ import { buildDayMenu, currentSeason, dayNotes, fiberGoal, ideasFromIngredients,
 import { evaluateFood, evaluateSelection, howToLines } from '../engine/rules'
 import { foodContribution, observedWeightGain, personalTarget, renalProteinCap, sumIntake, targetNotes } from '../engine/nutrition'
 import { BASE_EXERCISE, CONDITION_EXERCISE_NOTES, EXERCISE_BY_CANCER, INTAKE_EXERCISE_ADVICE } from '../data/exercise'
-import { REF_BY_ID } from '../data/references'
+import { CiteList, MealSourcesCard } from './Sources'
 import { ChipGroup, DayNoteList, EvidenceBadge, HowTo, LevelBadge, NutrientPanel, NutrientRow, nutrientState, Section, TodayStatus } from './ui'
 import { toggleMedication, visibleMedications } from '../data/interactions'
 import { BODY_LIMITS, parseInRange } from '../lib/bodyInput'
@@ -428,6 +428,8 @@ export function TodayMeals({
           ) : undefined
         }
       >
+        {/* 2026-11-19 애플 1.4.1 — '이렇게 채워 보세요' 의 출처가 이 화면에서 바로 보이게 */}
+        <MealSourcesCard className="mb-2.5" />
         <div className="space-y-2.5">
           {MEAL_SLOTS.map((slot) => {
             const items = selected.filter((i) => i.meal === slot)
@@ -751,19 +753,8 @@ function ExerciseAdvice({
               운동은 상쇄가 아니라 그 자체로 이득이 있습니다 — 결장암(3기·고위험 2기)에서는 보조항암 후
               3년 운동 프로그램이 5년 무병생존을 73.9 %에서 80.3 %로 올렸습니다.
             </p>
-            <details className="mt-2">
-              <summary className="cursor-pointer text-[10px] font-medium text-brand-700/70">근거 2건</summary>
-              <ul className="mt-1 space-y-0.5">
-                {/* CHALLENGE 원문(NEJM)은 구독제라 초록만 — 숫자(80.3 % 대 73.9 %)를 옮긴 원문 공개 종설(Shida 2026, PMC)로 바꿨다(2026-10-14 전수 대조) */}
-                {['shida2026-challenge', 'acs2022'].map((id) => REF_BY_ID[id]).filter(Boolean).map((r) => (
-                  <li key={r.id} className="text-[10px] leading-relaxed text-stone-500">
-                    {r.url
-                      ? <a href={r.url} target="_blank" rel="noreferrer" className="underline decoration-stone-300">{r.citation}</a>
-                      : r.citation}
-                  </li>
-                ))}
-              </ul>
-            </details>
+            {/* CHALLENGE 원문(NEJM)은 구독제라 초록만 — 숫자(80.3 % 대 73.9 %)를 옮긴 원문 공개 종설(Shida 2026, PMC)로 바꿨다(2026-10-14 전수 대조) */}
+            <CiteList ids={['shida2026-challenge', 'acs2022']} />
           </div>
         )}
 
@@ -779,28 +770,7 @@ function ExerciseAdvice({
           </p>
         )}
 
-        {main.refIds.length > 0 && (
-          <details className="mt-3">
-            <summary className="cursor-pointer text-[11px] font-medium text-stone-400">
-              근거 {main.refIds.length}건
-            </summary>
-            <ul className="mt-1.5 space-y-1">
-              {main.refIds.map((id) => {
-                const r = REF_BY_ID[id]
-                if (!r) return null
-                return (
-                  <li key={id} className="text-[11px] leading-relaxed text-stone-500">
-                    {r.url ? (
-                      <a href={r.url} target="_blank" rel="noreferrer" className="underline decoration-stone-300">
-                        {r.citation}
-                      </a>
-                    ) : r.citation}
-                  </li>
-                )
-              })}
-            </ul>
-          </details>
-        )}
+        <CiteList ids={main.refIds} className="mt-3" />
       </div>
     </Section>
   )
@@ -818,27 +788,7 @@ function ExerciseAdvice({
  * 부풀려 'G' 를 달면 앞서 고친 잘못을 여기서 되풀이하게 된다.
  */
 function AdviceRefs({ evidence, ids }: { evidence: EvidenceLevel; ids: string[] }) {
-  const refs = ids.map((id) => REF_BY_ID[id]).filter(Boolean)
-  if (refs.length === 0) return null
-  return (
-    <div className="mt-2.5">
-      <details>
-        <summary className="flex cursor-pointer items-center gap-1.5 text-[11px] font-medium text-stone-400">
-          <EvidenceBadge level={evidence} />
-          <span>근거 {refs.length}건</span>
-        </summary>
-        <ul className="mt-1.5 space-y-1">
-          {refs.map((r) => (
-            <li key={r.id} className="text-[11px] leading-relaxed text-stone-500">
-              {r.url
-                ? <a href={r.url} target="_blank" rel="noreferrer" className="underline decoration-stone-300">{r.citation}</a>
-                : r.citation}
-            </li>
-          ))}
-        </ul>
-      </details>
-    </div>
-  )
+  return <CiteList ids={ids} className="mt-2.5" badge={<EvidenceBadge level={evidence} />} />
 }
 
 function ExerciseLine({

@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { DELETED_FLAG } from './DeleteAccount'
 import { ALLERGENS } from '../data/allergens'
 import { SOURCES, setSource } from '../lib/stats'
 import { track } from '../lib/stats'
@@ -7,7 +8,7 @@ import { isSupabaseConfigured } from '../lib/supabase'
 import {
   checkSignUp, displayName, EMAIL_OPENS, emailOpen, lastProvider, MIN_PASSWORD, PROVIDER_LABEL,
   sendPasswordReset, signIn, signInWithEmail, signUpWithEmail, useSession, socialProviders } from '../lib/auth'
-import { isNative } from '../lib/native'
+import { isNative, pageUrl } from '../lib/native'
 import { today } from '../lib/day'
 import { confirmAdult, isAdultConfirmed } from '../lib/ageGate'
 import type { CancerId, Cuisine, PatientCondition, PatientContext, Phase, TreatmentHistory } from '../data/types'
@@ -65,6 +66,14 @@ export function Onboarding({
   /* 로그인 전에 앱이 무엇을 하는지 미리 보여 준다(2026-10-23) */
   const [tour, setTour] = useState(false)
   const { user } = useSession()
+  /*
+   * 계정을 막 지우고 오신 경우 — 지워졌다는 것을 먼저 알려 드린다(2026-11-19 애플 5.1.1(v)).
+   * 표시는 다시 로그인하실 때 거둔다(StrictMode 의 두 번 그리기에 지워지지 않도록 effect 에서 바로 지우지 않는다).
+   */
+  const [justDeleted] = useState(() => { try { return sessionStorage.getItem(DELETED_FLAG) === '1' } catch { return false } })
+  useEffect(() => {
+    if (user) { try { sessionStorage.removeItem(DELETED_FLAG) } catch { /* 막힌 브라우저 */ } }
+  }, [user])
   /* 지난번에 쓰신 로그인 방법 — 아이디·비밀번호는 이 앱이 받지 않는다 */
   const last = lastProvider()
   const steps = loginOnly
@@ -124,12 +133,25 @@ export function Onboarding({
       </div>
 
       <div className="flex-1 overflow-y-auto px-5 py-5">
+        {step === 0 && justDeleted && !user && (
+          <div className="mb-4 rounded-2xl border border-brand-300 bg-brand-50 p-4" role="status" id="of-deleted">
+            <p className="text-sm font-bold text-brand-800">계정이 삭제되었습니다</p>
+            <p className="mt-1 text-xs leading-relaxed text-stone-600">
+              로그인 계정과 남기신 문의·이용 통계를 서버에서 지웠습니다. 되돌릴 수 없습니다.
+              다시 쓰시려면 새로 가입해 주세요.
+            </p>
+          </div>
+        )}
         {step === 0 && (
           <Step
-            title={loginOnly ? '다시 로그인해 주세요' : '하루차림을 시작합니다'}
-            desc={loginOnly
-              ? '로그아웃하셨습니다. 다시 로그인하시면 적어 두신 기록이 그대로 있습니다.'
-              : '먼저 로그인해 주세요. 문의하신 내용의 답변을 앱에서 바로 확인하실 수 있습니다.'}
+            title={justDeleted && !user ? '다시 쓰시려면 새로 가입해 주세요' : loginOnly ? '다시 로그인해 주세요' : '하루차림을 시작합니다'}
+            desc={justDeleted && !user
+              ? (loginOnly
+                ? '이 기기에 남겨 두신 식단·체중 기록은 새 계정으로 들어오셔도 그대로 이어집니다.'
+                : '이 기기의 기록도 함께 지웠습니다. 새로 가입하시면 처음 설정부터 시작합니다.')
+              : loginOnly
+                ? '로그아웃하셨습니다. 다시 로그인하시면 적어 두신 기록이 그대로 있습니다.'
+                : '먼저 로그인해 주세요. 문의하신 내용의 답변을 앱에서 바로 확인하실 수 있습니다.'}
           >
             {user ? (
               <div className="rounded-2xl border border-brand-200 bg-brand-50/60 p-4">
@@ -222,14 +244,14 @@ export function Onboarding({
                 이용 통계에 따로 동의하시면 암종·치료 시기가 뭉갠 값으로 전송됩니다 &mdash;
                 동의하지 않으셔도 모든 기능을 그대로 쓰실 수 있습니다.{' '}
                 <a
-                  href={`${import.meta.env.BASE_URL}privacy.html`}
+                  href={pageUrl('privacy.html')}
                   target="_blank"
                   rel="noreferrer"
                   className="underline decoration-stone-300"
                 >
                   개인정보처리방침
                 </a>{' · '}<a
-                  href={`${import.meta.env.BASE_URL}terms.html`}
+                  href={pageUrl('terms.html')}
                   target="_blank" rel="noreferrer"
                   className="underline underline-offset-2"
                 >이용약관</a>

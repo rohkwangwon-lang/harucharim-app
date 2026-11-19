@@ -14,7 +14,7 @@ import { MealPlan } from './MealPlan'
 import { label as dayLabel } from '../lib/day'
 import { PLAN_MAX_DAYS } from '../engine/plan'
 import { SUPPLEMENT_BY_ID } from '../data/supplements'
-import { REF_BY_ID } from '../data/references'
+import { CiteList, MealSourcesCard } from './Sources'
 import { DayNoteList, EvidenceBadge, HowTo, NutrientPanel, NutrientRow, nutrientState, Section } from './ui'
 import { activeInteractions, activeRules, evaluateFood, howToLines } from '../engine/rules'
 
@@ -331,6 +331,8 @@ export function RecommendedMenu({
           <span className="text-xs text-stone-500">{peek.index + 1}일째 · {dayLabel(peek.day)}</span>
         </div>
       ) : daysPicker}
+      {/* 2026-11-19 애플 1.4.1 — 식단 화면에 출처가 바로 보이게 */}
+      <MealSourcesCard className="mb-3" />
       <div className="mb-4 rounded-2xl border border-brand-200 bg-brand-50/60 px-4 py-3.5">
         {/* 며칠 치 머리글과 같은 까닭으로, 폰 폭에서는 단추를 글 아래 줄에 둔다 */}
         <div className="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
@@ -443,6 +445,7 @@ export function RecommendedMenu({
                 <li key={s.id}><strong>{s.when}</strong> — {s.then}</li>
               ))}
             </ul>
+            <CiteList ids={signs.flatMap((s) => s.refIds ?? [])} className="mt-1.5" />
           </>
         )}
         <p className={signs.length > 0 ? 'mt-2 border-t border-danger-100 pt-2' : ''}>
@@ -654,7 +657,7 @@ export function RecommendedMenu({
       </button>
 
       <p className="px-1 pb-2 text-[11px] leading-relaxed text-stone-400">
-        추천 항목마다 어떤 권고에 따른 것인지와 근거를 함께 표시했습니다.
+        추천 항목마다 어떤 권고에 따른 것인지와 출처를 함께 표시했습니다(음식 옆 &lsquo;이유·출처&rsquo;).
         실제 처방·영양 상담을 대체하지 않습니다.
       </p>
       </div>}
@@ -705,7 +708,7 @@ function Why({
             */
           className="-my-2 flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center px-1 text-[11px] font-medium text-brand-700/80"
           aria-expanded={open}
-          aria-label={open ? '이유 접기' : '이 음식을 올린 이유 보기'}
+          aria-label={open ? '이유 접기' : '이 음식을 올린 이유와 출처 보기'}
           onClick={() => setOpen((v) => !v)}
         >
           {/*
@@ -713,7 +716,7 @@ function Why({
             * 단추에는 물음이 아니라 무엇이 열리는지를 적는다.
             * '근거' 는 바로 옆의 근거 등급·근거 N건(출처)과 겹치므로 '이유' 로 둔다.
             */}
-          {open ? '접기' : '이유'}
+          {open ? '접기' : '이유·출처'}
         </button>
       </div>
       {open && (
@@ -727,20 +730,18 @@ function Why({
 }
 
 function Refs({ ids }: { ids: string[] }) {
-  const refs = ids.map((id) => REF_BY_ID[id]).filter(Boolean)
-  if (refs.length === 0) return null
-  return (
-    <details className="mt-1.5">
-      <summary className="cursor-pointer text-[10px] font-medium text-brand-700/70">근거 {refs.length}건</summary>
-      <ul className="mt-1 space-y-0.5">
-        {refs.map((r) => (
-          <li key={r.id} className="text-[10px] leading-relaxed text-stone-500">
-            {r.url ? (
-              <a href={r.url} target="_blank" rel="noreferrer" className="underline decoration-stone-300">{r.citation}</a>
-            ) : r.citation}
-          </li>
-        ))}
-      </ul>
-    </details>
-  )
+  /* '이유·출처' 를 누르셨으면 출처를 보러 오신 것이다 — 한 겹 더 접어 두지 않는다(2026-11-19 애플 1.4.1) */
+  /*
+   * 밥·곁들임처럼 한 상의 꼴을 맞추려고 넣은 것에는 임상 규칙이 없다 — 출처를 지어내지 않고 그렇다고 적는다.
+   * 이 양이 하루 목표에 어떻게 맞춰졌는지의 출처는 화면 위 '이 식단의 출처' 에 있다.
+   */
+  if (ids.length === 0) {
+    return (
+      <p className="mt-1.5 text-[11px] leading-relaxed text-stone-500">
+        한 상(밥·반찬·국)의 꼴을 맞추려고 넣은 것이라 따로 붙은 임상 출처는 없습니다.
+        하루 열량·단백질을 맞춘 기준의 출처는 화면 위 <strong className="text-stone-700">이 식단의 출처</strong>에 있습니다.
+      </p>
+    )
+  }
+  return <CiteList ids={ids} open className="mt-1.5" />
 }

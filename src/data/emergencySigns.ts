@@ -17,6 +17,13 @@ export interface EmergencySign {
   when: string
   /** 어떻게 하시라 */
   then: string
+  /**
+   * 출처(2026-11-19 애플 1.4.1). 원문과 대조한 것만 단다 — 열·사레·장폐색처럼 원문을 대조한 출처가 아직 없는 일반 안내는 비워 둔다.
+   * (열: ASCO/IDSA 2018 Taplitz, PMID 29461916 이 '1시간 안 항생제' 를 말하지만 초록만 확인 — 전문 대조 뒤 넣을 것)
+   * 와파린 출혈: MedlinePlus(검은 변·붉은 소변·코피·잇몸 피 → 바로 연락, 2026-11-19 원문 확인)
+   * 장루 탈수: Nightingale 2022 · 재영양: NICE CG32
+   */
+  refIds?: string[]
 }
 
 export function emergencySigns(patient: PatientContext): EmergencySign[] {
@@ -36,14 +43,16 @@ export function emergencySigns(patient: PatientContext): EmergencySign[] {
     out.push({
       id: 'bleeding',
       when: '검은 변, 피 섞인 소변, 멎지 않는 코피·잇몸 피가 날 때',
-      then: '바로 담당 의료진께 연락하세요.'
+      then: '바로 담당 의료진께 연락하세요.',
+      refIds: ['medlineplus-warfarin']
     })
   }
   if (c.has('설사') || c.has('장루보유') || c.has('오심·구토')) {
     out.push({
       id: 'dehydration',
       when: '설사·구토가 멎지 않고 소변이 눈에 띄게 줄거나 어지러울 때',
-      then: '물을 마셔도 따라잡지 못하는 상태일 수 있습니다. 담당 의료진께 연락하세요.'
+      then: '물을 마셔도 따라잡지 못하는 상태일 수 있습니다. 담당 의료진께 연락하세요.',
+      refIds: c.has('장루보유') ? ['nightingale2020stoma'] : []
     })
   }
   if (c.has('연하곤란')) {
@@ -65,7 +74,8 @@ export function emergencySigns(patient: PatientContext): EmergencySign[] {
     out.push({
       id: 'refeeding',
       when: '드시기 시작한 뒤 가슴이 두근거리거나, 숨이 차거나, 몸이 붓거나, 심하게 기운이 없을 때',
-      then: '재영양증후군의 신호일 수 있습니다. 바로 담당 의료진께 연락하세요.'
+      then: '재영양증후군의 신호일 수 있습니다. 바로 담당 의료진께 연락하세요.',
+      refIds: ['nice-refeeding']
     })
   }
   return out

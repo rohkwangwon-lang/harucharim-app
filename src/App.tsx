@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
+import { pageUrl } from './lib/native'
 import { useBackHandler } from './lib/backGesture'
 import { loadAllergenIndex } from './lib/foodStore'
 import { ReminderCard } from './components/ReminderCard'
-import { DeleteAccount } from './components/DeleteAccount'
+import { AccountCard } from './components/AccountCard'
+import { OPEN_SOURCES_EVENT, AllSourcesButton } from './components/Sources'
 import { useAppState } from './lib/store'
 import { CANCER_BY_ID } from './data/cancers'
 import type { MealSlot } from './data/types'
@@ -29,7 +31,7 @@ import { StatsConsent } from './components/StatsConsent'
 import { track, flush } from './lib/stats'
 import { StatsAsk, shouldAsk } from './components/StatsAsk'
 import { checkAdmin } from './lib/inquiry'
-import { displayName, useSession, lastProvider, signOut } from './lib/auth'
+import { displayName, useSession, lastProvider } from './lib/auth'
 import { isSupabaseConfigured } from './lib/supabase'
 import { Credentials, Section } from './components/ui'
 import { NoticeBanner, NoticeList } from './components/NoticeBanner'
@@ -221,6 +223,22 @@ export default function App() {
   })
   useBackHandler(adminOpen && isAdmin, 3, () => closeAdmin())
   useBackHandler(tour, 2, () => { setTour(false); dismissTour() })
+
+  /*
+   * '출처 전체 보기' — 어느 화면에서 누르셔도 가이드 › 근거 등급 › 출처 전체로 간다(components/Sources.tsx).
+   * 탭을 옮기는 것이라 밀어서 뒤로 하면 보던 화면으로 돌아온다.
+   */
+  const setTabRef = useRef(setTab)
+  setTabRef.current = setTab
+  useEffect(() => {
+    const go = () => {
+      setTabRef.current('care')
+      setCare('evidence')
+      setTimeout(() => document.getElementById('all-sources')?.scrollIntoView({ block: 'start' }), 60)
+    }
+    window.addEventListener(OPEN_SOURCES_EVENT, go)
+    return () => window.removeEventListener(OPEN_SOURCES_EVENT, go)
+  }, [])
 
   const profile = CANCER_BY_ID[state.patient.cancer]
   const selectedIds = new Set<string>(selected.map((x) => x.foodId))
@@ -460,6 +478,14 @@ export default function App() {
               </button>
             )}
 
+            {/*
+              * 계정 — 내 정보 맨 위에 둔다(2026-11-19 애플 심사 반려 5.1.1(v)).
+              * 예전엔 '계정 삭제' 가 글자 크기·알림 카드 사이, 화면 맨 아래 가까이에 있었고
+              * 로그인 표시·로그아웃은 '문의하기' 카드 안에 있었다. 심사자는 끝까지 내려 보고도 찾지 못했다.
+              * 계정에 관한 것(누구로 로그인했는지·로그아웃·계정 삭제)을 한 카드에 모아 첫눈에 보이게 한다.
+              */}
+            <AccountCard isAdmin={isAdmin} onDeleted={() => setTab('compose')} />
+
             <PatientPanel patient={state.patient} onChange={setPatient} />
 
             <StatsConsent />
@@ -471,47 +497,6 @@ export default function App() {
               <p className="mt-1 text-xs leading-relaxed text-stone-500">
                 찾으시는 음식·영양제가 없거나 내용이 이상하면 알려 주세요. 확인 후 답변드립니다.
               </p>
-              {user && (
-                <>
-                  {/*
-                    * 로그아웃은 여기서 한다. 한동안 '문의하기' 창 안에만 있어서, 심사용 계정을 만들던 날
-                    * "내 정보에서 로그아웃을 찾지 못했다" 는 말을 들었다(2026-10-14). 함께 쓰는 기기에서는 꼭 필요한 단추다.
-                    * 로그아웃해도 이 기기에 적어 두신 식단·체중은 지워지지 않는다 — 다시 로그인하면 그대로 있다.
-                    */}
-                  <div className="mt-2 flex items-center justify-between gap-2">
-                    <p className="min-w-0 truncate text-xs text-stone-600">
-                      <span className="chip bg-brand-100 text-brand-700">로그인됨</span>{' '}
-                      {displayName(user)}
-                      {user.email ? ` · ${user.email}` : ''}
-                    </p>
-                    <button
-                      className="shrink-0 rounded-lg border border-stone-300 px-2.5 py-1 text-xs font-medium text-stone-600 hover:bg-stone-50"
-                      onClick={() => { void signOut() }}
-                    >
-                      로그아웃
-                    </button>
-                  </div>
-                  {!isAdmin && (
-                    <details className="mt-2">
-                      <summary className="cursor-pointer text-[11px] text-stone-400">
-                        관리자로 등록하려면
-                      </summary>
-                      <p className="mt-1.5 text-[11px] leading-relaxed text-stone-500">
-                        아래 계정 식별자를 <code className="rounded bg-stone-100 px-1">of_admins</code> 표에
-                        넣으면 이 계정이 관리자가 됩니다. 카카오 로그인은 이메일을 주지 않아
-                        식별자로 등록해야 합니다.
-                      </p>
-                      <p
-                        className="mt-1.5 cursor-pointer select-all break-all rounded-lg bg-stone-100 px-2.5 py-2 font-mono text-[11px] text-stone-700"
-                        onClick={() => navigator.clipboard?.writeText(user.id)}
-                        title="눌러서 복사"
-                      >
-                        {user.id}
-                      </p>
-                    </details>
-                  )}
-                </>
-              )}
               <button className="btn-outline mt-3 w-full text-xs" onClick={() => setAsking(true)}>
                 문의 남기기 · 내 문의 보기
               </button>
@@ -557,19 +542,6 @@ export default function App() {
               처음부터 다시 설정하기
             </button>
 
-            {/*
-              * 계정 삭제.
-              *
-              * 애플 심사 기준 5.1.1(v) 는 계정을 만들 수 있는 앱에
-              * 앱 안에서의 계정 삭제를 요구한다 — 예외가 없다.
-              * 개인정보보호법 제36조도 같은 것을 요구한다.
-              * 로그인하신 분에게만 보인다.
-              */}
-            {user && (
-              <div className="mb-5">
-                <DeleteAccount onDone={() => setTab('compose')} />
-              </div>
-            )}
             <Section title="알림" desc="약관·처리방침이 바뀌면 여기에 남겨 둡니다.">
               <NoticeList />
             </Section>
@@ -632,7 +604,10 @@ function Disclaimer() {
       <h3 className="text-sm font-bold text-stone-800">이 앱을 쓰실 때 알아 두실 것</h3>
       <ul className="mt-2 space-y-1.5 text-xs leading-relaxed text-stone-600">
         <li>· 이 앱은 진료·처방·영양 상담을 대체하지 않습니다. 실제 치료 결정은 반드시 담당 의료진과 상의하셔야 합니다.</li>
-        <li>· 모든 권고에는 근거 수준(A/B/C/G)과 출처를 함께 표시했습니다. 근거가 엇갈리는 주제는 그 사실 자체를 적었습니다.</li>
+        <li>
+          · 모든 권고에는 근거 수준(A/B/C/G)과 출처를 함께 표시했습니다. 근거가 엇갈리는 주제는 그 사실 자체를 적었습니다.{' '}
+          <AllSourcesButton />
+        </li>
         <li>· 영양성분 값은 국가표준식품성분표와 제품 표시값을 기준으로 정리한 대표값입니다. 조리법과 제품에 따라 실제 값은 달라집니다.</li>
         <li>
           · 암종·체중·식단 같은 <strong>건강 정보는 이 기기 안에만</strong> 저장됩니다.
@@ -649,7 +624,7 @@ function Disclaimer() {
         <li>
           ·{' '}
           <a
-            href={`${import.meta.env.BASE_URL}privacy.html`}
+            href={pageUrl('privacy.html')}
             target="_blank"
             rel="noreferrer"
             className="font-medium text-brand-700 underline decoration-brand-300 underline-offset-2"
@@ -660,7 +635,7 @@ function Disclaimer() {
         <li>
           ·{' '}
           <a
-            href={`${import.meta.env.BASE_URL}terms.html`}
+            href={pageUrl('terms.html')}
             target="_blank"
             rel="noreferrer"
             className="font-medium text-brand-700 underline decoration-brand-300 underline-offset-2"

@@ -4,6 +4,7 @@ import { CONDITION_RULES } from '../data/conditionRules'
 import { CANCERS } from '../data/cancers'
 import { REF_BY_ID } from '../data/references'
 import { EVIDENCE_INFO, Section } from './ui'
+import { RefLink } from './Sources'
 import type { EvidenceLevel, NutritionRule, PatientContext } from '../data/types'
 
 const ORDER: EvidenceLevel[] = ['A', 'B', 'C', 'G']
@@ -74,8 +75,8 @@ export function EvidenceGuide({ patient }: { patient: PatientContext }) {
                       <p className="text-[10px] font-medium text-stone-400">이 앱에 실려 있는 예</p>
                       <p className="mt-0.5 text-[11px] font-medium leading-relaxed text-stone-700">{sample.title}</p>
                       {sample.refIds[0] && REF_BY_ID[sample.refIds[0]] && (
-                        <p className="mt-1 text-[10px] leading-relaxed text-stone-400">
-                          {REF_BY_ID[sample.refIds[0]].citation}
+                        <p className="mt-1 text-[10px] leading-relaxed text-stone-500">
+                          <RefLink r={REF_BY_ID[sample.refIds[0]]} />
                         </p>
                       )}
                     </div>
@@ -111,19 +112,17 @@ export function EvidenceGuide({ patient }: { patient: PatientContext }) {
         </div>
       </Section>
 
-      <Section title="출처" desc={`이 앱이 인용하는 문헌·지침 ${Object.keys(REF_BY_ID).length}건입니다.`}>
-        <ul className="card divide-y divide-stone-100">
-          {Object.values(REF_BY_ID).map((r) => (
-            <li key={r.id} className="px-3.5 py-2.5 text-[11px] leading-relaxed text-stone-600">
-              {r.url ? (
-                <a href={r.url} target="_blank" rel="noreferrer" className="underline decoration-stone-300">
-                  {r.citation}
-                </a>
-              ) : r.citation}
-            </li>
-          ))}
-        </ul>
-      </Section>
+      <div id="all-sources" className="scroll-mt-24">
+        <Section title="출처 전체" desc={`이 앱이 인용하는 문헌·지침 ${Object.keys(REF_BY_ID).length}건입니다. 누르시면 원문이 열립니다.`}>
+          <ul className="card divide-y divide-stone-100">
+            {Object.values(REF_BY_ID).map((r) => (
+              <li key={r.id} className="px-3.5 py-2.5 text-[11px] leading-relaxed text-stone-600">
+                <RefLink r={r} />
+              </li>
+            ))}
+          </ul>
+        </Section>
+      </div>
     </div>
   )
 }

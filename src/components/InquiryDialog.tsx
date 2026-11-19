@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { pageUrl } from '../lib/native'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { displayName, PROVIDER_LABEL, signIn, signOut, useSession, type Provider, socialProviders } from '../lib/auth'
 import {
@@ -205,7 +206,7 @@ export function InquiryDialog({
                 보내신 내용과 연락처는 답변을 위해서만 쓰고 1년 뒤 지웁니다.
                 건강 상태나 진단명은 적지 않으셔도 됩니다.{' '}
                 <a
-                  href={`${import.meta.env.BASE_URL}privacy.html`}
+                  href={pageUrl('privacy.html')}
                   target="_blank"
                   rel="noreferrer"
                   className="underline decoration-stone-300 underline-offset-2 hover:text-stone-600"

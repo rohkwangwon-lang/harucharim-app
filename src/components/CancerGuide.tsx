@@ -1,7 +1,7 @@
 import type { PatientContext, Phase, CancerSubtype } from '../data/types'
 import { SUBTYPE_OPTIONS } from '../data/types'
 import { CANCER_BY_ID } from '../data/cancers'
-import { REF_BY_ID } from '../data/references'
+import { CiteList } from './Sources'
 import { EvidenceBadge, LevelBadge, Section } from './ui'
 
 const PHASE_LABEL: Record<Exclude<Phase, 'all'>, string> = {
@@ -106,26 +106,7 @@ export function CancerGuide({ patient }: { patient: PatientContext }) {
                 </div>
                 <p className="text-sm font-semibold text-stone-900">{r.title}</p>
                 <p className="mt-1 text-xs leading-relaxed text-stone-600">{r.reason}</p>
-                <details className="mt-2">
-                  <summary className="cursor-pointer text-[11px] font-medium text-stone-400">
-                    근거 {r.refIds.length}건
-                  </summary>
-                  <ul className="mt-1.5 space-y-1">
-                    {r.refIds.map((id) => {
-                      const ref = REF_BY_ID[id]
-                      if (!ref) return null
-                      return (
-                        <li key={id} className="text-[11px] leading-relaxed text-stone-500">
-                          {ref.url ? (
-                            <a href={ref.url} target="_blank" rel="noreferrer" className="underline decoration-stone-300">
-                              {ref.citation}
-                            </a>
-                          ) : ref.citation}
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </details>
+                <CiteList ids={r.refIds} />
               </div>
             ))}
         </div>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { MealSourcesCard } from './Sources'
 import { createPortal } from 'react-dom'
 import type { PatientContext, SelectedItem, Supplement, MealSlot } from '../data/types'
 import { MEAL_SLOTS } from '../data/types'
@@ -168,6 +169,8 @@ export function MealPlan({
 
   return (
     <div id="plan-print">
+      {/* 2026-11-19 애플 1.4.1 — 며칠 치 식단에도 출처가 바로 보이게 */}
+      <MealSourcesCard className="mb-3 print:hidden" />
       <div className="mb-3 rounded-2xl border border-brand-200 bg-brand-50/60 px-4 py-3.5">
         {/* 폰 폭에서는 단추를 글 아래 줄에 둔다 — 옆에 두면 단추 두 개가 글 칸을 110px 로 줄여 날짜까지 꺾인다.
             '다시 구성' 은 어느 안에서든 같은 자리(오른쪽 끝)에 남아 거듭 누르기 좋다 */}

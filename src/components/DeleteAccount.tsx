@@ -2,6 +2,10 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { signOut } from '../lib/auth'
 import { setConsent } from '../lib/stats'
+import { isNative } from '../lib/native'
+
+/** 지운 뒤 로그인 화면에서 '삭제되었습니다' 를 보여 드리는 표시(한 번 보이고 사라진다) */
+export const DELETED_FLAG = 'harucharim-account-deleted'
 
 /**
  * 계정 삭제.
@@ -46,6 +50,12 @@ export function DeleteAccount({ onDone }: { onDone: () => void }) {
         } catch { /* 저장이 막힌 브라우저 */ }
       }
 
+      /*
+       * 지운 다음 아무 말 없이 로그인 화면이 뜨면 지워졌는지 알 수 없다(애플도 '시작부터 확인까지' 를 본다).
+       * 새로 고침을 건너도 남도록 sessionStorage 에 표시를 두고, 로그인 화면(Onboarding)이 한 번 보여 준다.
+       * localStorage 를 비우는 위 줄과 이름이 겹치지 않게 'harucharim.' 이 아닌 이름을 쓴다.
+       */
+      try { sessionStorage.setItem(DELETED_FLAG, '1') } catch { /* 저장이 막힌 브라우저 */ }
       await signOut()
       onDone()
       location.reload()
@@ -58,7 +68,7 @@ export function DeleteAccount({ onDone }: { onDone: () => void }) {
   if (!open) {
     return (
       <button
-        className="mt-3 w-full rounded-xl border border-danger-200 px-3 py-2.5 text-xs font-semibold text-danger-700"
+        className="mt-3 min-h-[44px] w-full rounded-xl border border-danger-200 px-3 py-2.5 text-sm font-semibold text-danger-700"
         onClick={() => setOpen(true)}
       >
         계정 삭제
@@ -77,7 +87,7 @@ export function DeleteAccount({ onDone }: { onDone: () => void }) {
         <div>
           <p className="text-[11px] font-bold text-stone-700">지워지는 것</p>
           <ul className="mt-0.5 space-y-0.5 text-[11px] leading-relaxed text-stone-600">
-            <li>· 로그인 계정 (카카오·구글 연결)</li>
+            <li>· 로그인 계정 ({isNative() ? '이메일·비밀번호' : '이메일·카카오·구글 연결'})</li>
             <li>· 남기신 문의와 받으신 답변</li>
             <li>· 보내신 이용 통계 (동의하셨던 경우)</li>
           </ul>

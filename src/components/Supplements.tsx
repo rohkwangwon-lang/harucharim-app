@@ -6,7 +6,7 @@ import type { PatientContext, SupplementCategory } from '../data/types'
 import { SUPPLEMENTS } from '../data/supplements'
 import { activeInteractions, activeRules, evaluateSupplement } from '../engine/rules'
 import { NUTRIENT_META_BY_KEY, fmt } from '../engine/nutrition'
-import { REF_BY_ID } from '../data/references'
+import { CiteList } from './Sources'
 import { EvidenceBadge, LevelBadge, LevelDot, Section, BetaChip } from './ui'
 import { adviseSupplements, type AdviceLevel } from '../engine/supplementAdvice'
 import { nutritionRisk } from '../engine/nutrition'
@@ -464,18 +464,8 @@ export function Supplements({
 }
 
 function Cites({ ids }: { ids: string[] }) {
-  const refs = ids.map((id) => REF_BY_ID[id]).filter(Boolean)
-  if (refs.length === 0) return null
-  return (
-    <details className="mt-1.5">
-      <summary className="cursor-pointer text-[10px] font-medium text-stone-400">근거 {refs.length}건</summary>
-      <ul className="mt-1 space-y-0.5">
-        {refs.map((r) => (
-          <li key={r.id} className="text-[10px] leading-relaxed text-stone-500">{r.citation}</li>
-        ))}
-      </ul>
-    </details>
-  )
+  /* 예전엔 문헌 이름만 있고 주소가 없었다 — 2026-11-19 애플 1.4.1 반려 뒤 링크로 */
+  return <CiteList ids={ids} className="mt-1.5" />
 }
 
 const CANCER_LABEL: Record<string, string> = {
