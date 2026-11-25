@@ -2,7 +2,8 @@
 앱스토어 출시 홍보물(2026-11-25) — 대기실 포스터 · 손에 쥐여 드리는 카드 · 카카오톡/SNS 그림.
 
 숫자는 docs/보고서/numbers.json(앱 자료에서 센 값)에서만 읽는다.
-QR 은 하나 — https://harucharim.com/get/ (아이폰 → App Store, 그 밖 → 웹 앱. public/get/index.html).
+QR 은 하나 — https://harucharim.com/get/ (아이폰 → App Store, 안드로이드 → '출시 예정' 안내. public/get/index.html).
+2026-11-25 선생님 요청: 홍보물에는 App Store 만 싣고, 안드로이드는 '출시 예정'으로만 적는다(웹 주소도 싣지 않음).
 구글 플레이가 열리면 그 페이지만 고치면 되고, 인쇄물은 다시 찍지 않아도 된다.
 
 환자용 자료의 말 규칙(docs/홍보/게시물-문구.md 0절):
@@ -23,7 +24,7 @@ os.makedirs(OUT, exist_ok=True)
 N = json.load(open(os.path.join(ROOT, 'docs/보고서/numbers.json'), encoding='utf8'))
 
 GET = 'https://harucharim.com/get/'
-GET_SHOW = 'harucharim.com/get'
+SOON = '안드로이드 앱은 출시 예정입니다.'
 REFS = N['references']                              # 172
 RULES = N['total']                                  # 158
 FOODS = f"{N['foodsCore'] // 1000 * 1000:,}여"     # 18,000여
@@ -112,10 +113,10 @@ h1{{font-family:'Gowun Batang',serif;font-size:44pt;line-height:1.12;color:var(-
 <div class="mid"><ul class="pts">{pts}</ul><div class="phone"><img src="{shot('1-suggest')}" alt="하루차림 추천 식단 화면"></div></div>
 <ul class="stats">{sts}</ul>
 <section class="get">{qr_svg(GET)}<div>
-<h2>휴대폰 카메라로 비춰 보세요</h2>
+<h2>아이폰 카메라로 비춰 보세요</h2>
 <p><b>아이폰</b> · App Store에서 ‘하루차림’ 검색</p>
-<p><b>안드로이드 · 컴퓨터</b> · {GET_SHOW} 에서 바로 사용</p>
-<small>안드로이드 앱은 준비 중입니다. 지금은 웹에서 같은 기능을 쓰실 수 있습니다.</small>
+<p>App Store로 바로 연결됩니다.</p>
+<small>{SOON}</small>
 </div></section>
 <p class="legal">{LEGAL}</p>
 </main></body></html>"""
@@ -126,7 +127,7 @@ def cards() -> str:
     q = qr_svg(GET)
     one = f"""<div class="card"><div class="l"><div class="hd"><img src="{ICON}" alt=""><b class="serif">하루차림</b></div>
 <p class="q serif">“뭘 먹어야 하나요?”</p><p class="s">암 치료 중 식사를<br>근거와 함께 하루 세 끼로</p>
-<p class="w"><b>아이폰</b> App Store ‘하루차림’<br><b>그 밖</b> {GET_SHOW}</p></div><div class="r">{q}<span>카메라로 비추세요</span></div></div>"""
+<p class="w"><b>App Store</b>에서 ‘하루차림’<br>{SOON}</p></div><div class="r">{q}<span>아이폰 카메라로</span></div></div>"""
     return f"""<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>하루차림 안내 카드</title>{FONT}<style>{TOKENS}
 @page{{size:A4;margin:0}}body{{background:#d9d6cb}}
@@ -163,7 +164,7 @@ ul{{list-style:none;padding:0;margin:{46 if sq else 60}px 0 0;display:flex;flex-
 <h1>“뭘 먹어야<br>하나요?”</h1>
 <p class="lead">암 치료 중 식사, <em>근거를 붙여</em><br>하루 세 끼로 답합니다.</p>
 <ul>{pts}</ul>{phone}
-<div class="bot"><p><b>아이폰</b> App Store에서 ‘하루차림’<br><b>그 밖</b> {GET_SHOW}</p><div class="qrw">{qr_svg(GET)}</div></div>
+<div class="bot"><p><b>App Store</b>에서 ‘하루차림’<br>{SOON}</p><div class="qrw">{qr_svg(GET)}</div></div>
 </div></body></html>"""
 
 
