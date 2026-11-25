@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>하루차림 받기</title>
+<meta name="description" content="하루차림 — 아이폰은 App Store, 그 밖의 기기는 웹에서 바로 쓰실 수 있습니다.">
+<meta name="robots" content="noindex">
+<meta name="apple-itunes-app" content="app-id=6835254252">
+<link rel="icon" href="/favicon.svg">
+<!--
+  홍보물의 QR 이 가리키는 한 곳(2026-11-25 앱스토어 출시 홍보).
+  아이폰·아이패드 → App Store, 그 밖(안드로이드·컴퓨터) → 웹 앱.
+  구글 플레이가 열리면 ANDROID 주소만 바꾸면 된다 — 인쇄한 포스터·카드는 그대로 쓴다.
+-->
+<script>
+  var IOS = 'https://apps.apple.com/kr/app/id6835254252'
+  var ANDROID = '/'          // 구글 플레이 출시 뒤: 'https://play.google.com/store/apps/details?id=…'
+  var WEB = '/'
+  var ua = navigator.userAgent
+  var isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  var isAndroid = /Android/.test(ua)
+  var to = isIOS ? IOS : isAndroid ? ANDROID : null
+  if (to) location.replace(to)
+</script>
+<style>
+  :root{--rice:#faf9f4;--ink:#282621;--soft:#5e5a4e;--line:#e4e1d6;--leaf:#3d5630;--wash:#eef2e6;--paper:#fff}
+  @media (prefers-color-scheme:dark){:root{--rice:#1b1c18;--ink:#ecebe4;--soft:#b5b2a6;--line:#3a3b34;--leaf:#a9c58f;--wash:#263021;--paper:#24251f}}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--rice);color:var(--ink);
+    font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif;line-height:1.6;word-break:keep-all;padding:24px 16px}
+  main{max-width:420px;width:100%;text-align:center}
+  img{width:72px;height:72px;border-radius:16px}
+  h1{font-size:26px;margin:12px 0 4px;color:var(--leaf)}
+  p{margin:0 0 20px;color:var(--soft);font-size:15px}
+  a.btn{display:block;padding:15px 18px;margin:0 0 10px;border-radius:14px;font-weight:700;font-size:17px;text-decoration:none}
+  a.ios{background:var(--leaf);color:#fff}
+  a.web{background:var(--paper);color:var(--leaf);border:1.5px solid var(--line)}
+  a:focus-visible{outline:3px solid var(--leaf);outline-offset:3px}
+  small{display:block;margin-top:18px;font-size:12.5px;color:var(--soft)}
+</style>
+</head>
+<body>
+<main>
+  <img src="/icon-192.png" alt="">
+  <h1>하루차림</h1>
+  <p>암 치료 중 식사를 근거와 함께 정리한 앱</p>
+  <a class="btn ios" href="https://apps.apple.com/kr/app/id6835254252">아이폰 · App Store에서 받기</a>
+  <a class="btn web" href="/">안드로이드 · 컴퓨터 · 웹에서 바로 쓰기</a>
+  <small>안드로이드 앱은 준비 중입니다. 지금은 웹에서 같은 기능을 쓰실 수 있습니다.<br>이 앱은 진료를 대신하지 않습니다. 치료에 관한 결정은 담당 의료진과 상의하세요.</small>
+</main>
+</body>
+</html>

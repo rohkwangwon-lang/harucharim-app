@@ -66,11 +66,11 @@ export default defineConfig({
         // 데이터가 전부 번들에 들어 있으므로 앱 셸 전체를 캐시해 완전한 오프라인 사용을 지원한다
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
         // 설치 창에만 쓰는 미리보기 사진 — 오프라인 캐시에 넣으면 설치할 때마다 1 MB 가 더 내려간다
-        globIgnores: ['**/screenshots/**', 'tester/**'],
+        globIgnores: ['**/screenshots/**', 'tester/**', 'get/**'],
         // 저장에 없는 주소는 앱 화면으로 돌려보내므로, 앱이 아닌 페이지는 빼 준다.
         // 빠뜨리면 앱을 연 적 있는 기기에서 모집 페이지 대신 앱이 뜬다(2026-11-05 사용자 보고).
         // 끝 빗금 없이 harucharim.com/tester 로 치면 /tester/ 규칙에 안 걸려 다시 앱이 떴다(2026-11-09 사용자 보고) — 둘 다 막는다.
-        navigateFallbackDenylist: [/^\/tester(\/|$)/],
+        navigateFallbackDenylist: [/^\/tester(\/|$)/, /^\/get(\/|$)/],  // get/ : 홍보 QR 이 가리키는 받기 안내(2026-11-25)
         // 식품 데이터가 들어간 번들이 3 MB 를 넘으므로 넉넉히 잡는다
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
         // 새 서비스워커가 대기하지 않고 바로 넘겨받게 한다.
